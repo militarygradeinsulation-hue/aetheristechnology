@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { Services } from '@/components/Services';
 import { AutonomousWorkforce } from '@/components/AutonomousWorkforce';
+import { IndustriesWeServe } from '@/components/IndustriesWeServe';
 import { NeuralHub } from '@/components/NeuralHub';
 import { WhyUs } from '@/components/WhyUs';
 import { CEOProfile } from '@/components/CEOProfile';
@@ -24,6 +25,7 @@ const Index = () => {
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
         <Services />
         <AutonomousWorkforce />
+        <IndustriesWeServe />
         <NeuralHub />
         <WhyUs />
         <CEOProfile />
