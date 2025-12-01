@@ -1,6 +1,8 @@
 import React from 'react';
 import { Brain, Code, Database, Sparkles, Zap, Bot } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import crmDemoVideo from '@/assets/crm-demo-video.mp4';
+import leadGeneratorImg from '@/assets/lead-generator.jpg';
 
 export const Services: React.FC = () => {
   const services = [
@@ -85,6 +87,48 @@ export const Services: React.FC = () => {
               </div>
             </RevealOnScroll>
           ))}
+        </div>
+
+        {/* CRM/ERP Demo and Lead Generator Showcase */}
+        <div className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <RevealOnScroll>
+            <div className="glass p-6 rounded-xl">
+              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+                Custom CRM/ERP Solution
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Streamline your business operations with our intelligent, fully customized CRM/ERP system built for your unique needs.
+              </p>
+              <div className="rounded-lg overflow-hidden border border-border/50">
+                <video 
+                  controls 
+                  className="w-full h-auto"
+                  poster="/placeholder.svg"
+                >
+                  <source src={crmDemoVideo} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={0.2}>
+            <div className="glass p-6 rounded-xl">
+              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+                AI-Powered Lead Generator
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Automatically discover and qualify high-value leads with our intelligent lead generation system that never stops working.
+              </p>
+              <div className="rounded-lg overflow-hidden border border-border/50">
+                <img 
+                  src={leadGeneratorImg} 
+                  alt="AI Lead Generator Dashboard showing lead qualification and contact details"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </RevealOnScroll>
         </div>
       </div>
     </section>
