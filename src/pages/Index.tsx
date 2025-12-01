@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
+import { ThePitch } from '@/components/ThePitch';
 import { Services } from '@/components/Services';
 import { AutonomousWorkforce } from '@/components/AutonomousWorkforce';
 import { IndustriesWeServe } from '@/components/IndustriesWeServe';
@@ -23,6 +24,7 @@ const Index = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
+        <ThePitch />
         <Services />
         <AutonomousWorkforce />
         <IndustriesWeServe />

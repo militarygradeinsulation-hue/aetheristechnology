@@ -31,8 +31,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Strategic AI solutions built by a Marine Corps leader with 20 years of experience. 
-            We don't just implement AI—we architect systems that scale revenue and optimize performance.
+            You know you need AI for your business, but you don't know where to start. I do.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
