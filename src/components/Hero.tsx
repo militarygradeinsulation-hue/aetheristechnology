@@ -30,6 +30,12 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </span>
           </h1>
 
+          <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-cyan/30">
+            <span className="text-base md:text-lg font-semibold text-cyan">
+              White Label Quality Services for Premium Companies
+            </span>
+          </div>
+
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             You know you need AI for your business, but you don't know where to start. I do.
           </p>
