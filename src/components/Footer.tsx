@@ -1,4 +1,5 @@
 import React from 'react';
+import aetherisLogo from '@/assets/aetheris-logo.png';
 
 
 export const Footer: React.FC = () => {
@@ -10,7 +11,11 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan to-primary animate-pulse-glow" />
+              <img 
+                src={aetherisLogo} 
+                alt="Aetheris AI Logo" 
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-xl font-bold text-foreground">Aetheris AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
