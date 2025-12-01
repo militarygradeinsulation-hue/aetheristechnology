@@ -103,7 +103,7 @@ export const Services: React.FC = () => {
                 <video 
                   controls 
                   className="w-full h-auto"
-                  poster="/placeholder.svg"
+                  preload="metadata"
                 >
                   <source src={crmDemoVideo} type="video/mp4" />
                   Your browser does not support the video tag.
