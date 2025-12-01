@@ -31,8 +31,8 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Cutting-edge artificial intelligence solutions that revolutionize how you work,
-            create, and innovate. Welcome to the future of business automation.
+            Strategic AI solutions built by a Marine Corps leader with 20 years of experience. 
+            We don't just implement AI—we architect systems that scale revenue and optimize performance.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
@@ -56,9 +56,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
             {[
-              { label: 'Projects', value: '500+' },
-              { label: 'Clients', value: '200+' },
-              { label: 'AI Models', value: '50+' },
+              { label: 'Projects', value: '200+' },
+              { label: 'Clients', value: '100+' },
+              { label: 'Revenue Managed', value: '$25M' },
               { label: 'Success Rate', value: '99%' },
             ].map((stat, index) => (
               <motion.div
