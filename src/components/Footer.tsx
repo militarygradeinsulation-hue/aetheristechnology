@@ -59,6 +59,12 @@ export const Footer: React.FC = () => {
             <a href="#" className="hover:text-cyan transition-colors">Terms of Service</a>
           </div>
         </div>
+
+        <div className="text-center mt-6">
+          <p className="text-sm text-muted-foreground">
+            Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan hover:underline">CTOguy.ai</a>
+          </p>
+        </div>
       </div>
     </footer>
   );
