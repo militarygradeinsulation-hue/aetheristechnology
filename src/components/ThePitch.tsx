@@ -1,6 +1,7 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Users, Brain, Mail, BarChart3 } from 'lucide-react';
+import meVsYouImg from '@/assets/me-vs-you.jpg';
 
 export const ThePitch: React.FC = () => {
   return (
@@ -157,7 +158,17 @@ export const ThePitch: React.FC = () => {
           </div>
 
           <RevealOnScroll delay={0.7}>
-            <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-cyan/30">
+            <div className="mt-12 glass p-8 rounded-xl">
+              <img 
+                src={meVsYouImg} 
+                alt="Me vs You - I handle the automation and AI work while you receive the revenue growth and business success" 
+                className="w-full rounded-lg"
+              />
+            </div>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={0.8}>
+            <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-cyan/30">
               <p className="text-2xl font-bold text-foreground mb-4">
                 That's what I do for your business.
               </p>
