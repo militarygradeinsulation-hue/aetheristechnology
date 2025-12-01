@@ -35,11 +35,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <img 
               src={aetherisLogo} 
               alt="Aetheris AI Logo" 
-              className="w-8 h-8 object-contain"
+              className="w-12 h-12 object-contain"
             />
             <span className="text-xl font-bold text-foreground">Aetheris AI</span>
           </div>
