@@ -1,6 +1,5 @@
 import React from 'react';
 import { TiltCard } from './TiltCard';
-
 import { RevealOnScroll } from './RevealOnScroll';
 
 export const CEOProfile: React.FC = () => {
@@ -10,10 +9,10 @@ export const CEOProfile: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              The <span className="text-cyan glow-text">Architect</span>
+              Meet the <span className="text-cyan glow-text">Founder</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Meet the visionary behind Aetheris AI
+              Marine Corps leader turned AI strategist
             </p>
           </div>
         </RevealOnScroll>
@@ -26,10 +25,9 @@ export const CEOProfile: React.FC = () => {
                   <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan via-primary to-cyan/50 animate-pulse-glow" />
                   
                   <h3 className="text-2xl font-bold text-center mb-2 text-foreground">
-                    Dr. Alex Chen
+                    Joseph Toney
                   </h3>
-                  <p className="text-cyan text-center mb-6">Founder & CEO</p>
-
+                  <p className="text-cyan text-center mb-6">CEO & Founder</p>
                 </div>
               </TiltCard>
             </RevealOnScroll>
@@ -38,40 +36,54 @@ export const CEOProfile: React.FC = () => {
           <div className="flex-1 space-y-6">
             <RevealOnScroll delay={0.2}>
               <h3 className="text-3xl font-bold text-foreground mb-6">
-                Building the Future of AI
+                Strategic Business Architect & AI Growth Expert
               </h3>
               
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  With over 15 years in artificial intelligence and machine learning, 
-                  Dr. Alex Chen has pioneered innovations that power Fortune 500 companies 
-                  and startups alike.
+                  With 20 years of proven experience building high-impact systems that fuel growth, 
+                  Joseph Toney is a Marine Corps leader turned AI strategist who personally codes 
+                  solutions that scale revenue across industries.
                 </p>
                 
                 <p>
-                  Previously leading AI research at major tech giants, Alex founded Aetheris AI 
-                  with a mission: make cutting-edge AI accessible to businesses of all sizes.
+                  As CEO and Founder of Aetheris AI (formerly CTOguy), Joseph operates with a CEO mindset, 
+                  merging data, strategy, and execution to build marketing engines that move the needle. 
+                  From commanding 200+ Marines in the United States Marine Corps to scaling teams of 60+ 
+                  employees, he brings military precision to business execution.
                 </p>
 
                 <div className="glass p-6 rounded-xl mt-6">
                   <p className="italic text-foreground">
-                    "AI isn't about replacing humans - it's about amplifying human potential. 
-                    That's what we do at Aetheris."
+                    "I don't just lead teams—I build the systems myself: coded, tested, deployed. 
+                    Whether working with aerospace contractors or small businesses, I deliver results 
+                    that leaders can measure."
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-6">
                   {[
-                    { label: 'Years Experience', value: '15+' },
-                    { label: 'Patents', value: '24' },
-                    { label: 'Publications', value: '50+' },
-                    { label: 'Awards', value: '12' },
+                    { label: 'Years Experience', value: '20+' },
+                    { label: 'Marines Led', value: '200+' },
+                    { label: 'Lead Flow Increase', value: '60%' },
+                    { label: 'Revenue Managed', value: '$25M' },
                   ].map((stat) => (
                     <div key={stat.label} className="glass p-4 rounded-lg">
                       <div className="text-2xl font-bold text-cyan">{stat.value}</div>
                       <div className="text-sm text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
+                </div>
+
+                <div className="pt-4 space-y-2 text-sm">
+                  <p>
+                    <span className="text-cyan font-semibold">Education:</span> Master's in Marketing (4.0 GPA) • 
+                    Doctorate in Strategic Media starting 2026
+                  </p>
+                  <p>
+                    <span className="text-cyan font-semibold">Certifications:</span> IBM AI Engineering • 
+                    Harvard AI for Business • Google Analytics & Ads Expert
+                  </p>
                 </div>
               </div>
             </RevealOnScroll>

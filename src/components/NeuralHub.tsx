@@ -5,21 +5,21 @@ import { RevealOnScroll } from './RevealOnScroll';
 export const NeuralHub: React.FC = () => {
   const projects = [
     {
-      title: 'Predictive Analytics Engine',
-      desc: 'AI-powered forecasting system that increased accuracy by 94% for Fortune 500 client',
-      tags: ['Machine Learning', 'Python', 'TensorFlow'],
+      title: 'Marketing Automation Hub',
+      desc: 'Comprehensive multi-channel marketing automation platform delivering 250% ROI improvement for enterprise clients',
+      tags: ['Marketing Automation', 'AI Strategy', 'Analytics'],
       icon: Zap,
     },
     {
-      title: 'Smart Automation Platform',
-      desc: 'Reduced operational costs by 60% through intelligent process automation',
-      tags: ['RPA', 'AI', 'Cloud'],
+      title: 'Custom CRM Development',
+      desc: 'Built enterprise-grade CRM systems from scratch with automated quote generation and pipeline management',
+      tags: ['CRM', 'Sales Automation', 'Business Intelligence'],
       icon: Target,
     },
     {
-      title: 'Neural Network Vision',
-      desc: 'Computer vision solution processing 1M+ images daily with 99.5% accuracy',
-      tags: ['Computer Vision', 'Deep Learning', 'PyTorch'],
+      title: 'AI Vision Studio',
+      desc: 'Next-gen perspective analysis platform transforming how businesses understand visual data and spatial relationships',
+      tags: ['Computer Vision', 'AI Analysis', 'Data Intelligence'],
       icon: Layers,
     },
   ];
