@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { RevealOnScroll } from './RevealOnScroll';
 
@@ -33,11 +33,10 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 Schedule a Call
               </Button>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                 {[
-                  { icon: Mail, label: 'Email', value: 'hello@aetheris.ai' },
-                  { icon: Phone, label: 'Phone', value: '+1 (555) 123-4567' },
-                  { icon: MapPin, label: 'Location', value: 'San Francisco, CA' },
+                  { icon: Mail, label: 'Email', value: 'theaiformarketing@gmail.com' },
+                  { icon: MapPin, label: 'Location', value: 'Indianapolis, Indiana' },
                 ].map((item) => (
                   <div key={item.label} className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">

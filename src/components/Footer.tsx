@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Twitter, Linkedin } from 'lucide-react';
+
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -39,18 +39,9 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Connect</h4>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 glass-hover rounded-lg flex items-center justify-center">
-                <Twitter className="w-5 h-5 text-muted-foreground hover:text-cyan transition-colors" />
-              </a>
-              <a href="#" className="w-10 h-10 glass-hover rounded-lg flex items-center justify-center">
-                <Github className="w-5 h-5 text-muted-foreground hover:text-cyan transition-colors" />
-              </a>
-              <a href="#" className="w-10 h-10 glass-hover rounded-lg flex items-center justify-center">
-                <Linkedin className="w-5 h-5 text-muted-foreground hover:text-cyan transition-colors" />
-              </a>
-            </div>
+            <h4 className="font-bold text-foreground mb-4">Contact</h4>
+            <p className="text-sm text-muted-foreground">theaiformarketing@gmail.com</p>
+            <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
           </div>
         </div>
 

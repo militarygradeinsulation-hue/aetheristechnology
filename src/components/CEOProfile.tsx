@@ -1,6 +1,6 @@
 import React from 'react';
 import { TiltCard } from './TiltCard';
-import { Code, ExternalLink, Terminal } from 'lucide-react';
+
 import { RevealOnScroll } from './RevealOnScroll';
 
 export const CEOProfile: React.FC = () => {
@@ -30,17 +30,6 @@ export const CEOProfile: React.FC = () => {
                   </h3>
                   <p className="text-cyan text-center mb-6">Founder & CEO</p>
 
-                  <div className="flex justify-center gap-4">
-                    <a href="#" className="p-2 glass-hover rounded-lg">
-                      <Code className="w-5 h-5 text-cyan" />
-                    </a>
-                    <a href="#" className="p-2 glass-hover rounded-lg">
-                      <Terminal className="w-5 h-5 text-cyan" />
-                    </a>
-                    <a href="#" className="p-2 glass-hover rounded-lg">
-                      <ExternalLink className="w-5 h-5 text-cyan" />
-                    </a>
-                  </div>
                 </div>
               </TiltCard>
             </RevealOnScroll>
