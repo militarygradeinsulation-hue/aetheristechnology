@@ -1,6 +1,7 @@
 import React from 'react';
 import { TiltCard } from './TiltCard';
 import { RevealOnScroll } from './RevealOnScroll';
+import josephToney from '@/assets/joseph-toney.jpg';
 
 export const CEOProfile: React.FC = () => {
   return (
@@ -22,7 +23,11 @@ export const CEOProfile: React.FC = () => {
             <RevealOnScroll>
               <TiltCard>
                 <div className="glass p-8 rounded-2xl max-w-md">
-                  <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan via-primary to-cyan/50 animate-pulse-glow" />
+                  <img 
+                    src={josephToney} 
+                    alt="Joseph Toney - CEO & Founder" 
+                    className="w-48 h-48 mx-auto mb-6 rounded-full object-cover border-4 border-cyan/30 shadow-2xl"
+                  />
                   
                   <h3 className="text-2xl font-bold text-center mb-2 text-foreground">
                     Joseph Toney
