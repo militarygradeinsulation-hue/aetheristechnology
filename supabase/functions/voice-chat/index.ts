@@ -12,53 +12,14 @@ serve(async (req) => {
 
   try {
     const { message } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
 
-    const systemPrompt = `You are a friendly and knowledgeable AI assistant for Aetheris AI Technology. 
-
-About Aetheris AI:
-- We're an AI solutions company that transforms businesses with cutting-edge artificial intelligence
-- Our CEO is Joseph Toney, a proven leader with 20+ years of experience and Marine Corps background
-- We serve six key industries: Corporate & Enterprise, Logistics, Food Service, Construction, Healthcare, and Automotive
-- We provide white label quality services for premium companies
-
-Our main services include:
-- Machine Learning: Custom ML models, predictive analytics, neural networks
-- AI Automation: Process automation, smart workflows, task optimization
-- Custom AI Development: End-to-end AI solutions, API integration, model training
-- Data Intelligence: Transform raw data into actionable insights
-- AI Consulting: Strategic guidance for AI transformation
-- Performance Optimization: Supercharge existing AI systems
-
-We also offer:
-- Custom CRM/ERP solutions built for unique business needs
-- AI-powered lead generators that discover and qualify high-value leads automatically
-- Autonomous workforce solutions with 24/7 operations
-- NeuralHub: A smart command center that connects everything
-
-Our value proposition: "You know you need AI for your business, but you don't know where to start. I do."
-
-Contact: theaiformarketing@gmail.com and joseph@aetheris.technology
-Location: Indianapolis, Indiana
-
-Be conversational, enthusiastic, and helpful. Answer questions about our services, explain how AI can help their business, and encourage them to reach out for a consultation.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://aetheris-voice-ai-352627143115.us-west1.run.app", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ],
+        message: message
       }),
     });
 
@@ -81,7 +42,7 @@ Be conversational, enthusiastic, and helpful. Answer questions about our service
     }
 
     const data = await response.json();
-    const aiMessage = data.choices[0]?.message?.content || "I'm sorry, I couldn't process that.";
+    const aiMessage = data.message || "I'm sorry, I couldn't process that.";
 
     return new Response(
       JSON.stringify({ message: aiMessage }),
