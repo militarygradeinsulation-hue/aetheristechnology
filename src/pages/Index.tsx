@@ -33,6 +33,7 @@ const Index = () => {
         <WhyUs />
         <CEOProfile />
         <TechLogos />
+        <VoiceAI />
         <Contact onContactClick={() => setIsContactModalOpen(true)} />
         <Footer />
       </div>
@@ -41,8 +42,6 @@ const Index = () => {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
       />
-
-      <VoiceAI />
     </div>
   );
 };
