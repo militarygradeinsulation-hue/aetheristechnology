@@ -5,7 +5,6 @@ import { Hero } from '@/components/Hero';
 import { ThePitch } from '@/components/ThePitch';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
-import { AetherisAssistant } from '@/components/AetherisAssistant';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -18,11 +17,8 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
         <ThePitch />
-        <div id="assistant" className="h-1" />
         <Footer />
       </div>
-
-      <AetherisAssistant />
 
       <ContactModal
         isOpen={isContactModalOpen}
