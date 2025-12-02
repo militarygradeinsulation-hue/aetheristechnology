@@ -66,6 +66,19 @@ export const CEOProfile: React.FC = () => {
                   </p>
                 </div>
 
+                <div className="glass p-6 rounded-xl mt-6">
+                  <h4 className="text-lg font-bold text-cyan mb-4">Hear It In My Own Words</h4>
+                  <iframe 
+                    width="100%" 
+                    height="166" 
+                    scrolling="no" 
+                    frameBorder="no" 
+                    allow="autoplay" 
+                    src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1948054366&color=%2300d9ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"
+                    title="Joseph Toney explains Aetheris AI in his own words"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 pt-6">
                   {[
                     { label: 'Years Experience', value: '20+' },
