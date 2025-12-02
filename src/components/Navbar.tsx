@@ -27,6 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Solutions', href: '/solutions' },
     { label: 'Why Us', href: '/why-us' },
     { label: 'About', href: '/about' },
+    { label: 'AI Assistant', href: '/#assistant', special: true },
   ];
 
   return (
@@ -52,7 +53,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               <Link
                 key={item.href}
                 to={item.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className={`transition-colors ${
+                  item.special 
+                    ? 'text-cyan hover:text-cyan/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
                 {item.label}
               </Link>
@@ -80,7 +85,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               <Link
                 key={item.href}
                 to={item.href}
-                className="block text-muted-foreground hover:text-foreground transition-colors"
+                className={`block transition-colors ${
+                  item.special
+                    ? 'text-cyan hover:text-cyan/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
