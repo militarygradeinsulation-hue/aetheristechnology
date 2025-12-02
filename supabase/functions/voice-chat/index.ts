@@ -1,9 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const messageSchema = z.object({
+  message: z.string().trim().min(1, "Message cannot be empty").max(2000, "Message must be less than 2000 characters")
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,7 +17,24 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    // Parse and validate request body
+    const body = await req.json();
+    const validationResult = messageSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input", 
+          details: validationResult.error.issues.map(i => i.message).join(", ")
+        }), 
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { message } = validationResult.data;
 
     const response = await fetch("https://aetheris-voice-ai-352627143115.us-west1.run.app", {
       method: "POST",
