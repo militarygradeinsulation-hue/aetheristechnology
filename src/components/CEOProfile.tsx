@@ -70,13 +70,16 @@ export const CEOProfile: React.FC = () => {
                   <h4 className="text-lg font-bold text-cyan mb-4">Hear It In My Own Words</h4>
                   <iframe 
                     width="100%" 
-                    height="166" 
+                    height="300" 
                     scrolling="no" 
                     frameBorder="no" 
                     allow="autoplay" 
-                    src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1948054366&color=%2300d9ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"
-                    title="Joseph Toney explains Aetheris AI in his own words"
+                    src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2193958235&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+                    title="Joseph Toney explains what he does in his own words"
                   />
+                  <div style={{ fontSize: '10px', color: '#cccccc', lineBreak: 'anywhere', wordBreak: 'normal', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontFamily: 'Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif', fontWeight: 100 }}>
+                    <a href="https://soundcloud.com/joseph-toney-658917042" title="Joseph Toney" target="_blank" rel="noopener noreferrer" style={{ color: '#cccccc', textDecoration: 'none' }}>Joseph Toney</a> · <a href="https://soundcloud.com/joseph-toney-658917042/1_5163578393861555826" title="1_5163578393861555826" target="_blank" rel="noopener noreferrer" style={{ color: '#cccccc', textDecoration: 'none' }}>1_5163578393861555826</a>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-6">
