@@ -6,7 +6,6 @@ import { ThePitch } from '@/components/ThePitch';
 import { Services } from '@/components/Services';
 import { AutonomousWorkforce } from '@/components/AutonomousWorkforce';
 import { IndustriesWeServe } from '@/components/IndustriesWeServe';
-import { NeuralHub } from '@/components/NeuralHub';
 import { WhyUs } from '@/components/WhyUs';
 import { CEOProfile } from '@/components/CEOProfile';
 import { TechLogos } from '@/components/TechLogos';
@@ -29,7 +28,6 @@ const Index = () => {
         <Services />
         <AutonomousWorkforce />
         <IndustriesWeServe />
-        <NeuralHub />
         <WhyUs />
         <CEOProfile />
         <TechLogos />
