@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, Code, Database, Sparkles, Zap, Bot } from 'lucide-react';
+import { Brain, Code, Database, Sparkles, Zap, Bot, ArrowUpRight, Target, Layers } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
@@ -129,6 +129,127 @@ export const Services: React.FC = () => {
               </div>
             </div>
           </RevealOnScroll>
+        </div>
+
+        {/* Success Stories Section */}
+        <div className="mt-24">
+          <RevealOnScroll>
+            <div className="text-center mb-12">
+              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+                Proven <span className="text-cyan glow-text">Results</span>
+              </h3>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Real-world success stories powered by our AI solutions
+              </p>
+            </div>
+          </RevealOnScroll>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <RevealOnScroll delay={0.1}>
+              <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
+                      <Zap className="w-6 h-6 text-cyan" />
+                    </div>
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                  </div>
+
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                    Marketing Automation Hub
+                  </h4>
+                  
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Comprehensive multi-channel marketing automation platform delivering 250% ROI improvement for enterprise clients
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Marketing Automation
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      AI Strategy
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Analytics
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.2}>
+              <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
+                      <Target className="w-6 h-6 text-cyan" />
+                    </div>
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                  </div>
+
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                    Custom CRM Development
+                  </h4>
+                  
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Built enterprise-grade CRM systems from scratch with automated quote generation and pipeline management
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      CRM
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Sales Automation
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Business Intelligence
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.3}>
+              <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
+                      <Layers className="w-6 h-6 text-cyan" />
+                    </div>
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                  </div>
+
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                    AI Vision Studio
+                  </h4>
+                  
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Next-gen perspective analysis platform transforming how businesses understand visual data and spatial relationships
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Computer Vision
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      AI Analysis
+                    </span>
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                      Data Intelligence
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+          </div>
         </div>
       </div>
     </section>
