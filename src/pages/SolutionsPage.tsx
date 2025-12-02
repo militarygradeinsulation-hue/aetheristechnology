@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
-import { Hero } from '@/components/Hero';
-import { ThePitch } from '@/components/ThePitch';
-import { Services } from '@/components/Services';
 import { AutonomousWorkforce } from '@/components/AutonomousWorkforce';
-import { WhyUs } from '@/components/WhyUs';
-import { CEOProfile } from '@/components/CEOProfile';
-import { TechLogos } from '@/components/TechLogos';
-import { Contact } from '@/components/Contact';
+import { VoiceAI } from '@/components/VoiceAI';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
-import { VoiceAI } from '@/components/VoiceAI';
 
-const Index = () => {
+const SolutionsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
@@ -22,15 +15,10 @@ const Index = () => {
       
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-        <Hero onContactClick={() => setIsContactModalOpen(true)} />
-        <ThePitch />
-        <Services />
-        <AutonomousWorkforce />
-        <WhyUs />
-        <CEOProfile />
-        <TechLogos />
-        <VoiceAI />
-        <Contact onContactClick={() => setIsContactModalOpen(true)} />
+        <div className="pt-24">
+          <AutonomousWorkforce />
+          <VoiceAI />
+        </div>
         <Footer />
       </div>
 
@@ -42,4 +30,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default SolutionsPage;
