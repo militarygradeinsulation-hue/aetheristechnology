@@ -25,31 +25,10 @@ export const AutonomousWorkforce: React.FC = () => {
               alt="Engineering Your Autonomous Workforce - AI automation capabilities including intelligent CRM, 24/7 marketing hub, custom LLMs, and scalable neural architecture" 
               className="w-full rounded-lg shadow-2xl"
             />
-          </div>
-        </RevealOnScroll>
-
-        <RevealOnScroll delay={0.4}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-xl font-bold mb-3 text-cyan">Autonomous Lead Generation</h3>
-              <p className="text-muted-foreground">
-                AI agents navigate the digital landscape to find and route high-value prospects automatically
-              </p>
-            </div>
-
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-xl font-bold mb-3 text-cyan">Intelligent CRM</h3>
-              <p className="text-muted-foreground">
-                Central AI with perfect memory of all client preferences and interactions for seamless engagement
-              </p>
-            </div>
-
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-xl font-bold mb-3 text-cyan">24/7 Marketing Hub</h3>
-              <p className="text-muted-foreground">
-                Your brand's narrative propagates continuously through automated outreach campaigns
-              </p>
-            </div>
+            <p className="text-center text-muted-foreground mt-6 text-lg">
+              Complete AI infrastructure diagram showing lead generation, intelligent CRM, 
+              24/7 marketing automation, and scalable neural architecture working together seamlessly
+            </p>
           </div>
         </RevealOnScroll>
       </div>
