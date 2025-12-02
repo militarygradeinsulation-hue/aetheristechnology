@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { AutonomousWorkforce } from '@/components/AutonomousWorkforce';
-import { VoiceAI } from '@/components/VoiceAI';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 
@@ -17,7 +16,6 @@ const SolutionsPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <AutonomousWorkforce />
-          <VoiceAI />
         </div>
         <Footer />
       </div>
