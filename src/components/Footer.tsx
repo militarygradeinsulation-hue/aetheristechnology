@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import aetherisLogo from '@/assets/aetheris-logo.png';
 
 
@@ -26,20 +27,20 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-foreground mb-4">Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#services" className="hover:text-cyan transition-colors">Machine Learning</a></li>
-              <li><a href="#services" className="hover:text-cyan transition-colors">AI Automation</a></li>
-              <li><a href="#services" className="hover:text-cyan transition-colors">Data Intelligence</a></li>
-              <li><a href="#services" className="hover:text-cyan transition-colors">Consulting</a></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Machine Learning</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Automation</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Data Intelligence</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Consulting</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#about" className="hover:text-cyan transition-colors">About Us</a></li>
-              <li><a href="#neural-hub" className="hover:text-cyan transition-colors">Case Studies</a></li>
-              <li><a href="#contact" className="hover:text-cyan transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-cyan transition-colors">Careers</a></li>
+              <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Case Studies</Link></li>
+              <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
+              <li><Link to="/about" className="hover:text-cyan transition-colors">Careers</Link></li>
             </ul>
           </div>
 
