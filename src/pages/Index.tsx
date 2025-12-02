@@ -13,6 +13,7 @@ import { TechLogos } from '@/components/TechLogos';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { VoiceAI } from '@/components/VoiceAI';
 
 const Index = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -40,6 +41,8 @@ const Index = () => {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
       />
+
+      <VoiceAI />
     </div>
   );
 };
