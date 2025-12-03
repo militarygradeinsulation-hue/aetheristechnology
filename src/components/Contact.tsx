@@ -25,17 +25,9 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 Get a free consultation with our experts.
               </p>
 
-              <Button
-                size="lg"
-                onClick={onContactClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground mb-12"
-              >
-                Schedule a Call
-              </Button>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                 {[
-                  { icon: Mail, label: 'Email', value: 'theaiformarketing@gmail.com' },
+                  { icon: Mail, label: 'Email', value: 'aetheris.technology@outlook.com' },
                   { icon: MapPin, label: 'Location', value: 'Indianapolis, Indiana' },
                 ].map((item) => (
                   <div key={item.label} className="flex flex-col items-center gap-3">
