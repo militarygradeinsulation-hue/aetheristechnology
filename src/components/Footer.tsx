@@ -38,7 +38,7 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Case Studies</Link></li>
+              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition-colors">Portfolio</a></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
               <li><Link to="/about" className="hover:text-cyan transition-colors">Careers</Link></li>
             </ul>
