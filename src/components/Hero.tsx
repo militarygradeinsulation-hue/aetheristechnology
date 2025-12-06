@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 
 interface HeroProps {
@@ -8,6 +9,8 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
+  const navigate = useNavigate();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
       <div className="max-w-7xl mx-auto text-center">
@@ -53,7 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               size="lg"
               variant="outline"
               className="glass-hover border-border"
-              onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => navigate('/services')}
             >
               Explore Services
             </Button>
