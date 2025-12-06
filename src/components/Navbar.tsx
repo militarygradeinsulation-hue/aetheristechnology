@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Home', href: '/' },
     { label: 'Services', href: '/services' },
     { label: 'Solutions', href: '/solutions' },
-    { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true },
+    { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true, special: true },
     { label: 'Why Us', href: '/why-us' },
     { label: 'About', href: '/about' },
     { label: 'AI Assistant', href: '/assistant', special: true },
@@ -57,7 +57,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`transition-colors ${
+                    item.special 
+                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   {item.label}
                 </a>
@@ -101,7 +105,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-muted-foreground hover:text-foreground transition-colors"
+                  className={`block transition-colors ${
+                    item.special
+                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.label}
