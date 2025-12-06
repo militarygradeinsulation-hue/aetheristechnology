@@ -40,8 +40,11 @@ export const Footer: React.FC = () => {
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
               <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition-colors">Portfolio</a></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
-              <li><Link to="/about" className="hover:text-cyan transition-colors">Careers</Link></li>
+              <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-cyan transition-colors">Careers</a></li>
             </ul>
+            <p className="text-xs text-muted-foreground mt-3 italic">
+              We're a new startup seeking visionaries who understand the transformative power of AI.
+            </p>
           </div>
 
           <div>
@@ -55,9 +58,12 @@ export const Footer: React.FC = () => {
           <p className="text-sm text-muted-foreground">
             © {currentYear} Aetheris AI. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-cyan transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-cyan transition-colors">Terms of Service</a>
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+            <span>By using our services, you agree to our terms.</span>
+            <span>•</span>
+            <span>All AI solutions are customized per client agreement.</span>
+            <span>•</span>
+            <span>Data handled with enterprise-grade security.</span>
           </div>
         </div>
 
