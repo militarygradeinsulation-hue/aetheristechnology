@@ -98,6 +98,18 @@ export const Services: React.FC = () => {
   return (
     <section id="services" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
+        {/* CTOguy.ai Marketing Section */}
+        <RevealOnScroll>
+          <div className="glass p-8 rounded-xl mb-16 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              Marketing by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan glow-text hover:underline">CTOguy.ai</a>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Our marketing division delivers data-driven strategies and AI-powered campaigns that transform how businesses connect with their customers.
+            </p>
+          </div>
+        </RevealOnScroll>
+
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
