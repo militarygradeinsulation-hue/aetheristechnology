@@ -22,7 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   }, []);
 
   const navItems = [
-    { label: 'Home', href: '/' },
+    { label: 'Home', href: '/', special: true },
     { label: 'Services', href: '/services' },
     { label: 'Solutions', href: '/solutions' },
     { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true, special: true },
