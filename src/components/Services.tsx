@@ -315,6 +315,29 @@ export const Services: React.FC = () => {
           </div>
         </div>
 
+        {/* Portfolio Section */}
+        <div className="mt-16">
+          <RevealOnScroll>
+            <div className="glass glass-hover p-8 rounded-xl text-center group">
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Explore Our <span className="text-cyan glow-text">Portfolio</span>
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                See our AI tools and solutions in action. Visit our portfolio to explore the Aetheris Toolbox.
+              </p>
+              <a 
+                href="https://aetheristoolbox.org" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-cyan/20 border border-cyan/30 rounded-lg text-cyan font-semibold hover:bg-cyan/30 transition-colors group-hover:scale-105 transition-transform"
+              >
+                View Aetheris Toolbox
+                <ArrowUpRight className="w-5 h-5" />
+              </a>
+            </div>
+          </RevealOnScroll>
+        </div>
+
         {/* Industries We Transform Section */}
         <div className="mt-24">
           <RevealOnScroll>
