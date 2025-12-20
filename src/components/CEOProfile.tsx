@@ -24,17 +24,17 @@ export const CEOProfile: React.FC = () => {
           <div className="flex-1 flex justify-center">
             <RevealOnScroll>
               <TiltCard>
-                <div className="glass p-8 rounded-2xl max-w-md">
+                <div className="glass p-10 rounded-2xl max-w-lg">
                   <img 
                     src={josephToney} 
                     alt="Joseph Toney - CEO & Founder" 
-                    className="w-48 h-48 mx-auto mb-6 rounded-full object-cover border-4 border-cyan/30 shadow-2xl"
+                    className="w-72 h-72 mx-auto mb-8 rounded-full object-cover object-center border-4 border-cyan/30 shadow-2xl"
                   />
                   
-                  <h3 className="text-2xl font-bold text-center mb-2 text-foreground">
+                  <h3 className="text-3xl font-bold text-center mb-3 text-foreground">
                     Joseph Toney
                   </h3>
-                  <p className="text-cyan text-center mb-6">CEO & Founder</p>
+                  <p className="text-cyan text-center text-lg mb-6">CEO & Founder</p>
                 </div>
               </TiltCard>
             </RevealOnScroll>
