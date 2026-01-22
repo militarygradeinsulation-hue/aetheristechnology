@@ -25,8 +25,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Home', href: '/', special: true },
     { label: 'Services', href: '/services' },
     { label: 'Solutions', href: '/solutions' },
+    { label: 'Service Areas', href: '/service-areas' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true, special: true },
-    { label: 'Why Us', href: '/why-us' },
     { label: 'About', href: '/about' },
     { label: 'AI Assistant', href: '/assistant', special: true },
   ];

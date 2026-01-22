@@ -36,73 +36,43 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-    <!-- LocalBusiness Schema Markup -->
+    <!-- LocalBusiness Schema with Indiana Cities -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
       "name": "Aetheris AI",
-      "alternateName": "Aetheris Technology",
       "url": "https://aetheristechnology.lovable.app",
       "logo": "https://aetheristechnology.lovable.app/aetheris-logo.png",
-      "image": "https://aetheristechnology.lovable.app/aetheris-logo.png",
-      "description": "AI automation and consulting company specializing in custom CRM/ERP development, machine learning, and business intelligence solutions.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Indianapolis",
-        "addressRegion": "IN",
-        "addressCountry": "US"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 39.7684,
-        "longitude": -86.1581
-      },
+      "description": "AI automation and consulting company serving Indianapolis, Fort Wayne, Carmel, and all of Indiana.",
+      "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
+      "geo": { "@type": "GeoCoordinates", "latitude": 39.7684, "longitude": -86.1581 },
       "areaServed": [
-        {
-          "@type": "State",
-          "name": "Indiana"
-        },
-        {
-          "@type": "Country",
-          "name": "United States"
-        }
+        { "@type": "City", "name": "Indianapolis" },
+        { "@type": "City", "name": "Fort Wayne" },
+        { "@type": "City", "name": "Carmel" },
+        { "@type": "City", "name": "Fishers" },
+        { "@type": "City", "name": "Bloomington" },
+        { "@type": "City", "name": "Evansville" },
+        { "@type": "City", "name": "South Bend" },
+        { "@type": "City", "name": "Lafayette" },
+        { "@type": "State", "name": "Indiana" }
       ],
-      "serviceType": [
-        "AI Automation",
-        "Machine Learning",
-        "Custom CRM Development",
-        "Business Intelligence",
-        "AI Consulting",
-        "Process Automation"
-      ],
+      "serviceType": ["AI Automation", "Machine Learning", "Custom CRM Development", "AI Consulting"],
       "email": "aetheris.technology@outlook.com",
-      "founder": {
-        "@type": "Person",
-        "name": "Joseph Toney",
-        "jobTitle": "CEO"
-      },
-      "sameAs": [
-        "https://aetheristoolbox.org"
-      ]
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "50" }
     }
     </script>
 
-    <!-- Organization Schema -->
+    <!-- Blog Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Aetheris AI",
-      "url": "https://aetheristechnology.lovable.app",
-      "logo": "https://aetheristechnology.lovable.app/aetheris-logo.png",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "aetheris.technology@outlook.com",
-        "contactType": "customer service",
-        "areaServed": "US",
-        "availableLanguage": "English"
-      }
+      "@type": "Blog",
+      "name": "Aetheris AI Blog",
+      "description": "AI insights for Indiana businesses",
+      "url": "https://aetheristechnology.lovable.app/blog",
+      "publisher": { "@type": "Organization", "name": "Aetheris AI" }
     }
     </script>
   </head>
