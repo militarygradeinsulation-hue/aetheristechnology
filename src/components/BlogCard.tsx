@@ -3,6 +3,28 @@ import { Link } from 'react-router-dom';
 import { Calendar, User, MapPin, ArrowRight, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 
+// Import blog images
+import indianapolisAiImage from '@/assets/blog/indianapolis-ai-competition.jpg';
+import manufacturingAiImage from '@/assets/blog/manufacturing-ai-guide.jpg';
+import healthcareAiImage from '@/assets/blog/healthcare-ai-transformation.jpg';
+import logisticsImage from '@/assets/blog/logistics-supply-chain.jpg';
+import retailImage from '@/assets/blog/retail-ai-powered.jpg';
+import constructionImage from '@/assets/blog/construction-ai-building.jpg';
+import smallBusinessImage from '@/assets/blog/small-business-ai.jpg';
+import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
+
+// Map slugs to images
+const blogImages: Record<string, string> = {
+  'indianapolis-businesses-ai-competition': indianapolisAiImage,
+  'ai-automation-indiana-manufacturing-guide': manufacturingAiImage,
+  'ai-transforming-indiana-healthcare': healthcareAiImage,
+  'ai-indiana-logistics-supply-chain-hub': logisticsImage,
+  'ai-powered-retail-indiana-stores-machine-learning': retailImage,
+  'ai-transforming-indiana-construction-industry': constructionImage,
+  'ai-indiana-small-business-affordable-solutions': smallBusinessImage,
+  'optimizing-indiana-distribution-centers-ai-advantage': distributionImage,
+};
+
 interface BlogPost {
   id: string;
   title: string;
@@ -20,14 +42,26 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
+  const imageUrl = blogImages[post.slug] || post.featured_image;
+
   return (
     <Link 
       to={`/blog/${post.slug}`}
       className="block glass rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group h-full"
     >
-      {/* Placeholder Image */}
-      <div className="h-48 bg-gradient-to-br from-primary/20 to-cyan/20 flex items-center justify-center">
-        <div className="text-6xl opacity-50">📝</div>
+      {/* Featured Image */}
+      <div className="h-48 bg-gradient-to-br from-primary/20 to-cyan/20 overflow-hidden">
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={post.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-6xl opacity-50">📝</div>
+          </div>
+        )}
       </div>
 
       <div className="p-6">

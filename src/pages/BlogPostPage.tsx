@@ -11,6 +11,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
+// Import blog images
+import indianapolisAiImage from '@/assets/blog/indianapolis-ai-competition.jpg';
+import manufacturingAiImage from '@/assets/blog/manufacturing-ai-guide.jpg';
+import healthcareAiImage from '@/assets/blog/healthcare-ai-transformation.jpg';
+import logisticsImage from '@/assets/blog/logistics-supply-chain.jpg';
+import retailImage from '@/assets/blog/retail-ai-powered.jpg';
+import constructionImage from '@/assets/blog/construction-ai-building.jpg';
+import smallBusinessImage from '@/assets/blog/small-business-ai.jpg';
+import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
+
+// Map slugs to images
+const blogImages: Record<string, string> = {
+  'indianapolis-businesses-ai-competition': indianapolisAiImage,
+  'ai-automation-indiana-manufacturing-guide': manufacturingAiImage,
+  'ai-transforming-indiana-healthcare': healthcareAiImage,
+  'ai-indiana-logistics-supply-chain-hub': logisticsImage,
+  'ai-powered-retail-indiana-stores-machine-learning': retailImage,
+  'ai-transforming-indiana-construction-industry': constructionImage,
+  'ai-indiana-small-business-affordable-solutions': smallBusinessImage,
+  'optimizing-indiana-distribution-centers-ai-advantage': distributionImage,
+};
+
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -29,6 +51,8 @@ const BlogPostPage = () => {
       return data;
     },
   });
+
+  const featuredImage = slug ? blogImages[slug] : null;
 
   // Simple markdown to HTML conversion
   const renderContent = (content: string) => {
@@ -95,6 +119,17 @@ const BlogPostPage = () => {
               </div>
             ) : (
               <>
+                {/* Featured Image */}
+                {featuredImage && (
+                  <div className="mb-8 rounded-2xl overflow-hidden">
+                    <img 
+                      src={featuredImage} 
+                      alt={post.title}
+                      className="w-full h-64 md:h-96 object-cover"
+                    />
+                  </div>
+                )}
+
                 {/* Post Header */}
                 <header className="mb-12">
                   <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
