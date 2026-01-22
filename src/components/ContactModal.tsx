@@ -1,9 +1,5 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import React from 'react';
+import { X, Mail, Phone, MapPin } from 'lucide-react';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -11,31 +7,13 @@ interface ContactModalProps {
 }
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    message: '',
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: 'Message Sent!',
-      description: "We'll get back to you within 24 hours.",
-    });
-    setFormData({ name: '', email: '', company: '', message: '' });
-    onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative glass p-8 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="relative glass p-8 rounded-2xl max-w-md w-full">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 glass-hover rounded-lg"
@@ -43,75 +21,48 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-foreground">Let's Talk</h2>
+        <h2 className="text-3xl font-bold mb-2 text-foreground">Get In Touch</h2>
         <p className="text-muted-foreground mb-8">
-          Tell us about your project and we'll get back to you within 24 hours.
+          Reach out to discuss how AI can transform your business.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-foreground">
-              Name *
-            </label>
-            <Input
-              id="name"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="glass border-border"
-              placeholder="John Doe"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">
-              Email *
-            </label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="glass border-border"
-              placeholder="john@company.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="company" className="text-sm font-medium text-foreground">
-              Company
-            </label>
-            <Input
-              id="company"
-              value={formData.company}
-              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              className="glass border-border"
-              placeholder="Your Company Inc."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="message" className="text-sm font-medium text-foreground">
-              Message *
-            </label>
-            <Textarea
-              id="message"
-              required
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="glass border-border min-h-[120px]"
-              placeholder="Tell us about your project..."
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+        <div className="space-y-6">
+          <a 
+            href="tel:+13173762110" 
+            className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02]"
           >
-            Send Message
-          </Button>
-        </form>
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <Phone className="w-6 h-6 text-cyan" />
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Call Us</div>
+              <div className="text-foreground font-medium">1 (317) 376-2110</div>
+            </div>
+          </a>
+
+          <a 
+            href="mailto:aetheris.technology@outlook.com" 
+            className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02]"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <Mail className="w-6 h-6 text-cyan" />
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Email Us</div>
+              <div className="text-foreground font-medium">aetheris.technology@outlook.com</div>
+            </div>
+          </a>
+
+          <div className="flex items-center gap-4 p-4 glass rounded-xl">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-cyan" />
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Location</div>
+              <div className="text-foreground font-medium">Indianapolis, Indiana</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

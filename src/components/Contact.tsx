@@ -1,6 +1,5 @@
 import React from 'react';
-import { Mail, MapPin } from 'lucide-react';
-import { Button } from './ui/button';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 
 interface ContactProps {
@@ -25,27 +24,36 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 Get a free consultation with our experts.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                {[
-                  { icon: Mail, label: 'Email', value: 'aetheris.technology@outlook.com', href: 'mailto:aetheris.technology@outlook.com' },
-                  { icon: MapPin, label: 'Location', value: 'Indianapolis, Indiana', href: null },
-                ].map((item) => (
-                <div key={item.label} className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <item.icon className="w-6 h-6 text-cyan" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground mb-1">{item.label}</div>
-                      {item.href ? (
-                        <a href={item.href} className="text-foreground font-medium hover:text-cyan transition-colors">
-                          {item.value}
-                        </a>
-                      ) : (
-                        <div className="text-foreground font-medium">{item.value}</div>
-                      )}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <a href="tel:+13173762110" className="flex flex-col items-center gap-3 group">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                    <Phone className="w-6 h-6 text-cyan" />
                   </div>
-                ))}
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Phone</div>
+                    <div className="text-foreground font-medium group-hover:text-cyan transition-colors">1 (317) 376-2110</div>
+                  </div>
+                </a>
+
+                <a href="mailto:aetheris.technology@outlook.com" className="flex flex-col items-center gap-3 group">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                    <Mail className="w-6 h-6 text-cyan" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Email</div>
+                    <div className="text-foreground font-medium group-hover:text-cyan transition-colors">aetheris.technology@outlook.com</div>
+                  </div>
+                </a>
+
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-cyan" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Location</div>
+                    <div className="text-foreground font-medium">Indianapolis, Indiana</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
