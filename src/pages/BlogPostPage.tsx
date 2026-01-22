@@ -1,0 +1,174 @@
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Calendar, User, MapPin, Tag } from 'lucide-react';
+import { Background } from '@/components/Background';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
+import { ContactModal } from '@/components/ContactModal';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+
+const BlogPostPage = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const { data: post, isLoading, error } = useQuery({
+    queryKey: ['blog-post', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Simple markdown to HTML conversion
+  const renderContent = (content: string) => {
+    return content
+      .split('\n')
+      .map((line, index) => {
+        // Headers
+        if (line.startsWith('# ')) {
+          return <h1 key={index} className="text-3xl md:text-4xl font-bold mt-8 mb-4">{line.slice(2)}</h1>;
+        }
+        if (line.startsWith('## ')) {
+          return <h2 key={index} className="text-2xl font-bold mt-6 mb-3">{line.slice(3)}</h2>;
+        }
+        if (line.startsWith('### ')) {
+          return <h3 key={index} className="text-xl font-semibold mt-4 mb-2">{line.slice(4)}</h3>;
+        }
+        // Bold text
+        if (line.startsWith('**') && line.endsWith('**')) {
+          return <p key={index} className="font-semibold my-2">{line.slice(2, -2)}</p>;
+        }
+        // List items
+        if (line.startsWith('- ')) {
+          return <li key={index} className="ml-6 my-1">{line.slice(2)}</li>;
+        }
+        // Empty lines
+        if (line.trim() === '') {
+          return <br key={index} />;
+        }
+        // Regular paragraphs
+        return <p key={index} className="my-2 text-muted-foreground leading-relaxed">{line}</p>;
+      });
+  };
+
+  return (
+    <div className="relative min-h-screen">
+      <Background />
+      
+      <div className="relative z-10">
+        <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+        
+        <article className="pt-32 pb-20 px-4">
+          <div className="max-w-4xl mx-auto">
+            <Link to="/blog">
+              <Button variant="ghost" className="mb-8 gap-2">
+                <ArrowLeft className="w-4 h-4" /> Back to Blog
+              </Button>
+            </Link>
+
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-96 w-full" />
+              </div>
+            ) : error || !post ? (
+              <div className="text-center py-20">
+                <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
+                <p className="text-muted-foreground mb-6">
+                  The blog post you're looking for doesn't exist or has been removed.
+                </p>
+                <Link to="/blog">
+                  <Button>View All Posts</Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                {/* Post Header */}
+                <header className="mb-12">
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+                    {post.title}
+                  </h1>
+                  
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {post.author}
+                    </div>
+                    {post.published_at && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {format(new Date(post.published_at), 'MMMM d, yyyy')}
+                      </div>
+                    )}
+                    {post.location_focus && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {post.location_focus}
+                      </div>
+                    )}
+                  </div>
+
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((tag: string) => (
+                        <span 
+                          key={tag}
+                          className="inline-flex items-center gap-1 text-xs bg-muted px-3 py-1 rounded-full"
+                        >
+                          <Tag className="w-3 h-3" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </header>
+
+                {/* Post Content */}
+                <div className="prose prose-invert max-w-none">
+                  {renderContent(post.content)}
+                </div>
+
+                {/* CTA */}
+                <div className="mt-16 glass rounded-2xl p-8 text-center">
+                  <h2 className="text-2xl font-bold mb-4">
+                    Ready to Transform Your Business with AI?
+                  </h2>
+                  <p className="text-muted-foreground mb-6">
+                    Contact Aetheris AI for a free consultation and discover how AI can 
+                    drive growth for your Indiana business.
+                  </p>
+                  <Link to="/contact">
+                    <Button className="bg-primary hover:bg-primary/90">
+                      Get Started Today
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+        </article>
+
+        <Footer />
+      </div>
+
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
+    </div>
+  );
+};
+
+export default BlogPostPage;

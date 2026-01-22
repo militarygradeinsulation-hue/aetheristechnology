@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          author: string
+          content: string
+          created_at: string
+          excerpt: string
+          featured_image: string | null
+          id: string
+          is_published: boolean
+          location_focus: string | null
+          meta_description: string | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          content: string
+          created_at?: string
+          excerpt: string
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean
+          location_focus?: string | null
+          meta_description?: string | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          content?: string
+          created_at?: string
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean
+          location_focus?: string | null
+          meta_description?: string | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          client_name: string
+          company: string
+          created_at: string
+          id: string
+          industry: string | null
+          is_featured: boolean
+          location: string | null
+          quote: string
+          rating: number
+          role: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          client_name: string
+          company: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          is_featured?: boolean
+          location?: string | null
+          quote: string
+          rating?: number
+          role: string
+        }
+        Update: {
+          avatar_url?: string | null
+          client_name?: string
+          company?: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          is_featured?: boolean
+          location?: string | null
+          quote?: string
+          rating?: number
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

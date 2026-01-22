@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
-import { Hero } from '@/components/Hero';
-import { ThePitch } from '@/components/ThePitch';
-import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { ServiceAreas } from '@/components/ServiceAreas';
 
-const Home = () => {
+const ServiceAreasPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
@@ -16,9 +14,7 @@ const Home = () => {
       
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-        <Hero onContactClick={() => setIsContactModalOpen(true)} />
-        <ThePitch />
-        <Testimonials />
+        <ServiceAreas />
         <Footer />
       </div>
 
@@ -30,4 +26,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default ServiceAreasPage;
