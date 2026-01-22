@@ -88,10 +88,13 @@ export const BlogList: React.FC = () => {
               Get the latest AI insights delivered to your inbox. We share practical tips, 
               industry news, and success stories from Indiana businesses.
             </p>
-            <div className="flex items-center justify-center gap-2 text-cyan">
+            <a 
+              href="mailto:aetheris.technology@outlook.com?subject=Newsletter Subscription" 
+              className="inline-flex items-center justify-center gap-2 text-cyan hover:text-cyan/80 transition-colors"
+            >
               <span>Contact us to subscribe</span>
               <ArrowRight className="w-4 h-4" />
-            </div>
+            </a>
           </div>
         </RevealOnScroll>
       </div>
