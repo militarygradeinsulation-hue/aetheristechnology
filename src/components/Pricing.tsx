@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, Sparkles, Zap, Rocket, Crown, Gift, Clock, Shield, TrendingUp } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Button } from './ui/button';
+import { ContactModal } from './ContactModal';
 
+const generateClaimCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const timestamp = Date.now().toString(36).toUpperCase().slice(-4);
+  let code = 'AE-';
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code + '-' + timestamp;
+};
 interface PricingTier {
   name: string;
   icon: React.ElementType;
@@ -133,10 +143,18 @@ const pricingTiers: PricingTier[] = [
 ];
 
 export const Pricing: React.FC = () => {
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [claimCode, setClaimCode] = useState<string | null>(null);
+
   const calculateDaily = (monthly: number) => {
     return (monthly / 30).toFixed(2);
   };
 
+  const handleClaimSpot = () => {
+    const code = generateClaimCode();
+    setClaimCode(code);
+    setIsContactModalOpen(true);
+  };
   return (
     <section id="pricing" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
@@ -353,7 +371,7 @@ export const Pricing: React.FC = () => {
               </div>
               <Button 
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-background font-bold"
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={handleClaimSpot}
               >
                 Claim Your Spot
               </Button>
@@ -418,6 +436,12 @@ export const Pricing: React.FC = () => {
           </div>
         </RevealOnScroll>
       </div>
+
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        claimCode={claimCode || undefined}
+      />
     </section>
   );
 };
