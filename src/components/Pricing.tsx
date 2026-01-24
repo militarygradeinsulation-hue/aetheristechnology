@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Sparkles, Zap, Rocket, Crown } from 'lucide-react';
+import { Check, Sparkles, Zap, Rocket, Crown, Gift, Clock, Shield, TrendingUp } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Button } from './ui/button';
 
@@ -9,6 +9,8 @@ interface PricingTier {
   monthlyPrice: number;
   description: string;
   features: string[];
+  bonuses: string[];
+  savings: string;
   popular?: boolean;
   enterprise?: boolean;
 }
@@ -18,30 +20,53 @@ const pricingTiers: PricingTier[] = [
     name: 'Starter',
     icon: Sparkles,
     monthlyPrice: 497,
-    description: 'Perfect for small businesses getting started with AI automation',
+    description: 'Perfect for small businesses ready to automate and grow',
+    savings: 'Save $2,000+/month vs hiring',
     features: [
-      'Basic AI Automation Setup',
+      'AI Automation Setup & Configuration',
       'Up to 1,000 automated tasks/month',
-      'Email Support',
-      'Monthly Performance Reports',
-      '1 Custom Integration',
+      'Custom CRM Dashboard',
+      'Lead Capture & Scoring System',
+      'Automated Email Sequences (up to 5)',
       'Basic Analytics Dashboard',
+      '1 Custom Integration (QuickBooks, etc.)',
+      'Email Support (48hr response)',
+      'Monthly Performance Reports',
+      'Mobile App Access',
+    ],
+    bonuses: [
+      '🎁 FREE: 1-hour Strategy Call ($500 value)',
+      '🎁 FREE: AI Readiness Assessment',
+      '🎁 FREE: Competitor Analysis Report',
     ],
   },
   {
     name: 'Growth',
     icon: Zap,
     monthlyPrice: 997,
-    description: 'Ideal for growing companies ready to scale their operations',
+    description: 'Everything you need to scale fast and dominate your market',
+    savings: 'Save $5,000+/month vs hiring',
     features: [
-      'Advanced AI Automation',
+      'Everything in Starter, PLUS:',
       'Up to 10,000 automated tasks/month',
-      'Priority Support (24hr response)',
-      'Weekly Performance Reports',
+      'AI-Powered Lead Generator (auto-prospecting)',
+      'Full CRM/ERP System',
+      'Unlimited Email Sequences',
+      '24/7 Marketing Automation Hub',
+      'AI Chatbot for Your Website',
       '5 Custom Integrations',
-      'Advanced Analytics & Insights',
+      'Advanced Analytics & ROI Tracking',
+      'Priority Support (24hr response)',
+      'Weekly Strategy Calls',
       'Custom ML Model Training',
       'API Access',
+      'Team Training (up to 5 users)',
+    ],
+    bonuses: [
+      '🎁 FREE: Custom AI Workflow Design ($2,000 value)',
+      '🎁 FREE: LinkedIn Lead Gen Setup',
+      '🎁 FREE: Google My Business Optimization',
+      '🎁 FREE: Monthly SEO Report',
     ],
     popular: true,
   },
@@ -49,33 +74,59 @@ const pricingTiers: PricingTier[] = [
     name: 'Professional',
     icon: Rocket,
     monthlyPrice: 1997,
-    description: 'For established businesses demanding enterprise-grade AI',
+    description: 'Full AI transformation for serious businesses',
+    savings: 'Save $10,000+/month vs hiring',
     features: [
-      'Full AI Suite Access',
-      'Unlimited automated tasks',
-      '24/7 Priority Support',
-      'Real-time Dashboards',
-      'Unlimited Integrations',
-      'Custom AI Development',
+      'Everything in Growth, PLUS:',
+      'UNLIMITED automated tasks',
+      'Dedicated AI Development Team',
+      'Custom AI Model Development',
+      'Predictive Analytics & Forecasting',
+      'Voice AI Assistant Integration',
+      'UNLIMITED Integrations',
+      'Real-time Business Dashboards',
+      '24/7 Priority Support (1hr response)',
       'Dedicated Account Manager',
       'On-site Training Available',
-      'SLA Guarantee',
+      'White-glove Onboarding',
+      'Custom Reporting Suite',
+      'SLA Guarantee (99.9% uptime)',
+      'Quarterly Business Reviews',
+      'Team Training (unlimited users)',
+    ],
+    bonuses: [
+      '🎁 FREE: Full Marketing Automation Setup ($5,000 value)',
+      '🎁 FREE: Custom Mobile App',
+      '🎁 FREE: Annual Strategy Planning Session',
+      '🎁 FREE: Priority Feature Requests',
+      '🎁 FREE: Dedicated Slack Channel',
     ],
   },
   {
     name: 'Enterprise',
     icon: Crown,
     monthlyPrice: 0,
-    description: 'Custom solutions for large organizations with complex needs',
+    description: 'Fully custom AI solutions for large organizations',
+    savings: 'ROI typically 500-1000%',
     features: [
-      'Everything in Professional',
+      'Everything in Professional, PLUS:',
+      'Dedicated Development Team',
       'Custom AI Model Development',
       'White-label Solutions',
       'Multi-location Support',
-      'Custom Security & Compliance',
+      'Custom Security & Compliance (HIPAA, SOC2)',
+      'On-premise Deployment Options',
       'Executive Business Reviews',
-      'Dedicated Development Team',
+      'Custom Contract Terms',
+      'Volume Discounts Available',
+      '24/7 Phone Support',
       'Custom SLA Terms',
+    ],
+    bonuses: [
+      '🎁 Proof of Concept - FREE',
+      '🎁 Custom Integration Development',
+      '🎁 C-Suite Strategy Sessions',
+      '🎁 Industry Benchmarking Reports',
     ],
     enterprise: true,
   },
@@ -152,7 +203,7 @@ export const Pricing: React.FC = () => {
                   </div>
                 )}
 
-                <div className="mb-6">
+                <div className="mb-4">
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
                     tier.popular ? 'bg-cyan/30' : 'bg-primary/20'
                   }`}>
@@ -162,7 +213,15 @@ export const Pricing: React.FC = () => {
                   <p className="text-sm text-muted-foreground mt-1">{tier.description}</p>
                 </div>
 
-                <div className="mb-6">
+                {/* Savings Badge */}
+                <div className="mb-4 p-2 rounded-lg bg-green-500/10 border border-green-500/30">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-400" />
+                    <span className="text-sm font-semibold text-green-400">{tier.savings}</span>
+                  </div>
+                </div>
+
+                <div className="mb-4">
                   {tier.enterprise ? (
                     <div>
                       <p className="text-3xl font-bold text-foreground">Custom</p>
@@ -186,17 +245,34 @@ export const Pricing: React.FC = () => {
                   )}
                 </div>
 
-                <ul className="space-y-3 mb-6 flex-1">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-cyan shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                {/* Features */}
+                <div className="mb-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">What's Included:</p>
+                  <ul className="space-y-2">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-cyan shrink-0 mt-0.5" />
+                        <span className="text-xs text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Bonuses Section */}
+                <div className="mb-6 p-3 rounded-lg bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gift className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Bonuses Included</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {tier.bonuses.map((bonus) => (
+                      <li key={bonus} className="text-xs text-muted-foreground">{bonus}</li>
+                    ))}
+                  </ul>
+                </div>
 
                 <Button 
-                  className={`w-full ${
+                  className={`w-full mt-auto ${
                     tier.popular 
                       ? 'bg-cyan hover:bg-cyan/90 text-background' 
                       : tier.enterprise 
@@ -205,7 +281,7 @@ export const Pricing: React.FC = () => {
                   }`}
                   onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  {tier.enterprise ? 'Contact Sales' : 'Get Started'}
+                  {tier.enterprise ? 'Contact Sales' : 'Get Started Today'}
                 </Button>
               </div>
             </RevealOnScroll>
@@ -262,26 +338,82 @@ export const Pricing: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        {/* FAQ-style objections */}
+        {/* Urgency Section */}
+        <RevealOnScroll delay={0.35}>
+          <div className="mt-12 glass p-6 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-amber-500/20">
+                  <Clock className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-foreground">Limited Availability</h4>
+                  <p className="text-sm text-muted-foreground">We only take on 5 new clients per month to ensure quality</p>
+                </div>
+              </div>
+              <Button 
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-background font-bold"
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Claim Your Spot
+              </Button>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        {/* Trust Badges */}
         <RevealOnScroll delay={0.4}>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass p-6 rounded-xl">
-              <h4 className="text-lg font-bold text-foreground mb-2">No long-term contracts</h4>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="glass p-6 rounded-xl text-center">
+              <Shield className="w-8 h-8 text-cyan mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-foreground mb-2">No Contracts</h4>
               <p className="text-sm text-muted-foreground">
-                Cancel anytime. We're confident you'll stay because of results, not contracts.
+                Cancel anytime. We earn your business every month.
               </p>
             </div>
-            <div className="glass p-6 rounded-xl">
-              <h4 className="text-lg font-bold text-foreground mb-2">Setup included</h4>
+            <div className="glass p-6 rounded-xl text-center">
+              <Gift className="w-8 h-8 text-cyan mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-foreground mb-2">Setup Included</h4>
               <p className="text-sm text-muted-foreground">
-                Full onboarding and implementation included. No hidden setup fees.
+                $2,000+ in onboarding value included FREE.
               </p>
             </div>
-            <div className="glass p-6 rounded-xl">
-              <h4 className="text-lg font-bold text-foreground mb-2">30-day money back</h4>
+            <div className="glass p-6 rounded-xl text-center">
+              <TrendingUp className="w-8 h-8 text-cyan mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-foreground mb-2">30-Day Guarantee</h4>
               <p className="text-sm text-muted-foreground">
-                Not satisfied? Get a full refund within your first 30 days. Zero risk.
+                Full refund if you're not completely satisfied.
               </p>
+            </div>
+            <div className="glass p-6 rounded-xl text-center">
+              <Zap className="w-8 h-8 text-cyan mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-foreground mb-2">Go Live in 48hrs</h4>
+              <p className="text-sm text-muted-foreground">
+                Most clients are fully automated within 2 days.
+              </p>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        {/* Final CTA */}
+        <RevealOnScroll delay={0.45}>
+          <div className="mt-16 glass p-10 rounded-xl text-center border border-cyan/30 bg-gradient-to-br from-cyan/5 to-primary/5">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              Still on the Fence?
+            </h3>
+            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Every day you wait is another day your competitors are automating. 
+              Every task you do manually is money left on the table.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                size="lg"
+                className="bg-cyan hover:bg-cyan/90 text-background font-bold px-8"
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Start Your Free Consultation
+              </Button>
+              <p className="text-sm text-muted-foreground">No credit card required • 15-min call</p>
             </div>
           </div>
         </RevealOnScroll>
