@@ -22,10 +22,10 @@ const teamMembers = [
     funFact: "6 years in logistics operations"
   },
   {
-    name: "Emma Chen",
+    name: "Emily Sanders",
     title: "New Client Specialist",
     photo: emmaPhoto,
-    story: "Emma is usually the first person you'll connect with when exploring Aetheris. She built and ran her own e-commerce business for three years while finishing her degree—handling everything from customer service to fulfillment to marketing. So when she talks to entrepreneurs now, she genuinely understands the hustle. \"I joined Aetheris because I believe in working smarter, not just harder. Helping people find that balance? That's why I'm here,\" she says. Stop by the Indy office sometime—she'll probably offer you coffee.",
+    story: "Emily is usually the first person you'll connect with when exploring Aetheris. She built and ran her own e-commerce business for three years while finishing her degree—handling everything from customer service to fulfillment to marketing. So when she talks to entrepreneurs now, she genuinely understands the hustle. \"I joined Aetheris because I believe in working smarter, not just harder. Helping people find that balance? That's why I'm here,\" she says. Stop by the Indy office sometime—she'll probably offer you coffee.",
     funFact: "Former e-commerce entrepreneur"
   }
 ];
