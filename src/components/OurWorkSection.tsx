@@ -3,6 +3,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Briefcase, Users, Lightbulb, Rocket } from 'lucide-react';
 
 import teamVideo from '@/assets/office/team-video.mp4';
+import teamActionPoster from '@/assets/office/team-action-poster.jpg';
 import teamCollab1 from '@/assets/office/team-collab-1.jpg';
 
 const highlights = [
@@ -50,6 +51,7 @@ export const OurWorkSection: React.FC = () => {
             <div className="relative rounded-2xl overflow-hidden group lg:col-span-1">
               <video 
                 src={teamVideo}
+                poster={teamActionPoster}
                 autoPlay
                 loop
                 muted
