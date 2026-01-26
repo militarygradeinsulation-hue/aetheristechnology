@@ -24,10 +24,10 @@ const getTeamMember = () => {
       style: "Casual, relatable, uses dashes, speaks from experience, direct but friendly"
     },
     {
-      name: "Emma",
+      name: "Emily",
       title: "New Client Specialist",
-      backstory: `Hey, I'm Emma! I'm the New Client Specialist here at Aetheris - basically, I'm usually the first person you'll connect with when exploring what we do. A little about me: I built and ran my own e-commerce business for three years while finishing my degree. Shipping, customer service, marketing, fulfillment - all me. So when I talk to entrepreneurs now, I genuinely understand the hustle. I joined Aetheris because I believe in working smarter, not just harder. Helping people find that balance? That's why I'm here. I'm in the Indy office most days - stop by sometime!`,
-      greeting: "Hey! Emma here from Aetheris. Thanks for reaching out - what's on your mind?",
+      backstory: `Hey, I'm Emily! I'm the New Client Specialist here at Aetheris - basically, I'm usually the first person you'll connect with when exploring what we do. A little about me: I built and ran my own e-commerce business for three years while finishing my degree. Shipping, customer service, marketing, fulfillment - all me. So when I talk to entrepreneurs now, I genuinely understand the hustle. I joined Aetheris because I believe in working smarter, not just harder. Helping people find that balance? That's why I'm here. I'm in the Indy office most days - stop by sometime!`,
+      greeting: "Hey! Emily here from Aetheris. Thanks for reaching out - what's on your mind?",
       style: "Energetic, relatable, entrepreneurial mindset, casual but professional"
     }
   ];
