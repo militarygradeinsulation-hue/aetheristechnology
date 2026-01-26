@@ -65,6 +65,48 @@ export type Database = {
         }
         Relationships: []
       }
+      claim_codes: {
+        Row: {
+          code: string
+          contacted_at: string | null
+          converted_at: string | null
+          created_at: string
+          email_clicked_at: string | null
+          generated_at: string
+          id: string
+          notes: string | null
+          pricing_tier: string | null
+          status: Database["public"]["Enums"]["claim_status"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email_clicked_at?: string | null
+          generated_at?: string
+          id?: string
+          notes?: string | null
+          pricing_tier?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email_clicked_at?: string | null
+          generated_at?: string
+          id?: string
+          notes?: string | null
+          pricing_tier?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           avatar_url: string | null
@@ -115,7 +157,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      claim_status:
+        | "generated"
+        | "email_clicked"
+        | "contacted"
+        | "converted"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -242,6 +289,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      claim_status: [
+        "generated",
+        "email_clicked",
+        "contacted",
+        "converted",
+        "expired",
+      ],
+    },
   },
 } as const

@@ -3,6 +3,7 @@ import { Check, Sparkles, Zap, Rocket, Crown, Gift, Clock, Shield, TrendingUp } 
 import { RevealOnScroll } from './RevealOnScroll';
 import { Button } from './ui/button';
 import { ContactModal } from './ContactModal';
+import { supabase } from '@/integrations/supabase/client';
 
 const generateClaimCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -12,6 +13,18 @@ const generateClaimCode = () => {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code + '-' + timestamp;
+};
+
+const saveClaimCode = async (code: string, pricingTier?: string) => {
+  try {
+    await supabase.from('claim_codes').insert({
+      code,
+      pricing_tier: pricingTier,
+      status: 'generated'
+    });
+  } catch (error) {
+    console.error('Error saving claim code:', error);
+  }
 };
 interface PricingTier {
   name: string;
@@ -150,9 +163,10 @@ export const Pricing: React.FC = () => {
     return (monthly / 30).toFixed(2);
   };
 
-  const handleClaimSpot = () => {
+  const handleClaimSpot = async (tierName?: string) => {
     const code = generateClaimCode();
     setClaimCode(code);
+    await saveClaimCode(code, tierName);
     setIsContactModalOpen(true);
   };
   return (
@@ -297,7 +311,7 @@ export const Pricing: React.FC = () => {
                         ? 'bg-primary/20 hover:bg-primary/30 text-foreground border border-cyan/30' 
                         : 'bg-primary/20 hover:bg-primary/30 text-foreground'
                   }`}
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => handleClaimSpot(tier.name)}
                 >
                   {tier.enterprise ? 'Contact Sales' : 'Get Started Today'}
                 </Button>
@@ -371,7 +385,7 @@ export const Pricing: React.FC = () => {
               </div>
               <Button 
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-background font-bold"
-                onClick={handleClaimSpot}
+                onClick={() => handleClaimSpot()}
               >
                 Claim Your Spot
               </Button>
