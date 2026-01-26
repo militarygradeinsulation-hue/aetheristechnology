@@ -3,10 +3,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Briefcase, Users, Lightbulb, Rocket } from 'lucide-react';
 
 import teamMeeting1 from '@/assets/office/team-meeting-1.jpg';
-import teamMeeting2 from '@/assets/office/team-meeting-2.jpg';
-import teamMeeting3 from '@/assets/office/team-meeting-3.jpg';
 import teamMeeting4 from '@/assets/office/team-meeting-4.jpg';
-import teamMeeting5 from '@/assets/office/team-meeting-5.jpg';
 
 const highlights = [
   {
@@ -46,67 +43,27 @@ export const OurWorkSection: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        {/* Main Image Grid */}
+        {/* Image Grid - 2 images */}
         <RevealOnScroll>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            {/* Large featured image */}
-            <div className="md:col-span-2">
-              <div className="relative rounded-2xl overflow-hidden group">
-                <img 
-                  src={teamMeeting1} 
-                  alt="Team strategy session at Aetheris AI" 
-                  className="w-full h-[300px] md:h-[400px] object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
-                    AI Strategy & Architecture
-                  </h3>
-                  <p className="text-muted-foreground text-sm md:text-base">
-                    Every client engagement starts with deep-dive sessions where we map out 
-                    exactly how AI can solve your specific challenges.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Smaller grid images */}
-            <div className="relative rounded-2xl overflow-hidden group">
-              <img 
-                src={teamMeeting2} 
-                alt="Collaborative planning at Aetheris AI" 
-                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-lg font-semibold text-foreground">Client Collaboration</h4>
-                <p className="text-sm text-muted-foreground">Working directly with business owners</p>
-              </div>
-            </div>
-
-            <div className="relative rounded-2xl overflow-hidden group">
-              <img 
-                src={teamMeeting3} 
-                alt="Development planning at Aetheris AI" 
-                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-lg font-semibold text-foreground">Solution Design</h4>
-                <p className="text-sm text-muted-foreground">Mapping your AI roadmap</p>
-              </div>
-            </div>
-          </div>
-        </RevealOnScroll>
-
-        {/* Second row of images */}
-        <RevealOnScroll delay={0.1}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             <div className="relative rounded-2xl overflow-hidden group">
               <img 
+                src={teamMeeting1} 
+                alt="Team strategy session at Aetheris AI" 
+                className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Strategy & Architecture</h4>
+                <p className="text-sm text-muted-foreground">Mapping your AI roadmap together</p>
+              </div>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden group">
+              <img 
                 src={teamMeeting4} 
-                alt="AI ethics discussion at Aetheris AI" 
-                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+                alt="AI ethics and best practices discussion" 
+                className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
@@ -114,26 +71,13 @@ export const OurWorkSection: React.FC = () => {
                 <p className="text-sm text-muted-foreground">Building AI responsibly</p>
               </div>
             </div>
-
-            <div className="relative rounded-2xl overflow-hidden group">
-              <img 
-                src={teamMeeting5} 
-                alt="Project optimization meeting at Aetheris AI" 
-                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-lg font-semibold text-foreground">Optimization Sprints</h4>
-                <p className="text-sm text-muted-foreground">Continuous improvement cycles</p>
-              </div>
-            </div>
           </div>
         </RevealOnScroll>
 
         {/* Highlights */}
-        <RevealOnScroll delay={0.2}>
+        <RevealOnScroll delay={0.1}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {highlights.map((item, index) => (
+            {highlights.map((item) => (
               <div 
                 key={item.title}
                 className="glass rounded-xl p-6 border border-border/50 hover:border-cyan/30 transition-all duration-300"
