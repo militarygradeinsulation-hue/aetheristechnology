@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Gift, Users, TrendingUp, Award, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
+import teamVideo from '@/assets/office/team-video.mp4';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -65,6 +66,24 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             You know you need AI for your business. We build it, deploy it, and manage it—so you can focus on growth.
           </p>
+
+          {/* Team Video */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-cyan/20"
+          >
+            <video 
+              src={teamVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto object-cover rounded-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent rounded-2xl" />
+          </motion.div>
 
           {/* CTA Buttons - More Prominent */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
