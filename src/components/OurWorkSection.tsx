@@ -2,8 +2,8 @@ import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Briefcase, Users, Lightbulb, Rocket } from 'lucide-react';
 
+import teamVideo from '@/assets/office/team-video.mp4';
 import teamCollab1 from '@/assets/office/team-collab-1.jpg';
-import teamCollab2 from '@/assets/office/team-collab-2.jpg';
 
 const highlights = [
   {
@@ -43,9 +43,27 @@ export const OurWorkSection: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        {/* Image Grid - 2 images */}
+        {/* Video + Image Grid */}
         <RevealOnScroll>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+            {/* Team Video */}
+            <div className="relative rounded-2xl overflow-hidden group lg:col-span-1">
+              <video 
+                src={teamVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-[300px] lg:h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Our Team in Action</h4>
+                <p className="text-sm text-muted-foreground">Collaboration at our Indianapolis office</p>
+              </div>
+            </div>
+
+            {/* Static Image */}
             <div className="relative rounded-2xl overflow-hidden group">
               <img 
                 src={teamCollab1} 
@@ -56,19 +74,6 @@ export const OurWorkSection: React.FC = () => {
               <div className="absolute bottom-4 left-4 right-4">
                 <h4 className="text-lg font-semibold text-foreground">Client Collaboration</h4>
                 <p className="text-sm text-muted-foreground">Working directly with business owners</p>
-              </div>
-            </div>
-
-            <div className="relative rounded-2xl overflow-hidden group">
-              <img 
-                src={teamCollab2} 
-                alt="AI strategy presentation" 
-                className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-lg font-semibold text-foreground">Ethics & Best Practices</h4>
-                <p className="text-sm text-muted-foreground">Building AI responsibly</p>
               </div>
             </div>
           </div>
