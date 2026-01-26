@@ -11,9 +11,7 @@ const getTeamMember = () => {
   const dayOfWeek = new Date().getDay();
   const teamMembers = [
     { name: "Maya", title: "Client Success", initials: "M" },
-    { name: "Jordan", title: "Business Development", initials: "J" },
-    { name: "Sophia", title: "Client Relations", initials: "S" },
-    { name: "Rachel", title: "Client Experience", initials: "R" },
+    { name: "Marcus", title: "Business Development", initials: "M" },
     { name: "Emma", title: "New Clients", initials: "E" },
   ];
   return teamMembers[dayOfWeek % teamMembers.length];
