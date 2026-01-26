@@ -2,8 +2,8 @@ import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Briefcase, Users, Lightbulb, Rocket } from 'lucide-react';
 
-import teamMeeting1 from '@/assets/office/team-meeting-1.jpg';
-import teamMeeting4 from '@/assets/office/team-meeting-4.jpg';
+import teamCollab1 from '@/assets/office/team-collab-1.jpg';
+import teamCollab2 from '@/assets/office/team-collab-2.jpg';
 
 const highlights = [
   {
@@ -48,21 +48,21 @@ export const OurWorkSection: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             <div className="relative rounded-2xl overflow-hidden group">
               <img 
-                src={teamMeeting1} 
+                src={teamCollab1} 
                 alt="Team strategy session at Aetheris AI" 
                 className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-lg font-semibold text-foreground">Strategy & Architecture</h4>
-                <p className="text-sm text-muted-foreground">Mapping your AI roadmap together</p>
+                <h4 className="text-lg font-semibold text-foreground">Client Collaboration</h4>
+                <p className="text-sm text-muted-foreground">Working directly with business owners</p>
               </div>
             </div>
 
             <div className="relative rounded-2xl overflow-hidden group">
               <img 
-                src={teamMeeting4} 
-                alt="AI ethics and best practices discussion" 
+                src={teamCollab2} 
+                alt="AI strategy presentation" 
                 className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
