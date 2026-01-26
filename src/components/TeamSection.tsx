@@ -3,9 +3,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Users } from 'lucide-react';
 
 import mayaPhoto from '@/assets/team/maya.jpg';
-import jordanPhoto from '@/assets/team/jordan.jpg';
-import sophiaPhoto from '@/assets/team/sophia.jpg';
-import rachelPhoto from '@/assets/team/rachel.jpg';
+import marcusPhoto from '@/assets/team/marcus.jpg';
 import emmaPhoto from '@/assets/team/emma.jpg';
 
 const teamMembers = [
@@ -13,36 +11,22 @@ const teamMembers = [
     name: "Maya Rodriguez",
     title: "Client Success Coordinator",
     photo: mayaPhoto,
-    story: "Maya joined Aetheris about two years ago after managing a small marketing agency downtown. She saw firsthand how overwhelmed small business owners get trying to do everything themselves. When she met Joseph at a networking event and heard what Aetheris does, she knew she had to be part of it. \"Being able to help business owners get their time back? That's what gets me out of bed every morning,\" she says. She's usually the first one in the office—she likes her coffee before the phones start ringing.",
+    story: "Maya joined Aetheris about two years ago after running a small marketing agency downtown. She saw firsthand how overwhelmed business owners get trying to do everything themselves. When she met Joseph at a Chamber of Commerce event and heard what Aetheris does, she knew she had to be part of it. \"Being able to help business owners reclaim their time—that's what gets me excited every morning,\" she says. She's usually first in the office with her coffee, ready to tackle whatever comes her way.",
     funFact: "Former marketing agency owner"
   },
   {
-    name: "Jordan Mitchell",
+    name: "Marcus Johnson",
     title: "Business Development Associate",
-    photo: jordanPhoto,
-    story: "Jordan spent five years in restaurant management before making the switch to tech. Long hours, thin margins, constant fires to put out—she knows what it's like to run a business where you're always behind. That's exactly why she took this role. \"When I can help a business owner see how they could save 20 hours a week, that feeling never gets old,\" she explains. Based out of the Indianapolis office, she's usually juggling a few conversations at once.",
-    funFact: "5 years in restaurant management"
+    photo: marcusPhoto,
+    story: "Marcus spent six years in logistics operations before making the jump to tech. Long hours, tight deadlines, and constant problem-solving—he knows exactly what it feels like to run a business where you're always playing catch-up. That experience is why he's so passionate about this role. \"When I can show a business owner how to save 20 hours a week, and I see that weight lift off their shoulders—that never gets old,\" he explains. He's based in the Indy office, usually juggling multiple conversations at once.",
+    funFact: "6 years in logistics operations"
   },
   {
-    name: "Sophia Chen",
-    title: "Client Relations Specialist",
-    photo: sophiaPhoto,
-    story: "Sophia's path to Aetheris was a little unconventional—she was a high school business teacher for six years. She loved helping students understand entrepreneurship, but wanted to work directly with business owners making it happen in the real world. Joseph is actually a friend of her husband's from way back, and when he said they needed someone who could really connect with people and explain complex stuff simply, she jumped at the chance. \"Best decision I ever made. The team here is like family.\"",
-    funFact: "Former business teacher"
-  },
-  {
-    name: "Rachel Thompson",
-    title: "Client Experience Manager",
-    photo: rachelPhoto,
-    story: "Rachel has been in customer-facing roles her whole career—started in hospitality, moved to SaaS, and landed at Aetheris about 18 months ago. What she loves about this job is that she's not just answering questions—she's actually helping people solve real problems. \"Before Aetheris, I was at a software company where I felt like a number. Here, Joseph actually asks our opinions. We have real input. Seeing a stressed-out business owner finally breathe because they found a solution—that's the good stuff.\"",
-    funFact: "Hospitality → SaaS → Aetheris"
-  },
-  {
-    name: "Emma Patel",
+    name: "Emma Chen",
     title: "New Client Specialist",
     photo: emmaPhoto,
-    story: "Emma is usually the first person you'll talk to when exploring what Aetheris does. She ran an Etsy business for three years while putting herself through college—shipping, customer service, marketing, bookkeeping, all her. So when she talks to entrepreneurs now, she genuinely gets it. \"I joined Aetheris because I believe in what we're building. Helping people work smarter, not harder? Sign me up,\" she says. She's in the Indy office most days—stop by if you're ever in town!",
-    funFact: "Former Etsy entrepreneur"
+    story: "Emma is usually the first person you'll connect with when exploring Aetheris. She built and ran her own e-commerce business for three years while finishing her degree—handling everything from customer service to fulfillment to marketing. So when she talks to entrepreneurs now, she genuinely understands the hustle. \"I joined Aetheris because I believe in working smarter, not just harder. Helping people find that balance? That's why I'm here,\" she says. Stop by the Indy office sometime—she'll probably offer you coffee.",
+    funFact: "Former e-commerce entrepreneur"
   }
 ];
 
@@ -66,7 +50,7 @@ export const TeamSection: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {teamMembers.map((member, index) => (
             <RevealOnScroll key={member.name} delay={index * 0.1}>
               <div className="glass rounded-2xl overflow-hidden border border-border/50 hover:border-cyan/30 transition-all duration-300 group h-full flex flex-col">
@@ -77,7 +61,7 @@ export const TeamSection: React.FC = () => {
                     alt={member.name}
                     className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-bold text-foreground">{member.name}</h3>
                     <p className="text-cyan text-sm">{member.title}</p>
