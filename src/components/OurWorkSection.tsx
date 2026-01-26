@@ -1,0 +1,153 @@
+import React from 'react';
+import { RevealOnScroll } from './RevealOnScroll';
+import { Briefcase, Users, Lightbulb, Rocket } from 'lucide-react';
+
+import teamMeeting1 from '@/assets/office/team-meeting-1.jpg';
+import teamMeeting2 from '@/assets/office/team-meeting-2.jpg';
+import teamMeeting3 from '@/assets/office/team-meeting-3.jpg';
+import teamMeeting4 from '@/assets/office/team-meeting-4.jpg';
+import teamMeeting5 from '@/assets/office/team-meeting-5.jpg';
+
+const highlights = [
+  {
+    icon: Lightbulb,
+    title: "Strategy Sessions",
+    description: "We dig deep into your business challenges, mapping out AI solutions that actually make sense for your operations."
+  },
+  {
+    icon: Users,
+    title: "Collaborative Building",
+    description: "Our team works side-by-side with yours, ensuring every solution fits your workflow perfectly."
+  },
+  {
+    icon: Rocket,
+    title: "Real Implementation",
+    description: "From whiteboard to deployment—we build, test, and launch AI systems that deliver results from day one."
+  }
+];
+
+export const OurWorkSection: React.FC = () => {
+  return (
+    <section className="py-20 px-4">
+      <div className="max-w-6xl mx-auto">
+        <RevealOnScroll>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full border border-cyan/30 mb-6">
+              <Briefcase className="w-4 h-4 text-cyan" />
+              <span className="text-sm text-muted-foreground">Behind the Scenes</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              How We <span className="text-cyan glow-text">Build</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Real conversations, real strategy, real results. Here's a look at how our Indianapolis 
+              team works together to build AI solutions that transform businesses.
+            </p>
+          </div>
+        </RevealOnScroll>
+
+        {/* Main Image Grid */}
+        <RevealOnScroll>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {/* Large featured image */}
+            <div className="md:col-span-2">
+              <div className="relative rounded-2xl overflow-hidden group">
+                <img 
+                  src={teamMeeting1} 
+                  alt="Team strategy session at Aetheris AI" 
+                  className="w-full h-[300px] md:h-[400px] object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+                    AI Strategy & Architecture
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base">
+                    Every client engagement starts with deep-dive sessions where we map out 
+                    exactly how AI can solve your specific challenges.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Smaller grid images */}
+            <div className="relative rounded-2xl overflow-hidden group">
+              <img 
+                src={teamMeeting2} 
+                alt="Collaborative planning at Aetheris AI" 
+                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Client Collaboration</h4>
+                <p className="text-sm text-muted-foreground">Working directly with business owners</p>
+              </div>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden group">
+              <img 
+                src={teamMeeting3} 
+                alt="Development planning at Aetheris AI" 
+                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Solution Design</h4>
+                <p className="text-sm text-muted-foreground">Mapping your AI roadmap</p>
+              </div>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        {/* Second row of images */}
+        <RevealOnScroll delay={0.1}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            <div className="relative rounded-2xl overflow-hidden group">
+              <img 
+                src={teamMeeting4} 
+                alt="AI ethics discussion at Aetheris AI" 
+                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Ethics & Best Practices</h4>
+                <p className="text-sm text-muted-foreground">Building AI responsibly</p>
+              </div>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden group">
+              <img 
+                src={teamMeeting5} 
+                alt="Project optimization meeting at Aetheris AI" 
+                className="w-full h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h4 className="text-lg font-semibold text-foreground">Optimization Sprints</h4>
+                <p className="text-sm text-muted-foreground">Continuous improvement cycles</p>
+              </div>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        {/* Highlights */}
+        <RevealOnScroll delay={0.2}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {highlights.map((item, index) => (
+              <div 
+                key={item.title}
+                className="glass rounded-xl p-6 border border-border/50 hover:border-cyan/30 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-lg bg-cyan/10 flex items-center justify-center mb-4">
+                  <item.icon className="w-6 h-6 text-cyan" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </RevealOnScroll>
+      </div>
+    </section>
+  );
+};
