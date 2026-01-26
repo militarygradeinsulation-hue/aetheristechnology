@@ -1,11 +1,25 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, User, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
+// Rotate team members based on day of week (matches backend)
+const getTeamMember = () => {
+  const dayOfWeek = new Date().getDay();
+  const teamMembers = [
+    { name: "Maya", title: "Client Success", initials: "M" },
+    { name: "Jordan", title: "Business Development", initials: "J" },
+    { name: "Sophia", title: "Client Relations", initials: "S" },
+    { name: "Rachel", title: "Client Experience", initials: "R" },
+    { name: "Emma", title: "New Clients", initials: "E" },
+  ];
+  return teamMembers[dayOfWeek % teamMembers.length];
+};
+
+const TEAM_MEMBER = getTeamMember();
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 async function streamChat({
@@ -119,7 +133,7 @@ export const ChatWidget: React.FC = () => {
       onDelta: upsertAssistant,
       onDone: () => setIsLoading(false),
       onError: (error) => {
-        setMessages(prev => [...prev, { role: 'assistant', content: `Sorry, I encountered an error: ${error}. Please try again.` }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: `Oops, something went wrong on my end. Give me a sec and try again?` }]);
         setIsLoading(false);
       },
     });
@@ -165,12 +179,15 @@ export const ChatWidget: React.FC = () => {
             {/* Header */}
             <div className="p-4 border-b border-border/50 flex items-center justify-between bg-background/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-cyan/20 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-cyan" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan/30 to-primary/30 flex items-center justify-center text-cyan font-semibold">
+                  {TEAM_MEMBER.initials}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Aria</h3>
-                  <p className="text-xs text-muted-foreground">AI Assistant</p>
+                  <h3 className="font-semibold text-foreground">{TEAM_MEMBER.name}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <p className="text-xs text-muted-foreground">{TEAM_MEMBER.title}</p>
+                  </div>
                 </div>
               </div>
               <Button
@@ -187,9 +204,11 @@ export const ChatWidget: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
-                  <Bot className="w-12 h-12 mx-auto mb-3 text-cyan/50" />
-                  <p className="text-sm">Hi! I'm Aria, your AI assistant.</p>
-                  <p className="text-xs mt-1">Ask me about our services or how AI can help your business!</p>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan/20 to-primary/20 flex items-center justify-center mx-auto mb-3 text-2xl font-semibold text-cyan">
+                    {TEAM_MEMBER.initials}
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Hey! I'm {TEAM_MEMBER.name}.</p>
+                  <p className="text-xs mt-1">How can I help you today?</p>
                 </div>
               )}
               {messages.map((msg, i) => (
@@ -198,8 +217,8 @@ export const ChatWidget: React.FC = () => {
                   className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="w-7 h-7 rounded-full bg-cyan/20 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-cyan" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan/30 to-primary/30 flex items-center justify-center shrink-0 text-xs font-medium text-cyan">
+                      {TEAM_MEMBER.initials}
                     </div>
                   )}
                   <div
@@ -226,11 +245,15 @@ export const ChatWidget: React.FC = () => {
               ))}
               {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
                 <div className="flex gap-2 justify-start">
-                  <div className="w-7 h-7 rounded-full bg-cyan/20 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-cyan" />
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan/30 to-primary/30 flex items-center justify-center text-xs font-medium text-cyan">
+                    {TEAM_MEMBER.initials}
                   </div>
                   <div className="bg-muted px-3 py-2 rounded-2xl rounded-bl-md">
-                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
                   </div>
                 </div>
               )}
