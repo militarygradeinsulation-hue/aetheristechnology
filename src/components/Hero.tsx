@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Gift, Users, TrendingUp, Award, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +31,17 @@ const AnimatedCounter: React.FC<{ end: number; suffix?: string; prefix?: string;
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Ensure video plays on mount (fallback for browsers that block autoplay)
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {
+        // Autoplay was prevented, video will remain paused until user interaction
+      });
+    }
+  }, []);
   
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
@@ -75,6 +86,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             className="relative max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-cyan/20"
           >
             <video 
+              ref={videoRef}
               src={teamVideo}
               autoPlay
               loop
