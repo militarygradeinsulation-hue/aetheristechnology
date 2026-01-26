@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Gift, Users, TrendingUp, Award, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import teamVideo from '@/assets/office/team-video.mp4';
+import heroVideo from '@/assets/office/hero-video.mp4';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -87,7 +87,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           >
             <video 
               ref={videoRef}
-              src={teamVideo}
+              src={heroVideo}
               autoPlay
               loop
               muted
