@@ -207,7 +207,7 @@ const CareersPage = () => {
                           </span>
                         </div>
                         <a
-                          href={`mailto:aetheris.technology@outlook.com?subject=Application%20-%20${encodeURIComponent(position.title)}`}
+                          href={`mailto:aetheris.technology@outlook.com?subject=Application%20-%20${encodeURIComponent(position.title)}&body=${encodeURIComponent(`Hi Aetheris Team,\n\nI am interested in the ${position.title} position.\n\nPlease find my resume attached.\n\nName:\nPhone:\nLinkedIn:\n\nBrief Introduction:\n\n\nThank you for considering my application.\n\nBest regards`)}`}
                           className="inline-flex items-center justify-center gap-2 bg-cyan hover:bg-cyan/90 text-background font-semibold px-6 py-3 rounded-lg transition-colors"
                         >
                           Apply Now
@@ -230,7 +230,7 @@ const CareersPage = () => {
                   Send us your resume and tell us how you can contribute.
                 </p>
                 <a
-                  href="mailto:aetheris.technology@outlook.com?subject=General%20Career%20Inquiry"
+                  href={`mailto:aetheris.technology@outlook.com?subject=General%20Career%20Inquiry&body=${encodeURIComponent(`Hi Aetheris Team,\n\nI am interested in joining your team.\n\nPlease find my resume attached.\n\nName:\nPhone:\nLinkedIn:\n\nHow I can contribute:\n\n\nThank you for your time.\n\nBest regards`)}`}
                   className="inline-flex items-center gap-2 bg-card border border-cyan hover:bg-cyan/10 text-cyan font-semibold px-8 py-4 rounded-lg transition-colors"
                 >
                   Get in Touch
