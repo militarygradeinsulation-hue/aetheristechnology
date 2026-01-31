@@ -61,7 +61,7 @@ export const Footer: React.FC = () => {
             © {currentYear} Aetheris AI. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-            <span>By using our services, you agree to our terms.</span>
+            <Link to="/terms" className="hover:text-cyan transition-colors">Terms of Service</Link>
             <span>•</span>
             <span>All AI solutions are customized per client agreement.</span>
             <span>•</span>
