@@ -74,6 +74,12 @@ export const Footer: React.FC = () => {
             Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan hover:underline">CTOguy.ai</a>
           </p>
         </div>
+
+        <div className="text-center mt-6 pt-6 border-t border-border">
+          <p className="text-xs text-muted-foreground italic">
+            These systems are excluded from the scope of any Agreement made with a business, person, or employer.
+          </p>
+        </div>
       </div>
     </footer>
   );
