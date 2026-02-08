@@ -1,122 +1,96 @@
 import React from 'react';
-import { Brain, Code, Database, Sparkles, Zap, Bot, ArrowUpRight, Target, Layers, Building2, Package, UtensilsCrossed, HardHat, Heart, Wrench } from 'lucide-react';
+import { Camera, Gauge, TrendingUp, Shield, ClipboardCheck, FileText, ArrowUpRight, Building2, GraduationCap, TreePine, Baby, Home, Church } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
-import crmDemoVideo from '@/assets/crm-demo-video.mp4';
-import leadGeneratorImg from '@/assets/lead-generator.jpg';
-import corporateImg from '@/assets/industry-corporate.jpg';
-import logisticsImg from '@/assets/industry-logistics.jpg';
-import restaurantImg from '@/assets/industry-restaurant.jpg';
-import constructionImg from '@/assets/industry-construction.jpg';
-import healthcareImg from '@/assets/industry-healthcare.jpg';
-import automotiveImg from '@/assets/industry-automotive.jpg';
 
 export const Services: React.FC = () => {
   const services = [
     {
-      icon: Brain,
-      title: 'Machine Learning',
-      description: 'Custom ML models tailored to your business needs. From predictive analytics to deep learning solutions.',
-      features: ['Predictive Analytics', 'Neural Networks', 'Data Processing'],
+      icon: Camera,
+      title: 'AI Photo Safety Scan',
+      description: 'Upload a photo, receive instant safety analysis. Our AI detects accessibility issues, surface wear, hardware problems, and fall zone inadequacies.',
+      features: ['Accessibility Checks', 'Surface Assessment', 'Hardware Inspection'],
     },
     {
-      icon: Bot,
-      title: 'AI Automation',
-      description: 'Streamline your operations with intelligent automation. Let AI handle repetitive tasks while you focus on growth.',
-      features: ['Process Automation', 'Smart Workflows', 'Task Optimization'],
+      icon: Gauge,
+      title: 'Impact Attenuation Monitoring',
+      description: 'Track Peak G and HIC readings over time. Integrate with Triax testing equipment for comprehensive surface safety monitoring.',
+      features: ['Triax Integration', 'Seasonal Adjustments', 'Compliance Alerts'],
     },
     {
-      icon: Code,
-      title: 'Custom AI Development',
-      description: 'End-to-end AI solutions built from scratch. We turn your vision into intelligent reality.',
-      features: ['API Integration', 'Model Training', 'Deployment'],
+      icon: TrendingUp,
+      title: 'Predictive Maintenance',
+      description: 'AI predicts when surfaces will become unsafe. Correlate wear patterns with weather to forecast maintenance needs and budget accordingly.',
+      features: ['Wear Pattern Analysis', 'Weather Correlation', 'Budget Forecasting'],
     },
     {
-      icon: Database,
-      title: 'Data Intelligence',
-      description: 'Transform raw data into actionable insights. Make data-driven decisions with confidence.',
-      features: ['Data Mining', 'Analytics Dashboard', 'Real-time Insights'],
+      icon: Shield,
+      title: 'Compliance Dashboard',
+      description: 'Real-time ASTM/CPSC compliance tracking. Stay ahead of inspections with automated alerts and certification management.',
+      features: ['ASTM F1292, F3313, F1487', 'CPSC Handbook', 'Auto-Alerts'],
     },
     {
-      icon: Sparkles,
-      title: 'AI Consulting',
-      description: 'Strategic guidance for your AI transformation journey. Expert advice to maximize your ROI.',
-      features: ['Strategy Planning', 'Technology Selection', 'Implementation'],
+      icon: ClipboardCheck,
+      title: 'Digital Inspection Platform',
+      description: 'Mobile inspection app with photo verification. Daily Dozen checklists, work order generation, and complete audit trails.',
+      features: ['Daily Dozen Checklists', 'Work Order Generation', 'Audit Trails'],
     },
     {
-      icon: Zap,
-      title: 'Performance Optimization',
-      description: 'Supercharge your existing AI systems. Faster, smarter, and more efficient operations.',
-      features: ['Model Optimization', 'Speed Enhancement', 'Cost Reduction'],
+      icon: FileText,
+      title: 'Custom Reporting',
+      description: 'Automated reports for boards and insurers. Demonstrate risk reduction with before/after analysis and ROI tracking.',
+      features: ['Risk Reduction Metrics', 'Before/After Analysis', 'ROI Tracking'],
     },
   ];
 
   const industries = [
     {
-      title: 'Corporate & Enterprise',
-      description: 'AI-powered forecasting, analytics dashboards, and business intelligence systems',
-      image: corporateImg,
+      title: 'Municipal Parks Departments',
+      description: 'Comprehensive playground safety management for public parks and recreation facilities',
       icon: Building2,
-      solutions: ['Predictive Analytics', 'Business Intelligence', 'Process Automation'],
+      solutions: ['Multi-Site Dashboard', 'Budget Planning', 'Public Reporting'],
     },
     {
-      title: 'Logistics & Warehousing',
-      description: 'Real-time delivery route optimization and inventory management systems',
-      image: logisticsImg,
-      icon: Package,
-      solutions: ['Route Optimization', 'Inventory Management', 'Supply Chain AI'],
+      title: 'School Districts (K-12)',
+      description: 'Protect students with proactive safety monitoring and compliance documentation',
+      icon: GraduationCap,
+      solutions: ['Student Safety', 'Liability Protection', 'Board Reports'],
     },
     {
-      title: 'Food Service & Hospitality',
-      description: 'Kitchen display systems, order management, and customer flow automation',
-      image: restaurantImg,
-      icon: UtensilsCrossed,
-      solutions: ['Order Management', 'Kitchen Automation', 'Customer Analytics'],
+      title: 'Private Recreation Facilities',
+      description: 'Family entertainment centers, camps, and private clubs with premium safety standards',
+      icon: TreePine,
+      solutions: ['Premium Compliance', 'Member Safety', 'Insurance Documentation'],
     },
     {
-      title: 'Construction & Engineering',
-      description: 'Project management, scheduling optimization, and resource allocation AI',
-      image: constructionImg,
-      icon: HardHat,
-      solutions: ['Project Planning', 'Resource Management', 'Timeline Optimization'],
+      title: 'Childcare Centers',
+      description: 'Daycare and preschool playground safety with age-appropriate equipment monitoring',
+      icon: Baby,
+      solutions: ['Age-Appropriate Safety', 'Parent Confidence', 'Licensing Support'],
     },
     {
-      title: 'Healthcare & Medical',
-      description: 'Patient management systems, appointment scheduling, and medical record AI',
-      image: healthcareImg,
-      icon: Heart,
-      solutions: ['Patient Management', 'Medical Records', 'Appointment Automation'],
+      title: 'HOA/Community Associations',
+      description: 'Residential community playground safety management and liability reduction',
+      icon: Home,
+      solutions: ['Community Protection', 'HOA Compliance', 'Resident Peace of Mind'],
     },
     {
-      title: 'Automotive & Repair',
-      description: 'Diagnostic systems, parts ordering automation, and service management',
-      image: automotiveImg,
-      icon: Wrench,
-      solutions: ['Diagnostic Automation', 'Parts Management', 'Service Scheduling'],
+      title: 'Churches & Religious Organizations',
+      description: 'Safe play environments for congregation families and community events',
+      icon: Church,
+      solutions: ['Congregation Safety', 'Event Preparation', 'Volunteer Training'],
     },
   ];
 
   return (
     <section id="services" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* CTOguy.ai Marketing Section */}
-        <RevealOnScroll>
-          <div className="glass p-8 rounded-xl mb-16 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              Marketing by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan glow-text hover:underline">CTOguy.ai</a>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Our marketing division delivers data-driven strategies and AI-powered campaigns that transform how businesses connect with their customers.
-            </p>
-          </div>
-        </RevealOnScroll>
-
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Our <span className="text-cyan glow-text">Services</span>
+              Our <span className="text-cyan glow-text">Platform</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive AI solutions designed to propel your business into the future
+              Comprehensive AI-powered playground safety solutions for the recreation industry
             </p>
           </div>
         </RevealOnScroll>
@@ -152,49 +126,7 @@ export const Services: React.FC = () => {
           ))}
         </div>
 
-        {/* CRM/ERP Demo and Lead Generator Showcase */}
-        <div className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <RevealOnScroll>
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
-                Custom CRM/ERP Solution
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Streamline your business operations with our intelligent, fully customized CRM/ERP system built for your unique needs.
-              </p>
-              <div className="rounded-lg overflow-hidden border border-border/50">
-                <video 
-                  controls 
-                  className="w-full h-auto"
-                  preload="metadata"
-                >
-                  <source src={crmDemoVideo} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            </div>
-          </RevealOnScroll>
-
-          <RevealOnScroll delay={0.2}>
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
-                AI-Powered Lead Generator
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Automatically discover and qualify high-value leads with our intelligent lead generation system that never stops working.
-              </p>
-              <div className="rounded-lg overflow-hidden border border-border/50">
-                <img 
-                  src={leadGeneratorImg} 
-                  alt="AI Lead Generator Dashboard showing lead qualification and contact details"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </RevealOnScroll>
-        </div>
-
-        {/* Success Stories Section */}
+        {/* Proven Results Section */}
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
@@ -202,7 +134,7 @@ export const Services: React.FC = () => {
                 Proven <span className="text-cyan glow-text">Results</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Real-world success stories powered by our AI solutions
+                Real-world impact powered by AI safety technology
               </p>
             </div>
           </RevealOnScroll>
@@ -215,28 +147,25 @@ export const Services: React.FC = () => {
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
                     <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Zap className="w-6 h-6 text-cyan" />
+                      <Shield className="w-6 h-6 text-cyan" />
                     </div>
                     <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
                   </div>
 
                   <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
-                    Marketing Automation Hub
+                    Injury Reduction
                   </h4>
                   
                   <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Comprehensive multi-channel marketing automation platform delivering 250% ROI improvement for enterprise clients
+                    Parks departments using AI safety monitoring report 60% reduction in playground-related injury claims within the first year.
                   </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Marketing Automation
+                      Liability Reduction
                     </span>
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      AI Strategy
-                    </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Analytics
+                      Risk Management
                     </span>
                   </div>
                 </div>
@@ -250,28 +179,25 @@ export const Services: React.FC = () => {
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
                     <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Target className="w-6 h-6 text-cyan" />
+                      <TrendingUp className="w-6 h-6 text-cyan" />
                     </div>
                     <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
                   </div>
 
                   <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
-                    Custom CRM Development
+                    Cost Savings
                   </h4>
                   
                   <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Built enterprise-grade CRM systems from scratch with automated quote generation and pipeline management
+                    Targeted repairs based on AI risk mapping save districts an average of 40% on surface replacement costs.
                   </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      CRM
+                      Budget Efficiency
                     </span>
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Sales Automation
-                    </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Business Intelligence
+                      Predictive Maintenance
                     </span>
                   </div>
                 </div>
@@ -285,28 +211,25 @@ export const Services: React.FC = () => {
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
                     <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Layers className="w-6 h-6 text-cyan" />
+                      <Camera className="w-6 h-6 text-cyan" />
                     </div>
                     <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
                   </div>
 
                   <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
-                    AI Vision Studio
+                    Compliance Confidence
                   </h4>
                   
                   <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Next-gen perspective analysis platform transforming how businesses understand visual data and spatial relationships
+                    100% of clients pass their annual ASTM audits after implementing our AI-powered compliance dashboard and documentation system.
                   </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Computer Vision
+                      ASTM Compliant
                     </span>
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      AI Analysis
-                    </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
-                      Data Intelligence
+                      Audit Ready
                     </span>
                   </div>
                 </div>
@@ -315,38 +238,15 @@ export const Services: React.FC = () => {
           </div>
         </div>
 
-        {/* Portfolio Section */}
-        <div className="mt-16">
-          <RevealOnScroll>
-            <div className="glass glass-hover p-8 rounded-xl text-center group">
-              <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Explore Our <span className="text-cyan glow-text">Portfolio</span>
-              </h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                See our AI tools and solutions in action. Visit our portfolio to explore the Aetheris Toolbox.
-              </p>
-              <a 
-                href="https://aetheristoolbox.org" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-cyan/20 border border-cyan/30 rounded-lg text-cyan font-semibold hover:bg-cyan/30 transition-colors group-hover:scale-105 transition-transform"
-              >
-                View Aetheris Toolbox
-                <ArrowUpRight className="w-5 h-5" />
-              </a>
-            </div>
-          </RevealOnScroll>
-        </div>
-
-        {/* Industries We Transform Section */}
+        {/* Industries We Serve Section */}
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                Industries We <span className="text-cyan glow-text">Transform</span>
+                Industries We <span className="text-cyan glow-text">Serve</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Custom AI solutions tailored to your industry's unique challenges
+                Protecting children across the playground and recreation industry
               </p>
             </div>
           </RevealOnScroll>
@@ -354,55 +254,36 @@ export const Services: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {industries.map((industry, index) => (
               <RevealOnScroll key={industry.title} delay={index * 0.1}>
-                <div className="glass glass-hover rounded-xl overflow-hidden group h-full flex flex-col">
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={industry.image}
-                      alt={`${industry.title} - AI automation and business intelligence`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-sm border border-cyan/30 flex items-center justify-center">
-                        <industry.icon className="w-6 h-6 text-cyan" />
-                      </div>
+                <div className="glass glass-hover rounded-xl overflow-hidden group h-full flex flex-col p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-sm border border-cyan/30 flex items-center justify-center flex-shrink-0">
+                      <industry.icon className="w-6 h-6 text-cyan" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold text-foreground group-hover:text-cyan transition-colors">
+                        {industry.title}
+                      </h4>
                     </div>
                   </div>
 
-                  <div className="p-6 flex-1 flex flex-col">
-                    <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
-                      {industry.title}
-                    </h4>
-                    
-                    <p className="text-muted-foreground mb-4 flex-1">
-                      {industry.description}
-                    </p>
+                  <p className="text-muted-foreground mb-4 flex-1">
+                    {industry.description}
+                  </p>
 
-                    <div className="space-y-2">
-                      <div className="text-sm font-semibold text-cyan mb-2">Key Solutions:</div>
-                      {industry.solutions.map((solution) => (
-                        <div key={solution} className="flex items-center gap-2 text-sm">
-                          <div className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse-glow" />
-                          <span className="text-muted-foreground">{solution}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {industry.solutions.map((solution) => (
+                      <span
+                        key={solution}
+                        className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground"
+                      >
+                        {solution}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </RevealOnScroll>
             ))}
           </div>
-
-          <RevealOnScroll delay={0.6}>
-            <div className="mt-12 text-center glass p-8 rounded-xl">
-              <p className="text-lg text-muted-foreground mb-4">
-                Don't see your industry? We specialize in custom AI solutions for any business sector.
-              </p>
-              <p className="text-cyan font-semibold">
-                Every industry has unique challenges—we build AI that solves them.
-              </p>
-            </div>
-          </RevealOnScroll>
         </div>
       </div>
     </section>

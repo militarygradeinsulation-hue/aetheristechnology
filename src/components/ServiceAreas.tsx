@@ -16,63 +16,63 @@ const indianaCities: CityData[] = [
   {
     name: 'Indianapolis',
     region: 'Central Indiana',
-    industries: ['Healthcare', 'Manufacturing', 'Technology', 'Logistics'],
-    description: 'Our headquarters. Serving the Circle City with comprehensive AI solutions for the capital\'s diverse business landscape.',
+    industries: ['Parks Dept', 'Schools', 'Rec Centers', 'Childcare'],
+    description: 'Our headquarters. Serving Indy Parks, IPS schools, and hundreds of recreation facilities across the Circle City.',
     isHeadquarters: true,
   },
   {
     name: 'Fort Wayne',
     region: 'Northeast Indiana',
-    industries: ['Manufacturing', 'Healthcare', 'Defense', 'Insurance'],
-    description: 'Supporting Fort Wayne\'s strong manufacturing heritage with AI-powered automation and predictive analytics.',
+    industries: ['Parks', 'FWCS Schools', 'YMCAs', 'Churches'],
+    description: 'Supporting Fort Wayne Parks and Community Schools with comprehensive playground safety monitoring.',
   },
   {
     name: 'Carmel',
     region: 'Hamilton County',
-    industries: ['Technology', 'Healthcare', 'Finance', 'Professional Services'],
-    description: 'Partnering with Carmel\'s thriving business community to implement cutting-edge AI solutions.',
+    industries: ['Clay Parks', 'Schools', 'HOAs', 'Private Clubs'],
+    description: 'Partnering with Carmel Clay Parks and top-rated school districts for premium safety standards.',
   },
   {
     name: 'Fishers',
     region: 'Hamilton County',
-    industries: ['Technology', 'Startups', 'Healthcare', 'Retail'],
-    description: 'Empowering Fishers\' entrepreneurial spirit with AI tools that scale from startup to enterprise.',
+    industries: ['Parks', 'HSE Schools', 'Daycares', 'HOAs'],
+    description: 'Protecting Fishers\' growing community with AI-powered safety for parks, schools, and neighborhoods.',
   },
   {
     name: 'Bloomington',
     region: 'South Central Indiana',
-    industries: ['Education', 'Technology', 'Healthcare', 'Research'],
-    description: 'Collaborating with IU and Bloomington businesses on innovative AI research and applications.',
+    industries: ['B-Town Parks', 'MCCSC', 'IU Facilities', 'Childcare'],
+    description: 'Collaborating with Bloomington Parks and Monroe County schools on playground safety excellence.',
   },
   {
     name: 'Evansville',
     region: 'Southwest Indiana',
-    industries: ['Manufacturing', 'Healthcare', 'Logistics', 'Energy'],
-    description: 'Bringing AI transformation to Evansville\'s industrial base and healthcare networks.',
+    industries: ['Parks Dept', 'EVSC', 'Rec Centers', 'Churches'],
+    description: 'Bringing AI safety technology to Evansville\'s extensive parks and school playground network.',
   },
   {
     name: 'South Bend',
     region: 'North Central Indiana',
-    industries: ['Manufacturing', 'Education', 'Healthcare', 'Technology'],
-    description: 'Supporting South Bend\'s renaissance with AI solutions for modern manufacturing and healthcare.',
+    industries: ['Parks', 'SBCSC', 'Notre Dame', 'YMCAs'],
+    description: 'Supporting South Bend\'s renaissance with modern playground safety for schools and community spaces.',
   },
   {
     name: 'Lafayette',
     region: 'West Central Indiana',
-    industries: ['Manufacturing', 'Education', 'Agriculture', 'Technology'],
-    description: 'Partnering with Purdue-adjacent businesses and Lafayette\'s growing tech ecosystem.',
+    industries: ['Parks', 'LSSC', 'Tippecanoe Co', 'Daycares'],
+    description: 'Partnering with Lafayette and West Lafayette facilities for comprehensive safety coverage.',
   },
   {
     name: 'Noblesville',
     region: 'Hamilton County',
-    industries: ['Manufacturing', 'Retail', 'Professional Services', 'Healthcare'],
-    description: 'Helping Noblesville businesses compete with AI-powered efficiency and automation.',
+    industries: ['Parks', 'Schools', 'HOAs', 'Churches'],
+    description: 'Helping Noblesville\'s growing community maintain safe play environments for all children.',
   },
   {
     name: 'Greenwood',
     region: 'Johnson County',
-    industries: ['Retail', 'Healthcare', 'Logistics', 'Manufacturing'],
-    description: 'Serving Greenwood\'s diverse business community with tailored AI solutions.',
+    industries: ['Parks', 'Schools', 'Daycares', 'Churches'],
+    description: 'Serving Greenwood\'s diverse playground facilities with AI-powered safety assessments.',
   },
 ];
 
@@ -88,14 +88,14 @@ export const ServiceAreas: React.FC = () => {
               Based in Indianapolis, Serving All of Indiana
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              AI Solutions for{' '}
+              Playground Safety for{' '}
               <span className="bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
-                Indiana Businesses
+                Indiana Communities
               </span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From Indianapolis to Fort Wayne, Carmel to Evansville, we're proud to serve 
-              Hoosier businesses with cutting-edge AI automation and consulting services.
+              From Indianapolis to Fort Wayne, Carmel to Evansville—protecting children at 
+              500+ playgrounds across the Hoosier State with AI-powered safety technology.
             </p>
           </div>
         </RevealOnScroll>
@@ -104,10 +104,10 @@ export const ServiceAreas: React.FC = () => {
         <RevealOnScroll>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
             {[
-              { icon: Building2, value: '10+', label: 'Cities Served' },
-              { icon: Users, value: '50+', label: 'Indiana Clients' },
-              { icon: Briefcase, value: '6+', label: 'Industries' },
-              { icon: MapPin, value: '100%', label: 'Remote Capable' },
+              { icon: Building2, value: '500+', label: 'Playgrounds Protected' },
+              { icon: Users, value: '50+', label: 'Organizations Served' },
+              { icon: Briefcase, value: '6+', label: 'Facility Types' },
+              { icon: MapPin, value: '100%', label: 'Remote Assessment Ready' },
             ].map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6 text-center">
                 <stat.icon className="w-8 h-8 text-cyan mx-auto mb-3" />
@@ -163,22 +163,22 @@ export const ServiceAreas: React.FC = () => {
         <RevealOnScroll>
           <div className="glass rounded-2xl p-8 md:p-12 text-center mb-16">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Don't See Your City?
+              Don't See Your Community?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              While we're headquartered in Indianapolis, we serve clients across all of Indiana 
-              and beyond. Our AI solutions work remotely, and we're happy to travel for on-site 
-              consultations throughout the Midwest.
+              While we're headquartered in Indianapolis, our AI-powered assessments work remotely—
+              just upload photos from anywhere. We also travel for on-site Triax testing and 
+              training throughout the Midwest.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/contact">
                 <Button className="bg-primary hover:bg-primary/90 gap-2">
-                  Contact Us <ArrowRight className="w-4 h-4" />
+                  Request Assessment <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
               <Link to="/services">
                 <Button variant="outline" className="gap-2">
-                  View Our Services
+                  View Platform
                 </Button>
               </Link>
             </div>
@@ -189,21 +189,21 @@ export const ServiceAreas: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center">
             <h2 className="text-2xl md:text-3xl font-bold mb-6">
-              Why Choose a Local AI Partner?
+              Why Choose a Local Safety Partner?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
-                  title: 'We Understand Indiana Business',
-                  description: 'From manufacturing in Fort Wayne to healthcare in Indianapolis, we know the unique challenges Hoosier businesses face.',
+                  title: 'We Know Indiana Weather',
+                  description: 'From summer heat to winter freezes, we understand the "Winter Paradox" and how Hoosier weather affects playground surfaces.',
                 },
                 {
                   title: 'Same Timezone, Fast Response',
-                  description: 'When you need support, we\'re here during your business hours. No waiting for responses from distant time zones.',
+                  description: 'When you need emergency assessments or urgent support, we\'re here during your business hours—no waiting for distant time zones.',
                 },
                 {
                   title: 'On-Site When Needed',
-                  description: 'Sometimes AI implementation requires hands-on work. We can be at your Indiana location quickly for training and deployment.',
+                  description: 'For Triax testing, training, or complex assessments, we can be at your Indiana location quickly.',
                 },
               ].map((benefit, index) => (
                 <div key={index} className="text-left">

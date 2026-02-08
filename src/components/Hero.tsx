@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Gift, Users, TrendingUp, Award, Clock } from 'lucide-react';
+import { ArrowRight, Shield, Camera, AlertTriangle, CheckCircle, Clock, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import heroVideo from '@/assets/office/hero-video.mp4';
@@ -34,12 +34,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Ensure video plays on mount (fallback for browsers that block autoplay)
     const video = videoRef.current;
     if (video) {
-      video.play().catch(() => {
-        // Autoplay was prevented, video will remain paused until user interaction
-      });
+      video.play().catch(() => {});
     }
   }, []);
   
@@ -52,30 +49,30 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           transition={{ duration: 0.6 }}
           className="space-y-6"
         >
-          {/* Free Trial Badge - Conversion Hook */}
+          {/* Safety Badge - Industry Hook */}
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan/20 to-primary/20 border border-cyan/40 px-5 py-2.5 rounded-full"
           >
-            <Gift className="w-5 h-5 text-cyan animate-pulse" />
-            <span className="text-sm font-semibold text-cyan">Start Your 7-Day Free Trial</span>
-            <span className="text-xs bg-cyan/20 text-cyan px-2 py-0.5 rounded-full">No Card Required</span>
+            <Shield className="w-5 h-5 text-cyan animate-pulse" />
+            <span className="text-sm font-semibold text-cyan">Reducing 200,000+ Annual Playground Injuries</span>
           </motion.div>
 
-          {/* Simplified Headline */}
+          {/* Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            <span className="text-foreground">AI That Works</span>
+            <span className="text-foreground">AI-Powered Safety</span>
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-cyan">
-              While You Sleep
+              That Sees What Eyes Miss
             </span>
           </h1>
 
-          {/* Simple Value Prop */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            You know you need AI for your business. We build it, deploy it, and manage it—so you can focus on growth.
+          {/* Value Prop */}
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+            Instant compliance assessments, predictive maintenance, and real-time safety monitoring 
+            for parks, schools, and recreation facilities. ASTM/CPSC compliant.
           </p>
 
           {/* Team Video */}
@@ -97,31 +94,31 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent rounded-2xl" />
           </motion.div>
 
-          {/* CTA Buttons - More Prominent */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button
               size="lg"
               onClick={onContactClick}
               className="bg-gradient-to-r from-cyan to-primary hover:from-cyan/90 hover:to-primary/90 text-primary-foreground text-lg px-8 py-6 group shadow-lg shadow-cyan/25"
             >
-              <Gift className="mr-2 w-5 h-5" />
-              Start Free Trial
+              <Camera className="mr-2 w-5 h-5" />
+              Upload Photo for Free Assessment
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
               size="lg"
               variant="outline"
               className="glass-hover border-border text-lg px-8 py-6"
-              onClick={() => navigate('/services')}
+              onClick={() => navigate('/safety-science')}
             >
-              See How It Works
+              Learn the Science
             </Button>
           </div>
 
           {/* Trust Indicator */}
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
             <Clock className="w-4 h-4" />
-            Setup in 48 hours • Cancel anytime • 30-day money-back guarantee
+            48-hour reports • ASTM F1292 Compliant • 30-day money-back guarantee
           </p>
 
           {/* Social Proof Counters */}
@@ -132,10 +129,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-12 max-w-4xl mx-auto"
           >
             {[
-              { icon: Users, label: 'Happy Clients', value: 100, suffix: '+' },
-              { icon: TrendingUp, label: 'Revenue Generated', value: 25, prefix: '$', suffix: 'M+' },
-              { icon: Award, label: 'Success Rate', value: 99, suffix: '%' },
-              { icon: Clock, label: 'Hours Saved Monthly', value: 500, suffix: '+' },
+              { icon: AlertTriangle, label: 'Injuries Preventable Annually', value: 200, prefix: '', suffix: 'K+' },
+              { icon: CheckCircle, label: 'Detection Accuracy', value: 95, prefix: '', suffix: '%+' },
+              { icon: Award, label: 'ASTM Standards Covered', value: 4, prefix: '', suffix: '+' },
+              { icon: Clock, label: 'Hour Report Turnaround', value: 48, prefix: '', suffix: '' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}

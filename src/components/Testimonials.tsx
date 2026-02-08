@@ -65,13 +65,14 @@ export const Testimonials: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-              What Our{' '}
+              What{' '}
               <span className="bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
-                Clients Say
-              </span>
+                Safety Professionals
+              </span>{' '}
+              Say
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Trusted by Indiana businesses to deliver AI solutions that drive real results
+              Trusted by parks departments, school districts, and recreation facilities across Indiana
             </p>
           </div>
         </RevealOnScroll>
@@ -173,9 +174,9 @@ export const Testimonials: React.FC = () => {
         <RevealOnScroll>
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '50+', label: 'Happy Clients' },
-              { value: '4.9', label: 'Average Rating' },
-              { value: '95%', label: 'Success Rate' },
+              { value: '500+', label: 'Playgrounds Protected' },
+              { value: '60%', label: 'Injury Reduction' },
+              { value: '100%', label: 'Audit Pass Rate' },
               { value: '100%', label: 'Indiana Owned' },
             ].map((stat, index) => (
               <div key={index} className="text-center">

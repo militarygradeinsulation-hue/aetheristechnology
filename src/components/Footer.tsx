@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import aetherisLogo from '@/assets/aetheris-logo.png';
 
-
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
@@ -14,23 +13,23 @@ export const Footer: React.FC = () => {
             <div className="flex items-center space-x-3">
               <img 
                 src={aetherisLogo} 
-                alt="Aetheris AI Logo" 
+                alt="PlaySafe AI Logo" 
                 className="w-12 h-12 object-contain"
               />
-              <span className="text-xl font-bold text-foreground">Aetheris AI</span>
+              <span className="text-xl font-bold text-foreground">PlaySafe AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Transforming businesses through cutting-edge AI solutions.
+              AI-powered playground safety for the recreation industry. Protecting children, reducing liability.
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Services</h4>
+            <h4 className="font-bold text-foreground mb-4">Platform</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Machine Learning</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Automation</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Data Intelligence</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Photo Safety Scan</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Impact Attenuation Monitoring</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Predictive Maintenance</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Compliance Dashboard</Link></li>
             </ul>
           </div>
 
@@ -38,46 +37,45 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
+              <li><Link to="/safety-science" className="hover:text-cyan transition-colors">Safety Science</Link></li>
               <li><Link to="/service-areas" className="hover:text-cyan transition-colors">Service Areas</Link></li>
               <li><Link to="/blog" className="hover:text-cyan transition-colors">Blog</Link></li>
-              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition-colors">Portfolio</a></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
               <li><Link to="/careers" className="hover:text-cyan transition-colors">Careers</Link></li>
             </ul>
             <p className="text-xs text-muted-foreground mt-3 italic">
-              We're a new startup seeking visionaries who understand the transformative power of AI.
+              Seeking CPSI-certified safety inspectors and recreation industry professionals.
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Contact</h4>
-            <p className="text-sm text-muted-foreground">aetheris.technology@outlook.com</p>
-            <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
+            <h4 className="font-bold text-foreground mb-4">Standards & Compliance</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>ASTM F1292 (Impact Attenuation)</li>
+              <li>ASTM F3313 (Field Testing)</li>
+              <li>ASTM F1487 (Equipment Safety)</li>
+              <li>CPSC Handbook</li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-4">Indianapolis, Indiana</p>
           </div>
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Aetheris AI. All rights reserved.
+            © {currentYear} PlaySafe AI. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
             <Link to="/terms" className="hover:text-cyan transition-colors">Terms of Service</Link>
             <span>•</span>
-            <span>All AI solutions are customized per client agreement.</span>
+            <span>ASTM/CPSC Compliant</span>
             <span>•</span>
-            <span>Data handled with enterprise-grade security.</span>
+            <span>Enterprise-grade security</span>
           </div>
         </div>
 
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground">
             Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan hover:underline">CTOguy.ai</a>
-          </p>
-        </div>
-
-        <div className="text-center mt-6 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground italic">
-            These systems are excluded from the scope of any Agreement made with a business, person, or employer.
           </p>
         </div>
       </div>

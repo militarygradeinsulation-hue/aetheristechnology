@@ -1,7 +1,6 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Users, Brain, Mail, BarChart3 } from 'lucide-react';
-import meVsYouImg from '@/assets/me-vs-you.jpg';
+import { Eye, Gauge, TrendingUp, FileCheck } from 'lucide-react';
 
 export const ThePitch: React.FC = () => {
   return (
@@ -10,55 +9,73 @@ export const ThePitch: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              The <span className="text-cyan glow-text">Pitch</span>
+              The <span className="text-cyan glow-text">Safety Inspector</span> That Never Sleeps
             </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              AI-powered playground safety that works 24/7 to protect children and reduce your liability
+            </p>
           </div>
         </RevealOnScroll>
 
         <div className="max-w-4xl mx-auto">
-          <RevealOnScroll delay={0.2}>
-            <div className="glass p-8 md:p-12 rounded-2xl mb-8">
-              <h3 className="text-3xl font-bold text-cyan mb-6 text-center">THE MAGIC ROBOT</h3>
-              
-              <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-                Running a stand is hard work! You have to squeeze lemons, wave at people to come buy, 
-                and remember who likes extra sugar. You get tired.
-              </p>
-
-              <p className="text-2xl font-bold text-foreground mb-8 text-center">
-                I build you a Magic Robot to help you.
-              </p>
-            </div>
-          </RevealOnScroll>
-
           <div className="space-y-6">
+            <RevealOnScroll delay={0.2}>
+              <div className="glass glass-hover p-8 rounded-xl">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Eye className="w-7 h-7 text-cyan" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-2xl font-bold text-foreground mb-2">
+                      It Sees Hidden Dangers
+                    </h4>
+                    <p className="text-lg text-muted-foreground mb-4">
+                      Upload a photo and our AI instantly identifies accessibility issues, surface wear, 
+                      hardware problems, and fall zone inadequacies that human eyes often miss.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
+                        COMPUTER VISION
+                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
+                        INSTANT ANALYSIS
+                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
+                        PHOTO-TO-REPORT
+                      </span>
+                    </div>
+                    <div className="mt-4 p-4 bg-cyan/10 rounded-lg border border-cyan/20">
+                      <p className="text-sm font-semibold text-cyan">AI Safety Detection Active</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+
             <RevealOnScroll delay={0.3}>
               <div className="glass glass-hover p-8 rounded-xl">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-7 h-7 text-cyan" />
+                    <Gauge className="w-7 h-7 text-cyan" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-2xl font-bold text-foreground mb-2">
-                      It Finds New Friends
+                      It Measures What Matters
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      (Lead Gen) While you are busy pouring drinks, the Robot runs around the playground 
-                      and finds thirsty people. It brings them right to your stand!
+                      Track Peak G and HIC (Head Injury Criterion) readings over time. Our system monitors 
+                      impact attenuation and material degradation to ensure surfaces stay within safe limits.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        AUTO-PROSPECTING
+                        PEAK G MONITORING
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        LEAD SCORING
+                        HIC CRITERION
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        ROUTING
+                        COMPLIANCE TRACKING
                       </span>
-                    </div>
-                    <div className="mt-4 p-4 bg-cyan/10 rounded-lg border border-cyan/20">
-                      <p className="text-sm font-semibold text-cyan">Live Lead Feed</p>
                     </div>
                   </div>
                 </div>
@@ -69,25 +86,25 @@ export const ThePitch: React.FC = () => {
               <div className="glass glass-hover p-8 rounded-xl">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-7 h-7 text-cyan" />
+                    <TrendingUp className="w-7 h-7 text-cyan" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-2xl font-bold text-foreground mb-2">
-                      It Remembers Everything
+                      It Predicts Before Problems
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      (CRM with Context) The Robot has a perfect memory. It remembers every customer—
-                      who likes extra ice, who paid last time, and who promised to come back tomorrow.
+                      The "Winter Paradox": A surface safe in spring can fail in winter. Our AI correlates 
+                      temperature, weather, and usage patterns to warn you before surfaces become dangerous.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        PERFECT MEMORY
+                        PREDICTIVE MAINTENANCE
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        CLIENT PREFERENCES
+                        SEASONAL ALERTS
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        INTERACTION HISTORY
+                        RISK MAPPING
                       </span>
                     </div>
                   </div>
@@ -99,56 +116,25 @@ export const ThePitch: React.FC = () => {
               <div className="glass glass-hover p-8 rounded-xl">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-7 h-7 text-cyan" />
+                    <FileCheck className="w-7 h-7 text-cyan" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-2xl font-bold text-foreground mb-2">
-                      It Talks While You Sleep
+                      It Remembers Everything
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      (24/7 Marketing Hub) Even when you're home playing video games, the Robot is still 
-                      out there telling people about your lemonade. It never gets tired!
+                      Digital inspection records, ASTM compliance tracking, and audit trails that protect you 
+                      from liability. Every photo, every reading, every recommendation—documented and searchable.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        CONTINUOUS OUTREACH
+                        AUDIT TRAILS
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        AUTOMATED CAMPAIGNS
+                        LIABILITY PROTECTION
                       </span>
                       <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        24/7 ENGAGEMENT
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.6}>
-              <div className="glass glass-hover p-8 rounded-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <BarChart3 className="w-7 h-7 text-cyan" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-foreground mb-2">
-                      You Just Pour the Lemonade
-                    </h4>
-                    <p className="text-lg text-muted-foreground mb-4">
-                      You focus on making the best lemonade. The Robot handles everything else—
-                      finding customers, remembering orders, and spreading the word. 
-                      You just pour the lemonade and collect the money.
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        FOCUS ON CORE BUSINESS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        AUTOMATION HANDLES REST
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        SCALE REVENUE
+                        CERTIFICATION TRACKING
                       </span>
                     </div>
                   </div>
@@ -157,23 +143,13 @@ export const ThePitch: React.FC = () => {
             </RevealOnScroll>
           </div>
 
-          <RevealOnScroll delay={0.7}>
-            <div className="mt-12 glass p-8 rounded-xl">
-              <img 
-                src={meVsYouImg} 
-                alt="Me vs You - I handle the automation and AI work while you receive the revenue growth and business success" 
-                className="w-full rounded-lg"
-              />
-            </div>
-          </RevealOnScroll>
-
-          <RevealOnScroll delay={0.8}>
-            <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-cyan/30">
+          <RevealOnScroll delay={0.6}>
+            <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-cyan/30">
               <p className="text-2xl font-bold text-foreground mb-4">
-                That's what I do for your business.
+                That's what PlaySafe AI does for your facilities.
               </p>
               <p className="text-xl text-muted-foreground">
-                I build the Magic Robot. You run your business.
+                We protect children. You protect your organization.
               </p>
             </div>
           </RevealOnScroll>
