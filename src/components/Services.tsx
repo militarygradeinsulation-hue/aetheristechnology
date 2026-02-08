@@ -130,12 +130,21 @@ export const Services: React.FC = () => {
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
+              <p className="text-sm text-cyan mb-2 tracking-widest">TECHNICAL BUILDS BY <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan/80 transition-colors">CTOguy.ai</a></p>
               <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
                 Proven <span className="text-cyan glow-text">Results</span>
               </h3>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
                 Real-world impact powered by AI safety technology
               </p>
+              <a 
+                href="https://aetheris.ctoguy.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-cyan hover:text-cyan/80 transition-colors font-medium"
+              >
+                View Our Portfolio <ArrowUpRight className="w-4 h-4" />
+              </a>
             </div>
           </RevealOnScroll>
 
