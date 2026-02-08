@@ -16,7 +16,10 @@ export const Footer: React.FC = () => {
                 alt="PlaySafe AI Logo" 
                 className="w-12 h-12 object-contain"
               />
-              <span className="text-xl font-bold text-foreground">PlaySafe AI</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-foreground leading-tight">PlaySafe AI</span>
+                <span className="text-[10px] text-muted-foreground tracking-wide">By Aetheris Technology</span>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">
               AI-powered playground safety for the recreation industry. Protecting children, reducing liability.
