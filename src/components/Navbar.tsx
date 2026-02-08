@@ -23,13 +23,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems = [
     { label: 'Home', href: '/', special: true },
-    { label: 'Services', href: '/services' },
-    { label: 'Solutions', href: '/solutions' },
+    { label: 'Platform', href: '/services' },
+    { label: 'Safety Science', href: '/safety-science', special: true },
+    { label: 'Industries', href: '/solutions' },
     { label: 'Service Areas', href: '/service-areas' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true, special: true },
     { label: 'About', href: '/about' },
-    { label: 'AI Assistant', href: '/assistant', special: true },
   ];
 
   return (
@@ -43,46 +42,30 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           <Link to="/" className="flex items-center space-x-3">
             <img 
               src={aetherisLogo} 
-              alt="Aetheris AI Logo" 
+              alt="PlaySafe AI Logo" 
               className="w-12 h-12 object-contain"
             />
-            <span className="text-xl font-bold text-foreground">Aetheris AI</span>
+            <span className="text-xl font-bold text-foreground">PlaySafe AI</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`transition-colors ${
+                  item.special 
+                    ? 'text-cyan hover:text-cyan/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact">
               <Button className="bg-primary hover:bg-primary/90">
-                Contact Us
+                Free Assessment
               </Button>
             </Link>
           </div>
@@ -100,39 +83,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`block transition-colors ${
+                  item.special
+                    ? 'text-cyan hover:text-cyan/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90">
-                Contact Us
+                Free Assessment
               </Button>
             </Link>
           </div>
