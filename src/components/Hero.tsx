@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Shield, Camera, AlertTriangle, CheckCircle, Clock, Award } from 'lucide-react';
+import { ArrowRight, Shield, Camera, CheckCircle, Clock, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import heroVideo from '@/assets/office/hero-video.mp4';
