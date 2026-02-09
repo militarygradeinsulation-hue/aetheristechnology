@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ElevenLabsWidget } from "@/components/ElevenLabsWidget";
+import { VoiceAgent } from "@/components/VoiceAgent";
 import Home from "./pages/Home";
 import ServicesPage from "./pages/ServicesPage";
 import SolutionsPage from "./pages/SolutionsPage";
@@ -44,7 +44,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      <ElevenLabsWidget />
+      <VoiceAgent />
     </TooltipProvider>
   </QueryClientProvider>
 );
