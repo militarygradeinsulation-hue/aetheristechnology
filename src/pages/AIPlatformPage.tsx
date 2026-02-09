@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, Sparkles, Megaphone, Brain, Camera, Wand2, FileText, TrendingUp, Shield, Zap, CheckCircle, ArrowRight } from 'lucide-react';
+import { Eye, Sparkles, Megaphone, Brain, Camera, Wand2, Shield, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
