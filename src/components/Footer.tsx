@@ -29,10 +29,10 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-foreground mb-4">Platform</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Photo Safety Scan</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Impact Attenuation Monitoring</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Predictive Maintenance</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Compliance Dashboard</Link></li>
+              <li><Link to="/ai-platform" className="hover:text-cyan transition-colors">Triple-AI Platform</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Safety Analysis</Link></li>
+              <li><Link to="/ai-platform#creates" className="hover:text-cyan transition-colors">Image Generation</Link></li>
+              <li><Link to="/ai-platform#grows" className="hover:text-cyan transition-colors">Marketing AI</Link></li>
             </ul>
           </div>
 
@@ -41,14 +41,11 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
               <li><Link to="/safety-science" className="hover:text-cyan transition-colors">Safety Science</Link></li>
-              <li><Link to="/service-areas" className="hover:text-cyan transition-colors">Service Areas</Link></li>
+              <li><Link to="/solutions" className="hover:text-cyan transition-colors">Industries</Link></li>
               <li><Link to="/blog" className="hover:text-cyan transition-colors">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
               <li><Link to="/careers" className="hover:text-cyan transition-colors">Careers</Link></li>
             </ul>
-            <p className="text-xs text-muted-foreground mt-3 italic">
-              Seeking CPSI-certified safety inspectors and recreation industry professionals.
-            </p>
           </div>
 
           <div>

@@ -23,10 +23,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems = [
     { label: 'Home', href: '/', special: true },
+    { label: 'AI Platform', href: '/ai-platform', special: true },
     { label: 'Platform', href: '/services' },
-    { label: 'Safety Science', href: '/safety-science', special: true },
+    { label: 'Safety Science', href: '/safety-science' },
     { label: 'Industries', href: '/solutions' },
-    { label: 'Service Areas', href: '/service-areas' },
     { label: 'Blog', href: '/blog' },
     { label: 'About', href: '/about' },
   ];

@@ -17,6 +17,7 @@ import TestimonialsPage from "./pages/TestimonialsPage";
 import TermsPage from "./pages/TermsPage";
 import CareersPage from "./pages/CareersPage";
 import SafetySciencePage from "./pages/SafetySciencePage";
+import AIPlatformPage from "./pages/AIPlatformPage";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/safety-science" element={<SafetySciencePage />} />
+          <Route path="/ai-platform" element={<AIPlatformPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

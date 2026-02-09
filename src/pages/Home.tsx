@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
+import { AILayers } from '@/components/AILayers';
 import { ThePitch } from '@/components/ThePitch';
 import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
@@ -18,6 +19,7 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
+        <AILayers />
         <ThePitch />
         <Testimonials />
         <Footer />
