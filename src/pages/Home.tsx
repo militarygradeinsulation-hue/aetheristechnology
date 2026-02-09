@@ -8,6 +8,7 @@ import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { ChatWidget } from '@/components/ChatWidget';
+import { VoiceAgent } from '@/components/VoiceAgent';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -30,6 +31,7 @@ const Home = () => {
       />
 
       <ChatWidget />
+      <VoiceAgent />
     </div>
   );
 };
