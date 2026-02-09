@@ -1,6 +1,6 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Eye, Gauge, TrendingUp, FileCheck } from 'lucide-react';
+import { Eye, Gauge, TrendingUp, FileCheck, Sparkles } from 'lucide-react';
 
 export const ThePitch: React.FC = () => {
   return (
@@ -9,10 +9,10 @@ export const ThePitch: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              The <span className="text-cyan glow-text">Safety Inspector</span> That Never Sleeps
+              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-orange-500">AI Platform</span> That Never Sleeps
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              AI-powered playground safety that works 24/7 to protect children and reduce your liability
+              Triple-AI powered playground safety that works 24/7 to protect children, grow your business, and create stunning visuals
             </p>
           </div>
         </RevealOnScroll>
@@ -115,6 +115,36 @@ export const ThePitch: React.FC = () => {
             <RevealOnScroll delay={0.5}>
               <div className="glass glass-hover p-8 rounded-xl">
                 <div className="flex items-start gap-4 mb-4">
+                  <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-2xl font-bold text-foreground mb-2">
+                      It Creates What You Need
+                    </h4>
+                    <p className="text-lg text-muted-foreground mb-4">
+                      AI generates playground renderings for proposals, designs safety signage with your branding, 
+                      creates marketing content, and builds professional reports—all in seconds.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
+                        PLAYGROUND RENDERINGS
+                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
+                        SAFETY SIGNAGE
+                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
+                        MARKETING CONTENT
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.6}>
+              <div className="glass glass-hover p-8 rounded-xl">
+                <div className="flex items-start gap-4 mb-4">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <FileCheck className="w-7 h-7 text-cyan" />
                   </div>
@@ -143,13 +173,13 @@ export const ThePitch: React.FC = () => {
             </RevealOnScroll>
           </div>
 
-          <RevealOnScroll delay={0.6}>
+          <RevealOnScroll delay={0.7}>
             <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-cyan/30">
               <p className="text-2xl font-bold text-foreground mb-4">
                 That's what PlaySafe AI does for your facilities.
               </p>
               <p className="text-xl text-muted-foreground">
-                We protect children. You protect your organization.
+                We protect children. You protect your organization. <span className="text-cyan font-semibold">AI handles the rest.</span>
               </p>
             </div>
           </RevealOnScroll>

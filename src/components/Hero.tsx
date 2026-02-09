@@ -49,23 +49,23 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           transition={{ duration: 0.6 }}
           className="space-y-6"
         >
-          {/* Safety Badge - Industry Hook */}
+          {/* Triple-AI Badge */}
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan/20 to-primary/20 border border-cyan/40 px-5 py-2.5 rounded-full"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan/20 via-primary/20 to-orange-500/20 border border-cyan/40 px-5 py-2.5 rounded-full"
           >
             <Shield className="w-5 h-5 text-cyan animate-pulse" />
-            <span className="text-sm font-semibold text-cyan">On a Mission to Prevent 200,000+ Annual Injuries</span>
+            <span className="text-sm font-semibold bg-gradient-to-r from-cyan via-primary to-orange-500 bg-clip-text text-transparent">Triple-AI Powered Platform</span>
           </motion.div>
 
           {/* Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            <span className="text-foreground">AI-Powered Safety</span>
+            <span className="text-foreground">Three AI Engines.</span>
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-cyan">
-              That Sees What Eyes Miss
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-orange-500">
+              One Mission. Zero Compromises.
             </span>
           </h1>
 
@@ -129,7 +129,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-12 max-w-4xl mx-auto"
           >
             {[
-              { icon: AlertTriangle, label: 'Annual Injuries We Aim to Prevent', value: 200, prefix: '', suffix: 'K+' },
+              { icon: Shield, label: 'AI Layers Working Together', value: 3, prefix: '', suffix: '' },
               { icon: CheckCircle, label: 'Detection Accuracy', value: 95, prefix: '', suffix: '%+' },
               { icon: Award, label: 'ASTM Standards Covered', value: 4, prefix: '', suffix: '+' },
               { icon: Clock, label: 'Hour Report Turnaround', value: 48, prefix: '', suffix: '' },
