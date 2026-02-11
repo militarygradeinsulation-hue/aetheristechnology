@@ -1,38 +1,38 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Camera, Gauge, Shield, TrendingUp, FileText, AlertTriangle } from 'lucide-react';
+import { Camera, Gauge, Shield, TrendingUp, FileText, Palette } from 'lucide-react';
 
 export const AutonomousWorkforce: React.FC = () => {
   const platformFeatures = [
     {
       icon: Camera,
       title: 'AI Photo Analysis Engine',
-      description: 'Upload photos and receive instant safety assessments. Identifies accessibility issues, surface wear, and hardware hazards.',
+      description: 'Upload photos for instant assessments—playground hazards, interior design analysis, or construction quality checks.',
     },
     {
       icon: Shield,
       title: 'Compliance Dashboard',
-      description: 'Real-time tracking of ASTM F1292, F3313, F1487 standards. Automated alerts for expiring certifications.',
+      description: 'Real-time tracking of industry standards: ASTM/CPSC for playgrounds, building codes for construction, ADA for all.',
     },
     {
       icon: Gauge,
-      title: 'Impact Attenuation Monitoring',
-      description: 'Track Peak G and HIC readings over time. Integrate with Triax testing for comprehensive safety data.',
+      title: 'Performance Monitoring',
+      description: 'Track safety metrics, design trends, and project milestones over time with AI-driven insights.',
     },
     {
       icon: TrendingUp,
       title: 'Predictive Analytics Engine',
-      description: 'AI correlates weather, usage, and wear patterns to predict when surfaces will become unsafe.',
+      description: 'AI correlates environmental factors, usage patterns, and wear data to predict issues before they become problems.',
     },
     {
       icon: FileText,
       title: 'Report Generation System',
-      description: 'Automated reports for boards, insurers, and auditors. Demonstrate compliance and risk reduction.',
+      description: 'Automated reports for boards, insurers, clients, and auditors. Demonstrate compliance and track ROI.',
     },
     {
-      icon: AlertTriangle,
-      title: 'High-Risk Zone Mapping',
-      description: 'Identify and prioritize high-wear areas: beneath swings, base of slides, around climbing frames.',
+      icon: Palette,
+      title: 'Creative AI Studio',
+      description: 'Generate playground renderings, interior room visualizations, and home concept art for proposals and marketing.',
     },
   ];
 
@@ -42,10 +42,10 @@ export const AutonomousWorkforce: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              The <span className="text-cyan glow-text">PlaySafe AI</span> Platform
+              The <span className="text-cyan glow-text">Aetheris AI</span> Platform
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              A complete AI-powered safety management system for the playground and recreation industry
+              A complete AI-powered management system for playground safety, interior design, and home building
             </p>
           </div>
         </RevealOnScroll>
@@ -66,15 +66,13 @@ export const AutonomousWorkforce: React.FC = () => {
 
         <RevealOnScroll delay={0.4}>
           <div className="glass p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold text-center mb-6 text-foreground">
-              How It Works
-            </h3>
+            <h3 className="text-2xl font-bold text-center mb-6 text-foreground">How It Works</h3>
             <div className="grid md:grid-cols-4 gap-6">
               {[
-                { step: '1', title: 'Upload', desc: 'Take photos of your playground equipment and surfaces' },
-                { step: '2', title: 'Analyze', desc: 'AI identifies hazards, wear patterns, and compliance issues' },
-                { step: '3', title: 'Report', desc: 'Receive detailed safety reports with prioritized actions' },
-                { step: '4', title: 'Protect', desc: 'Track trends over time and prevent injuries before they happen' },
+                { step: '1', title: 'Upload', desc: 'Take photos of your playground, room, or construction site' },
+                { step: '2', title: 'Analyze', desc: 'AI identifies issues, opportunities, and compliance gaps' },
+                { step: '3', title: 'Report', desc: 'Receive detailed reports with prioritized actions' },
+                { step: '4', title: 'Optimize', desc: 'Track trends over time and continuously improve' },
               ].map((item) => (
                 <div key={item.step} className="text-center">
                   <div className="w-12 h-12 rounded-full bg-cyan/20 border-2 border-cyan flex items-center justify-center mx-auto mb-4">

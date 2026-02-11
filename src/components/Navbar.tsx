@@ -25,7 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Home', href: '/', special: true },
     { label: 'AI Platform', href: '/ai-platform', special: true },
     { label: 'Platform', href: '/services' },
-    { label: 'Safety Science', href: '/safety-science' },
     { label: 'Industries', href: '/solutions' },
     { label: 'Blog', href: '/blog' },
     { label: 'About', href: '/about' },
@@ -46,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               className="w-12 h-12 object-contain"
             />
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-foreground leading-tight">PlaySafe AI</span>
+              <span className="text-xl font-bold text-foreground leading-tight">Aetheris AI</span>
               <span className="text-[10px] text-muted-foreground tracking-wide">By Aetheris Technology</span>
             </div>
           </Link>

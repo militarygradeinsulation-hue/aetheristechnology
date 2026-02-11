@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, type = "rendering" } = await req.json();
+    const { prompt, type = "playground" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -22,10 +22,10 @@ serve(async (req) => {
       throw new Error("Prompt is required");
     }
 
-    // Build enhanced prompt based on type
     let enhancedPrompt = "";
     
     switch (type) {
+      case "playground":
       case "rendering":
         enhancedPrompt = `Create a photorealistic playground rendering: ${prompt}. 
           The image should show a modern, safe playground with appropriate safety surfacing, 
@@ -33,18 +33,33 @@ serve(async (req) => {
           Professional architectural visualization style, bright daylight, inviting atmosphere.
           Ultra high resolution, 16:9 aspect ratio.`;
         break;
+
+      case "interior":
+        enhancedPrompt = `Create a photorealistic interior design visualization: ${prompt}. 
+          The image should show a beautifully designed interior space with attention to lighting, 
+          materials, textures, furniture placement, and spatial flow. 
+          Professional interior photography style, natural and artificial lighting.
+          Ultra high resolution, 16:9 aspect ratio.`;
+        break;
+
+      case "homebuilding":
+        enhancedPrompt = `Create a photorealistic home building concept rendering: ${prompt}. 
+          The image should show an architectural visualization of a home exterior or construction concept, 
+          with attention to materials, landscaping, proportions, and curb appeal. 
+          Professional architectural photography style, golden hour lighting.
+          Ultra high resolution, 16:9 aspect ratio.`;
+        break;
       
       case "signage":
-        enhancedPrompt = `Design a professional playground safety sign: ${prompt}. 
+        enhancedPrompt = `Design a professional safety sign: ${prompt}. 
           Clean, modern design with clear iconography. Include relevant safety symbols.
           Professional signage design, high contrast, easy to read, family-friendly style.
           Square format, suitable for printing.`;
         break;
       
       case "marketing":
-        enhancedPrompt = `Create a marketing visual for playground safety services: ${prompt}. 
-          Professional, trustworthy, modern design. Incorporate themes of child safety, 
-          community, and technology. Suitable for social media or promotional materials.
+        enhancedPrompt = `Create a marketing visual for professional services: ${prompt}. 
+          Professional, trustworthy, modern design. Suitable for social media or promotional materials.
           16:9 aspect ratio, vibrant colors, professional quality.`;
         break;
       
@@ -62,12 +77,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-image",
-        messages: [
-          {
-            role: "user",
-            content: enhancedPrompt,
-          },
-        ],
+        messages: [{ role: "user", content: enhancedPrompt }],
         modalities: ["image", "text"],
       }),
     });
@@ -93,9 +103,6 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("AI response received");
-
-    // Extract image from response
     const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     
     if (!imageUrl) {

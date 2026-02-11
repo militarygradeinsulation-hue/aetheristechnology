@@ -65,14 +65,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-foreground">Three AI Engines.</span>
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-orange-500">
-              One Mission. Zero Compromises.
+              Three Industries. Unlimited Potential.
             </span>
           </h1>
 
           {/* Value Prop */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Instant compliance assessments, predictive maintenance, and real-time safety monitoring 
-            for parks, schools, and recreation facilities. ASTM/CPSC compliant.
+            AI-powered analysis, marketing automation, and creative generation for 
+            Playground Safety, Interior Design, and Home Building industries.
           </p>
 
           {/* Team Video */}
@@ -109,16 +109,16 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               size="lg"
               variant="outline"
               className="glass-hover border-border text-lg px-8 py-6"
-              onClick={() => navigate('/safety-science')}
+              onClick={() => navigate('/solutions')}
             >
-              Learn the Science
+              Explore Industries
             </Button>
           </div>
 
           {/* Trust Indicator */}
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
             <Clock className="w-4 h-4" />
-            48-hour reports • ASTM F1292 Compliant • 30-day money-back guarantee
+            48-hour reports • Industry-grade compliance • 30-day money-back guarantee
           </p>
 
           {/* Social Proof Counters */}
@@ -129,9 +129,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-12 max-w-4xl mx-auto"
           >
             {[
-              { icon: Shield, label: 'AI Layers Working Together', value: 3, prefix: '', suffix: '' },
+              { icon: Shield, label: 'Industries Served', value: 3, prefix: '', suffix: '' },
               { icon: CheckCircle, label: 'Detection Accuracy', value: 95, prefix: '', suffix: '%+' },
-              { icon: Award, label: 'ASTM Standards Covered', value: 4, prefix: '', suffix: '+' },
+              { icon: Award, label: 'AI Layers Working Together', value: 3, prefix: '', suffix: '' },
               { icon: Clock, label: 'Hour Report Turnaround', value: 48, prefix: '', suffix: '' },
             ].map((stat, index) => (
               <motion.div
