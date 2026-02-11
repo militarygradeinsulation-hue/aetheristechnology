@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { CEOProfile } from '@/components/CEOProfile';
-import { TeamSection } from '@/components/TeamSection';
+
 import { OurWorkSection } from '@/components/OurWorkSection';
 import { TechLogos } from '@/components/TechLogos';
 import { Footer } from '@/components/Footer';
@@ -20,7 +20,7 @@ const AboutPage = () => {
         <div className="pt-24">
           <CEOProfile />
           <OurWorkSection />
-          <TeamSection />
+          
           <TechLogos />
         </div>
         <Footer />
