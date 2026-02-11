@@ -12,7 +12,7 @@ export const ThePitch: React.FC = () => {
               The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-orange-500">AI Platform</span> That Never Sleeps
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Triple-AI powered playground safety that works 24/7 to protect children, grow your business, and create stunning visuals
+              Triple-AI powering playground safety, interior design, and home building—24/7
             </p>
           </div>
         </RevealOnScroll>
@@ -27,25 +27,19 @@ export const ThePitch: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-2xl font-bold text-foreground mb-2">
-                      It Sees Hidden Dangers
+                      It Sees Hidden Details
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      Upload a photo and our AI instantly identifies accessibility issues, surface wear, 
-                      hardware problems, and fall zone inadequacies that human eyes often miss.
+                      Upload a photo and our AI instantly identifies playground hazards, interior design flaws, 
+                      and construction defects that human eyes often miss.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        COMPUTER VISION
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        INSTANT ANALYSIS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        PHOTO-TO-REPORT
-                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">PLAYGROUND HAZARDS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">DESIGN FLAWS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">CONSTRUCTION DEFECTS</span>
                     </div>
                     <div className="mt-4 p-4 bg-cyan/10 rounded-lg border border-cyan/20">
-                      <p className="text-sm font-semibold text-cyan">AI Safety Detection Active</p>
+                      <p className="text-sm font-semibold text-cyan">AI Analysis Active Across All Industries</p>
                     </div>
                   </div>
                 </div>
@@ -63,19 +57,13 @@ export const ThePitch: React.FC = () => {
                       It Measures What Matters
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      Track Peak G and HIC (Head Injury Criterion) readings over time. Our system monitors 
-                      impact attenuation and material degradation to ensure surfaces stay within safe limits.
+                      Track safety metrics for playgrounds, spatial dimensions for interiors, 
+                      and build specifications for homes. Precision data across every vertical.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        PEAK G MONITORING
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        HIC CRITERION
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        COMPLIANCE TRACKING
-                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">SAFETY METRICS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">SPATIAL ANALYSIS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">BUILD SPECS</span>
                     </div>
                   </div>
                 </div>
@@ -93,19 +81,13 @@ export const ThePitch: React.FC = () => {
                       It Predicts Before Problems
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      The "Winter Paradox": A surface safe in spring can fail in winter. Our AI correlates 
-                      temperature, weather, and usage patterns to warn you before surfaces become dangerous.
+                      AI predicts surface wear in playgrounds, design trend shifts for interiors, 
+                      and construction delays for builders—before they impact your bottom line.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        PREDICTIVE MAINTENANCE
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        SEASONAL ALERTS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        RISK MAPPING
-                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">PREDICTIVE MAINTENANCE</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">TREND FORECASTING</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">DELAY PREVENTION</span>
                     </div>
                   </div>
                 </div>
@@ -123,19 +105,13 @@ export const ThePitch: React.FC = () => {
                       It Creates What You Need
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      AI generates playground renderings for proposals, designs safety signage with your branding, 
-                      creates marketing content, and builds professional reports—all in seconds.
+                      AI generates playground renderings, interior room visualizations, home concept art, 
+                      marketing content, and professional reports—all in seconds.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
-                        PLAYGROUND RENDERINGS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
-                        SAFETY SIGNAGE
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">
-                        MARKETING CONTENT
-                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">PLAYGROUND RENDERINGS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">INTERIOR VISUALIZATIONS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400">HOME CONCEPTS</span>
                     </div>
                   </div>
                 </div>
@@ -153,19 +129,13 @@ export const ThePitch: React.FC = () => {
                       It Remembers Everything
                     </h4>
                     <p className="text-lg text-muted-foreground mb-4">
-                      Digital inspection records, ASTM compliance tracking, and audit trails that protect you 
-                      from liability. Every photo, every reading, every recommendation—documented and searchable.
+                      Compliance records, project histories, client preferences, and audit trails. 
+                      Every photo, every specification, every recommendation—documented and searchable.
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        AUDIT TRAILS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        LIABILITY PROTECTION
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">
-                        CERTIFICATION TRACKING
-                      </span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">AUDIT TRAILS</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">PROJECT HISTORY</span>
+                      <span className="px-3 py-1 rounded-full glass border border-cyan/20 text-cyan">COMPLIANCE TRACKING</span>
                     </div>
                   </div>
                 </div>
@@ -176,10 +146,10 @@ export const ThePitch: React.FC = () => {
           <RevealOnScroll delay={0.7}>
             <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-cyan/30">
               <p className="text-2xl font-bold text-foreground mb-4">
-                That's what PlaySafe AI does for your facilities.
+                That's what Aetheris AI does for your business.
               </p>
               <p className="text-xl text-muted-foreground">
-                We protect children. You protect your organization. <span className="text-cyan font-semibold">AI handles the rest.</span>
+                Playground safety. Interior design. Home building. <span className="text-cyan font-semibold">AI handles the rest.</span>
               </p>
             </div>
           </RevealOnScroll>

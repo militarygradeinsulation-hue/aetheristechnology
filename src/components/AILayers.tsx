@@ -7,16 +7,16 @@ import { Button } from './ui/button';
 
 const layers = [
   {
-    id: 'safety',
+    id: 'analysis',
     icon: Eye,
-    title: 'Safety AI',
+    title: 'Analysis AI',
     subtitle: 'Computer Vision & Predictive Analytics',
-    description: 'Photo analysis that detects hazards humans miss. Real-time risk scoring and ASTM/CPSC compliance automation.',
+    description: 'Photo analysis that detects issues humans miss—playground hazards, interior design flaws, and construction defects.',
     features: [
-      'Photo hazard detection',
+      'Playground hazard detection',
+      'Interior space analysis',
+      'Construction inspection',
       'Predictive maintenance',
-      'ASTM/CPSC compliance',
-      'Real-time risk scoring',
     ],
     gradient: 'from-cyan to-blue-500',
     glowColor: 'cyan',
@@ -26,7 +26,7 @@ const layers = [
     icon: Megaphone,
     title: 'Marketing AI',
     subtitle: 'Content & Lead Generation',
-    description: 'Automated content creation, lead scoring, and personalized outreach campaigns that grow your business.',
+    description: 'Automated content creation, lead scoring, and personalized outreach for playground, design, and building companies.',
     features: [
       'Social media automation',
       'AI-written blog posts',
@@ -41,11 +41,11 @@ const layers = [
     icon: Sparkles,
     title: 'Creative AI',
     subtitle: 'Image Generation & Design',
-    description: 'Generate playground renderings, safety signage, marketing collateral, and proposal graphics instantly.',
+    description: 'Generate playground renderings, interior room visualizations, home concept art, and marketing collateral instantly.',
     features: [
       'Playground renderings',
-      'Before/after visualizations',
-      'Safety signage design',
+      'Interior design visualizations',
+      'Home building concept art',
       'Marketing collateral',
     ],
     gradient: 'from-orange-500 to-pink-500',
@@ -59,26 +59,17 @@ export const AILayers: React.FC = () => {
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 8, repeat: Infinity }}
           className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan/20 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.1, 0.2, 0.1],
-          }}
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 8, repeat: Infinity, delay: 2 }}
           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.05, 0.15, 0.05],
-          }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.05, 0.15, 0.05] }}
           transition={{ duration: 10, repeat: Infinity, delay: 4 }}
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-3xl"
         />
@@ -87,7 +78,6 @@ export const AILayers: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            {/* Badge */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -107,11 +97,11 @@ export const AILayers: React.FC = () => {
                 Triple-AI Platform
               </span>
               <br />
-              Built for Playground Safety
+              Built for Design, Safety & Construction
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Three interconnected AI engines working together to protect children, 
-              grow your business, and create stunning visuals. No other company has this.
+              Three interconnected AI engines powering playground safety, interior design, 
+              and home building. No other company has this.
             </p>
           </div>
         </RevealOnScroll>
@@ -125,27 +115,19 @@ export const AILayers: React.FC = () => {
                 transition={{ type: 'spring', stiffness: 300 }}
                 className="relative group"
               >
-                {/* Glow effect on hover */}
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${layer.gradient} rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
                 
                 <div className="relative glass p-8 rounded-2xl border border-border/50 h-full">
-                  {/* Icon with gradient background */}
                   <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${layer.gradient} flex items-center justify-center mb-6 shadow-lg`}>
                     <layer.icon className="w-8 h-8 text-white" />
                   </div>
 
-                  {/* Title */}
                   <h3 className={`text-2xl font-bold mb-1 bg-gradient-to-r ${layer.gradient} bg-clip-text text-transparent`}>
                     {layer.title}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">{layer.subtitle}</p>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">{layer.description}</p>
 
-                  {/* Description */}
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {layer.description}
-                  </p>
-
-                  {/* Features */}
                   <ul className="space-y-3">
                     {layer.features.map((feature, idx) => (
                       <motion.li
@@ -161,7 +143,6 @@ export const AILayers: React.FC = () => {
                     ))}
                   </ul>
 
-                  {/* Connection lines animation */}
                   <motion.div
                     animate={{ opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
@@ -176,7 +157,6 @@ export const AILayers: React.FC = () => {
         {/* Central connection visualization */}
         <RevealOnScroll delay={0.5}>
           <div className="relative">
-            {/* Connection hub */}
             <motion.div
               animate={{
                 boxShadow: [
@@ -207,13 +187,12 @@ export const AILayers: React.FC = () => {
                 All Three Working Together
               </p>
               <p className="text-sm text-muted-foreground max-w-md">
-                Your competitors are still using clipboards. You'll have AI.
+                Your competitors are still using spreadsheets. You'll have AI.
               </p>
             </motion.div>
           </div>
         </RevealOnScroll>
 
-        {/* CTA */}
         <RevealOnScroll delay={0.6}>
           <div className="text-center mt-12">
             <Link to="/ai-platform">

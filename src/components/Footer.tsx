@@ -17,12 +17,12 @@ export const Footer: React.FC = () => {
                 className="w-12 h-12 object-contain"
               />
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-foreground leading-tight">PlaySafe AI</span>
+                <span className="text-xl font-bold text-foreground leading-tight">Aetheris AI</span>
                 <span className="text-[10px] text-muted-foreground tracking-wide">By Aetheris Technology</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              AI-powered playground safety for the recreation industry. Protecting children, reducing liability.
+              Triple-AI platform for Playground Safety, Interior Design, and Home Building industries.
             </p>
           </div>
 
@@ -30,8 +30,8 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Platform</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/ai-platform" className="hover:text-cyan transition-colors">Triple-AI Platform</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Safety Analysis</Link></li>
-              <li><Link to="/ai-platform#creates" className="hover:text-cyan transition-colors">Image Generation</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Services</Link></li>
+              <li><Link to="/ai-platform#creates" className="hover:text-cyan transition-colors">Creative AI</Link></li>
               <li><Link to="/ai-platform#grows" className="hover:text-cyan transition-colors">Marketing AI</Link></li>
             </ul>
           </div>
@@ -40,7 +40,6 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
-              <li><Link to="/safety-science" className="hover:text-cyan transition-colors">Safety Science</Link></li>
               <li><Link to="/solutions" className="hover:text-cyan transition-colors">Industries</Link></li>
               <li><Link to="/blog" className="hover:text-cyan transition-colors">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
@@ -49,12 +48,11 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Standards & Compliance</h4>
+            <h4 className="font-bold text-foreground mb-4">Industries</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>ASTM F1292 (Impact Attenuation)</li>
-              <li>ASTM F3313 (Field Testing)</li>
-              <li>ASTM F1487 (Equipment Safety)</li>
-              <li>CPSC Handbook</li>
+              <li>🛝 Playground Safety</li>
+              <li>🏠 Interior Design</li>
+              <li>🏗️ Home Building</li>
             </ul>
             <p className="text-sm text-muted-foreground mt-4">Indianapolis, Indiana</p>
           </div>
@@ -62,7 +60,7 @@ export const Footer: React.FC = () => {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} PlaySafe AI. All rights reserved.
+            © {currentYear} Aetheris AI. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
             <Link to="/terms" className="hover:text-cyan transition-colors">Terms of Service</Link>
