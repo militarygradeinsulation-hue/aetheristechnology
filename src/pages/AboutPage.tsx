@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { CEOProfile } from '@/components/CEOProfile';
-
+import { VPProfile } from '@/components/VPProfile';
 import { OurWorkSection } from '@/components/OurWorkSection';
 import { TechLogos } from '@/components/TechLogos';
 import { Footer } from '@/components/Footer';
@@ -19,6 +19,7 @@ const AboutPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <CEOProfile />
+          <VPProfile />
           <OurWorkSection />
           
           <TechLogos />
