@@ -47,9 +47,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, cla
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-foreground">Get In Touch</h2>
+        <h2 className="text-3xl font-bold mb-2 text-foreground">$100/Hour Assessment</h2>
         <p className="text-muted-foreground mb-6">
-          Reach out to discuss how AI can transform your business.
+          Book a full hour with our AI experts to map out your transformation.
         </p>
 
         {claimCode && (

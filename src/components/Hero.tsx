@@ -102,7 +102,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               className="bg-gradient-to-r from-cyan to-primary hover:from-cyan/90 hover:to-primary/90 text-primary-foreground text-lg px-8 py-6 group shadow-lg shadow-cyan/25"
             >
               <Camera className="mr-2 w-5 h-5" />
-              Upload Photo for Free Assessment
+              Book $100/Hr Assessment
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
