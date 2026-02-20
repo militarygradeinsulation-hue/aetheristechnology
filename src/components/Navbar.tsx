@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             ))}
             <Link to="/contact">
               <Button className="bg-primary hover:bg-primary/90">
-                Free Assessment
+                $100/Hr Assessment
               </Button>
             </Link>
           </div>
@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             ))}
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90">
-                Free Assessment
+                $100/Hr Assessment
               </Button>
             </Link>
           </div>
