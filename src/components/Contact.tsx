@@ -16,12 +16,12 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
             
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-                Book Your $100/Hour Assessment
+                Ready to Transform Your Business?
               </h2>
               
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-                Get a full hour with our AI experts to analyze your business needs 
-                across playground safety, interior design, or home building — just $100.
+                Let's discuss how AI can revolutionize your operations. 
+                Get a free consultation with our experts.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">

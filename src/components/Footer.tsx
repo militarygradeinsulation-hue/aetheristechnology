@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import aetherisLogo from '@/assets/aetheris-logo.png';
 
+
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
@@ -13,26 +14,23 @@ export const Footer: React.FC = () => {
             <div className="flex items-center space-x-3">
               <img 
                 src={aetherisLogo} 
-                alt="PlaySafe AI Logo" 
+                alt="Aetheris AI Logo" 
                 className="w-12 h-12 object-contain"
               />
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-foreground leading-tight">Aetheris AI</span>
-                <span className="text-[10px] text-muted-foreground tracking-wide">By Aetheris Technology</span>
-              </div>
+              <span className="text-xl font-bold text-foreground">Aetheris AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Triple-AI platform for Playground Safety, Interior Design, and Home Building industries.
+              Transforming businesses through cutting-edge AI solutions.
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Platform</h4>
+            <h4 className="font-bold text-foreground mb-4">Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/ai-platform" className="hover:text-cyan transition-colors">Triple-AI Platform</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Services</Link></li>
-              <li><Link to="/ai-platform#creates" className="hover:text-cyan transition-colors">Creative AI</Link></li>
-              <li><Link to="/ai-platform#grows" className="hover:text-cyan transition-colors">Marketing AI</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Machine Learning</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Automation</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Data Intelligence</Link></li>
+              <li><Link to="/services" className="hover:text-cyan transition-colors">Consulting</Link></li>
             </ul>
           </div>
 
@@ -40,21 +38,21 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
-              <li><Link to="/solutions" className="hover:text-cyan transition-colors">Industries</Link></li>
+              <li><Link to="/service-areas" className="hover:text-cyan transition-colors">Service Areas</Link></li>
               <li><Link to="/blog" className="hover:text-cyan transition-colors">Blog</Link></li>
+              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition-colors">Portfolio</a></li>
               <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
-              <li><Link to="/careers" className="hover:text-cyan transition-colors">Careers</Link></li>
+              <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-cyan transition-colors">Careers</a></li>
             </ul>
+            <p className="text-xs text-muted-foreground mt-3 italic">
+              We're a new startup seeking visionaries who understand the transformative power of AI.
+            </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Industries</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>🛝 Playground Safety</li>
-              <li>🏠 Interior Design</li>
-              <li>🏗️ Home Building</li>
-            </ul>
-            <p className="text-sm text-muted-foreground mt-4">Indianapolis, Indiana</p>
+            <h4 className="font-bold text-foreground mb-4">Contact</h4>
+            <p className="text-sm text-muted-foreground">aetheris.technology@outlook.com</p>
+            <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
           </div>
         </div>
 
@@ -63,11 +61,11 @@ export const Footer: React.FC = () => {
             © {currentYear} Aetheris AI. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-            <Link to="/terms" className="hover:text-cyan transition-colors">Terms of Service</Link>
+            <span>By using our services, you agree to our terms.</span>
             <span>•</span>
-            <span>ASTM/CPSC Compliant</span>
+            <span>All AI solutions are customized per client agreement.</span>
             <span>•</span>
-            <span>Enterprise-grade security</span>
+            <span>Data handled with enterprise-grade security.</span>
           </div>
         </div>
 
