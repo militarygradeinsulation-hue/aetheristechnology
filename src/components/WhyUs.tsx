@@ -5,12 +5,12 @@ import { ComparisonChart } from './ComparisonChart';
 
 export const WhyUs: React.FC = () => {
   const benefits = [
-    'AI-driven solutions that actually work',
-    'Proven track record with 200+ clients',
-    '24/7 support and monitoring',
-    'Scalable architecture for growth',
-    'ROI-focused implementation',
-    'Cutting-edge technology stack',
+    'Hands-on consulting that delivers real results',
+    'Proven track record with 200+ client engagements',
+    'Ongoing advisory support and strategy reviews',
+    'Scalable strategies designed for long-term growth',
+    'ROI-focused recommendations and roadmaps',
+    'Deep expertise across cutting-edge AI technologies',
   ];
 
   return (
@@ -22,7 +22,7 @@ export const WhyUs: React.FC = () => {
               Why Choose <span className="text-cyan glow-text">Aetheris AI</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              We don't just build AI systems. We build the future of your business.
+              We don't just advise—we partner with you to build the future of your business.
             </p>
           </div>
         </RevealOnScroll>
@@ -46,9 +46,9 @@ export const WhyUs: React.FC = () => {
               </div>
 
               <p className="text-muted-foreground pt-6">
-                Stop settling for mediocre results. With Aetheris AI, you get cutting-edge 
-                technology backed by real expertise. We handle all the complex AI stuff - 
-                you just focus on growing your business.
+                Stop navigating AI alone. With Aetheris AI consulting, you get expert 
+                guidance backed by real-world experience. We handle the strategy and 
+                complexity—you focus on growing your business.
               </p>
             </div>
 

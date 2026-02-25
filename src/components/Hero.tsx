@@ -22,25 +22,25 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-cyan animate-pulse-glow" />
-            <span className="text-sm text-muted-foreground">Next-Gen AI Solutions</span>
+            <span className="text-sm text-muted-foreground">AI Consulting & Strategy</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
-            <span className="text-foreground">Transform Your Business</span>
+            <span className="text-foreground">Expert AI Consulting</span>
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-cyan glow-text">
-              With AI Intelligence
+              For Your Business
             </span>
           </h1>
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-cyan/30">
             <span className="text-base md:text-lg font-semibold text-cyan">
-              I work while you sleep.
+              Strategic guidance. Hands-on expertise. Real results.
             </span>
           </div>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            You know you need AI for your business, but you don't know where to start. I do.
+            You know you need AI for your business, but you don't know where to start. Let's figure it out together.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
@@ -49,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               onClick={onContactClick}
               className="bg-primary hover:bg-primary/90 text-primary-foreground group"
             >
-              Get Started
+              Book a Consultation
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
@@ -58,16 +58,16 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               className="glass-hover border-border"
               onClick={() => navigate('/services')}
             >
-              Explore Services
+              Our Consulting Services
             </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
             {[
-              { label: 'Projects', value: '200+' },
-              { label: 'Clients', value: '100+' },
-              { label: 'Revenue Managed', value: '$25M' },
-              { label: 'Success Rate', value: '99%' },
+              { label: 'Engagements', value: '200+' },
+              { label: 'Clients Advised', value: '100+' },
+              { label: 'Revenue Impacted', value: '$25M' },
+              { label: 'Client Satisfaction', value: '99%' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}

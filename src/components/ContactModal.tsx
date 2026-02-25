@@ -21,9 +21,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-foreground">Get In Touch</h2>
+        <h2 className="text-3xl font-bold mb-2 text-foreground">Book a Consultation</h2>
         <p className="text-muted-foreground mb-8">
-          Reach out to discuss how AI can transform your business.
+          Reach out to schedule a consultation and discuss your AI strategy.
         </p>
 
         <div className="space-y-6">

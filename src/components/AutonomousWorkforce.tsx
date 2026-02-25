@@ -12,8 +12,8 @@ export const AutonomousWorkforce: React.FC = () => {
               Engineering Your <span className="text-cyan glow-text">Autonomous Workforce</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Custom-built AI systems that automate key business functions, allowing companies 
-              to focus on core operations while AI handles execution
+              We consult on and architect AI systems that automate key business functions, allowing 
+              your team to focus on core operations while AI handles execution
             </p>
           </div>
         </RevealOnScroll>

@@ -14,39 +14,39 @@ export const Services: React.FC = () => {
   const services = [
     {
       icon: Brain,
-      title: 'Machine Learning',
-      description: 'Custom ML models tailored to your business needs. From predictive analytics to deep learning solutions.',
-      features: ['Predictive Analytics', 'Neural Networks', 'Data Processing'],
+      title: 'ML Strategy & Advisory',
+      description: 'We assess your data landscape and recommend the right ML approach. From feasibility studies to model selection guidance.',
+      features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
     },
     {
       icon: Bot,
-      title: 'AI Automation',
-      description: 'Streamline your operations with intelligent automation. Let AI handle repetitive tasks while you focus on growth.',
-      features: ['Process Automation', 'Smart Workflows', 'Task Optimization'],
+      title: 'Automation Consulting',
+      description: 'We identify automation opportunities in your operations and design intelligent workflows tailored to your team.',
+      features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
     },
     {
       icon: Code,
-      title: 'Custom AI Development',
-      description: 'End-to-end AI solutions built from scratch. We turn your vision into intelligent reality.',
-      features: ['API Integration', 'Model Training', 'Deployment'],
+      title: 'AI Implementation Advisory',
+      description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
+      features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
     },
     {
       icon: Database,
-      title: 'Data Intelligence',
-      description: 'Transform raw data into actionable insights. Make data-driven decisions with confidence.',
-      features: ['Data Mining', 'Analytics Dashboard', 'Real-time Insights'],
+      title: 'Data Strategy Consulting',
+      description: 'We help you build a data-driven culture with the right infrastructure, governance, and analytics strategy.',
+      features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
     },
     {
       icon: Sparkles,
-      title: 'AI Consulting',
-      description: 'Strategic guidance for your AI transformation journey. Expert advice to maximize your ROI.',
-      features: ['Strategy Planning', 'Technology Selection', 'Implementation'],
+      title: 'AI Transformation Strategy',
+      description: 'End-to-end strategic guidance for your AI journey. We help leadership teams make confident, informed decisions.',
+      features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
     },
     {
       icon: Zap,
-      title: 'Performance Optimization',
-      description: 'Supercharge your existing AI systems. Faster, smarter, and more efficient operations.',
-      features: ['Model Optimization', 'Speed Enhancement', 'Cost Reduction'],
+      title: 'Performance & Optimization',
+      description: 'We audit your existing AI systems and recommend improvements for speed, accuracy, and cost efficiency.',
+      features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
     },
   ];
 
@@ -102,10 +102,10 @@ export const Services: React.FC = () => {
         <RevealOnScroll>
           <div className="glass p-8 rounded-xl mb-16 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              Marketing by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan glow-text hover:underline">CTOguy.ai</a>
+              Marketing Consulting by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan glow-text hover:underline">CTOguy.ai</a>
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Our marketing division delivers data-driven strategies and AI-powered campaigns that transform how businesses connect with their customers.
+              Our marketing consulting practice delivers data-driven strategies and AI-powered campaigns that transform how businesses connect with their customers.
             </p>
           </div>
         </RevealOnScroll>
@@ -113,10 +113,10 @@ export const Services: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Our <span className="text-cyan glow-text">Services</span>
+              Consulting <span className="text-cyan glow-text">Services</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive AI solutions designed to propel your business into the future
+              Expert AI consulting to guide your business transformation from strategy to execution
             </p>
           </div>
         </RevealOnScroll>
@@ -157,10 +157,10 @@ export const Services: React.FC = () => {
           <RevealOnScroll>
             <div className="glass p-6 rounded-xl">
               <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
-                Custom CRM/ERP Solution
+                CRM/ERP Consulting
               </h3>
               <p className="text-muted-foreground mb-6">
-                Streamline your business operations with our intelligent, fully customized CRM/ERP system built for your unique needs.
+                We design and implement intelligent CRM/ERP systems tailored to your operations—guiding you from strategy through deployment.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50">
                 <video 
@@ -178,10 +178,10 @@ export const Services: React.FC = () => {
           <RevealOnScroll delay={0.2}>
             <div className="glass p-6 rounded-xl">
               <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
-                AI-Powered Lead Generator
+                Lead Generation Strategy
               </h3>
               <p className="text-muted-foreground mb-6">
-                Automatically discover and qualify high-value leads with our intelligent lead generation system that never stops working.
+                We build and optimize AI-powered lead generation systems that continuously discover and qualify high-value prospects for your business.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50">
                 <img 
@@ -199,10 +199,10 @@ export const Services: React.FC = () => {
           <RevealOnScroll>
             <div className="text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                Proven <span className="text-cyan glow-text">Results</span>
+                Client <span className="text-cyan glow-text">Success Stories</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Real-world success stories powered by our AI solutions
+                Real-world results from our consulting engagements
               </p>
             </div>
           </RevealOnScroll>
@@ -224,9 +224,9 @@ export const Services: React.FC = () => {
                     Marketing Automation Hub
                   </h4>
                   
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Comprehensive multi-channel marketing automation platform delivering 250% ROI improvement for enterprise clients
-                  </p>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Advised on comprehensive multi-channel marketing automation strategy, delivering 250% ROI improvement for enterprise clients
+              </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
@@ -259,9 +259,9 @@ export const Services: React.FC = () => {
                     Custom CRM Development
                   </h4>
                   
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Built enterprise-grade CRM systems from scratch with automated quote generation and pipeline management
-                  </p>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Designed and guided implementation of enterprise-grade CRM systems with automated quote generation and pipeline management
+              </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
@@ -294,9 +294,9 @@ export const Services: React.FC = () => {
                     AI Vision Studio
                   </h4>
                   
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Next-gen perspective analysis platform transforming how businesses understand visual data and spatial relationships
-                  </p>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Consulted on next-gen perspective analysis capabilities, transforming how businesses understand visual data and spatial relationships
+              </p>
 
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
@@ -346,7 +346,7 @@ export const Services: React.FC = () => {
                 Industries We <span className="text-cyan glow-text">Transform</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Custom AI solutions tailored to your industry's unique challenges
+                Expert AI consulting tailored to your industry's unique challenges
               </p>
             </div>
           </RevealOnScroll>
@@ -396,10 +396,10 @@ export const Services: React.FC = () => {
           <RevealOnScroll delay={0.6}>
             <div className="mt-12 text-center glass p-8 rounded-xl">
               <p className="text-lg text-muted-foreground mb-4">
-                Don't see your industry? We specialize in custom AI solutions for any business sector.
+                Don't see your industry? We provide expert AI consulting for any business sector.
               </p>
               <p className="text-cyan font-semibold">
-                Every industry has unique challenges—we build AI that solves them.
+                Every industry has unique challenges—we help you navigate them with the right AI strategy.
               </p>
             </div>
           </RevealOnScroll>

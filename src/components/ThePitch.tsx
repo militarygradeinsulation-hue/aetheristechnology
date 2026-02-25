@@ -170,10 +170,10 @@ export const ThePitch: React.FC = () => {
           <RevealOnScroll delay={0.8}>
             <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-cyan/30">
               <p className="text-2xl font-bold text-foreground mb-4">
-                That's what I do for your business.
+                That's what we consult on for your business.
               </p>
               <p className="text-xl text-muted-foreground">
-                I build the Magic Robot. You run your business.
+                We design and guide the Magic Robot. You run your business.
               </p>
             </div>
           </RevealOnScroll>
