@@ -24,11 +24,18 @@ export const CEOProfile: React.FC = () => {
             <RevealOnScroll>
               <TiltCard>
                 <div className="glass p-10 rounded-2xl max-w-lg">
-                  <img 
-                    src={josephToney} 
-                    alt="Joseph Toney - CEO & Founder" 
-                    className="w-72 h-72 mx-auto mb-8 rounded-full object-cover object-center border-4 border-cyan/30 shadow-2xl"
-                  />
+                  <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-cyan/30 shadow-2xl relative">
+                    <div style={{ padding: '100% 0 0 0', position: 'relative' }}>
+                      <iframe
+                        src="https://player.vimeo.com/video/1169431542?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+                        frameBorder="0"
+                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        style={{ position: 'absolute', top: '50%', left: '50%', width: '180%', height: '180%', transform: 'translate(-50%, -50%)' }}
+                        title="Joseph Toney - CEO"
+                      />
+                    </div>
+                  </div>
                   
                   <h3 className="text-3xl font-bold text-center mb-3 text-foreground">
                     Joseph Toney
