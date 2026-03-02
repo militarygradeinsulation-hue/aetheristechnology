@@ -205,11 +205,16 @@ export const Services: React.FC = () => {
                 For designers who want to reimagine any room—swap furniture, change styles, colors, layouts. If you can imagine it, the AI can render it.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
-                <img 
-                  src={luminaInteriorImg} 
-                  alt="Lumina AI Interior Design Studio - transform any room with AI-powered furniture and style changes"
-                  className="w-full h-auto"
-                />
+                <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
+                  <iframe
+                    src="https://player.vimeo.com/video/1169432672?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    title="AI Interior Design Studio Demo"
+                  />
+                </div>
               </div>
             </div>
           </RevealOnScroll>
