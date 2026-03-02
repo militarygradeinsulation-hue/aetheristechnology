@@ -166,14 +166,16 @@ export const Services: React.FC = () => {
                 We design and implement intelligent CRM/ERP systems tailored to your operations—guiding you from strategy through deployment.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
-                <video 
-                  controls 
-                  className="w-full h-auto"
-                  preload="metadata"
-                >
-                  <source src={crmDemoVideo} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+                <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
+                  <iframe
+                    src="https://player.vimeo.com/video/1169435712?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    title="CRM/ERP System Demo"
+                  />
+                </div>
               </div>
             </div>
           </RevealOnScroll>
