@@ -256,7 +256,32 @@ export const Services: React.FC = () => {
           </RevealOnScroll>
         </div>
 
-        {/* Success Stories Section */}
+        {/* AI Image Recoloring */}
+        <div className="mt-12">
+          <RevealOnScroll delay={0.3}>
+            <div className="glass p-8 rounded-xl">
+              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+                AI Image Recoloring
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-3xl">
+                Instantly recolor any image with AI. Change product colors, room palettes, or branding assets in seconds—perfect for designers, marketers, and e-commerce teams.
+              </p>
+              <div className="rounded-lg overflow-hidden border border-border/50">
+                <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
+                  <iframe
+                    src="https://player.vimeo.com/video/1169433295?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    title="AI Image Recoloring Demo"
+                  />
+                </div>
+              </div>
+            </div>
+          </RevealOnScroll>
+        </div>
+
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
