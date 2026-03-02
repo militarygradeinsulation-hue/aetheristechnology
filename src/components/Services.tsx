@@ -211,6 +211,8 @@ export const Services: React.FC = () => {
                   className="w-full h-auto"
                 />
               </div>
+            </div>
+          </RevealOnScroll>
         </div>
 
         {/* ArchiScan - Architect Sketch to Render */}
@@ -218,7 +220,7 @@ export const Services: React.FC = () => {
           <RevealOnScroll delay={0.2}>
             <div className="glass p-8 rounded-xl">
               <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
-                AI Architectural Rendering
+                ArchiScan — AI Architectural Rendering
               </h3>
               <p className="text-muted-foreground mb-6 max-w-3xl">
                 For architects who want to bring their sketches and concepts to life. Upload a hand-drawn sketch or blueprint and watch AI transform it into a photorealistic render—instantly.
@@ -246,8 +248,6 @@ export const Services: React.FC = () => {
                 </div>
               </div>
             </div>
-          </RevealOnScroll>
-        </div>
           </RevealOnScroll>
         </div>
 
