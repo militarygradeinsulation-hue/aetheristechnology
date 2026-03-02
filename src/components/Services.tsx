@@ -3,6 +3,7 @@ import { Brain, Code, Database, Sparkles, Zap, Bot, ArrowUpRight, Target, Layers
 import { RevealOnScroll } from './RevealOnScroll';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
+import luminaInteriorImg from '@/assets/lumina-interior-design.jpg';
 import corporateImg from '@/assets/industry-corporate.jpg';
 import logisticsImg from '@/assets/industry-logistics.jpg';
 import restaurantImg from '@/assets/industry-restaurant.jpg';
@@ -152,17 +153,17 @@ export const Services: React.FC = () => {
           ))}
         </div>
 
-        {/* CRM/ERP Demo and Lead Generator Showcase */}
-        <div className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* CRM/ERP Demo, Lead Generator & Interior Design Showcase */}
+        <div className="mt-24 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <RevealOnScroll>
-            <div className="glass p-6 rounded-xl">
+            <div className="glass p-6 rounded-xl h-full flex flex-col">
               <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
                 CRM/ERP Consulting
               </h3>
               <p className="text-muted-foreground mb-6">
                 We design and implement intelligent CRM/ERP systems tailored to your operations—guiding you from strategy through deployment.
               </p>
-              <div className="rounded-lg overflow-hidden border border-border/50">
+              <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
                 <video 
                   controls 
                   className="w-full h-auto"
@@ -176,17 +177,35 @@ export const Services: React.FC = () => {
           </RevealOnScroll>
 
           <RevealOnScroll delay={0.2}>
-            <div className="glass p-6 rounded-xl">
+            <div className="glass p-6 rounded-xl h-full flex flex-col">
               <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
                 Lead Generation Strategy
               </h3>
               <p className="text-muted-foreground mb-6">
                 We build and optimize AI-powered lead generation systems that continuously discover and qualify high-value prospects for your business.
               </p>
-              <div className="rounded-lg overflow-hidden border border-border/50">
+              <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
                 <img 
                   src={leadGeneratorImg} 
                   alt="AI Lead Generator Dashboard showing lead qualification and contact details"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={0.4}>
+            <div className="glass p-6 rounded-xl h-full flex flex-col">
+              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+                AI Interior Design Studio
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                For designers who want to reimagine any room—swap furniture, change styles, colors, layouts. If you can imagine it, the AI can render it.
+              </p>
+              <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
+                <img 
+                  src={luminaInteriorImg} 
+                  alt="Lumina AI Interior Design Studio - transform any room with AI-powered furniture and style changes"
                   className="w-full h-auto"
                 />
               </div>
