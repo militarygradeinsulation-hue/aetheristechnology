@@ -83,6 +83,21 @@ export const CEOProfile: React.FC = () => {
                   </div>
                 </div>
 
+                <div className="glass p-6 rounded-xl mt-6">
+                  <h4 className="text-lg font-bold text-cyan mb-4">🎥 Watch: CEO Video</h4>
+                  <p className="text-muted-foreground mb-4 text-sm">
+                    See Joseph Toney share his vision and approach to AI-driven business growth.
+                  </p>
+                  <a
+                    href="https://www.linkedin.com/posts/activity-7423480113406627840-1-Nv?utm_source=share&utm_medium=member_android&rcm=ACoAAEjaIxIB8iG2kHS6lgwQqVPL9CugLoGxuho"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cyan/20 border border-cyan/40 text-cyan font-semibold hover:bg-cyan/30 transition-colors"
+                  >
+                    ▶ Watch on LinkedIn
+                  </a>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 pt-6">
                   {[
                     { label: 'Years Experience', value: '20+' },
