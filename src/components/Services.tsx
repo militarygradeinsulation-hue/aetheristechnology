@@ -4,6 +4,8 @@ import { RevealOnScroll } from './RevealOnScroll';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
 import luminaInteriorImg from '@/assets/lumina-interior-design.jpg';
+import archiscanRenderImg from '@/assets/archiscan-render.png';
+import archiscanSketchImg from '@/assets/archiscan-sketch.jpg';
 import corporateImg from '@/assets/industry-corporate.jpg';
 import logisticsImg from '@/assets/industry-logistics.jpg';
 import restaurantImg from '@/assets/industry-restaurant.jpg';
@@ -209,7 +211,43 @@ export const Services: React.FC = () => {
                   className="w-full h-auto"
                 />
               </div>
+        </div>
+
+        {/* ArchiScan - Architect Sketch to Render */}
+        <div className="mt-12">
+          <RevealOnScroll delay={0.2}>
+            <div className="glass p-8 rounded-xl">
+              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+                AI Architectural Rendering
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-3xl">
+                For architects who want to bring their sketches and concepts to life. Upload a hand-drawn sketch or blueprint and watch AI transform it into a photorealistic render—instantly.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative rounded-lg overflow-hidden border border-border/50">
+                  <div className="absolute top-3 left-3 z-10 px-3 py-1 text-xs font-semibold rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-muted-foreground">
+                    SKETCH
+                  </div>
+                  <img 
+                    src={archiscanSketchImg} 
+                    alt="Architectural hand-drawn sketch concept"
+                    className="w-full h-72 object-cover bg-white"
+                  />
+                </div>
+                <div className="relative rounded-lg overflow-hidden border border-border/50">
+                  <div className="absolute top-3 left-3 z-10 px-3 py-1 text-xs font-semibold rounded-full bg-background/80 backdrop-blur-sm border border-cyan/30 text-cyan">
+                    AI RENDER
+                  </div>
+                  <img 
+                    src={archiscanRenderImg} 
+                    alt="AI-generated photorealistic architectural render from sketch"
+                    className="w-full h-72 object-cover"
+                  />
+                </div>
+              </div>
             </div>
+          </RevealOnScroll>
+        </div>
           </RevealOnScroll>
         </div>
 
