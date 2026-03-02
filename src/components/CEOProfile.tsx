@@ -24,7 +24,7 @@ export const CEOProfile: React.FC = () => {
             <RevealOnScroll>
               <TiltCard>
                 <div className="glass p-10 rounded-2xl max-w-lg">
-                  <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-cyan/30 shadow-2xl relative">
+                  <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-cyan/30 shadow-2xl relative group">
                     <div style={{ padding: '100% 0 0 0', position: 'relative' }}>
                       <iframe
                         src="https://player.vimeo.com/video/1169431542?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
@@ -33,8 +33,26 @@ export const CEOProfile: React.FC = () => {
                         referrerPolicy="strict-origin-when-cross-origin"
                         style={{ position: 'absolute', top: '50%', left: '50%', width: '180%', height: '180%', transform: 'translate(-50%, -50%)' }}
                         title="Joseph Toney - CEO"
+                        id="ceo-vimeo-player"
                       />
                     </div>
+                    <button
+                      onClick={() => {
+                        const iframe = document.getElementById('ceo-vimeo-player') as HTMLIFrameElement;
+                        if (iframe) {
+                          const src = iframe.src;
+                          if (src.includes('muted=1')) {
+                            iframe.src = src.replace('muted=1', 'muted=0');
+                          } else {
+                            iframe.src = src.replace('muted=0', 'muted=1');
+                          }
+                        }
+                      }}
+                      className="absolute bottom-2 right-2 z-10 bg-background/80 backdrop-blur-sm border border-cyan/30 rounded-full w-8 h-8 flex items-center justify-center text-cyan hover:bg-cyan/20 transition-colors opacity-0 group-hover:opacity-100"
+                      aria-label="Toggle mute"
+                    >
+                      🔊
+                    </button>
                   </div>
                   
                   <h3 className="text-3xl font-bold text-center mb-3 text-foreground">
