@@ -56,16 +56,21 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Aetheris AI. All rights reserved.
+        <div className="border-t border-border pt-8">
+          <p className="text-xs text-muted-foreground text-center mb-4 font-semibold italic">
+            All intellectual property—including software, AI models, algorithms, and visual assets—is exclusively owned by CTOguy.ai. These systems are independently developed works and are expressly excluded from the scope of any Agreement made with any business, person, or employer.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-            <span>By using our services, you agree to our terms.</span>
-            <span>•</span>
-            <span>All AI solutions are customized per client agreement.</span>
-            <span>•</span>
-            <span>Data handled with enterprise-grade security.</span>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              © {currentYear} Aetheris AI. All rights reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+              <Link to="/terms" className="hover:text-cyan transition-colors underline">Terms of Service</Link>
+              <span>•</span>
+              <span>All AI solutions are customized per client agreement.</span>
+              <span>•</span>
+              <span>Data handled with enterprise-grade security.</span>
+            </div>
           </div>
         </div>
 
