@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
               <li><Link to="/about" className="hover:text-amber transition-colors">About Us</Link></li>
               <li><Link to="/service-areas" className="hover:text-amber transition-colors">Service Areas</Link></li>
               <li><Link to="/blog" className="hover:text-amber transition-colors">Blog</Link></li>
-              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-amber transition-colors">Portfolio</a></li>
+              
               <li><Link to="/contact" className="hover:text-amber transition-colors">Contact</Link></li>
               <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-amber transition-colors">Careers</a></li>
             </ul>
