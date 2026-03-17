@@ -18,8 +18,8 @@ export const WhyUs: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Why Choose <span className="text-cyan glow-text">Aetheris AI</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+              Why Choose <span className="text-amber glow-text">Aetheris AI</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               We don't just advise—we partner with you to build the future of your business.
@@ -30,7 +30,7 @@ export const WhyUs: React.FC = () => {
         <div className="glass p-8 md:p-12 rounded-2xl">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="flex-1 space-y-6">
-              <h3 className="text-3xl font-bold text-foreground mb-8">
+              <h3 className="text-3xl font-bold text-foreground mb-8 font-display">
                 The Difference is Clear
               </h3>
               
@@ -38,7 +38,7 @@ export const WhyUs: React.FC = () => {
                 {benefits.map((benefit, index) => (
                   <RevealOnScroll key={benefit} delay={index * 0.1}>
                     <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-6 h-6 text-cyan flex-shrink-0 mt-1" />
+                      <CheckCircle2 className="w-6 h-6 text-amber flex-shrink-0 mt-1" />
                       <span className="text-lg text-muted-foreground">{benefit}</span>
                     </div>
                   </RevealOnScroll>

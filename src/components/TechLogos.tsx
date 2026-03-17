@@ -41,7 +41,7 @@ export const TechLogos: React.FC = () => {
     <div className="w-full py-8 border-y border-border glass overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 mb-6">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse-glow" />
+          <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse-glow" />
           Technologies We Master
         </h3>
       </div>
@@ -54,7 +54,7 @@ export const TechLogos: React.FC = () => {
         {[...technologies, ...technologies].map((tech, index) => (
           <div
             key={index}
-            className="flex-shrink-0 glass px-8 py-4 rounded-lg border border-cyan/20"
+            className="flex-shrink-0 glass px-8 py-4 rounded-lg border border-amber/20"
           >
             <span className="text-lg font-semibold text-muted-foreground whitespace-nowrap">
               {tech}

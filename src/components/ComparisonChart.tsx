@@ -3,7 +3,7 @@ import React from 'react';
 export const ComparisonChart: React.FC = () => {
   const data = [
     { label: 'Traditional', value: 35, color: 'bg-muted' },
-    { label: 'With Aetheris AI', value: 95, color: 'bg-gradient-to-r from-cyan to-primary' },
+    { label: 'With Aetheris AI', value: 95, color: 'bg-gradient-to-r from-amber to-primary' },
   ];
 
   return (

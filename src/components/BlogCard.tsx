@@ -50,7 +50,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       className="block glass rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group h-full"
     >
       {/* Featured Image */}
-      <div className="h-48 bg-gradient-to-br from-primary/20 to-cyan/20 overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-primary/20 to-amber/20 overflow-hidden">
         {imageUrl ? (
           <img 
             src={imageUrl} 
@@ -71,7 +71,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
             {post.tags.slice(0, 2).map((tag) => (
               <span 
                 key={tag}
-                className="inline-flex items-center gap-1 text-xs bg-cyan/10 text-cyan px-2 py-1 rounded-full"
+                className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full"
               >
                 <Tag className="w-3 h-3" />
                 {tag}
@@ -81,7 +81,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         )}
 
         {/* Title */}
-        <h3 className="text-xl font-bold mb-3 group-hover:text-cyan transition-colors line-clamp-2">
+        <h3 className="text-xl font-bold mb-3 group-hover:text-amber transition-colors line-clamp-2 font-display">
           {post.title}
         </h3>
 
@@ -111,7 +111,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         </div>
 
         {/* Read More */}
-        <div className="flex items-center gap-2 text-cyan text-sm font-medium group-hover:gap-3 transition-all">
+        <div className="flex items-center gap-2 text-amber text-sm font-medium group-hover:gap-3 transition-all">
           Read More <ArrowRight className="w-4 h-4" />
         </div>
       </div>

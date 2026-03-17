@@ -21,25 +21,25 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           className="space-y-8"
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6">
-            <Sparkles className="w-4 h-4 text-cyan animate-pulse-glow" />
+            <Sparkles className="w-4 h-4 text-amber animate-pulse-glow" />
             <span className="text-sm text-muted-foreground">AI Consulting & Strategy</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight font-display">
             <span className="text-foreground">Expert AI Consulting</span>
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-primary to-cyan glow-text">
+            <span className="text-gradient-amber">
               For Your Business
             </span>
           </h1>
 
-          <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-cyan/30">
-            <span className="text-base md:text-lg font-semibold text-cyan">
+          <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
+            <span className="text-base md:text-lg font-semibold text-amber">
               Strategic guidance. Hands-on expertise. Real results.
             </span>
           </div>
 
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-body">
             You know you need AI for your business, but you don't know where to start. Let's figure it out together.
           </p>
 
@@ -76,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 transition={{ duration: 0.8, delay: 0.2 + index * 0.1 }}
                 className="glass p-6 rounded-lg"
               >
-                <div className="text-3xl md:text-4xl font-bold text-cyan glow-text">
+                <div className="text-3xl md:text-4xl font-bold text-amber glow-text font-display">
                   {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground mt-2">{stat.label}</div>

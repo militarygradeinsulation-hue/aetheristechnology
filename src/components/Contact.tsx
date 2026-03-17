@@ -12,10 +12,10 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="glass p-12 md:p-16 rounded-2xl text-center relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber/10 rounded-full blur-3xl" />
             
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground font-display">
                 Ready to Talk Strategy?
               </h2>
               
@@ -27,27 +27,27 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                 <a href="tel:+13173762110" className="flex flex-col items-center gap-3 group">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-                    <Phone className="w-6 h-6 text-cyan" />
+                    <Phone className="w-6 h-6 text-amber" />
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Phone</div>
-                    <div className="text-foreground font-medium group-hover:text-cyan transition-colors">1 (317) 376-2110</div>
+                    <div className="text-foreground font-medium group-hover:text-amber transition-colors">1 (317) 376-2110</div>
                   </div>
                 </a>
 
                 <a href="mailto:aetheris.technology@outlook.com" className="flex flex-col items-center gap-3 group">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-                    <Mail className="w-6 h-6 text-cyan" />
+                    <Mail className="w-6 h-6 text-amber" />
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Email</div>
-                    <div className="text-foreground font-medium group-hover:text-cyan transition-colors">aetheris.technology@outlook.com</div>
+                    <div className="text-foreground font-medium group-hover:text-amber transition-colors">aetheris.technology@outlook.com</div>
                   </div>
                 </a>
 
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-cyan" />
+                    <MapPin className="w-6 h-6 text-amber" />
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Location</div>

@@ -104,8 +104,8 @@ export const Services: React.FC = () => {
         {/* CTOguy.ai Marketing Section */}
         <RevealOnScroll>
           <div className="glass p-8 rounded-xl mb-16 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              Marketing Consulting by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan glow-text hover:underline">CTOguy.ai</a>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground font-display">
+              Marketing Consulting by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-amber glow-text hover:underline">CTOguy.ai</a>
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Our marketing consulting practice delivers data-driven strategies and AI-powered campaigns that transform how businesses connect with their customers.
@@ -115,8 +115,8 @@ export const Services: React.FC = () => {
 
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Consulting <span className="text-cyan glow-text">Services</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+              Consulting <span className="text-amber glow-text">Services</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Expert AI consulting to guide your business transformation from strategy to execution
@@ -130,11 +130,11 @@ export const Services: React.FC = () => {
               <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer">
                 <div className="mb-6">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <service.icon className="w-7 h-7 text-cyan" />
+                    <service.icon className="w-7 h-7 text-amber" />
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-cyan transition-colors">
+                <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-amber transition-colors font-display">
                   {service.title}
                 </h3>
                 
@@ -145,7 +145,7 @@ export const Services: React.FC = () => {
                 <div className="space-y-2">
                   {service.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse-glow" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse-glow" />
                       <span className="text-muted-foreground">{feature}</span>
                     </div>
                   ))}
@@ -159,7 +159,7 @@ export const Services: React.FC = () => {
         <div className="mt-24 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <RevealOnScroll>
             <div className="glass p-6 rounded-xl h-full flex flex-col">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+              <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
                 CRM/ERP Consulting
               </h3>
               <p className="text-muted-foreground mb-6">
@@ -182,7 +182,7 @@ export const Services: React.FC = () => {
 
           <RevealOnScroll delay={0.2}>
             <div className="glass p-6 rounded-xl h-full flex flex-col">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+              <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
                 Lead Generation Strategy
               </h3>
               <p className="text-muted-foreground mb-6">
@@ -200,7 +200,7 @@ export const Services: React.FC = () => {
 
           <RevealOnScroll delay={0.4}>
             <div className="glass p-6 rounded-xl h-full flex flex-col">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+              <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
                 AI Interior Design Studio
               </h3>
               <p className="text-muted-foreground mb-6">
@@ -226,7 +226,7 @@ export const Services: React.FC = () => {
         <div className="mt-12">
           <RevealOnScroll delay={0.2}>
             <div className="glass p-8 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+              <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
                 ArchiScan — AI Architectural Rendering
               </h3>
               <p className="text-muted-foreground mb-6 max-w-3xl">
@@ -252,7 +252,7 @@ export const Services: React.FC = () => {
         <div className="mt-12">
           <RevealOnScroll delay={0.3}>
             <div className="glass p-8 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4 text-cyan glow-text">
+              <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
                 AI Image Recoloring
               </h3>
               <p className="text-muted-foreground mb-6 max-w-3xl">
@@ -277,8 +277,8 @@ export const Services: React.FC = () => {
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                Client <span className="text-cyan glow-text">Success Stories</span>
+              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground font-display">
+                Client <span className="text-amber glow-text">Success Stories</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Real-world results from our consulting engagements
@@ -289,17 +289,17 @@ export const Services: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <RevealOnScroll delay={0.1}>
               <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 rounded-full blur-3xl group-hover:bg-amber/20 transition-colors" />
                 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Zap className="w-6 h-6 text-cyan" />
+                    <div className="p-3 rounded-lg bg-primary/20 border border-amber/20">
+                      <Zap className="w-6 h-6 text-amber" />
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-amber transition-colors" />
                   </div>
 
-                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-amber transition-colors font-display">
                     Marketing Automation Hub
                   </h4>
                   
@@ -308,13 +308,13 @@ export const Services: React.FC = () => {
               </p>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Marketing Automation
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       AI Strategy
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Analytics
                     </span>
                   </div>
@@ -324,17 +324,17 @@ export const Services: React.FC = () => {
 
             <RevealOnScroll delay={0.2}>
               <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 rounded-full blur-3xl group-hover:bg-amber/20 transition-colors" />
                 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Target className="w-6 h-6 text-cyan" />
+                    <div className="p-3 rounded-lg bg-primary/20 border border-amber/20">
+                      <Target className="w-6 h-6 text-amber" />
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-amber transition-colors" />
                   </div>
 
-                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-amber transition-colors font-display">
                     Custom CRM Development
                   </h4>
                   
@@ -343,13 +343,13 @@ export const Services: React.FC = () => {
               </p>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       CRM
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Sales Automation
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Business Intelligence
                     </span>
                   </div>
@@ -359,17 +359,17 @@ export const Services: React.FC = () => {
 
             <RevealOnScroll delay={0.3}>
               <div className="glass glass-hover p-8 rounded-xl group cursor-pointer relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl group-hover:bg-cyan/20 transition-colors" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 rounded-full blur-3xl group-hover:bg-amber/20 transition-colors" />
                 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 rounded-lg bg-primary/20 border border-cyan/20">
-                      <Layers className="w-6 h-6 text-cyan" />
+                    <div className="p-3 rounded-lg bg-primary/20 border border-amber/20">
+                      <Layers className="w-6 h-6 text-amber" />
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan transition-colors" />
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-amber transition-colors" />
                   </div>
 
-                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                  <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-amber transition-colors font-display">
                     AI Vision Studio
                   </h4>
                   
@@ -378,13 +378,13 @@ export const Services: React.FC = () => {
               </p>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Computer Vision
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       AI Analysis
                     </span>
-                    <span className="px-3 py-1 text-xs rounded-full glass border border-cyan/20 text-muted-foreground">
+                    <span className="px-3 py-1 text-xs rounded-full glass border border-amber/20 text-muted-foreground">
                       Data Intelligence
                     </span>
                   </div>
@@ -398,8 +398,8 @@ export const Services: React.FC = () => {
         <div className="mt-16">
           <RevealOnScroll>
             <div className="glass glass-hover p-8 rounded-xl text-center group">
-              <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Explore Our <span className="text-cyan glow-text">Portfolio</span>
+              <h3 className="text-2xl font-bold mb-4 text-foreground font-display">
+                Explore Our <span className="text-amber glow-text">Portfolio</span>
               </h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 See our AI tools and solutions in action. Visit our portfolio to explore the Aetheris Toolbox.
@@ -408,7 +408,7 @@ export const Services: React.FC = () => {
                 href="https://aetheristoolbox.org" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-cyan/20 border border-cyan/30 rounded-lg text-cyan font-semibold hover:bg-cyan/30 transition-colors group-hover:scale-105 transition-transform"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-amber/20 border border-amber/30 rounded-lg text-amber font-semibold hover:bg-amber/30 transition-colors group-hover:scale-105 transition-transform"
               >
                 View Aetheris Toolbox
                 <ArrowUpRight className="w-5 h-5" />
@@ -421,8 +421,8 @@ export const Services: React.FC = () => {
         <div className="mt-24">
           <RevealOnScroll>
             <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                Industries We <span className="text-cyan glow-text">Transform</span>
+              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground font-display">
+                Industries We <span className="text-amber glow-text">Transform</span>
               </h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Expert AI consulting tailored to your industry's unique challenges
@@ -442,14 +442,14 @@ export const Services: React.FC = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
                     <div className="absolute bottom-4 left-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-sm border border-cyan/30 flex items-center justify-center">
-                        <industry.icon className="w-6 h-6 text-cyan" />
+                      <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-sm border border-amber/30 flex items-center justify-center">
+                        <industry.icon className="w-6 h-6 text-amber" />
                       </div>
                     </div>
                   </div>
 
                   <div className="p-6 flex-1 flex flex-col">
-                    <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-cyan transition-colors">
+                    <h4 className="text-2xl font-bold mb-3 text-foreground group-hover:text-amber transition-colors font-display">
                       {industry.title}
                     </h4>
                     
@@ -458,10 +458,10 @@ export const Services: React.FC = () => {
                     </p>
 
                     <div className="space-y-2">
-                      <div className="text-sm font-semibold text-cyan mb-2">Key Solutions:</div>
+                      <div className="text-sm font-semibold text-amber mb-2">Key Solutions:</div>
                       {industry.solutions.map((solution) => (
                         <div key={solution} className="flex items-center gap-2 text-sm">
-                          <div className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse-glow" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse-glow" />
                           <span className="text-muted-foreground">{solution}</span>
                         </div>
                       ))}
@@ -477,7 +477,7 @@ export const Services: React.FC = () => {
               <p className="text-lg text-muted-foreground mb-4">
                 Don't see your industry? We provide expert AI consulting for any business sector.
               </p>
-              <p className="text-cyan font-semibold">
+              <p className="text-amber font-semibold">
                 Every industry has unique challenges—we help you navigate them with the right AI strategy.
               </p>
             </div>

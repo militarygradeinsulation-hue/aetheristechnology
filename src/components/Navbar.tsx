@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               alt="Aetheris AI Logo" 
               className="w-12 h-12 object-contain"
             />
-            <span className="text-xl font-bold text-foreground">Aetheris AI</span>
+            <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   rel="noopener noreferrer"
                   className={`transition-colors ${
                     item.special 
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      ? 'text-amber hover:text-amber/80 font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   to={item.href}
                   className={`transition-colors ${
                     item.special 
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      ? 'text-amber hover:text-amber/80 font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   rel="noopener noreferrer"
                   className={`block transition-colors ${
                     item.special
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      ? 'text-amber hover:text-amber/80 font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -121,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   to={item.href}
                   className={`block transition-colors ${
                     item.special
-                      ? 'text-cyan hover:text-cyan/80 font-semibold'
+                      ? 'text-amber hover:text-amber/80 font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}

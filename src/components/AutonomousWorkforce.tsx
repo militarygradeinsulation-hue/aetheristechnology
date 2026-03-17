@@ -8,8 +8,8 @@ export const AutonomousWorkforce: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Engineering Your <span className="text-cyan glow-text">Autonomous Workforce</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+              Engineering Your <span className="text-amber glow-text">Autonomous Workforce</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               We consult on and architect AI systems that automate key business functions, allowing 
