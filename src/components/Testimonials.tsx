@@ -50,9 +50,9 @@ export const Testimonials: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-display">
               What Our{' '}
-              <span className="bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
+              <span className="text-gradient-amber">
                 Clients Say
               </span>
             </h2>
@@ -84,7 +84,7 @@ export const Testimonials: React.FC = () => {
 
                   {/* Quote */}
                   <div className="relative flex-1 mb-6">
-                    <Quote className="absolute -top-2 -left-2 w-8 h-8 text-cyan/20" />
+                    <Quote className="absolute -top-2 -left-2 w-8 h-8 text-amber/20" />
                     <p className="text-muted-foreground italic pl-6">
                       "{testimonial.quote}"
                     </p>
@@ -92,7 +92,7 @@ export const Testimonials: React.FC = () => {
 
                   {/* Author */}
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan to-primary flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber to-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
                       {testimonial.client_name.charAt(0)}
                     </div>
                     <div className="flex-1">
@@ -103,7 +103,7 @@ export const Testimonials: React.FC = () => {
                         {testimonial.role}, {testimonial.company}
                       </div>
                       {testimonial.location && (
-                        <div className="flex items-center gap-1 text-xs text-cyan mt-1">
+                        <div className="flex items-center gap-1 text-xs text-amber mt-1">
                           <MapPin className="w-3 h-3" />
                           {testimonial.location}
                         </div>
@@ -137,7 +137,7 @@ export const Testimonials: React.FC = () => {
               { value: '100%', label: 'Indiana Owned' },
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-cyan mb-1">
+                <div className="text-3xl md:text-4xl font-bold text-amber mb-1 font-display">
                   {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>

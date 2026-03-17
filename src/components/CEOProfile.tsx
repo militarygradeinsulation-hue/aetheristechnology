@@ -9,8 +9,8 @@ export const CEOProfile: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Meet the <span className="text-cyan glow-text">Leadership</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+              Meet the <span className="text-amber glow-text">Leadership</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Visionary leaders driving AI innovation
@@ -24,7 +24,7 @@ export const CEOProfile: React.FC = () => {
             <RevealOnScroll>
               <TiltCard>
                 <div className="glass p-10 rounded-2xl max-w-lg">
-                  <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-cyan/30 shadow-2xl relative group">
+                  <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-amber/30 shadow-2xl relative group">
                     <div style={{ padding: '100% 0 0 0', position: 'relative' }}>
                       <iframe
                         src="https://player.vimeo.com/video/1169431542?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
@@ -48,17 +48,17 @@ export const CEOProfile: React.FC = () => {
                           }
                         }
                       }}
-                      className="absolute bottom-2 right-2 z-10 bg-background/80 backdrop-blur-sm border border-cyan/30 rounded-full w-8 h-8 flex items-center justify-center text-cyan hover:bg-cyan/20 transition-colors opacity-0 group-hover:opacity-100"
+                      className="absolute bottom-2 right-2 z-10 bg-background/80 backdrop-blur-sm border border-amber/30 rounded-full w-8 h-8 flex items-center justify-center text-amber hover:bg-amber/20 transition-colors opacity-0 group-hover:opacity-100"
                       aria-label="Toggle mute"
                     >
                       🔊
                     </button>
                   </div>
                   
-                  <h3 className="text-3xl font-bold text-center mb-3 text-foreground">
+                  <h3 className="text-3xl font-bold text-center mb-3 text-foreground font-display">
                     Joseph Toney
                   </h3>
-                  <p className="text-cyan text-center text-lg mb-6">CEO & Founder</p>
+                  <p className="text-amber text-center text-lg mb-6">CEO & Founder</p>
                 </div>
               </TiltCard>
             </RevealOnScroll>
@@ -66,7 +66,7 @@ export const CEOProfile: React.FC = () => {
 
           <div className="flex-1 space-y-6">
             <RevealOnScroll delay={0.2}>
-              <h3 className="text-3xl font-bold text-foreground mb-6">
+              <h3 className="text-3xl font-bold text-foreground mb-6 font-display">
                 Strategic Business Architect & AI Growth Expert
               </h3>
               
@@ -93,7 +93,7 @@ export const CEOProfile: React.FC = () => {
                 </div>
 
                 <div className="glass p-6 rounded-xl mt-6">
-                  <h4 className="text-lg font-bold text-cyan mb-4">Hear It In My Own Words</h4>
+                  <h4 className="text-lg font-bold text-amber mb-4">Hear It In My Own Words</h4>
                   <iframe 
                     width="100%" 
                     height="300" 
@@ -109,7 +109,7 @@ export const CEOProfile: React.FC = () => {
                 </div>
 
                 <div className="glass p-6 rounded-xl mt-6">
-                  <h4 className="text-lg font-bold text-cyan mb-4">🎥 Watch: CEO Video</h4>
+                  <h4 className="text-lg font-bold text-amber mb-4">🎥 Watch: CEO Video</h4>
                   <p className="text-muted-foreground mb-4 text-sm">
                     See Joseph Toney share his vision and approach to AI-driven business growth.
                   </p>
@@ -117,7 +117,7 @@ export const CEOProfile: React.FC = () => {
                     href="https://www.linkedin.com/posts/activity-7423480113406627840-1-Nv?utm_source=share&utm_medium=member_android&rcm=ACoAAEjaIxIB8iG2kHS6lgwQqVPL9CugLoGxuho"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cyan/20 border border-cyan/40 text-cyan font-semibold hover:bg-cyan/30 transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber/20 border border-amber/40 text-amber font-semibold hover:bg-amber/30 transition-colors"
                   >
                     ▶ Watch on LinkedIn
                   </a>
@@ -131,7 +131,7 @@ export const CEOProfile: React.FC = () => {
                     { label: 'Revenue Managed', value: '$25M' },
                   ].map((stat) => (
                     <div key={stat.label} className="glass p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-cyan">{stat.value}</div>
+                      <div className="text-2xl font-bold text-amber font-display">{stat.value}</div>
                       <div className="text-sm text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
@@ -139,11 +139,11 @@ export const CEOProfile: React.FC = () => {
 
                 <div className="pt-4 space-y-2 text-sm">
                   <p>
-                    <span className="text-cyan font-semibold">Education:</span> Master's in Marketing (4.0 GPA) • 
+                    <span className="text-amber font-semibold">Education:</span> Master's in Marketing (4.0 GPA) • 
                     Doctorate in Strategic Media starting 2026
                   </p>
                   <p>
-                    <span className="text-cyan font-semibold">Certifications:</span> IBM AI Engineering • 
+                    <span className="text-amber font-semibold">Certifications:</span> IBM AI Engineering • 
                     Harvard AI for Business • Google Analytics & Ads Expert
                   </p>
                 </div>

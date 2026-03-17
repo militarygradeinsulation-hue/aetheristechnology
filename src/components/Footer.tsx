@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
                 alt="Aetheris AI Logo" 
                 className="w-12 h-12 object-contain"
               />
-              <span className="text-xl font-bold text-foreground">Aetheris AI</span>
+              <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Transforming businesses through cutting-edge AI solutions.
@@ -27,22 +27,22 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-foreground mb-4">Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Machine Learning</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">AI Automation</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Data Intelligence</Link></li>
-              <li><Link to="/services" className="hover:text-cyan transition-colors">Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Machine Learning</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">AI Automation</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Data Intelligence</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Consulting</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/about" className="hover:text-cyan transition-colors">About Us</Link></li>
-              <li><Link to="/service-areas" className="hover:text-cyan transition-colors">Service Areas</Link></li>
-              <li><Link to="/blog" className="hover:text-cyan transition-colors">Blog</Link></li>
-              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition-colors">Portfolio</a></li>
-              <li><Link to="/contact" className="hover:text-cyan transition-colors">Contact</Link></li>
-              <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-cyan transition-colors">Careers</a></li>
+              <li><Link to="/about" className="hover:text-amber transition-colors">About Us</Link></li>
+              <li><Link to="/service-areas" className="hover:text-amber transition-colors">Service Areas</Link></li>
+              <li><Link to="/blog" className="hover:text-amber transition-colors">Blog</Link></li>
+              <li><a href="https://aetheristoolbox.org" target="_blank" rel="noopener noreferrer" className="hover:text-amber transition-colors">Portfolio</a></li>
+              <li><Link to="/contact" className="hover:text-amber transition-colors">Contact</Link></li>
+              <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-amber transition-colors">Careers</a></li>
             </ul>
             <p className="text-xs text-muted-foreground mt-3 italic">
               We're a new startup seeking visionaries who understand the transformative power of AI.
@@ -65,7 +65,7 @@ export const Footer: React.FC = () => {
               © {currentYear} Aetheris AI. All rights reserved.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-              <Link to="/terms" className="hover:text-cyan transition-colors underline">Terms of Service</Link>
+              <Link to="/terms" className="hover:text-amber transition-colors underline">Terms of Service</Link>
               <span>•</span>
               <span>All AI solutions are customized per client agreement.</span>
               <span>•</span>
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
 
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground">
-            Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-cyan hover:underline">CTOguy.ai</a>
+            Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">CTOguy.ai</a>
           </p>
         </div>
       </div>

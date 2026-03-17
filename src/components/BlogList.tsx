@@ -27,13 +27,13 @@ export const BlogList: React.FC = () => {
         {/* Hero Section */}
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-cyan text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-amber text-sm font-medium mb-6">
               <BookOpen className="w-4 h-4" />
               AI Insights for Indiana Businesses
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">
               The Aetheris{' '}
-              <span className="bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
+              <span className="text-gradient-amber">
                 AI Blog
               </span>
             </h1>
@@ -81,7 +81,7 @@ export const BlogList: React.FC = () => {
         {/* Newsletter CTA */}
         <RevealOnScroll>
           <div className="mt-20 glass rounded-2xl p-8 md:p-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
               Stay Updated on AI Trends
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -90,7 +90,7 @@ export const BlogList: React.FC = () => {
             </p>
             <a 
               href="mailto:aetheris.technology@outlook.com?subject=Newsletter Subscription" 
-              className="inline-flex items-center justify-center gap-2 text-cyan hover:text-cyan/80 transition-colors"
+              className="inline-flex items-center justify-center gap-2 text-amber hover:text-amber/80 transition-colors"
             >
               <span>Contact us to subscribe</span>
               <ArrowRight className="w-4 h-4" />

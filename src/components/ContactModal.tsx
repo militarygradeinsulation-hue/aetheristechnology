@@ -21,7 +21,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-foreground">Book a Consultation</h2>
+        <h2 className="text-3xl font-bold mb-2 text-foreground font-display">Book a Consultation</h2>
         <p className="text-muted-foreground mb-8">
           Reach out to schedule a consultation and discuss your AI strategy.
         </p>
@@ -32,7 +32,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02]"
           >
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <Phone className="w-6 h-6 text-cyan" />
+              <Phone className="w-6 h-6 text-amber" />
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Call Us</div>
@@ -45,7 +45,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02]"
           >
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-cyan" />
+              <Mail className="w-6 h-6 text-amber" />
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Email Us</div>
@@ -55,7 +55,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
 
           <div className="flex items-center gap-4 p-4 glass rounded-xl">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-cyan" />
+              <MapPin className="w-6 h-6 text-amber" />
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Location</div>

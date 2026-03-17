@@ -83,13 +83,13 @@ export const ServiceAreas: React.FC = () => {
         {/* Hero Section */}
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-cyan text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-amber text-sm font-medium mb-6">
               <MapPin className="w-4 h-4" />
               Based in Indianapolis, Serving All of Indiana
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">
               AI Solutions for{' '}
-              <span className="bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
+              <span className="text-gradient-amber">
                 Indiana Businesses
               </span>
             </h1>
@@ -110,8 +110,8 @@ export const ServiceAreas: React.FC = () => {
               { icon: MapPin, value: '100%', label: 'Remote Capable' },
             ].map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6 text-center">
-                <stat.icon className="w-8 h-8 text-cyan mx-auto mb-3" />
-                <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
+                <stat.icon className="w-8 h-8 text-amber mx-auto mb-3" />
+                <div className="text-3xl font-bold text-foreground mb-1 font-display">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
@@ -123,21 +123,21 @@ export const ServiceAreas: React.FC = () => {
           {indianaCities.map((city, index) => (
             <RevealOnScroll key={city.name} delay={index * 0.05}>
               <div className={`glass rounded-xl p-6 h-full transition-all duration-300 hover:scale-[1.02] ${
-                city.isHeadquarters ? 'ring-2 ring-cyan' : ''
+                city.isHeadquarters ? 'ring-2 ring-amber' : ''
               }`}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2 font-display">
                       {city.name}
                       {city.isHeadquarters && (
-                        <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded-full">
+                        <span className="text-xs bg-amber/20 text-amber px-2 py-1 rounded-full">
                           HQ
                         </span>
                       )}
                     </h3>
                     <p className="text-sm text-muted-foreground">{city.region}</p>
                   </div>
-                  <MapPin className="w-5 h-5 text-cyan flex-shrink-0" />
+                  <MapPin className="w-5 h-5 text-amber flex-shrink-0" />
                 </div>
                 
                 <p className="text-muted-foreground text-sm mb-4">
@@ -162,7 +162,7 @@ export const ServiceAreas: React.FC = () => {
         {/* Beyond Indiana Section */}
         <RevealOnScroll>
           <div className="glass rounded-2xl p-8 md:p-12 text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
               Don't See Your City?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -188,7 +188,7 @@ export const ServiceAreas: React.FC = () => {
         {/* Why Local Matters */}
         <RevealOnScroll>
           <div className="text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 font-display">
               Why Choose a Local AI Partner?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -207,7 +207,7 @@ export const ServiceAreas: React.FC = () => {
                 },
               ].map((benefit, index) => (
                 <div key={index} className="text-left">
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">{benefit.title}</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground font-display">{benefit.title}</h3>
                   <p className="text-muted-foreground">{benefit.description}</p>
                 </div>
               ))}

@@ -24,8 +24,8 @@ const Home = () => {
           <div className="max-w-4xl mx-auto">
             <RevealOnScroll>
               <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-                  A Message from Our <span className="text-cyan glow-text">CEO</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 font-display">
+                  A Message from Our <span className="text-amber glow-text">CEO</span>
                 </h2>
                 <p className="text-muted-foreground">Hear directly from Joseph Toney on our mission</p>
               </div>
