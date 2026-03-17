@@ -22,25 +22,26 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-amber animate-pulse-glow" />
-            <span className="text-sm text-muted-foreground">AI Consulting & Strategy</span>
+            <span className="text-sm text-muted-foreground">AI Education & Digital Intelligence</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight font-display">
-            <span className="text-foreground">Expert AI Consulting</span>
+            <span className="text-foreground">Most Businesses Are</span>
             <br />
+            <span className="text-foreground">Using AI </span>
             <span className="text-gradient-amber">
-              For Your Business
+              Wrong.
             </span>
           </h1>
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
             <span className="text-base md:text-lg font-semibold text-amber">
-              Strategic guidance. Hands-on expertise. Real results.
+              We expose it. We fix it. We prove it with numbers.
             </span>
           </div>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-body">
-            You know you need AI for your business, but you don't know where to start. Let's figure it out together.
+            We expose the operational friction, disconnected systems, and wasted spend quietly draining your business — then build the systems that remove it.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
@@ -64,10 +65,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
             {[
-              { label: 'Engagements', value: '200+' },
-              { label: 'Clients Advised', value: '100+' },
-              { label: 'Revenue Impacted', value: '$25M' },
-              { label: 'Client Satisfaction', value: '99%' },
+              { label: 'Wasted on Bad AI Strategy Avg.', value: '$92K' },
+              { label: 'Leads Die in CRMs', value: '67%' },
+              { label: 'Can\'t Prove Marketing ROI', value: '54%' },
+              { label: 'Client Systems Fixed', value: '200+' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}

@@ -51,8 +51,17 @@ export const Footer: React.FC = () => {
 
           <div>
             <h4 className="font-bold text-foreground mb-4">Contact</h4>
-            <p className="text-sm text-muted-foreground">aetheris.technology@outlook.com</p>
+            <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-muted-foreground hover:text-amber transition-colors block">aetheris.technology@outlook.com</a>
+            <a href="tel:+13173762110" className="text-sm text-muted-foreground hover:text-amber transition-colors block mt-2">(317) 376-2110</a>
             <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
+            <a 
+              href="https://www.linkedin.com/company/aetheris-ai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-amber hover:text-amber/80 transition-colors block mt-2"
+            >
+              LinkedIn →
+            </a>
           </div>
         </div>
 
