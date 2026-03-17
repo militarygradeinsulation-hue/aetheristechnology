@@ -140,10 +140,9 @@ const BlogPostPage = () => {
                       {post.tags.map((tag: string) => (
                         <span 
                           key={tag}
-                          className="inline-flex items-center gap-1 text-xs bg-muted px-3 py-1 rounded-full"
+                          className="inline-flex items-center text-sm font-medium text-amber"
                         >
-                          <Tag className="w-3 h-3" />
-                          {tag}
+                          #{tag.replace(/\s+/g, '')}
                         </span>
                       ))}
                     </div>
