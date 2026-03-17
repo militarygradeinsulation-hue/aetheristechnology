@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Solutions', href: '/solutions' },
     { label: 'Service Areas', href: '/service-areas' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Portfolio', href: 'https://aetheristoolbox.org', external: true, special: true },
+    
     { label: 'About', href: '/about' },
     { label: 'AI Assistant', href: '/assistant', special: true },
   ];
@@ -52,33 +52,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`transition-colors ${
+                  item.special 
+                    ? 'text-amber hover:text-amber/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact">
               <Button className="bg-primary hover:bg-primary/90">
@@ -100,35 +84,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`block transition-colors ${
+                  item.special
+                    ? 'text-amber hover:text-amber/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90">
