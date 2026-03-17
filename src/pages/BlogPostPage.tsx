@@ -32,7 +32,7 @@ const BlogPostPage = () => {
     },
   });
 
-  const featuredImage = slug ? blogImages[slug] : null;
+  const featuredImage = slug ? getImageForSlug(slug) : null;
 
   // Simple markdown to HTML conversion
   const renderContent = (content: string) => {
