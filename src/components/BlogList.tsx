@@ -82,19 +82,30 @@ export const BlogList: React.FC = () => {
         <RevealOnScroll>
           <div className="mt-20 glass rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
-              Stay Updated on AI Trends
+              Stop Wasting Money on Broken Systems
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Get the latest AI insights delivered to your inbox. We share practical tips, 
-              industry news, and success stories from Indiana businesses.
+              Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM 
+              systems — and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
             </p>
-            <a 
-              href="mailto:aetheris.technology@outlook.com?subject=Newsletter Subscription" 
-              className="inline-flex items-center justify-center gap-2 text-amber hover:text-amber/80 transition-colors"
-            >
-              <span>Contact us to subscribe</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a 
+                href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Operational%20Systems%20Diagnostic" 
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium"
+              >
+                <span>Book Your Diagnostic</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://www.linkedin.com/company/aetheris-ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 text-amber hover:text-amber/80 transition-colors"
+              >
+                <span>Connect on LinkedIn</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </RevealOnScroll>
       </div>

@@ -23,14 +23,14 @@ import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
 
 // Map slugs to images
 const blogImages: Record<string, string> = {
-  'indianapolis-businesses-ai-competition': indianapolisAiImage,
-  'ai-automation-indiana-manufacturing-guide': manufacturingAiImage,
-  'ai-transforming-indiana-healthcare': healthcareAiImage,
-  'ai-indiana-logistics-supply-chain-hub': logisticsImage,
-  'ai-powered-retail-indiana-stores-machine-learning': retailImage,
-  'ai-transforming-indiana-construction-industry': constructionImage,
-  'ai-indiana-small-business-affordable-solutions': smallBusinessImage,
-  'optimizing-indiana-distribution-centers-ai-advantage': distributionImage,
+  'your-marketing-team-posting-into-void': logisticsImage,
+  'you-hired-65k-chatgpt-operator': smallBusinessImage,
+  'not-all-ai-same-stop-treating-like-hammer': manufacturingAiImage,
+  'your-crm-graveyard-dead-leads': distributionImage,
+  'the-200k-marketing-budget-zero-trackable-revenue': retailImage,
+  'healthcare-bleeding-money-bad-digital-strategy': healthcareAiImage,
+  'construction-companies-think-website-is-marketing': constructionImage,
+  'restaurants-spending-3k-social-media-no-reservations': indianapolisAiImage,
 };
 
 const BlogPostPage = () => {

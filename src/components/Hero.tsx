@@ -22,7 +22,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-amber animate-pulse-glow" />
-            <span className="text-sm text-muted-foreground">AI Consulting & Strategy</span>
+            <span className="text-sm text-muted-foreground">AI Education & Digital Intelligence</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight font-display">
