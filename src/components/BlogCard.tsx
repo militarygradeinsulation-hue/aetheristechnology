@@ -14,6 +14,7 @@ import smallBusinessImage from '@/assets/blog/small-business-ai.jpg';
 import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
 
 // Map slugs to images
+// Map slugs to images - for posts without a mapped image, we cycle through defaults
 const blogImages: Record<string, string> = {
   'your-marketing-team-posting-into-void': logisticsImage,
   'you-hired-65k-chatgpt-operator': smallBusinessImage,
@@ -23,6 +24,27 @@ const blogImages: Record<string, string> = {
   'healthcare-bleeding-money-bad-digital-strategy': healthcareAiImage,
   'construction-companies-think-website-is-marketing': constructionImage,
   'restaurants-spending-3k-social-media-no-reservations': indianapolisAiImage,
+  'stop-calling-it-digital-transformation': retailImage,
+  'your-website-isnt-a-sales-tool': constructionImage,
+  'paying-4000-month-social-media-zero-leads': smallBusinessImage,
+  'email-marketing-dead-bad-automation': distributionImage,
+  'logistics-companies-drowning-data-never-use': logisticsImage,
+  'manufacturing-lean-operation-bleeding-cash': manufacturingAiImage,
+  'seo-scam-agency-cant-show-single-customer': healthcareAiImage,
+  'competitors-eating-lunch-same-ai-tools': indianapolisAiImage,
+};
+
+const defaultImages = [logisticsImage, smallBusinessImage, manufacturingAiImage, distributionImage, retailImage, healthcareAiImage, constructionImage, indianapolisAiImage];
+
+export const getImageForSlug = (slug: string): string => {
+  if (blogImages[slug]) return blogImages[slug];
+  // Deterministic fallback based on slug hash
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash) + slug.charCodeAt(i);
+    hash |= 0;
+  }
+  return defaultImages[Math.abs(hash) % defaultImages.length];
 };
 
 interface BlogPost {
@@ -42,7 +64,7 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
-  const imageUrl = blogImages[post.slug] || post.featured_image;
+  const imageUrl = getImageForSlug(post.slug);
 
   return (
     <Link 
