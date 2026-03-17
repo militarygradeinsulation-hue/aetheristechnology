@@ -64,7 +64,7 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
-  const imageUrl = blogImages[post.slug] || post.featured_image;
+  const imageUrl = getImageForSlug(post.slug);
 
   return (
     <Link 

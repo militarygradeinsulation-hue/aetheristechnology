@@ -11,27 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
-// Import blog images
-import indianapolisAiImage from '@/assets/blog/indianapolis-ai-competition.jpg';
-import manufacturingAiImage from '@/assets/blog/manufacturing-ai-guide.jpg';
-import healthcareAiImage from '@/assets/blog/healthcare-ai-transformation.jpg';
-import logisticsImage from '@/assets/blog/logistics-supply-chain.jpg';
-import retailImage from '@/assets/blog/retail-ai-powered.jpg';
-import constructionImage from '@/assets/blog/construction-ai-building.jpg';
-import smallBusinessImage from '@/assets/blog/small-business-ai.jpg';
-import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
-
-// Map slugs to images
-const blogImages: Record<string, string> = {
-  'your-marketing-team-posting-into-void': logisticsImage,
-  'you-hired-65k-chatgpt-operator': smallBusinessImage,
-  'not-all-ai-same-stop-treating-like-hammer': manufacturingAiImage,
-  'your-crm-graveyard-dead-leads': distributionImage,
-  'the-200k-marketing-budget-zero-trackable-revenue': retailImage,
-  'healthcare-bleeding-money-bad-digital-strategy': healthcareAiImage,
-  'construction-companies-think-website-is-marketing': constructionImage,
-  'restaurants-spending-3k-social-media-no-reservations': indianapolisAiImage,
-};
+import { getImageForSlug } from '@/components/BlogCard';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
