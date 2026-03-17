@@ -65,10 +65,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
             {[
-              { label: 'Engagements', value: '200+' },
-              { label: 'Clients Advised', value: '100+' },
-              { label: 'Revenue Impacted', value: '$25M' },
-              { label: 'Client Satisfaction', value: '99%' },
+              { label: 'Wasted on Bad AI Strategy Avg.', value: '$92K' },
+              { label: 'Leads Die in CRMs', value: '67%' },
+              { label: 'Can\'t Prove Marketing ROI', value: '54%' },
+              { label: 'Client Systems Fixed', value: '200+' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
