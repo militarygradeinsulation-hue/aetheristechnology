@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
             <a href="tel:+13173762110" className="text-sm text-muted-foreground hover:text-amber transition-colors block mt-2">(317) 376-2110</a>
             <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
             <a 
-              href="https://www.linkedin.com/company/aetheris-ai" 
+              href="https://www.linkedin.com/in/aisystemsarchitect" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-sm text-amber hover:text-amber/80 transition-colors block mt-2"
