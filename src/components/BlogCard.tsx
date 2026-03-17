@@ -3,38 +3,45 @@ import { Link } from 'react-router-dom';
 import { Calendar, User, MapPin, ArrowRight, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 
-// Import blog images
-import indianapolisAiImage from '@/assets/blog/indianapolis-ai-competition.jpg';
-import manufacturingAiImage from '@/assets/blog/manufacturing-ai-guide.jpg';
-import healthcareAiImage from '@/assets/blog/healthcare-ai-transformation.jpg';
-import logisticsImage from '@/assets/blog/logistics-supply-chain.jpg';
-import retailImage from '@/assets/blog/retail-ai-powered.jpg';
-import constructionImage from '@/assets/blog/construction-ai-building.jpg';
-import smallBusinessImage from '@/assets/blog/small-business-ai.jpg';
-import distributionImage from '@/assets/blog/distribution-center-ai.jpg';
+// Import blog images - unique per post
+import marketingVoidImage from '@/assets/blog/marketing-posting-void.jpg';
+import chatgptOperatorImage from '@/assets/blog/chatgpt-operator-waste.jpg';
+import aiHammerImage from '@/assets/blog/ai-not-same-hammer.jpg';
+import crmGraveyardImage from '@/assets/blog/crm-graveyard-leads.jpg';
+import budgetWastedImage from '@/assets/blog/200k-budget-wasted.jpg';
+import healthcareBleedingImage from '@/assets/blog/healthcare-bleeding-money.jpg';
+import constructionMarketingImage from '@/assets/blog/construction-website-marketing.jpg';
+import restaurantWasteImage from '@/assets/blog/restaurant-social-media-waste.jpg';
+import digitalTransformImage from '@/assets/blog/digital-transformation-waste.jpg';
+import websiteTombstoneImage from '@/assets/blog/website-digital-tombstone.jpg';
+import socialMediaLeadsImage from '@/assets/blog/social-media-zero-leads.jpg';
+import emailMarketingImage from '@/assets/blog/email-marketing-dead.jpg';
+import logisticsDrowningImage from '@/assets/blog/logistics-drowning-data.jpg';
+import manufacturingCashImage from '@/assets/blog/manufacturing-bleeding-cash.jpg';
+import seoScamImage from '@/assets/blog/seo-scam-agency.jpg';
+import competitorsImage from '@/assets/blog/competitors-eating-lunch.jpg';
 
-// Map slugs to images
-// Map slugs to images - for posts without a mapped image, we cycle through defaults
+// Map slugs to their unique themed images
 const blogImages: Record<string, string> = {
-  'your-marketing-team-posting-into-void': logisticsImage,
-  'you-hired-65k-chatgpt-operator': smallBusinessImage,
-  'not-all-ai-same-stop-treating-like-hammer': manufacturingAiImage,
-  'your-crm-graveyard-dead-leads': distributionImage,
-  'the-200k-marketing-budget-zero-trackable-revenue': retailImage,
-  'healthcare-bleeding-money-bad-digital-strategy': healthcareAiImage,
-  'construction-companies-think-website-is-marketing': constructionImage,
-  'restaurants-spending-3k-social-media-no-reservations': indianapolisAiImage,
-  'stop-calling-it-digital-transformation': retailImage,
-  'your-website-isnt-a-sales-tool': constructionImage,
-  'paying-4000-month-social-media-zero-leads': smallBusinessImage,
-  'email-marketing-dead-bad-automation': distributionImage,
-  'logistics-companies-drowning-data-never-use': logisticsImage,
-  'manufacturing-lean-operation-bleeding-cash': manufacturingAiImage,
-  'seo-scam-agency-cant-show-single-customer': healthcareAiImage,
-  'competitors-eating-lunch-same-ai-tools': indianapolisAiImage,
+  'your-marketing-team-posting-into-void': marketingVoidImage,
+  'you-hired-65k-chatgpt-operator': chatgptOperatorImage,
+  'not-all-ai-same-stop-treating-like-hammer': aiHammerImage,
+  'your-crm-graveyard-dead-leads': crmGraveyardImage,
+  'the-200k-marketing-budget-zero-trackable-revenue': budgetWastedImage,
+  'healthcare-bleeding-money-bad-digital-strategy': healthcareBleedingImage,
+  'construction-companies-think-website-is-marketing': constructionMarketingImage,
+  'restaurants-spending-3k-social-media-no-reservations': restaurantWasteImage,
+  'stop-calling-it-digital-transformation': digitalTransformImage,
+  'your-website-isnt-a-sales-tool': websiteTombstoneImage,
+  'paying-4000-month-social-media-zero-leads': socialMediaLeadsImage,
+  'email-marketing-dead-bad-automation': emailMarketingImage,
+  'logistics-companies-drowning-data-never-use': logisticsDrowningImage,
+  'manufacturing-lean-operation-bleeding-cash': manufacturingCashImage,
+  'seo-scam-agency-cant-show-single-customer': seoScamImage,
+  'competitors-eating-lunch-same-ai-tools': competitorsImage,
 };
 
-const defaultImages = [logisticsImage, smallBusinessImage, manufacturingAiImage, distributionImage, retailImage, healthcareAiImage, constructionImage, indianapolisAiImage];
+const defaultImages = [marketingVoidImage, chatgptOperatorImage, aiHammerImage, crmGraveyardImage, budgetWastedImage, healthcareBleedingImage, constructionMarketingImage, restaurantWasteImage, digitalTransformImage, websiteTombstoneImage, socialMediaLeadsImage, emailMarketingImage, logisticsDrowningImage, manufacturingCashImage, seoScamImage, competitorsImage];
 
 export const getImageForSlug = (slug: string): string => {
   if (blogImages[slug]) return blogImages[slug];
