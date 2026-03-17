@@ -54,7 +54,7 @@ export const Background: React.FC = () => {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 217, 255, 0.6)';
+        ctx.fillStyle = 'rgba(229, 163, 26, 0.6)';
         ctx.fill();
 
         // Draw connections
