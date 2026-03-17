@@ -67,7 +67,7 @@ export const Background: React.FC = () => {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = `rgba(0, 217, 255, ${0.2 * (1 - distance / 150)})`;
+            ctx.strokeStyle = `rgba(229, 163, 26, ${0.2 * (1 - distance / 150)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
