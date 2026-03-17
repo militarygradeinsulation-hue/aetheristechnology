@@ -135,18 +135,18 @@ const BlogPostPage = () => {
                     )}
                   </div>
 
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {post.tags.map((tag: string) => (
-                        <span 
-                          key={tag}
-                          className="inline-flex items-center text-sm font-medium text-amber"
-                        >
-                          #{tag.replace(/\s+/g, '')}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center text-sm font-medium text-amber">#TheArchitect</span>
+                    <span className="inline-flex items-center text-sm font-medium text-amber">#AetherisTechnology</span>
+                    {post.tags && post.tags.length > 0 && post.tags.map((tag: string) => (
+                      <span 
+                        key={tag}
+                        className="inline-flex items-center text-sm font-medium text-amber"
+                      >
+                        #{tag.replace(/\s+/g, '')}
+                      </span>
+                    ))}
+                  </div>
                 </header>
 
                 {/* Post Content */}
