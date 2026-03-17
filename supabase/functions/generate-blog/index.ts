@@ -124,7 +124,7 @@ Structure every post:
 
 📧 [aetheris.technology@outlook.com](mailto:aetheris.technology@outlook.com)
 📞 (317) 376-2110
-🔗 [Connect on LinkedIn](https://www.linkedin.com/company/aetheris-ai)
+🔗 [Connect on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 
 Posts should be 2,500-3,000 words. Write in markdown format.`;
 
