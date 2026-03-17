@@ -126,7 +126,9 @@ Structure every post:
 📞 (317) 376-2110
 🔗 [Connect on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 
-Posts should be 2,500-3,000 words. Write in markdown format.`;
+Posts should be 2,500-3,000 words. Write in markdown format.
+
+CRITICAL: Return valid JSON. Escape all special characters in strings properly. Use \\n for newlines within JSON string values. Do not use literal newlines inside JSON string values. Escape backslashes as \\\\ and quotes as \\".`;
 
     const userPrompt = `Write a blog post about: "${angle}"
 
@@ -134,14 +136,16 @@ Category: ${categoryObj.category}
 
 Make it specific, data-driven, and hard-hitting. Include real statistics, cost breakdowns with dollar amounts, and industry examples. The reader should feel uncomfortable about how they're currently doing things.
 
-Return ONLY a JSON object with these fields:
+Return ONLY a valid JSON object with these fields:
 - title: A provocative, attention-grabbing title (no quotes around it)
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
 - excerpt: 1-2 sentence hook that makes people click (under 200 chars)
-- content: Full markdown blog post (2500-3000 words)
+- content: Full markdown blog post (2500-3000 words). IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
 - tags: Array of 3-5 relevant tags
 - meta_description: SEO meta description under 160 chars
-- location_focus: The industry or business area this targets`;
+- location_focus: The industry or business area this targets
+
+IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include any text outside the JSON object.`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -157,6 +161,7 @@ Return ONLY a JSON object with these fields:
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
+          response_format: { type: "json_object" },
         }),
       }
     );
@@ -184,11 +189,24 @@ Return ONLY a JSON object with these fields:
     let postData;
     try {
       postData = JSON.parse(jsonStr);
-    } catch {
+    } catch (e1) {
       // Try to extract JSON object directly
       const objMatch = rawContent.match(/\{[\s\S]*\}/);
       if (objMatch) {
-        postData = JSON.parse(objMatch[0]);
+        try {
+          postData = JSON.parse(objMatch[0]);
+        } catch (e2) {
+          // Last resort: try to fix common JSON issues
+          let fixed = objMatch[0];
+          // Fix unescaped control characters
+          fixed = fixed.replace(/[\x00-\x1F\x7F]/g, (ch: string) => {
+            if (ch === '\n') return '\\n';
+            if (ch === '\r') return '\\r';
+            if (ch === '\t') return '\\t';
+            return '';
+          });
+          postData = JSON.parse(fixed);
+        }
       } else {
         throw new Error("Could not parse AI response as JSON");
       }
