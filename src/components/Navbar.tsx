@@ -52,33 +52,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`transition-colors ${
-                    item.special 
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`transition-colors ${
+                  item.special 
+                    ? 'text-amber hover:text-amber/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact">
               <Button className="bg-primary hover:bg-primary/90">
