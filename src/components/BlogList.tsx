@@ -29,17 +29,17 @@ export const BlogList: React.FC = () => {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-amber text-sm font-medium mb-6">
               <BookOpen className="w-4 h-4" />
-              AI Insights for Indiana Businesses
+              AI Education for Business Leaders
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">
-              The Aetheris{' '}
+              Stop Guessing.{' '}
               <span className="text-gradient-amber">
-                AI Blog
+                Start Understanding.
               </span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Expert insights on AI automation, machine learning, and digital transformation 
-              for Indiana businesses. Stay ahead of the curve with our latest articles.
+              We break down exactly how businesses waste money on AI, marketing, and disconnected systems — 
+              with real numbers, real costs, and real solutions. No fluff. No hype.
             </p>
           </div>
         </RevealOnScroll>
