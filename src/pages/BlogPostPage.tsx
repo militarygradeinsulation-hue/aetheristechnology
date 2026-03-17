@@ -176,19 +176,45 @@ const BlogPostPage = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="mt-16 glass rounded-2xl p-8 text-center">
-                  <h2 className="text-2xl font-bold mb-4">
-                    Ready to Transform Your Business with AI?
+                <div className="mt-16 glass rounded-2xl p-8 md:p-12 text-center">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
+                    Stop Wasting Money. Start Building Systems That Work.
                   </h2>
-                  <p className="text-muted-foreground mb-6">
-                    Contact Aetheris AI for a free consultation and discover how AI can 
-                    drive growth for your Indiana business.
+                  <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                    Our 14-Day Operational Systems Diagnostic exposes exactly where your business 
+                    is leaking revenue — and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
                   </p>
-                  <Link to="/contact">
-                    <Button className="bg-primary hover:bg-primary/90">
-                      Get Started Today
-                    </Button>
-                  </Link>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+                    <a 
+                      href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Operational%20Systems%20Diagnostic"
+                      className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium"
+                    >
+                      Book Your Diagnostic
+                      <ArrowRight className="w-5 h-5" />
+                    </a>
+                    <a 
+                      href="tel:+13173762110"
+                      className="inline-flex items-center justify-center gap-2 glass-hover border border-border px-6 py-3 rounded-md transition-colors font-medium"
+                    >
+                      Call: (317) 376-2110
+                    </a>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <a 
+                      href="mailto:aetheris.technology@outlook.com" 
+                      className="hover:text-amber transition-colors"
+                    >
+                      📧 aetheris.technology@outlook.com
+                    </a>
+                    <a 
+                      href="https://www.linkedin.com/company/aetheris-ai" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:text-amber transition-colors"
+                    >
+                      🔗 Connect on LinkedIn
+                    </a>
+                  </div>
                 </div>
               </>
             )}
