@@ -84,35 +84,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
             {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`block transition-colors ${
-                    item.special
-                      ? 'text-amber hover:text-amber/80 font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              )
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`block transition-colors ${
+                  item.special
+                    ? 'text-amber hover:text-amber/80 font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
             ))}
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90">
