@@ -94,20 +94,29 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       </div>
 
       <div className="p-6">
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {post.tags.slice(0, 2).map((tag) => (
+        {/* Tags - always show mandatory hashtags first */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full">
+            <Tag className="w-3 h-3" />
+            #TheArchitect
+          </span>
+          <span className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full">
+            <Tag className="w-3 h-3" />
+            #AetherisTechnology
+          </span>
+          {post.tags && post.tags
+            .filter(tag => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
+            .slice(0, 2)
+            .map((tag) => (
               <span 
                 key={tag}
                 className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full"
               >
                 <Tag className="w-3 h-3" />
-                {tag}
+                #{tag.replace(/\s+/g, '')}
               </span>
             ))}
-          </div>
-        )}
+        </div>
 
         {/* Title */}
         <h3 className="text-xl font-bold mb-3 group-hover:text-amber transition-colors line-clamp-2 font-display">
