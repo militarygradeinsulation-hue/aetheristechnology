@@ -138,7 +138,9 @@ const BlogPostPage = () => {
                   <div className="flex flex-wrap gap-2">
                     <span className="inline-flex items-center text-sm font-medium text-amber">#TheArchitect</span>
                     <span className="inline-flex items-center text-sm font-medium text-amber">#AetherisTechnology</span>
-                    {post.tags && post.tags.length > 0 && post.tags.map((tag: string) => (
+                    {post.tags && post.tags.length > 0 && post.tags
+                      .filter((tag: string) => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
+                      .map((tag: string) => (
                       <span 
                         key={tag}
                         className="inline-flex items-center text-sm font-medium text-amber"
