@@ -7,9 +7,35 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const MANDATORY_TAGS = ["TheArchitect", "AetherisTechnology"];
+
+const LINKEDIN_HOOKS = [
+  'I used to think [X]. Then I lost $[amount] and learned [Y].',
+  'Everyone is talking about [Topic]. Here\'s what they\'re missing...',
+  'What [Failure/Setback] taught me about [Topic]...',
+  'Stop scrolling. This will save your business $[amount] this quarter.',
+  'I analyzed [number] companies. [X]% are making this exact mistake.',
+  'Unpopular opinion: [Bold claim about topic].',
+  'Your [Tool/System] isn\'t broken. Your strategy is.',
+  'The #1 reason [businesses/teams] fail at [Topic]? Nobody talks about it.',
+  'I just saved a client $[amount]. Here\'s the 3-step framework.',
+  '[Metric] down [X]%? Here\'s what\'s actually going wrong.',
+  'Hot take: [Contrarian view]. Here\'s the data to prove it.',
+  'If your [system/team] does THIS, you\'re leaving $[amount] on the table.',
+];
+
+const TRENDING_HASHTAGS = {
+  ai: ["AI", "ArtificialIntelligence", "MachineLearning", "Innovation", "Technology", "DigitalTransformation", "FutureOfWork", "Automation"],
+  marketing: ["DigitalMarketing", "Marketing", "ContentMarketing", "Branding", "SocialMedia", "GrowthHacking", "MarketingStrategy", "B2BMarketing"],
+  crm: ["CRM", "Sales", "SalesStrategy", "LeadGeneration", "CustomerExperience", "RevenueOperations", "SalesEnablement", "Pipeline"],
+  leadership: ["Leadership", "Management", "Entrepreneurship", "Startups", "BusinessStrategy", "PersonalDevelopment", "CEOInsights"],
+  industry: ["SmallBusiness", "BusinessGrowth", "OperationalExcellence", "DataDriven", "BusinessIntelligence", "ROI", "Sustainability"],
+};
+
 const TOPICS = [
   {
     category: "AI Misuse",
+    hashtagPool: "ai",
     angles: [
       "Companies using AI chatbots with zero training data from their own business",
       "Why your AI-generated content sounds like every other company's AI-generated content",
@@ -23,6 +49,7 @@ const TOPICS = [
   },
   {
     category: "Marketing Failures",
+    hashtagPool: "marketing",
     angles: [
       "Your Google Ads are sending traffic to pages with no conversion tracking",
       "Why your marketing agency reports impressions instead of revenue",
@@ -36,6 +63,7 @@ const TOPICS = [
   },
   {
     category: "CRM & Lead Journey",
+    hashtagPool: "crm",
     angles: [
       "Your sales team manually enters leads and loses 30% of them",
       "The follow-up gap: why leads go cold in 48 hours",
@@ -49,6 +77,7 @@ const TOPICS = [
   },
   {
     category: "Industry Specific",
+    hashtagPool: "industry",
     angles: [
       "Law firms spending $8K/month on marketing with no client attribution",
       "Real estate agencies using AI for listings but not for lead nurturing",
@@ -62,6 +91,7 @@ const TOPICS = [
   },
   {
     category: "Digital Intelligence",
+    hashtagPool: "ai",
     angles: [
       "You have analytics installed but nobody looks at the data",
       "The difference between data collection and data intelligence",
@@ -74,6 +104,19 @@ const TOPICS = [
     ],
   },
 ];
+
+function pickTrendingTags(pool: string): string[] {
+  const poolTags = TRENDING_HASHTAGS[pool as keyof typeof TRENDING_HASHTAGS] || TRENDING_HASHTAGS.ai;
+  const crossPool = TRENDING_HASHTAGS.leadership;
+  // Pick 2 from category pool + 1 from cross-pool for broader reach
+  const shuffled = [...poolTags].sort(() => Math.random() - 0.5);
+  const cross = crossPool[Math.floor(Math.random() * crossPool.length)];
+  return [shuffled[0], shuffled[1], cross];
+}
+
+function pickHook(): string {
+  return LINKEDIN_HOOKS[Math.floor(Math.random() * LINKEDIN_HOOKS.length)];
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -93,30 +136,61 @@ serve(async (req) => {
 
     // Pick a random topic
     const categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-    const angle =
-      categoryObj.angles[
-        Math.floor(Math.random() * categoryObj.angles.length)
-      ];
+    const angle = categoryObj.angles[Math.floor(Math.random() * categoryObj.angles.length)];
+    const suggestedHook = pickHook();
+    const trendingTags = pickTrendingTags(categoryObj.hashtagPool);
 
-    const systemPrompt = `You are a sharp, no-BS business writer for Aetheris Technology — an AI consulting firm that exposes how businesses waste money on bad AI implementations, disconnected marketing, and broken CRM systems.
+    const systemPrompt = `You are a sharp, no-BS business writer and LinkedIn content strategist for Aetheris Technology — an AI consulting firm that exposes how businesses waste money on bad AI implementations, disconnected marketing, and broken CRM systems.
 
-Your writing style:
-- Aggressive, direct, and data-driven
-- Use real statistics and cite sources (e.g., "McKinsey", "HubSpot", "Gartner")  
-- Include specific dollar amounts and cost breakdowns
-- Use tables for comparisons when appropriate (markdown tables)
-- Call out specific failures without being mean — be educational
-- Every post must make the reader realize they're doing something wrong
-- Reference specific AI models by name (GPT, Gemini, Claude) to show expertise
-- Include industry-specific examples
+## LINKEDIN VIRAL CONTENT RULES (CRITICAL)
 
-Structure every post:
-1. A punchy opening that states the problem with a shocking stat
-2. Detailed breakdown of what's going wrong (with numbers)
-3. Why it happens (common mistakes)
-4. What the right approach looks like
-5. How Aetheris helps (reference the 14-Day Operational Systems Diagnostic, $5,000-$10,000)
-6. End with contact info formatted exactly as:
+Your content MUST be optimized for LinkedIn virality. Follow these rules:
+
+### HOOKS (First 2 lines are EVERYTHING)
+- The first line must be a SCROLL-STOPPING hook under 8 words
+- Use one of these proven hook formulas:
+  * Pattern interrupt: "Stop. Read this before you [action]."
+  * Contrarian: "Unpopular opinion: [bold claim]"
+  * Curiosity gap: "I analyzed [X] companies. Here's what shocked me."
+  * Personal story: "I used to think [X]. Then I lost $[amount]."
+  * Data bomb: "[X]% of businesses are making this exact mistake."
+  * Challenge: "Your [system] isn't broken. Your strategy is."
+- The second line should deepen the hook with a specific stat or emotional pull
+- After the hook, add "---" then the full article
+
+### SEO & DISCOVERABILITY
+- Title must be under 60 chars, keyword-rich, provocative
+- Meta description under 160 chars with primary keyword in first 50 chars
+- Use H2/H3 subheadings every 200-300 words for scanability
+- Include the primary keyword in the first 100 words of content
+- Use semantic variations of the keyword throughout
+- Include internal linking language (references to related topics)
+
+### WRITING STYLE FOR VIRALITY
+- Short paragraphs (2-3 sentences max)
+- Use line breaks liberally — LinkedIn rewards white space
+- Include data tables with shocking comparisons
+- Use "you" language — make it personal and confrontational
+- Include 1-2 analogies or metaphors that make complex ideas simple
+- End sections with micro-CTAs or questions to drive comments
+- Use emojis strategically: 🚨 for alerts, 💰 for money, 📊 for data, ⚠️ for warnings, ✅ for solutions
+
+### EMOTIONAL TRIGGERS (use at least 3 per post)
+- Fear of missing out (competitors doing it better)
+- Pain of wasting money (specific dollar amounts)
+- Urgency (market is shifting NOW)
+- Authority (cite McKinsey, Gartner, HubSpot, Forrester)
+- Social proof (X% of companies, industry benchmarks)
+- Curiosity gap (tease insights before revealing)
+
+### STRUCTURE FOR MAXIMUM ENGAGEMENT
+1. 🔥 HOOK (scroll-stopping first 2 lines with shocking stat or bold claim)
+2. 📊 THE PROBLEM (data-driven breakdown with dollar amounts, tables)
+3. ⚠️ WHY IT HAPPENS (3-5 common mistakes, relatable scenarios)
+4. ✅ THE FIX (actionable framework, step-by-step, what the right approach looks like)
+5. 🏢 HOW AETHERIS HELPS (14-Day Operational Systems Diagnostic, $5,000-$10,000)
+6. 💬 CTA that drives comments: end with a specific question like "What's the biggest CRM mistake you've seen? Drop it below 👇"
+7. Contact block formatted exactly as:
 
 ---
 
@@ -126,24 +200,43 @@ Structure every post:
 📞 (317) 376-2110
 🔗 [Connect on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 
+### HASHTAG RULES
+- Always include these FIRST: #TheArchitect #AetherisTechnology
+- Then add 3-5 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- Mix broad (high-follower) hashtags with niche specific ones
+- Format: #TheArchitect #AetherisTechnology #${trendingTags[0]} #${trendingTags[1]} #${trendingTags[2]} plus 1-2 topic-specific
+
 Posts should be 2,500-3,000 words. Write in markdown format.
+Reference specific AI models by name (GPT, Gemini, Claude) to show expertise.
+Include industry-specific examples with real company sizes and dollar amounts.
 
 CRITICAL: Return valid JSON. Escape all special characters in strings properly. Use \\n for newlines within JSON string values. Do not use literal newlines inside JSON string values. Escape backslashes as \\\\ and quotes as \\".`;
 
-    const userPrompt = `Write a blog post about: "${angle}"
+    const userPrompt = `Write a LinkedIn-optimized blog post about: "${angle}"
 
 Category: ${categoryObj.category}
+Suggested hook formula to adapt: "${suggestedHook}"
 
-Make it specific, data-driven, and hard-hitting. Include real statistics, cost breakdowns with dollar amounts, and industry examples. The reader should feel uncomfortable about how they're currently doing things.
+Make it specific, data-driven, and hard-hitting. The post should be DESIGNED TO TREND on LinkedIn.
+
+Requirements:
+- Open with a scroll-stopping hook (under 8 words for the first line)
+- Include at least 2 data tables with shocking comparisons
+- Use emojis strategically throughout (🚨💰📊⚠️✅🔥)
+- End with an engagement-driving question (not just "agree?")
+- Every section should have a mini-hook subheading
+- Include specific dollar amounts, percentages, and timeframes
+- The reader should feel UNCOMFORTABLE about how they're currently doing things
 
 Return ONLY a valid JSON object with these fields:
-- title: A provocative, attention-grabbing title (no quotes around it)
+- title: A provocative, SEO-optimized title under 60 chars (no quotes around it)
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
-- excerpt: 1-2 sentence hook that makes people click (under 200 chars)
-- content: Full markdown blog post (2500-3000 words). IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
-- tags: Array of 3-5 relevant tags
-- meta_description: SEO meta description under 160 chars
+- excerpt: A LinkedIn-style hook that creates a curiosity gap (under 200 chars). This should make someone NEED to click.
+- content: Full markdown blog post (2500-3000 words) with emojis, tables, and LinkedIn formatting. IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
+- tags: Array starting with "TheArchitect", "AetherisTechnology", then 3-5 trending hashtags relevant to the topic (e.g., "AI", "Sales", "DigitalTransformation", "Leadership")
+- meta_description: SEO meta description under 160 chars with primary keyword in first 50 chars
 - location_focus: The industry or business area this targets
+- linkedin_hook: The standalone 1-2 line hook that could be used as a LinkedIn post teaser
 
 IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include any text outside the JSON object.`;
 
@@ -189,16 +282,13 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
     let postData;
     try {
       postData = JSON.parse(jsonStr);
-    } catch (e1) {
-      // Try to extract JSON object directly
+    } catch (_e1) {
       const objMatch = rawContent.match(/\{[\s\S]*\}/);
       if (objMatch) {
         try {
           postData = JSON.parse(objMatch[0]);
-        } catch (e2) {
-          // Last resort: try to fix common JSON issues
+        } catch (_e2) {
           let fixed = objMatch[0];
-          // Fix unescaped control characters
           fixed = fixed.replace(/[\x00-\x1F\x7F]/g, (ch: string) => {
             if (ch === '\n') return '\\n';
             if (ch === '\r') return '\\r';
@@ -212,6 +302,13 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
       }
     }
 
+    // Ensure mandatory tags are always first
+    let tags = postData.tags || [];
+    tags = tags.filter((t: string) => !MANDATORY_TAGS.includes(t));
+    tags = [...MANDATORY_TAGS, ...tags];
+    // Cap at 7 total hashtags (2 mandatory + 5 trending)
+    tags = tags.slice(0, 7);
+
     // Check for duplicate slug
     const { data: existing } = await supabase
       .from("blog_posts")
@@ -220,7 +317,6 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
       .maybeSingle();
 
     if (existing) {
-      // Append timestamp to make unique
       postData.slug = `${postData.slug}-${Date.now()}`;
     }
 
@@ -233,7 +329,7 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
         excerpt: postData.excerpt,
         content: postData.content,
         author: "Aetheris AI Team",
-        tags: postData.tags || [],
+        tags,
         meta_description: postData.meta_description,
         location_focus: postData.location_focus,
         is_published: true,
@@ -247,7 +343,7 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
       throw new Error(`Failed to insert blog post: ${insertError.message}`);
     }
 
-    console.log("Blog post created:", insertedPost.title);
+    console.log("Blog post created:", insertedPost.title, "| Tags:", tags.join(", "));
 
     return new Response(
       JSON.stringify({
@@ -256,6 +352,8 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
           id: insertedPost.id,
           title: insertedPost.title,
           slug: insertedPost.slug,
+          tags,
+          linkedin_hook: postData.linkedin_hook || postData.excerpt,
         },
       }),
       {
