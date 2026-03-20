@@ -20,6 +20,17 @@ import logisticsDrowningImage from '@/assets/blog/logistics-drowning-data.jpg';
 import manufacturingCashImage from '@/assets/blog/manufacturing-bleeding-cash.jpg';
 import seoScamImage from '@/assets/blog/seo-scam-agency.jpg';
 import competitorsImage from '@/assets/blog/competitors-eating-lunch.jpg';
+// New category images
+import excelNotCrmImage from '@/assets/blog/team-using-excel-not-crm.jpg';
+import echoChamberImage from '@/assets/blog/echo-chamber-engagement.jpg';
+import resistanceChangeImage from '@/assets/blog/resistance-to-change.jpg';
+import outdatedMarketingImage from '@/assets/blog/outdated-marketing-tactics.jpg';
+import linkedinZeroImage from '@/assets/blog/linkedin-zero-engagement.jpg';
+import teamDysfunctionImage from '@/assets/blog/internal-team-dysfunction.jpg';
+import manualProcessesImage from '@/assets/blog/manual-processes-burning-cash.jpg';
+import ceoCrossroadsImage from '@/assets/blog/ceo-crossroads-change.jpg';
+import salesIgnoringCrmImage from '@/assets/blog/sales-team-ignoring-crm.jpg';
+import linkedinNotTiktokImage from '@/assets/blog/linkedin-not-tiktok.jpg';
 
 // Map slugs to their unique themed images
 const blogImages: Record<string, string> = {
@@ -41,17 +52,65 @@ const blogImages: Record<string, string> = {
   'competitors-eating-lunch-same-ai-tools': competitorsImage,
 };
 
-const defaultImages = [marketingVoidImage, chatgptOperatorImage, aiHammerImage, crmGraveyardImage, budgetWastedImage, healthcareBleedingImage, constructionMarketingImage, restaurantWasteImage, digitalTransformImage, websiteTombstoneImage, socialMediaLeadsImage, emailMarketingImage, logisticsDrowningImage, manufacturingCashImage, seoScamImage, competitorsImage];
+// Keyword-based image matching for dynamic posts
+const keywordImageMap: Array<{ keywords: string[]; image: string }> = [
+  { keywords: ['excel', 'spreadsheet', 'data-team', 'manual-data'], image: excelNotCrmImage },
+  { keywords: ['echo-chamber', 'same-people', 'employees-like', 'hostage', 'followers'], image: echoChamberImage },
+  { keywords: ['resist', 'wont-change', 'always-done', 'fax', 'vetoes', 'old-way'], image: resistanceChangeImage },
+  { keywords: ['outdated', '2019', '2018', 'old-marketing', 'hubspot-blog', 'post-3-times'], image: outdatedMarketingImage },
+  { keywords: ['linkedin', 'zero-engagement', '12-likes', 'zero-comments', 'no-engagement'], image: linkedinZeroImage },
+  { keywords: ['internal-team', 'team-hurt', 'dysfunction', 'department', 'it-bottleneck'], image: teamDysfunctionImage },
+  { keywords: ['manual', 'burning-cash', 'onboarding', 'paper', 'hr-process'], image: manualProcessesImage },
+  { keywords: ['ceo', 'crossroads', 'growth', 'leadership', 'owner-won'], image: ceoCrossroadsImage },
+  { keywords: ['sales-team', 'crm-avoid', 'sticky-note', 'pipeline', 'sales-ignor'], image: salesIgnoringCrmImage },
+  { keywords: ['tiktok', 'not-tiktok', 'treating-like', 'dance', 'casual'], image: linkedinNotTiktokImage },
+  { keywords: ['marketing', 'posting', 'void', 'content'], image: marketingVoidImage },
+  { keywords: ['chatgpt', 'operator', 'salary', 'prompt'], image: chatgptOperatorImage },
+  { keywords: ['ai-tool', 'hammer', 'same-ai', 'different-tool'], image: aiHammerImage },
+  { keywords: ['crm', 'graveyard', 'dead-lead', 'lead-scor'], image: crmGraveyardImage },
+  { keywords: ['budget', 'wasted', 'revenue', 'attribution', 'utm'], image: budgetWastedImage },
+  { keywords: ['healthcare', 'patient', 'practice', 'medical'], image: healthcareBleedingImage },
+  { keywords: ['construction', 'contractor', 'bid'], image: constructionMarketingImage },
+  { keywords: ['restaurant', 'reservation', 'food'], image: restaurantWasteImage },
+  { keywords: ['transform', 'digital-transform'], image: digitalTransformImage },
+  { keywords: ['website', 'tombstone', 'brochure'], image: websiteTombstoneImage },
+  { keywords: ['social-media', 'social', 'zero-leads'], image: socialMediaLeadsImage },
+  { keywords: ['email', 'automation', 'newsletter'], image: emailMarketingImage },
+  { keywords: ['logistics', 'supply-chain', 'warehouse'], image: logisticsDrowningImage },
+  { keywords: ['manufacturing', 'lean', 'factory'], image: manufacturingCashImage },
+  { keywords: ['seo', 'agency', 'scam'], image: seoScamImage },
+  { keywords: ['competitor', 'eating-lunch', 'behind'], image: competitorsImage },
+];
+
+const allImages = [
+  marketingVoidImage, chatgptOperatorImage, aiHammerImage, crmGraveyardImage,
+  budgetWastedImage, healthcareBleedingImage, constructionMarketingImage,
+  restaurantWasteImage, digitalTransformImage, websiteTombstoneImage,
+  socialMediaLeadsImage, emailMarketingImage, logisticsDrowningImage,
+  manufacturingCashImage, seoScamImage, competitorsImage,
+  excelNotCrmImage, echoChamberImage, resistanceChangeImage, outdatedMarketingImage,
+  linkedinZeroImage, teamDysfunctionImage, manualProcessesImage, ceoCrossroadsImage,
+  salesIgnoringCrmImage, linkedinNotTiktokImage,
+];
 
 export const getImageForSlug = (slug: string): string => {
+  // 1. Exact slug match
   if (blogImages[slug]) return blogImages[slug];
-  // Deterministic fallback based on slug hash
+  
+  // 2. Keyword-based match from slug
+  for (const entry of keywordImageMap) {
+    if (entry.keywords.some(kw => slug.includes(kw))) {
+      return entry.image;
+    }
+  }
+  
+  // 3. Deterministic fallback from expanded pool
   let hash = 0;
   for (let i = 0; i < slug.length; i++) {
     hash = ((hash << 5) - hash) + slug.charCodeAt(i);
     hash |= 0;
   }
-  return defaultImages[Math.abs(hash) % defaultImages.length];
+  return allImages[Math.abs(hash) % allImages.length];
 };
 
 interface BlogPost {
