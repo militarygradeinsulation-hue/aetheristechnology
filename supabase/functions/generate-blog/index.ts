@@ -171,9 +171,29 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Pick a random topic
-    const categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-    const angle = categoryObj.angles[Math.floor(Math.random() * categoryObj.angles.length)];
+    // Parse optional request body for targeted generation
+    let requestAngle: string | null = null;
+    let requestCategory: string | null = null;
+    let requestHashtagPool: string | null = null;
+    try {
+      const body = await req.json();
+      requestAngle = body?.angle || null;
+      requestCategory = body?.category || null;
+      requestHashtagPool = body?.hashtagPool || null;
+    } catch {
+      // No body or invalid JSON — use random selection
+    }
+
+    // Use targeted topic if provided, otherwise pick random
+    let categoryObj;
+    let angle: string;
+    if (requestAngle && requestCategory) {
+      categoryObj = { category: requestCategory, hashtagPool: requestHashtagPool || "ai", angles: [requestAngle] };
+      angle = requestAngle;
+    } else {
+      categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+      angle = categoryObj.angles[Math.floor(Math.random() * categoryObj.angles.length)];
+    }
     const suggestedHook = pickHook();
     const trendingTags = pickTrendingTags(categoryObj.hashtagPool);
 
