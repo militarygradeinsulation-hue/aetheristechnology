@@ -30,7 +30,7 @@ export const ThePitch: React.FC = () => {
               </p>
 
               <p className="text-2xl font-bold text-foreground mb-8 text-center">
-                I build you a Magic Robot to help you.
+                I step in and build you the systems to fix it.
               </p>
             </div>
           </RevealOnScroll>
