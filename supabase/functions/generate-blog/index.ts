@@ -259,9 +259,9 @@ Your content MUST be optimized for LinkedIn virality. Follow these rules:
 
 ### HASHTAG RULES
 - Always include these FIRST: #TheArchitect #AetherisTechnology
-- Then add 3-5 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- Then add exactly 3 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- MAXIMUM 5 hashtags total: #TheArchitect #AetherisTechnology + 3 trending
 - Mix broad (high-follower) hashtags with niche specific ones
-- Format: #TheArchitect #AetherisTechnology #${trendingTags[0]} #${trendingTags[1]} #${trendingTags[2]} plus 1-2 topic-specific
 
 Posts should be 2,500-3,000 words. Write in markdown format.
 Reference specific AI models by name (GPT, Gemini, Claude) to show expertise.
