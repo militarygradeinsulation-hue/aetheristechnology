@@ -10,8 +10,12 @@ export const ThePitch: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              The <span className="text-amber glow-text">Pitch</span>
+              The <span className="text-amber glow-text">Co-CEO</span> Model
             </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              I don't hand you a strategy deck and walk away. I step into your business as a partner — finding the gaps, 
+              building the systems, and staying until the numbers prove it worked.
+            </p>
           </div>
         </RevealOnScroll>
 
