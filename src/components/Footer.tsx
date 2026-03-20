@@ -20,8 +20,16 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Transforming businesses through cutting-edge AI solutions.
+              Business consulting &amp; digital intelligence. Your Co-CEO for operational systems.
             </p>
+            <div className="flex flex-col gap-2 mt-3">
+              <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium">
+                📞 (317) 376-2110
+              </a>
+              <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all">
+                ✉️ aetheris.technology@outlook.com
+              </a>
+            </div>
           </div>
 
           <div>
