@@ -363,8 +363,8 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
     let tags = postData.tags || [];
     tags = tags.filter((t: string) => !MANDATORY_TAGS.includes(t));
     tags = [...MANDATORY_TAGS, ...tags];
-    // Cap at 7 total hashtags (2 mandatory + 5 trending)
-    tags = tags.slice(0, 7);
+    // Cap at 5 total hashtags (2 mandatory + 3 trending)
+    tags = tags.slice(0, 5);
 
     // Check for duplicate slug
     const { data: existing } = await supabase
