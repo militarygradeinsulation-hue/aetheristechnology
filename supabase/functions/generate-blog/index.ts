@@ -290,7 +290,7 @@ Return ONLY a valid JSON object with these fields:
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
 - excerpt: A LinkedIn-style hook that creates a curiosity gap (under 200 chars). This should make someone NEED to click.
 - content: Full markdown blog post (2500-3000 words) with emojis, tables, and LinkedIn formatting. IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
-- tags: Array starting with "TheArchitect", "AetherisTechnology", then 3-5 trending hashtags relevant to the topic (e.g., "AI", "Sales", "DigitalTransformation", "Leadership")
+- tags: Array starting with "TheArchitect", "AetherisTechnology", then exactly 3 trending hashtags (5 total max)
 - meta_description: SEO meta description under 160 chars with primary keyword in first 50 chars
 - location_focus: The industry or business area this targets
 - linkedin_hook: The standalone 1-2 line hook that could be used as a LinkedIn post teaser
