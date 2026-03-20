@@ -79,10 +79,16 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-amber/10 border border-amber/20 rounded-xl text-center">
+        <a
+          href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-6 p-4 bg-amber/10 border border-amber/20 rounded-xl text-center hover:bg-amber/20 transition-colors"
+        >
           <p className="text-sm font-semibold text-amber mb-1">14-Day Operational Diagnostic</p>
           <p className="text-xs text-muted-foreground">I embed into your business for 14 days and show you exactly where the money is leaking.</p>
-        </div>
+          <p className="text-xs text-amber mt-2 font-medium">View Full Breakdown →</p>
+        </a>
       </div>
     </div>
   );
