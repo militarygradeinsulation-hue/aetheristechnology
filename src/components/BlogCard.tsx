@@ -106,7 +106,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
           </span>
           {post.tags && post.tags
             .filter(tag => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
-            .slice(0, 2)
+            .slice(0, 3)
             .map((tag) => (
               <span 
                 key={tag}

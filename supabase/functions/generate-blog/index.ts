@@ -259,9 +259,9 @@ Your content MUST be optimized for LinkedIn virality. Follow these rules:
 
 ### HASHTAG RULES
 - Always include these FIRST: #TheArchitect #AetherisTechnology
-- Then add 3-5 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- Then add exactly 3 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- MAXIMUM 5 hashtags total: #TheArchitect #AetherisTechnology + 3 trending
 - Mix broad (high-follower) hashtags with niche specific ones
-- Format: #TheArchitect #AetherisTechnology #${trendingTags[0]} #${trendingTags[1]} #${trendingTags[2]} plus 1-2 topic-specific
 
 Posts should be 2,500-3,000 words. Write in markdown format.
 Reference specific AI models by name (GPT, Gemini, Claude) to show expertise.
@@ -290,7 +290,7 @@ Return ONLY a valid JSON object with these fields:
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
 - excerpt: A LinkedIn-style hook that creates a curiosity gap (under 200 chars). This should make someone NEED to click.
 - content: Full markdown blog post (2500-3000 words) with emojis, tables, and LinkedIn formatting. IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
-- tags: Array starting with "TheArchitect", "AetherisTechnology", then 3-5 trending hashtags relevant to the topic (e.g., "AI", "Sales", "DigitalTransformation", "Leadership")
+- tags: Array starting with "TheArchitect", "AetherisTechnology", then exactly 3 trending hashtags (5 total max)
 - meta_description: SEO meta description under 160 chars with primary keyword in first 50 chars
 - location_focus: The industry or business area this targets
 - linkedin_hook: The standalone 1-2 line hook that could be used as a LinkedIn post teaser
@@ -363,8 +363,8 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
     let tags = postData.tags || [];
     tags = tags.filter((t: string) => !MANDATORY_TAGS.includes(t));
     tags = [...MANDATORY_TAGS, ...tags];
-    // Cap at 7 total hashtags (2 mandatory + 5 trending)
-    tags = tags.slice(0, 7);
+    // Cap at 5 total hashtags (2 mandatory + 3 trending)
+    tags = tags.slice(0, 5);
 
     // Check for duplicate slug
     const { data: existing } = await supabase
