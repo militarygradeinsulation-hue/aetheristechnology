@@ -103,8 +103,45 @@ const TOPICS = [
       "The integration tax: what disconnected systems really cost",
     ],
   },
+  {
+    category: "Outdated Marketing",
+    hashtagPool: "marketing",
+    angles: [
+      "Your marketer is using 2019 tactics on LinkedIn and wondering why nobody cares",
+      "LinkedIn is not TikTok — stop treating it like one",
+      "Your marketing team learned everything from a 2018 HubSpot blog and never updated",
+      "Posting motivational quotes on LinkedIn isn't marketing — it's noise",
+      "Your social media manager doesn't understand the algorithm they're posting to",
+      "The 'post 3 times a day' strategy died in 2020 — here's what replaced it",
+      "Your marketing hire has 2 years of experience repeated 5 times",
+    ],
+  },
+  {
+    category: "Resistance to Change",
+    hashtagPool: "leadership",
+    angles: [
+      "You want more revenue but won't change a single process to get it",
+      "Your business looks exactly like it did in 2019 — and so do your results",
+      "CEOs who say 'we've always done it this way' are writing their own obituary",
+      "You hired a consultant then ignored everything they said",
+      "Your competitors changed. You didn't. That's why you're losing.",
+      "You want digital transformation but won't let go of the fax machine mentality",
+      "The CEO who wants growth but vetoes every new idea",
+    ],
+  },
+  {
+    category: "Echo Chamber Engagement",
+    hashtagPool: "marketing",
+    angles: [
+      "If only your employees like your posts, you don't have a following — you have a hostage situation",
+      "Your LinkedIn posts get 12 likes from the same 12 people — that's not engagement",
+      "When your own team scrolls past your content, the market already has",
+      "Zero comments from strangers means zero market relevance",
+      "Your followers are your employees and your mom — let's talk about that",
+      "You're posting into an echo chamber and calling it a marketing strategy",
+    ],
+  },
 ];
-
 function pickTrendingTags(pool: string): string[] {
   const poolTags = TRENDING_HASHTAGS[pool as keyof typeof TRENDING_HASHTAGS] || TRENDING_HASHTAGS.ai;
   const crossPool = TRENDING_HASHTAGS.leadership;
@@ -134,9 +171,29 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Pick a random topic
-    const categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-    const angle = categoryObj.angles[Math.floor(Math.random() * categoryObj.angles.length)];
+    // Parse optional request body for targeted generation
+    let requestAngle: string | null = null;
+    let requestCategory: string | null = null;
+    let requestHashtagPool: string | null = null;
+    try {
+      const body = await req.json();
+      requestAngle = body?.angle || null;
+      requestCategory = body?.category || null;
+      requestHashtagPool = body?.hashtagPool || null;
+    } catch {
+      // No body or invalid JSON — use random selection
+    }
+
+    // Use targeted topic if provided, otherwise pick random
+    let categoryObj;
+    let angle: string;
+    if (requestAngle && requestCategory) {
+      categoryObj = { category: requestCategory, hashtagPool: requestHashtagPool || "ai", angles: [requestAngle] };
+      angle = requestAngle;
+    } else {
+      categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+      angle = categoryObj.angles[Math.floor(Math.random() * categoryObj.angles.length)];
+    }
     const suggestedHook = pickHook();
     const trendingTags = pickTrendingTags(categoryObj.hashtagPool);
 
