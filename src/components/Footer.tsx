@@ -33,12 +33,12 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Services</h4>
+            <h4 className="font-bold text-foreground mb-4">What We Do</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/services" className="hover:text-amber transition-colors">Machine Learning</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">AI Automation</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">Data Intelligence</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Business Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Operational Diagnostics</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">CRM & Sales Systems</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">AI & Automation Strategy</Link></li>
             </ul>
           </div>
 

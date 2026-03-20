@@ -174,11 +174,23 @@ export const ThePitch: React.FC = () => {
           <RevealOnScroll delay={0.8}>
             <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-amber/30">
               <p className="text-2xl font-bold text-foreground mb-4">
-                That's what we consult on for your business.
+                That's what a Co-CEO does for your business.
               </p>
-              <p className="text-xl text-muted-foreground">
-                We design and guide the Magic Robot. You run your business.
+              <p className="text-xl text-muted-foreground mb-6">
+                I find the gaps. I build the systems. You run your business.
               </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="tel:+13173762110">
+                  <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors active:scale-[0.97]">
+                    📞 Call (317) 376-2110
+                  </button>
+                </a>
+                <a href="mailto:aetheris.technology@outlook.com?subject=Co-CEO%20Inquiry">
+                  <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
+                    ✉️ Email Us
+                  </button>
+                </a>
+              </div>
             </div>
           </RevealOnScroll>
         </div>
