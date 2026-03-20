@@ -140,6 +140,7 @@ const BlogPostPage = () => {
                     <span className="inline-flex items-center text-sm font-medium text-amber">#AetherisTechnology</span>
                     {post.tags && post.tags.length > 0 && post.tags
                       .filter((tag: string) => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
+                      .slice(0, 3)
                       .map((tag: string) => (
                       <span 
                         key={tag}
