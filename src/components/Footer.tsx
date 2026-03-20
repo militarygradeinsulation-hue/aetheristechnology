@@ -20,17 +20,25 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Transforming businesses through cutting-edge AI solutions.
+              Business consulting &amp; digital intelligence. Your Co-CEO for operational systems.
             </p>
+            <div className="flex flex-col gap-2 mt-3">
+              <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium">
+                📞 (317) 376-2110
+              </a>
+              <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all">
+                ✉️ aetheris.technology@outlook.com
+              </a>
+            </div>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Services</h4>
+            <h4 className="font-bold text-foreground mb-4">What We Do</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/services" className="hover:text-amber transition-colors">Machine Learning</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">AI Automation</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">Data Intelligence</Link></li>
-              <li><Link to="/services" className="hover:text-amber transition-colors">Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Business Consulting</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">Operational Diagnostics</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">CRM & Sales Systems</Link></li>
+              <li><Link to="/services" className="hover:text-amber transition-colors">AI & Automation Strategy</Link></li>
             </ul>
           </div>
 

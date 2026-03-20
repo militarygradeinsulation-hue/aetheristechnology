@@ -10,8 +10,12 @@ export const ThePitch: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              The <span className="text-amber glow-text">Pitch</span>
+              The <span className="text-amber glow-text">Co-CEO</span> Model
             </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              I don't hand you a strategy deck and walk away. I step into your business as a partner — finding the gaps, 
+              building the systems, and staying until the numbers prove it worked.
+            </p>
           </div>
         </RevealOnScroll>
 
@@ -26,7 +30,7 @@ export const ThePitch: React.FC = () => {
               </p>
 
               <p className="text-2xl font-bold text-foreground mb-8 text-center">
-                I build you a Magic Robot to help you.
+                I step in and build you the systems to fix it.
               </p>
             </div>
           </RevealOnScroll>
@@ -170,11 +174,23 @@ export const ThePitch: React.FC = () => {
           <RevealOnScroll delay={0.8}>
             <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-amber/30">
               <p className="text-2xl font-bold text-foreground mb-4">
-                That's what we consult on for your business.
+                That's what a Co-CEO does for your business.
               </p>
-              <p className="text-xl text-muted-foreground">
-                We design and guide the Magic Robot. You run your business.
+              <p className="text-xl text-muted-foreground mb-6">
+                I find the gaps. I build the systems. You run your business.
               </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="tel:+13173762110">
+                  <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors active:scale-[0.97]">
+                    📞 Call (317) 376-2110
+                  </button>
+                </a>
+                <a href="mailto:aetheris.technology@outlook.com?subject=Co-CEO%20Inquiry">
+                  <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
+                    ✉️ Email Us
+                  </button>
+                </a>
+              </div>
             </div>
           </RevealOnScroll>
         </div>
