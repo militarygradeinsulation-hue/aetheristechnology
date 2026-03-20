@@ -40,13 +40,15 @@ export const FloatingContact: React.FC = () => {
               <Linkedin className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">LinkedIn</span>
             </a>
-            <Link
-              to="/contact"
+            <a
+              href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-3 bg-primary px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
             >
               <MessageCircle className="w-5 h-5 text-primary-foreground" />
-              <span className="text-sm font-bold text-primary-foreground">Book a Diagnostic</span>
-            </Link>
+              <span className="text-sm font-bold text-primary-foreground">View the Diagnostic</span>
+            </a>
           </div>
         )}
 

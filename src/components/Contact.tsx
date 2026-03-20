@@ -126,6 +126,12 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </a>
+                <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="glass-hover border-amber/30 text-amber hover:bg-amber/10">
+                    View Full Diagnostic Breakdown
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
