@@ -15,6 +15,7 @@ import ServiceAreasPage from "./pages/ServiceAreasPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import TermsPage from "./pages/TermsPage";
+import ResourcesPage from "./pages/ResourcesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

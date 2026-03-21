@@ -27,6 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Solutions', href: '/solutions' },
     { label: 'Service Areas', href: '/service-areas' },
     { label: 'Blog', href: '/blog' },
+    { label: 'Playbooks', href: '/resources' },
     
     { label: 'About', href: '/about' },
     { label: 'AI Assistant', href: '/assistant', special: true },
