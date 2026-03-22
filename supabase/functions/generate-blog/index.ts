@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const MANDATORY_TAGS = ["TheArchitect", "AetherisTechnology"];
+const MANDATORY_TAGS: string[] = [];
 
 const LINKEDIN_HOOKS = [
   'I used to think [X]. Then I lost $[amount] and learned [Y].',
