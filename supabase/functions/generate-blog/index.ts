@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const MANDATORY_TAGS = ["TheArchitect", "AetherisTechnology"];
+const MANDATORY_TAGS: string[] = [];
 
 const LINKEDIN_HOOKS = [
   'I used to think [X]. Then I lost $[amount] and learned [Y].',
@@ -437,10 +437,10 @@ Your content MUST be optimized for LinkedIn virality. Follow these rules:
 📋 [View the 14-Day Diagnostic Breakdown](https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s)
 
 ### HASHTAG RULES
-- Always include these FIRST: #TheArchitect #AetherisTechnology
-- Then add exactly 3 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
-- MAXIMUM 5 hashtags total: #TheArchitect #AetherisTechnology + 3 trending
+- Use exactly 5 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- MAXIMUM 5 hashtags total — all should be high-volume business/AI/technology hashtags
 - Mix broad (high-follower) hashtags with niche specific ones
+- Do NOT include #TheArchitect or #AetherisTechnology
 
 Posts should be 2,500-3,000 words. Write in markdown format.
 Reference specific AI models by name (GPT, Gemini, Claude, Perplexity) to show expertise.
@@ -472,7 +472,7 @@ Return ONLY a valid JSON object with these fields:
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
 - excerpt: A LinkedIn-style hook that creates a curiosity gap (under 200 chars). This should make someone NEED to click.
 - content: Full markdown blog post (2500-3000 words) with emojis, tables, and LinkedIn formatting. IMPORTANT: Use \\n for newlines, escape all special chars for valid JSON.
-- tags: Array starting with "TheArchitect", "AetherisTechnology", then exactly 3 trending hashtags (5 total max)
+- tags: Array of exactly 5 trending business/AI/technology hashtags (do NOT include TheArchitect or AetherisTechnology)
 - meta_description: SEO meta description under 160 chars with primary keyword in first 50 chars
 - location_focus: The industry or business area this targets
 - linkedin_hook: The standalone 1-2 line hook that could be used as a LinkedIn post teaser

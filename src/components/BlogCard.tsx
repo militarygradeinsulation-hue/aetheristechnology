@@ -156,19 +156,11 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       </div>
 
       <div className="p-6">
-        {/* Tags - always show mandatory hashtags first */}
+        {/* Tags - top 5 trending hashtags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full">
-            <Tag className="w-3 h-3" />
-            #TheArchitect
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs bg-amber/10 text-amber px-2 py-1 rounded-full">
-            <Tag className="w-3 h-3" />
-            #AetherisTechnology
-          </span>
-          {post.tags && post.tags
+          {(post.tags && post.tags.length > 0 ? post.tags : ['AI', 'Innovation', 'Technology', 'Leadership', 'DigitalMarketing'])
             .filter(tag => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
-            .slice(0, 3)
+            .slice(0, 5)
             .map((tag) => (
               <span 
                 key={tag}
