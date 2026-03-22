@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Calendar, User, MapPin, Tag, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, User, MapPin, Tag, Download, Loader2 } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
