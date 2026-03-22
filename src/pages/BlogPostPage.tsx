@@ -137,12 +137,15 @@ const BlogPostPage = () => {
               <>
                 {/* Featured Image */}
                 {featuredImage && (
-                  <div className="mb-8 rounded-2xl overflow-hidden">
+                  <div className="mb-8 rounded-2xl overflow-hidden relative">
                     <img 
                       src={featuredImage} 
                       alt={post.title}
                       className="w-full h-64 md:h-96 object-cover"
                     />
+                    <span className="absolute bottom-3 right-3 text-xs font-semibold text-white/80 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+                      Aetheris AI Studio
+                    </span>
                   </div>
                 )}
 

@@ -138,7 +138,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       className="block glass rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group h-full"
     >
       {/* Featured Image */}
-      <div className="h-48 bg-gradient-to-br from-primary/20 to-amber/20 overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-primary/20 to-amber/20 overflow-hidden relative">
         {imageUrl ? (
           <img 
             src={imageUrl} 
@@ -150,6 +150,9 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
             <div className="text-6xl opacity-50">📝</div>
           </div>
         )}
+        <span className="absolute bottom-2 right-2 text-[10px] font-semibold text-white/70 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
+          Aetheris AI Studio
+        </span>
       </div>
 
       <div className="p-6">
