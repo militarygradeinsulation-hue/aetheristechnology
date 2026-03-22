@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Calendar, User, MapPin, Tag } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, User, MapPin, Tag, Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -151,9 +151,32 @@ const BlogPostPage = () => {
 
                 {/* Post Header */}
                 <header className="mb-12">
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-                    {post.title}
-                  </h1>
+                  <div className="flex items-start justify-between gap-4 mb-6">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                      {post.title}
+                    </h1>
+                    <button
+                      onClick={() => {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = post.content;
+                        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                        const tags = ['#TheArchitect', '#AetherisTechnology', ...(post.tags || []).filter((t: string) => t !== 'TheArchitect' && t !== 'AetherisTechnology').slice(0, 3).map((t: string) => `#${t.replace(/\s+/g, '')}`)].join(' ');
+                        const fileContent = `${post.title}\n\nBy ${post.author}${post.published_at ? ' | ' + format(new Date(post.published_at), 'MMMM d, yyyy') : ''}${post.location_focus ? ' | ' + post.location_focus : ''}\n${tags}\n\n${plainText}\n\n---\nAetheris AI Studio | aetheris.technology@outlook.com | (317) 376-2110`;
+                        const blob = new Blob([fileContent], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${post.slug}.txt`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg glass border border-border text-sm font-medium text-muted-foreground hover:text-amber hover:border-amber/40 transition-colors"
+                      title="Download this article"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span className="hidden sm:inline">Download</span>
+                    </button>
+                  </div>
                   
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
                     <div className="flex items-center gap-2">
