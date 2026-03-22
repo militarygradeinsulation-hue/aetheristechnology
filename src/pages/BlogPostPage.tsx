@@ -189,9 +189,10 @@ const BlogPostPage = () => {
                 </header>
 
                 {/* Post Content */}
-                <div className="prose prose-invert max-w-none">
-                  {renderContent(post.content)}
-                </div>
+                <div 
+                  className="prose prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: prepareContent(post.content) }}
+                />
 
                 {/* CTA */}
                 <div className="mt-16 glass rounded-2xl p-8 md:p-12 text-center">
