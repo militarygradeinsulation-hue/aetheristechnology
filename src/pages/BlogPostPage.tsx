@@ -34,7 +34,7 @@ const BlogPostPage = () => {
 
   const featuredImage = slug ? getImageForSlug(slug) : null;
 
-  // Clean up encoding artifacts and smart characters
+  // Clean up encoding artifacts
   const cleanText = (text: string): string => {
     return text
       .replace(/â€"/g, '—')
@@ -48,91 +48,58 @@ const BlogPostPage = () => {
       .replace(/Ã¢/g, 'â')
       .replace(/â€¦/g, '…')
       .replace(/â€¢/g, '•')
-      .replace(/\u00e2\u0080\u0093/g, '–')
-      .replace(/\u00e2\u0080\u0094/g, '—')
-      .replace(/\u00e2\u0080\u0099/g, "'")
-      .replace(/\u00e2\u0080\u009c/g, '"')
-      .replace(/\u00e2\u0080\u009d/g, '"')
       .replace(/[\u0080-\u009F]/g, '')
       .replace(/â/g, '');
   };
 
-  // Render inline markdown (bold, italic, links)
-  const renderInline = (text: string): React.ReactNode[] => {
-    const cleaned = cleanText(text);
-    const parts: React.ReactNode[] = [];
-    // Match **bold**, *italic*, and [text](url)
-    const regex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(\[(.+?)\]\((.+?)\))/g;
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(cleaned)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(cleaned.slice(lastIndex, match.index));
-      }
-      if (match[1]) {
-        parts.push(<strong key={match.index}>{match[2]}</strong>);
-      } else if (match[3]) {
-        parts.push(<em key={match.index}>{match[4]}</em>);
-      } else if (match[5]) {
-        parts.push(<a key={match.index} href={match[7]} className="text-amber hover:underline" target="_blank" rel="noopener noreferrer">{match[6]}</a>);
-      }
-      lastIndex = match.index + match[0].length;
-    }
-    if (lastIndex < cleaned.length) {
-      parts.push(cleaned.slice(lastIndex));
-    }
-    return parts.length > 0 ? parts : [cleaned];
+  // Check if content has HTML tags
+  const isHtmlContent = (content: string): boolean => {
+    return /<(table|div|h[1-6]|p|ul|ol|li|tr|td|th|thead|tbody|strong|em|a|br|hr)\b/i.test(content);
   };
 
-  // Simple markdown to HTML conversion
-  const renderContent = (content: string) => {
+  // Convert markdown content to HTML string
+  const markdownToHtml = (content: string): string => {
     return content
       .split('\n')
-      .map((line, index) => {
-        const trimmed = line.trim();
-        // Headers
-        if (trimmed.startsWith('# ')) {
-          return <h1 key={index} className="text-3xl md:text-4xl font-bold mt-8 mb-4">{renderInline(trimmed.slice(2))}</h1>;
+      .map(line => {
+        const t = line.trim();
+        if (t.startsWith('### ')) return `<h3>${t.slice(4)}</h3>`;
+        if (t.startsWith('## ')) return `<h2>${t.slice(3)}</h2>`;
+        if (t.startsWith('# ')) return `<h1>${t.slice(2)}</h1>`;
+        if (t.startsWith('- ') || t.startsWith('• ')) return `<li>${t.slice(2)}</li>`;
+        if (/^\d+\.\s/.test(t)) return `<li>${t.replace(/^\d+\.\s/, '')}</li>`;
+        if (t === '---' || t === '***') return '<hr />';
+        if (t === '') return '<br />';
+        if (t.startsWith('|') && t.endsWith('|')) {
+          if (t.replace(/[|\-\s:]/g, '') === '') return '';
+          const cells = t.split('|').filter(c => c.trim() !== '');
+          return `<tr>${cells.map(c => `<td>${c.trim()}</td>`).join('')}</tr>`;
         }
-        if (trimmed.startsWith('## ')) {
-          return <h2 key={index} className="text-2xl font-bold mt-6 mb-3">{renderInline(trimmed.slice(3))}</h2>;
-        }
-        if (trimmed.startsWith('### ')) {
-          return <h3 key={index} className="text-xl font-semibold mt-4 mb-2">{renderInline(trimmed.slice(4))}</h3>;
-        }
-        // Table rows
-        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-          if (trimmed.replace(/[|\-\s]/g, '') === '') return null; // separator row
-          const cells = trimmed.split('|').filter(c => c.trim() !== '');
-          return (
-            <div key={index} className="grid grid-cols-2 md:grid-cols-3 gap-2 my-1 text-sm">
-              {cells.map((cell, ci) => (
-                <span key={ci} className="px-2 py-1 glass rounded">{renderInline(cell.trim())}</span>
-              ))}
-            </div>
-          );
-        }
-        // List items
-        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-          return <li key={index} className="ml-6 my-1 text-muted-foreground leading-relaxed">{renderInline(trimmed.slice(2))}</li>;
-        }
-        // Numbered list
-        if (/^\d+\.\s/.test(trimmed)) {
-          const text = trimmed.replace(/^\d+\.\s/, '');
-          return <li key={index} className="ml-6 my-1 list-decimal text-muted-foreground leading-relaxed">{renderInline(text)}</li>;
-        }
-        // Empty lines
-        if (trimmed === '') {
-          return <br key={index} />;
-        }
-        // Horizontal rule
-        if (trimmed === '---' || trimmed === '***') {
-          return <hr key={index} className="my-6 border-border" />;
-        }
-        // Regular paragraphs
-        return <p key={index} className="my-2 text-muted-foreground leading-relaxed">{renderInline(trimmed)}</p>;
-      });
+        let text = t
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        return `<p>${text}</p>`;
+      })
+      .join('\n');
+  };
+
+  // Prepare final HTML content with styling
+  const prepareContent = (content: string): string => {
+    const cleaned = cleanText(content);
+    const html = isHtmlContent(cleaned) ? cleaned : markdownToHtml(cleaned);
+    
+    return html
+      .replace(/<table(?![^>]*class)/g, '<table class="w-full border-collapse my-6 text-sm"')
+      .replace(/<th(?![^>]*class)/g, '<th class="text-left p-3 border border-white/10 bg-white/5 font-semibold"')
+      .replace(/<td(?![^>]*class)/g, '<td class="p-3 border border-white/10"')
+      .replace(/<h1(?![^>]*class)/g, '<h1 class="text-3xl md:text-4xl font-bold mt-8 mb-4"')
+      .replace(/<h2(?![^>]*class)/g, '<h2 class="text-2xl font-bold mt-6 mb-3"')
+      .replace(/<h3(?![^>]*class)/g, '<h3 class="text-xl font-semibold mt-4 mb-2"')
+      .replace(/<p>(?!<)/g, '<p class="my-2 leading-relaxed opacity-80">')
+      .replace(/<li>(?!<)/g, '<li class="ml-6 my-1 leading-relaxed opacity-80">')
+      .replace(/<a(?![^>]*class)/g, '<a class="text-amber-400 hover:underline"')
+      .replace(/<strong>(?!<)/g, '<strong class="font-semibold opacity-100">');
   };
 
   return (
