@@ -12,10 +12,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 import { getImageForSlug } from '@/components/BlogCard';
+import { generateBlogPdf } from '@/lib/generateBlogPdf';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['blog-post', slug],
