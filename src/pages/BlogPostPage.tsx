@@ -160,7 +160,7 @@ const BlogPostPage = () => {
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = post.content;
                         const plainText = tempDiv.textContent || tempDiv.innerText || '';
-                        const tags = ['#TheArchitect', '#AetherisTechnology', ...(post.tags || []).filter((t: string) => t !== 'TheArchitect' && t !== 'AetherisTechnology').slice(0, 3).map((t: string) => `#${t.replace(/\s+/g, '')}`)].join(' ');
+                        const tags = (post.tags || ['AI', 'Innovation', 'Technology', 'Leadership', 'DigitalMarketing']).filter((t: string) => t !== 'TheArchitect' && t !== 'AetherisTechnology').slice(0, 5).map((t: string) => `#${t.replace(/\s+/g, '')}`).join(' ');
                         const fileContent = `${post.title}\n\nBy ${post.author}${post.published_at ? ' | ' + format(new Date(post.published_at), 'MMMM d, yyyy') : ''}${post.location_focus ? ' | ' + post.location_focus : ''}\n${tags}\n\n${plainText}\n\n---\nAetheris AI Studio | aetheris.technology@outlook.com | (317) 376-2110`;
                         const blob = new Blob([fileContent], { type: 'text/plain' });
                         const url = URL.createObjectURL(blob);
