@@ -437,10 +437,10 @@ Your content MUST be optimized for LinkedIn virality. Follow these rules:
 📋 [View the 14-Day Diagnostic Breakdown](https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s)
 
 ### HASHTAG RULES
-- Always include these FIRST: #TheArchitect #AetherisTechnology
-- Then add exactly 3 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
-- MAXIMUM 5 hashtags total: #TheArchitect #AetherisTechnology + 3 trending
+- Use exactly 5 trending LinkedIn hashtags from this pool: ${trendingTags.join(', ')}
+- MAXIMUM 5 hashtags total — all should be high-volume business/AI/technology hashtags
 - Mix broad (high-follower) hashtags with niche specific ones
+- Do NOT include #TheArchitect or #AetherisTechnology
 
 Posts should be 2,500-3,000 words. Write in markdown format.
 Reference specific AI models by name (GPT, Gemini, Claude, Perplexity) to show expertise.
