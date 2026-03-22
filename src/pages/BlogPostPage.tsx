@@ -198,11 +198,9 @@ const BlogPostPage = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center text-sm font-medium text-amber">#TheArchitect</span>
-                    <span className="inline-flex items-center text-sm font-medium text-amber">#AetherisTechnology</span>
-                    {post.tags && post.tags.length > 0 && post.tags
+                    {(post.tags && post.tags.length > 0 ? post.tags : ['AI', 'Innovation', 'Technology', 'Leadership', 'DigitalMarketing'])
                       .filter((tag: string) => tag !== 'TheArchitect' && tag !== 'AetherisTechnology')
-                      .slice(0, 3)
+                      .slice(0, 5)
                       .map((tag: string) => (
                       <span 
                         key={tag}
