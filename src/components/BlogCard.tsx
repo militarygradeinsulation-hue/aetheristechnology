@@ -170,8 +170,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
                 #{tag.replace(/\s+/g, '')}
               </span>
             ))}
-              </span>
-            ))}
         </div>
 
         {/* Title */}
