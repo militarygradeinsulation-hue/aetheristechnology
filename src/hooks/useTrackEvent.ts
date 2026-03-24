@@ -16,12 +16,12 @@ function getSessionId(): string {
 export function useTrackEvent() {
   const trackEvent = useCallback(async (eventType: string, eventData: Record<string, unknown> = {}) => {
     try {
-      await supabase.from('site_events').insert({
+      await supabase.from('site_events').insert([{
         event_type: eventType,
-        event_data: eventData,
+        event_data: eventData as any,
         session_id: getSessionId(),
         user_agent: navigator.userAgent,
-      });
+      }]);
     } catch (e) {
       // Silent fail — don't break UX for analytics
     }
