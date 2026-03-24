@@ -30,6 +30,12 @@ import renderConcreteCircles from '@/assets/renders/render-concrete-circles.png'
 import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pavilion.png';
 import renderGreenSwings from '@/assets/renders/render-green-swings.png';
 import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
+import renderScreenshot1 from '@/assets/renders/render-screenshot-1.png';
+import renderScreenshot2 from '@/assets/renders/render-screenshot-2.png';
+import renderScreenshot3 from '@/assets/renders/render-screenshot-3.png';
+import renderScreenshot4 from '@/assets/renders/render-screenshot-4.png';
+import renderScreenshot5 from '@/assets/renders/render-screenshot-5.png';
+import renderScreenshot6 from '@/assets/renders/render-screenshot-6.png';
 
 import rdeFinancial from '@/assets/rde/rde-financial.png';
 import rdeSocialActivity from '@/assets/rde/rde-social-activity.png';
