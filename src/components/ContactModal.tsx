@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Mail, Phone, MapPin, Linkedin, ArrowRight } from 'lucide-react';
+import { useTrackEvent } from '@/hooks/useTrackEvent';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -7,6 +8,8 @@ interface ContactModalProps {
 }
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
+  const { trackEvent } = useTrackEvent();
+
   if (!isOpen) return null;
 
   return (
@@ -14,23 +17,15 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
       
       <div className="relative glass p-8 rounded-2xl max-w-md w-full">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 glass-hover rounded-lg"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 glass-hover rounded-lg">
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
         <h2 className="text-3xl font-bold mb-2 text-foreground font-display">Let's Talk</h2>
-        <p className="text-muted-foreground mb-6">
-          Pick what's easiest. No forms. No runaround.
-        </p>
+        <p className="text-muted-foreground mb-6">Pick what's easiest. No forms. No runaround.</p>
 
         <div className="space-y-4">
-          <a 
-            href="tel:+13173762110" 
-            className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
+          <a href="tel:+13173762110" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('click', { label: 'phone', location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Phone className="w-6 h-6 text-amber" />
             </div>
@@ -40,10 +35,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             </div>
           </a>
 
-          <a 
-            href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business" 
-            className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
+          <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('click', { label: 'email', location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Mail className="w-6 h-6 text-amber" />
             </div>
@@ -53,12 +45,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             </div>
           </a>
 
-          <a 
-            href="https://www.linkedin.com/in/aisystemsarchitect"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
+          <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('linkedin_click', { location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Linkedin className="w-6 h-6 text-amber" />
             </div>
@@ -84,6 +71,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
           target="_blank"
           rel="noopener noreferrer"
           className="block mt-6 p-4 bg-amber/10 border border-amber/20 rounded-xl text-center hover:bg-amber/20 transition-colors"
+          onClick={() => trackEvent('click', { label: 'diagnostic_link', location: 'contact_modal' })}
         >
           <p className="text-sm font-semibold text-amber mb-1">14-Day Operational Diagnostic</p>
           <p className="text-xs text-muted-foreground">I embed into your business for 14 days and show you exactly where the money is leaking.</p>

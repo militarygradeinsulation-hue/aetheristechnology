@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTrackEvent } from '@/hooks/useTrackEvent';
 import aetherisLogo from '@/assets/aetheris-logo.png';
 
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const { trackEvent } = useTrackEvent();
 
   return (
     <footer className="relative border-t border-border py-12 px-4">
@@ -23,10 +25,10 @@ export const Footer: React.FC = () => {
               Business consulting &amp; digital intelligence. Your Co-CEO for operational systems.
             </p>
             <div className="flex flex-col gap-2 mt-3">
-              <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium">
+              <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium" onClick={() => trackEvent('click', { label: 'phone', location: 'footer' })}>
                 📞 (317) 376-2110
               </a>
-              <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all">
+              <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all" onClick={() => trackEvent('click', { label: 'email', location: 'footer' })}>
                 ✉️ aetheris.technology@outlook.com
               </a>
             </div>
@@ -46,9 +48,7 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-foreground mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-amber transition-colors">About Us</Link></li>
-              <li><Link to="/service-areas" className="hover:text-amber transition-colors">Service Areas</Link></li>
               <li><Link to="/blog" className="hover:text-amber transition-colors">Blog</Link></li>
-              
               <li><Link to="/contact" className="hover:text-amber transition-colors">Contact</Link></li>
               <li><a href="mailto:aetheris.technology@outlook.com?subject=Career%20Inquiry%20-%20Aetheris%20AI" className="hover:text-amber transition-colors">Careers</a></li>
             </ul>
@@ -67,6 +67,7 @@ export const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-sm text-amber hover:text-amber/80 transition-colors block mt-2"
+              onClick={() => trackEvent('linkedin_click', { location: 'footer' })}
             >
               LinkedIn →
             </a>
@@ -91,10 +92,13 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 flex flex-col items-center gap-2">
           <p className="text-sm text-muted-foreground">
             Powered by <a href="https://ctoguy.ai" target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">CTOguy.ai</a>
           </p>
+          <Link to="/admin/login" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            Admin
+          </Link>
         </div>
       </div>
     </footer>
