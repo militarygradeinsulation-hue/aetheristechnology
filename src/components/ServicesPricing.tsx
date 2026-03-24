@@ -30,6 +30,12 @@ import renderConcreteCircles from '@/assets/renders/render-concrete-circles.png'
 import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pavilion.png';
 import renderGreenSwings from '@/assets/renders/render-green-swings.png';
 import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
+import renderScreenshot1 from '@/assets/renders/render-screenshot-1.png';
+import renderScreenshot2 from '@/assets/renders/render-screenshot-2.png';
+import renderScreenshot3 from '@/assets/renders/render-screenshot-3.png';
+import renderScreenshot4 from '@/assets/renders/render-screenshot-4.png';
+import renderScreenshot5 from '@/assets/renders/render-screenshot-5.png';
+import renderScreenshot6 from '@/assets/renders/render-screenshot-6.png';
 
 import rdeFinancial from '@/assets/rde/rde-financial.png';
 import rdeSocialActivity from '@/assets/rde/rde-social-activity.png';
@@ -67,6 +73,12 @@ const RENDER_EXAMPLES = [
   { src: renderAmphitheaterPavilion, alt: 'AI-rendered modern amphitheater pavilion with timber slats and concrete water feature in park setting' },
   { src: renderGreenSwings, alt: 'AI-rendered children playing on green swing set with wood fiber surfacing on playground' },
   { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
+  { src: renderScreenshot1, alt: 'AI-rendered playground visualization example showcasing realistic scene composition' },
+  { src: renderScreenshot2, alt: 'AI-rendered outdoor recreation area with detailed environmental design' },
+  { src: renderScreenshot3, alt: 'AI-rendered playground equipment render demonstrating product visualization' },
+  { src: renderScreenshot4, alt: 'AI-rendered interactive play area with realistic lighting and materials' },
+  { src: renderScreenshot5, alt: 'AI-rendered recreation space concept with immersive scene detail' },
+  { src: renderScreenshot6, alt: 'AI-rendered playground design render with lifelike human interaction' },
 ];
 
 const RDE_EXAMPLES = [
