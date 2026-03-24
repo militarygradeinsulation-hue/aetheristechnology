@@ -123,6 +123,7 @@ const services: ServiceTier[] = [
     whyItPays: '70% of websites fail to convert effectively. Small improvements can increase revenue 10–50% without more traffic.',
     roiExample: 'If your site converts at 1% and improves to 1.5% — that\'s a 50% revenue increase from the same traffic.',
     payback: 'Immediate to 2 weeks',
+    showRdeExamples: true,
   },
   {
     icon: Eye,
