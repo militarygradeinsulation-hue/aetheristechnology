@@ -7,12 +7,28 @@ import renderXylophone from '@/assets/renders/render-xylophone.png';
 import renderMonkeyBars from '@/assets/renders/render-monkey-bars.png';
 import renderXylophoneCloseup from '@/assets/renders/render-xylophone-closeup.png';
 import renderSwings from '@/assets/renders/render-swings.png';
+import renderSlideGirl from '@/assets/renders/render-slide-girl.png';
+import renderSlideRed from '@/assets/renders/render-slide-red.png';
+import renderTunnelGirl from '@/assets/renders/render-tunnel-girl.png';
+import renderTunnelSmile from '@/assets/renders/render-tunnel-smile.png';
+import renderActivityPanel from '@/assets/renders/render-activity-panel.png';
+import renderActivityCloseup from '@/assets/renders/render-activity-closeup.png';
+import renderSteeringWheel from '@/assets/renders/render-steering-wheel.png';
+import renderSteeringCloseup from '@/assets/renders/render-steering-closeup.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
   { src: renderXylophone, alt: 'AI-rendered outdoor xylophone with children interacting on playground' },
   { src: renderMonkeyBars, alt: 'AI-rendered monkey bars with children climbing on playground equipment' },
   { src: renderXylophoneCloseup, alt: 'AI-rendered close-up of outdoor musical playground xylophone equipment' },
+  { src: renderSlideGirl, alt: 'AI-rendered child peeking around metal playground slide in golden hour light' },
+  { src: renderSlideRed, alt: 'AI-rendered child laughing on red and silver playground slide' },
+  { src: renderTunnelGirl, alt: 'AI-rendered child emerging from playground tunnel slide with joyful expression' },
+  { src: renderTunnelSmile, alt: 'AI-rendered child smiling through circular playground tunnel equipment' },
+  { src: renderActivityPanel, alt: 'AI-rendered toddler playing with colorful playground activity panel' },
+  { src: renderActivityCloseup, alt: 'AI-rendered close-up of child interacting with playground steering panel' },
+  { src: renderSteeringWheel, alt: 'AI-rendered child turning orange steering wheel on playground equipment' },
+  { src: renderSteeringCloseup, alt: 'AI-rendered close-up of boy playing with playground steering wheel toy' },
 ];
 
 interface ServiceTier {
