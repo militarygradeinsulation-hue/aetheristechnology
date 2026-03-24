@@ -26,6 +26,10 @@ import renderArchiscanBlueprint from '@/assets/renders/render-archiscan-blueprin
 import renderAerialLandscapePool from '@/assets/renders/render-aerial-landscape-pool.png';
 import renderWoodlandPlayground from '@/assets/renders/render-woodland-playground.png';
 import renderClassicEstate from '@/assets/renders/render-classic-estate.png';
+import renderConcreteCircles from '@/assets/renders/render-concrete-circles.png';
+import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pavilion.png';
+import renderGreenSwings from '@/assets/renders/render-green-swings.png';
+import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
