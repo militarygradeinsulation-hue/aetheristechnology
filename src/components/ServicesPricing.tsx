@@ -55,6 +55,10 @@ const RENDER_EXAMPLES = [
   { src: renderAerialLandscapePool, alt: 'AI-rendered aerial landscape and pool design concept for luxury property visualization' },
   { src: renderWoodlandPlayground, alt: 'AI-rendered natural woodland playground concept for destination park planning' },
   { src: renderClassicEstate, alt: 'AI-rendered classic luxury estate exterior concept for residential architectural visualization' },
+  { src: renderConcreteCircles, alt: 'AI-rendered brutalist concrete building with circular windows, fountain, and red steel staircase' },
+  { src: renderAmphitheaterPavilion, alt: 'AI-rendered modern amphitheater pavilion with timber slats and concrete water feature in park setting' },
+  { src: renderGreenSwings, alt: 'AI-rendered children playing on green swing set with wood fiber surfacing on playground' },
+  { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
 ];
 
 interface ServiceTier {
