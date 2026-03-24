@@ -50,6 +50,7 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
         <ServicesPricing />
+        <ToolsCapabilities />
         <ContactForm />
         <Footer />
       </div>
