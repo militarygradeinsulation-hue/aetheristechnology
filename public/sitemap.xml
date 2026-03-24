@@ -11,23 +11,13 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://aetheristechnology.lovable.app/solutions</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://aetheristechnology.lovable.app/service-areas</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://aetheristechnology.lovable.app/blog</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://aetheristechnology.lovable.app/why-us</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://aetheristechnology.lovable.app/resources</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
@@ -41,8 +31,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aetheristechnology.lovable.app/assistant</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://aetheristechnology.lovable.app/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

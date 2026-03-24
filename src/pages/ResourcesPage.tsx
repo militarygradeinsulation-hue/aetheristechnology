@@ -6,6 +6,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SEOHead } from '@/components/SEOHead';
 
 const RESOURCES = [
   {
@@ -63,11 +64,29 @@ const ResourcesPage = () => {
 
   return (
     <div className="relative min-h-screen">
+      <SEOHead
+        title="Strategic Playbooks — AI, Marketing & Leadership Frameworks"
+        description="Download free strategic playbooks on AI search optimization, digital influence, short-form video strategy, and leadership frameworks. Built from real consulting engagements and 2026 market data."
+        path="/resources"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Aetheris AI Strategic Playbooks",
+          "description": "Free downloadable strategic frameworks for business leaders navigating AI-powered markets.",
+          "url": "https://aetheristechnology.lovable.app/resources",
+          "numberOfItems": RESOURCES.length,
+          "itemListElement": RESOURCES.map((r, i) => ({
+            "@type": "ListItem",
+            "position": i + 1,
+            "name": r.title,
+            "description": r.description
+          }))
+        }}
+      />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
-        {/* Hero */}
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
@@ -85,7 +104,6 @@ const ResourcesPage = () => {
           </div>
         </section>
 
-        {/* Resources Grid */}
         <section className="pb-16 px-4">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             {RESOURCES.map((resource, index) => (
@@ -96,25 +114,19 @@ const ResourcesPage = () => {
                       <resource.icon className="w-6 h-6 text-amber" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-foreground font-display">{resource.title}</h3>
+                      <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
                       <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
                     </div>
                   </div>
-                  
                   <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
-                  
                   <div className="flex flex-wrap gap-2 mb-5">
                     {resource.tags.map(tag => (
-                      <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
-                        {tag}
-                      </span>
+                      <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                     ))}
                   </div>
-
                   <a href={resource.file} download className="block">
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-                      <Download className="w-4 h-4" />
-                      Download PDF
+                      <Download className="w-4 h-4" /> Download PDF
                     </Button>
                   </a>
                 </div>
@@ -123,7 +135,6 @@ const ResourcesPage = () => {
           </div>
         </section>
 
-        {/* CTA */}
         <section className="pb-24 px-4">
           <div className="max-w-4xl mx-auto">
             <RevealOnScroll>
@@ -136,24 +147,20 @@ const ResourcesPage = () => {
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
                     These playbooks show you what's broken. The 14-Day Operational Systems Diagnostic shows you exactly where — and builds the systems to fix it.
                   </p>
-
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="tel:+13173762110">
                       <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                        <Phone className="mr-2 w-5 h-5" />
-                        Call Now — (317) 376-2110
+                        <Phone className="mr-2 w-5 h-5" /> Call Now — (317) 376-2110
                       </Button>
                     </a>
                     <a href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Diagnostic%20Inquiry">
                       <Button size="lg" variant="outline" className="glass-hover border-border">
-                        <Mail className="mr-2 w-5 h-5" />
-                        Email to Start
+                        <Mail className="mr-2 w-5 h-5" /> Email to Start
                       </Button>
                     </a>
                     <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer">
                       <Button size="lg" variant="outline" className="glass-hover border-amber/30 text-amber hover:bg-amber/10">
-                        View the Diagnostic
-                        <ArrowRight className="ml-2 w-5 h-5" />
+                        View the Diagnostic <ArrowRight className="ml-2 w-5 h-5" />
                       </Button>
                     </a>
                   </div>

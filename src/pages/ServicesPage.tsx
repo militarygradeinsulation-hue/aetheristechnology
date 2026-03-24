@@ -4,26 +4,33 @@ import { Navbar } from '@/components/Navbar';
 import { Services } from '@/components/Services';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { SEOHead } from '@/components/SEOHead';
 
 const ServicesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen">
+      <SEOHead
+        title="Business Consulting & AI Automation Services"
+        description="From $50 visual renders to $25K+ custom AI implementations. Operational diagnostics, CRM restructuring, sales automation, and digital oversight for US businesses."
+        path="/services"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "serviceType": "Business Consulting & AI Automation",
+          "provider": { "@type": "Organization", "name": "Aetheris AI", "url": "https://aetheristechnology.lovable.app" },
+          "areaServed": { "@type": "Country", "name": "United States" },
+          "description": "Full-spectrum business consulting services including operational diagnostics, CRM development, AI automation strategy, and ongoing digital oversight."
+        }}
+      />
       <Background />
-      
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-        <div className="pt-24">
-          <Services />
-        </div>
+        <div className="pt-24"><Services /></div>
         <Footer />
       </div>
-
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-      />
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </div>
   );
 };
