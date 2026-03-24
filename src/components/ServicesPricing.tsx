@@ -91,6 +91,7 @@ interface ServiceTier {
   payback: string;
   details?: string[];
   showExamples?: boolean;
+  showRdeExamples?: boolean;
 }
 
 const services: ServiceTier[] = [
