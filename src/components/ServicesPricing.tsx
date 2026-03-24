@@ -3,6 +3,18 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import renderXylophone from '@/assets/renders/render-xylophone.png';
+import renderMonkeyBars from '@/assets/renders/render-monkey-bars.png';
+import renderXylophoneCloseup from '@/assets/renders/render-xylophone-closeup.png';
+import renderSwings from '@/assets/renders/render-swings.png';
+
+const RENDER_EXAMPLES = [
+  { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
+  { src: renderXylophone, alt: 'AI-rendered outdoor xylophone with children interacting on playground' },
+  { src: renderMonkeyBars, alt: 'AI-rendered monkey bars with children climbing on playground equipment' },
+  { src: renderXylophoneCloseup, alt: 'AI-rendered close-up of outdoor musical playground xylophone equipment' },
+];
+
 interface ServiceTier {
   icon: React.ElementType;
   title: string;
@@ -14,6 +26,7 @@ interface ServiceTier {
   roiExample: string;
   payback: string;
   details?: string[];
+  showExamples?: boolean;
 }
 
 const services: ServiceTier[] = [
@@ -27,6 +40,7 @@ const services: ServiceTier[] = [
     whyItPays: 'Visuals with people increase engagement by up to 38%. High-quality imagery can boost conversion by up to 30%.',
     roiExample: 'One improved image helps win one deal on a $25K–$150K+ project. A $400 image pays for itself instantly.',
     payback: 'Immediate',
+    showExamples: true,
     details: [
       '$50 — Basic enhancement (clarity, lighting, polish)',
       '$125 — Close-up or product-focused render',
@@ -158,6 +172,28 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                   <span className="text-xs font-semibold text-foreground uppercase tracking-wider">Payback:</span>
                   <span className="text-sm text-primary font-medium">{service.payback}</span>
                 </div>
+
+                {/* Render Examples Gallery */}
+                {service.showExamples && (
+                  <div className="pt-3">
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Image className="w-3.5 h-3.5 text-primary" /> Example Renders
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {RENDER_EXAMPLES.map((img) => (
+                        <div key={img.alt} className="rounded-lg overflow-hidden border border-border/30">
+                          <img
+                            src={img.src}
+                            alt={img.alt}
+                            className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">AI-generated playground renderings with realistic human interaction</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
