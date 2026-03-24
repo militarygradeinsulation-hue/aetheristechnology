@@ -3,6 +3,7 @@ import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { ToolsCapabilities } from '@/components/ToolsCapabilities';
 import { ContactForm } from '@/components/ContactForm';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
