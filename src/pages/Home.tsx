@@ -20,7 +20,7 @@ const Home = () => {
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
         <ServicesPricing />
         <ContactForm />
-        <Testimonials />
+        
         <Footer />
       </div>
 
