@@ -62,14 +62,9 @@ const AdminDashboard: React.FC = () => {
   }, [toast]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate('/admin/login', { replace: true }); return; }
-      const { data } = await supabase.from('admin_users').select('id').eq('user_id', session.user.id).maybeSingle();
-      if (!data) { navigate('/admin/login', { replace: true }); return; }
-      fetchData();
-    };
-    checkAuth();
+    const isAuth = sessionStorage.getItem('admin_authenticated') === 'true';
+    if (!isAuth) { navigate('/admin/login', { replace: true }); return; }
+    fetchData();
   }, [navigate, fetchData]);
 
   const toggleRead = async (id: string, current: boolean) => {
@@ -77,8 +72,8 @@ const AdminDashboard: React.FC = () => {
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_authenticated');
     navigate('/admin/login', { replace: true });
   };
 

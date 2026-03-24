@@ -1,99 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Lock } from 'lucide-react';
 
+const ADMIN_CODE = '9822';
+
 const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // If already logged in as admin, redirect
-    const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data } = await supabase.from('admin_users').select('id').eq('user_id', session.user.id).maybeSingle();
-        if (data) navigate('/admin', { replace: true });
-      }
-    };
-    check();
-  }, [navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      if (isSignUp) {
-        const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        // Auto-confirm is enabled, so user is immediately logged in
-        if (signUpData.user) {
-          // Try to auto-promote as first admin
-          await supabase.rpc('promote_if_first_admin', { _user_id: signUpData.user.id });
-          const { data: adminCheck } = await supabase.from('admin_users').select('id').eq('user_id', signUpData.user.id).maybeSingle();
-          if (adminCheck) {
-            navigate('/admin', { replace: true });
-            return;
-          }
-          await supabase.auth.signOut();
-          toast({ title: 'Access Denied', description: 'You are not authorized as an admin.', variant: 'destructive' });
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error('No session');
-        const { data } = await supabase.from('admin_users').select('id').eq('user_id', session.user.id).maybeSingle();
-        if (!data) {
-          await supabase.auth.signOut();
-          toast({ title: 'Access Denied', description: 'You are not an admin.', variant: 'destructive' });
-          return;
-        }
-        navigate('/admin', { replace: true });
-      }
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Something went wrong', variant: 'destructive' });
-    } finally {
-      setLoading(false);
+    if (code === ADMIN_CODE) {
+      sessionStorage.setItem('admin_authenticated', 'true');
+      navigate('/admin', { replace: true });
+    } else {
+      toast({ title: 'Access Denied', description: 'Invalid code.', variant: 'destructive' });
     }
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="glass p-8 rounded-2xl max-w-md w-full">
+      <div className="glass p-8 rounded-2xl max-w-sm w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-amber" />
           </div>
           <h1 className="text-2xl font-bold text-foreground font-display">Admin Access</h1>
-          <p className="text-muted-foreground text-sm mt-1">Authorized personnel only</p>
+          <p className="text-muted-foreground text-sm mt-1">Enter your access code</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Password</label>
-            <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-          </div>
+          <Input
+            type="password"
+            placeholder="Enter code"
+            value={code}
+            onChange={e => setCode(e.target.value)}
+            required
+            className="text-center text-lg tracking-widest"
+          />
           <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
-            {loading ? 'Please wait...' : isSignUp ? 'Sign Up' : 'Log In'}
+            {loading ? 'Checking...' : 'Unlock'}
           </Button>
         </form>
-        <button
-          onClick={() => setIsSignUp(!isSignUp)}
-          className="text-xs text-muted-foreground hover:text-foreground mt-4 block text-center w-full"
-        >
-          {isSignUp ? 'Already have an account? Log in' : 'First time? Create account'}
-        </button>
       </div>
     </div>
   );
