@@ -46,7 +46,7 @@ const Home = () => {
           </div>
         </section>
 
-        <ThePitch />
+        
         <ServicesPricing />
         <Testimonials />
         <Footer />
