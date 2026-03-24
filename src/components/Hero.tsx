@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
+import { useTrackEvent } from '@/hooks/useTrackEvent';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -10,6 +11,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const navigate = useNavigate();
+  const { trackEvent } = useTrackEvent();
   
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
@@ -48,7 +50,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <a href="tel:+13173762110">
+            <a href="tel:+13173762110" onClick={() => trackEvent('click', { label: 'call_now', location: 'hero' })}>
               <Button
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground group"
@@ -57,7 +59,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 Call Now — (317) 376-2110
               </Button>
             </a>
-            <a href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Diagnostic%20Inquiry">
+            <a href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Diagnostic%20Inquiry" onClick={() => trackEvent('click', { label: 'email_diagnostic', location: 'hero' })}>
               <Button
                 size="lg"
                 variant="outline"
@@ -67,7 +69,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </a>
-            <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer">
+            <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('click', { label: 'see_diagnostic', location: 'hero' })}>
               <Button
                 size="lg"
                 variant="outline"
@@ -110,13 +112,13 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           >
             <p className="text-sm text-muted-foreground mb-3">Ready to talk? Pick what's easiest for you:</p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-              <a href="tel:+13173762110" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-foreground">
+              <a href="tel:+13173762110" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-foreground" onClick={() => trackEvent('click', { label: 'phone_strip', location: 'hero' })}>
                 📞 (317) 376-2110
               </a>
-              <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-foreground">
+              <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-foreground" onClick={() => trackEvent('click', { label: 'email_strip', location: 'hero' })}>
                 ✉️ aetheris.technology@outlook.com
               </a>
-              <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-amber">
+              <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="glass px-4 py-2 rounded-full hover:border-amber/40 border border-transparent transition-colors text-amber" onClick={() => trackEvent('linkedin_click', { location: 'hero' })}>
                 💼 Connect on LinkedIn
               </a>
             </div>

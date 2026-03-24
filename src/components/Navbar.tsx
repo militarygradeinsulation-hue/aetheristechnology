@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
+import { useTrackEvent } from '@/hooks/useTrackEvent';
 import aetherisLogo from '@/assets/aetheris-logo.png';
 
 interface NavbarProps {
@@ -11,6 +12,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { trackEvent } = useTrackEvent();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +48,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
@@ -57,18 +58,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
+                onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
               >
                 {item.label}
               </Link>
             ))}
-            <Link to="/contact">
+            <Link to="/contact" onClick={() => trackEvent('click', { label: 'nav_contact', location: 'navbar' })}>
               <Button className="bg-primary hover:bg-primary/90">
                 Contact Us
               </Button>
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden text-foreground"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -77,7 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
             {navItems.map((item) => (
@@ -89,12 +89,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
               >
                 {item.label}
               </Link>
             ))}
-            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link to="/contact" onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: 'nav_contact', location: 'navbar_mobile' }); }}>
               <Button className="w-full bg-primary hover:bg-primary/90">
                 Contact Us
               </Button>
