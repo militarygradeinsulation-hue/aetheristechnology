@@ -26,12 +26,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] font-display">
-            <span className="text-foreground">Your Business Has</span>
+            <span className="text-foreground">This Isn't Feel-Good</span>
             <br />
-            <span className="text-foreground">Gaps You </span>
+            <span className="text-foreground">Consulting. This Is </span>
             <span className="text-gradient-amber">
-              Can't See.
+              Fix-Your-Business
             </span>
+            <br />
+            <span className="text-foreground">Consulting.</span>
           </h1>
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
