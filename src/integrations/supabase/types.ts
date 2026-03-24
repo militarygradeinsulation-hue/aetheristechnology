@@ -236,6 +236,7 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      promote_if_first_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       claim_status:
