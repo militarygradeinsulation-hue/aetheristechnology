@@ -31,6 +31,14 @@ import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pav
 import renderGreenSwings from '@/assets/renders/render-green-swings.png';
 import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
 
+import rdeFinancial from '@/assets/rde/rde-financial.png';
+import rdeSocialActivity from '@/assets/rde/rde-social-activity.png';
+import rdeSeoAnalysis from '@/assets/rde/rde-seo-analysis.png';
+import rdeTacticalSteps from '@/assets/rde/rde-tactical-steps.png';
+import rdeChainDo from '@/assets/rde/rde-chain-reactions-do.png';
+import rdeChainDont from '@/assets/rde/rde-chain-reactions-dont.png';
+import rdeSeoWoodplaync from '@/assets/rde/rde-seo-woodplaync.png';
+
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
   { src: renderXylophone, alt: 'AI-rendered outdoor xylophone with children interacting on playground' },
@@ -61,6 +69,16 @@ const RENDER_EXAMPLES = [
   { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
 ];
 
+const RDE_EXAMPLES = [
+  { src: rdeFinancial, alt: 'Company intelligence financial analysis showing revenue loss and growth opportunities' },
+  { src: rdeSocialActivity, alt: 'Social media activity audit across LinkedIn, Instagram, Facebook, YouTube, and TikTok' },
+  { src: rdeSeoAnalysis, alt: 'SEO analysis dashboard showing domain authority, traffic, backlinks, and technical metrics' },
+  { src: rdeTacticalSteps, alt: 'Tactical competitive exploitation steps with market capture and timeline projections' },
+  { src: rdeChainDo, alt: 'Chain reaction analysis showing positive SEO strategy outcomes over 12 months' },
+  { src: rdeChainDont, alt: 'Chain reaction analysis showing revenue losses from digital inaction' },
+  { src: rdeSeoWoodplaync, alt: 'Full SEO audit with page speed, mobile responsiveness, and meta tag scores' },
+];
+
 interface ServiceTier {
   icon: React.ElementType;
   title: string;
@@ -73,6 +91,7 @@ interface ServiceTier {
   payback: string;
   details?: string[];
   showExamples?: boolean;
+  showRdeExamples?: boolean;
 }
 
 const services: ServiceTier[] = [
@@ -104,6 +123,7 @@ const services: ServiceTier[] = [
     whyItPays: '70% of websites fail to convert effectively. Small improvements can increase revenue 10–50% without more traffic.',
     roiExample: 'If your site converts at 1% and improves to 1.5% — that\'s a 50% revenue increase from the same traffic.',
     payback: 'Immediate to 2 weeks',
+    showRdeExamples: true,
   },
   {
     icon: Eye,
@@ -238,6 +258,28 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2 italic">AI-generated playground renderings with realistic human interaction</p>
+                  </div>
+                )}
+
+                {/* RDE Examples Gallery */}
+                {service.showRdeExamples && (
+                  <div className="pt-3">
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-primary" /> Sample Evaluation Output
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {RDE_EXAMPLES.map((img) => (
+                        <div key={img.alt} className="rounded-lg overflow-hidden border border-border/30">
+                          <img
+                            src={img.src}
+                            alt={img.alt}
+                            className="w-full h-40 object-cover object-top hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">Real evaluation output — SEO audits, financial projections, competitive intelligence, and tactical recommendations</p>
                   </div>
                 )}
               </div>
