@@ -26,6 +26,10 @@ import renderArchiscanBlueprint from '@/assets/renders/render-archiscan-blueprin
 import renderAerialLandscapePool from '@/assets/renders/render-aerial-landscape-pool.png';
 import renderWoodlandPlayground from '@/assets/renders/render-woodland-playground.png';
 import renderClassicEstate from '@/assets/renders/render-classic-estate.png';
+import renderConcreteCircles from '@/assets/renders/render-concrete-circles.png';
+import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pavilion.png';
+import renderGreenSwings from '@/assets/renders/render-green-swings.png';
+import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
@@ -51,6 +55,10 @@ const RENDER_EXAMPLES = [
   { src: renderAerialLandscapePool, alt: 'AI-rendered aerial landscape and pool design concept for luxury property visualization' },
   { src: renderWoodlandPlayground, alt: 'AI-rendered natural woodland playground concept for destination park planning' },
   { src: renderClassicEstate, alt: 'AI-rendered classic luxury estate exterior concept for residential architectural visualization' },
+  { src: renderConcreteCircles, alt: 'AI-rendered brutalist concrete building with circular windows, fountain, and red steel staircase' },
+  { src: renderAmphitheaterPavilion, alt: 'AI-rendered modern amphitheater pavilion with timber slats and concrete water feature in park setting' },
+  { src: renderGreenSwings, alt: 'AI-rendered children playing on green swing set with wood fiber surfacing on playground' },
+  { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
 ];
 
 interface ServiceTier {
