@@ -1,199 +1,96 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Users, Brain, Mail, BarChart3 } from 'lucide-react';
-import meVsYouImg from '@/assets/me-vs-you.jpg';
 
 export const ThePitch: React.FC = () => {
+  const services = [
+    {
+      icon: Users,
+      title: 'Lead Generation',
+      description: 'I build systems that find and qualify prospects automatically — so your pipeline stays full without you chasing.',
+      tags: ['AUTO-PROSPECTING', 'LEAD SCORING', 'ROUTING'],
+    },
+    {
+      icon: Brain,
+      title: 'Intelligent CRM',
+      description: 'Every interaction tracked, every preference remembered. Your team never drops a lead or forgets a follow-up again.',
+      tags: ['FULL CONTEXT', 'CLIENT HISTORY', 'SMART FOLLOW-UPS'],
+    },
+    {
+      icon: Mail,
+      title: '24/7 Marketing Engine',
+      description: 'Automated outreach that runs while you sleep — email, content, campaigns — all working around the clock.',
+      tags: ['CONTINUOUS OUTREACH', 'AUTOMATED CAMPAIGNS', '24/7 ENGAGEMENT'],
+    },
+    {
+      icon: BarChart3,
+      title: 'You Focus on Your Business',
+      description: 'I handle the systems, the automation, and the infrastructure. You do what you do best — and collect the revenue.',
+      tags: ['CORE FOCUS', 'FULL AUTOMATION', 'SCALE REVENUE'],
+    },
+  ];
+
   return (
     <section className="relative py-24 px-4 bg-gradient-to-b from-background to-secondary/20">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              The <span className="text-amber glow-text">Co-CEO</span> Model
+              What I <span className="text-amber glow-text">Actually Do</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              I don't hand you a strategy deck and walk away. I step into your business as a partner — finding the gaps, 
-              building the systems, and staying until the numbers prove it worked.
+              I step into your business, find the gaps bleeding revenue, and build the systems to fix them.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="max-w-4xl mx-auto">
-          <RevealOnScroll delay={0.2}>
-            <div className="glass p-8 md:p-12 rounded-2xl mb-8">
-              <h3 className="text-3xl font-bold text-amber mb-6 text-center font-display">THE MAGIC ROBOT</h3>
-              
-              <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-                Running a stand is hard work! You have to squeeze lemons, wave at people to come buy, 
-                and remember who likes extra sugar. You get tired.
-              </p>
-
-              <p className="text-2xl font-bold text-foreground mb-8 text-center">
-                I step in and build you the systems to fix it.
-              </p>
-            </div>
-          </RevealOnScroll>
-
-          <div className="space-y-6">
-            <RevealOnScroll delay={0.3}>
-              <div className="glass glass-hover p-8 rounded-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-7 h-7 text-amber" />
+        <div className="grid md:grid-cols-2 gap-6">
+          {services.map((service, index) => (
+            <RevealOnScroll key={service.title} delay={0.1 + index * 0.1}>
+              <div className="glass glass-hover p-8 rounded-xl h-full">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <service.icon className="w-6 h-6 text-amber" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-foreground mb-2 font-display">
-                      It Finds New Friends
-                    </h4>
-                    <p className="text-lg text-muted-foreground mb-4">
-                      (Lead Gen) While you are busy pouring drinks, the Robot runs around the playground 
-                      and finds thirsty people. It brings them right to your stand!
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        AUTO-PROSPECTING
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        LEAD SCORING
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        ROUTING
-                      </span>
-                    </div>
-                    <div className="mt-4 p-4 bg-amber/10 rounded-lg border border-amber/20">
-                      <p className="text-sm font-semibold text-amber">Live Lead Feed</p>
+                    <h3 className="text-xl font-bold text-foreground mb-2 font-display">{service.title}</h3>
+                    <p className="text-muted-foreground mb-4">{service.description}</p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {service.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
+                          {tag}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
             </RevealOnScroll>
-
-            <RevealOnScroll delay={0.4}>
-              <div className="glass glass-hover p-8 rounded-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-7 h-7 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-foreground mb-2 font-display">
-                      It Remembers Everything
-                    </h4>
-                    <p className="text-lg text-muted-foreground mb-4">
-                      (CRM with Context) The Robot has a perfect memory. It remembers every customer—
-                      who likes extra ice, who paid last time, and who promised to come back tomorrow.
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        PERFECT MEMORY
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        CLIENT PREFERENCES
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        INTERACTION HISTORY
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.5}>
-              <div className="glass glass-hover p-8 rounded-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-7 h-7 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-foreground mb-2 font-display">
-                      It Talks While You Sleep
-                    </h4>
-                    <p className="text-lg text-muted-foreground mb-4">
-                      (24/7 Marketing Hub) Even when you're home playing video games, the Robot is still 
-                      out there telling people about your lemonade. It never gets tired!
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        CONTINUOUS OUTREACH
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        AUTOMATED CAMPAIGNS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        24/7 ENGAGEMENT
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.6}>
-              <div className="glass glass-hover p-8 rounded-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <BarChart3 className="w-7 h-7 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-foreground mb-2 font-display">
-                      You Just Pour the Lemonade
-                    </h4>
-                    <p className="text-lg text-muted-foreground mb-4">
-                      You focus on making the best lemonade. The Robot handles everything else—
-                      finding customers, remembering orders, and spreading the word. 
-                      You just pour the lemonade and collect the money.
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        FOCUS ON CORE BUSINESS
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        AUTOMATION HANDLES REST
-                      </span>
-                      <span className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                        SCALE REVENUE
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </RevealOnScroll>
-          </div>
-
-          <RevealOnScroll delay={0.7}>
-            <div className="mt-12 glass p-8 rounded-xl">
-              <img 
-                src={meVsYouImg} 
-                alt="Me vs You - I handle the automation and AI work while you receive the revenue growth and business success" 
-                className="w-full rounded-lg"
-              />
-            </div>
-          </RevealOnScroll>
-
-          <RevealOnScroll delay={0.8}>
-            <div className="mt-8 text-center glass p-8 rounded-xl border-2 border-amber/30">
-              <p className="text-2xl font-bold text-foreground mb-4">
-                That's what a Co-CEO does for your business.
-              </p>
-              <p className="text-xl text-muted-foreground mb-6">
-                I find the gaps. I build the systems. You run your business.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="tel:+13173762110">
-                  <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors active:scale-[0.97]">
-                    📞 Call (317) 376-2110
-                  </button>
-                </a>
-                <a href="mailto:aetheris.technology@outlook.com?subject=Co-CEO%20Inquiry">
-                  <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
-                    ✉️ Email Us
-                  </button>
-                </a>
-              </div>
-            </div>
-          </RevealOnScroll>
+          ))}
         </div>
+
+        <RevealOnScroll delay={0.6}>
+          <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-amber/30">
+            <p className="text-2xl font-bold text-foreground mb-4 font-display">
+              That's what a Co-CEO does for your business.
+            </p>
+            <p className="text-lg text-muted-foreground mb-6">
+              I find the gaps. I build the systems. You run your business.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a href="tel:+13173762110">
+                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors active:scale-[0.97]">
+                  📞 Call (317) 376-2110
+                </button>
+              </a>
+              <a href="mailto:aetheris.technology@outlook.com?subject=Co-CEO%20Inquiry">
+                <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
+                  ✉️ Email Us
+                </button>
+              </a>
+            </div>
+          </div>
+        </RevealOnScroll>
       </div>
     </section>
   );
