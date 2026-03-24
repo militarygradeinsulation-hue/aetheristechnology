@@ -260,6 +260,28 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                     <p className="text-xs text-muted-foreground mt-2 italic">AI-generated playground renderings with realistic human interaction</p>
                   </div>
                 )}
+
+                {/* RDE Examples Gallery */}
+                {service.showRdeExamples && (
+                  <div className="pt-3">
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-primary" /> Sample Evaluation Output
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {RDE_EXAMPLES.map((img) => (
+                        <div key={img.alt} className="rounded-lg overflow-hidden border border-border/30">
+                          <img
+                            src={img.src}
+                            alt={img.alt}
+                            className="w-full h-40 object-cover object-top hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">Real evaluation output — SEO audits, financial projections, competitive intelligence, and tactical recommendations</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
