@@ -14,7 +14,6 @@ import renderTunnelSmile from '@/assets/renders/render-tunnel-smile.png';
 import renderActivityPanel from '@/assets/renders/render-activity-panel.png';
 import renderActivityCloseup from '@/assets/renders/render-activity-closeup.png';
 import renderSteeringWheel from '@/assets/renders/render-steering-wheel.png';
-import renderSteeringWheel from '@/assets/renders/render-steering-wheel.png';
 import renderSteeringCloseup from '@/assets/renders/render-steering-closeup.png';
 import renderPuzzleGirl from '@/assets/renders/render-puzzle-girl.png';
 import renderPuzzleCloseup from '@/assets/renders/render-puzzle-closeup.png';
