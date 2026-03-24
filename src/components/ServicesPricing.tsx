@@ -3,6 +3,18 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import renderXylophone from '@/assets/renders/render-xylophone.png';
+import renderMonkeyBars from '@/assets/renders/render-monkey-bars.png';
+import renderXylophoneCloseup from '@/assets/renders/render-xylophone-closeup.png';
+import renderSwings from '@/assets/renders/render-swings.png';
+
+const RENDER_EXAMPLES = [
+  { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
+  { src: renderXylophone, alt: 'AI-rendered outdoor xylophone with children interacting on playground' },
+  { src: renderMonkeyBars, alt: 'AI-rendered monkey bars with children climbing on playground equipment' },
+  { src: renderXylophoneCloseup, alt: 'AI-rendered close-up of outdoor musical playground xylophone equipment' },
+];
+
 interface ServiceTier {
   icon: React.ElementType;
   title: string;
@@ -14,6 +26,7 @@ interface ServiceTier {
   roiExample: string;
   payback: string;
   details?: string[];
+  showExamples?: boolean;
 }
 
 const services: ServiceTier[] = [
