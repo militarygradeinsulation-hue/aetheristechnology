@@ -21,6 +21,11 @@ import renderGamePiece from '@/assets/renders/render-game-piece.png';
 import renderGameGirl from '@/assets/renders/render-game-girl.png';
 import renderGameBoy from '@/assets/renders/render-game-boy.png';
 import renderGameFocused from '@/assets/renders/render-game-focused.png';
+import renderArchiscanModernHouse from '@/assets/renders/render-archiscan-modern-house.png';
+import renderArchiscanBlueprint from '@/assets/renders/render-archiscan-blueprint.png';
+import renderAerialLandscapePool from '@/assets/renders/render-aerial-landscape-pool.png';
+import renderWoodlandPlayground from '@/assets/renders/render-woodland-playground.png';
+import renderClassicEstate from '@/assets/renders/render-classic-estate.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
