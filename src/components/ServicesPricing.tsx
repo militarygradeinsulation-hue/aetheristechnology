@@ -69,6 +69,16 @@ const RENDER_EXAMPLES = [
   { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
 ];
 
+const RDE_EXAMPLES = [
+  { src: rdeFinancial, alt: 'Company intelligence financial analysis showing revenue loss and growth opportunities' },
+  { src: rdeSocialActivity, alt: 'Social media activity audit across LinkedIn, Instagram, Facebook, YouTube, and TikTok' },
+  { src: rdeSeoAnalysis, alt: 'SEO analysis dashboard showing domain authority, traffic, backlinks, and technical metrics' },
+  { src: rdeTacticalSteps, alt: 'Tactical competitive exploitation steps with market capture and timeline projections' },
+  { src: rdeChainDo, alt: 'Chain reaction analysis showing positive SEO strategy outcomes over 12 months' },
+  { src: rdeChainDont, alt: 'Chain reaction analysis showing revenue losses from digital inaction' },
+  { src: rdeSeoWoodplaync, alt: 'Full SEO audit with page speed, mobile responsiveness, and meta tag scores' },
+];
+
 interface ServiceTier {
   icon: React.ElementType;
   title: string;
