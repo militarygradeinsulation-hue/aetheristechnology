@@ -39,7 +39,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
             <span className="text-base md:text-lg font-semibold text-amber">
-              I step in as your Co-CEO. I find them. I close them. I prove it with numbers.
+              I step in as your Co-CEO. I find the gaps. I close the gaps. I prove it with numbers.
             </span>
           </div>
 
