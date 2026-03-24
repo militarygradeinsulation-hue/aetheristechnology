@@ -3,6 +3,7 @@ import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { ThePitch } from '@/components/ThePitch';
+import { ServicesPricing } from '@/components/ServicesPricing';
 import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -46,6 +47,7 @@ const Home = () => {
         </section>
 
         <ThePitch />
+        <ServicesPricing />
         <Testimonials />
         <Footer />
       </div>
