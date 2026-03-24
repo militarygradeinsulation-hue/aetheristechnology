@@ -172,6 +172,28 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                   <span className="text-xs font-semibold text-foreground uppercase tracking-wider">Payback:</span>
                   <span className="text-sm text-primary font-medium">{service.payback}</span>
                 </div>
+
+                {/* Render Examples Gallery */}
+                {service.showExamples && (
+                  <div className="pt-3">
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Image className="w-3.5 h-3.5 text-primary" /> Example Renders
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {RENDER_EXAMPLES.map((img) => (
+                        <div key={img.alt} className="rounded-lg overflow-hidden border border-border/30">
+                          <img
+                            src={img.src}
+                            alt={img.alt}
+                            className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">AI-generated playground renderings with realistic human interaction</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
