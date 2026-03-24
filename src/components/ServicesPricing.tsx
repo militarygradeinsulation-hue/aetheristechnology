@@ -73,6 +73,12 @@ const RENDER_EXAMPLES = [
   { src: renderAmphitheaterPavilion, alt: 'AI-rendered modern amphitheater pavilion with timber slats and concrete water feature in park setting' },
   { src: renderGreenSwings, alt: 'AI-rendered children playing on green swing set with wood fiber surfacing on playground' },
   { src: renderXylophoneKids, alt: 'AI-rendered children laughing while playing outdoor xylophone on playground equipment' },
+  { src: renderScreenshot1, alt: 'AI-rendered playground visualization example showcasing realistic scene composition' },
+  { src: renderScreenshot2, alt: 'AI-rendered outdoor recreation area with detailed environmental design' },
+  { src: renderScreenshot3, alt: 'AI-rendered playground equipment render demonstrating product visualization' },
+  { src: renderScreenshot4, alt: 'AI-rendered interactive play area with realistic lighting and materials' },
+  { src: renderScreenshot5, alt: 'AI-rendered recreation space concept with immersive scene detail' },
+  { src: renderScreenshot6, alt: 'AI-rendered playground design render with lifelike human interaction' },
 ];
 
 const RDE_EXAMPLES = [
