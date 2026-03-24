@@ -31,6 +31,14 @@ import renderAmphitheaterPavilion from '@/assets/renders/render-amphitheater-pav
 import renderGreenSwings from '@/assets/renders/render-green-swings.png';
 import renderXylophoneKids from '@/assets/renders/render-xylophone-kids.png';
 
+import rdeFinancial from '@/assets/rde/rde-financial.png';
+import rdeSocialActivity from '@/assets/rde/rde-social-activity.png';
+import rdeSeoAnalysis from '@/assets/rde/rde-seo-analysis.png';
+import rdeTacticalSteps from '@/assets/rde/rde-tactical-steps.png';
+import rdeChainDo from '@/assets/rde/rde-chain-reactions-do.png';
+import rdeChainDont from '@/assets/rde/rde-chain-reactions-dont.png';
+import rdeSeoWoodplaync from '@/assets/rde/rde-seo-woodplaync.png';
+
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
   { src: renderXylophone, alt: 'AI-rendered outdoor xylophone with children interacting on playground' },
