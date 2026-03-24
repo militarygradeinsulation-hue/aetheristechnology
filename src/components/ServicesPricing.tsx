@@ -40,6 +40,7 @@ const services: ServiceTier[] = [
     whyItPays: 'Visuals with people increase engagement by up to 38%. High-quality imagery can boost conversion by up to 30%.',
     roiExample: 'One improved image helps win one deal on a $25K–$150K+ project. A $400 image pays for itself instantly.',
     payback: 'Immediate',
+    showExamples: true,
     details: [
       '$50 — Basic enhancement (clarity, lighting, polish)',
       '$125 — Close-up or product-focused render',
