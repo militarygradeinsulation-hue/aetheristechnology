@@ -195,7 +195,7 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                     <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Image className="w-3.5 h-3.5 text-primary" /> Example Renders
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {RENDER_EXAMPLES.map((img) => (
                         <div key={img.alt} className="rounded-lg overflow-hidden border border-border/30">
                           <img
