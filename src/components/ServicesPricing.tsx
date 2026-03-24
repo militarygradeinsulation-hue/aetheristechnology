@@ -15,6 +15,12 @@ import renderActivityPanel from '@/assets/renders/render-activity-panel.png';
 import renderActivityCloseup from '@/assets/renders/render-activity-closeup.png';
 import renderSteeringWheel from '@/assets/renders/render-steering-wheel.png';
 import renderSteeringCloseup from '@/assets/renders/render-steering-closeup.png';
+import renderPuzzleGirl from '@/assets/renders/render-puzzle-girl.png';
+import renderPuzzleCloseup from '@/assets/renders/render-puzzle-closeup.png';
+import renderGamePiece from '@/assets/renders/render-game-piece.png';
+import renderGameGirl from '@/assets/renders/render-game-girl.png';
+import renderGameBoy from '@/assets/renders/render-game-boy.png';
+import renderGameFocused from '@/assets/renders/render-game-focused.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
@@ -29,6 +35,12 @@ const RENDER_EXAMPLES = [
   { src: renderActivityCloseup, alt: 'AI-rendered close-up of child interacting with playground steering panel' },
   { src: renderSteeringWheel, alt: 'AI-rendered child turning orange steering wheel on playground equipment' },
   { src: renderSteeringCloseup, alt: 'AI-rendered close-up of boy playing with playground steering wheel toy' },
+  { src: renderPuzzleGirl, alt: 'AI-rendered girl playing with purple puzzle panel on playground equipment' },
+  { src: renderPuzzleCloseup, alt: 'AI-rendered close-up of child exploring purple tic-tac-toe playground panel' },
+  { src: renderGamePiece, alt: 'AI-rendered child moving game piece on purple 3-in-a-row playground board' },
+  { src: renderGameGirl, alt: 'AI-rendered girl playing 3-in-a-row game on purple playground panel' },
+  { src: renderGameBoy, alt: 'AI-rendered boy laughing while playing tic-tac-toe on playground equipment' },
+  { src: renderGameFocused, alt: 'AI-rendered child focused on purple playground game board pieces' },
 ];
 
 interface ServiceTier {
