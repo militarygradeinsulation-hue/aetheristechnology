@@ -21,6 +21,11 @@ import renderGamePiece from '@/assets/renders/render-game-piece.png';
 import renderGameGirl from '@/assets/renders/render-game-girl.png';
 import renderGameBoy from '@/assets/renders/render-game-boy.png';
 import renderGameFocused from '@/assets/renders/render-game-focused.png';
+import renderArchiscanModernHouse from '@/assets/renders/render-archiscan-modern-house.png';
+import renderArchiscanBlueprint from '@/assets/renders/render-archiscan-blueprint.png';
+import renderAerialLandscapePool from '@/assets/renders/render-aerial-landscape-pool.png';
+import renderWoodlandPlayground from '@/assets/renders/render-woodland-playground.png';
+import renderClassicEstate from '@/assets/renders/render-classic-estate.png';
 
 const RENDER_EXAMPLES = [
   { src: renderSwings, alt: 'AI-rendered playground swing set with children playing on wood fiber surfacing' },
@@ -41,6 +46,11 @@ const RENDER_EXAMPLES = [
   { src: renderGameGirl, alt: 'AI-rendered girl playing 3-in-a-row game on purple playground panel' },
   { src: renderGameBoy, alt: 'AI-rendered boy laughing while playing tic-tac-toe on playground equipment' },
   { src: renderGameFocused, alt: 'AI-rendered child focused on purple playground game board pieces' },
+  { src: renderArchiscanModernHouse, alt: 'AI-rendered modern architectural concept home with reflective water and wood deck' },
+  { src: renderArchiscanBlueprint, alt: 'Architectural blueprint concept of modern building generated from design-to-render workflow' },
+  { src: renderAerialLandscapePool, alt: 'AI-rendered aerial landscape and pool design concept for luxury property visualization' },
+  { src: renderWoodlandPlayground, alt: 'AI-rendered natural woodland playground concept for destination park planning' },
+  { src: renderClassicEstate, alt: 'AI-rendered classic luxury estate exterior concept for residential architectural visualization' },
 ];
 
 interface ServiceTier {
