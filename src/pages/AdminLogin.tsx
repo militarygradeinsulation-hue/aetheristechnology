@@ -31,14 +31,23 @@ const AdminLogin: React.FC = () => {
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+        const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast({ title: 'Check your email', description: 'Verify your email then come back to log in.' });
-        setIsSignUp(false);
+        // Auto-confirm is enabled, so user is immediately logged in
+        if (signUpData.user) {
+          // Try to auto-promote as first admin
+          await supabase.rpc('promote_if_first_admin', { _user_id: signUpData.user.id });
+          const { data: adminCheck } = await supabase.from('admin_users').select('id').eq('user_id', signUpData.user.id).maybeSingle();
+          if (adminCheck) {
+            navigate('/admin', { replace: true });
+            return;
+          }
+          await supabase.auth.signOut();
+          toast({ title: 'Access Denied', description: 'You are not authorized as an admin.', variant: 'destructive' });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        // Check admin
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error('No session');
         const { data } = await supabase.from('admin_users').select('id').eq('user_id', session.user.id).maybeSingle();
