@@ -1,90 +1,46 @@
 
 
-## Plan: Admin Dashboard, Contact Form, and Site Analytics
+# Growth Strategy Implementation Plan
 
-### Overview
-Build a self-contained analytics and lead management system directly into the site. Three major pieces: (1) track all visitor interactions, (2) save contact form submissions, (3) password-protected admin dashboard to view everything.
+This plan covers the **buildable website changes** from the growth strategy. Items like LinkedIn posting cadence, GMB setup, and LinkedIn Ads are external actions outside the codebase.
 
----
+## What We'll Build
 
-### Database Changes (3 new tables)
+### 1. Free AI Readiness Assessment (Lead Magnet)
+Create a new `/assessment` page with an interactive "AI Readiness Score" calculator. Users answer 5-6 quick multiple-choice questions about their operations (CRM usage, automation level, data tracking, etc.), enter their email, and receive an instant score with a breakdown. The submission saves to a new `assessment_leads` database table.
 
-**`site_events`** — tracks page views, button clicks, LinkedIn clicks, etc.
-- `id`, `event_type` (page_view, click, linkedin_click, etc.), `event_data` (JSONB — page path, button label, referrer, etc.), `session_id` (anonymous UUID stored in localStorage), `ip_address` (text, nullable), `user_agent`, `created_at`
-- RLS: public INSERT (anyone can log events), SELECT restricted to admin
+- **New page**: `src/pages/AssessmentPage.tsx` — multi-step quiz UI with progress bar, ending in email capture + instant score reveal
+- **New component**: `src/components/AIReadinessAssessment.tsx` — quiz logic, scoring algorithm, and results display
+- **Database**: New `assessment_leads` table (id, email, name, company, answers jsonb, score integer, created_at) with RLS allowing anonymous inserts
+- **Route**: Add `/assessment` to App.tsx
+- **Nav update**: Add "Free Assessment" CTA button to Navbar (amber/highlighted style)
 
-**`contact_submissions`** — stores form fills from the homepage
-- `id`, `name`, `email`, `phone` (nullable), `company` (nullable), `message`, `service_interest` (nullable), `is_read` (boolean, default false), `created_at`
-- RLS: public INSERT, SELECT restricted to admin
+### 2. Mid-Scroll CTA in Blog Posts
+Insert a persistent CTA block midway through every blog post, breaking up long content and giving readers a clear next step.
 
-**`admin_users`** — simple admin access table
-- `id`, `user_id` (references auth.users), `created_at`
-- RLS: SELECT only for the user's own row
+- **Modify `BlogPostPage.tsx`**: After rendering the post content via `dangerouslySetInnerHTML`, inject a mid-article CTA component. Since content is HTML string, we'll add the CTA as a React component rendered between a split of the content (split at roughly the halfway `<h2>` or `<p>` tag).
+- **New component**: `src/components/BlogMidCTA.tsx` — compact card with "Get Your Free AI Readiness Score" linking to `/assessment`, plus a secondary "Book a Diagnostic" CTA.
 
-A `is_admin` security definer function will check if a user_id exists in `admin_users`.
+### 3. Sticky Header CTA
+Add a sticky "Free Diagnostic" banner that appears after scrolling past the hero on all pages.
 
----
+- **Modify `Navbar.tsx`**: When `isScrolled` is true, show a slim secondary bar below the nav with "Get Your Free AI Readiness Score →" linking to `/assessment`. This uses the existing scroll detection logic.
 
-### New Components & Pages
+### 4. SEO Meta Description Optimization
+Update meta descriptions across all service/about pages to include "AI Business Consulting Indianapolis" keyword targeting.
 
-**1. Homepage Contact Form (`src/components/ContactForm.tsx`)**
-- Fields: Name, Email, Phone (optional), Company (optional), Message, Service Interest (dropdown matching your 5 tiers)
-- On submit: inserts into `contact_submissions` + shows success toast
-- Placed on the homepage between ServicesPricing and Testimonials
+- **Modify**: `ServicesPage.tsx`, `AboutPage.tsx`, `ContactPage.tsx`, `Home.tsx` — update `<SEOHead>` description props to naturally include Indianapolis-focused keywords
+- **Modify**: `public/sitemap.xml` — add `/assessment` page entry
 
-**2. Event Tracking Hook (`src/hooks/useTrackEvent.ts`)**
-- Generates/stores a `session_id` in localStorage
-- Exposes `trackEvent(type, data)` function that inserts into `site_events`
-- Auto-tracks page views on route change (wrap in App.tsx)
-- Specific click tracking added to: LinkedIn links (Footer, ContactModal, FloatingContact, Hero), CTA buttons, nav links
+### 5. Homepage Contact Form Enhancement
+Supplement the existing contact form with a prominent lead magnet CTA above it, directing users to the assessment first.
 
-**3. Admin Login Page (`src/pages/AdminLogin.tsx`)**
-- Simple email/password login using Supabase Auth
-- After login, checks `admin_users` table — if not admin, shows "Access Denied"
-- Route: `/admin/login`
+- **Modify `ContactForm.tsx`**: Add a banner above the form: "Not ready to talk? Take the free 2-minute AI Readiness Assessment first →"
 
-**4. Admin Dashboard (`src/pages/AdminDashboard.tsx`)**
-- Protected route — redirects to login if not authenticated admin
-- Route: `/admin`
-- Sections:
-  - **Overview cards**: Total visitors (unique sessions), total page views, total form submissions, LinkedIn clicks
-  - **Contact Submissions table**: Name, email, phone, company, message, service interest, date — with mark-as-read toggle
-  - **Event Log**: Filterable table of recent events (page views, clicks) with timestamps
-  - **LinkedIn Click count** prominently displayed
-- Real-time refresh button + auto-refresh option
+## Technical Details
 
-**5. Admin Nav Entry**
-- Small "Admin" link in the footer (subtle, not prominent) — links to `/admin/login`
-- No visible admin indicator in main nav
-
----
-
-### Auth Setup
-- Enable email/password auth (no auto-confirm — you'll verify your email once)
-- After first deploy, you manually sign up once, then I insert your user_id into `admin_users` via the database
-- Or: use a known email check in the security definer function for initial bootstrap
-
----
-
-### Click Tracking Implementation
-All LinkedIn links across the site get an `onClick` handler that calls `trackEvent('linkedin_click', { location: 'footer' })` (or hero, modal, floating, etc.). Same pattern for CTA buttons, nav links, and any other trackable interaction.
-
----
-
-### File Summary
-
-| Action | File |
-|--------|------|
-| Create | `src/components/ContactForm.tsx` |
-| Create | `src/hooks/useTrackEvent.ts` |
-| Create | `src/pages/AdminLogin.tsx` |
-| Create | `src/pages/AdminDashboard.tsx` |
-| Modify | `src/pages/Home.tsx` — add ContactForm |
-| Modify | `src/App.tsx` — add admin routes + page view tracking |
-| Modify | `src/components/Footer.tsx` — add admin link + LinkedIn tracking |
-| Modify | `src/components/Hero.tsx` — add click tracking |
-| Modify | `src/components/ContactModal.tsx` — add click tracking |
-| Modify | `src/components/FloatingContact.tsx` — add click tracking |
-| Modify | `src/components/Navbar.tsx` — add click tracking |
-| Migration | Create `site_events`, `contact_submissions`, `admin_users` tables + RLS + `is_admin` function |
+- **Database migration**: One new table `assessment_leads` with anonymous insert RLS policy (no auth required for lead capture)
+- **Scoring logic**: Client-side calculation based on weighted answers (no backend needed for score)
+- **Files created**: `AssessmentPage.tsx`, `AIReadinessAssessment.tsx`, `BlogMidCTA.tsx`
+- **Files modified**: `App.tsx`, `Navbar.tsx`, `BlogPostPage.tsx`, `ContactForm.tsx`, `ServicesPage.tsx`, `AboutPage.tsx`, `ContactPage.tsx`, `Home.tsx`, `sitemap.xml`
 
