@@ -51,6 +51,9 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
+        <RevealOnScroll>
+          <WebsiteScanner onContactClick={() => setIsContactModalOpen(true)} />
+        </RevealOnScroll>
         <ServicesPricing />
         <ToolsCapabilities />
         <ContactForm />
