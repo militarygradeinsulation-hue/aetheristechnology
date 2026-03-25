@@ -75,6 +75,13 @@ export const ContactForm: React.FC = () => {
   return (
     <section className="py-20 px-4" id="contact-form">
       <div className="max-w-2xl mx-auto">
+        {/* Lead magnet nudge */}
+        <div className="glass rounded-xl p-4 mb-8 text-center border border-primary/20">
+          <p className="text-muted-foreground text-sm">
+            Not ready to talk? <Link to="/assessment" className="text-primary font-semibold hover:underline">Take the free 2-minute AI Readiness Assessment first →</Link>
+          </p>
+        </div>
+
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
             Tell Me What's <span className="text-gradient-amber">Broken</span>
