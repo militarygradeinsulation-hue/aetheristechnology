@@ -32,6 +32,36 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_leads: {
+        Row: {
+          answers: Json
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          score: number
+        }
+        Insert: {
+          answers?: Json
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          score?: number
+        }
+        Update: {
+          answers?: Json
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          score?: number
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string

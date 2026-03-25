@@ -13,7 +13,7 @@ const ContactPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Contact Aetheris AI — Get Your Business Diagnostic"
-        description="Ready to fix what's broken? Call (317) 376-2110 or email aetheris.technology@outlook.com. Start with a 14-Day Operational Systems Diagnostic. Indianapolis, IN."
+        description="Ready to fix what's broken? AI business consulting Indianapolis — call (317) 376-2110 or email aetheris.technology@outlook.com. Start with a 14-Day Operational Systems Diagnostic."
         path="/contact"
         jsonLd={{
           "@context": "https://schema.org",

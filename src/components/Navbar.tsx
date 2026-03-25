@@ -31,6 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'About', href: '/about' },
   ];
 
+  // Sticky CTA bar shown after scroll
+  const showStickyCTA = isScrolled;
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -102,6 +105,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           </div>
         )}
       </div>
+
+      {/* Sticky CTA Banner */}
+      {showStickyCTA && (
+        <div className="bg-primary/90 backdrop-blur-sm py-1.5 px-4 text-center">
+          <Link
+            to="/assessment"
+            className="text-primary-foreground text-sm font-medium hover:underline inline-flex items-center gap-1"
+            onClick={() => trackEvent('click', { label: 'sticky_cta_assessment', location: 'navbar_sticky' })}
+          >
+            🔥 Get Your Free AI Readiness Score → 
+          </Link>
+        </div>
+      )}
     </nav>
   );
 };

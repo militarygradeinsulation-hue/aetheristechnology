@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 
 import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
+import { BlogMidCTA } from '@/components/BlogMidCTA';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -218,11 +219,24 @@ const BlogPostPage = () => {
                   </div>
                 </header>
 
-                {/* Post Content */}
-                <div 
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: prepareContent(post.content) }}
-                />
+                {/* Post Content with Mid-Scroll CTA */}
+                {(() => {
+                  const html = prepareContent(post.content);
+                  // Split at roughly the halfway h2 tag
+                  const h2Matches = [...html.matchAll(/<h2[\s>]/gi)];
+                  const midIndex = h2Matches.length >= 2
+                    ? h2Matches[Math.floor(h2Matches.length / 2)].index
+                    : Math.floor(html.length / 2);
+                  const firstHalf = html.slice(0, midIndex);
+                  const secondHalf = html.slice(midIndex);
+                  return (
+                    <>
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: firstHalf }} />
+                      <BlogMidCTA />
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: secondHalf }} />
+                    </>
+                  );
+                })()}
 
                 {/* CTA */}
                 <div className="mt-16 glass rounded-2xl p-8 md:p-12 text-center">
