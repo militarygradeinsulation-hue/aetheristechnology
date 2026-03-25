@@ -114,7 +114,7 @@ Provide your analysis as a JSON object with this exact structure. Return ONLY va
   ]
 }
 
-Include 6-8 findings. Order by severity (critical first). Be specific to this website — don't give generic advice.`,
+Include 12-16 findings across all categories. Order by severity (critical first). Be specific to this website — reference actual page elements, missing sections, or weak copy you observed. Each description should be 3-4 sentences explaining the gap, its business impact, and what best practice looks like.`,
           },
         ],
         tools: [
