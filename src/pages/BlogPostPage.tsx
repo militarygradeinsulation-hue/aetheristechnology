@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 
 import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
+import { BlogMidCTA } from '@/components/BlogMidCTA';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
