@@ -7,6 +7,8 @@ import { ToolsCapabilities } from '@/components/ToolsCapabilities';
 import { ContactForm } from '@/components/ContactForm';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
+import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { SEOHead } from '@/components/SEOHead';
 
 const Home = () => {
