@@ -16,6 +16,7 @@ import TermsPage from "./pages/TermsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AssessmentPage from "./pages/AssessmentPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
