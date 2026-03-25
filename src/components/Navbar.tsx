@@ -31,6 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'About', href: '/about' },
   ];
 
+  // Sticky CTA bar shown after scroll
+  const showStickyCTA = isScrolled;
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
