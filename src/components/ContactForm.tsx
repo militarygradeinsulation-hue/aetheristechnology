@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Send, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SERVICE_OPTIONS = [
   'The Diagnostic — $4,500',
