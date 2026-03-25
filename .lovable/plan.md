@@ -1,46 +1,62 @@
 
 
-# Growth Strategy Implementation Plan
+# Website Scanner with Gated Results
 
-This plan covers the **buildable website changes** from the growth strategy. Items like LinkedIn posting cadence, GMB setup, and LinkedIn Ads are external actions outside the codebase.
+## Overview
+Add a "Scan Your Website" tool to the homepage. A visitor enters their URL, the system scrapes it via Firecrawl and analyzes it with AI to identify business/digital gaps. The first 2-3 findings display clearly, then the remaining results fade to transparent with a gradient overlay and a "Contact us to see your full report" CTA.
+
+## Prerequisites
+- **Firecrawl connector** must be linked to the project (you have 3 connections available, we'll link one)
 
 ## What We'll Build
 
-### 1. Free AI Readiness Assessment (Lead Magnet)
-Create a new `/assessment` page with an interactive "AI Readiness Score" calculator. Users answer 5-6 quick multiple-choice questions about their operations (CRM usage, automation level, data tracking, etc.), enter their email, and receive an instant score with a breakdown. The submission saves to a new `assessment_leads` database table.
+### 1. Edge Function: `scan-website`
+- Accepts a URL from the frontend
+- Calls Firecrawl scrape API (formats: `markdown`, `branding`, `links`) to pull the site's content, brand assets, and link structure
+- Sends the scraped data to the Lovable AI gateway (Gemini Flash) with a prompt that produces a structured JSON analysis:
+  - **Overall Score** (0-100)
+  - **6-8 gap findings**, each with: category (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency), severity (critical/warning/info), title, and description
+- Returns the structured analysis to the frontend
 
-- **New page**: `src/pages/AssessmentPage.tsx` — multi-step quiz UI with progress bar, ending in email capture + instant score reveal
-- **New component**: `src/components/AIReadinessAssessment.tsx` — quiz logic, scoring algorithm, and results display
-- **Database**: New `assessment_leads` table (id, email, name, company, answers jsonb, score integer, created_at) with RLS allowing anonymous inserts
-- **Route**: Add `/assessment` to App.tsx
-- **Nav update**: Add "Free Assessment" CTA button to Navbar (amber/highlighted style)
+### 2. New Component: `WebsiteScanner.tsx`
+- URL input field with "Scan My Website" button
+- Loading state with animated progress indicators
+- Results display:
+  - Overall score (circular gauge)
+  - Gap cards in a vertical list
+  - **First 3 gaps**: fully visible
+  - **Remaining gaps**: rendered but covered by a CSS gradient fade (from visible to transparent white/dark overlay)
+  - Over the faded area: a locked overlay with "Unlock Your Full Report" CTA linking to `/contact` or opening the contact modal
+- Tracks scan events via `useTrackEvent`
 
-### 2. Mid-Scroll CTA in Blog Posts
-Insert a persistent CTA block midway through every blog post, breaking up long content and giving readers a clear next step.
+### 3. Database: `website_scans` table
+- Stores: id, url, score, gaps (jsonb), created_at
+- RLS: anonymous insert allowed (lead capture without auth)
+- Captures scan data for the admin dashboard
 
-- **Modify `BlogPostPage.tsx`**: After rendering the post content via `dangerouslySetInnerHTML`, inject a mid-article CTA component. Since content is HTML string, we'll add the CTA as a React component rendered between a split of the content (split at roughly the halfway `<h2>` or `<p>` tag).
-- **New component**: `src/components/BlogMidCTA.tsx` — compact card with "Get Your Free AI Readiness Score" linking to `/assessment`, plus a secondary "Book a Diagnostic" CTA.
-
-### 3. Sticky Header CTA
-Add a sticky "Free Diagnostic" banner that appears after scrolling past the hero on all pages.
-
-- **Modify `Navbar.tsx`**: When `isScrolled` is true, show a slim secondary bar below the nav with "Get Your Free AI Readiness Score →" linking to `/assessment`. This uses the existing scroll detection logic.
-
-### 4. SEO Meta Description Optimization
-Update meta descriptions across all service/about pages to include "AI Business Consulting Indianapolis" keyword targeting.
-
-- **Modify**: `ServicesPage.tsx`, `AboutPage.tsx`, `ContactPage.tsx`, `Home.tsx` — update `<SEOHead>` description props to naturally include Indianapolis-focused keywords
-- **Modify**: `public/sitemap.xml` — add `/assessment` page entry
-
-### 5. Homepage Contact Form Enhancement
-Supplement the existing contact form with a prominent lead magnet CTA above it, directing users to the assessment first.
-
-- **Modify `ContactForm.tsx`**: Add a banner above the form: "Not ready to talk? Take the free 2-minute AI Readiness Assessment first →"
+### 4. Homepage Integration
+- Insert `WebsiteScanner` between `Hero` and `ServicesPricing` on `Home.tsx`
+- Wrapped in `RevealOnScroll` for consistent animation
 
 ## Technical Details
 
-- **Database migration**: One new table `assessment_leads` with anonymous insert RLS policy (no auth required for lead capture)
-- **Scoring logic**: Client-side calculation based on weighted answers (no backend needed for score)
-- **Files created**: `AssessmentPage.tsx`, `AIReadinessAssessment.tsx`, `BlogMidCTA.tsx`
-- **Files modified**: `App.tsx`, `Navbar.tsx`, `BlogPostPage.tsx`, `ContactForm.tsx`, `ServicesPage.tsx`, `AboutPage.tsx`, `ContactPage.tsx`, `Home.tsx`, `sitemap.xml`
+**Fade effect** (CSS gradient overlay):
+```text
+┌─────────────────────────┐
+│  Gap 1: Missing CTAs    │  ← fully visible
+│  Gap 2: Weak SEO meta   │  ← fully visible  
+│  Gap 3: No mobile CTA   │  ← fully visible
+│░░Gap░4:░Brand░incons░░░░│  ← fading
+│░░░░░░░░░░░░░░░░░░░░░░░░░│
+│   🔒 Unlock Full Report │  ← overlay CTA
+│   [Contact Us to See]   │
+│░░░░░░░░░░░░░░░░░░░░░░░░░│
+└─────────────────────────┘
+```
+
+Implemented via a `relative` container with an `absolute` gradient div (`bg-gradient-to-b from-transparent to-background`) starting at ~40% height.
+
+**Files created**: `supabase/functions/scan-website/index.ts`, `src/components/WebsiteScanner.tsx`
+**Files modified**: `src/pages/Home.tsx`
+**Migration**: New `website_scans` table
 
