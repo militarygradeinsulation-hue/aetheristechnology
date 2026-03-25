@@ -260,6 +260,30 @@ export type Database = {
         }
         Relationships: []
       }
+      website_scans: {
+        Row: {
+          created_at: string
+          gaps: Json
+          id: string
+          score: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          gaps?: Json
+          id?: string
+          score?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          gaps?: Json
+          id?: string
+          score?: number
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
