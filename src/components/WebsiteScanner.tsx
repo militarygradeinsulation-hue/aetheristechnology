@@ -199,14 +199,14 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
                 {/* Gated gaps with fade */}
                 {result.gaps.length > VISIBLE_GAPS && (
                   <div className="relative mt-3">
-                    <div className="space-y-3 pointer-events-none select-none" aria-hidden="true">
+                    <div className="space-y-3 pointer-events-none select-none blur-[2px]" aria-hidden="true">
                       {result.gaps.slice(VISIBLE_GAPS).map((gap, i) => (
                         <GapCard key={i + VISIBLE_GAPS} gap={gap} index={i + VISIBLE_GAPS} />
                       ))}
                     </div>
 
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background flex flex-col items-center justify-end pb-8">
+                    {/* Gradient overlay — heavier fade */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/90 to-background flex flex-col items-center justify-end pb-8">
                       <Lock className="w-8 h-8 text-primary mb-3" />
                       <h3 className="text-lg font-semibold text-foreground mb-1">
                         {result.gaps.length - VISIBLE_GAPS} more findings hidden
