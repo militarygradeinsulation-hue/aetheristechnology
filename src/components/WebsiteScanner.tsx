@@ -93,7 +93,7 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
   const [error, setError] = useState('');
   const { trackEvent } = useTrackEvent();
 
-  const VISIBLE_GAPS = 3;
+  const VISIBLE_GAPS = 2;
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
