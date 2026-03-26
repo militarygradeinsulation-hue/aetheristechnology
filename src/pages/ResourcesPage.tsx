@@ -73,7 +73,7 @@ const ResourcesPage = () => {
           "@type": "CollectionPage",
           "name": "Aetheris AI Strategic Playbooks",
           "description": "Free downloadable strategic frameworks for business leaders navigating AI-powered markets.",
-          "url": "https://aetheristechnology.lovable.app/resources",
+          "url": "https://aetheris.technology/resources",
           "numberOfItems": RESOURCES.length,
           "itemListElement": RESOURCES.map((r, i) => ({
             "@type": "ListItem",
