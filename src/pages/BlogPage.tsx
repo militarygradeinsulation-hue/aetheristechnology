@@ -21,11 +21,11 @@ const BlogPage = () => {
           "@type": "Blog",
           "name": "Aetheris AI Blog",
           "description": "Daily AI and business strategy insights for leaders who want to stop wasting money on broken systems.",
-          "url": "https://aetheristechnology.lovable.app/blog",
+          "url": "https://aetheris.technology/blog",
           "publisher": {
             "@type": "Organization",
             "name": "Aetheris AI",
-            "logo": { "@type": "ImageObject", "url": "https://aetheristechnology.lovable.app/aetheris-logo.png" }
+            "logo": { "@type": "ImageObject", "url": "https://aetheris.technology/aetheris-logo.png" }
           }
         }}
       />

@@ -19,7 +19,7 @@ const ServicesPage = () => {
           "@context": "https://schema.org",
           "@type": "Service",
           "serviceType": "Business Consulting & AI Automation",
-          "provider": { "@type": "Organization", "name": "Aetheris AI", "url": "https://aetheristechnology.lovable.app" },
+          "provider": { "@type": "Organization", "name": "Aetheris AI", "url": "https://aetheris.technology" },
           "areaServed": { "@type": "Country", "name": "United States" },
           "description": "Full-spectrum business consulting services including operational diagnostics, CRM development, AI automation strategy, and ongoing digital oversight."
         }}

@@ -9,7 +9,7 @@ interface SEOHeadProps {
   jsonLd?: Record<string, unknown>;
 }
 
-const SITE_URL = 'https://aetheristechnology.lovable.app';
+const SITE_URL = 'https://aetheris.technology';
 const SITE_NAME = 'Aetheris AI';
 const OG_IMAGE = `${SITE_URL}/aetheris-logo.png`;
 
