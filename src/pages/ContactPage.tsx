@@ -34,6 +34,7 @@ const ContactPage = () => {
         <div className="pt-24">
           <Contact onContactClick={() => setIsContactModalOpen(true)} />
         </div>
+        <HubSpotMeeting />
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
