@@ -27,12 +27,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-sm text-muted-foreground">Business Consulting &amp; Digital Intelligence</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.95] font-display tracking-tight text-left">
-            <span className="block text-foreground">Excuse Me,</span>
-            <span className="block text-foreground pl-[10%] md:pl-[15%]">But You're</span>
-            <span className="block text-gradient-amber pl-[20%] md:pl-[30%]">
-              Leaking.
+          <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.95] font-display tracking-tight">
+            <span className="text-foreground">This Isn't Feel-Good Consulting.</span>
+            <br />
+            <span className="text-foreground">This Is </span>
+            <span className="text-gradient-amber">
+              Fix-Your-Business
             </span>
+            <span className="text-foreground"> Consulting.</span>
           </h1>
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
