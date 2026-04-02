@@ -36,7 +36,6 @@ serve(async (req) => {
       });
     }
 
-    // Format URL
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
       formattedUrl = `https://${formattedUrl}`;
@@ -44,7 +43,6 @@ serve(async (req) => {
 
     console.log("Scraping URL:", formattedUrl);
 
-    // Scrape with Firecrawl
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: {
@@ -75,7 +73,6 @@ serve(async (req) => {
 
     console.log("Scrape successful, analyzing with AI...");
 
-    // Analyze with Lovable AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -83,15 +80,15 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `You are a senior digital strategist and website auditor for Aetheris AI, an Indianapolis-based business consulting firm. Analyze the provided website content and produce a gap analysis. Be direct, specific, and actionable. Reference actual content from the site when possible.`,
+            content: `You are a senior digital strategist and website auditor for Aetheris Technology, an Indianapolis-based strategic business architecture firm. You produce Executive Diagnostic Reports that identify revenue leaks, operational gaps, and strategic opportunities. Be direct, specific, and reference actual content from the site. Every gap must include an estimated annual cost and a projected ROI from fixing it.`,
           },
           {
             role: "user",
-            content: `Analyze this website and identify business/digital gaps.
+            content: `Produce a full Executive Diagnostic Report for this website.
 
 URL: ${formattedUrl}
 Title: ${metadata.title || "Unknown"}
@@ -99,34 +96,36 @@ Description: ${metadata.description || "None found"}
 Number of links found: ${links.length}
 
 Page content (markdown):
-${markdown.slice(0, 8000)}
+${markdown.slice(0, 10000)}
 
-Provide your analysis as a JSON object with this exact structure. Return ONLY valid JSON, no markdown formatting:
-{
-  "score": <number 0-100 representing overall digital health>,
-  "gaps": [
-    {
-      "category": "<one of: SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture>",
-      "severity": "<one of: critical, warning, info>",
-      "title": "<short gap title>",
-      "description": "<2-3 sentence explanation of the gap and its business impact>"
-    }
-  ]
-}
+Return a comprehensive analysis using the website_diagnostic_report function. Be extremely specific — reference actual page elements, missing sections, weak copy, and real business impact. Every gap needs a dollar estimate for annual revenue leak and projected recovery.
 
-Include 12-16 findings across all categories. Order by severity (critical first). Be specific to this website — reference actual page elements, missing sections, or weak copy you observed. Each description should be 3-4 sentences explaining the gap, its business impact, and what best practice looks like.`,
+For the executive summary: provide an overall letter grade (A-F), estimate total annual revenue leak, and give a 2-3 sentence positioning assessment.
+
+For gaps: include 12-16 findings across categories (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture). Each gap needs: category, severity, title, detailed description (3-4 sentences), estimated annual cost of the gap, recommended fix, and projected ROI percentage from fixing it.
+
+For the roadmap: create a 6-month implementation plan with monthly actions, estimated costs, and projected revenue recovery.
+
+For ROI projections: break down by category showing current annual waste vs projected recovery after fixes.
+
+For next steps: provide 5 prioritized action items.
+
+For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.`,
           },
         ],
         tools: [
           {
             type: "function",
             function: {
-              name: "website_analysis",
-              description: "Return structured website gap analysis",
+              name: "website_diagnostic_report",
+              description: "Return a full executive diagnostic report",
               parameters: {
                 type: "object",
                 properties: {
                   score: { type: "number", description: "Overall score 0-100" },
+                  grade: { type: "string", description: "Letter grade A-F" },
+                  companyName: { type: "string", description: "Company name extracted from site" },
+                  executiveSummary: { type: "string", description: "2-3 paragraph executive summary with overall assessment, revenue leak estimate, and positioning" },
                   gaps: {
                     type: "array",
                     items: {
@@ -136,17 +135,51 @@ Include 12-16 findings across all categories. Order by severity (critical first)
                         severity: { type: "string", enum: ["critical", "warning", "info"] },
                         title: { type: "string" },
                         description: { type: "string" },
+                        annualCost: { type: "string", description: "Estimated annual revenue leak e.g. '$12,000 - $24,000'" },
+                        recommendedFix: { type: "string", description: "Specific actionable fix" },
+                        projectedROI: { type: "string", description: "Projected ROI percentage from fixing e.g. '150-300%'" },
                       },
-                      required: ["category", "severity", "title", "description"],
+                      required: ["category", "severity", "title", "description", "annualCost", "recommendedFix", "projectedROI"],
                     },
                   },
+                  roadmap: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        month: { type: "string", description: "e.g. 'Month 1'" },
+                        action: { type: "string" },
+                        estimatedCost: { type: "string" },
+                        projectedRecovery: { type: "string" },
+                      },
+                      required: ["month", "action", "estimatedCost", "projectedRecovery"],
+                    },
+                  },
+                  roiTable: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        category: { type: "string" },
+                        currentWaste: { type: "string" },
+                        projectedRecovery: { type: "string" },
+                      },
+                      required: ["category", "currentWaste", "projectedRecovery"],
+                    },
+                  },
+                  nextSteps: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "5 prioritized action items",
+                  },
+                  competitiveBrief: { type: "string", description: "2-3 sentence competitive positioning assessment" },
                 },
-                required: ["score", "gaps"],
+                required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief"],
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "website_analysis" } },
+        tool_choice: { type: "function", function: { name: "website_diagnostic_report" } },
       }),
     });
 
@@ -156,28 +189,24 @@ Include 12-16 findings across all categories. Order by severity (critical first)
 
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (aiResponse.status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
       return new Response(JSON.stringify({ error: "AI analysis failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const aiData = await aiResponse.json();
     console.log("AI response received");
 
-    // Extract structured output from tool call
-    let analysis = { score: 50, gaps: [] };
+    let analysis = { score: 50, grade: "C", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "" };
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       try {
@@ -187,7 +216,7 @@ Include 12-16 findings across all categories. Order by severity (critical first)
       }
     }
 
-    // Save to database
+    // Save to database - store full report in gaps column
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
@@ -202,7 +231,7 @@ Include 12-16 findings across all categories. Order by severity (critical first)
       body: JSON.stringify({
         url: formattedUrl,
         score: analysis.score,
-        gaps: analysis.gaps,
+        gaps: analysis,
       }),
     });
 

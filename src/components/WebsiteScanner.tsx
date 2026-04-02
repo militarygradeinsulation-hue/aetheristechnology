@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, AlertTriangle, AlertCircle, Info, Lock, Globe, Loader2 } from 'lucide-react';
+import { Search, AlertTriangle, AlertCircle, Info, Lock, Globe, Loader2, FileDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
 
 interface Gap {
   category: string;
   severity: 'critical' | 'warning' | 'info';
   title: string;
   description: string;
+  annualCost?: string;
+  recommendedFix?: string;
+  projectedROI?: string;
 }
 
-interface ScanResult {
-  score: number;
+interface ScanResult extends FullReport {
   gaps: Gap[];
 }
 
@@ -24,7 +27,7 @@ const severityConfig = {
   info: { icon: Info, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border' },
 };
 
-const ScoreGauge = ({ score }: { score: number }) => {
+const ScoreGauge = ({ score, grade }: { score: number; grade?: string }) => {
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
   const color = score >= 70 ? 'hsl(142, 76%, 36%)' : score >= 40 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))';
@@ -50,6 +53,7 @@ const ScoreGauge = ({ score }: { score: number }) => {
         >
           {score}
         </motion.span>
+        {grade && <span className="text-xs font-semibold text-primary">{grade}</span>}
         <span className="text-xs text-muted-foreground">/ 100</span>
       </div>
     </div>
@@ -80,11 +84,24 @@ const GapCard = ({ gap, index }: { gap: Gap; index: number }) => {
           </div>
           <h4 className="font-semibold text-foreground mt-1">{gap.title}</h4>
           <p className="text-sm text-muted-foreground mt-1">{gap.description}</p>
+          {gap.annualCost && (
+            <div className="mt-2 flex flex-wrap gap-3 text-xs">
+              <span className="text-destructive font-medium">Est. Leak: {gap.annualCost}</span>
+              {gap.projectedROI && <span className="text-primary font-medium">ROI: {gap.projectedROI}</span>}
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
   );
 };
+
+const pricingTiers = [
+  { name: 'Digital Snapshot', price: '$125', period: '', description: 'Key findings overview + actionable next steps' },
+  { name: 'Full Evaluation', price: '$750', period: '', description: 'Complete diagnostic with strategic roadmap' },
+  { name: 'Strategy Sprint', price: '$2,500', period: '', description: '90-day implementation plan + weekly check-ins' },
+  { name: 'Fractional CTO/CMO', price: '$5,000', period: '/mo', description: 'Ongoing strategic leadership + execution' },
+];
 
 export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void }) => {
   const [url, setUrl] = useState('');
@@ -123,6 +140,12 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
     }
   };
 
+  const handleDownloadPreview = () => {
+    if (!result) return;
+    generatePreviewPdf(result);
+    trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+  };
+
   return (
     <section className="py-20 px-4">
       <div className="max-w-3xl mx-auto">
@@ -148,11 +171,7 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
             />
           </div>
           <Button type="submit" disabled={isLoading || !url.trim()}>
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Search className="w-4 h-4" />
-            )}
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             {isLoading ? 'Scanning...' : 'Scan'}
           </Button>
         </form>
@@ -183,44 +202,80 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Score */}
               <div className="text-center mb-8">
                 <p className="text-sm text-muted-foreground mb-2">Your Digital Health Score</p>
-                <ScoreGauge score={result.score} />
+                <ScoreGauge score={result.score} grade={result.grade} />
               </div>
 
-              <div className="relative">
-                {/* Visible gaps */}
-                <div className="space-y-3">
-                  {result.gaps.slice(0, VISIBLE_GAPS).map((gap, i) => (
-                    <GapCard key={i} gap={gap} index={i} />
-                  ))}
-                </div>
+              {/* Visible gaps */}
+              <div className="space-y-3">
+                {result.gaps.slice(0, VISIBLE_GAPS).map((gap, i) => (
+                  <GapCard key={i} gap={gap} index={i} />
+                ))}
+              </div>
 
-                {/* Gated gaps with fade */}
-                {result.gaps.length > VISIBLE_GAPS && (
-                  <div className="relative mt-3">
-                    <div className="space-y-3 pointer-events-none select-none blur-[2px]" aria-hidden="true">
-                      {result.gaps.slice(VISIBLE_GAPS).map((gap, i) => (
-                        <GapCard key={i + VISIBLE_GAPS} gap={gap} index={i + VISIBLE_GAPS} />
+              {/* Download preview link */}
+              <div className="text-center mt-4">
+                <button
+                  onClick={handleDownloadPreview}
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  Download Preview PDF
+                </button>
+              </div>
+
+              {/* Gated section with tiered pricing */}
+              {result.gaps.length > VISIBLE_GAPS && (
+                <div className="relative mt-6">
+                  {/* Heavily blurred background gaps */}
+                  <div className="space-y-3 pointer-events-none select-none blur-[6px] opacity-30" aria-hidden="true">
+                    {result.gaps.slice(VISIBLE_GAPS, VISIBLE_GAPS + 4).map((gap, i) => (
+                      <GapCard key={i + VISIBLE_GAPS} gap={gap} index={i + VISIBLE_GAPS} />
+                    ))}
+                  </div>
+
+                  {/* Full overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/95 to-background flex flex-col items-center justify-center px-6 py-8">
+                    <Lock className="w-8 h-8 text-primary mb-4" />
+                    <h3 className="text-xl font-bold text-foreground mb-1 text-center">
+                      Unlock the Full Report for {result.companyName || 'Your Business'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
+                      You are viewing a preview. The complete diagnostic, strategic roadmap, and implementation plan are available below.
+                    </p>
+
+                    {/* Pricing tiers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg mb-6">
+                      {pricingTiers.map((tier) => (
+                        <div
+                          key={tier.name}
+                          className="rounded-lg border border-border bg-card/80 backdrop-blur-sm p-4 border-l-4 border-l-primary"
+                        >
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+                            {tier.name}
+                          </p>
+                          <p className="text-xl font-bold text-foreground">
+                            {tier.price}
+                            {tier.period && <span className="text-sm font-normal text-muted-foreground">{tier.period}</span>}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{tier.description}</p>
+                        </div>
                       ))}
                     </div>
 
-                    {/* Gradient overlay — heavier fade */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/90 to-background flex flex-col items-center justify-end pb-8">
-                      <Lock className="w-8 h-8 text-primary mb-3" />
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
-                        {result.gaps.length - VISIBLE_GAPS} more findings hidden
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
-                        Contact us to unlock your full report with actionable recommendations.
-                      </p>
-                      <Button onClick={onContactClick} size="lg">
-                        Unlock Your Full Report
-                      </Button>
-                    </div>
+                    <Button onClick={onContactClick} size="lg" className="gap-2">
+                      <ArrowRight className="w-4 h-4" />
+                      Request Full Report
+                    </Button>
+
+                    <p className="text-xs italic text-muted-foreground mt-5 text-center max-w-sm">
+                      "Notice I did not ask for your business. This is free. What I do is educational. I find problems. I show the math. If you want them fixed — that is when I go to work."
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
