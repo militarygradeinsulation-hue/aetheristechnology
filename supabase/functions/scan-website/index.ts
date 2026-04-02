@@ -41,6 +41,53 @@ serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
+    // Easter egg: detect Aetheris own domain
+    const parsedHost = new URL(formattedUrl).hostname.replace(/^www\./, "").toLowerCase();
+    if (parsedHost === "aetheris.technology" || parsedHost === "aetheristechnology.lovable.app") {
+      const easterEgg = {
+        score: 97,
+        grade: "A+",
+        companyName: "Aetheris AI",
+        executiveSummary: "Nice try. You just pointed the cannon at the people who built it. Aetheris Technology operates at a diagnostic-grade level of strategic architecture — the same system producing this report was engineered in-house. There are no revenue leaks here. Only leverage.",
+        gaps: [
+          {
+            category: "Meta",
+            severity: "info",
+            title: "You Can't Use My Own Tricks Against Me",
+            description: "This scanner was built by Aetheris AI. Scanning our own site is like asking the locksmith to pick his own lock — he already knows where every pin sits. The architecture, messaging, conversion flow, and technical SEO were designed by the same system generating this report.",
+            annualCost: "$0",
+            recommendedFix: "Scan your own website instead — that's where the gaps are.",
+            projectedROI: "∞",
+          },
+          {
+            category: "Brand Consistency",
+            severity: "info",
+            title: "Strategic Architecture: Operating as Designed",
+            description: "Every element on aetheris.technology — from the copy cadence to the CTA placement to the schema markup — was intentionally engineered for conversion. The site serves as a living case study of what we build for clients.",
+            annualCost: "$0",
+            recommendedFix: "No fix needed. This is the standard.",
+            projectedROI: "N/A",
+          },
+        ],
+        roadmap: [
+          { month: "Month 1", action: "Scan YOUR website instead", estimatedCost: "$0", projectedRecovery: "Let's find out" },
+        ],
+        roiTable: [
+          { category: "Aetheris Operations", currentWaste: "$0", projectedRecovery: "Already optimized" },
+        ],
+        nextSteps: [
+          "Enter your own website URL above and see what we find.",
+          "Book a call if you want the full diagnostic treatment.",
+          "Stop trying to reverse-engineer the magician — hire him.",
+        ],
+        competitiveBrief: "Aetheris AI built this tool. Scanning it is flattering, but the real value is pointing it at your business. We already know what's under our hood.",
+      };
+
+      return new Response(JSON.stringify(easterEgg), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     console.log("Scraping URL:", formattedUrl);
 
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
