@@ -186,7 +186,7 @@ Current meta_description: ${post.meta_description || "MISSING"}`;
     }
 
     return new Response(
-      JSON.stringify({ success: true, total: posts.length, updated, errors }),
+      JSON.stringify({ success: true, total: posts.length, updated, errors, nextOffset: offset + limit }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
