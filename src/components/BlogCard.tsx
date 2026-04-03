@@ -130,7 +130,8 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
-  const imageUrl = getImageForSlug(post.slug);
+  // Prioritize unique featured_image from DB, fall back to static mapping
+  const imageUrl = post.featured_image || getImageForSlug(post.slug);
 
   return (
     <Link 
