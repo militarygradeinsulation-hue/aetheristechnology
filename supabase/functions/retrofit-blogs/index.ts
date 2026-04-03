@@ -40,18 +40,28 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch all published blog posts
+    // Accept offset and limit for chunked processing
+    let offset = 0;
+    let limit = 15; // Process 15 posts per invocation to stay within timeout
+    try {
+      const body = await req.json();
+      if (body.offset !== undefined) offset = body.offset;
+      if (body.limit !== undefined) limit = body.limit;
+    } catch {}
+
+    // Fetch published blog posts with pagination
     const { data: posts, error: fetchError } = await supabase
       .from("blog_posts")
       .select("id, title, content, tags, meta_description, excerpt")
       .eq("is_published", true)
-      .order("published_at", { ascending: true });
+      .order("published_at", { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (fetchError) throw fetchError;
 
-    console.log(`Found ${posts.length} posts to retrofit`);
+    console.log(`Processing ${posts.length} posts (offset: ${offset}, limit: ${limit})`);
 
-    const BATCH_SIZE = 5;
+    const BATCH_SIZE = 3;
     let updated = 0;
     let errors = 0;
 
