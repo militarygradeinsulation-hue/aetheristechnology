@@ -191,6 +191,42 @@ export type Database = {
         }
         Relationships: []
       }
+      playbooks: {
+        Row: {
+          created_at: string
+          description: string
+          file_url: string
+          icon_name: string | null
+          id: string
+          published_at: string | null
+          subtitle: string | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          file_url: string
+          icon_name?: string | null
+          id?: string
+          published_at?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          file_url?: string
+          icon_name?: string | null
+          id?: string
+          published_at?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       site_events: {
         Row: {
           created_at: string
