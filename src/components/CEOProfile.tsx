@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TiltCard } from './TiltCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import josephToney from '@/assets/joseph-toney.jpg';
 
 export const CEOProfile: React.FC = () => {
+  useEffect(() => {
+    if (!document.getElementById('linkedin-badge-script')) {
+      const script = document.createElement('script');
+      script.id = 'linkedin-badge-script';
+      script.src = 'https://platform.linkedin.com/badges/js/profile.js';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   return (
     <section id="about" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
@@ -59,6 +70,26 @@ export const CEOProfile: React.FC = () => {
                     Joseph Toney
                   </h3>
                   <p className="text-amber text-center text-lg mb-6">CEO & Founder</p>
+                  <div className="flex justify-center">
+                    <div
+                      className="badge-base LI-profile-badge"
+                      data-locale="en_US"
+                      data-size="medium"
+                      data-theme="dark"
+                      data-type="VERTICAL"
+                      data-vanity="aisystemsarchitect"
+                      data-version="v1"
+                    >
+                      <a
+                        className="badge-base__link LI-simple-link"
+                        href="https://www.linkedin.com/in/aisystemsarchitect?trk=profile-badge"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Joseph T.
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </TiltCard>
             </RevealOnScroll>
