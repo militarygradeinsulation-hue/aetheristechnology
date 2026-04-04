@@ -4,6 +4,17 @@ import { RevealOnScroll } from './RevealOnScroll';
 import josephToney from '@/assets/joseph-toney.jpg';
 
 export const CEOProfile: React.FC = () => {
+  useEffect(() => {
+    if (!document.getElementById('linkedin-badge-script')) {
+      const script = document.createElement('script');
+      script.id = 'linkedin-badge-script';
+      script.src = 'https://platform.linkedin.com/badges/js/profile.js';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   return (
     <section id="about" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
