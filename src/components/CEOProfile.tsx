@@ -70,7 +70,26 @@ export const CEOProfile: React.FC = () => {
                     Joseph Toney
                   </h3>
                   <p className="text-amber text-center text-lg mb-6">CEO & Founder</p>
-                </div>
+                  <div className="flex justify-center">
+                    <div
+                      className="badge-base LI-profile-badge"
+                      data-locale="en_US"
+                      data-size="medium"
+                      data-theme="dark"
+                      data-type="VERTICAL"
+                      data-vanity="aisystemsarchitect"
+                      data-version="v1"
+                    >
+                      <a
+                        className="badge-base__link LI-simple-link"
+                        href="https://www.linkedin.com/in/aisystemsarchitect?trk=profile-badge"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Joseph T.
+                      </a>
+                    </div>
+                  </div>
               </TiltCard>
             </RevealOnScroll>
           </div>
