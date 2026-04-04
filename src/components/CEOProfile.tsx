@@ -90,6 +90,7 @@ export const CEOProfile: React.FC = () => {
                       </a>
                     </div>
                   </div>
+                </div>
               </TiltCard>
             </RevealOnScroll>
           </div>
