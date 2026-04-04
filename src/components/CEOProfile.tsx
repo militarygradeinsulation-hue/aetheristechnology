@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TiltCard } from './TiltCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import josephToney from '@/assets/joseph-toney.jpg';
