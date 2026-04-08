@@ -6,6 +6,7 @@ interface SEOHeadProps {
   description: string;
   path: string;
   type?: string;
+  image?: string;
   jsonLd?: Record<string, unknown>;
 }
 
@@ -13,9 +14,10 @@ const SITE_URL = 'https://aetheris.technology';
 const SITE_NAME = 'Aetheris AI';
 const OG_IMAGE = `${SITE_URL}/aetheris-logo.png`;
 
-export const SEOHead: React.FC<SEOHeadProps> = ({ title, description, path, type = 'website', jsonLd }) => {
+export const SEOHead: React.FC<SEOHeadProps> = ({ title, description, path, type = 'website', image, jsonLd }) => {
   const fullUrl = `${SITE_URL}${path}`;
   const fullTitle = `${title} | Aetheris AI — Business Consulting & AI Technology`;
+  const ogImage = image || OG_IMAGE;
 
   return (
     <Helmet>
@@ -29,7 +31,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ title, description, path, type
       <meta property="og:url" content={fullUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={OG_IMAGE} />
+      <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_US" />
 
@@ -37,7 +39,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ title, description, path, type
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={OG_IMAGE} />
+      <meta name="twitter:image" content={ogImage} />
 
       {/* JSON-LD */}
       {jsonLd && (
