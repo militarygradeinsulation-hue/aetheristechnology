@@ -20,4 +20,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/login
 
-Sitemap: https://aetheristechnology.lovable.app/sitemap.xml
+Sitemap: https://aetheris.technology/sitemap.xml
