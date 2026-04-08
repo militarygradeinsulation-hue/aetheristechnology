@@ -6,6 +6,7 @@ interface SEOHeadProps {
   description: string;
   path: string;
   type?: string;
+  image?: string;
   jsonLd?: Record<string, unknown>;
 }
 
