@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { SEOHead } from '@/components/SEOHead';
 
 const DiagnosticQuizPage: React.FC = () => {
