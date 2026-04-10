@@ -103,7 +103,7 @@ const pricingTiers = [
   { name: 'Fractional CTO/CMO', price: '$5,000', period: '/mo', description: 'Ongoing strategic leadership + execution' },
 ];
 
-export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void }) => {
+export const WebsiteScanner = ({ onContactClick, hideHeader = false }: { onContactClick: () => void; hideHeader?: boolean }) => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
