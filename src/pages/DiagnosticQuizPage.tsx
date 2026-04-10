@@ -42,6 +42,7 @@ const DiagnosticQuizPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <WebsiteScanner onContactClick={() => setIsContactOpen(true)} />
       <Footer />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
