@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { SEOHead } from '@/components/SEOHead';
 
 const DiagnosticQuizPage: React.FC = () => {
@@ -41,6 +42,7 @@ const DiagnosticQuizPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <WebsiteScanner onContactClick={() => setIsContactOpen(true)} />
       <Footer />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
