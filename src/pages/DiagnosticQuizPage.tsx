@@ -25,17 +25,21 @@ const DiagnosticQuizPage: React.FC = () => {
       />
       <Background />
       <Navbar onContactClick={() => setIsContactOpen(true)} />
-      <main className="pt-32 pb-20 px-4">
-        <div className="text-center mb-12">
-          <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔥 Free Business Diagnostic</span>
-          <h1 className="text-4xl md:text-5xl font-bold font-display mt-3 text-foreground">
-            Where Is Your Business<br />Quietly Losing Money?
-          </h1>
-          <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-            Answer 20 quick questions to uncover hidden revenue leaks in your marketing, conversion, branding, systems, and growth strategy.
-          </p>
+      <main className="relative z-10 pt-32 pb-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-2xl border border-border bg-background/90 backdrop-blur-xl p-6 md:p-10 shadow-2xl">
+            <div className="text-center mb-12">
+              <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔥 Free Business Diagnostic</span>
+              <h1 className="text-4xl md:text-5xl font-bold font-display mt-3 text-foreground">
+                Where Is Your Business<br />Quietly Losing Money?
+              </h1>
+              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+                Answer 20 quick questions to uncover hidden revenue leaks in your marketing, conversion, branding, systems, and growth strategy.
+              </p>
+            </div>
+            <BusinessDiagnostic />
+          </div>
         </div>
-        <BusinessDiagnostic />
       </main>
       <Footer />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
