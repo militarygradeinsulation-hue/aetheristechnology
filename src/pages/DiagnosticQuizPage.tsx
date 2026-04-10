@@ -43,13 +43,13 @@ const DiagnosticQuizPage: React.FC = () => {
         </div>
       </main>
 
-      <div className="relative z-10 py-16 px-4">
-        <div className="max-w-3xl mx-auto text-center mb-2">
+      <div className="relative z-10 pt-10 px-4">
+        <div className="max-w-3xl mx-auto text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔍 Bonus Tool</span>
           <h2 className="text-3xl md:text-4xl font-bold font-display mt-3 text-foreground">
             Want a Deeper Look at Your Website?
           </h2>
-          <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
+          <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
             Run a free AI-powered scan to uncover SEO issues, weak CTAs, and missed conversion opportunities — instantly.
           </p>
         </div>
