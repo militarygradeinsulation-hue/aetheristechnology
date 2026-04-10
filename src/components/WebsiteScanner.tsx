@@ -103,7 +103,7 @@ const pricingTiers = [
   { name: 'Fractional CTO/CMO', price: '$5,000', period: '/mo', description: 'Ongoing strategic leadership + execution' },
 ];
 
-export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void }) => {
+export const WebsiteScanner = ({ onContactClick, hideHeader = false }: { onContactClick: () => void; hideHeader?: boolean }) => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -147,16 +147,18 @@ export const WebsiteScanner = ({ onContactClick }: { onContactClick: () => void 
   };
 
   return (
-    <section className="py-20 px-4">
+    <section className={hideHeader ? "py-6 px-4" : "py-20 px-4"}>
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-            Scan Your Website for <span className="text-primary">Hidden Gaps</span>
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities — in under 30 seconds.
-          </p>
-        </div>
+        {!hideHeader && (
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Scan Your Website for <span className="text-primary">Hidden Gaps</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities — in under 30 seconds.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleScan} className="flex gap-3 max-w-lg mx-auto mb-8">
           <div className="relative flex-1">
