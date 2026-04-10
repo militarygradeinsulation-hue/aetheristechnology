@@ -168,28 +168,28 @@ const categoryMap: Record<string, { label: string; icon: React.ReactNode; questi
 
 const categoryNarratives: Record<string, string[]> = {
   marketing: [
-    'Your lead generation is inconsistent — you're relying on methods that don't scale.',
-    'Content posting is sporadic, which means you're invisible to potential customers most of the time.',
-    'You lack visibility into which marketing efforts actually drive revenue.',
+    "Your lead generation is inconsistent \u2014 you're relying on methods that don't scale.",
+    "Content posting is sporadic, which means you're invisible to potential customers most of the time.",
+    "You lack visibility into which marketing efforts actually drive revenue.",
   ],
   conversion: [
-    'Your website doesn't make it clear what visitors should do next — they're bouncing.',
-    'Slow response times to inquiries mean warm leads are going cold before you reach them.',
-    'Without a structured follow-up system, potential customers are slipping through the cracks.',
+    "Your website doesn't make it clear what visitors should do next \u2014 they're bouncing.",
+    "Slow response times to inquiries mean warm leads are going cold before you reach them.",
+    "Without a structured follow-up system, potential customers are slipping through the cracks.",
   ],
   brand: [
-    'Your brand messaging doesn't clearly differentiate you from competitors.',
-    'Generic visuals are undermining trust — prospects can't see real proof of your work.',
-    'People can't instantly understand what you do, which kills first impressions.',
+    "Your brand messaging doesn't clearly differentiate you from competitors.",
+    "Generic visuals are undermining trust \u2014 prospects can't see real proof of your work.",
+    "People can't instantly understand what you do, which kills first impressions.",
   ],
   systems: [
-    'Without a CRM, leads are getting lost and follow-ups are inconsistent.',
-    'You have no visibility into your sales pipeline — growth is a guessing game.',
-    'Manual processes are creating bottlenecks that cost you time and revenue.',
+    "Without a CRM, leads are getting lost and follow-ups are inconsistent.",
+    "You have no visibility into your sales pipeline \u2014 growth is a guessing game.",
+    "Manual processes are creating bottlenecks that cost you time and revenue.",
   ],
   growth: [
-    'You feel the business should be growing faster but can't pinpoint what's holding it back.',
-    'Without a clear growth strategy, effort is being wasted on low-impact activities.',
+    "You feel the business should be growing faster but can't pinpoint what's holding it back.",
+    "Without a clear growth strategy, effort is being wasted on low-impact activities.",
   ],
 };
 
