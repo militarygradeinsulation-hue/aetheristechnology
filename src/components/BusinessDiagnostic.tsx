@@ -4,13 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, XCircle, TrendingUp, Megaphone, ShoppingCart, Palette, Settings, Rocket } from 'lucide-react';
+import { generateDiagnosticPdf } from '@/lib/generateDiagnosticPdf';
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, XCircle, TrendingUp, Megaphone, ShoppingCart, Palette, Settings, Rocket, Download } from 'lucide-react';
 
 // --- DATA ---
 
 interface QuestionOption {
   label: string;
-  score: number; // -1 means not scored (profile questions)
+  score: number;
 }
 
 interface Question {
@@ -168,23 +169,23 @@ const categoryMap: Record<string, { label: string; icon: React.ReactNode; questi
 
 const categoryNarratives: Record<string, string[]> = {
   marketing: [
-    "Your lead generation is inconsistent \u2014 you're relying on methods that don't scale.",
+    "Your lead generation is inconsistent — you're relying on methods that don't scale.",
     "Content posting is sporadic, which means you're invisible to potential customers most of the time.",
     "You lack visibility into which marketing efforts actually drive revenue.",
   ],
   conversion: [
-    "Your website doesn't make it clear what visitors should do next \u2014 they're bouncing.",
+    "Your website doesn't make it clear what visitors should do next — they're bouncing.",
     "Slow response times to inquiries mean warm leads are going cold before you reach them.",
     "Without a structured follow-up system, potential customers are slipping through the cracks.",
   ],
   brand: [
     "Your brand messaging doesn't clearly differentiate you from competitors.",
-    "Generic visuals are undermining trust \u2014 prospects can't see real proof of your work.",
+    "Generic visuals are undermining trust — prospects can't see real proof of your work.",
     "People can't instantly understand what you do, which kills first impressions.",
   ],
   systems: [
     "Without a CRM, leads are getting lost and follow-ups are inconsistent.",
-    "You have no visibility into your sales pipeline \u2014 growth is a guessing game.",
+    "You have no visibility into your sales pipeline — growth is a guessing game.",
     "Manual processes are creating bottlenecks that cost you time and revenue.",
   ],
   growth: [
@@ -199,16 +200,16 @@ export const BusinessDiagnostic: React.FC = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [scores, setScores] = useState<Record<number, number>>({});
-  const [showEmailGate, setShowEmailGate] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
   const { trackEvent } = useTrackEvent();
 
   const totalSections = sections.length;
-  const progress = showResults ? 100 : showEmailGate ? 95 : ((currentSection) / totalSections) * 90;
+  const progress = showResults ? 100 : ((currentSection) / totalSections) * 100;
 
   const currentSectionData = sections[currentSection];
 
@@ -228,15 +229,14 @@ export const BusinessDiagnostic: React.FC = () => {
       setCurrentSection(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      setShowEmailGate(true);
+      setShowResults(true);
       trackEvent('diagnostic_completed_questions');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleBack = () => {
-    if (showEmailGate) {
-      setShowEmailGate(false);
-    } else if (currentSection > 0) {
+    if (currentSection > 0) {
       setCurrentSection(prev => prev - 1);
     }
   };
@@ -251,10 +251,18 @@ export const BusinessDiagnostic: React.FC = () => {
     return { totalScore, maxScore: 80, catScores };
   };
 
-  const handleSubmitEmail = async () => {
+  const getWeakestCategories = (catScores: Record<string, { score: number; max: number; pct: number }>) => {
+    return Object.entries(catScores)
+      .sort(([, a], [, b]) => a.pct - b.pct)
+      .slice(0, 3)
+      .map(([key]) => key);
+  };
+
+  const handleDownloadPdf = async () => {
     if (!email) return;
     setSubmitting(true);
     const { totalScore, catScores } = computeResults();
+    const weakest = getWeakestCategories(catScores);
 
     try {
       await supabase.from('diagnostic_leads').insert({
@@ -273,9 +281,17 @@ export const BusinessDiagnostic: React.FC = () => {
       console.error('Failed to save diagnostic lead', e);
     }
 
-    setShowResults(true);
+    generateDiagnosticPdf({
+      name: name || undefined,
+      company: company || undefined,
+      totalScore,
+      maxScore: 80,
+      catScores,
+      weakestCategories: weakest,
+    });
+
+    setPdfDownloaded(true);
     setSubmitting(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const { totalScore, maxScore, catScores } = computeResults();
@@ -287,17 +303,10 @@ export const BusinessDiagnostic: React.FC = () => {
     return { color: 'text-red-400', bg: 'bg-red-500/20 border-red-500/30', label: 'Revenue Leakage Mode', icon: <XCircle className="w-8 h-8 text-red-400" />, desc: 'You\'re losing a significant amount of business without realizing it.', rec: 'Full diagnostic needed across marketing, conversion, and systems.' };
   };
 
-  const getWeakestCategories = () => {
-    return Object.entries(catScores)
-      .sort(([, a], [, b]) => a.pct - b.pct)
-      .slice(0, 3)
-      .map(([key]) => key);
-  };
-
   // --- RESULTS VIEW ---
   if (showResults) {
     const tier = getTier();
-    const weakest = getWeakestCategories();
+    const weakest = getWeakestCategories(catScores);
 
     return (
       <div className="max-w-3xl mx-auto space-y-8">
@@ -362,53 +371,75 @@ export const BusinessDiagnostic: React.FC = () => {
           </p>
         </div>
 
-        {/* Recommendation */}
-        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center space-y-4">
-          <h3 className="text-xl font-semibold text-foreground">👉 Recommendation: {tier.rec}</h3>
-          <p className="text-muted-foreground text-sm">
-            Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a roadmap to fix it.
-          </p>
-          <a href="/diagnostic">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
-              Learn About the 14-Day Diagnostic <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </a>
+        {/* PDF Download CTA */}
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 space-y-5">
+          {pdfDownloaded ? (
+            <div className="text-center space-y-3">
+              <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />
+              <h3 className="text-xl font-semibold text-foreground">Your Action Plan Has Been Downloaded!</h3>
+              <p className="text-muted-foreground text-sm">
+                Check your downloads folder for your personalized PDF. Want expert help implementing it?
+              </p>
+              <a href="/contact">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 mt-2">
+                  Book a Free Strategy Call <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </a>
+            </div>
+          ) : (
+            <>
+              <div className="text-center space-y-2">
+                <h3 className="text-xl font-semibold text-foreground">
+                  📋 Get Your Free Personalized Action Plan
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  We'll generate a custom PDF with step-by-step instructions to fix your weakest areas. Enter your info below to download it instantly.
+                </p>
+              </div>
+              <div className="space-y-3 max-w-md mx-auto">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
+                  <Input type="email" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Name</label>
+                  <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Company</label>
+                  <Input placeholder="Your company" value={company} onChange={e => setCompany(e.target.value)} />
+                </div>
+                <Button
+                  onClick={handleDownloadPdf}
+                  disabled={!email || submitting}
+                  className="w-full bg-primary hover:bg-primary/90"
+                  size="lg"
+                >
+                  {submitting ? 'Generating...' : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" /> Download Your Free Action Plan
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
-      </div>
-    );
-  }
 
-  // --- EMAIL GATE ---
-  if (showEmailGate) {
-    return (
-      <div className="max-w-lg mx-auto space-y-6">
-        <Progress value={progress} className="h-2" />
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold font-display text-foreground">Almost There!</h2>
-          <p className="text-muted-foreground">Enter your details to see your personalized results</p>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
-            <Input type="email" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} required />
+        {/* Recommendation */}
+        {!pdfDownloaded && (
+          <div className="rounded-2xl border border-border bg-card p-6 text-center space-y-4">
+            <h3 className="text-xl font-semibold text-foreground">👉 Recommendation: {tier.rec}</h3>
+            <p className="text-muted-foreground text-sm">
+              Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a roadmap to fix it.
+            </p>
+            <a href="/contact">
+              <Button size="lg" variant="outline">
+                Learn More <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </a>
           </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Name</label>
-            <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Company</label>
-            <Input placeholder="Your company" value={company} onChange={e => setCompany(e.target.value)} />
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handleBack} className="flex-1">
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
-          <Button onClick={handleSubmitEmail} disabled={!email || submitting} className="flex-1 bg-primary hover:bg-primary/90">
-            {submitting ? 'Processing...' : 'See My Results'} <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
+        )}
       </div>
     );
   }
@@ -429,7 +460,7 @@ export const BusinessDiagnostic: React.FC = () => {
       </div>
 
       <div className="space-y-8">
-        {currentSectionData.questions.map((q, qi) => (
+        {currentSectionData.questions.map((q) => (
           <div key={q.id} className="space-y-3">
             <p className="font-medium text-foreground">
               {q.id}. {q.text}
