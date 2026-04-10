@@ -191,6 +191,48 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_leads: {
+        Row: {
+          answers: Json
+          category_scores: Json
+          company: string | null
+          company_size: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          name: string | null
+          scores: Json
+          total_score: number
+        }
+        Insert: {
+          answers?: Json
+          category_scores?: Json
+          company?: string | null
+          company_size?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          name?: string | null
+          scores?: Json
+          total_score?: number
+        }
+        Update: {
+          answers?: Json
+          category_scores?: Json
+          company?: string | null
+          company_size?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          name?: string | null
+          scores?: Json
+          total_score?: number
+        }
+        Relationships: []
+      }
       playbooks: {
         Row: {
           created_at: string

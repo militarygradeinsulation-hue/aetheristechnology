@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AssessmentPage from "./pages/AssessmentPage";
 import ScanPage from "./pages/ScanPage";
 import NotFound from "./pages/NotFound";
+import DiagnosticQuizPage from "./pages/DiagnosticQuizPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/assessment" element={<AssessmentPage />} />
           <Route path="/scan" element={<ScanPage />} />
+          <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
