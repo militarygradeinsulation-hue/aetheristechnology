@@ -1,56 +1,44 @@
 
 
-# Aetheris Business Diagnostic — Full 20-Question Assessment
+# Show Score First, Then Offer Personalized PDF for Contact Info
 
 ## Overview
-Create a new `/diagnostic` page with a comprehensive 20-question business diagnostic quiz organized into 6 sections. Each question has scored options. After completion (with email gate), the user sees a total score, category-level breakdowns (Marketing, Conversion, Brand, Systems, Growth), and tailored recommendations with CTAs to the consultation page.
+Remove the email gate before results. Show scores immediately after the quiz. Add a contact info form on the results page that unlocks a personalized PDF action plan generated client-side using jsPDF, tailored to each user's specific weak categories.
 
-## What Gets Built
+## Changes
 
-### 1. New Component: `BusinessDiagnostic.tsx`
-- 20 questions across 6 sections (Business Profile, Marketing & Visibility, Conversion & Sales, Brand & Messaging, Systems & Operations, Growth & Strategy)
-- Section-by-section flow with progress bar (not one question per screen — show all questions in a section, then advance to the next section)
-- Scoring: Strong = 5, Moderate = 3, Weak = 1, Critical = 0 per question (Business Profile section is context-only, not scored)
-- Email/name/company capture gate before results
-- Results page shows:
-  - Overall score with color-coded tier (Green 80-100, Yellow 50-79, Red 0-49)
-  - Per-category breakdown bars (Marketing Gaps, Conversion Breakdowns, Messaging Issues, System Failures, Growth Blockers)
-  - Personalized narrative output highlighting top 3 weakest areas with specific language like the example provided
-  - CTA to book consultation / call
+### 1. Restructure Flow in `BusinessDiagnostic.tsx`
+- Remove the email gate step entirely — after the last section, go straight to results
+- On the results page, add a "Get Your Free Action Plan" section with email/name/company fields
+- On submit: save lead to `diagnostic_leads`, generate a personalized PDF, and trigger download
 
-### 2. New Page: `DiagnosticPage.tsx`
-- Route: `/diagnostic`
-- SEO-optimized with meta description targeting "business diagnostic" keywords
-- Same layout pattern as AssessmentPage (Background, Navbar, Footer, ContactModal)
-- Headline: "Where Is Your Business Quietly Losing Money?"
+### 2. Create `src/lib/generateDiagnosticPdf.ts`
+A client-side PDF generator (using jsPDF, same pattern as `generateBlogPdf.ts`) that builds a personalized action plan based on the user's weakest categories. Each category gets specific, actionable instructions:
 
-### 3. Database: `diagnostic_leads` table
-- Columns: id, email, name, company, industry, company_size, answers (jsonb), scores (jsonb), total_score, category_scores (jsonb), created_at
-- RLS: anon insert, admin select
-- Stores all answers plus computed scores for follow-up
+- **Marketing**: Steps to build a lead gen system, content calendar, tracking setup
+- **Conversion**: CTA optimization, response time protocols, follow-up sequences
+- **Brand**: Messaging framework, visual audit checklist, differentiation exercises
+- **Systems**: CRM setup guide, pipeline visibility steps, automation priorities
+- **Growth**: Growth audit framework, bottleneck identification, strategy alignment
 
-### 4. Route Registration
-- Add `/diagnostic` route to `App.tsx`
+The PDF includes:
+- Cover page with score and tier
+- Category breakdown with scores
+- 2-3 pages of specific action items for the user's top 3 weakest areas
+- CTA page for the 14-Day Diagnostic
 
-### 5. Navigation Link
-- Add "Free Diagnostic" link to the Navbar for visibility
+### 3. Updated Results UI
+- Score card and category breakdown shown immediately (no gate)
+- Below the findings: a card offering the free PDF
+- Email field required, name/company optional
+- "Download Your Free Action Plan" button
+- After submit: PDF auto-downloads, lead saved to database
 
 ## Technical Details
 
-**New files:**
-- `src/components/BusinessDiagnostic.tsx` — main quiz component (~400 lines)
-- `src/pages/DiagnosticPage.tsx` — page wrapper
-
 **Modified files:**
-- `src/App.tsx` — add route
-- `src/components/Navbar.tsx` — add nav link
+- `src/components/BusinessDiagnostic.tsx` — remove email gate, show results directly, add PDF CTA form on results page
+- `src/lib/generateDiagnosticPdf.ts` — new file, jsPDF-based personalized PDF generator
 
-**New migration:**
-- Create `diagnostic_leads` table with RLS policies
-
-**Scoring logic (client-side):**
-- 16 scored questions (Q5-Q20), max 80 points
-- Questions 1-4 are profile context (not scored but stored)
-- Category scores computed by grouping: Marketing (Q5-8), Conversion (Q9-12), Brand (Q13-15), Systems (Q16-18), Growth (Q19-20)
-- Results narrative dynamically generated from the weakest 2-3 categories
+**No database changes needed** — `diagnostic_leads` table already exists with all required columns.
 
