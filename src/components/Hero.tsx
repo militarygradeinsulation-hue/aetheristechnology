@@ -28,9 +28,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] font-display tracking-tight">
-            <span className="text-foreground">Most high-end </span>
-            <span className="text-gradient-amber">playground</span>
-            <span className="text-foreground"> companies lose premium customers because their </span>
+            <span className="text-foreground">Most high-end playground </span>
+            <span className="text-gradient-amber">companies</span>
+            <span className="text-foreground"> lose premium customers because their </span>
             <span className="text-gradient-amber">outdated</span>
             <span className="text-foreground"> websites and </span>
             <span className="text-gradient-amber">generic</span>
