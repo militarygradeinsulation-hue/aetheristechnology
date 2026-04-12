@@ -38,9 +38,13 @@ const CareersPage = () => {
       return;
     }
     setLoading(true);
+    const id = crypto.randomUUID();
+    const trimmedEmail = form.email.trim();
+    const trimmedName = form.name.trim();
     const { error } = await supabase.from('rep_signups').insert([{
-      name: form.name.trim(),
-      email: form.email.trim(),
+      id,
+      name: trimmedName,
+      email: trimmedEmail,
       phone: form.phone.trim() || null,
       linkedin_url: form.linkedin_url.trim() || null,
       experience: form.experience.trim() || null,
@@ -50,8 +54,17 @@ const CareersPage = () => {
       toast({ title: "Something went wrong. Try again.", variant: "destructive" });
       return;
     }
+    // Send welcome email with playbook
+    supabase.functions.invoke('send-transactional-email', {
+      body: {
+        templateName: 'rep-welcome',
+        recipientEmail: trimmedEmail,
+        idempotencyKey: `rep-welcome-${id}`,
+        templateData: { name: trimmedName },
+      },
+    });
     setSubmitted(true);
-    toast({ title: "You're in. Welcome to the team." });
+    toast({ title: "You're in. Welcome to the team. Check your email for the playbook." });
   };
 
   return (

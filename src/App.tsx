@@ -21,6 +21,7 @@ import ScanPage from "./pages/ScanPage";
 import NotFound from "./pages/NotFound";
 import DiagnosticQuizPage from "./pages/DiagnosticQuizPage";
 import CareersPage from "./pages/CareersPage";
+import UnsubscribePage from "./pages/UnsubscribePage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/scan" element={<ScanPage />} />
           <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
           <Route path="/careers" element={<CareersPage />} />
+          <Route path="/unsubscribe" element={<UnsubscribePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
