@@ -8,203 +8,136 @@ const corsHeaders = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// 360 BREW ALGORITHM-ALIGNED HASHTAG POOLS
-// Niche-specific, high-relevance tags matching the 3 core pillars
+// PLAYGROUND & RECREATION INDUSTRY HASHTAG POOLS
 // ═══════════════════════════════════════════════════════════════════
 
 const HASHTAG_POOLS = {
-  marketingTech: [
-    "MarketingAutomation", "RevOps", "LeadGeneration", "CRM",
-    "MarketingStrategy", "AttributionModeling", "DemandGen",
-    "B2BMarketing", "MarketingOps", "GrowthStrategy",
-    "DigitalMarketing", "ContentStrategy", "MarketingROI",
+  industryMarket: [
+    "PlaygroundIndustry", "RecreationBusiness", "CommercialPlayground",
+    "OutdoorRecreation", "PlayEquipment", "RecreationDesign",
+    "InclusivePlay", "PlaygroundSafety", "ParkDesign", "CommunityRecreation",
   ],
-  consulting: [
-    "BusinessConsulting", "OperationalExcellence", "ManagementConsulting",
-    "BusinessStrategy", "ProcessOptimization", "ChangeManagement",
-    "ExecutiveLeadership", "BusinessTransformation", "StrategicPlanning",
-    "Consulting", "BusinessGrowth", "Operations",
+  salesDigital: [
+    "B2BMarketing", "HighTicketSales", "LuxuryBranding",
+    "WebDesignFail", "CRMAutomation", "DigitalBrandMakeover",
+    "SalesAutomation", "LeadConversion", "RecreationMarketing",
   ],
-  aiTransformation: [
-    "AIStrategy", "DigitalTransformation", "ArtificialIntelligence",
-    "BusinessAutomation", "AIImplementation", "DataDriven",
-    "MachineLearning", "AIforBusiness", "IntelligentAutomation",
-    "FutureOfWork", "TechStrategy", "Innovation",
+  growthTrends: [
+    "EmergingMarkets", "PlaygroundTrends", "InclusiveDesign",
+    "NaturePlay", "FitnessPlayground", "ADACompliance",
+    "SmartPlayground", "SeniorFitness", "WaterPlay", "IndoorPlayground",
   ],
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// TOPICS — 80% RULE: All content within 3 core pillars
-// Pillar 1: Marketing Technology Strategy
-// Pillar 2: Business Consulting & Operational Systems
-// Pillar 3: AI & Digital Transformation
+// TOPICS — PLAYGROUND & RECREATION INDUSTRY ANGLES
+// Raw. Blunt. Memorable.
 // ═══════════════════════════════════════════════════════════════════
 
 const TOPICS = [
-  // ── PILLAR 1: Marketing Technology Strategy ──
+  // ── Playground Industry Market Intelligence ──
   {
-    category: "Marketing Technology Strategy",
-    pillar: 1,
-    hashtagPool: "marketingTech",
+    category: "Playground Industry Market Intelligence",
+    hashtagPool: "industryMarket",
     funnelStage: "Awareness",
     angles: [
-      "Your marketing stack costs $15K/month and you use 20% of it — the rest is expensive shelf-ware",
-      "Your Google Ads send traffic to pages with no conversion tracking — you're paying for ghosts",
-      "Why your marketing agency reports impressions instead of revenue attribution",
-      "The $10K/month retainer that produces nothing measurable — how to audit your agency in 48 hours",
-      "Your CRM has 50,000 contacts and you can't tell which ones are worth calling",
-      "Your lead scoring model hasn't been updated since you built it — and it shows in your close rate",
-      "The handoff problem: marketing generates leads, sales ignores them, revenue disappears",
-      "Duplicate records are costing you more than your worst sales rep",
+      "The commercial playground market hit $14B globally and most manufacturers still sell like it's 2005 — static catalogs, dead websites, zero follow-up",
+      "Indoor playground franchises are exploding at 12% CAGR while traditional manufacturers fight over the same municipal RFPs",
+      "Nature play and adventure playgrounds are the fastest-growing segment and 90% of companies can't even explain what they sell",
+      "The inclusive play equipment mandate is a $2B opportunity most companies are treating as a compliance checkbox",
+      "Senior fitness parks are a $500M emerging market and nobody in the playground industry is talking about it",
+      "Water play installations generate 3x the revenue per project of traditional playgrounds — yet most companies don't even list them",
     ],
   },
+  // ── Digital Failures in Recreation ──
   {
-    category: "Marketing Technology Strategy",
-    pillar: 1,
-    hashtagPool: "marketingTech",
+    category: "Digital Failures in Recreation",
+    hashtagPool: "salesDigital",
     funnelStage: "Consideration",
     angles: [
-      "Your pipeline report lies to you every Monday — here's how to build one that tells the truth",
-      "Why your webinars generate attendees but zero pipeline — the attribution gap nobody talks about",
-      "Your competitor's ugly website outperforms your beautiful one — because theirs converts",
-      "You're A/B testing button colors while your funnel has a $200K hole in it",
-      "Email marketing isn't dead — your automation just sends the wrong message to the wrong person",
-      "Your social media manager doesn't understand the algorithm they're posting to",
-      "LinkedIn is not TikTok — stop treating it like one and start treating it like a sales floor",
-      "Posting motivational quotes on LinkedIn isn't marketing — it's noise that trains the algorithm to ignore you",
+      "Your playground company website looks like it was built in 2012 because it was — and your premium products suffer for it",
+      "You sell $200K custom playground systems but your social media looks like a daycare newsletter",
+      "Your competitors are winning $500K municipal contracts because their website has 3D renderings and yours has blurry JPEGs from 2018",
+      "Recreation companies spending $8K/month on trade shows while their Google listing has 2 reviews and wrong hours",
+      "You have a $50K product line and zero email sequences — every lead that doesn't buy in 48 hours is gone forever",
+      "Your sales rep closes one $300K deal a quarter but can't remember the last time a lead came from the website",
+      "The playground industry trade show circuit is a $50K annual habit that produces business cards nobody follows up on",
     ],
   },
-  // ── PILLAR 2: Business Consulting & Operational Systems ──
+  // ── Growth & Emerging Markets ──
   {
-    category: "Business Consulting & Operational Systems",
-    pillar: 2,
-    hashtagPool: "consulting",
+    category: "Growth & Emerging Markets",
+    hashtagPool: "growthTrends",
     funnelStage: "Awareness",
     angles: [
-      "You want more revenue but won't change a single process to get it — the CEO self-sabotage playbook",
-      "Your business looks exactly like it did in 2019 — and so do your results",
-      "CEOs who say 'we've always done it this way' are writing their own business obituary",
-      "You hired a consultant then ignored everything they said — that's not consulting, that's therapy",
-      "Your competitors changed. You didn't. That's why you're losing market share every quarter.",
-      "The CEO who wants growth but vetoes every new idea — why leadership resistance is the #1 operational gap",
-      "Your sales team manually enters leads and loses 30% of them — that's not a CRM problem, it's a culture problem",
-      "If only your employees like your LinkedIn posts, you don't have a following — you have a hostage situation",
-    ],
-  },
-  {
-    category: "Business Consulting & Operational Systems",
-    pillar: 2,
-    hashtagPool: "consulting",
-    funnelStage: "Consideration",
-    angles: [
-      "Law firms spending $8K/month on marketing with no client attribution — the professional services revenue leak",
-      "Auto dealerships with $50K ad budgets and no follow-up automation — where the money actually goes",
-      "HVAC companies bidding on Google Ads against their own organic listings — paying to compete with yourself",
-      "Insurance agencies drowning in leads they never call back — the 48-hour follow-up gap that kills revenue",
-      "Your team uses Excel as a CRM because nobody trusts the $50K system you bought",
-      "The integration tax: what disconnected systems really cost when you add up manual workarounds",
-      "You have analytics installed but nobody looks at the data — dashboards without alerts are just wallpaper",
-      "The difference between data collection and data intelligence — and why most companies have the first but not the second",
-    ],
-  },
-  // ── PILLAR 3: AI & Digital Transformation ──
-  {
-    category: "AI & Digital Transformation",
-    pillar: 3,
-    hashtagPool: "aiTransformation",
-    funnelStage: "Awareness",
-    angles: [
-      "Companies using AI chatbots with zero training data from their own business — generic AI is just expensive search",
-      "Your AI-generated content sounds like every other company's AI-generated content — because it is",
-      "The hidden cost of AI hallucinations in customer-facing applications — one wrong answer costs a client",
-      "Your team is using 5 different AI tools that don't talk to each other — that's not transformation, that's chaos",
-      "AI without data governance is just expensive guessing with a better interface",
-      "You automated the wrong processes and now everything is worse — the automation-first fallacy",
-      "The AI vendor lock-in trap most businesses walk into blindly — and how to architect for flexibility",
-      "Your competitors know more about your customers than you do — because they invested in intelligence infrastructure",
-    ],
-  },
-  {
-    category: "AI & Digital Transformation",
-    pillar: 3,
-    hashtagPool: "aiTransformation",
-    funnelStage: "Consideration",
-    angles: [
-      "B2B tech website traffic declined 34% and you're still optimizing for Google page 1 — the GEO shift",
-      "You're invisible to ChatGPT, Gemini, and Perplexity — here's why that's killing your pipeline",
-      "AI search engines downgrade your content after 60 days — and you haven't updated since last year",
-      "89% of AI citations come from earned media — your blog isn't one of them",
-      "By 2027 traditional search will be 45% of queries — is your brand ready for AI recommendations?",
-      "The 3 metrics that matter in 2026: AI Visibility Score, Citation Share, and Share of AI Voice",
-      "Only 14% of brands have a playbook for AI-generated deepfake threats — crisis resilience is an operational gap",
-      "Social selling leaders create 45% more opportunities — your team is still cold calling into voicemail",
+      "Smart playgrounds with IoT sensors and usage analytics are coming — and they'll make traditional equipment look like typewriters",
+      "The Middle East and Southeast Asia are building $100M recreation mega-projects and US manufacturers are asleep",
+      "Inclusive play isn't charity — ADA-compliant playground projects average 40% higher budgets than standard installations",
+      "Adult fitness playgrounds are the fastest path to recurring municipal revenue and nobody's pitching them",
+      "The commercial recreation industry hasn't had a real brand innovation in 20 years — everyone looks the same, sells the same, loses the same",
+      "Municipalities are shifting from lowest-bid procurement to value-based selection and most playground companies don't know how to sell value",
     ],
   },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
-// BRANDED AETHERIS FRAMEWORKS (IP Creation for semantic authority)
+// BRANDED AETHERIS FRAMEWORKS — RECREATION INDUSTRY
 // ═══════════════════════════════════════════════════════════════════
 
 const AETHERIS_FRAMEWORKS = [
-  "The Diagnostic Protocol™ — A 14-day operational teardown that maps every revenue leak, system gap, and process failure across marketing, sales, and operations. Deliverable: a prioritized roadmap with dollar-value impact estimates.",
-  "The Revenue Architecture Model™ — A framework for rebuilding lead-to-revenue infrastructure: CRM configuration, attribution modeling, pipeline analytics, and automated follow-up sequences that convert.",
-  "The 14-Day Co-CEO Method™ — Joseph Toney embeds into your business as a temporary Co-CEO for 14 days, with full operational authority to diagnose, document, and deliver a transformation blueprint.",
-  "The Operational Gap Matrix™ — A scoring system that evaluates 6 business dimensions (Marketing Systems, Sales Infrastructure, Data Intelligence, Process Automation, Team Alignment, Technology Stack) on a 1-10 scale to identify the highest-ROI intervention points.",
-  "The Signal-to-Noise Audit™ — Strips away vanity metrics and surfaces the 3-5 numbers that actually predict revenue, then builds dashboards and alerts around those signals.",
-  "The Integration Tax Calculator™ — Quantifies the hidden cost of disconnected systems by measuring manual workarounds, duplicate data entry, and decision-making delays across departments.",
+  "The Playground Brand Overhaul™ — A complete digital repositioning: website rebuild, product photography, 3D rendering integration, and social media strategy that makes $200K systems look like $200K systems.",
+  "The Recreation Revenue Engine™ — CRM automation, lead scoring, and follow-up sequences designed for long-cycle B2B playground sales where one lost deal costs $50K-$500K.",
+  "The Specification Domination Strategy™ — Getting your products spec'd into architectural plans and municipal RFPs before the bid even opens. Control the spec, control the deal.",
+  "The High-Ticket Visual Authority System™ — Why your competitors close bigger deals: their digital presence matches their product quality. Yours doesn't. We fix that.",
 ];
 
 // ═══════════════════════════════════════════════════════════════════
-// STRATEGIC KNOWLEDGE BASE
+// STRATEGIC KNOWLEDGE BASE — RECREATION INDUSTRY
 // ═══════════════════════════════════════════════════════════════════
 
 const STRATEGIC_INTELLIGENCE = `
-## KEY STATISTICS & DATA POINTS (Use as authoritative citations)
+## PLAYGROUND & RECREATION INDUSTRY DATA
 
-### AI & Search Disruption
-- B2B tech website traffic declined 34% between 2024 and 2025
-- AI-generated traffic reached 20% of B2B traffic by end of 2025
-- By 2027, traditional search projected to represent only 45% of all queries
-- 61% of B2B CMOs are rethinking marketing for Generative Engine Optimization (GEO)
-- AI overview rates surged from 40% in late 2024 to 70% by May 2025
+### Global Market Size & Growth
+- Global commercial playground equipment market: ~$14B (2025), projected $19B by 2030
+- Indoor playground & entertainment market growing at 12% CAGR
+- Nature play / adventure playground segment: fastest-growing category globally
+- Water play installations average 3x revenue per project vs. traditional playground builds
+- Inclusive play equipment segment: estimated $2B addressable market with 40% higher project budgets
 
-### AI Search Metrics (The New KPIs)
-- AI Visibility Score: Frequency of brand recommendation in AI-generated answers
-- Citation Share: How often content is used as a source for AI answers
-- Share of AI Voice: Prominence in AI answers relative to competitors
-- 33% of B2B tech CMOs now report Share of AI Voice to their CEOs
+### Emerging Markets & Segments
+- Middle East & Southeast Asia: $100M+ recreation mega-projects in development
+- Senior fitness parks: $500M emerging market, largely untapped by US manufacturers
+- Adult outdoor fitness equipment: growing 15% annually as municipalities seek multi-generational parks
+- Smart playgrounds (IoT-enabled usage tracking, safety sensors): early-stage but accelerating
+- Indoor adventure parks & trampoline parks: saturating in US, booming in Asia-Pacific
 
-### Content & Citation Factors
-- AI downgrades content older than 2 months (citation decay)
-- Adding current year to URLs can boost ChatGPT citations by 20%
-- 30% of AI citations come from listicles and short, self-contained content segments
-- Earned media (Bloomberg, Fortune, Forbes) accounts for up to 89% of AI search citations
-- VC-backed firms are increasing PR budgets by 45% to bypass the authority gap
+### Industry Digital Gaps
+- 73% of commercial playground company websites have not been redesigned in 5+ years
+- Average playground manufacturer has fewer than 10 Google reviews
+- Less than 15% of recreation companies use CRM automation for lead follow-up
+- Trade show ROI is unmeasurable for 80% of exhibitors — $30K-$50K spent per show with no attribution
+- 90% of playground companies have no email nurture sequence for inbound leads
+- Municipal procurement cycles average 6-18 months — companies without automated follow-up lose 60%+ of pipeline
 
-### LinkedIn Algorithm (2025-2026)
-- LinkedIn shifted to semantic matching model; reach for many creators fell 50%
-- Organic LinkedIn company content slipped from 2.1% to 1.6% of feed share
-- Social selling leaders create 45% more opportunities and are 51% more likely to reach quota
-- The algorithm uses the first 1-2 sentences to categorize content and match to ICP profiles
-- Save > Like > Comment in the algorithm's engagement priority hierarchy
-- 80% topic consistency signals expertise to the algorithm's semantic classifier
-- Dwell time (time spent reading) is the confirmation metric that validates initial distribution
-- Content decay: posts lose algorithmic boost after ~60 days
+### Procurement & Sales Patterns
+- Municipal playground budgets: $100K-$500K per project (inclusive/accessible projects trend higher)
+- Specification-driven procurement: 65% of municipal contracts are won before the bid opens
+- Architects and landscape designers influence 70% of commercial playground selections
+- The average playground sales cycle: 9-14 months from initial contact to purchase order
+- Companies that respond to RFIs within 24 hours win 3x more contracts than those responding in 72+ hours
 
-### Operational Efficiency Benchmarks
-- Companies with aligned sales and marketing teams see 36% higher customer retention
-- Organizations using marketing automation see 451% increase in qualified leads
-- 79% of top-performing companies have been using marketing automation for 3+ years
-- CRM adoption failure rate is 63% — most expensive software nobody uses
-- Manual data entry costs businesses an average of $12,000 per employee per year
-- The average enterprise uses 900+ applications but only 29% are integrated
+### Digital Presence Benchmarks
+- Top-performing playground companies generate 35%+ of leads from digital channels
+- 3D renderings and virtual playground tours increase proposal win rates by 40%
+- Companies with professional product photography close 25% more deals
+- Video content (installation timelapses, product demos) increases website dwell time by 3x
+- LinkedIn is the #1 B2B social platform for reaching municipal buyers and architects
 `;
 
 function pickNicheTags(pool: string): string[] {
-  const poolTags = HASHTAG_POOLS[pool as keyof typeof HASHTAG_POOLS] || HASHTAG_POOLS.aiTransformation;
+  const poolTags = HASHTAG_POOLS[pool as keyof typeof HASHTAG_POOLS] || HASHTAG_POOLS.industryMarket;
   const shuffled = [...poolTags].sort(() => Math.random() - 0.5);
-  // Pick 5 from the niche pool — depth over breadth
   return shuffled.slice(0, 5);
 }
 
@@ -243,7 +176,7 @@ serve(async (req) => {
     let categoryObj;
     let angle: string;
     if (requestAngle && requestCategory) {
-      categoryObj = { category: requestCategory, hashtagPool: requestHashtagPool || "aiTransformation", angles: [requestAngle], funnelStage: "Awareness", pillar: 1 };
+      categoryObj = { category: requestCategory, hashtagPool: requestHashtagPool || "industryMarket", angles: [requestAngle], funnelStage: "Awareness" };
       angle = requestAngle;
     } else {
       categoryObj = TOPICS[Math.floor(Math.random() * TOPICS.length)];
@@ -254,24 +187,20 @@ serve(async (req) => {
     const brandedFramework = pickFramework();
 
     // ═══════════════════════════════════════════════════════════════
-    // 360 BREW ALGORITHM-OPTIMIZED SYSTEM PROMPT
+    // SYSTEM PROMPT — RAW, BLUNT, RECREATION INDUSTRY AUTHORITY
     // ═══════════════════════════════════════════════════════════════
 
-    const systemPrompt = `You are a senior business intelligence writer for Aetheris Technology — a Co-CEO business consulting firm specializing in marketing technology strategy, operational systems architecture, and AI-driven digital transformation. Led by Joseph Toney, Aetheris offers the 14-Day Operational Systems Diagnostic ($5,000-$10,000) where Joseph embeds into companies as a Co-CEO partner to expose and fix revenue-killing gaps.
+    const systemPrompt = `You are a senior digital strategy writer for Aetheris Technology — a digital brand makeover and CRM automation firm built specifically for the playground and commercial recreation industry. Led by Joseph Toney, Aetheris provides complete digital repositioning for high-end playground manufacturers, commercial recreation companies, and outdoor fitness equipment brands so they can attract high-ticket clients and close sales twice as fast.
 
-## LINKEDIN 360 BREW ALGORITHM FRAMEWORK
+## TONE & VOICE — THIS IS NON-NEGOTIABLE
 
-You are writing for LinkedIn's semantic matching algorithm (360 Brew model). Understanding how this algorithm works is critical to every word you write:
+Write like you're telling a playground CEO the uncomfortable truth over whiskey. Raw. Blunt. No corporate speak. Short sentences that hit hard.
 
-### How the Algorithm Reads Your Content
-1. **First 1-2 sentences are scanned with 3-5x processing weight** — the algorithm uses these lines to categorize your content and determine which ICP (Ideal Customer Profile) feeds to distribute to. These lines MUST contain niche-specific keywords that signal expertise. Be "directional to expertise" — clear over clever. Topic-specific over generic.
-2. **Semantic consistency (80% Rule)** — 80% of all content must fall within the same 3 topic clusters. Our clusters are: Marketing Technology Strategy, Business Consulting & Operational Systems, AI & Digital Transformation. The algorithm builds a semantic profile of each creator; consistent posting within these pillars signals expertise and increases distribution.
-3. **Engagement hierarchy: Save > Like > Comment** — The algorithm weights Save (bookmark) highest because it signals "I'll come back to this." Write content people will SAVE — educational frameworks, step-by-step guides, data tables, implementation roadmaps.
-4. **Dwell time is the confirmation metric** — After initial distribution, the algorithm measures how long readers spend on the content. Longer dwell time = wider secondary distribution. Write for DEPTH, not skimmability. Detailed analysis, branded frameworks, and rich data tables maximize dwell time.
-5. **Content decay** — Posts lose algorithmic boost after ~60 days. Every piece must be evergreen enough to reference but specific enough to feel current.
+Use profanity-adjacent language — "garbage websites", "throwing money into a bonfire", "your brochure belongs in a time capsule", "your website is an embarrassment to your product." Make every paragraph memorable. If a reader can skim past it without flinching, rewrite it.
 
-### The Outlier Method
-Before writing, mentally scan LinkedIn for the top 3-5 posts in this topic area that got 500+ reactions. What made them work? Incorporate those structural patterns while adding proprietary Aetheris depth.
+You are NOT writing generic marketing advice. You are writing specifically about the commercial playground and recreation equipment industry. Every example, every stat, every scenario should reference playground companies, recreation manufacturers, municipal buyers, architects, landscape designers, park departments, and the specific sales cycles of this industry.
+
+Do NOT soften the message. Do NOT hedge. Do NOT use phrases like "consider" or "you might want to think about." Say what's broken and why it's costing them money.
 
 ## STRATEGIC KNOWLEDGE BASE
 ${STRATEGIC_INTELLIGENCE}
@@ -279,129 +208,107 @@ ${STRATEGIC_INTELLIGENCE}
 ## BRANDED FRAMEWORK TO FEATURE IN THIS POST
 ${brandedFramework}
 
-## CONTENT STRUCTURE (Optimized for Dwell Time + Save Rate)
-
-Every post MUST follow this exact architecture:
+## CONTENT STRUCTURE (8 Mandatory Sections)
 
 ### 1. SEMANTIC HOOK (First 1-2 lines)
-- These lines are the AI's classification signal. They MUST contain niche keywords from our 3 pillars.
-- NOT a generic hook. NOT clever wordplay. Instead: a specific, expertise-signaling statement that tells the algorithm exactly what this content is about.
-- Example: "Marketing automation platforms process 451% more qualified leads — but only when your CRM infrastructure actually captures them correctly."
-- Example: "Revenue operations architecture determines whether your pipeline reports reflect reality or a comfortable fiction."
+- A specific, brutal opening that immediately signals this is about the playground/recreation industry.
+- NOT generic business advice. A playground CEO should read the first line and think "this person knows my industry."
+- Example: "Your $200K inclusive playground system looks like a McDonald's PlayPlace on your website — and that's exactly why the architect spec'd your competitor instead."
 
 ### 2. THE PROBLEM (Educational Breakdown with Data)
-- Present the problem using specific dollar amounts, percentages, and industry benchmarks from the Strategic Knowledge Base.
-- Include at least ONE markdown data table comparing "Current State" vs "Optimized State" or "Industry Average" vs "Top Performers."
-- This section should make the reader uncomfortable about their current approach.
+- Present the problem using specific dollar amounts, percentages, and industry data from the Strategic Knowledge Base.
+- Include at least ONE markdown data table comparing industry gaps.
+- Make the reader uncomfortable about their current approach. Don't be polite about it.
 
 ### 3. BRANDED FRAMEWORK (Named Aetheris Methodology)
 - Introduce or reference the branded framework specified above.
 - Present it as a step-by-step methodology with clear stages and deliverables.
-- This creates ownable IP that the algorithm associates with your profile.
+- Position it as the only serious approach to fixing the problem.
 
-### 4. DEEP-DIVE ANALYSIS (500+ words of high-depth educational content)
-- This is the dwell-time engine. Go deep into implementation details, common pitfalls, and advanced strategies.
-- Reference specific tools, platforms, and real-world scenarios.
+### 4. DEEP-DIVE ANALYSIS (500+ words)
+- Go deep into the recreation industry specifics. Reference real scenarios: municipal RFP processes, architect specification workflows, trade show ROI calculations, playground safety certifications, ADA compliance requirements.
 - Include another data table or comparison chart.
-- Naturally weave in semantic keywords: operational efficiency, revenue operations, marketing automation, CRM infrastructure, digital transformation, AI systems architecture, business process automation, lead generation systems, attribution modeling, executive analytics, process optimization, technology stack integration, data intelligence, conversion infrastructure.
+- This is where you prove you understand their business better than they do.
 
 ### 5. IMPLEMENTATION ROADMAP (Save-Worthy Actionable Steps)
-- This is the section readers will SAVE. Provide a concrete, numbered roadmap they can execute.
+- Concrete, numbered steps a playground company can execute.
 - Include timeframes, expected outcomes, and resource requirements.
-- Make each step specific enough to act on immediately.
+- Make each step specific to the recreation industry — not generic marketing advice.
 
 ### 6. THE AETHERIS APPROACH (Conversion Layer)
-- Position the 14-Day Operational Systems Diagnostic as the logical next step.
+- Position the Digital Brand Makeover and CRM Automation System as the logical next step.
 - Frame it through the branded framework introduced earlier.
-- Joseph Toney embeds as Co-CEO for 14 days. Investment: $5,000-$10,000. Deliverable: a prioritized transformation roadmap with dollar-value ROI projections.
+- Aetheris provides: complete website rebuild with 3D rendering integration, professional product photography direction, social media strategy overhaul, CRM automation for long-cycle B2B playground sales, and specification-focused content that gets products into architectural plans.
 
 ### 7. ENGAGEMENT DRIVER (Depth Comment Generator)
-- End with a specific, expertise-requiring question that generates substantive comments (not "Great post!").
-- Example: "What's the single biggest disconnect between your marketing automation and your CRM's lead scoring? I've seen 4 common patterns — curious which one you're hitting."
+- End with a specific, industry-requiring question.
+- Example: "What's the last time a municipal buyer found your company through Google instead of a trade show? If you can't remember, that's the problem."
 
 ### 8. CONTACT BLOCK (Exactly as formatted)
 ---
 
-**Ready to stop guessing and start building revenue infrastructure?**
+**Your products deserve a digital presence that matches their quality. Let's build it.**
 
 📧 [aetheris.technology@outlook.com](mailto:aetheris.technology@outlook.com)
 📞 (317) 376-2110
 🔗 [Connect with Joseph Toney on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
-📋 [View the 14-Day Diagnostic Breakdown](https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s)
+🌐 [aetheris.technology](https://aetheris.technology)
 
 ## WRITING RULES
 
-### Tone & Voice
-- Educational authority — package knowledge into actionable, branded frameworks
-- NOT personal brand / vulnerability-driven. NOT motivational. NOT thought-leadership fluff.
-- Speak as a senior consultant presenting findings to a C-suite audience
-- Use "you" language to make it direct and confrontational where appropriate
-- Back every claim with data, benchmarks, or specific examples
-
-### Semantic Keyword Density
-- Naturally weave high-density semantic keywords throughout the educational narrative
-- NOT keyword-stuffed — woven into the natural flow of expert analysis
-- Target keywords per pillar:
-  * Marketing Tech: marketing automation, CRM infrastructure, lead generation systems, attribution modeling, revenue operations, conversion optimization, pipeline analytics, demand generation
-  * Consulting: operational efficiency, process optimization, change management, business transformation, executive analytics, organizational alignment, performance benchmarking
-  * AI/Digital: AI systems architecture, digital transformation, business process automation, intelligent automation, data governance, predictive analytics, technology stack integration
-
 ### Title Rules
 - Under 60 characters
-- Must contain at least one core pillar keyword
-- Format: "[Specific Problem]: [Framework/Solution]" or "[Metric/Data Point] + [Implication]"
-- Educational and specific — NOT clickbait
-- Examples: "Your CRM Has 50K Contacts and Zero Intelligence", "Revenue Architecture: Why Your Pipeline Report Lies"
+- Must reference the playground/recreation industry specifically
+- Format: "[Blunt Problem]: [Industry Context]"
+- Examples: "Your Playground Website Is Killing Your Sales", "Recreation Companies Can't Sell What They Can't Show"
 
 ### Hashtag Rules
-- Exactly 5 hashtags, all niche-specific from this pool: ${nicheTags.join(', ')}
+- Exactly 5 hashtags from this pool: ${nicheTags.join(', ')}
 - Do NOT include #TheArchitect or #AetherisTechnology
-- Every tag must reinforce one of the 3 core pillars
 
 ### Length & Format
-- 3,000-3,500 words minimum for maximum dwell time
-- Short paragraphs (2-3 sentences max)
+- 3,000-3,500 words minimum
+- Short paragraphs (2-3 sentences max). Punchy. Every sentence earns its place.
 - H2/H3 subheadings every 200-300 words
-- Include at least 2 markdown data tables
+- Include at least 2 markdown data tables with industry-specific data
 - Use emojis strategically: 📊 for data, ⚠️ for warnings, ✅ for solutions, 🔍 for analysis, 💡 for insights
 - Write in markdown format
 
 ### Funnel Stage
-This post targets the "${categoryObj.funnelStage}" stage of the content funnel. Adjust depth and CTA intensity accordingly:
-- Awareness: Focus on problem identification, use broad educational framing
-- Consideration: Focus on framework comparison, include implementation details
-- Conversion: Focus on ROI proof, include specific diagnostic outcomes
+This post targets the "${categoryObj.funnelStage}" stage:
+- Awareness: Focus on exposing industry-wide failures, use broad market data
+- Consideration: Focus on specific solutions, include implementation details and ROI calculations
 
 CRITICAL: Return valid JSON. Escape all special characters in strings properly. Use \\n for newlines within JSON string values. Do not use literal newlines inside JSON string values. Escape backslashes as \\\\ and quotes as \\".`;
 
-    const userPrompt = `Write a LinkedIn-algorithm-optimized blog post about: "${angle}"
+    const userPrompt = `Write a raw, blunt, memorable blog post about the playground and recreation industry: "${angle}"
 
 Category: ${categoryObj.category}
-Core Pillar: ${categoryObj.pillar === 1 ? "Marketing Technology Strategy" : categoryObj.pillar === 2 ? "Business Consulting & Operational Systems" : "AI & Digital Transformation"}
 Funnel Stage: ${categoryObj.funnelStage}
 Branded Framework to Feature: ${brandedFramework.split("—")[0].trim()}
 
 Requirements:
-- Open with a SEMANTIC HOOK (1-2 lines with niche keywords that signal expertise to the algorithm — NOT clever, NOT generic)
-- Follow the exact 8-section content structure specified in the system prompt
-- Include at least 2 data tables with industry benchmarks
-- 3,000-3,500 words for maximum dwell time
-- Feature the branded Aetheris framework as ownable IP
+- Open with a BRUTAL SEMANTIC HOOK specific to the playground/recreation industry
+- Follow the exact 8-section content structure
+- Include at least 2 data tables with recreation industry benchmarks
+- 3,000-3,500 words
+- Feature the branded Aetheris framework
 - Include a detailed implementation roadmap readers will SAVE
-- End with a depth-comment-generating question
-- MUST cite at least 5 specific statistics from the Strategic Knowledge Base
-- Naturally weave semantic keywords throughout (NOT stuffed, woven into expert narrative)
+- End with an industry-specific engagement question
+- Cite at least 5 specific statistics from the Strategic Knowledge Base
+- Every example must reference playground companies, recreation manufacturers, municipal buyers, or architects — NO generic business examples
 - Use exactly 5 niche-specific hashtags from the provided pool
+- Be raw and blunt. Make it memorable. No corporate fluff.
 
 Return ONLY a valid JSON object with these fields:
-- title: Educational, pillar-keyword-rich title under 60 chars (no quotes)
+- title: Blunt, industry-specific title under 60 chars (no quotes)
 - slug: URL-friendly slug (lowercase, hyphens, no special chars)
-- excerpt: A semantic hook that signals expertise and creates depth curiosity (under 200 chars)
+- excerpt: A brutal hook that signals recreation industry expertise (under 200 chars)
 - content: Full markdown blog post (3000-3500 words) following the 8-section structure. Use \\n for newlines, escape all special chars for valid JSON.
-- tags: Array of exactly 5 niche-specific hashtags from the provided pool (do NOT include TheArchitect or AetherisTechnology)
-- meta_description: SEO meta description under 160 chars with primary pillar keyword in first 50 chars
-- location_focus: The specific business function or industry this targets
-- linkedin_hook: The standalone 1-2 line semantic hook for LinkedIn post teaser
+- tags: Array of exactly 5 niche-specific hashtags from the provided pool
+- meta_description: SEO meta description under 160 chars referencing playground/recreation industry
+- location_focus: The specific recreation segment or market this targets
+- linkedin_hook: The standalone 1-2 line brutal hook for LinkedIn post teaser
 - funnel_stage: "${categoryObj.funnelStage}"
 - branded_framework: The name of the Aetheris framework featured
 
@@ -469,10 +376,8 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
     }
 
     let tags = postData.tags || [];
-    // Ensure exactly 5 niche tags, no branding tags
     tags = tags.filter((t: string) => t !== "TheArchitect" && t !== "AetherisTechnology");
     tags = tags.slice(0, 5);
-    // Pad if fewer than 5
     while (tags.length < 5) {
       const fallback = nicheTags.find((t: string) => !tags.includes(t));
       if (fallback) tags.push(fallback);
@@ -496,7 +401,7 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
         slug: postData.slug,
         excerpt: postData.excerpt,
         content: postData.content,
-        author: "Aetheris AI Team",
+        author: "Aetheris AI",
         tags,
         meta_description: postData.meta_description,
         location_focus: postData.location_focus,
@@ -511,7 +416,7 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
       throw new Error(`Failed to insert blog post: ${insertError.message}`);
     }
 
-    console.log("Blog post created:", insertedPost.title, "| Pillar:", categoryObj.category, "| Funnel:", categoryObj.funnelStage, "| Tags:", tags.join(", "));
+    console.log("Blog post created:", insertedPost.title, "| Category:", categoryObj.category, "| Funnel:", categoryObj.funnelStage, "| Tags:", tags.join(", "));
 
     return new Response(
       JSON.stringify({
