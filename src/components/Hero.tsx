@@ -27,19 +27,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-sm text-muted-foreground">Business Consulting &amp; Digital Intelligence</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.95] font-display tracking-tight">
-            <span className="text-foreground">This Isn't Feel-Good Consulting.</span>
-            <br />
-            <span className="text-foreground">This Is </span>
-            <span className="text-gradient-amber">
-              Fix-Your-Business
-            </span>
-            <span className="text-foreground"> Consulting.</span>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] font-display tracking-tight">
+            <span className="text-foreground">Most high-end playground companies lose premium customers because their outdated websites and generic social media make their luxury products look like </span>
+            <span className="text-gradient-amber">cheap toys.</span>
           </h1>
 
           <div className="inline-flex items-center gap-2 glass px-6 py-3 rounded-full border border-amber/30">
             <span className="text-base md:text-lg font-semibold text-amber">
-              I step in as your Co-CEO. I find the gaps. I close the gaps. I prove it with numbers.
+              I provide a complete digital brand makeover &amp; CRM automation system designed for the recreation industry — so you can attract high-ticket clients and close sales twice as fast.
             </span>
           </div>
 
