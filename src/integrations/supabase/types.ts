@@ -269,6 +269,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_signups: {
+        Row: {
+          created_at: string
+          email: string
+          experience: string | null
+          id: string
+          linkedin_url: string | null
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          experience?: string | null
+          id?: string
+          linkedin_url?: string | null
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          experience?: string | null
+          id?: string
+          linkedin_url?: string | null
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
       site_events: {
         Row: {
           created_at: string
