@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -154,7 +155,16 @@ const PlaybookSection = () => (
       <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
         Welcome to <span className="text-primary">Aetheris AI</span>
       </h1>
-      <p className="text-xl text-muted-foreground">Your sales playbook is below. Read it. Learn it. Start closing.</p>
+      <p className="text-xl text-muted-foreground mb-6">Your sales playbook is below. Read it. Learn it. Start closing.</p>
+      <a
+        href="https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/playbooks/rep_playbook.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Button size="lg" className="gap-2">
+          <Download className="w-5 h-5" /> Download Playbook PDF
+        </Button>
+      </a>
     </div>
 
     {/* PRICING LADDER */}
