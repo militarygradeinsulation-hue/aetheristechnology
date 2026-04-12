@@ -20,6 +20,7 @@ import AssessmentPage from "./pages/AssessmentPage";
 import ScanPage from "./pages/ScanPage";
 import NotFound from "./pages/NotFound";
 import DiagnosticQuizPage from "./pages/DiagnosticQuizPage";
+import CareersPage from "./pages/CareersPage";
 
 const queryClient = new QueryClient();
 
