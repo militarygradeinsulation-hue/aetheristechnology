@@ -29,6 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Blog', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'Free Diagnostic', href: '/business-diagnostic' },
+    { label: 'Careers', href: '/careers' },
     { label: 'About', href: '/about' },
   ];
 
