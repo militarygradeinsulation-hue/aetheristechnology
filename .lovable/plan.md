@@ -1,49 +1,35 @@
 
 
-# Careers Page — Commission-Based Rep Signup
+# Downloadable Rep Instructions PDF
 
 ## Overview
-Create a `/careers` page where visitors can sign up as commission-based independent sales reps. After submitting their info, the page reveals the full playbook: pricing ladder, commission percentages, sales approach, what to say, what not to do, and sample monthly earnings.
+Generate a branded PDF "Rep Playbook" that reps can download from the Careers page after signing up. The PDF covers the daily action plan: repost Aetheris content, follow our network, email/call prospects, book appointments, close deals, get paid.
 
-## Database
+## PDF Content Structure
 
-**New table: `rep_signups`**
-- `id` (uuid, PK)
-- `name` (text, required)
-- `email` (text, required)
-- `phone` (text, nullable)
-- `linkedin_url` (text, nullable)
-- `experience` (text, nullable — brief background)
-- `created_at` (timestamptz, default now())
+1. **Cover Page** — "Aetheris AI — Independent Sales Rep Playbook"
+2. **Daily Action Checklist**
+   - Repost every Aetheris LinkedIn post, blog, video, and carousel to your feed
+   - Follow the people and companies Aetheris follows — they're your prospect list
+   - Comment on prospect posts to get visible before you pitch
+3. **Outreach Playbook**
+   - Email template: lead with a specific website observation
+   - Cold call script: "I noticed your website — you're losing bids because of it"
+   - LinkedIn connect message template
+   - Follow-up cadence: Day 1, Day 3, Day 7
+4. **The Sales Ladder** — pricing recap ($125 → $25K+)
+5. **Commission Structure** — rates and step-up bonuses
+6. **How You Get Paid** — book appointment → close deal → client pays → you get paid within 7 days
+7. **Contact & Resources** — email, phone, scanner URL
 
-RLS: anyone can insert (anon + authenticated), admins can select.
+## Implementation
 
-## Page Structure
-
-### Before Signup (top half)
-- Hero section with recruiting pitch: raw, direct language from the playbook ("Commission-Only Independent Sales Reps Wanted")
-- Brief value prop bullets: what you sell, who you sell to, why it works
-- Signup form: Name, Email, Phone, LinkedIn URL, Brief Experience/Background
-- Submit saves to `rep_signups` table
-
-### After Signup (revealed content)
-The form disappears and the full playbook is shown in styled sections:
-
-1. **Pricing Ladder** — table showing all offers ($125 snapshots through $25K+ implementation) with price, format, and purpose
-2. **Your Commission** — table with base commission rates (25% on snapshots, 25% on evaluations, 12% on diagnostics, 8-10% on implementation) plus step-up bonuses
-3. **How to Sell** — pain-to-offer matching table, the outreach sequence (lead with observation, not pitch), and "what not to do" rules
-4. **Sample Monthly Earnings** — the example showing $1,950 commission on $12,000 in closed revenue
-5. **How to Get Started** — share LinkedIn posts, email companies directly, call prospects, use the website scanner as a conversation starter
+1. **Create a Python script** to generate a branded PDF using reportlab with Aetheris colors (dark bg, amber accents) — output to `/mnt/documents/rep_playbook.pdf`
+2. **Upload PDF to backend storage** (Supabase Storage bucket)
+3. **Add download button** to the PlaybookSection in `CareersPage.tsx` — appears after signup, links to the stored PDF
 
 ## Files
-
-- **New:** `src/pages/CareersPage.tsx` — full page component with form + revealed playbook
-- **Modified:** `src/App.tsx` — add `/careers` route
-- **Migration:** create `rep_signups` table with RLS
-
-## Technical Detail
-- Form uses existing `supabase.from('rep_signups').insert()` pattern
-- State toggle: `submitted` boolean controls form vs. playbook view
-- Styled with existing glass/card patterns and amber accent colors
-- Tables use the existing `<table>` UI component for the pricing/commission grids
+- **Script:** `/tmp/gen_rep_playbook.py` (temporary)
+- **Output:** `/mnt/documents/rep_playbook.pdf`
+- **Modified:** `src/pages/CareersPage.tsx` — add download button in PlaybookSection
 
