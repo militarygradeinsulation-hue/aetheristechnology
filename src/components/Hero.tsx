@@ -27,6 +27,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-sm text-muted-foreground">Business Consulting &amp; Digital Intelligence</span>
           </div>
 
+          <p className="text-lg md:text-xl font-semibold text-foreground/90 italic mb-4 max-w-3xl mx-auto">
+            "With me you're paying for <span className="text-amber">honesty &amp; accuracy</span> — not overhead while calling it <span className="text-amber">'productivity'</span>."
+          </p>
+
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] font-display tracking-tight">
             <span className="text-foreground">Most high-end playground </span>
             <span className="text-gradient-amber">companies</span>
