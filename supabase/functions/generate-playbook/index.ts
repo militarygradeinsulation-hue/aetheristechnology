@@ -31,7 +31,220 @@ const TOPIC_POOL = [
   { title: "The AI-First Customer Experience Blueprint", subtitle: "Designing Touchpoints That Learn, Adapt, and Convert", pillar: "AI Transformation", tags: ["Customer Experience", "AI Personalization", "Conversion Design"], icon: "BookOpen" },
   { title: "The Predictive Analytics Implementation Roadmap", subtitle: "From Historical Reporting to Revenue Forecasting in 90 Days", pillar: "AI Transformation", tags: ["Predictive Analytics", "Revenue Forecasting", "Data Strategy"], icon: "BarChart3" },
   { title: "The AI Ethics and Governance Playbook", subtitle: "Building Trust While Deploying Autonomous Systems", pillar: "AI Transformation", tags: ["AI Ethics", "Governance", "Trust Architecture"], icon: "Shield" },
+
+  // === EXPANDED POOL (20+ new topics) ===
+
+  // Marketing Technology — Expanded
+  { title: "The Account-Based Marketing Execution Guide", subtitle: "Targeting the 20% of Accounts That Drive 80% of Revenue", pillar: "Marketing Technology", tags: ["ABM", "Target Accounts", "Revenue Concentration"], icon: "TrendingUp" },
+  { title: "The Email Deliverability & Reputation Playbook", subtitle: "Stop Landing in Spam — Engineering Inbox Placement at Scale", pillar: "Marketing Technology", tags: ["Email Marketing", "Deliverability", "Sender Reputation"], icon: "FileText" },
+  { title: "The Social Proof Automation Framework", subtitle: "Systematizing Testimonials, Reviews, and Case Studies", pillar: "Marketing Technology", tags: ["Social Proof", "Testimonials", "Trust Signals"], icon: "BookOpen" },
+  { title: "The Marketing Analytics Dashboard Blueprint", subtitle: "Building Real-Time Visibility Into Every Dollar Spent", pillar: "Marketing Technology", tags: ["Marketing Dashboards", "Real-Time Analytics", "Data Visualization"], icon: "BarChart3" },
+  { title: "The Lead Scoring & Qualification Engine", subtitle: "Separating Tire-Kickers from Buyers With Predictive Models", pillar: "Marketing Technology", tags: ["Lead Scoring", "Sales Qualification", "Predictive Models"], icon: "TrendingUp" },
+  { title: "The SEO-to-Revenue Pipeline Playbook", subtitle: "Connecting Organic Traffic to Closed Deals in 90 Days", pillar: "Marketing Technology", tags: ["SEO Strategy", "Pipeline Attribution", "Organic Revenue"], icon: "BarChart3" },
+  { title: "The Video Marketing ROI Framework", subtitle: "From Content Creation to Pipeline Impact Measurement", pillar: "Marketing Technology", tags: ["Video Marketing", "Content ROI", "Pipeline Impact"], icon: "Video" },
+
+  // Strategic Consulting — Expanded
+  { title: "The Cash Flow Optimization Playbook", subtitle: "Accelerating Collections and Engineering Predictable Revenue", pillar: "Strategic Consulting", tags: ["Cash Flow", "Collections", "Revenue Predictability"], icon: "TrendingUp" },
+  { title: "The Strategic Partnership Framework", subtitle: "Building Channel Partnerships That Multiply Revenue Without Adding Headcount", pillar: "Strategic Consulting", tags: ["Partnerships", "Channel Strategy", "Revenue Multiplication"], icon: "BookOpen" },
+  { title: "The Talent Acquisition & Retention Playbook", subtitle: "Competing for A-Players When You Can't Compete on Salary", pillar: "Strategic Consulting", tags: ["Talent Strategy", "Retention", "Employer Brand"], icon: "Shield" },
+  { title: "The Crisis Management Operating System", subtitle: "Turning Business Disruptions Into Competitive Advantages", pillar: "Strategic Consulting", tags: ["Crisis Management", "Business Continuity", "Resilience"], icon: "Shield" },
+  { title: "The Customer Acquisition Cost Reduction Guide", subtitle: "Cutting CAC by 40% Without Cutting Marketing Spend", pillar: "Strategic Consulting", tags: ["CAC Optimization", "Unit Economics", "Growth Efficiency"], icon: "BarChart3" },
+  { title: "The Sales Process Reengineering Playbook", subtitle: "From Intuition-Based Selling to Data-Driven Revenue Operations", pillar: "Strategic Consulting", tags: ["Sales Process", "Revenue Operations", "Data-Driven Sales"], icon: "TrendingUp" },
+  { title: "The Board-Ready Financial Modeling Guide", subtitle: "Building Projections That Investors and Lenders Actually Trust", pillar: "Strategic Consulting", tags: ["Financial Modeling", "Investor Relations", "Forecasting"], icon: "BarChart3" },
+
+  // AI Transformation — Expanded
+  { title: "The AI-Powered Sales Enablement Playbook", subtitle: "Arming Your Sales Team With Intelligence That Closes Deals", pillar: "AI Transformation", tags: ["AI Sales Tools", "Sales Intelligence", "Deal Acceleration"], icon: "TrendingUp" },
+  { title: "The Intelligent Document Processing Guide", subtitle: "Eliminating Manual Data Entry With AI-Powered Extraction", pillar: "AI Transformation", tags: ["Document AI", "Process Automation", "Data Extraction"], icon: "FileText" },
+  { title: "The AI Chatbot Strategy & Deployment Guide", subtitle: "From FAQ Bot to Revenue-Generating Conversational AI", pillar: "AI Transformation", tags: ["Conversational AI", "Chatbot Strategy", "Customer Service AI"], icon: "BookOpen" },
+  { title: "The Computer Vision for Business Playbook", subtitle: "Practical Applications of Visual AI Beyond the Hype", pillar: "AI Transformation", tags: ["Computer Vision", "Visual AI", "Business Applications"], icon: "Video" },
+  { title: "The AI Content Production Pipeline", subtitle: "Scaling Thought Leadership Without Scaling Your Team", pillar: "AI Transformation", tags: ["AI Content", "Thought Leadership", "Content Scaling"], icon: "FileText" },
+  { title: "The Machine Learning ROI Calculator Framework", subtitle: "Quantifying AI Investment Returns for the C-Suite", pillar: "AI Transformation", tags: ["ML ROI", "AI Investment", "Business Case"], icon: "BarChart3" },
+  { title: "The AI-Driven Competitive Analysis System", subtitle: "Real-Time Market Intelligence Powered by Machine Learning", pillar: "AI Transformation", tags: ["Competitive Analysis", "Market Intelligence", "AI Monitoring"], icon: "Shield" },
 ];
+
+// ─── PDF Rendering Helpers ───
+function addPageBackground(doc: any, pageW: number, pageH: number) {
+  doc.setFillColor(15, 15, 20);
+  doc.rect(0, 0, pageW, pageH, "F");
+}
+
+function addPageFooter(doc: any, pageW: number, pageH: number, margin: number, pageNum: number) {
+  // Subtle top line
+  doc.setDrawColor(40, 40, 50);
+  doc.setLineWidth(0.3);
+  doc.line(margin, pageH - 14, pageW - margin, pageH - 14);
+  // Footer text
+  doc.setFontSize(7);
+  doc.setTextColor(100, 95, 90);
+  doc.setFont("helvetica", "normal");
+  doc.text("AETHERIS", margin, pageH - 9);
+  doc.text(`Page ${pageNum}`, pageW - margin, pageH - 9, { align: "right" });
+}
+
+function addDecoCorner(doc: any, pageW: number) {
+  // Top-right corner accent
+  doc.setFillColor(217, 158, 46);
+  doc.rect(pageW - 30, 0, 30, 3, "F");
+  doc.rect(pageW - 3, 0, 3, 30, "F");
+}
+
+function renderCoverPage(doc: any, topic: any, pageW: number, pageH: number, margin: number) {
+  addPageBackground(doc, pageW, pageH);
+  const contentW = pageW - margin * 2;
+
+  // Decorative frame lines
+  doc.setDrawColor(217, 158, 46);
+  doc.setLineWidth(0.5);
+  doc.rect(margin - 5, margin - 5, contentW + 10, pageH - margin * 2 + 10);
+
+  // Large amber accent bar
+  doc.setFillColor(217, 158, 46);
+  doc.rect(margin, 55, 50, 3, "F");
+
+  // Pillar label
+  doc.setFontSize(10);
+  doc.setTextColor(217, 158, 46);
+  doc.setFont("helvetica", "bold");
+  doc.text(topic.pillar.toUpperCase(), margin, 50);
+
+  // Title
+  doc.setTextColor(235, 230, 220);
+  doc.setFontSize(34);
+  doc.setFont("helvetica", "bold");
+  const titleLines = doc.splitTextToSize(topic.title, contentW);
+  doc.text(titleLines, margin, 78);
+
+  // Subtitle
+  const subtitleY = 78 + titleLines.length * 15 + 8;
+  doc.setFontSize(16);
+  doc.setTextColor(200, 195, 185);
+  doc.setFont("helvetica", "normal");
+  const subtitleLines = doc.splitTextToSize(topic.subtitle, contentW);
+  doc.text(subtitleLines, margin, subtitleY);
+
+  // Tags
+  const tagsY = subtitleY + subtitleLines.length * 8 + 15;
+  doc.setFontSize(9);
+  doc.setTextColor(180, 130, 40);
+  doc.text(topic.tags.join("   •   "), margin, tagsY);
+
+  // Decorative geometric element
+  doc.setFillColor(217, 158, 46);
+  doc.setGlobalAlpha?.(0.1);
+  doc.rect(pageW - 80, pageH - 120, 60, 60, "F");
+  doc.setGlobalAlpha?.(1);
+
+  // Footer block
+  doc.setFillColor(217, 158, 46);
+  doc.rect(margin, pageH - 60, 50, 2, "F");
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(217, 158, 46);
+  doc.text("AETHERIS", margin, pageH - 45);
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(160, 155, 145);
+  doc.text("aetheris.technology", margin, pageH - 38);
+  doc.text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" }), margin, pageH - 31);
+
+  doc.setFontSize(7);
+  doc.setTextColor(80, 75, 70);
+  doc.text("CONFIDENTIAL — FOR AUTHORIZED DISTRIBUTION ONLY", margin, pageH - 20);
+}
+
+function renderTOCPage(doc: any, sections: string[], pageW: number, pageH: number, margin: number) {
+  addPageBackground(doc, pageW, pageH);
+  addDecoCorner(doc, pageW);
+  const contentW = pageW - margin * 2;
+
+  doc.setFillColor(217, 158, 46);
+  doc.rect(margin, margin, 35, 2, "F");
+
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(235, 230, 220);
+  doc.text("Table of Contents", margin, margin + 16);
+
+  let y = margin + 35;
+  sections.forEach((section, i) => {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(200, 195, 185);
+
+    // Section number
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(217, 158, 46);
+    doc.text(`${String(i + 1).padStart(2, "0")}`, margin, y);
+
+    // Section title
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(200, 195, 185);
+    const truncated = section.length > 70 ? section.substring(0, 67) + "..." : section;
+    doc.text(truncated, margin + 14, y);
+
+    // Dotted line
+    doc.setDrawColor(60, 60, 70);
+    doc.setLineWidth(0.2);
+    const textWidth = doc.getTextWidth(truncated);
+    const lineStart = margin + 14 + textWidth + 3;
+    const lineEnd = pageW - margin;
+    if (lineStart < lineEnd - 10) {
+      for (let x = lineStart; x < lineEnd; x += 3) {
+        doc.circle(x, y - 1, 0.3, "F");
+      }
+    }
+
+    y += 10;
+  });
+
+  addPageFooter(doc, pageW, pageH, margin, 2);
+}
+
+function renderBackCover(doc: any, pageW: number, pageH: number, margin: number) {
+  addPageBackground(doc, pageW, pageH);
+  const contentW = pageW - margin * 2;
+
+  // Decorative frame
+  doc.setDrawColor(217, 158, 46);
+  doc.setLineWidth(0.5);
+  doc.rect(margin - 5, margin - 5, contentW + 10, pageH - margin * 2 + 10);
+
+  // Amber bar
+  doc.setFillColor(217, 158, 46);
+  doc.rect(pageW / 2 - 25, 65, 50, 3, "F");
+
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(235, 230, 220);
+  doc.text("Ready to Execute?", pageW / 2, 88, { align: "center" });
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(200, 195, 185);
+  const ctaLines = doc.splitTextToSize(
+    "This playbook gives you the framework. The 14-Day Operational Systems Diagnostic gives you the execution plan — custom-built for your business, your market, and your revenue goals.",
+    contentW - 20
+  );
+  doc.text(ctaLines, pageW / 2, 108, { align: "center" });
+
+  const contactY = 108 + ctaLines.length * 7 + 20;
+  doc.setFillColor(217, 158, 46);
+  doc.rect(pageW / 2 - 20, contactY - 5, 40, 2, "F");
+
+  doc.setFontSize(13);
+  doc.setTextColor(217, 158, 46);
+  doc.setFont("helvetica", "bold");
+  doc.text("(317) 376-2110", pageW / 2, contactY + 12, { align: "center" });
+  doc.text("aetheris.technology@outlook.com", pageW / 2, contactY + 26, { align: "center" });
+  doc.text("aetheris.technology", pageW / 2, contactY + 40, { align: "center" });
+
+  doc.setFontSize(9);
+  doc.setTextColor(120, 115, 110);
+  doc.setFont("helvetica", "normal");
+  doc.text(`© ${new Date().getFullYear()} Aetheris. All rights reserved.`, pageW / 2, pageH - 25, { align: "center" });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -114,73 +327,49 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
     const content = aiData.choices?.[0]?.message?.content;
     if (!content) throw new Error("No content generated");
 
-    // Generate PDF using jsPDF
+    // ─── Build PDF ───
     const { jsPDF } = await import("https://esm.sh/jspdf@2.5.2");
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     
     const pageW = 210;
     const pageH = 297;
-    const margin = 20;
+    const margin = 22;
     const contentW = pageW - margin * 2;
-    let y = 0;
 
-    const ensureSpace = (needed: number) => {
-      if (y + needed > pageH - margin) {
-        doc.addPage();
-        y = margin;
+    // Extract section headers for TOC
+    const sectionHeaders: string[] = [];
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("## ") && !trimmed.startsWith("### ")) {
+        sectionHeaders.push(trimmed.replace("## ", "").replace(/\*\*/g, ""));
       }
-    };
+    }
 
     // --- Cover Page ---
-    doc.setFillColor(15, 15, 20);
-    doc.rect(0, 0, pageW, pageH, "F");
+    renderCoverPage(doc, topic, pageW, pageH, margin);
 
-    // Gold accent line
-    doc.setFillColor(217, 158, 46);
-    doc.rect(margin, 60, 40, 2, "F");
-
-    // Title
-    doc.setTextColor(235, 230, 220);
-    doc.setFontSize(32);
-    doc.setFont("helvetica", "bold");
-    const titleLines = doc.splitTextToSize(topic.title, contentW);
-    doc.text(titleLines, margin, 80);
-
-    // Subtitle
-    doc.setFontSize(16);
-    doc.setTextColor(217, 158, 46);
-    doc.setFont("helvetica", "normal");
-    const subtitleY = 80 + titleLines.length * 14;
-    const subtitleLines = doc.splitTextToSize(topic.subtitle, contentW);
-    doc.text(subtitleLines, margin, subtitleY);
-
-    // Pillar badge
-    doc.setFontSize(10);
-    doc.setTextColor(160, 155, 145);
-    doc.text(topic.pillar.toUpperCase(), margin, subtitleY + subtitleLines.length * 8 + 10);
-
-    // Tags
-    doc.setFontSize(9);
-    doc.setTextColor(180, 130, 40);
-    doc.text(topic.tags.join("  •  "), margin, subtitleY + subtitleLines.length * 8 + 20);
-
-    // Footer
-    doc.setFontSize(11);
-    doc.setTextColor(217, 158, 46);
-    doc.text("AETHERIS", margin, pageH - 40);
-    doc.setFontSize(9);
-    doc.setTextColor(160, 155, 145);
-    doc.text("aetheris.technology", margin, pageH - 33);
-    doc.text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" }), margin, pageH - 26);
-
-    // Confidential
-    doc.setFontSize(7);
-    doc.setTextColor(100, 95, 90);
-    doc.text("CONFIDENTIAL — FOR AUTHORIZED DISTRIBUTION ONLY", margin, pageH - 15);
+    // --- Table of Contents ---
+    doc.addPage();
+    renderTOCPage(doc, sectionHeaders, pageW, pageH, margin);
 
     // --- Content Pages ---
     doc.addPage();
-    y = margin;
+    addPageBackground(doc, pageW, pageH);
+    addDecoCorner(doc, pageW);
+    let y = margin;
+    let pageNum = 3;
+    let sectionNum = 0;
+
+    const ensureSpace = (needed: number) => {
+      if (y + needed > pageH - 18) {
+        addPageFooter(doc, pageW, pageH, margin, pageNum);
+        doc.addPage();
+        pageNum++;
+        addPageBackground(doc, pageW, pageH);
+        addDecoCorner(doc, pageW);
+        y = margin;
+      }
+    };
 
     const lines = content.split("\n");
     
@@ -191,122 +380,140 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
         continue;
       }
 
-      // Page background
-      if (y <= margin + 1) {
-        doc.setFillColor(15, 15, 20);
-        doc.rect(0, 0, pageW, pageH, "F");
-      }
+      if (trimmed.startsWith("## ") && !trimmed.startsWith("### ")) {
+        // Major section — start new page
+        if (y > margin + 5) {
+          addPageFooter(doc, pageW, pageH, margin, pageNum);
+          doc.addPage();
+          pageNum++;
+        }
+        addPageBackground(doc, pageW, pageH);
+        addDecoCorner(doc, pageW);
+        y = margin;
+        sectionNum++;
 
-      if (trimmed.startsWith("## ")) {
-        ensureSpace(20);
-        // Section header
+        // Section number badge
         doc.setFillColor(217, 158, 46);
-        doc.rect(margin, y, 30, 1.5, "F");
+        doc.rect(margin, y, 35, 2, "F");
+        y += 10;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(217, 158, 46);
+        doc.text(`SECTION ${String(sectionNum).padStart(2, "0")}`, margin, y);
         y += 8;
-        doc.setFontSize(18);
+
+        // Section title
+        doc.setFontSize(20);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(235, 230, 220);
-        const headerLines = doc.splitTextToSize(trimmed.replace("## ", ""), contentW);
+        const headerText = trimmed.replace("## ", "").replace(/\*\*/g, "");
+        const headerLines = doc.splitTextToSize(headerText, contentW);
         doc.text(headerLines, margin, y);
-        y += headerLines.length * 8 + 6;
+        y += headerLines.length * 9 + 8;
+
       } else if (trimmed.startsWith("### ")) {
-        ensureSpace(14);
+        ensureSpace(16);
+        y += 3;
         doc.setFontSize(13);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(217, 158, 46);
-        const subLines = doc.splitTextToSize(trimmed.replace("### ", ""), contentW);
+        const subText = trimmed.replace("### ", "").replace(/\*\*/g, "");
+        const subLines = doc.splitTextToSize(subText, contentW);
         doc.text(subLines, margin, y);
-        y += subLines.length * 6 + 4;
+        y += subLines.length * 6 + 5;
+
       } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-        ensureSpace(10);
-        doc.setFontSize(10);
+        ensureSpace(12);
+        doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(200, 195, 185);
+
+        // Amber diamond marker
         doc.setFillColor(217, 158, 46);
-        doc.circle(margin + 2, y - 1.5, 1, "F");
-        const bulletText = trimmed.replace(/^[-*]\s/, "");
-        const bulletLines = doc.splitTextToSize(bulletText, contentW - 10);
-        doc.text(bulletLines, margin + 8, y);
-        y += bulletLines.length * 5 + 3;
+        const diamondX = margin + 3;
+        const diamondY = y - 1.5;
+        doc.triangle(
+          diamondX, diamondY - 1.5,
+          diamondX + 1.5, diamondY,
+          diamondX, diamondY + 1.5,
+          "F"
+        );
+        doc.triangle(
+          diamondX, diamondY - 1.5,
+          diamondX - 1.5, diamondY,
+          diamondX, diamondY + 1.5,
+          "F"
+        );
+
+        const bulletText = trimmed.replace(/^[-*]\s/, "").replace(/\*\*/g, "");
+        const bulletLines = doc.splitTextToSize(bulletText, contentW - 12);
+        doc.text(bulletLines, margin + 10, y);
+        y += bulletLines.length * 6 + 3;
+
       } else if (trimmed.startsWith("|")) {
         // Table row
-        ensureSpace(8);
+        ensureSpace(10);
         const cells = trimmed.split("|").filter(c => c.trim()).map(c => c.trim());
-        if (cells.some(c => /^[-:]+$/.test(c))) continue; // skip separator rows
-        
-        const isHeader = cells.every(c => c === c.toUpperCase() || /[A-Z]/.test(c[0]));
-        doc.setFontSize(8);
+        if (cells.some(c => /^[-:]+$/.test(c))) continue; // skip separator
+
+        const isHeader = cells.length > 0 && cells.every(c => c === c.toUpperCase() || (c.length > 0 && /[A-Z]/.test(c[0])));
+        doc.setFontSize(9);
         
         if (isHeader) {
-          doc.setFillColor(30, 30, 40);
-          doc.rect(margin, y - 4, contentW, 7, "F");
+          // Amber header row
+          doc.setFillColor(40, 35, 20);
+          doc.rect(margin, y - 4.5, contentW, 7.5, "F");
+          doc.setFillColor(217, 158, 46);
+          doc.rect(margin, y - 4.5, contentW, 0.5, "F");
           doc.setFont("helvetica", "bold");
           doc.setTextColor(217, 158, 46);
         } else {
+          // Alternating row shading
+          const rowIndex = Math.floor((y - margin) / 6);
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(22, 22, 30);
+            doc.rect(margin, y - 4, contentW, 7, "F");
+          }
           doc.setFont("helvetica", "normal");
           doc.setTextColor(200, 195, 185);
         }
         
         const colW = contentW / cells.length;
         cells.forEach((cell, i) => {
-          doc.text(cell.substring(0, 30), margin + i * colW + 2, y);
+          doc.text(cell.substring(0, 35), margin + i * colW + 3, y);
         });
-        y += 6;
+        y += 7;
+
       } else {
         // Regular paragraph
-        ensureSpace(10);
-        doc.setFontSize(10);
+        ensureSpace(12);
+        doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(200, 195, 185);
         
-        // Handle bold text markers
         const paraLines = doc.splitTextToSize(trimmed.replace(/\*\*/g, ""), contentW);
         doc.text(paraLines, margin, y);
-        y += paraLines.length * 5 + 3;
+        y += paraLines.length * 6 + 3;
       }
 
       // Check page break
-      if (y > pageH - margin) {
+      if (y > pageH - 18) {
+        addPageFooter(doc, pageW, pageH, margin, pageNum);
         doc.addPage();
+        pageNum++;
+        addPageBackground(doc, pageW, pageH);
+        addDecoCorner(doc, pageW);
         y = margin;
-        doc.setFillColor(15, 15, 20);
-        doc.rect(0, 0, pageW, pageH, "F");
       }
     }
 
-    // --- CTA Page ---
+    // Footer on last content page
+    addPageFooter(doc, pageW, pageH, margin, pageNum);
+
+    // --- Back Cover (CTA) ---
     doc.addPage();
-    doc.setFillColor(15, 15, 20);
-    doc.rect(0, 0, pageW, pageH, "F");
-
-    doc.setFillColor(217, 158, 46);
-    doc.rect(margin, 60, 40, 2, "F");
-
-    doc.setFontSize(28);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(235, 230, 220);
-    doc.text("Ready to Execute?", margin, 80);
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(200, 195, 185);
-    const ctaText = doc.splitTextToSize(
-      "This playbook gives you the framework. The 14-Day Operational Systems Diagnostic gives you the execution plan — custom-built for your business, your market, and your revenue goals.",
-      contentW
-    );
-    doc.text(ctaText, margin, 95);
-
-    doc.setFontSize(14);
-    doc.setTextColor(217, 158, 46);
-    doc.setFont("helvetica", "bold");
-    doc.text("Call: (317) 376-2110", margin, 135);
-    doc.text("Email: aetheris.technology@outlook.com", margin, 148);
-    doc.text("Web: aetheris.technology", margin, 161);
-
-    doc.setFontSize(10);
-    doc.setTextColor(160, 155, 145);
-    doc.setFont("helvetica", "normal");
-    doc.text("© " + new Date().getFullYear() + " Aetheris. All rights reserved.", margin, pageH - 20);
+    renderBackCover(doc, pageW, pageH, margin);
 
     // Convert to buffer and upload
     const pdfBuffer = doc.output("arraybuffer");
