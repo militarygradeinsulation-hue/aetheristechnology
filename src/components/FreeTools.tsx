@@ -25,7 +25,7 @@ const tools = [
   {
     icon: Globe,
     title: 'Website Scanner',
-    description: 'Instant audit of your site's SEO, speed, and gaps.',
+    description: "Instant audit of your site's SEO, speed, and gaps.",
     path: '/scan',
   },
 ];
