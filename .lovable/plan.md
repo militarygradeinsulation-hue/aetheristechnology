@@ -1,39 +1,58 @@
 
 
-# Scale Down Automation to Weekly
+# Redesign Homepage as a Clear Landing Page
 
-## Current State (6 cron jobs)
-- **Job 1**: Old blog gen — daily at 11 UTC
-- **Job 2**: Blog morning — daily at 13 UTC (8 AM EST)
-- **Job 3**: Blog afternoon — daily at 19 UTC (2 PM EST)
-- **Job 4**: Weekly playbook — Mondays at 13 UTC
-- **Job 5**: Email queue — every 5 seconds (keep this)
-- **Job 6**: Playbook twice daily — 12 & 18 UTC
+## Goal
+Simplify the homepage so any visitor instantly understands: what you do, what problem you solve, and how to take action. Replace the current dense layout with a clean landing page flow.
 
-That's ~4 AI-heavy edge function calls per day burning credits. We'll cut it to 4 per week.
+## New Homepage Structure (top to bottom)
 
-## Changes
+### 1. Hero — Simplified
+- Keep the brand quote at top: "With me you're paying for honesty & accuracy..."
+- Replace the current long headline with a shorter, clearer problem statement
+- Keep the 3 CTA buttons (Call, Email, Diagnostic) but make **email front and center**
+- Remove the stats grid (move to About page if needed)
+- Remove the trust strip at bottom (redundant with floating contact)
 
-### 1. Delete excess cron jobs
-Remove jobs 1, 2, 3, and 6 (the daily blog and twice-daily playbook schedules).
+### 2. NEW: "3 Key Areas I Focus On" Section
+Three clean cards, side by side on desktop, stacked on mobile:
 
-### 2. Create two new weekly schedules
-- **Weekly blogs**: Monday at 8 AM and 2 PM EST (13 UTC and 19 UTC) — 2 blogs per week
-- **Weekly playbooks**: Keep existing job 4 (Monday 13 UTC) + add one more Monday slot — 2 playbooks per week
+| Card | Title | Description |
+|---|---|---|
+| 🎨 | **Digital Strategy** | I fix old graphics and outdated images hurting your brand. |
+| 📢 | **Branding Message** | Social posts will have 4K quality images that make people want to buy. |
+| ⚙️ | **Internal Systems** | I fix how you get leads, score them, and outreach. All increasing your conversion rate by 75%. |
 
-Final schedule (all Mondays):
-| Time (EST) | What |
-|---|---|
-| 8 AM | 1 blog |
-| 9 AM | 1 playbook (existing job 4) |
-| 2 PM | 1 blog |
-| 3 PM | 1 playbook (new) |
+Each card gets an amber icon and a short, punchy description — no jargon.
 
-### 3. No code changes needed
-The edge functions themselves stay the same — only the cron schedules change.
+### 3. NEW: "Free Tools & Resources" Section
+Four link cards in a grid pointing to existing pages:
+- **Free Blog Articles** → `/blog`
+- **Free Playbooks** → `/resources`
+- **Free Business Diagnostic** → `/business-diagnostic`
+- **Free Website Scanner** → `/scan`
 
-## Technical Steps
-- `SELECT cron.unschedule(1)`, `cron.unschedule(2)`, `cron.unschedule(3)`, `cron.unschedule(6)` to remove old jobs
-- Create 2 new weekly blog jobs: `0 13 * * 1` and `0 19 * * 1`
-- Create 1 new weekly playbook job: `0 20 * * 1` (keep job 4 as-is)
+Each card has an icon, title, one-line description, and a "Try It Free →" link.
+
+### 4. Email / Contact — Front & Center
+Move the existing ContactForm component up to appear right after the free tools section — prominently positioned, not buried at the bottom.
+
+### 5. Footer
+Keep as-is.
+
+## What Gets Removed from Homepage
+- **WebsiteScanner embed** (replaced by a link card pointing to `/scan`)
+- **ServicesPricing** (detailed pricing tiers — keep on `/services` page)
+- **ToolsCapabilities** (skills grid — keep on `/services` or `/about`)
+- **Stats grid** in Hero
+- **Trust strip** in Hero
+
+## Files Modified
+- `src/pages/Home.tsx` — restructured component order, remove ServicesPricing/ToolsCapabilities/WebsiteScanner
+- `src/components/Hero.tsx` — simplified headline, email CTA prioritized, stats removed
+- `src/components/ThreeAreas.tsx` — **new component** for the 3 key focus areas
+- `src/components/FreeTools.tsx` — **new component** for resource link cards
+
+## No Backend Changes
+This is purely a frontend layout redesign. No database or edge function changes needed.
 
