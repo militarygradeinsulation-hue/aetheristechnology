@@ -12,13 +12,13 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center px-4 pt-20">
+    <section className="relative min-h-[70vh] flex items-center justify-center px-4 pt-20 pb-8">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-8"
+          className="space-y-5"
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
             <Sparkles className="w-4 h-4 text-amber animate-pulse-glow" />
@@ -40,7 +40,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             I fix your digital presence, sharpen your brand message, and rebuild the internal systems bleeding your revenue.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help" onClick={() => trackEvent('click', { label: 'email_hero', location: 'hero' })}>
               <Button
                 size="lg"

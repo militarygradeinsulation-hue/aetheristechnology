@@ -22,10 +22,10 @@ const areas = [
 
 export const ThreeAreas: React.FC = () => {
   return (
-    <section className="py-20 px-4">
+    <section className="py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <span className="text-amber font-bold text-lg tracking-wide uppercase">🚨 The 3 Key Areas I Focus On</span>
           </div>
         </RevealOnScroll>

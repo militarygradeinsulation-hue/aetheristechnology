@@ -63,7 +63,7 @@ export const ContactForm: React.FC = () => {
 
   if (submitted) {
     return (
-      <section className="py-20 px-4" id="contact-form">
+       <section className="py-12 px-4" id="contact-form">
         <div className="max-w-2xl mx-auto text-center glass p-12 rounded-2xl">
           <CheckCircle className="w-16 h-16 text-amber mx-auto mb-4" />
           <h3 className="text-3xl font-bold text-foreground font-display mb-3">We Got Your Message</h3>
@@ -74,7 +74,7 @@ export const ContactForm: React.FC = () => {
   }
 
   return (
-    <section className="py-20 px-4" id="contact-form">
+    <section className="py-12 px-4" id="contact-form">
       <div className="max-w-2xl mx-auto">
         {/* Lead magnet nudge */}
         <div className="glass rounded-xl p-4 mb-8 text-center border border-primary/20">
