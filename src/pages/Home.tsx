@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
-import { ServicesPricing } from '@/components/ServicesPricing';
-import { ToolsCapabilities } from '@/components/ToolsCapabilities';
+import { ThreeAreas } from '@/components/ThreeAreas';
+import { FreeTools } from '@/components/FreeTools';
 import { ContactForm } from '@/components/ContactForm';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
-import { WebsiteScanner } from '@/components/WebsiteScanner';
-import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { SEOHead } from '@/components/SEOHead';
 
 const Home = () => {
@@ -35,27 +33,15 @@ const Home = () => {
           "areaServed": { "@type": "Country", "name": "United States" },
           "serviceType": ["Business Consulting", "AI Automation", "Operational Diagnostics", "CRM Development", "Digital Intelligence"],
           "sameAs": ["https://www.linkedin.com/in/aisystemsarchitect"],
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "50" },
-          "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Consulting Services",
-            "itemListElement": [
-              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "14-Day Operational Systems Diagnostic", "description": "Complete operational breakdown identifying workflow inefficiencies, disconnected systems, and automation opportunities." }, "price": "7500", "priceCurrency": "USD" },
-              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Rapid Digital Evaluation", "description": "Focused tear-down of messaging, CTA placement, conversion flow and positioning." }, "price": "750", "priceCurrency": "USD" },
-              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Ongoing Digital Oversight", "description": "Continuous oversight on messaging, content direction, visual consistency." }, "price": "1500", "priceCurrency": "USD" }
-            ]
-          }
+          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "50" }
         }}
       />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
-        <RevealOnScroll>
-          <WebsiteScanner onContactClick={() => setIsContactModalOpen(true)} />
-        </RevealOnScroll>
-        <ServicesPricing />
-        <ToolsCapabilities />
+        <ThreeAreas />
+        <FreeTools />
         <ContactForm />
         <Footer />
       </div>
