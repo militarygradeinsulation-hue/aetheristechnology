@@ -492,7 +492,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          scan_id: string
+          scan_id: string | null
           stripe_session_id: string | null
           tier: string
           user_id: string
@@ -500,7 +500,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          scan_id: string
+          scan_id?: string | null
           stripe_session_id?: string | null
           tier: string
           user_id: string
@@ -508,7 +508,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          scan_id?: string
+          scan_id?: string | null
           stripe_session_id?: string | null
           tier?: string
           user_id?: string

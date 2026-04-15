@@ -10,8 +10,10 @@ export default function CheckoutReturn() {
   const sessionId = searchParams.get("session_id");
   const type = searchParams.get("type");
   const topic = searchParams.get("topic");
+  const scanUrl = searchParams.get("scan_url");
 
   const isPlaybook = type === "playbook";
+  const isScanReport = type === "scan_report";
 
   // Poll for playbook status if this is a playbook purchase
   const { data: playbook, isLoading: playbookLoading } = useQuery({
@@ -29,7 +31,7 @@ export default function CheckoutReturn() {
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === 'ready' || status === 'failed') return false;
-      return 3000; // poll every 3s while generating
+      return 3000;
     },
   });
 
@@ -41,7 +43,6 @@ export default function CheckoutReturn() {
           {sessionId ? (
             <>
               {isPlaybook ? (
-                // Playbook purchase flow
                 <>
                   {(!playbook || playbook.status === 'pending' || playbook.status === 'generating') && (
                     <>
@@ -90,6 +91,20 @@ export default function CheckoutReturn() {
                       </Link>
                     </>
                   )}
+                </>
+              ) : isScanReport ? (
+                // Scan report purchase — redirect back to scanner
+                <>
+                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold text-foreground mb-3">Report Unlocked!</h1>
+                  <p className="text-muted-foreground mb-6">
+                    Your full website diagnostic report is now available. Head back to the scanner to view all findings.
+                  </p>
+                  <Link to="/scan">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+                      View Full Report →
+                    </Button>
+                  </Link>
                 </>
               ) : (
                 // Default payment flow
