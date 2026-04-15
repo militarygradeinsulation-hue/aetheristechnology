@@ -115,6 +115,17 @@ export const ContactForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl space-y-5">
+          {/* Persistent promo banner */}
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-4">
+            <p className="text-sm font-semibold text-amber mb-2">🔥 Limited-Time: $500 Full Analytics Package</p>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
+              <li>Full website &amp; social media scan</li>
+              <li>Marketing strategy diagnostics</li>
+              <li>Personalized recommendations report</li>
+              <li>CRM analysis &amp; optimization plan</li>
+            </ul>
+            <p className="text-xs text-muted-foreground mt-2 italic">Normally $1,200+ — select it below to claim this price.</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Name *</label>
