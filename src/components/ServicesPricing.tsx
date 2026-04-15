@@ -269,6 +269,19 @@ export const ServicesPricing: React.FC = () => {
                             </ul>
                           </div>
 
+                          {service.includes && service.includes.length > 0 && (
+                            <div className="bg-secondary/30 rounded-lg p-2.5">
+                              <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5">Services Included (if purchased separately)</div>
+                              <div className="space-y-1">
+                                {service.includes.map((inc) => (
+                                  <div key={inc.name} className="flex items-center justify-between text-xs">
+                                    <span className="text-muted-foreground">{inc.name}</span>
+                                    <span className="font-semibold text-primary">{inc.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           <div className="bg-primary/5 rounded-lg p-2.5">
                             <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Why It's Valuable</div>
                             <p className="text-xs text-muted-foreground leading-relaxed">{service.whyValuable}</p>
