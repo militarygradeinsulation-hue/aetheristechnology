@@ -1,56 +1,83 @@
 
 
-# On-Demand Playbook Generator — Plan
+# Tiered Scanner Paywall + Smart UX Upgrade
 
-## Concept
-Add a "Request a Playbook" section to the Resources page where users browse topic categories, click a topic, the system generates a custom playbook via AI, and charges them to download the full PDF.
+## What We're Building
 
-## How It Works
+Transform the existing website scanner from a simple "show 2 gaps, blur the rest" model into a **conversion machine** with animated progress, red-highlighted problems, "Fix This" buttons, and a 3-tier paywall with Stripe checkout.
 
-```text
-User browses topic chips/cards → Clicks "Generate This Playbook"
-  → Signs in (if not already) → Pays $25 via Stripe checkout
-    → Edge function generates PDF → Saved to storage → Download link delivered
-```
+## Pricing Tiers
 
-## Implementation Steps
+| Tier | Price | What They Get |
+|------|-------|---------------|
+| **Free** | $0 | Score, grade, 2 visible gaps (blurred rest), preview PDF |
+| **Full Report** | $49 | All gaps unlocked, revenue estimates, roadmap, ROI table, competitive brief — downloadable PDF |
+| **Strategy Blueprint** | $299 | Everything above + CRM plan, system blueprint, content calendar, "Fix This" action items with implementation specs |
 
-### 1. Create Stripe Product & Price
-- Product: `custom_playbook` — "Custom AI-Generated Strategic Playbook"
-- Price: `custom_playbook_once` — $25 one-time (or your preferred price)
+Two new Stripe products: `scan_full_report` ($49) and `scan_strategy_blueprint` ($299).
 
-### 2. Database: `generated_playbooks` table
-- `id`, `user_id`, `topic_title`, `topic_data` (jsonb), `status` (pending/generating/ready/failed), `file_url`, `stripe_session_id`, `created_at`
-- RLS: users see only their own; service role manages all
+## Smart UX Upgrades
 
-### 3. New UI Section on Resources Page
-- Below the existing playbooks grid, add a "Build Your Own Playbook" section
-- Display the ~36 topics from the existing `TOPIC_POOL` as clickable cards grouped by pillar (Marketing Technology, Strategic Consulting, AI Transformation)
-- Each card shows title, subtitle, tags
-- Search/filter bar to find topics by keyword
-- Click → opens a modal with topic details + "Generate & Buy — $25" button
+### 1. Animated Progress Bar Loading
+Replace the current spinner with a multi-phase progress bar:
+- "Scraping website..." (0-30%)
+- "Analyzing SEO structure..." (30-50%)
+- "Evaluating messaging & CTAs..." (50-70%)
+- "Calculating revenue leaks..." (70-90%)
+- "Generating diagnostic report..." (90-100%)
 
-### 4. Purchase & Generation Flow
-- "Generate & Buy" triggers Stripe checkout for `custom_playbook_once` with the topic title in metadata
-- On successful payment (webhook), the `payments-webhook` edge function inserts a row into `generated_playbooks` with status `pending`
-- A new edge function `generate-custom-playbook` picks up pending rows, reuses the existing `generate-playbook` PDF generation logic, uploads to the `playbooks` storage bucket, updates status to `ready` with `file_url`
-- The webhook calls `generate-custom-playbook` immediately after recording the purchase
+Uses a `Progress` component with timed intervals. Feels like real work happening.
 
-### 5. User's Download Page
-- After checkout return, show the playbook status (generating → ready with download link)
-- Users can also see their purchased playbooks from a simple "My Playbooks" section (query `generated_playbooks` where `user_id = auth.uid()`)
+### 2. Red-Highlighted Problem Cards
+- Critical gaps: red border, red icon, pulsing red dot
+- Warning gaps: amber/gold border
+- Each gap shows "Est. Annual Leak" in bold red text
+- Add a summary banner: "We found **$47,000–$92,000** in annual revenue leaks"
 
-### 6. Files Changed/Created
-- **New migration**: `generated_playbooks` table + RLS
-- **New Stripe product/price**: `custom_playbook` / `custom_playbook_once` at $25
-- **New edge function**: `generate-custom-playbook/index.ts` — reuses existing PDF logic from `generate-playbook`
-- **Modified**: `payments-webhook/index.ts` — trigger generation on custom playbook purchase
-- **Modified**: `src/pages/ResourcesPage.tsx` — add topic browser section with search, pillar filters, and buy button
-- **New component**: `src/components/PlaybookTopicBrowser.tsx` — topic grid with search/filter
-- **Modified**: `src/pages/CheckoutReturn.tsx` — handle playbook generation status display
+### 3. "Fix Available" / "Fix This For Me" Buttons
+Every visible gap card gets a "Fix Available" badge. Clicking it:
+- If free tier → opens the tier upgrade overlay
+- If paid tier → triggers contact/checkout for consulting
 
-### Technical Notes
-- The topic pool already exists in `generate-playbook/index.ts` with 36+ topics — we'll expose these as the browsable catalog
-- Authentication is required before purchase (existing auth flow)
-- The generation reuses the same AI prompt + jsPDF rendering already built
+### 4. Blurred Results + Gated Overlay (Enhanced)
+- Free users see 2 gaps clearly, rest heavily blurred
+- Revenue total is shown but individual amounts blurred
+- Roadmap section title visible but content blurred
+- Overlay with tier comparison cards + CTAs
+
+### 5. Post-Purchase Unlock Flow
+After Stripe payment completes:
+- Store `scan_id` + `tier` in a new `scan_purchases` table
+- Return page polls for completion, then redirects back to `/scan` with unlocked results
+- Full results rendered inline OR downloadable as comprehensive PDF
+
+## Technical Implementation
+
+### Database
+- New `scan_purchases` table: `id`, `user_id`, `scan_id` (refs website_scans), `tier`, `stripe_session_id`, `created_at`
+- RLS: users see own purchases, service_role manages all
+
+### Edge Function Updates
+- `scan-website/index.ts`: No changes needed — already returns full data. Gating is client-side.
+
+### Frontend Changes (Primary)
+- **`src/components/WebsiteScanner.tsx`** — Major rewrite:
+  - Replace spinner with animated progress bar + phase labels
+  - Add revenue leak summary banner after score
+  - Style critical gaps with red highlights + pulsing indicators
+  - Add "Fix Available" badges on each gap card
+  - "Fix This For Me" button → opens tier selector or contact
+  - Enhanced blur overlay with 2-tier pricing cards
+  - Stripe checkout integration for both tiers
+  - Unlock state management (check `scan_purchases` for current scan)
+
+### New Stripe Products
+- `scan_full_report` / `scan_full_report_once` — $49
+- `scan_strategy_blueprint` / `scan_strategy_blueprint_once` — $299
+
+### Files Changed/Created
+1. **Migration**: `scan_purchases` table + RLS
+2. **New Stripe products**: 2 products, 2 prices
+3. **`src/components/WebsiteScanner.tsx`**: Major UX overhaul (progress bar, red highlights, fix buttons, tier overlay, Stripe checkout)
+4. **`src/pages/CheckoutReturn.tsx`**: Handle scan purchase returns
 
