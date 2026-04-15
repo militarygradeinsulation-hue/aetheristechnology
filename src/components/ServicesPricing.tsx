@@ -42,6 +42,7 @@ const services: ServiceTile[] = [
     longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
     deliverables: ['Everything in Full Website Report', 'CRM implementation plan', 'System architecture blueprint', '30-day content calendar', '"Fix This" items with implementation specs', 'Priority-ranked action items'],
     whyValuable: 'Companies that follow a structured blueprint improve 3–5x faster than those who just read reports. A clear roadmap turns $299 into $10K+ in recovered revenue within 90 days.',
+    includes: [{ name: 'Full Website Report', value: '$49' }, { name: 'Content Calendar', value: '$29' }, { name: 'CRM Plan', value: 'included' }],
   },
   {
     icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
