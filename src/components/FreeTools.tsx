@@ -34,6 +34,12 @@ const tools = [
     description: 'AI-powered post creator for scroll-stopping content.',
     path: '/marketing-studio',
   },
+  {
+    icon: Compass,
+    title: 'Marketing Strategist',
+    description: 'AI strategist that builds a custom marketing plan for you.',
+    path: '/marketing-strategist',
+  },
 ];
 
 export const FreeTools: React.FC = () => {
