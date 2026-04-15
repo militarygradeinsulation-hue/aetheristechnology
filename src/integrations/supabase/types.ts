@@ -664,6 +664,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_generations: {
+        Row: {
+          created_at: string
+          id: string
+          input_data: Json
+          output_data: Json
+          stripe_session_id: string | null
+          tier: string
+          tool_type: Database["public"]["Enums"]["tool_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          stripe_session_id?: string | null
+          tier?: string
+          tool_type: Database["public"]["Enums"]["tool_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          stripe_session_id?: string | null
+          tier?: string
+          tool_type?: Database["public"]["Enums"]["tool_type"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       website_scans: {
         Row: {
           created_at: string
@@ -728,6 +761,11 @@ export type Database = {
         | "contacted"
         | "converted"
         | "expired"
+      tool_type:
+        | "social_content"
+        | "sales_scripts"
+        | "content_calendar"
+        | "follow_up_plan"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -861,6 +899,12 @@ export const Constants = {
         "contacted",
         "converted",
         "expired",
+      ],
+      tool_type: [
+        "social_content",
+        "sales_scripts",
+        "content_calendar",
+        "follow_up_plan",
       ],
     },
   },
