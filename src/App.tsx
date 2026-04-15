@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FloatingContact } from "@/components/FloatingContact";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import Home from "./pages/Home";
 import ServicesPage from "./pages/ServicesPage";
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         <FloatingContact />
+        <ConsentBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
