@@ -113,6 +113,18 @@ interface ServiceTier {
 const services: ServiceTier[] = [
   {
     icon: Search,
+    title: 'Full Website Report',
+    subtitle: 'Every gap unlocked with revenue estimates',
+    pricing: '$49',
+    pricingDetail: 'one-time report',
+    priceId: 'scan_full_report_once',
+    description: 'Run our AI scanner on your site and unlock the complete diagnostic — all gaps, revenue leak estimates, ROI projections, competitive brief, and a downloadable PDF.',
+    whyItPays: 'Most businesses don\'t know what\'s broken until they see the data. This report reveals every blind spot instantly.',
+    roiExample: 'Identifying one conversion gap can recover $1,000+/month in lost revenue. $49 pays for itself on day one.',
+    payback: 'Immediate',
+  },
+  {
+    icon: Search,
     title: 'Digital Snapshot',
     subtitle: 'See where you\'re losing money online',
     pricing: '$125',
@@ -122,6 +134,19 @@ const services: ServiceTier[] = [
     whyItPays: 'Most businesses don\'t know what\'s broken until they see the data. This report reveals blind spots instantly.',
     roiExample: 'Identifying one conversion gap can recover $1,000+/month in lost revenue. $125 pays for itself on day one.',
     payback: 'Immediate',
+  },
+  {
+    icon: BarChart3,
+    title: 'Strategy Blueprint',
+    subtitle: 'Full diagnostic + CRM plan + implementation specs',
+    pricing: '$299',
+    pricingDetail: 'one-time · comprehensive',
+    priceId: 'scan_strategy_blueprint_once',
+    badge: 'MOST POPULAR',
+    description: 'Everything in the Full Report plus a CRM implementation plan, system blueprint, content calendar, and actionable "Fix This" items with implementation specs.',
+    whyItPays: 'Companies that act on a structured blueprint see 3–5x faster improvement than those who just read reports.',
+    roiExample: 'A clear implementation roadmap turns $299 into $10K+ in recovered revenue within the first 90 days.',
+    payback: '1–4 weeks',
   },
   {
     icon: Image,
