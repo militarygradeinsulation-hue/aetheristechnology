@@ -766,6 +766,9 @@ export type Database = {
         | "sales_scripts"
         | "content_calendar"
         | "follow_up_plan"
+        | "strategic_questions"
+        | "brand_contradictions"
+        | "friction_audit"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -905,6 +908,9 @@ export const Constants = {
         "sales_scripts",
         "content_calendar",
         "follow_up_plan",
+        "strategic_questions",
+        "brand_contradictions",
+        "friction_audit",
       ],
     },
   },
