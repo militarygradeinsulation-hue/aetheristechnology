@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Services } from '@/components/Services';
+import { ServicesPricing } from '@/components/ServicesPricing';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -27,7 +28,10 @@ const ServicesPage = () => {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-        <div className="pt-24"><Services /></div>
+        <div className="pt-24">
+          <ServicesPricing />
+          <Services />
+        </div>
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
