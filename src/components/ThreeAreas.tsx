@@ -88,43 +88,24 @@ const BrandingMessageTile: React.FC = () => {
 };
 
 const InternalSystemsTile: React.FC = () => {
-  const [hovered, setHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (hovered && videoRef.current) {
-      videoRef.current.currentTime = 0;
+    if (videoRef.current) {
       videoRef.current.play().catch(() => {});
-    } else if (videoRef.current) {
-      videoRef.current.pause();
     }
-  }, [hovered]);
+  }, []);
 
   return (
-    <div
-      className="w-full aspect-square overflow-hidden relative"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <img
-        src={internalSystemsThumb}
-        alt="Internal Systems"
-        loading="lazy"
-        width={512}
-        height={512}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-          hovered ? 'opacity-0' : 'opacity-100'
-        }`}
-      />
+    <div className="w-full aspect-square overflow-hidden relative">
       <video
         ref={videoRef}
         src={crmVideo}
         muted
         loop
+        autoPlay
         playsInline
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-          hovered ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="absolute inset-0 w-full h-full object-cover"
       />
     </div>
   );
