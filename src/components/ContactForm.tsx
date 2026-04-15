@@ -116,9 +116,9 @@ export const ContactForm: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl space-y-5">
           {/* Persistent promo banner */}
-          <div className="rounded-lg border border-amber/30 bg-amber/5 p-4">
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-center">
             <p className="text-sm font-semibold text-amber mb-2">🔥 Limited-Time: $500 Full Analytics Package</p>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
+            <ul className="text-sm text-muted-foreground space-y-1 list-none">
               <li>Full website &amp; social media scan</li>
               <li>Marketing strategy diagnostics</li>
               <li>Personalized recommendations report</li>
