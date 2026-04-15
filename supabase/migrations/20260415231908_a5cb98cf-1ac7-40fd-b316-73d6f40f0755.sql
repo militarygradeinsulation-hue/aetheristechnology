@@ -1,0 +1,1 @@
+ALTER TABLE public.scan_purchases ALTER COLUMN scan_id DROP NOT NULL;
