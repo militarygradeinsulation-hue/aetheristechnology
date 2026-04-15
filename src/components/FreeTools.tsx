@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Activity, Globe, Megaphone, ArrowRight } from 'lucide-react';
+import { BookOpen, FileText, Activity, Globe, Megaphone, Compass, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 
