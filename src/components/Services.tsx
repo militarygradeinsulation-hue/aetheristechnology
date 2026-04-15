@@ -163,28 +163,43 @@ export const Services: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <RevealOnScroll key={service.title} delay={index * 0.1}>
-              <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer">
+              <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer flex flex-col">
                 <div className="mb-6">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <service.icon className="w-7 h-7 text-amber" />
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-amber transition-colors font-display">
+                <h3 className="text-2xl font-bold mb-2 text-foreground group-hover:text-amber transition-colors font-display">
                   {service.title}
                 </h3>
+
+                <div className="text-lg font-bold text-primary font-display mb-3">{service.pricing}</div>
                 
                 <p className="text-muted-foreground mb-6 leading-relaxed">
                   {service.description}
                 </p>
 
-                <div className="space-y-2">
+                <div className="space-y-2 mb-5">
                   {service.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-2 text-sm">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse-glow" />
                       <span className="text-muted-foreground">{feature}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Related paid services */}
+                <div className="mt-auto pt-4 border-t border-border/40">
+                  <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-2">Starts With</div>
+                  <div className="space-y-1.5">
+                    {service.relatedServices.map((rs) => (
+                      <div key={rs.name} className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{rs.name}</span>
+                        <span className="font-semibold text-primary">{rs.cost}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </RevealOnScroll>
