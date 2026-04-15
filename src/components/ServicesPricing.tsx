@@ -124,6 +124,7 @@ function getDiscount(count: number): number {
 export const ServicesPricing: React.FC = () => {
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
 
