@@ -366,10 +366,13 @@ export const ServicesPricing: React.FC = () => {
   if (checkoutPriceId) {
     return (
       <div className="fixed inset-0 z-[9998] bg-background/95 backdrop-blur-sm flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-bold text-foreground">Complete Your Purchase</h2>
-          <button onClick={() => setCheckoutPriceId(null)} className="text-muted-foreground hover:text-foreground">
-            <X className="w-6 h-6" />
+        <div className="flex items-center justify-between p-4 border-b border-border max-w-2xl mx-auto w-full">
+          <button
+            onClick={() => setCheckoutPriceId(null)}
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+            Cancel &amp; return to services
           </button>
         </div>
         <div className="flex-1 overflow-auto p-4">
