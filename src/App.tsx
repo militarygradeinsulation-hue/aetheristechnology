@@ -30,6 +30,10 @@ import MarketingStrategistPage from "./pages/MarketingStrategistPage";
 import AIConsultantPage from "./pages/AIConsultantPage";
 import SalesCompassPage from "./pages/SalesCompassPage";
 import CheckoutReturn from "./pages/CheckoutReturn";
+import ContentGeneratorPage from "./pages/ContentGeneratorPage";
+import SalesScriptsPage from "./pages/SalesScriptsPage";
+import ContentCalendarPage from "./pages/ContentCalendarPage";
+import FollowUpPlanPage from "./pages/FollowUpPlanPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -67,6 +71,10 @@ const App = () => (
             <Route path="/ai-consultant" element={<AIConsultantPage />} />
             <Route path="/sales-compass" element={<SalesCompassPage />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
+            <Route path="/content-generator" element={<ContentGeneratorPage />} />
+            <Route path="/sales-scripts" element={<SalesScriptsPage />} />
+            <Route path="/content-calendar" element={<ContentCalendarPage />} />
+            <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
