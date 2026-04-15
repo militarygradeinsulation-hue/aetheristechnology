@@ -7,8 +7,8 @@ const MarketingStudioPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
-        title="Free AI Marketing Studio | Aetheris AI"
-        description="Create scroll-stopping marketing posts with our free AI-powered studio. No login required."
+        title="Hook AI — Free Post Creator | Aetheris AI"
+        description="Create scroll-stopping marketing posts with Hook AI. Free tool — no login required."
         path="/marketing-studio"
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">
@@ -20,13 +20,13 @@ const MarketingStudioPage = () => {
           Back to Aetheris AI
         </Link>
         <span className="text-muted-foreground/50">|</span>
-        <span className="text-sm font-semibold text-foreground">AI Marketing Studio</span>
+        <span className="text-sm font-semibold text-foreground">Hook AI</span>
         <span className="ml-auto text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-medium">Free Tool</span>
       </div>
       <iframe
         src="https://studio--hookai-m7nx0.us-central1.hosted.app/"
         className="flex-1 w-full border-0"
-        title="AI Marketing Studio"
+        title="Hook AI"
         allow="clipboard-write"
       />
     </div>

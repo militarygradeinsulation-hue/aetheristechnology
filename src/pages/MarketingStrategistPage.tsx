@@ -7,7 +7,7 @@ const MarketingStrategistPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
-        title="Free AI Marketing Strategist | Aetheris AI"
+        title="Marketing Hub — Free AI Strategy | Aetheris AI"
         description="Get AI-powered marketing strategy recommendations for your business. Free tool — no login required."
         path="/marketing-strategist"
       />
@@ -20,13 +20,13 @@ const MarketingStrategistPage = () => {
           Back to Aetheris AI
         </Link>
         <span className="text-muted-foreground/50">|</span>
-        <span className="text-sm font-semibold text-foreground">AI Marketing Strategist</span>
+        <span className="text-sm font-semibold text-foreground">Marketing Hub</span>
         <span className="ml-auto text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-medium">Free Tool</span>
       </div>
       <iframe
         src="https://studio--olsen-ai-marketing-navigator.us-central1.hosted.app/strategist"
         className="flex-1 w-full border-0"
-        title="AI Marketing Strategist"
+        title="Marketing Hub"
         allow="clipboard-write"
       />
     </div>
