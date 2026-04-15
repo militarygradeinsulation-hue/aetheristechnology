@@ -42,15 +42,35 @@ export const ContactForm: React.FC = () => {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.from('contact_submissions').insert({
+      const submissionId = crypto.randomUUID();
+      const trimmed = {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
         company: form.company.trim() || null,
         message: form.message.trim(),
         service_interest: form.service_interest || null,
-      });
+      };
+      const { error } = await supabase.from('contact_submissions').insert({ ...trimmed, id: submissionId });
       if (error) throw error;
+      
+      // Send notification email to joseph@aetheris.technology
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'contact-notification',
+          recipientEmail: trimmed.email,
+          idempotencyKey: `contact-notify-${submissionId}`,
+          templateData: {
+            name: trimmed.name,
+            email: trimmed.email,
+            phone: trimmed.phone,
+            company: trimmed.company,
+            message: trimmed.message,
+            service_interest: trimmed.service_interest,
+          },
+        },
+      });
+      
       trackEvent('contact_form_submit', { service_interest: form.service_interest });
       setSubmitted(true);
       toast({ title: 'Message sent!', description: "We'll be in touch shortly." });
