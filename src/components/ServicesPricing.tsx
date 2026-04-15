@@ -216,12 +216,12 @@ export const ServicesPricing: React.FC = () => {
                         <ShoppingCart className="w-3 h-3" /> Buy
                       </button>
                     )}
-                    <Link
-                      to="/contact"
-                      className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-foreground transition-colors"
+                    <button
+                      onClick={() => setExpandedIdx(expandedIdx === index ? null : index)}
+                      className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:border-primary/40"
                     >
-                      <MessageCircle className="w-3 h-3" /> Talk
-                    </Link>
+                      <Info className="w-3 h-3" /> Details
+                    </button>
                     {service.bundleable && (
                       <button
                         onClick={() => toggleSelect(index)}
@@ -236,6 +236,57 @@ export const ServicesPricing: React.FC = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Expandable Detail Panel */}
+                  <AnimatePresence>
+                    {expandedIdx === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pt-3 border-t border-border/50 space-y-3">
+                          <p className="text-xs text-muted-foreground leading-relaxed">{service.longDescription}</p>
+                          
+                          <div>
+                            <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5">What You Get</div>
+                            <ul className="space-y-1">
+                              {service.deliverables.map((d) => (
+                                <li key={d} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                  <Check className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                                  {d}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="bg-primary/5 rounded-lg p-2.5">
+                            <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Why It's Valuable</div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{service.whyValuable}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            {service.priceId && (
+                              <button
+                                onClick={() => setCheckoutPriceId(service.priceId!)}
+                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                              >
+                                <ShoppingCart className="w-3.5 h-3.5" /> Buy Now — {service.pricing}
+                              </button>
+                            )}
+                            <Link
+                              to="/contact"
+                              className="inline-flex items-center gap-1.5 glass-hover border border-border px-4 py-2 rounded-md text-xs font-medium text-foreground transition-colors"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" /> Talk to Us
+                            </Link>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </RevealOnScroll>
             );
