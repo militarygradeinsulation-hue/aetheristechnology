@@ -488,6 +488,41 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          scan_id: string
+          stripe_session_id: string | null
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scan_id: string
+          stripe_session_id?: string | null
+          tier: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scan_id?: string
+          stripe_session_id?: string | null
+          tier?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_purchases_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "website_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_events: {
         Row: {
           created_at: string
