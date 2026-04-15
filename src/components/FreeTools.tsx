@@ -14,7 +14,6 @@ import contentGenThumb from '@/assets/content-generator-thumb.jpg';
 import salesScriptsThumb from '@/assets/sales-scripts-thumb.jpg';
 import contentCalendarThumb from '@/assets/content-calendar-thumb.jpg';
 import followUpThumb from '@/assets/follow-up-plan-thumb.jpg';
-import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
