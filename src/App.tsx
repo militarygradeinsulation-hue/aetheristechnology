@@ -7,6 +7,7 @@ import { FloatingContact } from "@/components/FloatingContact";
 import { SalesChat } from "@/components/SalesChat";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "./pages/Home";
 import ServicesPage from "./pages/ServicesPage";
 import WhyUsPage from "./pages/WhyUsPage";
@@ -29,6 +30,10 @@ import MarketingStrategistPage from "./pages/MarketingStrategistPage";
 import AIConsultantPage from "./pages/AIConsultantPage";
 import SalesCompassPage from "./pages/SalesCompassPage";
 import CheckoutReturn from "./pages/CheckoutReturn";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -38,35 +43,41 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <PageViewTracker />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/why-us" element={<WhyUsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/assessment" element={<AssessmentPage />} />
-          <Route path="/scan" element={<ScanPage />} />
-          <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
-          <Route path="/careers" element={<CareersPage />} />
-          <Route path="/unsubscribe" element={<UnsubscribePage />} />
-          <Route path="/marketing-studio" element={<MarketingStudioPage />} />
-          <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
-          <Route path="/ai-consultant" element={<AIConsultantPage />} />
-          <Route path="/sales-compass" element={<SalesCompassPage />} />
-          <Route path="/checkout/return" element={<CheckoutReturn />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <FloatingContact />
-        <SalesChat />
-        <ConsentBanner />
+        <AuthProvider>
+          <PageViewTracker />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/why-us" element={<WhyUsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/assessment" element={<AssessmentPage />} />
+            <Route path="/scan" element={<ScanPage />} />
+            <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
+            <Route path="/careers" element={<CareersPage />} />
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
+            <Route path="/marketing-studio" element={<MarketingStudioPage />} />
+            <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
+            <Route path="/ai-consultant" element={<AIConsultantPage />} />
+            <Route path="/sales-compass" element={<SalesCompassPage />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <FloatingContact />
+          <SalesChat />
+          <ConsentBanner />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
