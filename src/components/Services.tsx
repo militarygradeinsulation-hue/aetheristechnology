@@ -20,36 +20,72 @@ export const Services: React.FC = () => {
       title: 'ML Strategy & Advisory',
       description: 'We assess your data landscape and recommend the right ML approach. From feasibility studies to model selection guidance.',
       features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
+      pricing: 'From $2,500',
+      relatedServices: [
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Strategy Blueprint', cost: '$299' },
+      ],
     },
     {
       icon: Bot,
       title: 'Automation Consulting',
       description: 'We identify automation opportunities in your operations and design intelligent workflows tailored to your team.',
       features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
+      pricing: 'From $299',
+      relatedServices: [
+        { name: 'Strategy Blueprint', cost: '$299' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Code,
       title: 'AI Implementation Advisory',
       description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
       features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
+      pricing: 'From $2,500',
+      relatedServices: [
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Database,
       title: 'Data Strategy Consulting',
       description: 'We help you build a data-driven culture with the right infrastructure, governance, and analytics strategy.',
       features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
+      pricing: 'From $500',
+      relatedServices: [
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Website Evaluation', cost: '$500' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+      ],
     },
     {
       icon: Sparkles,
       title: 'AI Transformation Strategy',
       description: 'End-to-end strategic guidance for your AI journey. We help leadership teams make confident, informed decisions.',
       features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
+      pricing: 'From $5,000/mo',
+      relatedServices: [
+        { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Zap,
       title: 'Performance & Optimization',
       description: 'We audit your existing AI systems and recommend improvements for speed, accuracy, and cost efficiency.',
       features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
+      pricing: 'From $500',
+      relatedServices: [
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Digital Snapshot', cost: '$125' },
+        { name: 'Strategy Blueprint', cost: '$299' },
+      ],
     },
   ];
 
