@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
+import { Brain, Bot, Code, Database, Sparkles, Zap } from 'lucide-react';
 import digitalStrategyThumb from '@/assets/digital-strategy-thumb.jpg';
 import brandingMessageThumb from '@/assets/branding-message-thumb.jpg';
 import internalSystemsThumb from '@/assets/internal-systems-thumb.jpg';
@@ -14,6 +15,15 @@ import render5 from '@/assets/renders/render-woodland-playground.png';
 import render6 from '@/assets/renders/render-amphitheater-pavilion.png';
 
 const digitalStrategyImages = [render1, render2, render3, render4, render5, render6];
+
+const consultingServices = [
+  { icon: Brain, title: 'ML Strategy & Advisory', description: 'Assess your data landscape and recommend the right ML approach.' },
+  { icon: Bot, title: 'Automation Consulting', description: 'Identify automation opportunities and design intelligent workflows.' },
+  { icon: Code, title: 'AI Implementation Advisory', description: 'Hands-on guidance from architecture to deployment.' },
+  { icon: Database, title: 'Data Strategy Consulting', description: 'Build a data-driven culture with the right infrastructure.' },
+  { icon: Sparkles, title: 'AI Transformation Strategy', description: 'End-to-end strategic guidance for your AI journey.' },
+  { icon: Zap, title: 'Performance & Optimization', description: 'Audit existing AI systems for speed, accuracy, and cost.' },
+];
 
 const DigitalStrategyTile: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,6 +50,39 @@ const DigitalStrategyTile: React.FC = () => {
           }`}
         />
       ))}
+    </div>
+  );
+};
+
+const BrandingMessageTile: React.FC = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % consultingServices.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="w-full aspect-square overflow-hidden relative bg-background/80">
+      {consultingServices.map((service, i) => {
+        const Icon = service.icon;
+        return (
+          <div
+            key={i}
+            className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ${
+              i === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+              <Icon className="w-8 h-8 text-amber" />
+            </div>
+            <h4 className="text-lg font-bold text-foreground font-display mb-2">{service.title}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">{service.description}</p>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -121,20 +164,11 @@ export const ThreeAreas: React.FC = () => {
               <div className="glass rounded-2xl overflow-hidden border border-border hover:border-amber/40 transition-colors h-full">
                 {area.id === 'digital-strategy' ? (
                   <DigitalStrategyTile />
+                ) : area.id === 'branding' ? (
+                  <BrandingMessageTile />
                 ) : area.id === 'internal-systems' ? (
                   <InternalSystemsTile />
-                ) : (
-                  <div className="w-full aspect-square overflow-hidden">
-                    <img
-                      src={area.thumbnail}
-                      alt={area.title}
-                      loading="lazy"
-                      width={512}
-                      height={512}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+                ) : null}
                 <div className="p-8 text-center">
                   <h3 className="text-xl font-bold text-foreground font-display mb-3">{area.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{area.description}</p>
