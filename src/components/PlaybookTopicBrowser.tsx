@@ -231,6 +231,11 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
                 priceId="custom_playbook_once"
                 customerEmail={user.email || undefined}
                 returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=playbook&topic=${encodeURIComponent(selectedTopic.title)}`}
+                metadata={{
+                  playbook_topic: selectedTopic.title,
+                  playbook_topic_data: JSON.stringify(selectedTopic),
+                  user_id: user.id,
+                }}
               />
             )}
           </DialogContent>
