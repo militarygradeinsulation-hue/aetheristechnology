@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FloatingContact } from "@/components/FloatingContact";
+import { SalesChat } from "@/components/SalesChat";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import Home from "./pages/Home";
@@ -27,6 +28,7 @@ import MarketingStudioPage from "./pages/MarketingStudioPage";
 import MarketingStrategistPage from "./pages/MarketingStrategistPage";
 import AIConsultantPage from "./pages/AIConsultantPage";
 import SalesCompassPage from "./pages/SalesCompassPage";
+import CheckoutReturn from "./pages/CheckoutReturn";
 
 const queryClient = new QueryClient();
 
@@ -58,10 +60,12 @@ const App = () => (
           <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
           <Route path="/ai-consultant" element={<AIConsultantPage />} />
           <Route path="/sales-compass" element={<SalesCompassPage />} />
+          <Route path="/checkout/return" element={<CheckoutReturn />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <FloatingContact />
+        <SalesChat />
         <ConsentBanner />
       </BrowserRouter>
     </TooltipProvider>

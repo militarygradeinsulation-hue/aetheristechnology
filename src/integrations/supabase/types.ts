@@ -356,6 +356,45 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount_total: number | null
+          created_at: string | null
+          currency: string | null
+          email: string | null
+          environment: string
+          id: string
+          metadata: Json | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_session_id: string
+        }
+        Insert: {
+          amount_total?: number | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          environment?: string
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id: string
+        }
+        Update: {
+          amount_total?: number | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          environment?: string
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string
+        }
+        Relationships: []
+      }
       rep_signups: {
         Row: {
           created_at: string
@@ -410,6 +449,51 @@ export type Database = {
           id?: string
           session_id?: string
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
