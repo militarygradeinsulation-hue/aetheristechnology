@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Activity, Globe, Megaphone, ArrowRight } from 'lucide-react';
+import { BookOpen, FileText, Activity, Globe, Megaphone, Compass, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 
@@ -33,6 +33,12 @@ const tools = [
     title: 'Marketing Studio',
     description: 'AI-powered post creator for scroll-stopping content.',
     path: '/marketing-studio',
+  },
+  {
+    icon: Compass,
+    title: 'Marketing Strategist',
+    description: 'AI strategist that builds a custom marketing plan for you.',
+    path: '/marketing-strategist',
   },
 ];
 
