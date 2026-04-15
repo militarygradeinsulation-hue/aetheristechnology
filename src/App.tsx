@@ -28,6 +28,7 @@ import MarketingStudioPage from "./pages/MarketingStudioPage";
 import MarketingStrategistPage from "./pages/MarketingStrategistPage";
 import AIConsultantPage from "./pages/AIConsultantPage";
 import SalesCompassPage from "./pages/SalesCompassPage";
+import CheckoutReturn from "./pages/CheckoutReturn";
 
 const queryClient = new QueryClient();
 
