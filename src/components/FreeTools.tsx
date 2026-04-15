@@ -1,13 +1,18 @@
 import React from 'react';
-import { BookOpen, FileText, Activity, Globe, BotMessageSquare, Target, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 import hookAiThumb from '@/assets/hook-ai-thumb.jpg';
 import marketingHubThumb from '@/assets/marketing-hub-thumb.jpg';
+import blogThumb from '@/assets/blog-thumb.jpg';
+import playbooksThumb from '@/assets/playbooks-thumb.jpg';
+import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
+import scannerThumb from '@/assets/scanner-thumb.jpg';
+import consultantThumb from '@/assets/consultant-thumb.jpg';
+import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
 
 interface Tool {
-  icon?: React.ComponentType<{ className?: string }>;
-  thumbnail?: string;
+  thumbnail: string;
   title: string;
   description: string;
   path: string;
@@ -15,25 +20,25 @@ interface Tool {
 
 const tools: Tool[] = [
   {
-    icon: BookOpen,
+    thumbnail: blogThumb,
     title: 'Free Blog Articles',
     description: 'Actionable insights on AI, operations, and growth.',
     path: '/blog',
   },
   {
-    icon: FileText,
+    thumbnail: playbooksThumb,
     title: 'Free Playbooks',
     description: 'Step-by-step guides you can implement today.',
     path: '/resources',
   },
   {
-    icon: Activity,
+    thumbnail: diagnosticThumb,
     title: 'Business Diagnostic',
     description: '20-question quiz that scores your operational health.',
     path: '/business-diagnostic',
   },
   {
-    icon: Globe,
+    thumbnail: scannerThumb,
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and gaps.",
     path: '/scan',
@@ -51,13 +56,13 @@ const tools: Tool[] = [
     path: '/marketing-strategist',
   },
   {
-    icon: BotMessageSquare,
+    thumbnail: consultantThumb,
     title: 'AI Business Consultant',
     description: 'Get instant AI-powered consulting advice for your business.',
     path: '/ai-consultant',
   },
   {
-    icon: Target,
+    thumbnail: salesCompassThumb,
     title: 'Sales Compass',
     description: 'AI-powered sales guidance to sharpen your strategy.',
     path: '/sales-compass',
@@ -83,24 +88,16 @@ export const FreeTools: React.FC = () => {
                 to={tool.path}
                 className="glass rounded-xl border border-border hover:border-amber/40 transition-colors flex flex-col h-full group overflow-hidden"
               >
-                {tool.thumbnail ? (
-                  <div className="w-full aspect-square overflow-hidden">
-                    <img
-                      src={tool.thumbnail}
-                      alt={tool.title}
-                      loading="lazy"
-                      width={512}
-                      height={512}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className="p-6 pb-0">
-                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-amber/10 mb-4">
-                      {tool.icon && <tool.icon className="w-5 h-5 text-amber" />}
-                    </div>
-                  </div>
-                )}
+                <div className="w-full aspect-square overflow-hidden">
+                  <img
+                    src={tool.thumbnail}
+                    alt={tool.title}
+                    loading="lazy"
+                    width={512}
+                    height={512}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
                 <div className="p-6 pt-3 flex flex-col flex-1">
                   <h3 className="text-lg font-bold text-foreground font-display mb-2">{tool.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4 flex-1">{tool.description}</p>
