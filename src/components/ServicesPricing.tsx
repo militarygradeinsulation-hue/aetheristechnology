@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 
@@ -8,28 +9,109 @@ interface ServiceTile {
   icon: React.ElementType;
   title: string;
   pricing: string;
-  priceRaw: number; // cents for bundle calc
+  priceRaw: number;
   pricingDetail: string;
   priceId?: string;
   badge?: string;
   bundleable?: boolean;
   description: string;
+  longDescription: string;
+  deliverables: string[];
+  whyValuable: string;
 }
 
 const services: ServiceTile[] = [
-  { icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true, description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.' },
-  { icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true, description: 'Automated report showing where you\'re bleeding revenue online.' },
-  { icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true, description: 'Full report + CRM plan + implementation specs + content calendar.' },
-  { icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true, description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.' },
-  { icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true, description: 'Call scripts, objection handlers & follow-up templates.' },
-  { icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true, description: '30 days of topics, hooks, captions & posting times.' },
-  { icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true, description: '14-day multi-channel sales cadence with templates.' },
-  { icon: Image, title: 'Visual Rendering', pricing: '$50–$400', priceRaw: 0, pricingDetail: 'per image', description: 'AI renders with realistic human interaction for your products.' },
-  { icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true, description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.' },
-  { icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true, description: 'Website + social + CRM — the complete picture.' },
-  { icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once', description: 'Find exactly where money is leaking in your operation.' },
-  { icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,000/mo', priceRaw: 500000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly', description: 'Ongoing strategic leadership + execution.' },
-  { icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped', description: 'Build the systems that scale you.' },
+  {
+    icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
+    description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
+    longDescription: 'Our AI scans your entire website and produces a comprehensive diagnostic covering every technical, content, and conversion gap. You get revenue leak estimates, competitive positioning data, and a downloadable PDF you can share with your team.',
+    deliverables: ['Full gap analysis with severity scores', 'Revenue leak estimates per issue', 'ROI projections if gaps are fixed', 'Competitive brief vs. top 3 competitors', 'Downloadable PDF report'],
+    whyValuable: 'Most businesses lose $1,000–$5,000/month from invisible website issues. This report makes them visible in minutes — not weeks of consulting.',
+  },
+  {
+    icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
+    description: 'Automated report showing where you\'re bleeding revenue online.',
+    longDescription: 'A deeper automated analysis of your digital footprint — website performance, SEO health, content gaps, and conversion friction. This is the door opener that shows exactly what\'s broken before you spend a dime fixing it.',
+    deliverables: ['Website performance & speed audit', 'SEO health score with fix priorities', 'Content gap analysis', 'Conversion friction points identified', 'Actionable fix-it checklist'],
+    whyValuable: 'You can\'t fix what you can\'t see. This snapshot reveals blind spots that are costing you money every single day — for less than the cost of one hour of consulting.',
+  },
+  {
+    icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
+    description: 'Full report + CRM plan + implementation specs + content calendar.',
+    longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
+    deliverables: ['Everything in Full Website Report', 'CRM implementation plan', 'System architecture blueprint', '30-day content calendar', '"Fix This" items with implementation specs', 'Priority-ranked action items'],
+    whyValuable: 'Companies that follow a structured blueprint improve 3–5x faster than those who just read reports. A clear roadmap turns $299 into $10K+ in recovered revenue within 90 days.',
+  },
+  {
+    icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
+    description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
+    longDescription: 'We scan your website and generate 25 ready-to-post social media pieces tailored to your brand voice, audience, and industry. Each post includes a hook, body copy, CTA, and hashtag suggestions.',
+    deliverables: ['10 LinkedIn posts with hooks & CTAs', '10 Facebook posts optimized for engagement', '5 ad hooks for paid campaigns', 'Hashtag suggestions per post', 'Copy-to-clipboard for instant use'],
+    whyValuable: 'Hiring a copywriter for 25 posts costs $500+. A social media manager charges $2,000+/month. Get a month of content in minutes for $29.',
+  },
+  {
+    icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
+    description: 'Call scripts, objection handlers & follow-up templates.',
+    longDescription: 'AI-generated sales scripts customized to your industry, product, and target customer. Includes a complete cold call script, warm call script, 5 objection handlers with reframes, and 3 follow-up templates for email, SMS, and voicemail.',
+    deliverables: ['Cold call opening script', 'Warm call conversation flow', '5 objection handlers with reframes', 'Email follow-up template', 'SMS follow-up template', 'Voicemail drop script'],
+    whyValuable: 'Sales teams with scripts close 30% more deals. One extra closed deal per month at $500+ = 10x ROI on a $49 investment.',
+  },
+  {
+    icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
+    description: '30 days of topics, hooks, captions & posting times.',
+    longDescription: 'A full 30-day content calendar with daily post ideas, proven hooks, captions, content types (carousel, video, text), hashtags, and optimal posting times — all generated for your specific industry and goals.',
+    deliverables: ['30 daily post topics', 'Hook + caption for each day', 'Content type recommendations', 'Optimal posting times', 'Hashtag strategy per post', 'Platform-specific formatting tips'],
+    whyValuable: 'Content consistency is the #1 growth lever on social media. This eliminates the "what do I post today" problem for an entire month — for less than a coffee per day.',
+  },
+  {
+    icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
+    description: '14-day multi-channel sales cadence with templates.',
+    longDescription: 'A complete 14-day follow-up system covering email, SMS, phone calls, and LinkedIn touches. Every touchpoint is scripted, timed, and designed to re-engage leads without being annoying.',
+    deliverables: ['Day-by-day 14-day cadence plan', 'Email templates for each touchpoint', 'SMS scripts with timing', 'Call scripts for check-ins', 'LinkedIn message templates', 'Escalation triggers & rules'],
+    whyValuable: '80% of sales require 5+ follow-ups, but most reps stop at 2. This system closes the gap and recovers deals you\'re currently losing — $500–$5,000+ per recovered deal.',
+  },
+  {
+    icon: Image, title: 'Visual Rendering', pricing: '$50–$400', priceRaw: 0, pricingDetail: 'per image',
+    description: 'AI renders with realistic human interaction for your products.',
+    longDescription: 'From basic image enhancement to full-scene AI renders with realistic human interaction. These visuals show your product in real-world use — not empty, lifeless shots. Perfect for proposals, catalogs, and social media.',
+    deliverables: ['$50 — Basic enhancement (clarity, lighting, polish)', '$125 — Close-up or product-focused render', '$275 — Full scene render without people', '$400 — Full scene with AI-generated interaction', 'Commercial-use license included'],
+    whyValuable: 'Visuals with people increase engagement by 38%. High-quality imagery boosts conversion by up to 30%. One improved image helps win one deal on a $25K–$150K+ project.',
+  },
+  {
+    icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
+    description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
+    longDescription: 'A focused, human-reviewed tear-down of your messaging clarity, CTA placement, conversion flow, and market positioning. Includes a live strategy call to walk through every finding and prioritize next steps.',
+    deliverables: ['Messaging clarity audit', 'CTA placement & conversion flow analysis', 'Competitive positioning review', 'SEO & technical performance report', '45-minute strategy call', 'Prioritized action plan document'],
+    whyValuable: '70% of websites fail to convert effectively. Small improvements can increase revenue 10–50% without more traffic. If your site converts at 1% and improves to 1.5% — that\'s a 50% revenue increase.',
+  },
+  {
+    icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
+    description: 'Website + social + CRM — the complete picture.',
+    longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
+    deliverables: ['Full website diagnostic', 'Social media activity audit (all platforms)', 'CRM pipeline analysis', 'Marketing spend efficiency report', 'Cross-channel attribution insights', 'Unified action plan'],
+    whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together.',
+  },
+  {
+    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
+    description: 'Find exactly where money is leaking in your operation.',
+    longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
+    deliverables: ['Full operational workflow mapping', 'Time & cost waste analysis per department', 'System integration gap assessment', 'Automation opportunity identification', 'Employee productivity insights', 'Prioritized fix-it roadmap with ROI estimates'],
+    whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Fixing one major inefficiency recovers $2K–$10K/month.',
+  },
+  {
+    icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,000/mo', priceRaw: 500000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
+    description: 'Ongoing strategic leadership + execution.',
+    longDescription: 'Full-time strategic leadership without the full-time salary. We become your embedded technology and marketing executive — setting strategy, managing execution, and continuously optimizing your operation month over month.',
+    deliverables: ['Weekly strategy sessions', 'Technology stack management', 'Marketing campaign oversight', 'Vendor & tool evaluation', 'Team training & enablement', 'Monthly performance reporting'],
+    whyValuable: 'A full-time CTO costs $150K–$250K/year. A CMO costs $120K–$200K. You get both for $60K/year — and we\'re accountable for results, not hours.',
+  },
+  {
+    icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
+    description: 'Build the systems that scale you.',
+    longDescription: 'Once gaps are identified, implementation is the multiplier. We build custom systems, deploy automation, restructure CRMs, and integrate workflows — everything needed to scale without adding headcount.',
+    deliverables: ['Custom system architecture & build', 'CRM restructuring & migration', 'Automation deployment (AI + workflow)', 'Integration between existing tools', 'Staff training on new systems', 'Ongoing optimization support'],
+    whyValuable: 'This is where companies reduce long-term labor costs, increase execution speed, and scale without adding headcount. ROI compounds month over month the longer the system runs.',
+  },
 ];
 
 function getDiscount(count: number): number {
@@ -42,6 +124,7 @@ function getDiscount(count: number): number {
 export const ServicesPricing: React.FC = () => {
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
 
@@ -133,12 +216,12 @@ export const ServicesPricing: React.FC = () => {
                         <ShoppingCart className="w-3 h-3" /> Buy
                       </button>
                     )}
-                    <Link
-                      to="/contact"
-                      className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-foreground transition-colors"
+                    <button
+                      onClick={() => setExpandedIdx(expandedIdx === index ? null : index)}
+                      className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:border-primary/40"
                     >
-                      <MessageCircle className="w-3 h-3" /> Talk
-                    </Link>
+                      <Info className="w-3 h-3" /> Details
+                    </button>
                     {service.bundleable && (
                       <button
                         onClick={() => toggleSelect(index)}
@@ -153,6 +236,57 @@ export const ServicesPricing: React.FC = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Expandable Detail Panel */}
+                  <AnimatePresence>
+                    {expandedIdx === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pt-3 border-t border-border/50 space-y-3">
+                          <p className="text-xs text-muted-foreground leading-relaxed">{service.longDescription}</p>
+                          
+                          <div>
+                            <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5">What You Get</div>
+                            <ul className="space-y-1">
+                              {service.deliverables.map((d) => (
+                                <li key={d} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                  <Check className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                                  {d}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="bg-primary/5 rounded-lg p-2.5">
+                            <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Why It's Valuable</div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{service.whyValuable}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            {service.priceId && (
+                              <button
+                                onClick={() => setCheckoutPriceId(service.priceId!)}
+                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                              >
+                                <ShoppingCart className="w-3.5 h-3.5" /> Buy Now — {service.pricing}
+                              </button>
+                            )}
+                            <Link
+                              to="/contact"
+                              className="inline-flex items-center gap-1.5 glass-hover border border-border px-4 py-2 rounded-md text-xs font-medium text-foreground transition-colors"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" /> Talk to Us
+                            </Link>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </RevealOnScroll>
             );
