@@ -28,7 +28,10 @@ const ServicesPage = () => {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-        <div className="pt-24"><Services /></div>
+        <div className="pt-24">
+          <ServicesPricing />
+          <Services />
+        </div>
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
