@@ -10,6 +10,11 @@ import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
 import scannerThumb from '@/assets/scanner-thumb.jpg';
 import consultantThumb from '@/assets/consultant-thumb.jpg';
 import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
+import contentGenThumb from '@/assets/content-generator-thumb.jpg';
+import salesScriptsThumb from '@/assets/sales-scripts-thumb.jpg';
+import contentCalendarThumb from '@/assets/content-calendar-thumb.jpg';
+import followUpThumb from '@/assets/follow-up-plan-thumb.jpg';
+import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
@@ -66,6 +71,30 @@ const tools: Tool[] = [
     title: 'Sales Compass',
     description: 'AI-powered sales guidance to sharpen your strategy.',
     path: '/sales-compass',
+  },
+  {
+    thumbnail: contentGenThumb,
+    title: 'Social Content Generator',
+    description: 'Scan your site — get 25 ready-to-post social pieces.',
+    path: '/content-generator',
+  },
+  {
+    thumbnail: salesScriptsThumb,
+    title: 'Sales Script Generator',
+    description: 'AI call scripts, objection handlers & follow-ups.',
+    path: '/sales-scripts',
+  },
+  {
+    thumbnail: contentCalendarThumb,
+    title: '30-Day Content Calendar',
+    description: 'Daily post ideas, hooks & topics for your industry.',
+    path: '/content-calendar',
+  },
+  {
+    thumbnail: followUpThumb,
+    title: 'Follow-Up System Plan',
+    description: '14-day multi-channel sales cadence with templates.',
+    path: '/follow-up-plan',
   },
 ];
 
