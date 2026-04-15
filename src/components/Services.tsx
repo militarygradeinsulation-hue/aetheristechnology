@@ -20,36 +20,72 @@ export const Services: React.FC = () => {
       title: 'ML Strategy & Advisory',
       description: 'We assess your data landscape and recommend the right ML approach. From feasibility studies to model selection guidance.',
       features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
+      pricing: 'From $2,500',
+      relatedServices: [
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Strategy Blueprint', cost: '$299' },
+      ],
     },
     {
       icon: Bot,
       title: 'Automation Consulting',
       description: 'We identify automation opportunities in your operations and design intelligent workflows tailored to your team.',
       features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
+      pricing: 'From $299',
+      relatedServices: [
+        { name: 'Strategy Blueprint', cost: '$299' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Code,
       title: 'AI Implementation Advisory',
       description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
       features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
+      pricing: 'From $2,500',
+      relatedServices: [
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Database,
       title: 'Data Strategy Consulting',
       description: 'We help you build a data-driven culture with the right infrastructure, governance, and analytics strategy.',
       features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
+      pricing: 'From $500',
+      relatedServices: [
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Website Evaluation', cost: '$500' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+      ],
     },
     {
       icon: Sparkles,
       title: 'AI Transformation Strategy',
       description: 'End-to-end strategic guidance for your AI journey. We help leadership teams make confident, informed decisions.',
       features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
+      pricing: 'From $5,000/mo',
+      relatedServices: [
+        { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
+        { name: '14-Day Diagnostic', cost: '$2,500' },
+        { name: 'Custom Implementation', cost: '$25,000+' },
+      ],
     },
     {
       icon: Zap,
       title: 'Performance & Optimization',
       description: 'We audit your existing AI systems and recommend improvements for speed, accuracy, and cost efficiency.',
       features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
+      pricing: 'From $500',
+      relatedServices: [
+        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Digital Snapshot', cost: '$125' },
+        { name: 'Strategy Blueprint', cost: '$299' },
+      ],
     },
   ];
 
@@ -127,28 +163,43 @@ export const Services: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <RevealOnScroll key={service.title} delay={index * 0.1}>
-              <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer">
+              <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer flex flex-col">
                 <div className="mb-6">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <service.icon className="w-7 h-7 text-amber" />
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-amber transition-colors font-display">
+                <h3 className="text-2xl font-bold mb-2 text-foreground group-hover:text-amber transition-colors font-display">
                   {service.title}
                 </h3>
+
+                <div className="text-lg font-bold text-primary font-display mb-3">{service.pricing}</div>
                 
                 <p className="text-muted-foreground mb-6 leading-relaxed">
                   {service.description}
                 </p>
 
-                <div className="space-y-2">
+                <div className="space-y-2 mb-5">
                   {service.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-2 text-sm">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse-glow" />
                       <span className="text-muted-foreground">{feature}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Related paid services */}
+                <div className="mt-auto pt-4 border-t border-border/40">
+                  <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-2">Starts With</div>
+                  <div className="space-y-1.5">
+                    {service.relatedServices.map((rs) => (
+                      <div key={rs.name} className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{rs.name}</span>
+                        <span className="font-semibold text-primary">{rs.cost}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </RevealOnScroll>
