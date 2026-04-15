@@ -197,70 +197,77 @@
     <script type="text/javascript" id="hs-script-loader" async defer src="//js-na2.hs-scripts.com/244481481.js"></script>
     <!-- End of HubSpot Embed Code -->
     <!-- ElevenLabs Conversational AI Widget -->
-    <elevenlabs-convai agent-id="agent_7701k5xv4272ekwaw1d0nx7cwf3m"></elevenlabs-convai>
+    <div id="elevenlabs-drag-wrapper">
+      <div id="elevenlabs-drag-handle" title="Drag to move">⠿</div>
+      <elevenlabs-convai agent-id="agent_7701k5xv4272ekwaw1d0nx7cwf3m"></elevenlabs-convai>
+    </div>
     <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
     <style>
+      #elevenlabs-drag-wrapper {
+        position: fixed;
+        top: 80px;
+        left: 16px;
+        z-index: 9999;
+      }
+      #elevenlabs-drag-handle {
+        width: 100%;
+        height: 20px;
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.6);
+        font-size: 14px;
+        text-align: center;
+        line-height: 20px;
+        cursor: grab;
+        user-select: none;
+        border-radius: 8px 8px 0 0;
+        letter-spacing: 2px;
+      }
+      #elevenlabs-drag-handle:active {
+        cursor: grabbing;
+        background: rgba(255,255,255,0.2);
+      }
       elevenlabs-convai {
-        position: fixed !important;
-        top: 80px !important;
-        left: 16px !important;
-        right: auto !important;
-        bottom: auto !important;
-        z-index: 9999 !important;
+        display: block;
         width: auto !important;
         height: auto !important;
         min-width: 56px !important;
         min-height: 56px !important;
         overflow: visible !important;
-        cursor: grab;
-        user-select: none;
-      }
-      elevenlabs-convai.dragging {
-        cursor: grabbing;
       }
     </style>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        function makeDraggable(el) {
-          let offsetX, offsetY, isDragging = false;
-          el.addEventListener('mousedown', function(e) {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            isDragging = true;
-            el.classList.add('dragging');
-            const rect = el.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            e.preventDefault();
-          });
-          document.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
-            el.style.left = (e.clientX - offsetX) + 'px';
-            el.style.top = (e.clientY - offsetY) + 'px';
-          });
-          document.addEventListener('mouseup', function() {
-            isDragging = false;
-            el.classList.remove('dragging');
-          });
-          el.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            isDragging = true;
-            const rect = el.getBoundingClientRect();
-            const touch = e.touches[0];
-            offsetX = touch.clientX - rect.left;
-            offsetY = touch.clientY - rect.top;
-          }, {passive: true});
-          document.addEventListener('touchmove', function(e) {
-            if (!isDragging) return;
-            const touch = e.touches[0];
-            el.style.left = (touch.clientX - offsetX) + 'px';
-            el.style.top = (touch.clientY - offsetY) + 'px';
-          });
-          document.addEventListener('touchend', function() { isDragging = false; });
-        }
-        var check = setInterval(function() {
-          var w = document.querySelector('elevenlabs-convai');
-          if (w) { clearInterval(check); makeDraggable(w); }
-        }, 200);
+        var handle = document.getElementById('elevenlabs-drag-handle');
+        var wrapper = document.getElementById('elevenlabs-drag-wrapper');
+        if (!handle || !wrapper) return;
+        var offsetX, offsetY, isDragging = false;
+        handle.addEventListener('mousedown', function(e) {
+          isDragging = true;
+          var rect = wrapper.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+          if (!isDragging) return;
+          wrapper.style.left = (e.clientX - offsetX) + 'px';
+          wrapper.style.top = (e.clientY - offsetY) + 'px';
+        });
+        document.addEventListener('mouseup', function() { isDragging = false; });
+        handle.addEventListener('touchstart', function(e) {
+          isDragging = true;
+          var rect = wrapper.getBoundingClientRect();
+          var t = e.touches[0];
+          offsetX = t.clientX - rect.left;
+          offsetY = t.clientY - rect.top;
+        }, {passive: true});
+        document.addEventListener('touchmove', function(e) {
+          if (!isDragging) return;
+          var t = e.touches[0];
+          wrapper.style.left = (t.clientX - offsetX) + 'px';
+          wrapper.style.top = (t.clientY - offsetY) + 'px';
+        });
+        document.addEventListener('touchend', function() { isDragging = false; });
       });
     </script>
   </body>
