@@ -8,12 +8,11 @@ import { Send, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const SERVICE_OPTIONS = [
-  'The Diagnostic — $4,500',
-  'Foundation Build — $7,500/mo',
-  'Growth Engine — $12,000/mo',
-  'Full Operations — $18,500/mo',
-  'Enterprise / Co-CEO — Custom',
-  'Not sure yet',
+  'I am losing money in marketing',
+  'My website is ugly',
+  'My CRM is a mess',
+  'My company is outdated',
+  'Just figure it out for me!',
 ];
 
 export const ContactForm: React.FC = () => {
