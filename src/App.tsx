@@ -76,7 +76,6 @@ const App = () => (
           </Routes>
           <FloatingContact />
           <SalesChat />
-          <ConsentBanner />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -89,6 +89,16 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
+          {/* Terms & Consent Notice */}
+          <div className="border-t border-border/50 pt-6 mb-6">
+            <p className="text-[11px] leading-relaxed text-muted-foreground/80 text-center max-w-4xl mx-auto">
+              <span className="font-semibold text-muted-foreground">Terms & Conditions:</span>{' '}
+              By clicking "Call," "Talk," or "Agree," and each time you interact with our AI agents, you consent to the recording, storage, and sharing of communications with third-party service providers, as described in the{' '}
+              <Link to="/terms" className="text-amber underline hover:text-amber/80 transition-colors">Privacy Policy</Link>.
+              {' '}If you do not wish to have conversations recorded, please refrain from using this service.
+            </p>
+          </div>
+
           <div className="border-t border-border pt-8">
             <p className="text-xs text-muted-foreground text-center mb-4 font-semibold italic">
               All intellectual property—including software, AI models, algorithms, and visual assets—is exclusively owned by CTOguy.ai. These systems are independently developed works and are expressly excluded from the scope of any Agreement made with any business, person, or employer.
