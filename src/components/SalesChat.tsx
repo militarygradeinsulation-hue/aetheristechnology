@@ -126,16 +126,16 @@ export const SalesChat: React.FC = () => {
     // Replace checkout links with buttons
     const parts = content.split(/\[([^\]]+)\]\(checkout:([^)]+)\)/g);
     if (parts.length === 1) {
-      return <ReactMarkdown className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2">{content}</ReactMarkdown>;
+      return <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2"><ReactMarkdown>{content}</ReactMarkdown></div>;
     }
 
     const elements: React.ReactNode[] = [];
     for (let i = 0; i < parts.length; i += 3) {
       if (parts[i]) {
         elements.push(
-          <ReactMarkdown key={`md-${i}`} className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2">
-            {parts[i]}
-          </ReactMarkdown>
+          <div key={`md-${i}`} className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2">
+            <ReactMarkdown>{parts[i]}</ReactMarkdown>
+          </div>
         );
       }
       if (i + 1 < parts.length && i + 2 < parts.length) {
