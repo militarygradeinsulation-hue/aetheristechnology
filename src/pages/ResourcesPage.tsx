@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   TrendingUp,
@@ -33,6 +34,8 @@ const ResourcesPage = () => {
       return data;
     },
   });
+
+  const existingTitles = (playbooks || []).map(p => p.title);
 
   return (
     <div className="relative min-h-screen">
@@ -76,6 +79,7 @@ const ResourcesPage = () => {
           </div>
         </section>
 
+        {/* Free Playbooks */}
         <section className="pb-16 px-4">
           <div className="max-w-6xl mx-auto">
             {isLoading ? (
@@ -117,6 +121,9 @@ const ResourcesPage = () => {
             )}
           </div>
         </section>
+
+        {/* On-Demand Playbook Generator */}
+        <PlaybookTopicBrowser existingTitles={existingTitles} />
 
         <section className="pb-24 px-4">
           <div className="max-w-4xl mx-auto">
