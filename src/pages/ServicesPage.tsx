@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Services } from '@/components/Services';
+import { ServicesPricing } from '@/components/ServicesPricing';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
