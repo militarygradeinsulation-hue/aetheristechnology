@@ -365,18 +365,18 @@ export const ServicesPricing: React.FC = () => {
 
   if (checkoutPriceId) {
     return (
-      <div className="fixed inset-0 z-[9998] bg-background/95 backdrop-blur-sm flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-border max-w-2xl mx-auto w-full">
-          <button
-            onClick={() => setCheckoutPriceId(null)}
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-            Cancel &amp; return to services
-          </button>
-        </div>
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-2xl mx-auto">
+      <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPriceId(null)}>
+        <div className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <button
+              onClick={() => setCheckoutPriceId(null)}
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-5 h-5" />
+              Cancel
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
             <StripeEmbeddedCheckout
               priceId={checkoutPriceId}
               returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
