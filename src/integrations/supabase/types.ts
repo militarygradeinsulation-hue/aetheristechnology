@@ -356,6 +356,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           amount_total: number | null
@@ -368,6 +392,7 @@ export type Database = {
           status: string | null
           stripe_customer_id: string | null
           stripe_session_id: string
+          user_id: string | null
         }
         Insert: {
           amount_total?: number | null
@@ -380,6 +405,7 @@ export type Database = {
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id: string
+          user_id?: string | null
         }
         Update: {
           amount_total?: number | null
@@ -392,6 +418,7 @@ export type Database = {
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -466,6 +493,7 @@ export type Database = {
           stripe_customer_id: string
           stripe_subscription_id: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           cancel_at_period_end?: boolean | null
@@ -480,6 +508,7 @@ export type Database = {
           stripe_customer_id: string
           stripe_subscription_id: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           cancel_at_period_end?: boolean | null
@@ -494,6 +523,7 @@ export type Database = {
           stripe_customer_id?: string
           stripe_subscription_id?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

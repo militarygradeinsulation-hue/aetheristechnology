@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign, ShoppingCart, MessageCircle, BarChart3, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
+import { Link } from 'react-router-dom';
 
 import renderXylophone from '@/assets/renders/render-xylophone.png';
 import renderMonkeyBars from '@/assets/renders/render-monkey-bars.png';
@@ -101,12 +103,26 @@ interface ServiceTier {
   whyItPays: string;
   roiExample: string;
   payback: string;
+  priceId?: string;
+  badge?: string;
   details?: string[];
   showExamples?: boolean;
   showRdeExamples?: boolean;
 }
 
 const services: ServiceTier[] = [
+  {
+    icon: Search,
+    title: 'Digital Snapshot',
+    subtitle: 'See where you\'re losing money online',
+    pricing: '$125',
+    pricingDetail: 'one-time report',
+    priceId: 'digital_snapshot_once',
+    description: 'Automated website report showing gaps in your digital presence. The door opener — shows exactly where you\'re bleeding revenue.',
+    whyItPays: 'Most businesses don\'t know what\'s broken until they see the data. This report reveals blind spots instantly.',
+    roiExample: 'Identifying one conversion gap can recover $1,000+/month in lost revenue. $125 pays for itself on day one.',
+    payback: 'Immediate',
+  },
   {
     icon: Image,
     title: 'Visual Rendering & Image Creation',
@@ -127,37 +143,53 @@ const services: ServiceTier[] = [
   },
   {
     icon: Globe,
-    title: 'Rapid Digital Evaluation',
-    subtitle: 'Find what\'s broken in your online presence',
-    pricing: '$750',
-    pricingDetail: 'flat · delivered in 3–5 days',
-    description: 'A focused tear-down of your messaging clarity, CTA placement, conversion flow, and positioning. Fixes that affect existing traffic instantly.',
+    title: 'Website Evaluation',
+    subtitle: 'Detailed analysis + strategy call',
+    pricing: '$500',
+    pricingDetail: 'one-time · delivered in 3–5 days',
+    priceId: 'website_evaluation_once',
+    description: 'A focused tear-down of your messaging clarity, CTA placement, conversion flow, and positioning. Includes a strategy call to walk through findings.',
     whyItPays: '70% of websites fail to convert effectively. Small improvements can increase revenue 10–50% without more traffic.',
     roiExample: 'If your site converts at 1% and improves to 1.5% — that\'s a 50% revenue increase from the same traffic.',
     payback: 'Immediate to 2 weeks',
     showRdeExamples: true,
   },
   {
-    icon: Eye,
-    title: 'Ongoing Digital Oversight',
-    subtitle: 'Stop the slow drift that kills growth',
-    pricing: '$1,500',
-    pricingDetail: '/month · ~$75/day',
-    description: 'Continuous oversight on messaging, content direction, visual consistency, and opportunity capture. Consistency compounds into stronger brand clarity and higher engagement.',
-    whyItPays: 'Companies don\'t fail from bad strategy — they fail from drift. Weak messaging, inconsistent visuals, and missed opportunities compound over time.',
-    roiExample: 'A 10–20% improvement across content and engagement compounds into more inbound interest, better response rates, and stronger closes.',
-    payback: 'Within 1 month',
+    icon: BarChart3,
+    title: 'Full Analytics Package',
+    subtitle: 'Website + social + CRM — the complete picture',
+    pricing: '$500',
+    pricingDetail: 'one-time · normally $1,200+',
+    priceId: 'full_analytics_package_once',
+    badge: 'LIMITED TIME',
+    description: 'Full website & social media scan + marketing diagnostics + CRM analysis. Everything in the Digital Snapshot and Website Evaluation, plus deep social and CRM audits.',
+    whyItPays: 'Disconnected data costs companies 20-30% in wasted marketing spend. This package connects the dots across every channel.',
+    roiExample: 'Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together.',
+    payback: '1–4 weeks',
   },
   {
-    icon: Search,
+    icon: Eye,
     title: '14-Day Operational Diagnostic',
     subtitle: 'Find exactly where money is leaking',
-    pricing: '$7,500',
-    pricingDetail: 'flat · 14 days · ~$535/day',
+    pricing: '$2,500',
+    pricingDetail: 'flat · 14 days',
+    priceId: 'fourteen_day_diagnostic_once',
     description: 'A complete operational breakdown — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. Structured, visible, and actionable.',
     whyItPays: 'Up to 30% of employee time is wasted. Poor systems reduce productivity by 20–30%. Automation improves efficiency by 20–40%.',
     roiExample: '5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Fixing one major inefficiency recovers $2K–$10K/month.',
     payback: '2–8 weeks',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Fractional CTO/CMO',
+    subtitle: 'Ongoing strategic leadership + execution',
+    pricing: '$5,000',
+    pricingDetail: '/month',
+    priceId: 'fractional_cto_cmo_monthly',
+    description: 'Full implementation and continuous optimization. Strategic leadership for companies ready to transform, not just diagnose.',
+    whyItPays: 'Companies don\'t fail from bad strategy — they fail from drift. Consistent execution compounds into stronger results every month.',
+    roiExample: 'A 10–20% improvement across operations, content, and engagement compounds into more inbound interest, better response rates, and stronger closes.',
+    payback: 'Within 1 month',
   },
   {
     icon: Wrench,
@@ -172,7 +204,7 @@ const services: ServiceTier[] = [
   },
 ];
 
-const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ service, index }) => {
+const ServiceCard: React.FC<{ service: ServiceTier; index: number; onCheckout: (priceId: string) => void }> = ({ service, index, onCheckout }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -189,7 +221,12 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
                 <service.icon className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
+                  {service.badge && (
+                    <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">{service.badge}</span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground mt-0.5">{service.subtitle}</p>
               </div>
             </div>
@@ -201,13 +238,33 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
 
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{service.description}</p>
 
-          <button
-            className="flex items-center gap-1.5 text-xs text-primary mt-3 font-medium group-hover:underline"
-            onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-          >
-            {expanded ? 'Less' : 'ROI breakdown'}
-            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </button>
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 mt-4">
+            {service.priceId && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onCheckout(service.priceId!); }}
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                Buy Now
+              </button>
+            )}
+            <Link
+              to="/contact"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-2 glass-hover border border-border px-4 py-2 rounded-lg text-sm font-medium text-foreground transition-colors active:scale-[0.97]"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Talk to Us
+            </Link>
+            <button
+              className="flex items-center gap-1.5 text-xs text-primary ml-auto font-medium group-hover:underline"
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+            >
+              {expanded ? 'Less' : 'ROI breakdown'}
+              {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
 
         {/* Expandable ROI section */}
@@ -304,6 +361,29 @@ const ServiceCard: React.FC<{ service: ServiceTier; index: number }> = ({ servic
 };
 
 export const ServicesPricing: React.FC = () => {
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+
+  if (checkoutPriceId) {
+    return (
+      <div className="fixed inset-0 z-[9998] bg-background/95 backdrop-blur-sm flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-bold text-foreground">Complete Your Purchase</h2>
+          <button onClick={() => setCheckoutPriceId(null)} className="text-muted-foreground hover:text-foreground">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto p-4">
+          <div className="max-w-2xl mx-auto">
+            <StripeEmbeddedCheckout
+              priceId={checkoutPriceId}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <section className="relative py-24 px-4 bg-gradient-to-b from-secondary/20 to-background">
       <div className="max-w-4xl mx-auto">
@@ -320,7 +400,7 @@ export const ServicesPricing: React.FC = () => {
 
         <div className="space-y-4">
           {services.map((service, index) => (
-            <ServiceCard key={service.title} service={service} index={index} />
+            <ServiceCard key={service.title} service={service} index={index} onCheckout={setCheckoutPriceId} />
           ))}
         </div>
 
@@ -330,7 +410,7 @@ export const ServicesPricing: React.FC = () => {
               The Real Question
             </p>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              It's not "Do I spend $7,500?" — it's "How much is inefficiency already costing me every month?"
+              It's not "Do I spend $2,500?" — it's "How much is inefficiency already costing me every month?"
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a href="tel:+13173762110">
