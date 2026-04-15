@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Activity, Globe, ArrowRight } from 'lucide-react';
+import { BookOpen, FileText, Activity, Globe, Megaphone, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 
@@ -27,6 +27,12 @@ const tools = [
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and gaps.",
     path: '/scan',
+  },
+  {
+    icon: Megaphone,
+    title: 'Marketing Studio',
+    description: 'AI-powered post creator for scroll-stopping content.',
+    path: '/marketing-studio',
   },
 ];
 
