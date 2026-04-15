@@ -164,20 +164,11 @@ export const ThreeAreas: React.FC = () => {
               <div className="glass rounded-2xl overflow-hidden border border-border hover:border-amber/40 transition-colors h-full">
                 {area.id === 'digital-strategy' ? (
                   <DigitalStrategyTile />
+                ) : area.id === 'branding' ? (
+                  <BrandingMessageTile />
                 ) : area.id === 'internal-systems' ? (
                   <InternalSystemsTile />
-                ) : (
-                  <div className="w-full aspect-square overflow-hidden">
-                    <img
-                      src={area.thumbnail}
-                      alt={area.title}
-                      loading="lazy"
-                      width={512}
-                      height={512}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+                ) : null}
                 <div className="p-8 text-center">
                   <h3 className="text-xl font-bold text-foreground font-display mb-3">{area.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{area.description}</p>
