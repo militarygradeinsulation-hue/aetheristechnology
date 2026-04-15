@@ -25,6 +25,7 @@ import UnsubscribePage from "./pages/UnsubscribePage";
 import MarketingStudioPage from "./pages/MarketingStudioPage";
 import MarketingStrategistPage from "./pages/MarketingStrategistPage";
 import AIConsultantPage from "./pages/AIConsultantPage";
+import SalesCompassPage from "./pages/SalesCompassPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/marketing-studio" element={<MarketingStudioPage />} />
           <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
           <Route path="/ai-consultant" element={<AIConsultantPage />} />
+          <Route path="/sales-compass" element={<SalesCompassPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
