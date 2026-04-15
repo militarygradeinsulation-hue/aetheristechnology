@@ -75,10 +75,11 @@ export const FreeTools: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground font-display mb-3">
+            <span className="text-amber font-bold text-xl md:text-2xl tracking-wide uppercase mb-2 block">Enjoy my Stuff</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">
               Free Tools & <span className="text-gradient-amber">Resources</span>
             </h2>
-            <p className="text-muted-foreground text-lg">Try before you talk — no strings attached.</p>
+            <p className="text-muted-foreground text-xl md:text-2xl">Try before you talk — no strings attached.</p>
           </div>
         </RevealOnScroll>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

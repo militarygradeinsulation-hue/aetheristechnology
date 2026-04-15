@@ -136,7 +136,7 @@ export const ThreeAreas: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-8">
-            <span className="text-amber font-bold text-lg tracking-wide uppercase">🚨 The 3 Key Areas I Focus On</span>
+            <span className="text-amber font-bold text-xl md:text-2xl tracking-wide uppercase">🚨 The 3 Key Areas I Focus On</span>
           </div>
         </RevealOnScroll>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
