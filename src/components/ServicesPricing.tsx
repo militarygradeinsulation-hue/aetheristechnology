@@ -18,6 +18,7 @@ interface ServiceTile {
   longDescription: string;
   deliverables: string[];
   whyValuable: string;
+  includes?: { name: string; value: string }[];
 }
 
 const services: ServiceTile[] = [
