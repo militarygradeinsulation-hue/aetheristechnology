@@ -320,6 +320,42 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_playbooks: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          status: string
+          stripe_session_id: string | null
+          topic_data: Json
+          topic_title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          stripe_session_id?: string | null
+          topic_data?: Json
+          topic_title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          stripe_session_id?: string | null
+          topic_data?: Json
+          topic_title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       playbooks: {
         Row: {
           created_at: string
