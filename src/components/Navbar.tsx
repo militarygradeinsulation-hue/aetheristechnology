@@ -12,6 +12,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { trackEvent } = useTrackEvent();
 
   useEffect(() => {
@@ -33,14 +34,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'About', href: '/about' },
   ];
 
-  // Sticky CTA bar shown after scroll
   const showStickyCTA = isScrolled;
+  const expanded = isHovered || isMobileMenuOpen;
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled ? 'glass py-4' : 'bg-transparent py-6'
       }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -50,15 +53,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               alt="Aetheris AI Logo" 
               className="w-12 h-12 object-contain"
             />
-            <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
+            <span className={`text-xl font-bold text-foreground font-display transition-opacity duration-300 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:w-auto md:opacity-60'}`}>Aetheris AI</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className={`hidden md:flex items-center space-x-8 transition-all duration-300 ${expanded ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none -translate-y-2'}`}>
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`transition-colors ${
+                className={`transition-colors whitespace-nowrap ${
                   item.special 
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -108,9 +111,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
         )}
       </div>
 
-      {/* Sticky CTA Banner */}
       {showStickyCTA && (
-        <div className="bg-primary/90 backdrop-blur-sm py-1.5 px-4 text-center">
+        <div className={`bg-primary/90 backdrop-blur-sm py-1.5 px-4 text-center transition-all duration-300 ${expanded ? 'opacity-100 max-h-10' : 'opacity-0 max-h-0 overflow-hidden'}`}>
           <Link
             to="/assessment"
             className="text-primary-foreground text-sm font-medium hover:underline inline-flex items-center gap-1"
