@@ -13,6 +13,7 @@ const SERVICE_OPTIONS = [
   'My CRM is a mess',
   'My company is outdated',
   'Just figure it out for me!',
+  '💥 $500 Full Analytics Package (Limited-Time Discount)',
 ];
 
 export const ContactForm: React.FC = () => {
@@ -80,6 +81,8 @@ export const ContactForm: React.FC = () => {
     }
   };
 
+  const isAnalyticsPackage = form.service_interest.includes('Full Analytics Package');
+
   if (submitted) {
     return (
        <section className="py-12 px-4" id="contact-form">
@@ -144,7 +147,19 @@ export const ContactForm: React.FC = () => {
               {SERVICE_OPTIONS.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
-            </select>
+          </select>
+          {isAnalyticsPackage && (
+            <div className="mt-3 rounded-lg border border-amber/30 bg-amber/5 p-4">
+              <p className="text-sm font-semibold text-amber mb-2">🔥 Limited-Time: $500 Full Analytics Package</p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
+                <li>Full website &amp; social media scan</li>
+                <li>Marketing strategy diagnostics</li>
+                <li>Personalized recommendations report</li>
+                <li>CRM analysis &amp; optimization plan</li>
+              </ul>
+              <p className="text-xs text-muted-foreground mt-2 italic">Normally $1,200+ — available at this price for a limited time.</p>
+            </div>
+          )}
           </div>
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">What's going on? *</label>
