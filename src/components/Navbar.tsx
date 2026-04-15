@@ -71,11 +71,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                 {item.label}
               </Link>
             ))}
-            <Link to="/contact" onClick={() => trackEvent('click', { label: 'nav_contact', location: 'navbar' })}>
-              <Button className="bg-primary hover:bg-primary/90">
-                Contact Us
-              </Button>
-            </Link>
           </div>
 
           <button
