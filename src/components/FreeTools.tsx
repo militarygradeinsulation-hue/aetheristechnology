@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Activity, Globe, Megaphone, Compass, BotMessageSquare, ArrowRight } from 'lucide-react';
+import { BookOpen, FileText, Activity, Globe, Megaphone, Compass, BotMessageSquare, Target, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 
@@ -45,6 +45,12 @@ const tools = [
     title: 'AI Business Consultant',
     description: 'Get instant AI-powered consulting advice for your business.',
     path: '/ai-consultant',
+  },
+  {
+    icon: Target,
+    title: 'Sales Compass',
+    description: 'AI-powered sales guidance to sharpen your strategy.',
+    path: '/sales-compass',
   },
 ];
 
