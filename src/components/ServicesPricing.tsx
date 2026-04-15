@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign, ShoppingCart, MessageCircle, BarChart3, X } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, ChevronDown, ChevronUp, TrendingUp, Clock, DollarSign, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
@@ -147,6 +147,54 @@ const services: ServiceTier[] = [
     whyItPays: 'Companies that act on a structured blueprint see 3–5x faster improvement than those who just read reports.',
     roiExample: 'A clear implementation roadmap turns $299 into $10K+ in recovered revenue within the first 90 days.',
     payback: '1–4 weeks',
+  },
+  {
+    icon: Share2,
+    title: 'Social Content Pack',
+    subtitle: '25 AI-generated social posts from your website',
+    pricing: '$29',
+    pricingDetail: 'one-time',
+    priceId: 'social_content_pack_once',
+    description: '10 LinkedIn posts, 10 Facebook posts, and 5 ad hooks — all tailored to your brand by scanning your website.',
+    whyItPays: 'Hiring a copywriter for 25 posts costs $500+. Get the same output in minutes.',
+    roiExample: 'One viral post can drive $1,000+ in inbound leads. $29 is a rounding error.',
+    payback: 'Immediate',
+  },
+  {
+    icon: Phone,
+    title: 'Sales Script Pack',
+    subtitle: 'Call scripts, objection handlers & follow-ups',
+    pricing: '$49',
+    pricingDetail: 'one-time',
+    priceId: 'sales_script_pack_once',
+    description: 'Complete call script, 5 objection handlers with reframes, 3 follow-up templates (email/SMS/voicemail).',
+    whyItPays: 'Sales teams with scripts close 30% more deals. This pays for itself on the first call.',
+    roiExample: 'Closing one extra deal per month at $500+ = 10x ROI.',
+    payback: 'Immediate',
+  },
+  {
+    icon: Calendar,
+    title: '30-Day Content Calendar',
+    subtitle: 'Daily topics, hooks & posting times',
+    pricing: '$29',
+    pricingDetail: 'one-time',
+    priceId: 'content_calendar_once',
+    description: '30 days of post ideas with hooks, captions, hashtags, content types, and optimal posting times for your industry.',
+    whyItPays: 'Content consistency is the #1 growth lever. This eliminates the "what do I post today" problem.',
+    roiExample: 'Consistent posting increases reach 3x. One month of content for less than a lunch.',
+    payback: 'Immediate',
+  },
+  {
+    icon: Mail,
+    title: 'Follow-Up System Plan',
+    subtitle: '14-day multi-channel sales cadence',
+    pricing: '$49',
+    pricingDetail: 'one-time',
+    priceId: 'follow_up_plan_once',
+    description: '14-day follow-up flow with email, SMS, call, and LinkedIn templates. Every touchpoint scripted and timed.',
+    whyItPays: '80% of sales require 5+ follow-ups, but most reps stop at 2. This system closes the gap.',
+    roiExample: 'Recovering one lost deal per month = $500–$5,000+ in revenue.',
+    payback: 'Immediate',
   },
   {
     icon: Image,
