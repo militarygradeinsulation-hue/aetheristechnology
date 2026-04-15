@@ -63,6 +63,38 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       metadata: session.metadata || {},
     });
     if (error) console.error("Insert purchase error:", error);
+
+    // Check if this is a custom playbook purchase
+    if (session.metadata?.playbook_topic) {
+      try {
+        const topicData = JSON.parse(session.metadata.playbook_topic_data || '{}');
+        const { data: pb, error: pbError } = await supabase.from("generated_playbooks").insert({
+          user_id: session.metadata.user_id,
+          topic_title: session.metadata.playbook_topic,
+          topic_data: topicData,
+          status: "pending",
+          stripe_session_id: session.id,
+        }).select().single();
+
+        if (pbError) {
+          console.error("Insert generated_playbooks error:", pbError);
+        } else if (pb) {
+          // Trigger generation
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+          const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+          fetch(`${SUPABASE_URL}/functions/v1/generate-custom-playbook`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({ playbookId: pb.id }),
+          }).catch(e => console.error("Trigger generation error:", e));
+        }
+      } catch (e) {
+        console.error("Playbook generation trigger error:", e);
+      }
+    }
   }
 }
 
