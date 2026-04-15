@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.generate-custom-playbook]
+verify_jwt = false
