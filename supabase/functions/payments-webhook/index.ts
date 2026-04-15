@@ -64,6 +64,17 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     });
     if (error) console.error("Insert purchase error:", error);
 
+    // Check if this is a scan report purchase
+    if (session.metadata?.scan_type === 'report' && session.metadata?.tier) {
+      const { error: spError } = await supabase.from("scan_purchases").insert({
+        user_id: session.metadata.user_id,
+        tier: session.metadata.tier,
+        stripe_session_id: session.id,
+        scan_id: null,
+      });
+      if (spError) console.error("Insert scan_purchases error:", spError);
+    }
+
     // Check if this is a custom playbook purchase
     if (session.metadata?.playbook_topic) {
       try {
@@ -79,7 +90,6 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         if (pbError) {
           console.error("Insert generated_playbooks error:", pbError);
         } else if (pb) {
-          // Trigger generation
           const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
           const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
           fetch(`${SUPABASE_URL}/functions/v1/generate-custom-playbook`, {
