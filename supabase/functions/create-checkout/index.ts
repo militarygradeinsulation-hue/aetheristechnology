@@ -8,7 +8,7 @@ serve(async (req) => {
   }
 
   try {
-    const { priceId, quantity, customerEmail, returnUrl, environment } = await req.json();
+    const { priceId, quantity, customerEmail, returnUrl, environment, metadata } = await req.json();
     if (!priceId || typeof priceId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
       return new Response(JSON.stringify({ error: "Invalid priceId" }), {
         status: 400,
@@ -29,13 +29,23 @@ serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: any = {
       line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded",
       return_url: returnUrl || `${req.headers.get("origin")}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
       ...(customerEmail && { customer_email: customerEmail }),
-    });
+    };
+
+    // Pass metadata if provided (e.g., for custom playbook purchases)
+    if (metadata && typeof metadata === 'object') {
+      sessionParams.metadata = metadata;
+      if (isRecurring) {
+        sessionParams.subscription_data = { metadata };
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
