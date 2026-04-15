@@ -63,6 +63,21 @@ const CareersPage = () => {
         templateData: { name: trimmedName },
       },
     });
+    // Notify joseph@ about the new application
+    supabase.functions.invoke('send-transactional-email', {
+      body: {
+        templateName: 'rep-application-notification',
+        recipientEmail: 'joseph@aetheris.technology',
+        idempotencyKey: `rep-app-notify-${id}`,
+        templateData: {
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: form.phone.trim() || undefined,
+          linkedin_url: form.linkedin_url.trim() || undefined,
+          experience: form.experience.trim() || undefined,
+        },
+      },
+    });
     setSubmitted(true);
     toast({ title: "You're in. Welcome to the team. Check your email for the playbook." });
   };
