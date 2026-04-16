@@ -140,6 +140,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: 'Custom question map exposing blind spots across 8 departments.',
     successStat: '84% discover critical blind spots they hadn\'t considered',
     longDescription: 'A business clarity engine that generates sharp, specific questions organized by leadership, sales, marketing, operations, hiring, pricing, customer journey, and growth. Not generic — tailored to your exact company profile.',
