@@ -3,7 +3,26 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3 } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft } from 'lucide-react';
+import { SocialContentGenerator } from '@/components/SocialContentGenerator';
+import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
+import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
+import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
+import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
+import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+
+type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction';
+
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
+  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
+  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
+  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
+  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail },
+  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
+  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
+  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
+];
 
 interface ContactSubmission {
   id: string;
@@ -32,7 +51,8 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools'>('overview');
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [recommendations, setRecommendations] = useState('');
   const [loadingInsights, setLoadingInsights] = useState(false);
@@ -164,18 +184,19 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'events', 'insights'] as const).map(tab => (
+          {(['overview', 'submissions', 'events', 'insights', 'tools'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
+                if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : '🧠 AI Insights'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : tab === 'insights' ? '🧠 AI Insights' : '🛠 My Tools'}
             </button>
           ))}
         </div>
