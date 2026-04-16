@@ -187,6 +187,7 @@ export const ServicesPricing: React.FC = () => {
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
 
   const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
 
