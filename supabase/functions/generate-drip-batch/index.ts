@@ -7,10 +7,28 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function generateAllEmails(prospect: any, steps: any[], apiKey: string) {
+const PLAYBOOK_URL =
+  "https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/playbooks/sales-process-reengineering.pdf";
+
+// Email 1 is ALWAYS this exact template. No AI personalization.
+const EMAIL_1_SUBJECT = "Quick question";
+const EMAIL_1_BODY_HTML = `<p>Quick question.</p>
+<p>I have been building a simple AI system that helps local businesses capture leads, follow up automatically, and automate branding so they stop losing customers.</p>
+<p>I am doing a few free walkthroughs while I dial the process in, and I wanted to ask if you know any business owner who might be open to a try it out and a quick conversation for feedback about it.</p>
+<p>No pressure at all if not. Just figured I would ask.</p>
+<p>Joseph Toney</p>
+<p><a href="https://aetheris.technology/">aetheris.technology</a><br>
+Website: theaiformarketing.com<br>
+<a href="https://linkedin.com/in/aisystemsarchitect">linkedin.com/in/aisystemsarchitect</a></p>`;
+
+async function generateFollowUpEmails(prospect: any, steps: any[], apiKey: string) {
+  // We only AI-generate emails 2..N (index 1..N-1). Email 1 is fixed.
+  const followUps = steps.slice(1);
+  if (followUps.length === 0) return [];
+
   const scraped = prospect.scraped_data || {};
-  const stepsDescription = steps.map((s: any, i: number) =>
-    `Email ${i + 1}: ${s.body_prompt}`
+  const stepsDescription = followUps.map((s: any, i: number) =>
+    `Email ${i + 2}: ${s.body_prompt}`
   ).join("\n");
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -24,25 +42,27 @@ async function generateAllEmails(prospect: any, steps: any[], apiKey: string) {
       messages: [
         {
           role: "system",
-          content: `You write genuine cold outreach emails for Joseph Toney at Aetheris Technology (aetheris.technology). He built a simple AI system that helps local businesses capture leads, follow up automatically, and automate branding so they stop losing customers.
+          content: `You write genuine cold outreach follow-up emails for Joseph Toney at Aetheris Technology (aetheris.technology).
+
+Joseph's first email already went out. It was a soft ask: "I built a simple AI system for local businesses. Doing free walkthroughs for feedback. Know anyone who might want to try?" Signed Joseph Toney with links to aetheris.technology, theaiformarketing.com, and linkedin.com/in/aisystemsarchitect.
+
+Now write the follow-ups.
 
 Core voice and rules:
 1. NEVER use dashes as punctuation. No em dashes, en dashes, or hyphens used as separators. Use periods, commas, or new sentences instead.
-2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. Instead, ask if they know anyone who might want to try it, or offer a free walkthrough. Let them come to you.
-3. NEVER pressure. No urgency. No "limited time." No "don't miss out." No "act now."
-4. You are NOT selling. You are offering free walkthroughs while Joseph dials the process in. Frame it as seeking feedback, not closing a deal.
-5. Under 120 words. Short paragraphs. Conversational. Sounds like a text from a friend who happens to know tech.
-6. No corporate language. No "I hope this finds you well." No buzzwords. No "synergy" or "leverage." No "revolutionize" or "transform."
-7. Sign off simply as "Joseph" or "Joseph Toney"
-8. Only include ONE link maximum per email, and only aetheris.technology. Never include multiple links or social profiles.
-9. The angle: "I built something that solves a specific problem you probably have. I am doing free walkthroughs for feedback. No pressure if not."
-10. Write like a real person texting a neighbor, not like a marketer running a sequence.
-11. Reference their specific business or industry naturally. Show you looked at what they do.
-12. First email should be the softest. Ask if they know someone, not if they want it themselves. Later emails can be more direct but never pushy.`,
+2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. Offer free walkthroughs or playbooks. Let them come to you.
+3. NEVER pressure. No urgency. No "limited time." No "don't miss out."
+4. You are NOT selling. You are offering free help while Joseph dials the process in.
+5. Under 120 words. Short paragraphs. Conversational. Like a text from a friend who happens to know tech.
+6. No corporate language. No "I hope this finds you well." No buzzwords.
+7. Sign off as "Joseph" or "Joseph Toney"
+8. Only ONE link maximum per email, only aetheris.technology (unless the email purpose specifies otherwise, like the playbook email).
+9. Reference their specific business or industry naturally. Show you looked at what they do.
+10. Each follow-up should make them think "this person actually gets my problems."`,
         },
         {
           role: "user",
-          content: `Write all ${steps.length} emails for this prospect as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags only, no links in HTML).
+          content: `Write ${followUps.length} follow-up emails as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags only, no links in HTML unless the email purpose specifies a link).
 
 Prospect info:
 Business: ${prospect.business_name || "Unknown"}
@@ -55,20 +75,16 @@ Context: ${scraped.context || "No additional context"}
 Email purposes:
 ${stepsDescription}
 
-Rules for the sequence:
-- Email 1: Soft ask. "Do you know any business owner who might want to try this?" Never pitch them directly.
-- Email 2: Share a quick story about a real pain point in their industry and how automation solved it. Still casual.
-- Email 3: Offer something free and specific to their business. A quick audit, a playbook, something they can use immediately.
-- Later emails: Gradually more direct but always give before you ask. Every email should make them think "this person actually gets my problems."
+For Email 3 specifically: Offer them a free playbook called "The Sales Process Reengineering Playbook" and include this link in the HTML: ${PLAYBOOK_URL}. Frame it as "I made this thing, thought you might find it useful, no strings."
 
-Return ONLY a JSON array of ${steps.length} objects with "subject" and "body_html". No dashes anywhere. Sign off as just "Joseph".`,
+Return ONLY a JSON array of ${followUps.length} objects with "subject" and "body_html". No dashes anywhere. Sign off as just "Joseph".`,
         },
       ],
     }),
   });
 
   if (!res.ok) {
-    console.error("Batch email generation failed:", res.status);
+    console.error("Follow-up generation failed:", res.status);
     return null;
   }
 
@@ -77,7 +93,7 @@ Return ONLY a JSON array of ${steps.length} objects with "subject" and "body_htm
   raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
   try {
     const emails = JSON.parse(raw);
-    if (Array.isArray(emails) && emails.length === steps.length) return emails;
+    if (Array.isArray(emails) && emails.length === followUps.length) return emails;
   } catch { /* fall through */ }
   return null;
 }
@@ -98,7 +114,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get active sequence
     const { data: seqData, error: seqErr } = await supabase
       .from("drip_sequences")
       .select("id, steps")
@@ -113,7 +128,6 @@ serve(async (req) => {
       });
     }
 
-    // Pick prospects with status 'imported' that have no drip emails yet
     const { data: prospects, error: prospErr } = await supabase
       .from("drip_prospects")
       .select("*")
@@ -130,26 +144,31 @@ serve(async (req) => {
     let processed = 0;
     let failed = 0;
 
-    // Process in parallel chunks
     const chunkSize = Math.min(concurrency, 5);
     for (let c = 0; c < prospects.length; c += chunkSize) {
       const chunk = prospects.slice(c, c + chunkSize);
       const results = await Promise.allSettled(
         chunk.map(async (prospect) => {
-          const generatedEmails = await generateAllEmails(prospect, steps, LOVABLE_API_KEY);
-          if (!generatedEmails) throw new Error("generation failed");
+          // Generate only emails 2..N
+          const followUps = await generateFollowUpEmails(prospect, steps, LOVABLE_API_KEY);
+          if (followUps === null) throw new Error("generation failed");
 
           const emailRows = steps.map((step: any, i: number) => {
             const scheduledFor = new Date();
             scheduledFor.setDate(scheduledFor.getDate() + (step.delay_days || 0));
+
+            // Email 1 is ALWAYS the verbatim template
+            const subject = i === 0 ? EMAIL_1_SUBJECT : followUps[i - 1].subject;
+            const body_html = i === 0 ? EMAIL_1_BODY_HTML : followUps[i - 1].body_html;
+
             return {
               prospect_id: prospect.id,
               sequence_id: seqData.id,
               step_index: i,
               scheduled_for: scheduledFor.toISOString(),
               status: "pending",
-              subject: generatedEmails[i].subject,
-              body_html: generatedEmails[i].body_html,
+              subject,
+              body_html,
             };
           });
 
@@ -169,7 +188,6 @@ serve(async (req) => {
         message: `Processed ${processed} prospects, ${failed} failed`,
         processed,
         failed,
-        remaining_imported: "check database",
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
