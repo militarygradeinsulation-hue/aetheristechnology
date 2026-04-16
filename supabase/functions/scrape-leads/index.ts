@@ -43,8 +43,10 @@ async function searchBusinesses(query: string, apiKey: string) {
     const data = await res.json();
     console.log("Firecrawl search response keys:", Object.keys(data || {}));
     const items = Array.isArray(data?.data) ? data.data : Array.isArray(data?.results) ? data.results : Array.isArray(data?.web) ? data.web : [];
+    console.log(`Firecrawl returned ${items.length} items`);
+    if (items.length > 0) console.log("First item keys:", Object.keys(items[0]));
     for (const r of items) {
-      const md = r?.markdown || "";
+      const md = r?.markdown || r?.content || r?.description || "";
       if (md.length > 50) results.push({ url: r.url || "", markdown: md.substring(0, 6000) });
     }
   } catch (e) {
