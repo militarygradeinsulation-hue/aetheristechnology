@@ -66,6 +66,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
+    monthlyPriceId: 'sales_script_pack_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: 'Call scripts, objection handlers & follow-up templates.',
     successStat: '68% of sales teams report higher close rates within 1 month',
     longDescription: 'AI-generated sales scripts customized to your industry, product, and target customer. Includes a complete cold call script, warm call script, 5 objection handlers with reframes, and 3 follow-up templates for email, SMS, and voicemail.',
