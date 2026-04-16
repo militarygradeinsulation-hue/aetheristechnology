@@ -1,44 +1,37 @@
 
 
-# Import 18,000 Leads from XLSX into Drip Pipeline
-
-## What We Know
-- The spreadsheet has ~18,000 rows with columns: **Client Name**, **Email**, **Phone**
-- Target table: `drip_prospects` (email, business_name, industry, location, status)
-- Each prospect needs a drip sequence with 6 personalized emails queued in `drip_emails`
-
-## The Problem
-18,000 contacts is too many to generate personalized 6-email sequences for all at once. That would be 18,000 AI calls. We need a staged approach.
+The user wants me to use the verbatim "Quick question" script as Email 1 (already done), and from there layer in master-salesman psychology for Emails 2-6 and the AI auto-replies. Email 1 stays untouched.
 
 ## Plan
 
-### Step 1 — Parse and bulk-insert prospects
-- Copy the xlsx to `/tmp`, read with openpyxl
-- Extract Client Name → `business_name`, Email → `email`, Phone → store in `scraped_data` JSON
-- Dedup against existing `drip_prospects` by email
-- Batch insert into `drip_prospects` with `status = 'imported'` (new status to distinguish from scraped leads)
-- Skip rows with empty/invalid emails
+**1. `generate-drip-batch/index.ts` — upgrade follow-up email voice (Emails 2, 4, 5, 6)**
 
-### Step 2 — Create a batch email generation edge function
-- New function: `generate-drip-batch` that picks N prospects (default 50) with `status = 'imported'` and no drip emails yet
-- For each, generates 6 emails using the same prompt style from `scrape-leads`
-- Queues them into `drip_emails` with staggered `scheduled_for` dates
-- Updates prospect status to `'queued'`
-- Can be invoked repeatedly (manually or via cron) to process the backlog in chunks
+Email 1 stays the verbatim "Quick question" script. Email 3 stays the playbook drop. Rewrite the system prompt for Emails 2, 4, 5, 6 to write like a master salesman who:
+- Opens with a pattern-interrupt that names the elephant ("totally fair if you read the first one and thought 'this is a sales pitch'")
+- Uses tactical empathy labels ("sounds like you've already got follow-up handled" / "guessing leads aren't actually the bottleneck")
+- Asks ONE bold, specific, calibrated question per email ("what would have to break for you to actually look at something like this?", "what's the real cost of a lead going cold for you, dollar-wise?")
+- Uses loss-framing tied to their industry ("most [industry] owners I talk to are bleeding 2-3 leads a week and have no idea")
+- Mirrors and reframes objections as curiosity
+- Stays under 120 words, no dashes, signs off "Joseph"
 
-### Step 3 — Invoke the import
-- Run the parsing script to load all 18,000 contacts into `drip_prospects`
-- Kick off the first batch of 50 email generations
-- The existing `process-drip` cron handles sending at 100/day
+**2. `handle-drip-replies/index.ts` — upgrade AI reply voice for "interested" + "question" intents**
 
-### Why This Approach
-- **No AI cost explosion**: Generate emails in batches of 50, not all 18,000 at once
-- **Daily capacity**: At 100 emails/day, 18,000 contacts × 6 emails = 108,000 emails = ~3 years of sends. We should prioritize and batch intelligently.
-- **Controllable**: You can run `generate-drip-batch` whenever you want more emails queued
+Same master-salesman persona for the auto-replies. Add rules:
+- Lead with a label that disarms ("sounds like X is the actual frustration")
+- Ask ONE bold calibrated question, never three
+- Mirror their last 2-4 words to keep them talking
+- Goal of every reply = get them to say more, not to close
+- Reframe soft objections ("when you say not now, is that 'not now,' 'not this,' or 'not me'?")
+- Still no scheduled meetings, no calendars, under 100 words, signs off "Joseph", no dashes
+- Playbook link only when it genuinely fits the question
 
-## Technical Details
-- Migration: none needed (reusing existing tables, `status` is already a text field)
-- New edge function: `supabase/functions/generate-drip-batch/index.ts`
-- Script: Python one-off to parse xlsx and insert via Supabase REST API
-- Files modified: 1 new edge function, 1 temp script
+Classification logic and unsubscribe/not-interested auto-removal stay exactly the same.
+
+**3. Deploy both edge functions.**
+
+## Files Changed
+- `supabase/functions/generate-drip-batch/index.ts` — follow-up system prompt only
+- `supabase/functions/handle-drip-replies/index.ts` — reply-drafting system prompt only
+
+No schema changes. Email 1 verbatim script stays intact. Already-queued emails keep current copy unless you want me to regenerate them as a follow-up.
 
