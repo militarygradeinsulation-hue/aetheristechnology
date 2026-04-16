@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { ThreeAreas } from '@/components/ThreeAreas';
 import { FreeTools } from '@/components/FreeTools';
+import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { ContactForm } from '@/components/ContactForm';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -42,6 +43,7 @@ const Home = () => {
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
         <ThreeAreas />
         <FreeTools />
+        <WhatsWrongDiagnostic />
         <ContactForm />
         <Footer />
       </div>
