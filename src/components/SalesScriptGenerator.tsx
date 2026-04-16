@@ -180,7 +180,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
         </div>
       )}
 
-      {showCheckout && (
+      {showCheckout && !adminMode && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>
