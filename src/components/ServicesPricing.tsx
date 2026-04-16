@@ -296,20 +296,37 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Price */}
                   <div className="flex items-baseline gap-1.5 mb-3">
-                    <span className="text-lg font-bold text-primary font-display">{service.pricing}</span>
-                    <span className="text-[10px] text-muted-foreground">{service.pricingDetail}</span>
+                    {billingMode === 'monthly' && service.monthlyPriceId ? (
+                      <>
+                        <span className="text-lg font-bold text-primary font-display">{service.monthlyPricing}</span>
+                        <span className="text-[10px] text-muted-foreground line-through">{service.pricing}</span>
+                        <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">-{service.monthlySavePercent}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-lg font-bold text-primary font-display">{service.pricing}</span>
+                        <span className="text-[10px] text-muted-foreground">{service.pricingDetail}</span>
+                      </>
+                    )}
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {service.priceId && (
+                    {billingMode === 'monthly' && service.monthlyPriceId ? (
+                      <button
+                        onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
+                        className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                      >
+                        <RefreshCw className="w-3 h-3" /> Subscribe
+                      </button>
+                    ) : service.priceId ? (
                       <button
                         onClick={() => setCheckoutPriceId(service.priceId!)}
                         className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
                       >
                         <ShoppingCart className="w-3 h-3" /> Buy
                       </button>
-                    )}
+                    ) : null}
                     <button
                       onClick={() => setExpandedIdx(expandedIdx === index ? null : index)}
                       className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:border-primary/40"
