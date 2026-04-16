@@ -47,6 +47,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
+    monthlyPriceId: 'scan_strategy_blueprint_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: 'Full report + CRM plan + implementation specs + content calendar.',
     successStat: '3.2x avg revenue improvement within 90 days of implementation',
     longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
