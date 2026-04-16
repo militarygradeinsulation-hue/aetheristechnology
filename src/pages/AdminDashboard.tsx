@@ -59,6 +59,7 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
+  const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
   const [recommendations, setRecommendations] = useState('');
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [topPages, setTopPages] = useState<{ page: string; views: number }[]>([]);
