@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.generate-friction-audit]
 verify_jwt = false
+
+[functions.monthly-delivery]
+verify_jwt = false

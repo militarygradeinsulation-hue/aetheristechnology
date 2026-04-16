@@ -100,7 +100,7 @@ export default function MySubscriptionPage() {
   if (authLoading || loading) {
     return (
       <>
-        <Navbar />
+        <Navbar onContactClick={() => {}} />
         <main className="min-h-screen bg-background pt-24 flex items-center justify-center">
           <div className="animate-pulse text-muted-foreground">Loading your subscriptions...</div>
         </main>
@@ -111,8 +111,8 @@ export default function MySubscriptionPage() {
 
   return (
     <>
-      <SEOHead title="My Subscription | Aetheris" description="Manage your AI consultant subscription, view deliveries, and provide feedback." />
-      <Navbar />
+      <SEOHead title="My Subscription | Aetheris" description="Manage your AI consultant subscription, view deliveries, and provide feedback." path="/my-subscription" />
+      <Navbar onContactClick={() => {}} />
       <main className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-8">

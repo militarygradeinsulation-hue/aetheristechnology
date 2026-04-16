@@ -136,8 +136,8 @@ export default function SubscriberOnboardingPage() {
 
   return (
     <>
-      <SEOHead title="Subscriber Onboarding | Aetheris" description="Set up your AI consultant profile for personalized monthly deliveries." />
-      <Navbar />
+      <SEOHead title="Subscriber Onboarding | Aetheris" description="Set up your AI consultant profile for personalized monthly deliveries." path="/subscriber-onboarding" />
+      <Navbar onContactClick={() => {}} />
       <main className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-lg mx-auto px-4">
           <div className="text-center mb-8">
