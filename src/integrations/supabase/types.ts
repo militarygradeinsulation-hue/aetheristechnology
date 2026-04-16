@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_library: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          input_data: Json
+          output_data: Json
+          title: string
+          tool_type: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          title: string
+          tool_type: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          title?: string
+          tool_type?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string

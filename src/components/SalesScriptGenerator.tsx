@@ -8,6 +8,7 @@ import { Lock, Copy, Check, Phone, Mail, MessageSquare, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 const PHASES = [
   { label: 'Analyzing your industry...', target: 25 },
@@ -50,6 +51,14 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
+      if (adminMode) {
+        saveToAdminLibrary({
+          tool_type: 'sales_scripts',
+          title: `${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`,
+          input_data: form,
+          output_data: data,
+        }).catch(e => console.error('Library save failed:', e));
+      }
     } catch (err: any) {
       clearInterval(interval);
       toast({ title: 'Error', description: err.message, variant: 'destructive' });

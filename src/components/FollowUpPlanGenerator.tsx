@@ -7,6 +7,7 @@ import { Lock, Copy, Check, Mail, Phone, MessageSquare, Linkedin, X } from 'luci
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 const PHASES = [
   { label: 'Analyzing your sales cycle...', target: 25 },
@@ -61,6 +62,14 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
+      if (adminMode) {
+        saveToAdminLibrary({
+          tool_type: 'follow_up_plan',
+          title: `${form.businessType} — Follow-up — ${new Date().toLocaleDateString()}`,
+          input_data: form,
+          output_data: data,
+        }).catch(e => console.error('Library save failed:', e));
+      }
     } catch (err: any) {
       clearInterval(interval);
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
