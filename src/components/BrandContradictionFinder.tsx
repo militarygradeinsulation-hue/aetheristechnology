@@ -20,13 +20,13 @@ const PERCEPTION_OPTIONS = ['Premium', 'Trustworthy', 'Fast', 'Innovative', 'Fam
 
 const SEVERITY_COLORS: Record<string, string> = { critical: 'text-red-400 bg-red-500/20', high: 'text-amber bg-amber/20', moderate: 'text-primary bg-primary/20' };
 
-export const BrandContradictionFinder: React.FC = () => {
+export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [form, setForm] = useState({ url: '', socialLinks: '', idealCustomer: '', desiredPerception: [] as string[] });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -153,7 +153,7 @@ export const BrandContradictionFinder: React.FC = () => {
           )}
 
           {/* Paywall */}
-          {!unlocked && (
+          {!unlocked && !adminMode && (
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Contradiction Report</h3>
@@ -165,7 +165,7 @@ export const BrandContradictionFinder: React.FC = () => {
         </div>
       )}
 
-      {showCheckout && (
+      {showCheckout && !adminMode && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>

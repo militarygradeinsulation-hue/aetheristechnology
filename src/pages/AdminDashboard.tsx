@@ -3,7 +3,26 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3 } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft } from 'lucide-react';
+import { SocialContentGenerator } from '@/components/SocialContentGenerator';
+import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
+import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
+import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
+import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
+import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+
+type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction';
+
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
+  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
+  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
+  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
+  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail },
+  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
+  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
+  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
+];
 
 interface ContactSubmission {
   id: string;
@@ -32,7 +51,8 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools'>('overview');
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [recommendations, setRecommendations] = useState('');
   const [loadingInsights, setLoadingInsights] = useState(false);
@@ -164,18 +184,19 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'events', 'insights'] as const).map(tab => (
+          {(['overview', 'submissions', 'events', 'insights', 'tools'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
+                if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : '🧠 AI Insights'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : tab === 'insights' ? '🧠 AI Insights' : '🛠 My Tools'}
             </button>
           ))}
         </div>
@@ -348,6 +369,51 @@ const AdminDashboard: React.FC = () => {
               <div className="glass p-12 rounded-xl text-center text-muted-foreground">
                 Click "Refresh Insights" to generate AI-powered recommendations.
               </div>
+            )}
+          </div>
+        )}
+
+        {/* My Tools */}
+        {activeTab === 'tools' && (
+          <div className="space-y-6">
+            {!activeTool ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <Wrench className="w-6 h-6 text-amber" />
+                  <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
+                  <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {ADMIN_TOOLS.map(tool => (
+                    <button
+                      key={tool.key}
+                      onClick={() => setActiveTool(tool.key)}
+                      className="glass p-6 rounded-xl text-left hover:border-amber/40 border border-border transition-colors group"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+                          <tool.icon className="w-5 h-5 text-amber" />
+                        </div>
+                        <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{tool.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
+                </Button>
+                {activeTool === 'social' && <SocialContentGenerator adminMode />}
+                {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
+                {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+                {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
+                {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
+                {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
+                {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
+              </>
             )}
           </div>
         )}

@@ -15,13 +15,13 @@ const PHASES = [
   { label: 'Writing ad hooks...', target: 98 },
 ];
 
-export const SocialContentGenerator: React.FC = () => {
+export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -181,7 +181,7 @@ export const SocialContentGenerator: React.FC = () => {
           </div>
 
           {/* Paywall */}
-          {!unlocked && (
+          {!unlocked && !adminMode && (
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Content Pack</h3>
@@ -196,7 +196,7 @@ export const SocialContentGenerator: React.FC = () => {
       )}
 
       {/* Checkout Modal */}
-      {showCheckout && (
+      {showCheckout && !adminMode && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}>

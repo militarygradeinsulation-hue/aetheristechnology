@@ -29,13 +29,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   hiringAndPeople: 'Hiring & People', pricingAndOffer: 'Pricing & Offer', customerJourney: 'Customer Journey', growthAndExpansion: 'Growth & Expansion',
 };
 
-export const StrategicQuestionEngine: React.FC = () => {
+export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [form, setForm] = useState({ industry: '', companySize: '', yearsInBusiness: '', mainProduct: '', growthStage: '', biggestFrustration: '', pressureAreas: [] as string[], revenueRange: '', goal: '' });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -198,7 +198,7 @@ export const StrategicQuestionEngine: React.FC = () => {
           )}
 
           {/* Paywall */}
-          {!unlocked && (
+          {!unlocked && !adminMode && (
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Question Map</h3>
@@ -211,7 +211,7 @@ export const StrategicQuestionEngine: React.FC = () => {
       )}
 
       {/* Checkout Modal */}
-      {showCheckout && (
+      {showCheckout && !adminMode && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>

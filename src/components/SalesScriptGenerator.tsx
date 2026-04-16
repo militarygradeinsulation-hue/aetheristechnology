@@ -17,13 +17,13 @@ const PHASES = [
   { label: 'Finalizing scripts...', target: 98 },
 ];
 
-export const SalesScriptGenerator: React.FC = () => {
+export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [form, setForm] = useState({ industry: '', product: '', targetCustomer: '', objections: '' });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -168,7 +168,7 @@ export const SalesScriptGenerator: React.FC = () => {
             </div>
           </div>
 
-          {!unlocked && (
+          {!unlocked && !adminMode && (
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Sales Script Pack</h3>
@@ -180,7 +180,7 @@ export const SalesScriptGenerator: React.FC = () => {
         </div>
       )}
 
-      {showCheckout && (
+      {showCheckout && !adminMode && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>
