@@ -57,6 +57,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
+    monthlyPriceId: 'social_content_pack_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
     description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
     successStat: '74% see measurable engagement increase within 2 weeks',
     longDescription: 'We scan your website and generate 25 ready-to-post social media pieces tailored to your brand voice, audience, and industry. Each post includes a hook, body copy, CTA, and hashtag suggestions.',
