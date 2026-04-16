@@ -7,6 +7,7 @@ import { Lock, Copy, Check, Globe, AlertTriangle, Shield, X, ArrowRight } from '
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
@@ -47,6 +48,14 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       if (error || !data) throw new Error(error?.message || 'Failed to analyze');
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
+      if (adminMode) {
+        saveToAdminLibrary({
+          tool_type: 'brand_contradictions',
+          title: `${form.url} — Brand audit — ${new Date().toLocaleDateString()}`,
+          input_data: form,
+          output_data: data,
+        }).catch(e => console.error('Library save failed:', e));
+      }
     } catch (err: any) {
       clearInterval(interval);
       toast({ title: 'Error', description: err.message, variant: 'destructive' });

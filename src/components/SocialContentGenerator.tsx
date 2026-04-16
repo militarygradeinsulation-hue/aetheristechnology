@@ -6,6 +6,7 @@ import { Lock, Copy, Check, Globe, Linkedin, Facebook, Megaphone, X } from 'luci
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 25 },
@@ -50,6 +51,14 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
+      if (adminMode) {
+        saveToAdminLibrary({
+          tool_type: 'social_content',
+          title: `${data.businessName || url.trim()} — ${new Date().toLocaleDateString()}`,
+          input_data: { url: url.trim() },
+          output_data: data,
+        }).catch(e => console.error('Library save failed:', e));
+      }
     } catch (err: any) {
       clearInterval(interval);
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
