@@ -165,9 +165,9 @@ export const CampaignActivity: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="glass p-5 rounded-xl">
+          <div key={s.label} className={`glass p-5 rounded-xl ${s.label === 'Sent Today' ? 'border border-amber/40' : ''}`}>
             <div className="flex items-center gap-2 mb-2">
               <s.icon className="w-4 h-4 text-amber" />
               <span className="text-xs text-muted-foreground">{s.label}</span>
@@ -176,6 +176,53 @@ export const CampaignActivity: React.FC = () => {
             {s.sub && <div className="text-xs text-muted-foreground mt-1">{s.sub}</div>}
           </div>
         ))}
+      </div>
+
+      {/* Sent Today */}
+      <div className="glass p-6 rounded-xl border border-amber/30">
+        <h3 className="text-lg font-bold text-foreground font-display mb-4 flex items-center gap-2">
+          <Send className="w-5 h-5 text-amber" /> Sent Today
+          <span className="text-xs text-muted-foreground font-normal">{sentToday.length} emails delivered · {failedToday.length} failed</span>
+        </h3>
+        {sentToday.length === 0 && failedToday.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No emails sent yet today. The drip processor runs on a schedule.</p>
+        ) : (
+          <div className="space-y-1 max-h-96 overflow-y-auto">
+            {sentToday.map(e => {
+              const p = prospectMap.get(e.prospect_id);
+              const seq = sequenceMap.get(e.sequence_id);
+              const stepCount = Array.isArray(seq?.steps) ? seq.steps.length : 0;
+              return (
+                <div key={e.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/30 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                  <span className="text-foreground font-medium truncate flex-1 min-w-0">
+                    {p?.business_name || p?.email || 'Unknown'}
+                  </span>
+                  <span className="text-muted-foreground text-xs truncate hidden sm:block max-w-[35%]">{e.subject || '—'}</span>
+                  <span className="text-amber text-xs whitespace-nowrap">Step {e.step_index + 1}{stepCount > 0 ? `/${stepCount}` : ''}</span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(e.sent_at!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
+            {failedToday.map(e => {
+              const p = prospectMap.get(e.prospect_id);
+              return (
+                <div key={e.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 text-sm">
+                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="text-foreground font-medium truncate flex-1 min-w-0">
+                    {p?.business_name || p?.email || 'Unknown'}
+                  </span>
+                  <span className="text-red-400 text-xs">failed</span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(e.sent_at || e.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Hot Prospects */}
