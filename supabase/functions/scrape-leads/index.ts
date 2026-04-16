@@ -41,7 +41,7 @@ async function searchBusinesses(query: string, apiKey: string) {
       body: JSON.stringify({ query, limit: 10, scrapeOptions: { formats: ["markdown"] } }),
     });
     const data = await res.json();
-    console.log("Firecrawl search response keys:", Object.keys(data || {}));
+    console.log("Firecrawl search raw response:", JSON.stringify(data).substring(0, 2000));
     const items = Array.isArray(data?.data) ? data.data : Array.isArray(data?.results) ? data.results : Array.isArray(data?.web) ? data.web : [];
     console.log(`Firecrawl returned ${items.length} items`);
     if (items.length > 0) console.log("First item keys:", Object.keys(items[0]));
