@@ -43,7 +43,7 @@ const DELIVERY_MAP: Record<string, { type: string; prompt: string }> = {
     type: "website_evaluation",
     prompt: "Generate a monthly website evaluation comparing current state to last month, highlighting improvements and new issues.",
   },
-  full_analytics_monthly: {
+  full_analytics_package_monthly: {
     type: "full_analytics",
     prompt: "Generate a comprehensive monthly analytics package with traffic analysis, conversion data, and growth recommendations.",
   },
@@ -51,15 +51,15 @@ const DELIVERY_MAP: Record<string, { type: string; prompt: string }> = {
     type: "diagnostic",
     prompt: "Generate a deep monthly business diagnostic covering operations, marketing, sales, and technology with executive-level insights.",
   },
-  strategic_questions_monthly: {
+  strategic_question_engine_monthly: {
     type: "strategic_questions",
     prompt: "Generate a fresh set of strategic questions based on the subscriber's evolving business context and past responses.",
   },
-  brand_contradictions_monthly: {
+  brand_contradiction_finder_monthly: {
     type: "brand_contradictions",
     prompt: "Re-audit the subscriber's brand for contradictions, tracking progress on previously identified issues and finding new ones.",
   },
-  friction_audit_monthly: {
+  friction_vocabulary_audit_monthly: {
     type: "friction_audit",
     prompt: "Re-scan the subscriber's communication for friction vocabulary, tracking improvements and identifying new problem areas.",
   },

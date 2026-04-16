@@ -4,7 +4,7 @@ import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCir
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
-
+import { useAuth } from '@/contexts/AuthContext';
 interface ServiceTile {
   icon: React.ElementType;
   title: string;
@@ -184,6 +184,7 @@ function getDiscount(count: number): number {
 }
 
 export const ServicesPricing: React.FC = () => {
+  const { user } = useAuth();
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
@@ -219,7 +220,7 @@ export const ServicesPricing: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 overflow-auto p-4">
-            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} />
+            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} customerEmail={user?.email || undefined} metadata={user ? { userId: user.id } : undefined} />
           </div>
         </div>
       </div>
