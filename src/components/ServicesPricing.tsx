@@ -75,6 +75,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
+    monthlyPriceId: 'content_calendar_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
     description: '30 days of topics, hooks, captions & posting times.',
     successStat: '82% post consistently for 30+ days (vs. 23% without a plan)',
     longDescription: 'A full 30-day content calendar with daily post ideas, proven hooks, captions, content types (carousel, video, text), hashtags, and optimal posting times — all generated for your specific industry and goals.',
