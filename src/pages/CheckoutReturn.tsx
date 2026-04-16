@@ -14,8 +14,8 @@ export default function CheckoutReturn() {
 
   const isPlaybook = type === "playbook";
   const isScanReport = type === "scan_report";
+  const isSubscription = type === "subscription";
 
-  // Poll for playbook status if this is a playbook purchase
   const { data: playbook, isLoading: playbookLoading } = useQuery({
     queryKey: ['generated-playbook', sessionId],
     queryFn: async () => {
@@ -74,7 +74,7 @@ export default function CheckoutReturn() {
                       </a>
                       <br />
                       <Link to="/resources" className="text-primary hover:underline font-medium">
-                        ← Back to Playbooks
+                        &larr; Back to Playbooks
                       </Link>
                     </>
                   )}
@@ -87,13 +87,12 @@ export default function CheckoutReturn() {
                         <a href="tel:+13173762110" className="text-primary font-semibold">(317) 376-2110</a> and we'll get you sorted.
                       </p>
                       <Link to="/resources" className="text-primary hover:underline font-medium">
-                        ← Back to Playbooks
+                        &larr; Back to Playbooks
                       </Link>
                     </>
                   )}
                 </>
               ) : isScanReport ? (
-                // Scan report purchase — redirect back to scanner
                 <>
                   <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
                   <h1 className="text-3xl font-bold text-foreground mb-3">Report Unlocked!</h1>
@@ -102,12 +101,24 @@ export default function CheckoutReturn() {
                   </p>
                   <Link to="/scan">
                     <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
-                      View Full Report →
+                      View Full Report &rarr;
+                    </Button>
+                  </Link>
+                </>
+              ) : isSubscription ? (
+                <>
+                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold text-foreground mb-3">Subscription Active!</h1>
+                  <p className="text-muted-foreground mb-6">
+                    Let's set up your AI consultant so it can start learning about your business and deliver personalized content every month.
+                  </p>
+                  <Link to={`/subscriber-onboarding?subscription_id=${sessionId}`}>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+                      Set Up My AI Consultant &rarr;
                     </Button>
                   </Link>
                 </>
               ) : (
-                // Default payment flow
                 <>
                   <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
                   <h1 className="text-3xl font-bold text-foreground mb-3">Payment Complete!</h1>
@@ -117,7 +128,7 @@ export default function CheckoutReturn() {
                     <a href="tel:+13173762110" className="text-primary font-semibold">(317) 376-2110</a>.
                   </p>
                   <Link to="/" className="text-primary hover:underline font-medium">
-                    ← Back to Home
+                    &larr; Back to Home
                   </Link>
                 </>
               )}
@@ -127,7 +138,7 @@ export default function CheckoutReturn() {
               <h1 className="text-2xl font-bold text-foreground mb-3">No Session Found</h1>
               <p className="text-muted-foreground mb-6">It looks like this page was accessed without a valid checkout session.</p>
               <Link to="/" className="text-primary hover:underline font-medium">
-                ← Back to Home
+                &larr; Back to Home
               </Link>
             </>
           )}
