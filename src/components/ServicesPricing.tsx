@@ -19,6 +19,7 @@ interface ServiceTile {
   deliverables: string[];
   whyValuable: string;
   includes?: { name: string; value: string }[];
+  successStat: string;
 }
 
 const services: ServiceTile[] = [
