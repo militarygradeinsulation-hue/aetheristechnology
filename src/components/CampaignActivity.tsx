@@ -66,14 +66,24 @@ export const CampaignActivity: React.FC = () => {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [emailRes, prospectRes, seqRes, subRes, countRes] = await Promise.all([
-        supabase.from('drip_emails').select('*').order('scheduled_for', { ascending: false }).limit(500),
+      const [sentRes, pendingRes, failedRes, prospectRes, seqRes, subRes, countRes] = await Promise.all([
+        // Recently sent (last 30d) — ordered by sent_at so today's sends always appear
+        supabase.from('drip_emails').select('*').eq('status', 'sent').order('sent_at', { ascending: false }).limit(300),
+        // Upcoming pending — ordered by scheduled_for ascending so soonest sends appear first
+        supabase.from('drip_emails').select('*').in('status', ['pending', 'scheduled']).order('scheduled_for', { ascending: true }).limit(500),
+        // Failed/bounced
+        supabase.from('drip_emails').select('*').in('status', ['failed', 'bounced']).order('scheduled_for', { ascending: false }).limit(200),
         supabase.from('drip_prospects').select('*').order('updated_at', { ascending: false }).limit(500),
         supabase.from('drip_sequences').select('id,name,steps'),
         supabase.from('contact_submissions').select('email,name,company,message,created_at').order('created_at', { ascending: false }).limit(100),
         supabase.from('drip_prospects').select('*', { count: 'exact', head: true }),
       ]);
-      setEmails((emailRes.data || []) as DripEmail[]);
+      const combined = [
+        ...((sentRes.data || []) as DripEmail[]),
+        ...((pendingRes.data || []) as DripEmail[]),
+        ...((failedRes.data || []) as DripEmail[]),
+      ];
+      setEmails(combined);
       setProspects((prospectRes.data || []) as DripProspect[]);
       setSequences((seqRes.data || []) as DripSequence[]);
       setSubmissions((subRes.data || []) as ContactSub[]);
