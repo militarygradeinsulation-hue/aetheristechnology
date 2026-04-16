@@ -62,3 +62,12 @@ verify_jwt = false
 
 [functions.generate-follow-up-plan]
 verify_jwt = false
+
+[functions.generate-strategic-questions]
+verify_jwt = false
+
+[functions.generate-brand-contradictions]
+verify_jwt = false
+
+[functions.generate-friction-audit]
+verify_jwt = false

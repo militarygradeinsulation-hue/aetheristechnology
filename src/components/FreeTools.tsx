@@ -95,6 +95,24 @@ const tools: Tool[] = [
     description: '14-day multi-channel sales cadence with templates.',
     path: '/follow-up-plan',
   },
+  {
+    thumbnail: '/placeholder.svg',
+    title: 'Strategic Question Engine',
+    description: 'Expose blind spots across leadership, sales & operations.',
+    path: '/strategic-questions',
+  },
+  {
+    thumbnail: '/placeholder.svg',
+    title: 'Brand Contradiction Finder',
+    description: 'See where your brand says one thing but signals another.',
+    path: '/brand-contradictions',
+  },
+  {
+    thumbnail: '/placeholder.svg',
+    title: 'Friction Vocabulary Audit',
+    description: 'Find the words quietly weakening trust and action.',
+    path: '/friction-audit',
+  },
 ];
 
 export const FreeTools: React.FC = () => {

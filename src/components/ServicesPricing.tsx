@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
@@ -110,6 +110,27 @@ const services: ServiceTile[] = [
     deliverables: ['Weekly strategy sessions', 'Technology stack management', 'Marketing campaign oversight', 'Vendor & tool evaluation', 'Team training & enablement', 'Monthly performance reporting'],
     whyValuable: 'A full-time CTO costs $150K–$250K/year. A CMO costs $120K–$200K. You get both for $60K/year — and we\'re accountable for results, not hours.',
     includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Full Analytics Package', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
+  },
+  {
+    icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    description: 'Custom question map exposing blind spots across 8 departments.',
+    longDescription: 'A business clarity engine that generates sharp, specific questions organized by leadership, sales, marketing, operations, hiring, pricing, customer journey, and growth. Not generic — tailored to your exact company profile.',
+    deliverables: ['Top 10 critical questions ranked by urgency', 'Questions across 8 business categories', '"Questions you\'re probably not asking" section', 'Leadership team discussion prompts', 'Workshop prompts for team meetings', 'Urgency scoring for each question'],
+    whyValuable: 'Business owners are drowning in advice. Very few people help them think clearly. This tool comes in like a surgeon and says "here are the questions your business has earned."',
+  },
+  {
+    icon: Search, title: 'Brand Contradiction Finder', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    description: 'See where your brand says one thing but signals another.',
+    longDescription: 'We scrape your website and branding to compare message versus signal across 5 layers: visual identity, tone, pricing, process, and trust. Buyers feel contradictions immediately — this tool makes them visible.',
+    deliverables: ['Brand Alignment Score (0-100)', 'Contradictions across 5 perception layers', 'Emotional impact of each contradiction', 'Buyer perception analysis', 'Before/after positioning fixes', 'Priority fix roadmap', 'Hidden strengths to amplify'],
+    whyValuable: 'Most businesses think they need more traffic. Sometimes they just need to stop sending mixed signals. One contradiction fix can increase conversion 10-30%.',
+  },
+  {
+    icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$69', priceRaw: 6900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    description: 'Find the exact words weakening your trust and authority.',
+    longDescription: 'We scan your entire website copy for vague language, corporate filler, weak emotional language, risky wording, and flat CTAs. Every flagged phrase gets a specific replacement that fits your desired brand tone.',
+    deliverables: ['Copy Friction Score (0-100)', '15-25 flagged phrases with exact replacements', 'Tone alignment analysis', 'Stronger CTA alternatives', 'Priority fix list', 'Copy strengths to keep'],
+    whyValuable: 'This is one of those things people never notice until shown to them. Then they can\'t unsee it. "These 11 phrases are quietly weakening your authority" — that lands.',
   },
   {
     icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',

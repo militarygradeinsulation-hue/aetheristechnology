@@ -34,6 +34,9 @@ import ContentGeneratorPage from "./pages/ContentGeneratorPage";
 import SalesScriptsPage from "./pages/SalesScriptsPage";
 import ContentCalendarPage from "./pages/ContentCalendarPage";
 import FollowUpPlanPage from "./pages/FollowUpPlanPage";
+import StrategicQuestionsPage from "./pages/StrategicQuestionsPage";
+import BrandContradictionsPage from "./pages/BrandContradictionsPage";
+import FrictionAuditPage from "./pages/FrictionAuditPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -75,6 +78,9 @@ const App = () => (
             <Route path="/sales-scripts" element={<SalesScriptsPage />} />
             <Route path="/content-calendar" element={<ContentCalendarPage />} />
             <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
+            <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
+            <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
+            <Route path="/friction-audit" element={<FrictionAuditPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
