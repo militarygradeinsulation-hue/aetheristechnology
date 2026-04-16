@@ -36,8 +36,9 @@ export const SalesScriptGenerator: React.FC = () => {
     let phase = 0;
     const interval = setInterval(() => {
       if (phase < PHASES.length) {
-        setPhaseLabel(PHASES[phase].label);
-        setProgress((prev) => Math.min(prev + Math.random() * 8 + 4, PHASES[phase].target));
+        const currentPhase = PHASES[phase];
+        setPhaseLabel(currentPhase.label);
+        setProgress((prev) => Math.min(prev + Math.random() * 8 + 4, currentPhase.target));
         phase++;
       }
     }, 3000);
