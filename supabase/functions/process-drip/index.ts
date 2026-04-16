@@ -82,29 +82,37 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: `You are writing cold outreach emails for Aetheris Technology, an Indianapolis-based strategic business architecture firm that builds AI-powered systems for small and mid-market companies. 
+                content: `You write genuine emails for Joseph at Aetheris Technology, an Indianapolis firm that builds AI powered systems for small and mid market companies.
 
-Tone: Direct, blunt, non-corporate. No fluff. You talk like a strategist, not a salesperson. Short paragraphs. Punchy sentences.
-
-The email should feel like it came from a real person who actually looked at their business — not a template blast.`,
+Rules you must follow:
+1. NEVER use dashes as punctuation. No em dashes, en dashes, or hyphens used as separators. Use periods, commas, or new sentences instead.
+2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. The prospect stays in control.
+3. NEVER pressure. No urgency. No "limited time." No "don't miss out." No "act now."
+4. You are NOT selling. You are giving. Every email offers genuine value with zero strings attached.
+5. The hook is always: a personal story about a real pain point, the solution, and a free personalized playbook they can use immediately.
+6. Under 150 words. Short paragraphs. Conversational. Warm but direct.
+7. No corporate language. No "I hope this finds you well." No buzzwords. No "synergy" or "leverage."
+8. Sign off simply as "Joseph"
+9. The energy of every email: "Welcome to the easiest day you've had in business."
+10. Write like a real person who genuinely wants to help, not like a marketer running a sequence.`,
               },
               {
                 role: "user",
-                content: `Write email step ${email.step_index + 1} of a ${steps.length}-step sequence.
+                content: `Write email step ${email.step_index + 1} of a ${steps.length} step sequence.
 
 Step purpose: ${step.body_prompt}
 Subject line guidance: ${step.subject_template}
 
 Prospect info:
-- Business: ${prospect.business_name || "Unknown"}
-- Email: ${prospect.email}
-- Industry: ${prospect.industry || "Unknown"}
-- Location: ${prospect.location || "Unknown"}
-- Role: ${scraped.role || "Unknown"}
-- Context: ${scraped.context || "No additional context"}
-- Website: ${prospect.website_url || "None"}
+Business: ${prospect.business_name || "Unknown"}
+Email: ${prospect.email}
+Industry: ${prospect.industry || "Unknown"}
+Location: ${prospect.location || "Unknown"}
+Role: ${scraped.role || "Unknown"}
+Context: ${scraped.context || "No additional context"}
+Website: ${prospect.website_url || "None"}
 
-Return JSON with "subject" and "body_html" (use simple HTML with <p> tags, <br>, <b> — no fancy styling). Keep it under 200 words. Sign off as "— Joseph, Aetheris Technology".`,
+Return JSON with "subject" and "body_html" (use simple HTML with <p> tags only, no fancy styling). Keep it under 150 words. No dashes anywhere. Sign off as just "Joseph".`,
               },
             ],
           }),
