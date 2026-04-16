@@ -35,8 +35,9 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
     let phase = 0;
     const interval = setInterval(() => {
       if (phase < PHASES.length) {
-        setPhaseLabel(PHASES[phase].label);
-        setProgress((prev) => Math.min(prev + Math.random() * 8 + 4, PHASES[phase].target));
+        const current = PHASES[phase];
+        setPhaseLabel(current.label);
+        setProgress((prev) => Math.min(prev + Math.random() * 8 + 4, current.target));
         phase++;
       }
     }, 3500);
