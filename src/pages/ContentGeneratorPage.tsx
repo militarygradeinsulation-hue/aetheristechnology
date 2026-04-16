@@ -12,8 +12,8 @@ const ContentGeneratorPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Social Content Generator — Free LinkedIn, Facebook & Ad Content"
-        description="Enter your website URL and get 10 LinkedIn posts, 10 Facebook posts, and 5 ad hooks tailored to your brand. Free preview, full pack for $29."
+        title="AI Social Content Generator | Aetheris AI"
+        description="Enter your URL, get 10 LinkedIn posts, 10 Facebook posts, and 5 ad hooks tailored to your brand. Free preview, full pack $29."
         path="/content-generator"
       />
       <Background />

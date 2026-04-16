@@ -12,8 +12,8 @@ const ContentCalendarPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Content Calendar Generator — 30 Days of Posts in Minutes"
-        description="Get a 30-day content calendar with daily topics, hooks, captions, and posting times. First 7 days free, full calendar for $29."
+        title="AI Content Calendar — 30 Days of Posts | Aetheris"
+        description="Generate a 30-day content calendar with daily topics, hooks, captions, and post times. First 7 days free, full calendar $29."
         path="/content-calendar"
       />
       <Background />

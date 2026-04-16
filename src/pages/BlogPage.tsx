@@ -12,8 +12,8 @@ const BlogPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI & Business Strategy Blog"
-        description="Expert insights on AI automation, operational efficiency, CRM optimization, digital marketing failures, and business consulting strategies. Updated daily with actionable intelligence."
+        title="AI & Business Strategy Blog | Aetheris AI"
+        description="Insights on AI automation, operational efficiency, CRM, and digital marketing failures. Updated daily with actionable intelligence."
         path="/blog"
         type="blog"
         jsonLd={{

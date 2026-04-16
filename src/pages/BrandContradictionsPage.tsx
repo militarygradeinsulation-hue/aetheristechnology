@@ -10,7 +10,7 @@ const BrandContradictionsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Brand Contradiction Finder — See Where Trust Breaks" description="Your buyers can feel contradiction before they can explain it. This tool shows you where trust is being weakened in silence." path="/brand-contradictions" />
+      <SEOHead title="Brand Contradiction Finder | Aetheris AI" description="Buyers feel contradiction before they can explain it. Find where trust in your brand is quietly weakening — free preview." path="/brand-contradictions" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
