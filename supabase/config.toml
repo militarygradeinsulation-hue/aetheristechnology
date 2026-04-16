@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.check-drip-replies]
 verify_jwt = false
+
+[functions.generate-drip-batch]
+verify_jwt = false
