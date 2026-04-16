@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import aetherisLogo from '@/assets/aetheris-logo.png';
@@ -14,6 +14,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { trackEvent } = useTrackEvent();
+  const navigate = useNavigate();
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoTap = (e: React.MouseEvent) => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      e.preventDefault();
+      tapCountRef.current = 0;
+      navigate('/admin/login');
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 600);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,11 +64,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3" onClick={handleLogoTap}>
             <img 
               src={aetherisLogo} 
               alt="Aetheris AI Logo" 
-              className="w-12 h-12 object-contain"
+              className="w-12 h-12 object-contain select-none"
+              draggable={false}
             />
             <span className={`text-xl font-bold text-foreground font-display transition-opacity duration-300 ${expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:w-auto md:opacity-60'}`}>Aetheris AI</span>
           </Link>
