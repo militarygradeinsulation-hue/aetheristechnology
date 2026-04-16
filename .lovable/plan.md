@@ -1,50 +1,59 @@
 
 
-# Update Drip Campaign: Zero-Pressure, Self-Service Outreach
+# Minimize Credits & Cloud Cost: Batch Pre-Generate All Emails
 
-## Philosophy Shift
+## The Problem
 
-No calls. No "let's chat." No sales pressure. The entire point is: you remove the confusion, the marketer, the overhead. The prospect stays in control. They get a free playbook that solves a real problem — and if they want more, the path is obvious and frictionless.
+Current architecture makes **1 AI call per email at send time**. For 100 prospects × 6 steps = **600 AI calls**. Plus hourly cron jobs hitting edge functions 24/7.
 
-The tagline energy: **"Welcome to the easiest day you've had in business."**
+## The Solution: Pre-Generate at Intake
+
+When a prospect is added via `scrape-leads`, generate **all 6 emails in a single AI call** and store them directly in `drip_emails`. The `process-drip` function becomes a dumb sender — no AI, just picks up pre-written emails and sends via Outlook.
+
+**Cost reduction:**
+- AI calls drop from **6 per prospect** to **1 per prospect** (6x reduction)
+- Use `gemini-2.5-flash-lite` instead of `gemini-2.5-flash` (cheapest model, fine for short emails)
+- `process-drip` becomes pure send logic — faster execution, lower cloud compute
+- Reduce cron from hourly to **every 4 hours** (6x fewer invocations)
+- `check-drip-replies` from every 6 hours to **every 12 hours**
 
 ## Changes
 
-### 1. Rewrite AI system prompt in `process-drip/index.ts`
+### 1. `scrape-leads/index.ts` — Generate all emails at intake
 
-Replace the current system prompt (lines 85-89) and user prompt (lines 93-107) with:
+After inserting a prospect and finding the active sequence, make **one AI call** that returns all 6 emails as a JSON array. Insert all 6 into `drip_emails` with pre-filled `subject` and `body_html`, status `pending`, and correct `scheduled_for` dates.
 
-**New system prompt:**
-- You write genuine emails for Joseph at Aetheris Technology. You are NOT selling. You are giving.
-- NEVER use dashes as punctuation. Use periods or commas instead.
-- NEVER suggest a call, meeting, chat, demo, or any scheduled interaction.
-- NEVER pressure. No urgency. No "limited time." No "don't miss out."
-- The prospect is always in control. You remove confusion, not add to it.
-- The hook is always: a personal story about a real pain point, the solution, and a free personalized playbook they can use immediately with no strings attached.
-- Under 150 words. Short paragraphs. Conversational. Warm but direct.
-- No corporate language. No "I hope this finds you well." No buzzwords.
-- Sign off simply as "Joseph"
-- The vibe: "Welcome to the easiest day you've had in business."
+Single prompt: "Write all 6 emails for this prospect" → returns `[{subject, body_html}, ...]`
 
-**New user prompt:** Same prospect data injection, but instructions updated to match the no-pressure, playbook-gift approach.
+Model: `gemini-2.5-flash-lite` (cheapest available)
 
-### 2. New migration: Seed updated 6-step sequence
+### 2. `process-drip/index.ts` — Strip out AI entirely
 
-Delete the old default sequence and insert a new one with these steps:
+Remove the AI generation logic. The function just:
+1. Queries `drip_emails` where `scheduled_for <= now()` and `status = pending` and `body_html IS NOT NULL`
+2. Sends via Outlook Gateway
+3. Marks as sent
 
-| Step | Delay | Purpose |
-|------|-------|---------|
-| 1 | Day 0 | Personal story about a business like theirs drowning in complexity. Offer a free playbook built for their specific situation. No strings. |
-| 2 | Day 3 | Quick insight about something specific in their industry that most businesses get wrong. Mention the playbook is still there if they want it. |
-| 3 | Day 7 | One concrete thing you noticed on their website or business that could be simpler. Show you actually looked. Playbook reminder. |
-| 4 | Day 12 | Short story about how a business like theirs went from chaos to clarity. Not a pitch. Just a story. |
-| 5 | Day 18 | Share a useful resource or framework they can apply today. Mention the playbook one more time. |
-| 6 | Day 25 | Genuine goodbye. "If the timing isn't right, no worries at all." Leave the playbook link. That's it. |
+No AI calls. No model. Just a sender.
 
-No step mentions calls, meetings, demos, or scheduling anything. Every step gives value and keeps the prospect in control.
+### 3. Reduce cron frequency via migration
 
-### 3. Files modified
+- `process-drip`: change from `0 * * * *` (hourly) to `0 */4 * * *` (every 4 hours)
+- `check-drip-replies`: change from `0 */6 * * *` to `0 */12 * * *` (every 12 hours)
 
-- **`supabase/functions/process-drip/index.ts`** — New system prompt, new user prompt template
-- **New migration** — Seed the updated 6-step sequence into `drip_sequences`
+### 4. Files modified
+
+- **`supabase/functions/scrape-leads/index.ts`** — Add batch email generation after prospect insert
+- **`supabase/functions/process-drip/index.ts`** — Remove AI, become pure sender
+- **New migration** — Update cron schedules
+
+## Cost Summary
+
+| Item | Before | After |
+|------|--------|-------|
+| AI calls per prospect | 6 (one per send) | 1 (at intake) |
+| AI model | gemini-2.5-flash | gemini-2.5-flash-lite |
+| process-drip cron | 24/day | 6/day |
+| check-replies cron | 4/day | 2/day |
+| Edge function compute per send | AI generation + send | Send only |
 
