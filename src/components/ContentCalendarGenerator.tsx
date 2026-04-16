@@ -15,13 +15,13 @@ const PHASES = [
   { label: 'Optimizing posting times...', target: 95 },
 ];
 
-export const ContentCalendarGenerator: React.FC = () => {
+export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [form, setForm] = useState({ industry: '', goals: '', platforms: '' });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -130,7 +130,7 @@ export const ContentCalendarGenerator: React.FC = () => {
             })}
           </div>
 
-          {!unlocked && (
+          {!unlocked && !adminMode && (
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full 30-Day Calendar</h3>
