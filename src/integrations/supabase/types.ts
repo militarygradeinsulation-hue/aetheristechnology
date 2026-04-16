@@ -233,6 +233,135 @@ export type Database = {
         }
         Relationships: []
       }
+      drip_emails: {
+        Row: {
+          body_html: string | null
+          created_at: string
+          id: string
+          outlook_message_id: string | null
+          prospect_id: string
+          scheduled_for: string
+          sent_at: string | null
+          sequence_id: string
+          status: string
+          step_index: number
+          subject: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          created_at?: string
+          id?: string
+          outlook_message_id?: string | null
+          prospect_id: string
+          scheduled_for: string
+          sent_at?: string | null
+          sequence_id: string
+          status?: string
+          step_index?: number
+          subject?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          created_at?: string
+          id?: string
+          outlook_message_id?: string | null
+          prospect_id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          sequence_id?: string
+          status?: string
+          step_index?: number
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_emails_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "drip_prospects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_emails_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "drip_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_prospects: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          location: string | null
+          scraped_data: Json
+          source_url: string | null
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          scraped_data?: Json
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          scraped_data?: Json
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      drip_sequences: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
