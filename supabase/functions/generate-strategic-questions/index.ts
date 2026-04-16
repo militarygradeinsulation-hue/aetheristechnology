@@ -103,6 +103,7 @@ RULES:
     const aiData = await aiRes.json();
     let raw = aiData.choices?.[0]?.message?.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '');
     const result = JSON.parse(raw);
 
     return new Response(JSON.stringify(result), {
