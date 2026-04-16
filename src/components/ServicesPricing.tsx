@@ -84,6 +84,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
+    monthlyPriceId: 'follow_up_plan_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: '14-day multi-channel sales cadence with templates.',
     successStat: '76% of users recover at least 1 lost deal within 14 days',
     longDescription: 'A complete 14-day follow-up system covering email, SMS, phone calls, and LinkedIn touches. Every touchpoint is scripted, timed, and designed to re-engage leads without being annoying.',
