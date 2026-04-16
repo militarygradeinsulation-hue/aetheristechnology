@@ -29,6 +29,7 @@ interface ServiceTile {
 const services: ServiceTile[] = [
   {
     icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
+    monthlyPriceId: 'scan_full_report_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
     successStat: '91% of businesses found at least 3 fixable revenue leaks',
     longDescription: 'Our AI scans your entire website and produces a comprehensive diagnostic covering every technical, content, and conversion gap. You get revenue leak estimates, competitive positioning data, and a downloadable PDF you can share with your team.',
