@@ -149,6 +149,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Search, title: 'Brand Contradiction Finder', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
     description: 'See where your brand says one thing but signals another.',
     successStat: '79% see conversion lift after fixing top contradiction',
     longDescription: 'We scrape your website and branding to compare message versus signal across 5 layers: visual identity, tone, pricing, process, and trust. Buyers feel contradictions immediately — this tool makes them visible.',
