@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
