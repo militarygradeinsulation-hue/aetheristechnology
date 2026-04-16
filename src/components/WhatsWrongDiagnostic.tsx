@@ -10,67 +10,73 @@ import { supabase } from '@/integrations/supabase/client';
 const ISSUE_CATEGORIES = [
   {
     id: 'marketing',
-    label: '💸 Marketing isn't working',
+    label: 'Marketing is not working',
+    emoji: '\u{1F4B8}',
     issues: [
       'Spending money on ads with no ROI',
       'No idea where my leads actually come from',
       'Social media feels pointless',
       'My competitors are outranking me everywhere',
-      'I don't have a content strategy',
+      'I do not have a content strategy',
     ],
   },
   {
     id: 'website',
-    label: '🖥️ My website is a problem',
+    label: 'My website is a problem',
+    emoji: '\u{1F5A5}',
     issues: [
       'It looks outdated or unprofessional',
       'People visit but never convert',
-      'It's slow or broken on mobile',
+      'It is slow or broken on mobile',
       'No clear call-to-action',
-      'I'm embarrassed to send people to it',
+      'I am embarrassed to send people to it',
     ],
   },
   {
     id: 'sales',
-    label: '📉 Sales are stalling',
+    label: 'Sales are stalling',
+    emoji: '\u{1F4C9}',
     issues: [
-      'Leads go cold because I don't follow up fast enough',
+      'Leads go cold because I do not follow up fast enough',
       'No repeatable sales process',
-      'I close deals but can't scale it',
-      'Don't know what to say on sales calls',
+      'I close deals but cannot scale it',
+      'Do not know what to say on sales calls',
       'Losing deals to cheaper competitors',
     ],
   },
   {
     id: 'operations',
-    label: '⚙️ Internal systems are broken',
+    label: 'Internal systems are broken',
+    emoji: '\u{2699}',
     issues: [
-      'My CRM is a mess (or I don't have one)',
+      'My CRM is a mess or I do not have one',
       'Team is doing busywork instead of revenue work',
-      'No automation — everything is manual',
+      'No automation - everything is manual',
       'Data lives in spreadsheets and sticky notes',
-      'I can't track what's actually working',
+      'I cannot track what is actually working',
     ],
   },
   {
     id: 'brand',
-    label: '🎯 Brand & positioning feels off',
+    label: 'Brand and positioning feels off',
+    emoji: '\u{1F3AF}',
     issues: [
-      'Customers don't understand what I do',
+      'Customers do not understand what I do',
       'I sound like everyone else in my industry',
-      'Pricing feels wrong but I don't know why',
+      'Pricing feels wrong but I do not know why',
       'No clear differentiator',
-      'My messaging doesn't match my quality',
+      'My messaging does not match my quality',
     ],
   },
   {
     id: 'growth',
-    label: '🚀 Growth has flatlined',
+    label: 'Growth has flatlined',
+    emoji: '\u{1F680}',
     issues: [
-      'Revenue is stuck — I don't know how to break through',
-      'I'm the bottleneck in my own business',
+      'Revenue is stuck and I do not know how to break through',
+      'I am the bottleneck in my own business',
       'Tried everything and nothing moves the needle',
-      'Don't know which problem to solve first',
+      'Do not know which problem to solve first',
       'Need a real strategy, not more tactics',
     ],
   },
@@ -182,15 +188,14 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             <span className="text-sm text-muted-foreground">Smart Diagnostic</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
-            Tell Me What's <span className="text-gradient-amber">Wrong</span>
+            Tell Me What&apos;s <span className="text-gradient-amber">Wrong</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Pick the problems you're dealing with. I'll analyze them and recommend exactly what you need — no guessing.
+            Pick the problems you&apos;re dealing with. I&apos;ll analyze them and recommend exactly what you need.
           </p>
         </div>
 
         <AnimatePresence mode="wait">
-          {/* STEP 1: Pick issues */}
           {step === 'pick' && (
             <motion.div key="pick" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="space-y-3">
@@ -200,7 +205,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                       onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
                       className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/20 transition-colors"
                     >
-                      <span className="font-semibold text-foreground">{cat.label}</span>
+                      <span className="font-semibold text-foreground">{cat.emoji} {cat.label}</span>
                       <div className="flex items-center gap-2">
                         {selectedIssues.filter(i => cat.issues.includes(i)).length > 0 && (
                           <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">
@@ -232,7 +237,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                                   type="checkbox"
                                   checked={selectedIssues.includes(issue)}
                                   onChange={() => toggleIssue(issue)}
-                                  className="mt-0.5 accent-amber"
+                                  className="mt-0.5 accent-[hsl(var(--amber))]"
                                 />
                                 <span className="text-sm text-foreground/90">{issue}</span>
                               </label>
@@ -253,9 +258,9 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   <Button
                     onClick={() => setStep('notes')}
                     size="lg"
-                    className="bg-amber hover:bg-amber/90 text-black font-semibold"
+                    className="bg-amber hover:bg-amber/90 text-foreground font-semibold"
                   >
-                    Next — Add Context
+                    Next &mdash; Add Context
                     <ChevronRight className="ml-2 w-5 h-5" />
                   </Button>
                 </motion.div>
@@ -263,13 +268,12 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             </motion.div>
           )}
 
-          {/* STEP 2: Notes */}
           {step === 'notes' && (
             <motion.div key="notes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="glass p-6 md:p-8 rounded-2xl space-y-5">
                 <div>
                   <h3 className="text-xl font-bold text-foreground mb-2">Anything else I should know?</h3>
-                  <p className="text-sm text-muted-foreground">Optional — but the more detail you give, the sharper the recommendation.</p>
+                  <p className="text-sm text-muted-foreground">Optional &mdash; but the more detail you give, the sharper the recommendation.</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -283,7 +287,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                 <Textarea
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  placeholder="E.g. 'We're a 12-person HVAC company doing $2M/year. Marketing budget is $3K/month but I have no idea if it's working...'"
+                  placeholder="E.g. We are a 12-person HVAC company doing $2M/year. Marketing budget is $3K/month but I have no idea if it is working..."
                   rows={4}
                   maxLength={1500}
                   className="bg-background/50"
@@ -299,14 +303,13 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                     className="flex-[2] bg-primary hover:bg-primary/90"
                   >
                     <Sparkles className="mr-2 w-5 h-5" />
-                    Analyze & Recommend
+                    Analyze &amp; Recommend
                   </Button>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 3: Loading */}
           {step === 'loading' && (
             <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
               <Loader2 className="w-12 h-12 text-amber mx-auto animate-spin mb-4" />
@@ -315,11 +318,9 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             </motion.div>
           )}
 
-          {/* STEP 4: Results */}
           {step === 'results' && recommendation && (
             <motion.div key="results" ref={resultsRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="space-y-6">
-                {/* Diagnosis */}
                 <div className="glass p-6 rounded-2xl border border-border/50">
                   <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-amber" />
@@ -328,19 +329,16 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   <p className="text-muted-foreground leading-relaxed">{recommendation.diagnosis}</p>
                 </div>
 
-                {/* Urgent fix */}
-                <div className="glass p-6 rounded-2xl border border-red-500/30 bg-red-500/5">
-                  <h3 className="text-lg font-bold text-red-400 mb-2">🚨 Fix This First</h3>
+                <div className="glass p-6 rounded-2xl border border-destructive/30 bg-destructive/5">
+                  <h3 className="text-lg font-bold text-destructive mb-2">Fix This First</h3>
                   <p className="text-foreground/90">{recommendation.urgentFix}</p>
                 </div>
 
-                {/* Revenue leak */}
                 <div className="glass p-4 rounded-xl border border-amber/30 bg-amber/5 text-center">
-                  <p className="text-sm text-muted-foreground">Estimated revenue you're leaving on the table:</p>
+                  <p className="text-sm text-muted-foreground">Estimated revenue you&apos;re leaving on the table:</p>
                   <p className="text-3xl font-bold text-amber mt-1">{recommendation.estimatedRevenueLeak}</p>
                 </div>
 
-                {/* Recommended package */}
                 <div className="glass p-6 rounded-2xl border-2 border-primary/50">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckCircle className="w-5 h-5 text-primary" />
@@ -356,7 +354,6 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Additional services */}
                 {recommendation.additionalServices.length > 0 && (
                   <div className="glass p-6 rounded-2xl border border-border/50">
                     <h3 className="text-lg font-bold text-foreground mb-4">Also Consider</h3>
@@ -374,12 +371,10 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   </div>
                 )}
 
-                {/* Next step */}
                 <div className="glass p-5 rounded-xl border border-border/50 text-center">
                   <p className="text-foreground font-medium">{recommendation.nextStep}</p>
                 </div>
 
-                {/* Actions: Email + Download */}
                 <div className="glass p-6 rounded-2xl space-y-4">
                   <h3 className="text-lg font-bold text-foreground text-center">Save Your Recommendation</h3>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -419,30 +414,40 @@ export const WhatsWrongDiagnostic: React.FC = () => {
 };
 
 function buildPlainText(rec: Recommendation, issues: string[]): string {
-  return `AETHERIS AI — PERSONALIZED RECOMMENDATION
-==========================================
+  const lines = [
+    'AETHERIS AI - PERSONALIZED RECOMMENDATION',
+    '==========================================',
+    '',
+    'YOUR ISSUES:',
+    ...issues.map(i => `  - ${i}`),
+    '',
+    'DIAGNOSIS:',
+    rec.diagnosis,
+    '',
+    'FIX THIS FIRST:',
+    rec.urgentFix,
+    '',
+    `ESTIMATED REVENUE LEAK: ${rec.estimatedRevenueLeak}`,
+    '',
+    'RECOMMENDED PACKAGE:',
+    `${rec.recommendedPackage.name} - ${rec.recommendedPackage.price}`,
+    rec.recommendedPackage.description,
+    `Why this fits: ${rec.recommendedPackage.whyThisFits}`,
+    '',
+  ];
 
-YOUR ISSUES:
-${issues.map(i => `• ${i}`).join('\n')}
+  if (rec.additionalServices.length > 0) {
+    lines.push('ALSO CONSIDER:');
+    rec.additionalServices.forEach(s => {
+      lines.push(`  - ${s.name} (${s.price}) - ${s.reason}`);
+    });
+    lines.push('');
+  }
 
-DIAGNOSIS:
-${rec.diagnosis}
+  lines.push(`NEXT STEP: ${rec.nextStep}`);
+  lines.push('');
+  lines.push('---');
+  lines.push('Aetheris AI | aetheris.technology | (317) 376-2110');
 
-🚨 FIX THIS FIRST:
-${rec.urgentFix}
-
-ESTIMATED REVENUE LEAK: ${rec.estimatedRevenueLeak}
-
-RECOMMENDED PACKAGE:
-${rec.recommendedPackage.name} — ${rec.recommendedPackage.price}
-${rec.recommendedPackage.description}
-Why this fits: ${rec.recommendedPackage.whyThisFits}
-
-${rec.additionalServices.length > 0 ? `ALSO CONSIDER:\n${rec.additionalServices.map(s => `• ${s.name} (${s.price}) — ${s.reason}`).join('\n')}` : ''}
-
-NEXT STEP: ${rec.nextStep}
-
-—
-Aetheris AI | aetheris.technology | (317) 376-2110
-`;
+  return lines.join('\n');
 }
