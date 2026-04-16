@@ -50,7 +50,7 @@ export const StrategicQuestionEngine: React.FC = () => {
     }
     setLoading(true); setProgress(0); setResult(null);
     let phase = 0;
-    const interval = setInterval(() => { if (phase < PHASES.length) { setPhaseLabel(PHASES[phase].label); setProgress(prev => Math.min(prev + Math.random() * 8 + 4, PHASES[phase].target)); phase++; } }, 4000);
+    const interval = setInterval(() => { if (phase < PHASES.length) { const p = PHASES[phase]; setPhaseLabel(p.label); setProgress(prev => Math.min(prev + Math.random() * 8 + 4, p.target)); phase++; } }, 4000);
     try {
       const { data, error } = await supabase.functions.invoke('generate-strategic-questions', { body: form });
       clearInterval(interval);
