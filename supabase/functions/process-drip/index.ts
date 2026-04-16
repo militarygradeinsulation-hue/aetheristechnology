@@ -26,14 +26,16 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get pending emails that are due
+    // Get pending emails that are due AND have pre-generated content
     const { data: pendingEmails, error: fetchErr } = await supabase
       .from("drip_emails")
-      .select("*, drip_prospects(*), drip_sequences(*)")
+      .select("*, drip_prospects(*)")
       .eq("status", "pending")
+      .not("body_html", "is", null)
+      .not("subject", "is", null)
       .lte("scheduled_for", new Date().toISOString())
       .order("scheduled_for", { ascending: true })
-      .limit(30); // Rate limit: max 30 per run
+      .limit(30);
 
     if (fetchErr) throw new Error(`Failed to fetch pending emails: ${fetchErr.message}`);
     if (!pendingEmails || pendingEmails.length === 0) {
@@ -48,100 +50,16 @@ serve(async (req) => {
 
     for (const email of pendingEmails) {
       const prospect = email.drip_prospects;
-      const sequence = email.drip_sequences;
 
       // Skip if prospect has replied, unsubscribed, or bounced
       if (!prospect || ["replied", "unsubscribed", "bounced"].includes(prospect.status)) {
-        await supabase
-          .from("drip_emails")
-          .update({ status: "skipped" })
-          .eq("id", email.id);
+        await supabase.from("drip_emails").update({ status: "skipped" }).eq("id", email.id);
         skipped++;
         continue;
       }
 
       try {
-        const steps = (sequence?.steps as any[]) || [];
-        const step = steps[email.step_index];
-        if (!step) {
-          await supabase.from("drip_emails").update({ status: "skipped" }).eq("id", email.id);
-          skipped++;
-          continue;
-        }
-
-        // Generate personalized email using AI
-        const scraped = prospect.scraped_data || {};
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              {
-                role: "system",
-                content: `You write genuine emails for Joseph at Aetheris Technology, an Indianapolis firm that builds AI powered systems for small and mid market companies.
-
-Rules you must follow:
-1. NEVER use dashes as punctuation. No em dashes, en dashes, or hyphens used as separators. Use periods, commas, or new sentences instead.
-2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. The prospect stays in control.
-3. NEVER pressure. No urgency. No "limited time." No "don't miss out." No "act now."
-4. You are NOT selling. You are giving. Every email offers genuine value with zero strings attached.
-5. The hook is always: a personal story about a real pain point, the solution, and a free personalized playbook they can use immediately.
-6. Under 150 words. Short paragraphs. Conversational. Warm but direct.
-7. No corporate language. No "I hope this finds you well." No buzzwords. No "synergy" or "leverage."
-8. Sign off simply as "Joseph"
-9. The energy of every email: "Welcome to the easiest day you've had in business."
-10. Write like a real person who genuinely wants to help, not like a marketer running a sequence.`,
-              },
-              {
-                role: "user",
-                content: `Write email step ${email.step_index + 1} of a ${steps.length} step sequence.
-
-Step purpose: ${step.body_prompt}
-Subject line guidance: ${step.subject_template}
-
-Prospect info:
-Business: ${prospect.business_name || "Unknown"}
-Email: ${prospect.email}
-Industry: ${prospect.industry || "Unknown"}
-Location: ${prospect.location || "Unknown"}
-Role: ${scraped.role || "Unknown"}
-Context: ${scraped.context || "No additional context"}
-Website: ${prospect.website_url || "None"}
-
-Return JSON with "subject" and "body_html" (use simple HTML with <p> tags only, no fancy styling). Keep it under 150 words. No dashes anywhere. Sign off as just "Joseph".`,
-              },
-            ],
-          }),
-        });
-
-        if (!aiRes.ok) {
-          console.error(`AI failed for email ${email.id}:`, aiRes.status);
-          await supabase.from("drip_emails").update({ status: "failed" }).eq("id", email.id);
-          failed++;
-          continue;
-        }
-
-        const aiData = await aiRes.json();
-        let raw = aiData.choices?.[0]?.message?.content || "";
-        raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-        let subject: string;
-        let bodyHtml: string;
-        try {
-          const parsed = JSON.parse(raw);
-          subject = parsed.subject;
-          bodyHtml = parsed.body_html;
-        } catch {
-          // Fallback: use raw as body
-          subject = step.subject_template || "Quick question";
-          bodyHtml = `<p>${raw}</p>`;
-        }
-
-        // Send via Outlook Gateway
+        // Send via Outlook Gateway (content is pre-generated)
         const sendRes = await fetch(`${OUTLOOK_GATEWAY}/me/sendMail`, {
           method: "POST",
           headers: {
@@ -151,8 +69,8 @@ Return JSON with "subject" and "body_html" (use simple HTML with <p> tags only, 
           },
           body: JSON.stringify({
             message: {
-              subject,
-              body: { contentType: "HTML", content: bodyHtml },
+              subject: email.subject,
+              body: { contentType: "HTML", content: email.body_html },
               toRecipients: [
                 { emailAddress: { address: prospect.email } },
               ],
@@ -171,29 +89,8 @@ Return JSON with "subject" and "body_html" (use simple HTML with <p> tags only, 
         // Mark as sent
         await supabase
           .from("drip_emails")
-          .update({
-            status: "sent",
-            sent_at: new Date().toISOString(),
-            subject,
-            body_html: bodyHtml,
-          })
+          .update({ status: "sent", sent_at: new Date().toISOString() })
           .eq("id", email.id);
-
-        // Schedule next step if available
-        const nextIndex = email.step_index + 1;
-        if (nextIndex < steps.length) {
-          const nextStep = steps[nextIndex];
-          const nextDate = new Date();
-          nextDate.setDate(nextDate.getDate() + (nextStep.delay_days || 3));
-
-          await supabase.from("drip_emails").insert({
-            prospect_id: prospect.id,
-            sequence_id: sequence.id,
-            step_index: nextIndex,
-            scheduled_for: nextDate.toISOString(),
-            status: "pending",
-          });
-        }
 
         sent++;
 
