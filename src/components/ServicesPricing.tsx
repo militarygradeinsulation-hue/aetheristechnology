@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,10 @@ interface ServiceTile {
   priceRaw: number;
   pricingDetail: string;
   priceId?: string;
+  monthlyPriceId?: string;
+  monthlyPricing?: string;
+  monthlyPriceRaw?: number;
+  monthlySavePercent?: number;
   badge?: string;
   bundleable?: boolean;
   description: string;
@@ -25,6 +29,7 @@ interface ServiceTile {
 const services: ServiceTile[] = [
   {
     icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
+    monthlyPriceId: 'scan_full_report_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
     successStat: '91% of businesses found at least 3 fixable revenue leaks',
     longDescription: 'Our AI scans your entire website and produces a comprehensive diagnostic covering every technical, content, and conversion gap. You get revenue leak estimates, competitive positioning data, and a downloadable PDF you can share with your team.',
@@ -33,6 +38,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
+    monthlyPriceId: 'digital_snapshot_monthly', monthlyPricing: '$79/mo', monthlyPriceRaw: 7900, monthlySavePercent: 37,
     description: 'Automated report showing where you\'re bleeding revenue online.',
     successStat: '87% recover the cost within 30 days of acting on findings',
     longDescription: 'A deeper automated analysis of your digital footprint — website performance, SEO health, content gaps, and conversion friction. This is the door opener that shows exactly what\'s broken before you spend a dime fixing it.',
@@ -41,6 +47,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
+    monthlyPriceId: 'scan_strategy_blueprint_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: 'Full report + CRM plan + implementation specs + content calendar.',
     successStat: '3.2x avg revenue improvement within 90 days of implementation',
     longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
@@ -50,6 +57,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
+    monthlyPriceId: 'social_content_pack_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
     description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
     successStat: '74% see measurable engagement increase within 2 weeks',
     longDescription: 'We scan your website and generate 25 ready-to-post social media pieces tailored to your brand voice, audience, and industry. Each post includes a hook, body copy, CTA, and hashtag suggestions.',
@@ -58,6 +66,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
+    monthlyPriceId: 'sales_script_pack_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: 'Call scripts, objection handlers & follow-up templates.',
     successStat: '68% of sales teams report higher close rates within 1 month',
     longDescription: 'AI-generated sales scripts customized to your industry, product, and target customer. Includes a complete cold call script, warm call script, 5 objection handlers with reframes, and 3 follow-up templates for email, SMS, and voicemail.',
@@ -66,6 +75,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
+    monthlyPriceId: 'content_calendar_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
     description: '30 days of topics, hooks, captions & posting times.',
     successStat: '82% post consistently for 30+ days (vs. 23% without a plan)',
     longDescription: 'A full 30-day content calendar with daily post ideas, proven hooks, captions, content types (carousel, video, text), hashtags, and optimal posting times — all generated for your specific industry and goals.',
@@ -74,6 +84,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
+    monthlyPriceId: 'follow_up_plan_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
     description: '14-day multi-channel sales cadence with templates.',
     successStat: '76% of users recover at least 1 lost deal within 14 days',
     longDescription: 'A complete 14-day follow-up system covering email, SMS, phone calls, and LinkedIn touches. Every touchpoint is scripted, timed, and designed to re-engage leads without being annoying.',
@@ -90,6 +101,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
+    monthlyPriceId: 'website_evaluation_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
     description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
     successStat: '93% implement at least 3 changes within 7 days of the call',
     longDescription: 'A focused, human-reviewed tear-down of your messaging clarity, CTA placement, conversion flow, and market positioning. Includes a live strategy call to walk through every finding and prioritize next steps.',
@@ -99,6 +111,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
+    monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
     description: 'Website + social + CRM — the complete picture.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
     longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
@@ -108,6 +121,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
+    monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,750/mo', monthlyPriceRaw: 175000, monthlySavePercent: 30,
     description: 'Find exactly where money is leaking in your operation.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
     longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
@@ -126,6 +140,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: 'Custom question map exposing blind spots across 8 departments.',
     successStat: '84% discover critical blind spots they hadn\'t considered',
     longDescription: 'A business clarity engine that generates sharp, specific questions organized by leadership, sales, marketing, operations, hiring, pricing, customer journey, and growth. Not generic — tailored to your exact company profile.',
@@ -134,6 +149,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Search, title: 'Brand Contradiction Finder', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
     description: 'See where your brand says one thing but signals another.',
     successStat: '79% see conversion lift after fixing top contradiction',
     longDescription: 'We scrape your website and branding to compare message versus signal across 5 layers: visual identity, tone, pricing, process, and trust. Buyers feel contradictions immediately — this tool makes them visible.',
@@ -142,6 +158,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$69', priceRaw: 6900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 43,
     description: 'Find the exact words weakening your trust and authority.',
     successStat: '71% report stronger brand perception within 2 weeks of edits',
     longDescription: 'We scan your entire website copy for vague language, corporate filler, weak emotional language, risky wording, and flat CTAs. Every flagged phrase gets a specific replacement that fits your desired brand tone.',
@@ -170,6 +187,7 @@ export const ServicesPricing: React.FC = () => {
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
 
   const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
 
@@ -214,6 +232,31 @@ export const ServicesPricing: React.FC = () => {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Every service increases conversion or reduces waste. Mix & match for up to 20% off.
             </p>
+
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center gap-1 mt-4 bg-secondary/50 rounded-lg p-1 border border-border">
+              <button
+                onClick={() => setBillingMode('once')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+                  billingMode === 'once'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                One-Time
+              </button>
+              <button
+                onClick={() => setBillingMode('monthly')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  billingMode === 'monthly'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Monthly
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">SAVE</span>
+              </button>
+            </div>
           </div>
         </RevealOnScroll>
 
@@ -253,20 +296,37 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Price */}
                   <div className="flex items-baseline gap-1.5 mb-3">
-                    <span className="text-lg font-bold text-primary font-display">{service.pricing}</span>
-                    <span className="text-[10px] text-muted-foreground">{service.pricingDetail}</span>
+                    {billingMode === 'monthly' && service.monthlyPriceId ? (
+                      <>
+                        <span className="text-lg font-bold text-primary font-display">{service.monthlyPricing}</span>
+                        <span className="text-[10px] text-muted-foreground line-through">{service.pricing}</span>
+                        <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">-{service.monthlySavePercent}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-lg font-bold text-primary font-display">{service.pricing}</span>
+                        <span className="text-[10px] text-muted-foreground">{service.pricingDetail}</span>
+                      </>
+                    )}
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {service.priceId && (
+                    {billingMode === 'monthly' && service.monthlyPriceId ? (
+                      <button
+                        onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
+                        className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                      >
+                        <RefreshCw className="w-3 h-3" /> Subscribe
+                      </button>
+                    ) : service.priceId ? (
                       <button
                         onClick={() => setCheckoutPriceId(service.priceId!)}
                         className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
                       >
                         <ShoppingCart className="w-3 h-3" /> Buy
                       </button>
-                    )}
+                    ) : null}
                     <button
                       onClick={() => setExpandedIdx(expandedIdx === index ? null : index)}
                       className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:border-primary/40"
@@ -332,14 +392,21 @@ export const ServicesPricing: React.FC = () => {
                           </div>
 
                           <div className="flex items-center gap-2 pt-1">
-                            {service.priceId && (
+                            {billingMode === 'monthly' && service.monthlyPriceId ? (
+                              <button
+                                onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
+                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" /> Subscribe — {service.monthlyPricing}
+                              </button>
+                            ) : service.priceId ? (
                               <button
                                 onClick={() => setCheckoutPriceId(service.priceId!)}
                                 className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
                               >
                                 <ShoppingCart className="w-3.5 h-3.5" /> Buy Now — {service.pricing}
                               </button>
-                            )}
+                            ) : null}
                             <Link
                               to="/contact"
                               className="inline-flex items-center gap-1.5 glass-hover border border-border px-4 py-2 rounded-md text-xs font-medium text-foreground transition-colors"
