@@ -14,6 +14,9 @@ import contentGenThumb from '@/assets/content-generator-thumb.jpg';
 import salesScriptsThumb from '@/assets/sales-scripts-thumb.jpg';
 import contentCalendarThumb from '@/assets/content-calendar-thumb.jpg';
 import followUpThumb from '@/assets/follow-up-plan-thumb.jpg';
+import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
+import brandContradictionsThumb from '@/assets/brand-contradictions-thumb.jpg';
+import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
@@ -94,6 +97,24 @@ const tools: Tool[] = [
     title: 'Follow-Up System Plan',
     description: '14-day multi-channel sales cadence with templates.',
     path: '/follow-up-plan',
+  },
+  {
+    thumbnail: strategicQuestionsThumb,
+    title: 'Strategic Question Engine',
+    description: 'Expose blind spots across leadership, sales & operations.',
+    path: '/strategic-questions',
+  },
+  {
+    thumbnail: brandContradictionsThumb,
+    title: 'Brand Contradiction Finder',
+    description: 'See where your brand says one thing but signals another.',
+    path: '/brand-contradictions',
+  },
+  {
+    thumbnail: frictionAuditThumb,
+    title: 'Friction Vocabulary Audit',
+    description: 'Find the words quietly weakening trust and action.',
+    path: '/friction-audit',
   },
 ];
 
