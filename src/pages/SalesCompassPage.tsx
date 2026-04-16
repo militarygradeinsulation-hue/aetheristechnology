@@ -8,7 +8,7 @@ const SalesCompassPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
         title="Free Sales Compass | Aetheris AI"
-        description="AI-powered sales guidance to sharpen your strategy and close more deals. Free tool — no login required."
+        description="AI-powered sales guidance to sharpen your strategy and close more deals. Free tool, no login required."
         path="/sales-compass"
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">

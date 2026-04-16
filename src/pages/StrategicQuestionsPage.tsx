@@ -10,7 +10,7 @@ const StrategicQuestionsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Strategic Question Engine — Expose Business Blind Spots" description="Stop guessing. Get a custom question map that exposes blind spots across leadership, sales, marketing, operations, and growth. Free preview included." path="/strategic-questions" />
+      <SEOHead title="Strategic Question Engine | Aetheris AI" description="Stop guessing. Get a custom question map exposing blind spots in leadership, sales, marketing, ops, and growth. Free preview." path="/strategic-questions" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />

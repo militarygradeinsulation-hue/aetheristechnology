@@ -12,8 +12,8 @@ const SalesScriptsPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Sales Script Generator — Call Scripts, Objection Handlers & Follow-Ups"
-        description="Generate tailored call scripts, objection handling guides, and follow-up templates for your industry. Free preview, full pack for $49."
+        title="AI Sales Script Generator | Aetheris AI"
+        description="Tailored call scripts, objection handlers, and follow-up templates for your industry. Free preview, full pack $49."
         path="/sales-scripts"
       />
       <Background />

@@ -10,7 +10,7 @@ const FrictionAuditPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Friction Vocabulary Audit — Find Words Weakening Your Brand" description="Sometimes the problem isn't your offer. It's the words wrapping around it. Find the exact phrases creating drag on your website." path="/friction-audit" />
+      <SEOHead title="Friction Vocabulary Audit | Aetheris AI" description="Find the exact words and phrases on your website that are weakening conversions. Free audit with stronger replacements." path="/friction-audit" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />

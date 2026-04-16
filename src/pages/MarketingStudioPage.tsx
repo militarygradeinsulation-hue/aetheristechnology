@@ -8,7 +8,7 @@ const MarketingStudioPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
         title="Hook AI — Free Post Creator | Aetheris AI"
-        description="Create scroll-stopping marketing posts with Hook AI. Free tool — no login required."
+        description="Create scroll-stopping marketing posts with Hook AI. Free tool, no login required. Built by Aetheris AI."
         path="/marketing-studio"
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">

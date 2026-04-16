@@ -7,12 +7,12 @@ import internalSystemsThumb from '@/assets/internal-systems-thumb.jpg';
 import crmVideo from '@/assets/crm-demo-video.mp4';
 
 // High-quality render images for Digital Strategy carousel
-import render1 from '@/assets/renders/render-activity-panel.png';
-import render2 from '@/assets/renders/render-archiscan-modern-house.png';
-import render3 from '@/assets/renders/render-classic-estate.png';
-import render4 from '@/assets/renders/render-aerial-landscape-pool.png';
-import render5 from '@/assets/renders/render-woodland-playground.png';
-import render6 from '@/assets/renders/render-amphitheater-pavilion.png';
+import render1 from '@/assets/renders/render-activity-panel.jpg';
+import render2 from '@/assets/renders/render-archiscan-modern-house.jpg';
+import render3 from '@/assets/renders/render-classic-estate.jpg';
+import render4 from '@/assets/renders/render-aerial-landscape-pool.jpg';
+import render5 from '@/assets/renders/render-woodland-playground.jpg';
+import render6 from '@/assets/renders/render-amphitheater-pavilion.jpg';
 
 const digitalStrategyImages = [render1, render2, render3, render4, render5, render6];
 

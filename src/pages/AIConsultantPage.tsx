@@ -8,7 +8,7 @@ const AIConsultantPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
         title="Free AI Business Consultant | Aetheris AI"
-        description="Get AI-powered business consulting advice for your company. Free tool — no login required."
+        description="AI-powered business consulting advice for your company. Free tool, no login required. Indianapolis-based."
         path="/ai-consultant"
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">

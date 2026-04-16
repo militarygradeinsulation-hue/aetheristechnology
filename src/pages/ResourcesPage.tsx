@@ -40,8 +40,8 @@ const ResourcesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Strategic Playbooks — AI, Marketing & Leadership Frameworks"
-        description="Download free strategic playbooks on AI search optimization, digital influence, short-form video strategy, and leadership frameworks. Built from real consulting engagements and 2026 market data."
+        title="Strategic Playbooks — AI & Marketing | Aetheris"
+        description="Free playbooks on AI search, digital influence, short-form video, and leadership. Built from real consulting engagements."
         path="/resources"
         jsonLd={{
           "@context": "https://schema.org",

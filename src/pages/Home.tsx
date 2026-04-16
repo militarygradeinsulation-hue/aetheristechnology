@@ -16,8 +16,8 @@ const Home = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Fix-Your-Business Consulting & AI Automation"
-        description="Aetheris AI embeds into your operation as a Co-CEO to expose revenue leaks, rebuild broken systems, and deploy AI automation. Indianapolis-based consulting for US businesses. Call (317) 376-2110."
+        title="Aetheris AI — Business Consulting & AI Automation"
+        description="We embed into your operation as a Co-CEO. Expose revenue leaks, rebuild broken systems, deploy AI. Indianapolis. (317) 376-2110."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",

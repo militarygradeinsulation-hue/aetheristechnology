@@ -12,8 +12,8 @@ const TermsPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Terms of Service"
-        description="Terms of service for Aetheris AI consulting and technology services. Intellectual property, data handling, and engagement terms."
+        title="Terms of Service | Aetheris AI"
+        description="Terms for Aetheris AI consulting and technology services. Intellectual property, data handling, and engagement terms."
         path="/terms"
       />
       <Background />

@@ -13,8 +13,8 @@ const ServicesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Business Consulting & AI Automation Services"
-        description="AI business consulting Indianapolis — from $50 visual renders to $25K+ custom AI implementations. Operational diagnostics, CRM restructuring, sales automation, and digital oversight for US businesses."
+        title="Consulting & AI Automation Services | Aetheris AI"
+        description="From $50 visual renders to $25K+ custom AI builds. Diagnostics, CRM, sales automation, and digital oversight. Indianapolis-based."
         path="/services"
         jsonLd={{
           "@context": "https://schema.org",

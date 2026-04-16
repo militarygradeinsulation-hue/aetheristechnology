@@ -13,8 +13,8 @@ const DiagnosticQuizPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Free Business Diagnostic"
-        description="Take the free Aetheris Business Diagnostic to discover where your business is quietly losing money. Get a personalized score and actionable recommendations."
+        title="Free Business Diagnostic | Aetheris AI"
+        description="Find where your business is quietly losing money. Free 20-question diagnostic with personalized score and actionable recommendations."
         path="/business-diagnostic"
         jsonLd={{
           '@context': 'https://schema.org',
