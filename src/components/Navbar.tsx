@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import aetherisLogo from '@/assets/aetheris-logo.png';
@@ -14,6 +14,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { trackEvent } = useTrackEvent();
+  const navigate = useNavigate();
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoTap = (e: React.MouseEvent) => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      e.preventDefault();
+      tapCountRef.current = 0;
+      navigate('/admin/login');
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 600);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
