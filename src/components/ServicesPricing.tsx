@@ -121,6 +121,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
+    monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,750/mo', monthlyPriceRaw: 175000, monthlySavePercent: 30,
     description: 'Find exactly where money is leaking in your operation.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
     longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
