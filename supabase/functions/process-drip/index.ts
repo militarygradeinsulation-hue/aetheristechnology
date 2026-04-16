@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const OUTLOOK_GATEWAY = "https://connector-gateway.lovable.dev/microsoft_outlook";
+const DAILY_LIMIT = 100;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,6 +27,27 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Check how many emails were already sent today
+    const todayMidnight = new Date();
+    todayMidnight.setUTCHours(0, 0, 0, 0);
+
+    const { count: sentToday, error: countErr } = await supabase
+      .from("drip_emails")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "sent")
+      .gte("sent_at", todayMidnight.toISOString());
+
+    if (countErr) throw new Error(`Failed to count today's sends: ${countErr.message}`);
+
+    const remaining = DAILY_LIMIT - (sentToday || 0);
+    if (remaining <= 0) {
+      return new Response(JSON.stringify({ message: `Daily limit reached (${DAILY_LIMIT}). Sent today: ${sentToday}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const batchSize = Math.min(remaining, 25);
+
     // Get pending emails that are due AND have pre-generated content
     const { data: pendingEmails, error: fetchErr } = await supabase
       .from("drip_emails")
@@ -35,11 +57,11 @@ serve(async (req) => {
       .not("subject", "is", null)
       .lte("scheduled_for", new Date().toISOString())
       .order("scheduled_for", { ascending: true })
-      .limit(30);
+      .limit(batchSize);
 
     if (fetchErr) throw new Error(`Failed to fetch pending emails: ${fetchErr.message}`);
     if (!pendingEmails || pendingEmails.length === 0) {
-      return new Response(JSON.stringify({ message: "No pending emails to process" }), {
+      return new Response(JSON.stringify({ message: "No pending emails to process", sentToday, remaining }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -59,7 +81,6 @@ serve(async (req) => {
       }
 
       try {
-        // Send via Outlook Gateway (content is pre-generated)
         const sendRes = await fetch(`${OUTLOOK_GATEWAY}/me/sendMail`, {
           method: "POST",
           headers: {
@@ -86,7 +107,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Mark as sent
         await supabase
           .from("drip_emails")
           .update({ status: "sent", sent_at: new Date().toISOString() })
@@ -104,7 +124,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed` }),
+      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed. Daily total: ${(sentToday || 0) + sent}/${DAILY_LIMIT}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
