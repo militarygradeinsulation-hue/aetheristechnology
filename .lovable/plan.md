@@ -1,73 +1,73 @@
 
 
-The user wants:
-1. Persistent personal library for all admin tool generations (don't lose work when backing out)
-2. Copy + Download options on every saved item
-3. New "Playbook Creator" tool in the admin Tools tab that saves generated playbooks to a personal library
-
-Let me check existing infrastructure quickly.
-<lov-tool-use id="toolu_vrtx_0111ewAM19hJjjFQcfEzyHvH" name="code--search_files" integration-id="code" data="{\"query\": \"tool_generations\", \"include_patterns\": \"*.tsx,*.ts\"}">
+The user wants the admin Activity Log to show their full email outreach campaign — sends, timing, who's interested, and next steps. Let me check the current admin activity log and what email data is available.
+<lov-tool-use id="toolu_vrtx_014GEaF6mUpP3FrbT3NHjqPo" name="code--search_files" integration-id="code" data="{\"query\": \"activity|Activity Log\", \"include_patterns\": \"src/pages/AdminDashboard.tsx\"}">
 </lov-tool-use>
 
-<lov-tool-use id="toolu_vrtx_01ACL5cvYkP9z5F8QvnLNSjp" name="code--view" integration-id="code" data="{\"file_path\": \"supabase/functions/generate-custom-playbook/index.ts\", \"lines\": \"1-60\"}">
+<lov-tool-use id="toolu_vrtx_01AdzaTB2sbekELDL6Masqxz" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/AdminDashboard.tsx\", \"lines\": \"1-100\"}">
 </lov-tool-use>
 
-<lov-tool-use id="toolu_vrtx_01SaU9uMSgPeAg5mzNdbPk2H" name="code--search_files" integration-id="code" data="{\"query\": \"tool_generations\", \"include_patterns\": \"*.tsx,*.ts\"}">
+<lov-tool-use id="toolu_vrtx_01XfvtPBPmW7bQJurhU6mTMT" name="code--search_files" integration-id="code" data="{\"query\": \"Activity|activity\", \"include_patterns\": \"src/pages/AdminDashboard.tsx\"}">
 </lov-tool-use>
 
-<lov-tool-use id="toolu_vrtx_01EPCRPzH9tqpNHiHLbSuMwP" name="code--view" integration-id="code" data="{\"file_path\": \"supabase/functions/generate-custom-playbook/index.ts\", \"lines\": \"1-80\"}">
+<lov-tool-use id="toolu_vrtx_01GNx2bQwKVR2p5j7UG2rrgN" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/AdminDashboard.tsx\", \"lines\": \"1-120\"}">
 </lov-tool-use>
-
-<lov-tool-use id="toolu_vrtx_01U3C7ifaDtrd6xfZBVRRJaU" name="code--view" integration-id="code" data="{\"file_path\": \"src/integrations/supabase/types.ts\", \"lines\": \"1-50\"}">
+I have enough context. Let me check the drip system briefly to understand campaign structure.
+<lov-tool-use id="toolu_vrtx_01NsAjoGiyrg2gafa5KRyjKb" name="code--exec" integration-id="code" data="{\"command\": \"psql -c \\\"SELECT count(*) as drip_emails FROM drip_emails; SELECT count(*) as prospects FROM drip_prospects; SELECT count(*) as send_log FROM email_send_log;\\\" 2>&1 | head -30\", \"user_facing_description\": \"Checking campaign data volume\"}">
 </lov-tool-use>
-I have enough context. The auth issue: admin uses sessionStorage passcode (not Supabase auth), so saved tool runs can't be tied to `auth.uid()`. I'll use a dedicated `admin_tool_library` table with service-role-only RLS, and the client will use a passcode-validated edge function (or simply `is_admin`-style check via header). Simplest: use a public table with a special "admin" marker, but more secure is an edge function gateway. Given the existing pattern (sessionStorage flag, no real auth), I'll use service-role edge functions for admin save/list/delete + a shared admin secret check. Or simpler: use the sessionStorage flag and a service-role edge function with a passcode in the body.
-
-Let me check the existing admin pattern.
-<lov-tool-use id="toolu_vrtx_018xDwPtLeZ6g11isyJCxp9X" name="code--view" integration-id="code" data="{\"file_path\": \"supabase/functions/admin-insights/index.ts\", \"lines\": \"1-40\"}">
-</lov-tool-use>
-
-<lov-tool-use id="toolu_vrtx_016nUHzCBz9JjKqhuNMLoGCY" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/AdminLogin.tsx\"}">
-</lov-tool-use>
-I have full context. Now I'll present the plan.
+Good — there's a real campaign: 17,702 prospects and 636 drip emails scheduled/sent. The current Activity Log only shows `site_events`. The user wants a full campaign view.
 
 <lov-plan>
 
 ## Goal
-Anything you generate inside the `/admin` Tools tab gets saved to a personal "My Library" so it survives page navigation. Each saved item has Copy and Download buttons. Add a new "Playbook Creator" tool that saves custom playbooks you can re-download anytime.
+Replace the current narrow "Activity Log" (only site events) with a full **Campaign Activity** dashboard showing the entire outbound email campaign: prospects, sends, opens/replies, and what's queued next.
 
-## How It Works
+## What You'll See
 
-**1. New `admin_library` table** stores every tool run keyed by a server-side admin secret (not `auth.uid`, since admin uses the 9822 passcode, not Supabase auth):
-- `id`, `tool_type`, `title`, `input_data` (jsonb), `output_data` (jsonb), `file_url` (nullable, for playbook PDFs), `created_at`
-- RLS: service-role only. All access goes through a new edge function `admin-library` that requires the admin passcode (`9822`) in the request body.
+The "Activity Log" tab becomes **"📨 Campaign"** with 4 stacked sections:
 
-**2. New edge function `admin-library`** with actions: `list`, `save`, `delete`, `get`. Validates passcode against env var on every call.
+**1. Campaign Stats (top cards)**
+- Total prospects: 17,702
+- Emails sent (last 30d / all time)
+- Pending sends (next 24h / next 7d)
+- Replies received
+- Failed / bounced
 
-**3. Auto-save on every admin tool run.** Update each of the 7 tool components — when `adminMode={true}` and a generation completes, call `admin-library` with action `save`. Title is auto-derived (e.g., "LinkedIn — example.com — Apr 16").
+**2. Email Send Timeline**
+A table of every email sent, newest first:
+- Recipient + business name
+- Subject line
+- Step # in sequence (e.g., "Step 2 of 5")
+- Sent at (timestamp)
+- Status badge (sent / failed / bounced / replied)
+- Filter by date range, status, sequence
 
-**4. New "📚 Library" sub-tab inside the Tools section.** Lists all saved items grouped by tool type, newest first. Each card shows:
-- Title + timestamp + tool icon
-- "View" button — re-opens the saved output inline (read-only, with full Copy buttons)
-- "Copy All" button — copies the full output to clipboard
-- "Download" button — exports as `.txt` (or `.md` for playbooks, `.pdf` if file_url exists)
-- "Delete" button — removes from library
+**3. Hot Prospects (Interested)**
+Prospects who replied OR clicked the LinkedIn/website tracking link OR submitted a contact form after receiving a drip:
+- Name, business, email, location
+- Last action (replied / clicked / form submit)
+- Which sequence step triggered it
+- Quick "Mark contacted" / "Convert" buttons
 
-**5. New "Playbook Creator" tool** (8th tool) inside Tools:
-- Form: Title, Subtitle, Pillar (Sales / Marketing / AI / Strategy), Tags
-- Calls existing `generate-custom-playbook` edge function (which already produces a 4-5k word PDF and stores it in the `playbooks` Supabase storage bucket)
-- On success, saves a row to `admin_library` with `tool_type='playbook'`, `file_url=<pdf url>`, `title=<title>`
-- Library card shows "Download PDF" linking directly to the stored file
+**4. Next Steps Queue**
+Upcoming scheduled emails grouped by day:
+- Today: 12 sends queued
+- Tomorrow: 18 sends
+- This week: 84 sends
+- Expandable list per day showing recipient, subject, scheduled time
+
+Plus a separate "Site Activity" sub-tab keeps the existing site_events log (page views, button clicks) so nothing is lost.
+
+## Data Sources (already exist)
+- `drip_prospects` (17,702 rows) — leads + status
+- `drip_emails` (636 rows) — scheduled/sent emails with `status`, `scheduled_for`, `sent_at`, `step_index`
+- `drip_sequences` — sequence names + steps
+- `email_send_log` — transactional email delivery status
+- `contact_submissions` — replies/form fills (cross-reference by email)
 
 ## Files Changed
-- **New:** `supabase/migrations/<timestamp>_admin_library.sql` — create `admin_library` table + RLS
-- **New:** `supabase/functions/admin-library/index.ts` — gated CRUD edge function
-- **New:** `src/components/AdminLibrary.tsx` — library viewer UI with copy/download/delete
-- **New:** `src/components/PlaybookCreator.tsx` — playbook creator form + admin-library save
-- **Edit:** `src/pages/AdminDashboard.tsx` — add "Library" sub-tab and "Playbook Creator" tool tile; share an `onAdminSave` callback to all 7 tools
-- **Edit (7 tools):** `SocialContentGenerator`, `SalesScriptGenerator`, `ContentCalendarGenerator`, `FollowUpPlanGenerator`, `StrategicQuestionEngine`, `BrandContradictionFinder`, `FrictionVocabularyAudit` — when `adminMode`, auto-save result via `admin-library` edge function
+- **Edit:** `src/pages/AdminDashboard.tsx` — fetch drip data, restructure the "events" tab into 4 sections + sub-tabs (Campaign / Site Activity)
+- **New:** `src/components/CampaignActivity.tsx` — the 4-section campaign view (stats, send timeline, hot prospects, queue)
 
-## Notes
-- Existing public tool pages stay untouched (no save behavior).
-- The `generate-custom-playbook` edge function already exists and handles PDF generation + storage.
-- "Back to Tools" no longer loses your work — everything is in the Library.
+No DB changes, no new edge functions — all data is already there.
 
