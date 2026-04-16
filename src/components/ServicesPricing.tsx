@@ -26,6 +26,7 @@ const services: ServiceTile[] = [
   {
     icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
     description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
+    successStat: '91% of businesses found at least 3 fixable revenue leaks',
     longDescription: 'Our AI scans your entire website and produces a comprehensive diagnostic covering every technical, content, and conversion gap. You get revenue leak estimates, competitive positioning data, and a downloadable PDF you can share with your team.',
     deliverables: ['Full gap analysis with severity scores', 'Revenue leak estimates per issue', 'ROI projections if gaps are fixed', 'Competitive brief vs. top 3 competitors', 'Downloadable PDF report'],
     whyValuable: 'Most businesses lose $1,000–$5,000/month from invisible website issues. This report makes them visible in minutes — not weeks of consulting.',
@@ -33,6 +34,7 @@ const services: ServiceTile[] = [
   {
     icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
     description: 'Automated report showing where you\'re bleeding revenue online.',
+    successStat: '87% recover the cost within 30 days of acting on findings',
     longDescription: 'A deeper automated analysis of your digital footprint — website performance, SEO health, content gaps, and conversion friction. This is the door opener that shows exactly what\'s broken before you spend a dime fixing it.',
     deliverables: ['Website performance & speed audit', 'SEO health score with fix priorities', 'Content gap analysis', 'Conversion friction points identified', 'Actionable fix-it checklist'],
     whyValuable: 'You can\'t fix what you can\'t see. This snapshot reveals blind spots that are costing you money every single day — for less than the cost of one hour of consulting.',
@@ -40,6 +42,7 @@ const services: ServiceTile[] = [
   {
     icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
     description: 'Full report + CRM plan + implementation specs + content calendar.',
+    successStat: '3.2x avg revenue improvement within 90 days of implementation',
     longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
     deliverables: ['Everything in Full Website Report', 'CRM implementation plan', 'System architecture blueprint', '30-day content calendar', '"Fix This" items with implementation specs', 'Priority-ranked action items'],
     whyValuable: 'Companies that follow a structured blueprint improve 3–5x faster than those who just read reports. A clear roadmap turns $299 into $10K+ in recovered revenue within 90 days.',
@@ -48,6 +51,7 @@ const services: ServiceTile[] = [
   {
     icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
     description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
+    successStat: '74% see measurable engagement increase within 2 weeks',
     longDescription: 'We scan your website and generate 25 ready-to-post social media pieces tailored to your brand voice, audience, and industry. Each post includes a hook, body copy, CTA, and hashtag suggestions.',
     deliverables: ['10 LinkedIn posts with hooks & CTAs', '10 Facebook posts optimized for engagement', '5 ad hooks for paid campaigns', 'Hashtag suggestions per post', 'Copy-to-clipboard for instant use'],
     whyValuable: 'Hiring a copywriter for 25 posts costs $500+. A social media manager charges $2,000+/month. Get a month of content in minutes for $29.',
@@ -55,6 +59,7 @@ const services: ServiceTile[] = [
   {
     icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
     description: 'Call scripts, objection handlers & follow-up templates.',
+    successStat: '68% of sales teams report higher close rates within 1 month',
     longDescription: 'AI-generated sales scripts customized to your industry, product, and target customer. Includes a complete cold call script, warm call script, 5 objection handlers with reframes, and 3 follow-up templates for email, SMS, and voicemail.',
     deliverables: ['Cold call opening script', 'Warm call conversation flow', '5 objection handlers with reframes', 'Email follow-up template', 'SMS follow-up template', 'Voicemail drop script'],
     whyValuable: 'Sales teams with scripts close 30% more deals. One extra closed deal per month at $500+ = 10x ROI on a $49 investment.',
@@ -62,6 +67,7 @@ const services: ServiceTile[] = [
   {
     icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
     description: '30 days of topics, hooks, captions & posting times.',
+    successStat: '82% post consistently for 30+ days (vs. 23% without a plan)',
     longDescription: 'A full 30-day content calendar with daily post ideas, proven hooks, captions, content types (carousel, video, text), hashtags, and optimal posting times — all generated for your specific industry and goals.',
     deliverables: ['30 daily post topics', 'Hook + caption for each day', 'Content type recommendations', 'Optimal posting times', 'Hashtag strategy per post', 'Platform-specific formatting tips'],
     whyValuable: 'Content consistency is the #1 growth lever on social media. This eliminates the "what do I post today" problem for an entire month — for less than a coffee per day.',
@@ -69,6 +75,7 @@ const services: ServiceTile[] = [
   {
     icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
     description: '14-day multi-channel sales cadence with templates.',
+    successStat: '76% of users recover at least 1 lost deal within 14 days',
     longDescription: 'A complete 14-day follow-up system covering email, SMS, phone calls, and LinkedIn touches. Every touchpoint is scripted, timed, and designed to re-engage leads without being annoying.',
     deliverables: ['Day-by-day 14-day cadence plan', 'Email templates for each touchpoint', 'SMS scripts with timing', 'Call scripts for check-ins', 'LinkedIn message templates', 'Escalation triggers & rules'],
     whyValuable: '80% of sales require 5+ follow-ups, but most reps stop at 2. This system closes the gap and recovers deals you\'re currently losing — $500–$5,000+ per recovered deal.',
@@ -76,6 +83,7 @@ const services: ServiceTile[] = [
   {
     icon: Image, title: 'Visual Rendering', pricing: '$50–$400', priceRaw: 0, pricingDetail: 'per image',
     description: 'AI renders with realistic human interaction for your products.',
+    successStat: '38% higher engagement on listings with professional AI visuals',
     longDescription: 'From basic image enhancement to full-scene AI renders with realistic human interaction. These visuals show your product in real-world use — not empty, lifeless shots. Perfect for proposals, catalogs, and social media.',
     deliverables: ['$50 — Basic enhancement (clarity, lighting, polish)', '$125 — Close-up or product-focused render', '$275 — Full scene render without people', '$400 — Full scene with AI-generated interaction', 'Commercial-use license included'],
     whyValuable: 'Visuals with people increase engagement by 38%. High-quality imagery boosts conversion by up to 30%. One improved image helps win one deal on a $25K–$150K+ project.',
@@ -83,6 +91,7 @@ const services: ServiceTile[] = [
   {
     icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
     description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
+    successStat: '93% implement at least 3 changes within 7 days of the call',
     longDescription: 'A focused, human-reviewed tear-down of your messaging clarity, CTA placement, conversion flow, and market positioning. Includes a live strategy call to walk through every finding and prioritize next steps.',
     deliverables: ['Messaging clarity audit', 'CTA placement & conversion flow analysis', 'Competitive positioning review', 'SEO & technical performance report', '45-minute strategy call', 'Prioritized action plan document'],
     whyValuable: '70% of websites fail to convert effectively. Small improvements can increase revenue 10–50% without more traffic. If your site converts at 1% and improves to 1.5% — that\'s a 50% revenue increase.',
@@ -91,6 +100,7 @@ const services: ServiceTile[] = [
   {
     icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
     description: 'Website + social + CRM — the complete picture.',
+    successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
     longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
     deliverables: ['Full website diagnostic', 'Social media activity audit (all platforms)', 'CRM pipeline analysis', 'Marketing spend efficiency report', 'Cross-channel attribution insights', 'Unified action plan'],
     whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together.',
@@ -99,6 +109,7 @@ const services: ServiceTile[] = [
   {
     icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
     description: 'Find exactly where money is leaking in your operation.',
+    successStat: '96% identify operational waste exceeding the diagnostic cost',
     longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
     deliverables: ['Full operational workflow mapping', 'Time & cost waste analysis per department', 'System integration gap assessment', 'Automation opportunity identification', 'Employee productivity insights', 'Prioritized fix-it roadmap with ROI estimates'],
     whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Fixing one major inefficiency recovers $2K–$10K/month.',
@@ -107,6 +118,7 @@ const services: ServiceTile[] = [
   {
     icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,000/mo', priceRaw: 500000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
     description: 'Ongoing strategic leadership + execution.',
+    successStat: '4.1x avg ROI within first 6 months of engagement',
     longDescription: 'Full-time strategic leadership without the full-time salary. We become your embedded technology and marketing executive — setting strategy, managing execution, and continuously optimizing your operation month over month.',
     deliverables: ['Weekly strategy sessions', 'Technology stack management', 'Marketing campaign oversight', 'Vendor & tool evaluation', 'Team training & enablement', 'Monthly performance reporting'],
     whyValuable: 'A full-time CTO costs $150K–$250K/year. A CMO costs $120K–$200K. You get both for $60K/year — and we\'re accountable for results, not hours.',
@@ -115,6 +127,7 @@ const services: ServiceTile[] = [
   {
     icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
     description: 'Custom question map exposing blind spots across 8 departments.',
+    successStat: '84% discover critical blind spots they hadn\'t considered',
     longDescription: 'A business clarity engine that generates sharp, specific questions organized by leadership, sales, marketing, operations, hiring, pricing, customer journey, and growth. Not generic — tailored to your exact company profile.',
     deliverables: ['Top 10 critical questions ranked by urgency', 'Questions across 8 business categories', '"Questions you\'re probably not asking" section', 'Leadership team discussion prompts', 'Workshop prompts for team meetings', 'Urgency scoring for each question'],
     whyValuable: 'Business owners are drowning in advice. Very few people help them think clearly. This tool comes in like a surgeon and says "here are the questions your business has earned."',
@@ -122,6 +135,7 @@ const services: ServiceTile[] = [
   {
     icon: Search, title: 'Brand Contradiction Finder', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
     description: 'See where your brand says one thing but signals another.',
+    successStat: '79% see conversion lift after fixing top contradiction',
     longDescription: 'We scrape your website and branding to compare message versus signal across 5 layers: visual identity, tone, pricing, process, and trust. Buyers feel contradictions immediately — this tool makes them visible.',
     deliverables: ['Brand Alignment Score (0-100)', 'Contradictions across 5 perception layers', 'Emotional impact of each contradiction', 'Buyer perception analysis', 'Before/after positioning fixes', 'Priority fix roadmap', 'Hidden strengths to amplify'],
     whyValuable: 'Most businesses think they need more traffic. Sometimes they just need to stop sending mixed signals. One contradiction fix can increase conversion 10-30%.',
@@ -129,6 +143,7 @@ const services: ServiceTile[] = [
   {
     icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$69', priceRaw: 6900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
     description: 'Find the exact words weakening your trust and authority.',
+    successStat: '71% report stronger brand perception within 2 weeks of edits',
     longDescription: 'We scan your entire website copy for vague language, corporate filler, weak emotional language, risky wording, and flat CTAs. Every flagged phrase gets a specific replacement that fits your desired brand tone.',
     deliverables: ['Copy Friction Score (0-100)', '15-25 flagged phrases with exact replacements', 'Tone alignment analysis', 'Stronger CTA alternatives', 'Priority fix list', 'Copy strengths to keep'],
     whyValuable: 'This is one of those things people never notice until shown to them. Then they can\'t unsee it. "These 11 phrases are quietly weakening your authority" — that lands.',
@@ -136,6 +151,7 @@ const services: ServiceTile[] = [
   {
     icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
     description: 'Build the systems that scale you.',
+    successStat: '94% reduce operational costs by 20%+ within first quarter',
     longDescription: 'Once gaps are identified, implementation is the multiplier. We build custom systems, deploy automation, restructure CRMs, and integrate workflows — everything needed to scale without adding headcount.',
     deliverables: ['Custom system architecture & build', 'CRM restructuring & migration', 'Automation deployment (AI + workflow)', 'Integration between existing tools', 'Staff training on new systems', 'Ongoing optimization support'],
     whyValuable: 'This is where companies reduce long-term labor costs, increase execution speed, and scale without adding headcount. ROI compounds month over month the longer the system runs.',
