@@ -88,7 +88,7 @@ serve(async (req) => {
   }
 
   try {
-    const { batchSize = 50 } = await req.json().catch(() => ({}));
+    const { batchSize = 10, concurrency = 5 } = await req.json().catch(() => ({}));
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -130,37 +130,38 @@ serve(async (req) => {
     let processed = 0;
     let failed = 0;
 
-    for (const prospect of prospects) {
-      const generatedEmails = await generateAllEmails(prospect, steps, LOVABLE_API_KEY);
+    // Process in parallel chunks
+    const chunkSize = Math.min(concurrency, 5);
+    for (let c = 0; c < prospects.length; c += chunkSize) {
+      const chunk = prospects.slice(c, c + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map(async (prospect) => {
+          const generatedEmails = await generateAllEmails(prospect, steps, LOVABLE_API_KEY);
+          if (!generatedEmails) throw new Error("generation failed");
 
-      if (generatedEmails) {
-        for (let i = 0; i < steps.length; i++) {
-          const scheduledFor = new Date();
-          scheduledFor.setDate(scheduledFor.getDate() + (steps[i].delay_days || 0));
-
-          await supabase.from("drip_emails").insert({
-            prospect_id: prospect.id,
-            sequence_id: seqData.id,
-            step_index: i,
-            scheduled_for: scheduledFor.toISOString(),
-            status: "pending",
-            subject: generatedEmails[i].subject,
-            body_html: generatedEmails[i].body_html,
+          const emailRows = steps.map((step: any, i: number) => {
+            const scheduledFor = new Date();
+            scheduledFor.setDate(scheduledFor.getDate() + (step.delay_days || 0));
+            return {
+              prospect_id: prospect.id,
+              sequence_id: seqData.id,
+              step_index: i,
+              scheduled_for: scheduledFor.toISOString(),
+              status: "pending",
+              subject: generatedEmails[i].subject,
+              body_html: generatedEmails[i].body_html,
+            };
           });
-        }
 
-        await supabase
-          .from("drip_prospects")
-          .update({ status: "active" })
-          .eq("id", prospect.id);
+          await supabase.from("drip_emails").insert(emailRows);
+          await supabase.from("drip_prospects").update({ status: "active" }).eq("id", prospect.id);
+        })
+      );
 
-        processed++;
-      } else {
-        failed++;
+      for (const r of results) {
+        if (r.status === "fulfilled") processed++;
+        else failed++;
       }
-
-      // Small delay between AI calls
-      await new Promise(r => setTimeout(r, 500));
     }
 
     return new Response(
