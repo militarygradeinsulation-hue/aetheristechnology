@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems = [
     { label: 'Home', href: '/', special: true },
-    { label: 'Services', href: '/services' },
+    { label: 'Solution Store', href: '/services', special: true },
     { label: 'Blog', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'Free Diagnostic', href: '/business-diagnostic' },
