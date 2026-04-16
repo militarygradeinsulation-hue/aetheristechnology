@@ -13,8 +13,10 @@ import { BrandContradictionFinder } from '@/components/BrandContradictionFinder'
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AdminLibrary } from '@/components/AdminLibrary';
+import { CampaignActivity } from '@/components/CampaignActivity';
 
 type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
+type EventsSubTab = 'campaign' | 'site';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
