@@ -13,8 +13,10 @@ import { BrandContradictionFinder } from '@/components/BrandContradictionFinder'
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AdminLibrary } from '@/components/AdminLibrary';
+import { CampaignActivity } from '@/components/CampaignActivity';
 
 type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
+type EventsSubTab = 'campaign' | 'site';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
@@ -57,6 +59,7 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
+  const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
   const [recommendations, setRecommendations] = useState('');
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [topPages, setTopPages] = useState<{ page: string; views: number }[]>([]);
@@ -199,7 +202,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : '📚 My Library'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? '📨 Campaign' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : '📚 My Library'}
             </button>
           ))}
         </div>
@@ -301,46 +304,66 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Events */}
+        {/* Events / Campaign */}
         {activeTab === 'events' && (
           <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {['', 'page_view', 'linkedin_click', 'click', 'contact_form_submit'].map(f => (
+            <div className="flex gap-2 mb-6">
+              {(['campaign', 'site'] as const).map(t => (
                 <button
-                  key={f}
-                  onClick={() => setEventFilter(f)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    eventFilter === f ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
+                  key={t}
+                  onClick={() => setEventsSubTab(t)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    eventsSubTab === t ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {f || 'All'}
+                  {t === 'campaign' ? '📨 Campaign' : '🌐 Site Activity'}
                 </button>
               ))}
             </div>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {filteredEvents.length === 0 ? (
-                <div className="glass p-12 rounded-xl text-center text-muted-foreground">No events yet.</div>
-              ) : (
-                filteredEvents.map(evt => (
-                  <div key={evt.id} className="glass px-4 py-3 rounded-lg flex items-center gap-4 text-sm">
-                    <span className={`px-2 py-0.5 rounded text-xs font-mono ${
-                      evt.event_type === 'linkedin_click' ? 'bg-blue-500/20 text-blue-400' :
-                      evt.event_type === 'page_view' ? 'bg-green-500/20 text-green-400' :
-                      evt.event_type === 'contact_form_submit' ? 'bg-amber/20 text-amber' :
-                      'bg-muted text-muted-foreground'
-                    }`}>
-                      {evt.event_type}
-                    </span>
-                    <span className="text-muted-foreground flex-1 truncate">
-                      {JSON.stringify(evt.event_data)}
-                    </span>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(evt.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
+
+            {eventsSubTab === 'campaign' && <CampaignActivity />}
+
+            {eventsSubTab === 'site' && (
+              <div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {['', 'page_view', 'linkedin_click', 'click', 'contact_form_submit'].map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setEventFilter(f)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        eventFilter === f ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {f || 'All'}
+                    </button>
+                  ))}
+                </div>
+                <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                  {filteredEvents.length === 0 ? (
+                    <div className="glass p-12 rounded-xl text-center text-muted-foreground">No events yet.</div>
+                  ) : (
+                    filteredEvents.map(evt => (
+                      <div key={evt.id} className="glass px-4 py-3 rounded-lg flex items-center gap-4 text-sm">
+                        <span className={`px-2 py-0.5 rounded text-xs font-mono ${
+                          evt.event_type === 'linkedin_click' ? 'bg-blue-500/20 text-blue-400' :
+                          evt.event_type === 'page_view' ? 'bg-green-500/20 text-green-400' :
+                          evt.event_type === 'contact_form_submit' ? 'bg-amber/20 text-amber' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {evt.event_type}
+                        </span>
+                        <span className="text-muted-foreground flex-1 truncate">
+                          {JSON.stringify(evt.event_data)}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(evt.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
