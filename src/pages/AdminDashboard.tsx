@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library } from 'lucide-react';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -11,8 +11,10 @@ import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+import { PlaybookCreator } from '@/components/PlaybookCreator';
+import { AdminLibrary } from '@/components/AdminLibrary';
 
-type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction';
+type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
@@ -22,6 +24,7 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
   { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
   { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
+  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen },
 ];
 
 interface ContactSubmission {
@@ -51,7 +54,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [recommendations, setRecommendations] = useState('');
@@ -184,7 +187,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'events', 'insights', 'tools'] as const).map(tab => (
+          {(['overview', 'submissions', 'events', 'insights', 'tools', 'library'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -196,7 +199,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : tab === 'insights' ? '🧠 AI Insights' : '🛠 My Tools'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? 'Activity Log' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : '📚 My Library'}
             </button>
           ))}
         </div>
@@ -413,10 +416,14 @@ const AdminDashboard: React.FC = () => {
                 {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
                 {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
                 {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
+                {activeTool === 'playbook' && <PlaybookCreator />}
               </>
             )}
           </div>
         )}
+
+        {/* My Library */}
+        {activeTab === 'library' && <AdminLibrary />}
       </div>
     </div>
   );
