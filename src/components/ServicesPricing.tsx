@@ -158,6 +158,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$69', priceRaw: 6900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 43,
     description: 'Find the exact words weakening your trust and authority.',
     successStat: '71% report stronger brand perception within 2 weeks of edits',
     longDescription: 'We scan your entire website copy for vague language, corporate filler, weak emotional language, risky wording, and flat CTAs. Every flagged phrase gets a specific replacement that fits your desired brand tone.',
