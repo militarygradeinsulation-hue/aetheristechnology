@@ -459,9 +459,12 @@ export const ServicesPricing: React.FC = () => {
                 <div className="flex items-center gap-4 sm:ml-auto">
                   <div className="text-right">
                     {discount > 0 && (
-                      <div className="text-xs text-muted-foreground line-through">${(subtotal / 100).toFixed(0)}</div>
+                      <div className="text-xs text-muted-foreground line-through">${((billingMode === 'monthly' ? selectedItems.reduce((s, i) => s + (i.monthlyPriceRaw || i.priceRaw), 0) : subtotal) / 100).toFixed(0)}</div>
                     )}
-                    <div className="text-xl font-bold text-primary font-display">${(discountedTotal / 100).toFixed(0)}</div>
+                    <div className="text-xl font-bold text-primary font-display">
+                      ${(Math.round((billingMode === 'monthly' ? selectedItems.reduce((s, i) => s + (i.monthlyPriceRaw || i.priceRaw), 0) : subtotal) * (1 - discount)) / 100).toFixed(0)}
+                      {billingMode === 'monthly' && <span className="text-xs font-normal text-muted-foreground">/mo</span>}
+                    </div>
                   </div>
                   <Link
                     to={`/contact?bundle=${selectedItems.map(s => s.title).join(',')}&total=${discountedTotal}`}
