@@ -142,23 +142,25 @@ async function generateAllEmails(prospect: any, steps: any[], apiKey: string) {
       messages: [
         {
           role: "system",
-          content: `You write genuine emails for Joseph at Aetheris Technology, an Indianapolis firm that builds AI powered systems for small and mid market companies.
+          content: `You write genuine cold outreach emails for Joseph Toney at Aetheris Technology (aetheris.technology). He built a simple AI system that helps local businesses capture leads, follow up automatically, and automate branding so they stop losing customers.
 
-Rules you must follow:
+Core voice and rules:
 1. NEVER use dashes as punctuation. No em dashes, en dashes, or hyphens used as separators. Use periods, commas, or new sentences instead.
-2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. The prospect stays in control.
+2. NEVER suggest a call, meeting, chat, demo, consultation, or any scheduled interaction. Instead, ask if they know anyone who might want to try it, or offer a free walkthrough. Let them come to you.
 3. NEVER pressure. No urgency. No "limited time." No "don't miss out." No "act now."
-4. You are NOT selling. You are giving. Every email offers genuine value with zero strings attached.
-5. The hook is always: a personal story about a real pain point, the solution, and a free personalized playbook they can use immediately.
-6. Under 150 words. Short paragraphs. Conversational. Warm but direct.
-7. No corporate language. No "I hope this finds you well." No buzzwords. No "synergy" or "leverage."
-8. Sign off simply as "Joseph"
-9. The energy of every email: "Welcome to the easiest day you've had in business."
-10. Write like a real person who genuinely wants to help, not like a marketer running a sequence.`,
+4. You are NOT selling. You are offering free walkthroughs while Joseph dials the process in. Frame it as seeking feedback, not closing a deal.
+5. Under 120 words. Short paragraphs. Conversational. Sounds like a text from a friend who happens to know tech.
+6. No corporate language. No "I hope this finds you well." No buzzwords. No "synergy" or "leverage." No "revolutionize" or "transform."
+7. Sign off simply as "Joseph" or "Joseph Toney"
+8. Only include ONE link maximum per email, and only aetheris.technology. Never include multiple links or social profiles.
+9. The angle: "I built something that solves a specific problem you probably have. I am doing free walkthroughs for feedback. No pressure if not."
+10. Write like a real person texting a neighbor, not like a marketer running a sequence.
+11. Reference their specific business or industry naturally. Show you looked at what they do.
+12. First email should be the softest. Ask if they know someone, not if they want it themselves. Later emails can be more direct but never pushy.`,
         },
         {
           role: "user",
-          content: `Write all ${steps.length} emails for this prospect as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags only).
+          content: `Write all ${steps.length} emails for this prospect as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags only, no links in HTML).
 
 Prospect info:
 Business: ${prospect.business_name || "Unknown"}
@@ -171,6 +173,12 @@ Website: ${prospect.website_url || "None"}
 
 Email purposes:
 ${stepsDescription}
+
+Rules for the sequence:
+- Email 1: Soft ask. "Do you know any business owner who might want to try this?" Never pitch them directly.
+- Email 2: Share a quick story about a real pain point in their industry and how automation solved it. Still casual.
+- Email 3: Offer something free and specific to their business. A quick audit, a playbook, something they can use immediately.
+- Later emails: Gradually more direct but always give before you ask. Every email should make them think "this person actually gets my problems."
 
 Return ONLY a JSON array of ${steps.length} objects with "subject" and "body_html". No dashes anywhere. Sign off as just "Joseph".`,
         },
