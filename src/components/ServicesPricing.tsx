@@ -232,6 +232,31 @@ export const ServicesPricing: React.FC = () => {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Every service increases conversion or reduces waste. Mix & match for up to 20% off.
             </p>
+
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center gap-1 mt-4 bg-secondary/50 rounded-lg p-1 border border-border">
+              <button
+                onClick={() => setBillingMode('once')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+                  billingMode === 'once'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                One-Time
+              </button>
+              <button
+                onClick={() => setBillingMode('monthly')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  billingMode === 'monthly'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Monthly
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">SAVE</span>
+              </button>
+            </div>
           </div>
         </RevealOnScroll>
 
