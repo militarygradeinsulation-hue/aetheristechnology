@@ -97,6 +97,14 @@ export const CampaignActivity: React.FC = () => {
   const failedEmails = emails.filter(e => e.status === 'failed' || e.status === 'bounced');
   const last30 = sentEmails.filter(e => e.sent_at && (now.getTime() - new Date(e.sent_at).getTime()) < 30 * 86400000);
 
+  const todayStr = now.toDateString();
+  const sentToday = sentEmails.filter(e => e.sent_at && new Date(e.sent_at).toDateString() === todayStr)
+    .sort((a, b) => new Date(b.sent_at!).getTime() - new Date(a.sent_at!).getTime());
+  const failedToday = failedEmails.filter(e => {
+    const ts = e.sent_at || e.scheduled_for;
+    return ts && new Date(ts).toDateString() === todayStr;
+  });
+
   const next24 = pendingEmails.filter(e => {
     const d = new Date(e.scheduled_for);
     return d > now && d.getTime() - now.getTime() < 86400000;
@@ -128,6 +136,7 @@ export const CampaignActivity: React.FC = () => {
   const filteredTimeline = (statusFilter ? emails.filter(e => e.status === statusFilter) : emails).slice(0, 100);
 
   const stats = [
+    { label: 'Sent Today', value: sentToday.length, sub: `${failedToday.length} failed today`, icon: Send },
     { label: 'Total Prospects', value: totalProspects.toLocaleString(), icon: Users },
     { label: 'Sent (30d)', value: last30.length, sub: `${sentEmails.length} all-time`, icon: Send },
     { label: 'Next 24h', value: next24.length, sub: `${next7.length} this week`, icon: Clock },
