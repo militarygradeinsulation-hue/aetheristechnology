@@ -243,7 +243,13 @@ export const ServicesPricing: React.FC = () => {
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
+                  <p className="text-xs text-muted-foreground mb-2 flex-1 leading-relaxed">{service.description}</p>
+
+                  {/* Success Stat */}
+                  <div className="flex items-center gap-1.5 mb-3 bg-emerald-500/10 rounded-md px-2 py-1.5">
+                    <Percent className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                    <span className="text-[10px] text-emerald-400 font-medium leading-tight">{service.successStat}</span>
+                  </div>
 
                   {/* Price */}
                   <div className="flex items-baseline gap-1.5 mb-3">
