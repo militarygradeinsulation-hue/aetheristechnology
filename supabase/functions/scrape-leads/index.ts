@@ -263,8 +263,8 @@ serve(async (req) => {
     const insertedProspects: any[] = [];
 
     for (const contact of contacts) {
-      const email = contact.email.toLowerCase().trim();
-      if (existingSet.has(email)) continue;
+      const email = contact.email?.toLowerCase().trim();
+      if (!email || email.length < 5 || !email.includes("@") || existingSet.has(email)) continue;
 
       const prospect = {
         email,
