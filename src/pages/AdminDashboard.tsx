@@ -372,6 +372,51 @@ const AdminDashboard: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* My Tools */}
+        {activeTab === 'tools' && (
+          <div className="space-y-6">
+            {!activeTool ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <Wrench className="w-6 h-6 text-amber" />
+                  <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
+                  <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {ADMIN_TOOLS.map(tool => (
+                    <button
+                      key={tool.key}
+                      onClick={() => setActiveTool(tool.key)}
+                      className="glass p-6 rounded-xl text-left hover:border-amber/40 border border-border transition-colors group"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+                          <tool.icon className="w-5 h-5 text-amber" />
+                        </div>
+                        <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{tool.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
+                </Button>
+                {activeTool === 'social' && <SocialContentGenerator adminMode />}
+                {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
+                {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+                {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
+                {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
+                {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
+                {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
