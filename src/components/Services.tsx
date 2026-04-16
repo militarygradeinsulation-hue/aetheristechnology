@@ -4,7 +4,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
 import luminaInteriorImg from '@/assets/lumina-interior-design.jpg';
-import archiscanRenderImg from '@/assets/archiscan-render.png';
+import archiscanRenderImg from '@/assets/archiscan-render.jpg';
 import archiscanSketchImg from '@/assets/archiscan-sketch.jpg';
 import corporateImg from '@/assets/industry-corporate.jpg';
 import logisticsImg from '@/assets/industry-logistics.jpg';
