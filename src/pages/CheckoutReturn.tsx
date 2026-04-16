@@ -155,18 +155,7 @@ export default function CheckoutReturn() {
                   </Link>
                 </>
               ) : isSubscription ? (
-                <>
-                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h1 className="text-3xl font-bold text-foreground mb-3">Subscription Active!</h1>
-                  <p className="text-muted-foreground mb-6">
-                    Let's set up your AI consultant so it can start learning about your business and deliver personalized content every month.
-                  </p>
-                  <Link to={`/subscriber-onboarding?subscription_id=${sessionId}`}>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
-                      Set Up My AI Consultant &rarr;
-                    </Button>
-                  </Link>
-                </>
+                <SubscriptionReturn sessionId={sessionId!} />
               ) : (
                 <>
                   <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
