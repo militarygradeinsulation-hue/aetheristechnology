@@ -101,6 +101,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
+    monthlyPriceId: 'website_evaluation_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
     description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
     successStat: '93% implement at least 3 changes within 7 days of the call',
     longDescription: 'A focused, human-reviewed tear-down of your messaging clarity, CTA placement, conversion flow, and market positioning. Includes a live strategy call to walk through every finding and prioritize next steps.',
