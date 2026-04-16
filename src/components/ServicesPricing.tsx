@@ -38,6 +38,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
+    monthlyPriceId: 'digital_snapshot_monthly', monthlyPricing: '$79/mo', monthlyPriceRaw: 7900, monthlySavePercent: 37,
     description: 'Automated report showing where you\'re bleeding revenue online.',
     successStat: '87% recover the cost within 30 days of acting on findings',
     longDescription: 'A deeper automated analysis of your digital footprint — website performance, SEO health, content gaps, and conversion friction. This is the door opener that shows exactly what\'s broken before you spend a dime fixing it.',
