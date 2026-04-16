@@ -111,6 +111,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
+    monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
     description: 'Website + social + CRM — the complete picture.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
     longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
