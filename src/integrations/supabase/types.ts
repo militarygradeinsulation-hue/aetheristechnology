@@ -550,6 +550,122 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriber_feedback: {
+        Row: {
+          created_at: string
+          delivery_id: string
+          id: string
+          notes: string | null
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_id: string
+          id?: string
+          notes?: string | null
+          rating: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_id?: string
+          id?: string
+          notes?: string | null
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriber_feedback_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_deliveries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriber_profiles: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          goals: string[] | null
+          id: string
+          industry: string | null
+          notes: string | null
+          subscription_id: string
+          target_audience: string | null
+          tone_preference: string | null
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          goals?: string[] | null
+          id?: string
+          industry?: string | null
+          notes?: string | null
+          subscription_id: string
+          target_audience?: string | null
+          tone_preference?: string | null
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          goals?: string[] | null
+          id?: string
+          industry?: string | null
+          notes?: string | null
+          subscription_id?: string
+          target_audience?: string | null
+          tone_preference?: string | null
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      subscription_deliveries: {
+        Row: {
+          created_at: string
+          delivery_date: string
+          delivery_type: string
+          feedback_score: number | null
+          id: string
+          output_data: Json
+          stripe_invoice_id: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_date?: string
+          delivery_type: string
+          feedback_score?: number | null
+          id?: string
+          output_data?: Json
+          stripe_invoice_id?: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_date?: string
+          delivery_type?: string
+          feedback_score?: number | null
+          id?: string
+          output_data?: Json
+          stripe_invoice_id?: string | null
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
