@@ -12,6 +12,10 @@ interface ServiceTile {
   priceRaw: number;
   pricingDetail: string;
   priceId?: string;
+  monthlyPriceId?: string;
+  monthlyPricing?: string;
+  monthlyPriceRaw?: number;
+  monthlySavePercent?: number;
   badge?: string;
   bundleable?: boolean;
   description: string;
