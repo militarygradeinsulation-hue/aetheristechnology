@@ -98,7 +98,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
             Build Your Own <span className="text-amber glow-text">Playbook</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Pick a topic. Our AI generates a comprehensive 20+ page strategic playbook — custom frameworks, data, and action plans. <span className="text-amber font-semibold">$25 each.</span>
+            Pick a topic. <span className="text-amber font-semibold">OUR Strategic Business AI</span> generates a comprehensive 20+ page strategic playbook — custom frameworks, data, and action plans. <span className="text-amber font-semibold">$25 each.</span>
           </p>
         </div>
 
