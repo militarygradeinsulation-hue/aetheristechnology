@@ -41,8 +41,12 @@ async function searchBusinesses(query: string, apiKey: string) {
       body: JSON.stringify({ query, limit: 10, scrapeOptions: { formats: ["markdown"] } }),
     });
     const data = await res.json();
-    for (const r of data?.data || []) {
-      const md = r.markdown || "";
+    console.log("Firecrawl search raw response:", JSON.stringify(data).substring(0, 2000));
+    const items = Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.web) ? data.data.web : Array.isArray(data?.results) ? data.results : [];
+    console.log(`Firecrawl returned ${items.length} items`);
+    if (items.length > 0) console.log("First item keys:", Object.keys(items[0]));
+    for (const r of items) {
+      const md = r?.markdown || r?.content || r?.description || "";
       if (md.length > 50) results.push({ url: r.url || "", markdown: md.substring(0, 6000) });
     }
   } catch (e) {
@@ -259,8 +263,8 @@ serve(async (req) => {
     const insertedProspects: any[] = [];
 
     for (const contact of contacts) {
-      const email = contact.email.toLowerCase().trim();
-      if (existingSet.has(email)) continue;
+      const email = contact.email?.toLowerCase().trim();
+      if (!email || email.length < 5 || !email.includes("@") || existingSet.has(email)) continue;
 
       const prospect = {
         email,
