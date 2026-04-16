@@ -392,14 +392,21 @@ export const ServicesPricing: React.FC = () => {
                           </div>
 
                           <div className="flex items-center gap-2 pt-1">
-                            {service.priceId && (
+                            {billingMode === 'monthly' && service.monthlyPriceId ? (
+                              <button
+                                onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
+                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" /> Subscribe — {service.monthlyPricing}
+                              </button>
+                            ) : service.priceId ? (
                               <button
                                 onClick={() => setCheckoutPriceId(service.priceId!)}
                                 className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
                               >
                                 <ShoppingCart className="w-3.5 h-3.5" /> Buy Now — {service.pricing}
                               </button>
-                            )}
+                            ) : null}
                             <Link
                               to="/contact"
                               className="inline-flex items-center gap-1.5 glass-hover border border-border px-4 py-2 rounded-md text-xs font-medium text-foreground transition-colors"
