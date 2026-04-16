@@ -5,6 +5,55 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
+function SubscriptionReturn({ sessionId }: { sessionId: string }) {
+  // Look up the actual subscription UUID from the Stripe session ID
+  const { data: subscription, isLoading } = useQuery({
+    queryKey: ['subscription-by-session', sessionId],
+    queryFn: async () => {
+      // The webhook stores stripe_subscription_id, not session_id.
+      // But checkout.session.completed fires first with session.subscription = stripe sub id
+      // We poll for a subscription that was recently created (within last 5 min)
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: (query) => {
+      if (query.state.data?.id) return false;
+      return 2000;
+    },
+  });
+
+  if (isLoading || !subscription) {
+    return (
+      <>
+        <Loader2 className="w-16 h-16 text-amber mx-auto mb-4 animate-spin" />
+        <h1 className="text-3xl font-bold text-foreground mb-3">Activating Subscription...</h1>
+        <p className="text-muted-foreground mb-6">Setting up your AI consultant. This takes a moment.</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+      <h1 className="text-3xl font-bold text-foreground mb-3">Subscription Active!</h1>
+      <p className="text-muted-foreground mb-6">
+        Let's set up your AI consultant so it can start learning about your business and deliver personalized content every month.
+      </p>
+      <Link to={`/subscriber-onboarding?subscription_id=${subscription.id}`}>
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+          Set Up My AI Consultant &rarr;
+        </Button>
+      </Link>
+    </>
+  );
+}
+
 export default function CheckoutReturn() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -106,18 +155,7 @@ export default function CheckoutReturn() {
                   </Link>
                 </>
               ) : isSubscription ? (
-                <>
-                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h1 className="text-3xl font-bold text-foreground mb-3">Subscription Active!</h1>
-                  <p className="text-muted-foreground mb-6">
-                    Let's set up your AI consultant so it can start learning about your business and deliver personalized content every month.
-                  </p>
-                  <Link to={`/subscriber-onboarding?subscription_id=${sessionId}`}>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
-                      Set Up My AI Consultant &rarr;
-                    </Button>
-                  </Link>
-                </>
+                <SubscriptionReturn sessionId={sessionId!} />
               ) : (
                 <>
                   <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />

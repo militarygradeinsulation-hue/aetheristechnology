@@ -116,8 +116,23 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const priceId = item?.price?.metadata?.lovable_external_id || item?.price?.id;
   const productId = item?.price?.product;
 
+  // Extract userId from metadata, fall back to email lookup
+  let userId = subscription.metadata?.userId || null;
+  if (!userId) {
+    const email = subscription.customer_email || subscription.customer_details?.email;
+    if (email) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+      if (profile) userId = profile.id;
+    }
+  }
+
   await supabase.from("subscriptions").upsert(
     {
+      user_id: userId,
       stripe_subscription_id: subscription.id,
       stripe_customer_id: subscription.customer,
       product_id: productId,
