@@ -35,6 +35,9 @@ serve(async (req) => {
       case "invoice.payment_failed":
         console.log("Payment failed:", event.data.object.id);
         break;
+      case "invoice.paid":
+        await handleInvoicePaid(event.data.object);
+        break;
       default:
         console.log("Unhandled event:", event.type);
     }
