@@ -204,6 +204,11 @@ export const ServicesPricing: React.FC = () => {
   const discount = getDiscount(selectedItems.length);
   const discountedTotal = Math.round(subtotal * (1 - discount));
 
+  const isMonthlyCheckout = checkoutPriceId?.endsWith('_monthly');
+  const checkoutReturnUrl = isMonthlyCheckout
+    ? `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=subscription`
+    : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+
   if (checkoutPriceId) {
     return (
       <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPriceId(null)}>
@@ -214,7 +219,7 @@ export const ServicesPricing: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 overflow-auto p-4">
-            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`} />
+            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} />
           </div>
         </div>
       </div>
