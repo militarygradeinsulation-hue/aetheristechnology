@@ -159,3 +159,36 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
 }
+
+async function handleInvoicePaid(invoice: any) {
+  // Only trigger for subscription invoices (not one-time payments)
+  if (!invoice.subscription) return;
+  console.log("Invoice paid for subscription:", invoice.subscription);
+
+  // Trigger the monthly-delivery edge function
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/monthly-delivery`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({
+        subscription_id: invoice.subscription,
+        stripe_invoice_id: invoice.id,
+      }),
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error("Monthly delivery trigger failed:", resp.status, text);
+    } else {
+      console.log("Monthly delivery triggered successfully");
+    }
+  } catch (e) {
+    console.error("Monthly delivery trigger error:", e);
+  }
+}
