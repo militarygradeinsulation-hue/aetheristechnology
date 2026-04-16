@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { LibraryItemRenderer } from './LibraryItemRenderer';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -154,9 +155,9 @@ export const AdminLibrary: React.FC = () => {
                 </a>
               )}
             </div>
-            <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">
-              {formatLibraryItemAsText(viewItem)}
-            </pre>
+            <div className="max-h-[65vh] overflow-y-auto pr-2">
+              <LibraryItemRenderer item={viewItem} />
+            </div>
           </div>
         </div>
       )}
