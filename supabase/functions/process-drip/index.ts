@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 const OUTLOOK_GATEWAY = "https://connector-gateway.lovable.dev/microsoft_outlook";
-const DAILY_LIMIT = 100;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,6 +25,22 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Read campaign settings (active toggle, daily limit, signature)
+    const { data: settings } = await supabase
+      .from("campaign_settings")
+      .select("is_active, daily_limit, signature_html")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (!settings?.is_active) {
+      return new Response(JSON.stringify({ message: "Campaign is paused. Toggle it ON in admin to send." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const DAILY_LIMIT = settings.daily_limit || 100;
+    const signatureHtml: string = settings.signature_html || "";
 
     // Check how many emails were already sent today
     const todayMidnight = new Date();
@@ -91,7 +106,7 @@ serve(async (req) => {
           body: JSON.stringify({
             message: {
               subject: email.subject,
-              body: { contentType: "HTML", content: email.body_html },
+              body: { contentType: "HTML", content: appendSignature(email.body_html, signatureHtml) },
               toRecipients: [
                 { emailAddress: { address: prospect.email } },
               ],
