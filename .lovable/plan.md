@@ -1,75 +1,48 @@
 
 
 ## Goal
-Ship the highest-ROI content expansion: 5 long-tail AEO blog posts + 6 vertical landing pages + an `/industries` hub. All inherit the existing schema/AEO machinery (FAQ, HowTo, Speakable, breadcrumbs, weekly auto-optimizer).
+Make the 6 new vertical landing pages and the 5 long-tail blog posts get auto-optimized by the weekly SEO/AEO loop — same brand-locked AI rewrites the rest of the site already gets.
 
-## Part 1: Long-Tail Blog Posts (5)
+## Current Gap
+The `seo-weekly-optimize` edge function has a hardcoded `ROUTES` array of 12 paths. The new pages aren't in it, so:
+- Vertical pages (`/ai-for-healthcare`, etc.) get their **static** SEO from `verticals.ts` only — no weekly AI rewrites
+- Blog posts get their **static** title/description from the DB — no weekly schema/FAQ refresh
+- The `useSEOOverride` hook on these pages does nothing because no override row exists
 
-Generate via the existing `generate-blog` edge function pattern, but with **forced topics** (currently it picks from playground industry — these need AI consulting topics). Insert directly into `blog_posts` table.
+The schema/FAQ/Speakable/HowTo machinery on these pages **is** working — it's just frozen. The auto-optimizer never touches it.
 
-**Posts (each ~3,000 words, with TL;DR card, FAQ schema, HowTo schema, Article schema):**
-1. `how-to-implement-ai-in-business` — 7-step framework, common pitfalls, 90-day roadmap
-2. `ai-adoption-roadmap` — Maturity stages, milestones, KPIs by stage
-3. `reduce-operational-costs-with-ai` — Cost categories, ROI formulas, case patterns
-4. `ai-maturity-assessment-guide` — 5 maturity levels, self-scoring rubric, next steps per level
-5. `build-vs-buy-ai-decision-framework` — Decision matrix, TCO calc, when each wins
+## Fix
 
-**Approach:** Create a one-shot edge function `generate-aeo-blog-batch` that takes a list of topics + outlines and writes 5 posts in one run using Lovable AI (Gemini 2.5 Pro). Brand voice locked. Each post stored with `is_published=true` so they go live immediately and get picked up by sitemap/auto-optimizer.
+### 1. Extend static route list (vertical pages)
+In `seo-weekly-optimize/index.ts`, add the 7 new static routes to `ROUTES`:
+- `/industries`
+- `/ai-for-healthcare`, `/ai-for-finance`, `/ai-for-logistics`, `/ai-for-construction`, `/ai-for-manufacturing`, `/ai-for-saas`
 
-## Part 2: Vertical Landing Pages (6) + Hub
+Each with an industry-specific `intent` string to guide the AI.
 
-**Routes:**
-- `/industries` — hub page with 6 vertical cards
-- `/ai-for-healthcare`
-- `/ai-for-finance`
-- `/ai-for-logistics`
-- `/ai-for-construction`
-- `/ai-for-manufacturing`
-- `/ai-for-saas`
+### 2. Dynamic blog route inclusion
+At runtime inside the function, query `blog_posts` where `is_published = true` and append each as `{ path: "/blog/<slug>", intent: "Long-form blog — <title>" }`. This keeps it future-proof — any new blog posts get optimized automatically without code changes.
 
-**Single reusable template** `VerticalLandingPage.tsx` driven by config — keeps code clean. Each page has:
-- Hero with industry-specific pain hook (aggressive, blunt — per brand voice)
-- TL;DR "Quick Answer" card (Speakable schema)
-- 4 industry-specific use cases (Strategy / Governance / Tech / Marketing — mapped from approved keyword taxonomy)
-- ROI angle section with industry stats
-- 5 industry-specific FAQs (FAQPage schema)
-- "How AI transforms [industry]" 5-step section (HowTo schema)
-- Service schema with `areaServed` + industry context
-- Breadcrumbs
-- CTA to `/assessment` + `/contact`
+### 3. Token-cost guardrail
+- Cap dynamic blog routes at 25 newest posts per run (prevents runaway cost as blog grows)
+- Keep the existing per-route try/catch so one failure doesn't kill the run
 
-**Content config:** `src/config/verticals.ts` — single source of truth per vertical (hero, pains, use cases, FAQs, HowTo steps, stats). Easy to extend later.
+### 4. Brand rules tweak for blogs vs verticals
+Add a tiny conditional in the optimizer prompt: if path starts with `/ai-for-` add "industry vertical landing page — keep industry name + Indianapolis in title/desc"; if path starts with `/blog/` add "long-form blog — title stays close to original H1, FAQ section is highest priority for AEO citations."
 
-## Part 3: Wiring
-
-- `App.tsx` — register 7 new routes
-- `Navbar.tsx` — add "Industries" dropdown (mirrors existing nav style)
-- `Footer.tsx` — link to /industries hub
-- `public/sitemap.xml` — add 7 routes with `lastmod`
-- `public/llms-full.txt` — add industries section so LLMs cite verticals
-- `src/lib/schemas.ts` — small `industryServiceSchema()` helper if needed (probably reuses `serviceSchema`)
-- Auto-optimizer already targets static routes — these get included automatically next Sunday (or via "Run now")
+### 5. Admin dashboard reflection
+The existing `SEOOptimizer.tsx` already lists all routes from the override/log tables — it'll auto-show the new ones once the optimizer runs. No UI changes needed.
 
 ## Files
 
-**New:**
-- `supabase/functions/generate-aeo-blog-batch/index.ts` — one-shot blog generator
-- `src/pages/IndustriesPage.tsx` — hub
-- `src/pages/VerticalLandingPage.tsx` — reusable template
-- `src/config/verticals.ts` — content config for all 6 verticals
+**Edited (one file):**
+- `supabase/functions/seo-weekly-optimize/index.ts` — add 7 static routes, dynamic blog query, intent-aware prompt addendum
 
-**Edited:**
-- `src/App.tsx` — 7 new routes
-- `src/components/Navbar.tsx` — Industries nav entry
-- `src/components/Footer.tsx` — Industries link
-- `public/sitemap.xml` — 7 new entries
-- `public/llms-full.txt` — industries section
-
-**One-time action after deploy:**
-- Invoke `generate-aeo-blog-batch` once to create the 5 blog posts (admin can also re-run from a button — optional, can add to admin dashboard SEO tab)
+**Optional one-time action after deploy:**
+- Click "Run Full Optimization Now" in the admin SEO panel to immediately optimize the 18+ routes (rather than waiting for Sunday cron)
 
 ## Out of Scope
-- Per-industry case studies with named clients (you have no testimonials per brand rules)
-- Industry-specific pricing pages
-- Spanish/multi-language versions
+- Changing how the optimizer applies overrides (already works via `seo_overrides` table)
+- A/B variants per route (logged for future)
+- Optimizing legal/utility pages like `/terms`, `/login` (intentionally excluded)
 
