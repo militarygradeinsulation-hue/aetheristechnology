@@ -306,18 +306,22 @@ export const AllInOneGenerator: React.FC = () => {
     let skipped = 0;
     const total = allJobs.length;
 
-    // Run in parallel — each updates state independently as it finishes
-    await Promise.all(
-      allJobs.map(async (job) => {
-        const result = await runOne(job);
-        completed++;
-        if (result.status === 'success') succeeded++;
-        else if (result.status === 'error') failed++;
-        else if (result.status === 'skipped') skipped++;
-        setProgress(Math.round((completed / total) * 100));
-        setStates((prev) => ({ ...prev, [job.key]: result }));
-      }),
-    );
+    // Run in staggered batches of 3 to avoid AI gateway rate limits
+    const BATCH_SIZE = 3;
+    for (let i = 0; i < allJobs.length; i += BATCH_SIZE) {
+      const batch = allJobs.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (job) => {
+          const result = await runOne(job);
+          completed++;
+          if (result.status === 'success') succeeded++;
+          else if (result.status === 'error') failed++;
+          else if (result.status === 'skipped') skipped++;
+          setProgress(Math.round((completed / total) * 100));
+          setStates((prev) => ({ ...prev, [job.key]: result }));
+        }),
+      );
+    }
 
     setRunning(false);
     setProgress(100);
