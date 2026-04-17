@@ -1,19 +1,24 @@
 import jsPDF from 'jspdf';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
 
-// Aetheris brand palette (RGB)
-const COLOR = {
-  bg: [15, 15, 20] as [number, number, number],          // dark charcoal
-  card: [26, 26, 32] as [number, number, number],
-  border: [55, 55, 65] as [number, number, number],
-  amber: [217, 167, 71] as [number, number, number],     // primary accent
-  amberSoft: [60, 45, 20] as [number, number, number],
-  text: [240, 240, 245] as [number, number, number],
-  muted: [165, 165, 175] as [number, number, number],
-  white: [255, 255, 255] as [number, number, number],
-  red: [220, 90, 90] as [number, number, number],
-  blue: [110, 165, 230] as [number, number, number],
-};
+/**
+ * Professional library PDF generator.
+ * Light theme (white background, black text) — guarantees readability and printability.
+ * Aetheris amber accents for brand consistency.
+ */
+
+const AMBER: [number, number, number] = [217, 167, 71];
+const INK: [number, number, number] = [25, 25, 30];
+const SUB: [number, number, number] = [110, 110, 120];
+const RULE: [number, number, number] = [220, 220, 225];
+const SOFT: [number, number, number] = [248, 246, 240]; // soft amber-tinted card
+const RED: [number, number, number] = [180, 60, 60];
+const BLUE: [number, number, number] = [55, 110, 175];
+
+const PAGE_W = 210;
+const PAGE_H = 297;
+const MARGIN = 18;
+const CONTENT_W = PAGE_W - MARGIN * 2;
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content Pack',
@@ -26,283 +31,318 @@ const TOOL_LABELS: Record<string, string> = {
   playbook: 'Strategic Playbook',
 };
 
-const PAGE_W = 210;
-const PAGE_H = 297;
-const MARGIN = 16;
-const CONTENT_W = PAGE_W - MARGIN * 2;
+type Block =
+  | { type: 'h1'; text: string }
+  | { type: 'h2'; text: string; count?: number }
+  | { type: 'h3'; text: string; color?: [number, number, number] }
+  | { type: 'p'; text: string; color?: [number, number, number]; size?: number; bold?: boolean }
+  | { type: 'kv'; label: string; value: string; labelColor?: [number, number, number] }
+  | { type: 'quote'; text: string }
+  | { type: 'spacer'; mm: number }
+  | { type: 'rule' }
+  | { type: 'card_start' }
+  | { type: 'card_end' };
 
-class PdfBuilder {
+class PdfWriter {
   doc: jsPDF;
-  y: number = MARGIN;
+  y: number;
   pageNum: number = 1;
-  title: string;
   toolLabel: string;
+  cardStartY: number | null = null;
 
-  constructor(title: string, toolLabel: string) {
+  constructor(toolLabel: string) {
     this.doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    this.title = title;
+    this.y = MARGIN + 14;
     this.toolLabel = toolLabel;
-    this.paintBackground();
-  }
-
-  paintBackground() {
-    this.doc.setFillColor(...COLOR.bg);
-    this.doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
-  }
-
-  ensure(needed: number) {
-    if (this.y + needed > PAGE_H - 22) this.newPage();
-  }
-
-  newPage() {
+    this.drawHeader();
     this.drawFooter();
-    this.doc.addPage();
-    this.pageNum++;
-    this.paintBackground();
-    this.y = MARGIN;
-    this.drawRunningHeader();
   }
 
-  drawRunningHeader() {
-    this.doc.setFillColor(...COLOR.amber);
-    this.doc.rect(0, 0, PAGE_W, 1.2, 'F');
+  drawHeader() {
+    // Amber bar
+    this.doc.setFillColor(...AMBER);
+    this.doc.rect(0, 0, PAGE_W, 3, 'F');
+    // Brand
     this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...COLOR.amber);
-    this.doc.text('AETHERIS', MARGIN, 8);
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(...INK);
+    this.doc.text('AETHERIS', MARGIN, 11);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(...COLOR.muted);
-    this.doc.text(this.toolLabel.toUpperCase(), PAGE_W - MARGIN, 8, { align: 'right' });
-    this.y = 16;
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...SUB);
+    this.doc.text(this.toolLabel.toUpperCase(), PAGE_W - MARGIN, 11, { align: 'right' });
+    // Hairline under header
+    this.doc.setDrawColor(...RULE);
+    this.doc.setLineWidth(0.2);
+    this.doc.line(MARGIN, 14, PAGE_W - MARGIN, 14);
   }
 
   drawFooter() {
-    const fy = PAGE_H - 10;
-    this.doc.setDrawColor(...COLOR.border);
+    const fy = PAGE_H - 12;
+    this.doc.setDrawColor(...RULE);
     this.doc.setLineWidth(0.2);
     this.doc.line(MARGIN, fy - 4, PAGE_W - MARGIN, fy - 4);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(7.5);
-    this.doc.setTextColor(...COLOR.muted);
-    this.doc.text('aetheris.technology', MARGIN, fy);
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...SUB);
+    this.doc.text('aetheris.technology  ·  Strategic Asset', MARGIN, fy);
     this.doc.text(`Page ${this.pageNum}`, PAGE_W - MARGIN, fy, { align: 'right' });
   }
 
-  drawCover() {
-    // Amber band
-    this.doc.setFillColor(...COLOR.amber);
-    this.doc.rect(0, 0, PAGE_W, 4, 'F');
+  ensure(needed: number) {
+    if (this.y + needed > PAGE_H - 22) {
+      this.doc.addPage();
+      this.pageNum++;
+      this.y = MARGIN + 14;
+      this.drawHeader();
+      this.drawFooter();
+    }
+  }
 
-    // Logo / brand
+  textBlock(text: string, opts: { size?: number; bold?: boolean; color?: [number, number, number]; gapAfter?: number }) {
+    if (!text) return;
+    const size = opts.size ?? 10;
+    const color = opts.color ?? INK;
+    const lh = size * 0.45;
+    this.doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    this.doc.setFontSize(size);
+    this.doc.setTextColor(color[0], color[1], color[2]);
+    const wrapped = this.doc.splitTextToSize(String(text), CONTENT_W - 4);
+    for (const line of wrapped) {
+      this.ensure(lh + 1);
+      this.y += lh;
+      this.doc.text(line, MARGIN + 2, this.y);
+    }
+    this.y += opts.gapAfter ?? 1.5;
+  }
+
+  h1(text: string) {
+    this.ensure(20);
+    this.y += 4;
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setFontSize(22);
+    this.doc.setTextColor(...INK);
+    const wrapped = this.doc.splitTextToSize(text, CONTENT_W);
+    for (const line of wrapped) {
+      this.ensure(10);
+      this.y += 9;
+      this.doc.text(line, MARGIN, this.y);
+    }
+    // amber underline
+    this.doc.setDrawColor(...AMBER);
+    this.doc.setLineWidth(0.8);
+    this.doc.line(MARGIN, this.y + 2, MARGIN + 28, this.y + 2);
+    this.y += 8;
+  }
+
+  h2(text: string, count?: number) {
+    this.ensure(16);
+    this.y += 6;
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setFontSize(13);
+    this.doc.setTextColor(...INK);
+    const label = count !== undefined ? `${text}  (${count})` : text;
+    this.y += 5;
+    this.doc.text(label, MARGIN, this.y);
+    // small amber accent
+    this.doc.setFillColor(...AMBER);
+    this.doc.rect(MARGIN, this.y - 4, 3, 5, 'F');
+    this.y += 3;
+  }
+
+  paragraph(text: string, color: [number, number, number] = INK, size = 10, bold = false) {
+    this.textBlock(text, { color, size, bold, gapAfter: 1.5 });
+  }
+
+  kv(label: string, value: string, labelColor: [number, number, number] = AMBER) {
+    if (!value) return;
+    // Two-piece line: bold colored label, then normal text
+    const size = 9.5;
+    const lh = size * 0.45;
+    this.doc.setFontSize(size);
+    this.doc.setFont('helvetica', 'bold');
+    const labelText = `${label}: `;
+    const labelW = this.doc.getTextWidth(labelText);
+
+    // Wrap value to remaining width
+    this.doc.setFont('helvetica', 'normal');
+    const maxValueWidth = CONTENT_W - 4 - labelW;
+    const wrapped = this.doc.splitTextToSize(String(value), maxValueWidth);
+
+    for (let i = 0; i < wrapped.length; i++) {
+      this.ensure(lh + 1);
+      this.y += lh;
+      if (i === 0) {
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.setTextColor(...labelColor);
+        this.doc.text(labelText, MARGIN + 2, this.y);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.setTextColor(...INK);
+        this.doc.text(wrapped[i], MARGIN + 2 + labelW, this.y);
+      } else {
+        this.doc.text(wrapped[i], MARGIN + 2 + labelW, this.y);
+      }
+    }
+    this.y += 1.5;
+  }
+
+  divider() {
+    this.ensure(4);
+    this.y += 2;
+    this.doc.setDrawColor(...RULE);
+    this.doc.setLineWidth(0.2);
+    this.doc.line(MARGIN, this.y, PAGE_W - MARGIN, this.y);
+    this.y += 3;
+  }
+
+  /** Soft beige callout for grouping a block of related content. */
+  beginCard() {
+    this.ensure(20);
+    this.cardStartY = this.y;
+    this.y += 3; // top inner padding
+  }
+
+  endCard() {
+    if (this.cardStartY === null) return;
+    const start = this.cardStartY;
+    const end = this.y + 2;
+    const h = end - start;
+    // Draw a left amber bar + soft fill BEHIND the already-drawn text by re-drawing the text on top.
+    // Simpler approach: draw the fill+left bar BEFORE the content using a deferred rectangle.
+    // jsPDF doesn't support layers, so we instead leave a thin left bar only — drawn AFTER text is fine.
+    this.doc.setFillColor(...AMBER);
+    this.doc.rect(MARGIN - 2, start, 1.2, h, 'F');
+    // hairline bottom
+    this.doc.setDrawColor(...RULE);
+    this.doc.setLineWidth(0.15);
+    this.doc.line(MARGIN, end + 1, PAGE_W - MARGIN, end + 1);
+    this.cardStartY = null;
+    this.y = end + 4;
+  }
+
+  drawCover(title: string) {
+    // Fresh first page: clear and redraw
+    // (Constructor already drew headers; for cover we want a clean look.)
+    // Top brand
     this.doc.setFont('helvetica', 'bold');
     this.doc.setFontSize(11);
-    this.doc.setTextColor(...COLOR.amber);
-    this.doc.text('AETHERIS', MARGIN, 26);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...COLOR.muted);
-    this.doc.text('AI Studio · Indianapolis', MARGIN, 31);
+    this.doc.setTextColor(...AMBER);
+    this.doc.text('AETHERIS  ·  AI STUDIO', MARGIN, 30);
 
     // Tool label chip
-    this.doc.setFillColor(...COLOR.amberSoft);
-    this.doc.roundedRect(MARGIN, 70, 70, 8, 1.5, 1.5, 'F');
+    this.doc.setFillColor(...AMBER);
+    this.doc.rect(MARGIN, 90, 2, 20, 'F');
     this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...COLOR.amber);
-    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 4, 75.5);
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(...AMBER);
+    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 6, 96);
 
     // Title
     this.doc.setFont('helvetica', 'bold');
     this.doc.setFontSize(28);
-    this.doc.setTextColor(...COLOR.white);
-    const titleLines = this.doc.splitTextToSize(this.title, CONTENT_W);
-    this.doc.text(titleLines, MARGIN, 92);
+    this.doc.setTextColor(...INK);
+    const titleLines = this.doc.splitTextToSize(title, CONTENT_W);
+    let ty = 105;
+    for (const line of titleLines) {
+      this.doc.text(line, MARGIN + 6, ty);
+      ty += 11;
+    }
 
-    // Divider
-    const dividerY = 92 + titleLines.length * 11 + 8;
-    this.doc.setDrawColor(...COLOR.amber);
-    this.doc.setLineWidth(0.6);
-    this.doc.line(MARGIN, dividerY, MARGIN + 30, dividerY);
-
-    // Meta
+    // Date
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(10);
-    this.doc.setTextColor(...COLOR.muted);
-    this.doc.text(`Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, MARGIN, dividerY + 8);
+    this.doc.setTextColor(...SUB);
+    this.doc.text(
+      `Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+      MARGIN + 6,
+      ty + 4,
+    );
 
-    // Footer block
-    this.doc.setFillColor(...COLOR.card);
-    this.doc.rect(0, PAGE_H - 30, PAGE_W, 30, 'F');
+    // Bottom note
+    this.doc.setDrawColor(...AMBER);
+    this.doc.setLineWidth(0.6);
+    this.doc.line(MARGIN, PAGE_H - 35, MARGIN + 25, PAGE_H - 35);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setFontSize(9);
-    this.doc.setTextColor(...COLOR.amber);
-    this.doc.text('Confidential — Strategic Asset', MARGIN, PAGE_H - 18);
+    this.doc.setTextColor(...INK);
+    this.doc.text('Confidential — Strategic Asset', MARGIN, PAGE_H - 28);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(8);
-    this.doc.setTextColor(...COLOR.muted);
-    this.doc.text('Generated by Aetheris AI Studio. Built for execution, not for filing.', MARGIN, PAGE_H - 12);
+    this.doc.setTextColor(...SUB);
+    this.doc.text('Generated by Aetheris AI Studio. Built for execution, not for filing.', MARGIN, PAGE_H - 22);
 
+    // New content page
     this.doc.addPage();
     this.pageNum++;
-    this.paintBackground();
-    this.drawRunningHeader();
-  }
-
-  sectionTitle(label: string, count?: number) {
-    this.ensure(18);
-    this.y += 4;
-    // accent bar
-    this.doc.setFillColor(...COLOR.amber);
-    this.doc.rect(MARGIN, this.y, 2, 7, 'F');
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(14);
-    this.doc.setTextColor(...COLOR.white);
-    this.doc.text(label, MARGIN + 5, this.y + 5.5);
-    if (count !== undefined) {
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.setFontSize(9);
-      this.doc.setTextColor(...COLOR.muted);
-      const w = this.doc.getTextWidth(label);
-      this.doc.text(`(${count})`, MARGIN + 5 + w + 3, this.y + 5.5);
-    }
-    this.y += 10;
-  }
-
-  card(draw: (innerY: number, innerW: number) => number) {
-    const startY = this.y;
-    const innerX = MARGIN + 4;
-    const innerW = CONTENT_W - 8;
-    this.y += 4;
-    const endY = draw(this.y, innerW);
-    this.y = endY + 4;
-    const h = this.y - startY;
-    if (this.y > PAGE_H - 22) {
-    } else {
-      this.doc.setDrawColor(...COLOR.border);
-      this.doc.setLineWidth(0.2);
-      this.doc.setFillColor(...COLOR.card);
-      this.doc.roundedRect(MARGIN, startY, CONTENT_W, h, 1.5, 1.5, 'FD');
-    }
-    this.y += 3;
-  }
-
-  paintCard(lines: { text: string; size?: number; bold?: boolean; color?: [number, number, number]; gap?: number }[]) {
-    const innerW = CONTENT_W - 8;
-    const padTop = 4;
-    const padBottom = 5;
-    let h = padTop;
-    const measured: { wrapped: string[]; size: number; bold: boolean; color: [number, number, number]; gap: number }[] = [];
-    for (const ln of lines) {
-      const size = ln.size ?? 9.5;
-      const bold = ln.bold ?? false;
-      const color = ln.color ?? COLOR.text;
-      const gap = ln.gap ?? 1.5;
-      this.doc.setFont('helvetica', bold ? 'bold' : 'normal');
-      this.doc.setFontSize(size);
-      const wrapped = this.doc.splitTextToSize(ln.text, innerW);
-      measured.push({ wrapped, size, bold, color, gap });
-      h += wrapped.length * (size * 0.42) + gap;
-    }
-    h += padBottom;
-
-    this.ensure(h + 4);
-    this.doc.setDrawColor(...COLOR.border);
-    this.doc.setLineWidth(0.2);
-    this.doc.setFillColor(...COLOR.card);
-    this.doc.roundedRect(MARGIN, this.y, CONTENT_W, h, 1.8, 1.8, 'FD');
-
-    let cursor = this.y + padTop;
-    for (const m of measured) {
-      this.doc.setFont('helvetica', m.bold ? 'bold' : 'normal');
-      this.doc.setFontSize(m.size);
-      this.doc.setTextColor(...m.color);
-      const lh = m.size * 0.42;
-      for (const w of m.wrapped) {
-        cursor += lh;
-        this.doc.text(w, MARGIN + 4, cursor);
-      }
-      cursor += m.gap;
-    }
-    this.y += h + 3;
-  }
-
-  paragraph(text: string, opts: { size?: number; bold?: boolean; color?: [number, number, number] } = {}) {
-    if (!text) return;
-    const size = opts.size ?? 10;
-    const color = opts.color ?? COLOR.text;
-    this.doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
-    this.doc.setFontSize(size);
-    this.doc.setTextColor(...color);
-    const wrapped = this.doc.splitTextToSize(text, CONTENT_W);
-    const lh = size * 0.42;
-    for (const line of wrapped) {
-      this.ensure(lh + 1);
-      this.y += lh;
-      this.doc.text(line, MARGIN, this.y);
-    }
-    this.y += 2;
+    this.y = MARGIN + 14;
+    this.drawHeader();
+    this.drawFooter();
   }
 
   finish(filename: string) {
-    this.drawFooter();
     this.doc.save(filename);
   }
 }
 
-function renderSocialContent(b: PdfBuilder, data: any) {
-  if (data.businessName) b.paragraph(`For: ${data.businessName}`, { color: COLOR.muted, size: 9.5 });
-  if (data.linkedinPosts?.length) {
-    b.sectionTitle('LinkedIn Posts', data.linkedinPosts.length);
-    data.linkedinPosts.forEach((p: any, i: number) => {
-      b.paintCard([
-        { text: `LinkedIn · Post ${i + 1}`, size: 8, bold: true, color: COLOR.blue, gap: 2 },
-        ...(p.hook ? [{ text: p.hook, size: 10.5, bold: true, color: COLOR.amber, gap: 2 }] : []),
-        ...(p.body ? [{ text: p.body, size: 9.5, color: COLOR.text, gap: 2 }] : []),
-        ...(p.cta ? [{ text: `Call to action: ${p.cta}`, size: 9, bold: true, color: COLOR.white }] : []),
-      ]);
+// ---------------- Renderers ----------------
+
+function renderSocial(w: PdfWriter, d: any) {
+  if (d.businessName) {
+    w.paragraph(`Prepared for: ${d.businessName}`, SUB, 10);
+    w.divider();
+  }
+  if (d.linkedinPosts?.length) {
+    w.h2('LinkedIn Posts', d.linkedinPosts.length);
+    d.linkedinPosts.forEach((p: any, i: number) => {
+      w.beginCard();
+      w.paragraph(`Post ${i + 1}`, BLUE, 9, true);
+      if (p.hook) w.paragraph(p.hook, AMBER, 11, true);
+      if (p.body) w.paragraph(p.body, INK, 10);
+      if (p.cta) w.kv('Call to action', p.cta);
+      w.endCard();
     });
   }
-  if (data.facebookPosts?.length) {
-    b.sectionTitle('Facebook Posts', data.facebookPosts.length);
-    data.facebookPosts.forEach((p: any, i: number) => {
-      b.paintCard([
-        { text: `Facebook · Post ${i + 1}`, size: 8, bold: true, color: COLOR.blue, gap: 2 },
-        ...(p.hook ? [{ text: p.hook, size: 10.5, bold: true, color: COLOR.amber, gap: 2 }] : []),
-        ...(p.body ? [{ text: p.body, size: 9.5, color: COLOR.text, gap: 2 }] : []),
-        ...(p.cta ? [{ text: `Call to action: ${p.cta}`, size: 9, bold: true, color: COLOR.white }] : []),
-      ]);
+  if (d.facebookPosts?.length) {
+    w.h2('Facebook Posts', d.facebookPosts.length);
+    d.facebookPosts.forEach((p: any, i: number) => {
+      w.beginCard();
+      w.paragraph(`Post ${i + 1}`, BLUE, 9, true);
+      if (p.hook) w.paragraph(p.hook, AMBER, 11, true);
+      if (p.body) w.paragraph(p.body, INK, 10);
+      if (p.cta) w.kv('Call to action', p.cta);
+      w.endCard();
     });
   }
-  if (data.adHooks?.length) {
-    b.sectionTitle('Ad Hooks', data.adHooks.length);
-    data.adHooks.forEach((h: any, i: number) => {
-      b.paintCard([
-        { text: `Ad Hook ${i + 1}`, size: 8, bold: true, color: COLOR.amber, gap: 2 },
-        ...(h.headline ? [{ text: h.headline, size: 11, bold: true, color: COLOR.white, gap: 2 }] : []),
-        ...(h.subheadline ? [{ text: h.subheadline, size: 9.5, color: COLOR.text, gap: 2 }] : []),
-        ...(h.cta ? [{ text: `CTA: ${h.cta}`, size: 9, bold: true, color: COLOR.amber }] : []),
-      ]);
+  if (d.adHooks?.length) {
+    w.h2('Ad Hooks', d.adHooks.length);
+    d.adHooks.forEach((h: any, i: number) => {
+      w.beginCard();
+      w.paragraph(`Ad Hook ${i + 1}`, AMBER, 9, true);
+      if (h.headline) w.paragraph(h.headline, INK, 12, true);
+      if (h.subheadline) w.paragraph(h.subheadline, INK, 10);
+      if (h.cta) w.kv('CTA', h.cta);
+      w.endCard();
     });
   }
 }
 
-function renderContentCalendar(b: PdfBuilder, data: any) {
-  const days = data.days || [];
-  b.sectionTitle('30-Day Content Calendar', days.length);
-  days.forEach((d: any) => {
-    const meta = [d.platform, d.contentType, d.bestTime].filter(Boolean).join(' · ');
-    const tags = (d.hashtags || []).map((h: string) => `#${h.replace('#', '')}`).join(' ');
-    b.paintCard([
-      { text: `Day ${d.day}${meta ? ' · ' + meta : ''}`, size: 8, bold: true, color: COLOR.amber, gap: 2 },
-      ...(d.topic ? [{ text: d.topic, size: 11, bold: true, color: COLOR.white, gap: 2 }] : []),
-      ...(d.hook ? [{ text: `"${d.hook}"`, size: 10, bold: true, color: COLOR.amber, gap: 2 }] : []),
-      ...(d.caption ? [{ text: d.caption, size: 9.5, color: COLOR.text, gap: 2 }] : []),
-      ...(tags ? [{ text: tags, size: 8.5, color: COLOR.blue }] : []),
-    ]);
+function renderCalendar(w: PdfWriter, d: any) {
+  const days = d.days || [];
+  w.h2('30-Day Content Calendar', days.length);
+  days.forEach((day: any) => {
+    const meta = [day.platform, day.contentType, day.bestTime].filter(Boolean).join(' · ');
+    const tags = (day.hashtags || []).map((h: string) => `#${String(h).replace('#', '')}`).join(' ');
+    w.beginCard();
+    w.paragraph(`Day ${day.day}${meta ? '  ·  ' + meta : ''}`, AMBER, 9, true);
+    if (day.topic) w.paragraph(day.topic, INK, 12, true);
+    if (day.hook) w.paragraph(`"${day.hook}"`, AMBER, 10, true);
+    if (day.caption) w.paragraph(day.caption, INK, 10);
+    if (tags) w.paragraph(tags, BLUE, 9);
+    w.endCard();
   });
 }
 
-function renderSalesScripts(b: PdfBuilder, data: any) {
+function renderSalesScripts(w: PdfWriter, d: any) {
   const sections: { key: string; label: string }[] = [
     { key: 'coldCalls', label: 'Cold Call Scripts' },
     { key: 'emailScripts', label: 'Email Scripts' },
@@ -310,84 +350,126 @@ function renderSalesScripts(b: PdfBuilder, data: any) {
     { key: 'closingScripts', label: 'Closing Scripts' },
   ];
   for (const s of sections) {
-    const arr = data[s.key];
+    const arr = d[s.key];
     if (!arr?.length) continue;
-    b.sectionTitle(s.label, arr.length);
+    w.h2(s.label, arr.length);
     arr.forEach((item: any, i: number) => {
-      const text = typeof item === 'string' ? item : (item.script || item.body || '');
-      const lines: any[] = [{ text: `${s.label.slice(0, -1)} ${i + 1}`, size: 8, bold: true, color: COLOR.amber, gap: 2 }];
-      if (item.title) lines.push({ text: item.title, size: 11, bold: true, color: COLOR.white, gap: 2 });
-      if (item.scenario) lines.push({ text: `Scenario: ${item.scenario}`, size: 9, bold: true, color: COLOR.blue, gap: 2 });
-      if (item.objection) lines.push({ text: `"${item.objection}"`, size: 10, bold: true, color: COLOR.amber, gap: 2 });
-      if (item.subject) lines.push({ text: `Subject: ${item.subject}`, size: 9.5, bold: true, color: COLOR.white, gap: 2 });
-      if (text) lines.push({ text, size: 9.5, color: COLOR.text });
-      b.paintCard(lines);
+      const text = typeof item === 'string' ? item : item.script || item.body || '';
+      w.beginCard();
+      w.paragraph(`${s.label.replace(/s$/, '')} ${i + 1}`, AMBER, 9, true);
+      if (item.title) w.paragraph(item.title, INK, 12, true);
+      if (item.scenario) w.kv('Scenario', item.scenario, BLUE);
+      if (item.objection) w.paragraph(`"${item.objection}"`, AMBER, 11, true);
+      if (item.subject) w.kv('Subject', item.subject);
+      if (text) w.paragraph(text, INK, 10);
+      w.endCard();
     });
   }
 }
 
-function renderFollowUp(b: PdfBuilder, data: any) {
-  const steps = data.steps || data.touches || data.plan || [];
-  b.sectionTitle('Follow-Up Sequence', steps.length);
+function renderFollowUp(w: PdfWriter, d: any) {
+  const steps = d.steps || d.touches || d.plan || [];
+  w.h2('Follow-Up Sequence', steps.length);
   steps.forEach((s: any, i: number) => {
     const day = s.day || s.dayNumber || i + 1;
-    const meta = [s.channel, s.goal].filter(Boolean).join(' · ');
+    const meta = [s.channel, s.goal].filter(Boolean).join('  ·  ');
     const body = s.message || s.body || s.script || '';
-    const lines: any[] = [{ text: `Day ${day}${meta ? ' · ' + meta : ''}`, size: 8, bold: true, color: COLOR.amber, gap: 2 }];
-    if (s.subject) lines.push({ text: `Subject: ${s.subject}`, size: 10, bold: true, color: COLOR.white, gap: 2 });
-    if (body) lines.push({ text: body, size: 9.5, color: COLOR.text });
-    b.paintCard(lines);
+    w.beginCard();
+    w.paragraph(`Day ${day}${meta ? '  ·  ' + meta : ''}`, AMBER, 9, true);
+    if (s.subject) w.kv('Subject', s.subject);
+    if (body) w.paragraph(body, INK, 10);
+    w.endCard();
   });
 }
 
-function renderStrategicQuestions(b: PdfBuilder, data: any) {
-  const qs = data.questions || data.strategicQuestions || [];
-  b.sectionTitle('Strategic Questions', qs.length);
+function renderQuestions(w: PdfWriter, d: any) {
+  const qs = d.questions || d.strategicQuestions || [];
+  w.h2('Strategic Questions', qs.length);
   qs.forEach((q: any, i: number) => {
-    const text = typeof q === 'string' ? q : (q.question || q.text || '');
-    const lines: any[] = [{ text: `Question ${i + 1}`, size: 8, bold: true, color: COLOR.amber, gap: 2 }];
-    if (text) lines.push({ text, size: 10.5, bold: true, color: COLOR.white, gap: 2 });
-    if (q.purpose) lines.push({ text: `Why ask it: ${q.purpose}`, size: 9, color: COLOR.text, gap: 2 });
-    if (q.followUp) lines.push({ text: `Follow-up: ${q.followUp}`, size: 9, color: COLOR.muted });
-    b.paintCard(lines);
+    const text = typeof q === 'string' ? q : q.question || q.text || '';
+    w.beginCard();
+    w.paragraph(`Question ${i + 1}`, AMBER, 9, true);
+    if (text) w.paragraph(text, INK, 11, true);
+    if (q.purpose) w.kv('Why ask it', q.purpose);
+    if (q.followUp) w.kv('Follow-up', q.followUp, SUB);
+    w.endCard();
   });
 }
 
-function renderBrandContradictions(b: PdfBuilder, data: any) {
-  const items = data.contradictions || data.findings || [];
-  b.sectionTitle('Brand Contradictions', items.length);
+function renderContradictions(w: PdfWriter, d: any) {
+  const items = d.contradictions || d.findings || [];
+  w.h2('Brand Contradictions', items.length);
   items.forEach((c: any, i: number) => {
-    const lines: any[] = [{ text: `Contradiction ${i + 1}`, size: 8, bold: true, color: COLOR.red, gap: 2 }];
     const title = c.title || c.contradiction;
-    if (title) lines.push({ text: title, size: 11, bold: true, color: COLOR.white, gap: 2 });
-    if (c.claim) lines.push({ text: `Claim: ${c.claim}`, size: 9.5, color: COLOR.text, gap: 2 });
-    if (c.reality) lines.push({ text: `Reality: ${c.reality}`, size: 9.5, color: COLOR.text, gap: 2 });
     const fix = c.fix || c.recommendation;
-    if (fix) lines.push({ text: `Fix: ${fix}`, size: 9.5, bold: true, color: COLOR.amber });
-    b.paintCard(lines);
+    w.beginCard();
+    w.paragraph(`Contradiction ${i + 1}`, RED, 9, true);
+    if (title) w.paragraph(title, INK, 12, true);
+    if (c.claim) w.kv('Claim', c.claim);
+    if (c.reality) w.kv('Reality', c.reality, RED);
+    if (fix) w.kv('Fix', fix, AMBER);
+    w.endCard();
   });
 }
 
-function renderFrictionAudit(b: PdfBuilder, data: any) {
-  const items = data.findings || data.frictionPoints || data.audit || [];
-  b.sectionTitle('Friction Vocabulary Audit', items.length);
+function renderFriction(w: PdfWriter, d: any) {
+  const items = d.findings || d.frictionPoints || d.audit || [];
+  w.h2('Friction Vocabulary Audit', items.length);
   items.forEach((f: any, i: number) => {
     const phrase = f.phrase || f.term || f.title;
     const problem = f.problem || f.issue;
     const fix = f.suggestion || f.replacement;
-    const lines: any[] = [{ text: `Finding ${i + 1}`, size: 8, bold: true, color: COLOR.amber, gap: 2 }];
-    if (phrase) lines.push({ text: `"${phrase}"`, size: 11, bold: true, color: COLOR.white, gap: 2 });
-    if (problem) lines.push({ text: `Why it hurts: ${problem}`, size: 9.5, color: COLOR.text, gap: 2 });
-    if (fix) lines.push({ text: `Replace with: ${fix}`, size: 9.5, bold: true, color: COLOR.amber });
-    b.paintCard(lines);
+    w.beginCard();
+    w.paragraph(`Finding ${i + 1}`, AMBER, 9, true);
+    if (phrase) w.paragraph(`"${phrase}"`, INK, 12, true);
+    if (problem) w.kv('Why it hurts', problem, RED);
+    if (fix) w.kv('Replace with', fix, AMBER);
+    w.endCard();
   });
 }
 
-function renderGenericJson(b: PdfBuilder, data: any) {
-  b.sectionTitle('Output');
-  const text = JSON.stringify(data, null, 2);
-  b.paragraph(text, { size: 8.5, color: COLOR.muted });
+/** Walk an unknown JSON shape and render it as readable sections. */
+function renderUnknown(w: PdfWriter, d: any) {
+  const renderValue = (val: any, depth: number) => {
+    if (val === null || val === undefined) return;
+    if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+      w.paragraph(String(val), INK, 10);
+      return;
+    }
+    if (Array.isArray(val)) {
+      val.forEach((entry, i) => {
+        if (typeof entry === 'string' || typeof entry === 'number') {
+          w.paragraph(`${i + 1}. ${entry}`, INK, 10);
+        } else {
+          w.beginCard();
+          w.paragraph(`Item ${i + 1}`, AMBER, 9, true);
+          renderValue(entry, depth + 1);
+          w.endCard();
+        }
+      });
+      return;
+    }
+    if (typeof val === 'object') {
+      for (const [k, v] of Object.entries(val)) {
+        if (v === null || v === undefined || v === '') continue;
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim();
+        if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+          w.kv(label, String(v));
+        } else if (Array.isArray(v)) {
+          if (v.length === 0) continue;
+          w.h2(label, v.length);
+          renderValue(v, depth + 1);
+        } else if (typeof v === 'object') {
+          w.h2(label);
+          renderValue(v, depth + 1);
+        }
+      }
+    }
+  };
+  renderValue(d, 0);
 }
+
+// ---------------- Entry ----------------
 
 export function downloadLibraryItemAsPdf(item: AdminLibraryItem) {
   if (item.tool_type === 'playbook' && item.file_url) {
@@ -396,25 +478,34 @@ export function downloadLibraryItemAsPdf(item: AdminLibraryItem) {
   }
 
   const toolLabel = TOOL_LABELS[item.tool_type] || item.tool_type;
-  const b = new PdfBuilder(item.title, toolLabel);
-  b.drawCover();
+  const w = new PdfWriter(toolLabel);
+  w.drawCover(item.title);
+  w.h1(item.title);
 
   const data = item.output_data as any;
-  if (!data || typeof data !== 'object') {
-    b.paragraph('No content available.', { color: COLOR.muted });
+  if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+    w.paragraph('No content available for this item.', SUB, 10);
   } else {
-    switch (item.tool_type) {
-      case 'social_content': renderSocialContent(b, data); break;
-      case 'content_calendar': renderContentCalendar(b, data); break;
-      case 'sales_scripts': renderSalesScripts(b, data); break;
-      case 'follow_up_plan': renderFollowUp(b, data); break;
-      case 'strategic_questions': renderStrategicQuestions(b, data); break;
-      case 'brand_contradictions': renderBrandContradictions(b, data); break;
-      case 'friction_audit': renderFrictionAudit(b, data); break;
-      default: renderGenericJson(b, data);
+    try {
+      switch (item.tool_type) {
+        case 'social_content': renderSocial(w, data); break;
+        case 'content_calendar': renderCalendar(w, data); break;
+        case 'sales_scripts': renderSalesScripts(w, data); break;
+        case 'follow_up_plan': renderFollowUp(w, data); break;
+        case 'strategic_questions': renderQuestions(w, data); break;
+        case 'brand_contradictions': renderContradictions(w, data); break;
+        case 'friction_audit': renderFriction(w, data); break;
+        default: renderUnknown(w, data);
+      }
+    } catch (err) {
+      // Fallback: dump as readable JSON
+      console.error('Library PDF render error:', err);
+      w.h2('Raw Output');
+      const text = JSON.stringify(data, null, 2);
+      text.split('\n').forEach((line) => w.paragraph(line, INK, 9));
     }
   }
 
   const safe = item.title.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '_').slice(0, 80) || 'aetheris-library';
-  b.finish(`${safe}.pdf`);
+  w.finish(`${safe}.pdf`);
 }
