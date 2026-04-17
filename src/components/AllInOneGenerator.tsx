@@ -481,32 +481,37 @@ export const AllInOneGenerator: React.FC = () => {
               return (
                 <div
                   key={job.key}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/40"
+                  className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-card/40"
                 >
-                  <Icon className="w-4 h-4 text-amber flex-shrink-0" />
-                  <span className="flex-1 text-sm font-medium text-foreground">{job.label}</span>
-                  <div className="flex items-center gap-2 text-xs">
-                    {state.status === 'running' && (
-                      <span className="flex items-center gap-1 text-amber">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running
-                      </span>
-                    )}
-                    {state.status === 'success' && (
-                      <span className="flex items-center gap-1 text-green-400">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Library
-                        {state.durationMs ? <span className="text-muted-foreground">· {(state.durationMs / 1000).toFixed(1)}s</span> : null}
-                      </span>
-                    )}
-                    {state.status === 'error' && (
-                      <span className="flex items-center gap-1 text-red-400" title={state.message}>
-                        <XCircle className="w-3.5 h-3.5" /> Failed
-                      </span>
-                    )}
-                    {state.status === 'skipped' && (
-                      <span className="text-muted-foreground" title={state.message}>Skipped</span>
-                    )}
-                    {state.status === 'idle' && <span className="text-muted-foreground">Queued</span>}
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-amber flex-shrink-0" />
+                    <span className="flex-1 text-sm font-medium text-foreground">{job.label}</span>
+                    <div className="flex items-center gap-2 text-xs">
+                      {state.status === 'running' && (
+                        <span className="flex items-center gap-1 text-amber">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running
+                        </span>
+                      )}
+                      {state.status === 'success' && (
+                        <span className="flex items-center gap-1 text-green-400">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Library
+                          {state.durationMs ? <span className="text-muted-foreground">· {(state.durationMs / 1000).toFixed(1)}s</span> : null}
+                        </span>
+                      )}
+                      {state.status === 'error' && (
+                        <span className="flex items-center gap-1 text-red-400">
+                          <XCircle className="w-3.5 h-3.5" /> Failed
+                        </span>
+                      )}
+                      {state.status === 'skipped' && (
+                        <span className="text-muted-foreground">Skipped</span>
+                      )}
+                      {state.status === 'idle' && <span className="text-muted-foreground">Queued</span>}
+                    </div>
                   </div>
+                  {(state.status === 'error' || state.status === 'skipped') && state.message && (
+                    <p className="text-[11px] text-muted-foreground pl-7 leading-snug">{state.message}</p>
+                  )}
                 </div>
               );
             })}
