@@ -1,66 +1,90 @@
 
 
-## Goal
-Make PIN 9822 unlock the admin area instantly. Strip every check that's currently slowing it down.
+The user uploaded files from a different "CTOguy.ai Project Vision" project (a project management dashboard with team workload, tasks, AI chatbot). They want me to:
+1. Build a **full CRM** into the admin backend to consolidate/clean things up
+2. **Showcase this custom CRM as a demo on the front-end** for clients to see
 
-## What's slow today
-1. `admin-pin-login` edge function does, in sequence: profile lookup → upsert into `admin_users` → spin up a second Supabase client → `signInWithPassword`. The auth logs show that single password sign-in takes 150–375 ms on its own, plus cold-start.
-2. After PIN succeeds, the client calls `setSession(...)` (network round-trip to Supabase Auth) before navigating.
-3. `AdminLogin` runs an extra `getSession` + `is_admin` RPC on mount.
-4. `AdminDashboard` then re-runs `getSession` + `is_admin` RPC before showing anything.
-5. The whole admin tree is wrapped in `AuthProvider`, which on every mount fires `onAuthStateChange` + `getSession` + a `profiles` SELECT + possible `profiles` INSERT — all triggered again by the PIN sign-in event.
+The TO-DO.json hints at CRM scope: contacts, interactions, leads, pipeline stages, CSV import.
 
-That's why "verifying" feels long: 4–6 sequential network calls before the dashboard renders.
+Looking at current state — there's already `drip_prospects` (basically leads), `contact_submissions`, `assessment_leads`, `diagnostic_leads`, `subscriber_profiles`, `purchases`. These are scattered. A real CRM should unify them into Contacts + Companies + Deals + Interactions.
 
-## Plan — rip it out
+Let me ask one clarifying question about scope so I don't overbuild, then present the plan.
 
-### 1. Replace the edge function with a trivial PIN check
-Rewrite `supabase/functions/admin-pin-login/index.ts` to:
-- Validate `pin === "9822"`.
-- Return `{ ok: true, token: "<server-signed short token>" }` (HMAC of pin + timestamp using `SUPABASE_SERVICE_ROLE_KEY` as secret, valid for ~12h).
-- No DB calls. No `signInWithPassword`. No user creation. No `admin_users` table.
+Actually — the request is clear enough. Let me present a plan with sensible defaults and let the user prune.
 
-This eliminates ~400–800 ms of backend work and a cold-start path.
+---
 
-### 2. Client stores PIN session locally, no Supabase auth involved
-In `AdminLogin.tsx`:
-- On submit, POST PIN to the function. On `ok`, write `localStorage.setItem('aetheris_admin_token', token)` and `navigate('/admin')`.
-- Remove the `useEffect` that calls `getSession` + `is_admin`. Replace with a synchronous check: if `localStorage` has a non-expired token, redirect immediately.
-- Keep the "Back to website" link and the PIN input — nothing else.
+# Plan: Aetheris CRM (Admin tool + Public demo)
 
-### 3. Isolate admin from `AuthProvider`
-In `App.tsx`:
-- Move `<Route path="/admin/*">` and `<Route path="/admin/login">` **outside** `<AuthProvider>` (render them in a parallel `<Routes>` block, or wrap only non-admin routes in `AuthProvider`).
-- Result: visiting `/admin/login` no longer triggers `onAuthStateChange`, the `profiles` SELECT/INSERT, or any Supabase auth bootstrapping.
+## What you'll get
 
-### 4. Strip admin verification from the dashboard
-In `AdminDashboard.tsx`:
-- Delete the `verifyAndLoad` block that calls `getSession` + `is_admin`.
-- Replace with synchronous: read `aetheris_admin_token` from localStorage; if missing/expired → `navigate('/admin/login')`; otherwise call `fetchData()` immediately.
-- `handleLogout` becomes `localStorage.removeItem('aetheris_admin_token'); navigate('/admin/login')` — no `supabase.auth.signOut()`.
+**1. A unified CRM inside `/admin`** — one place that ties together every contact, lead, and deal. Cleans up the scattered tables (drip prospects, contact submissions, assessment/diagnostic leads, purchases) by surfacing them as one timeline per person.
 
-### 5. Keep the admin-only edge functions working
-`admin-library` and `admin-insights` currently expect a Supabase user with `is_admin`. Switch them to accept the PIN token in an `x-admin-token` header and verify it with the same HMAC. Quick, no DB lookup.
+**2. A live demo CRM on the public site** at `/crm-demo` — read-only, sandboxed sample data, branded to look exactly like the real admin tool. Shareable link for client pitches.
 
-### 6. Memory update
-Update `mem://features/admin-analytics-hub` to note: PIN 9822 is the only admin auth; admin pages do not use Supabase Auth or `AuthProvider`.
+## Scope
 
-## Files to change
-- `supabase/functions/admin-pin-login/index.ts` — rewrite
-- `supabase/functions/admin-library/index.ts` — accept PIN token instead of JWT
-- `supabase/functions/admin-insights/index.ts` — accept PIN token instead of JWT
-- `src/pages/AdminLogin.tsx` — remove session/RPC checks, store token locally
-- `src/pages/AdminDashboard.tsx` — remove session/RPC verification, use localStorage
-- `src/App.tsx` — move admin routes outside `AuthProvider`
-- `mem://features/admin-analytics-hub` — note new auth model
+### Data model (new tables)
+- `crm_companies` — name, website, industry, size, notes
+- `crm_contacts` — name, email, phone, title, company_id, owner, tags
+- `crm_deals` — title, contact_id, value, stage (Lead → Qualified → Proposal → Won/Lost), close date
+- `crm_interactions` — contact_id, type (call/email/meeting/note), subject, body, occurred_at
+- `crm_demo_data` — pre-seeded fictional companies/contacts/deals for the public demo (separate so the demo is never polluted with real data)
 
-## Trade-off (FYI)
-Without a real Supabase session, the admin dashboard's direct DB queries (`contact_submissions`, `site_events`) will run as the **anon role**. Those tables currently rely on RLS that requires `is_admin(auth.uid())`, so they'd return zero rows. Two options:
-- **A (recommended for speed):** route those reads through a new `admin-data` edge function that checks the PIN token and uses the service role to fetch.
-- **B:** keep an invisible service-account session, but that puts us back where we started.
+All tables: RLS locked to `is_admin(auth.uid())` for the real CRM; demo table is publicly readable.
 
-I'll go with **A** — one extra edge function (`admin-data`) is cheaper than the 4-call verification chain we have now.
+### Admin CRM UI (new tab in `/admin`)
+- **Contacts list** — searchable, filterable by tag/owner, CSV import
+- **Contact detail** — profile + interaction timeline + linked deals + linked company
+- **Companies list + detail** — same pattern
+- **Deals pipeline** — Kanban board with drag-and-drop between stages
+- **Interactions log** — quick-add call/email/meeting/note from any contact
+- **Auto-import bridges**:
+  - New `contact_submissions` → auto-create CRM contact + "Inbound form" interaction
+  - New `drip_prospects` → CRM contact tagged "outbound"
+  - New `purchases` → CRM deal marked Won
+  - New `diagnostic_leads` / `assessment_leads` → contact + scored interaction
 
-## Result
-PIN submit → 1 edge call (~50–150 ms) → navigate. Dashboard renders immediately and pulls data in the background. No `getSession`, no `is_admin` RPC, no `AuthProvider` involvement.
+### Public Demo (`/crm-demo`)
+- Same UI components, fed from `crm_demo_data` (fictional brands like "Northpoint Logistics", "Helix Medical", etc.)
+- Banner: "Live demo of the Aetheris CRM — sample data only"
+- Read-only: drag/edit interactions show a toast "Demo mode — sign up to enable editing"
+- Linked from `/services` and a new nav entry "See our CRM"
+
+## File changes (high level)
+
+```text
+NEW  supabase/migrations/* — 5 tables + RLS + seed demo data
+NEW  src/components/crm/
+       ContactsList.tsx
+       ContactDetail.tsx
+       CompaniesList.tsx
+       DealsPipeline.tsx        ← Kanban drag-drop (use @dnd-kit)
+       InteractionTimeline.tsx
+       QuickInteractionModal.tsx
+       CsvImportDialog.tsx
+       CrmShell.tsx             ← shared layout (used by admin + demo)
+NEW  src/lib/crm.ts             ← typed query helpers
+NEW  src/pages/CrmDemoPage.tsx  ← public read-only demo
+EDIT src/pages/AdminDashboard.tsx — add "CRM" tab
+EDIT src/App.tsx — add /crm-demo route
+EDIT supabase/functions/admin-data/index.ts — CRM read endpoints
+NEW  supabase/functions/crm-import-csv/index.ts
+NEW  supabase/functions/crm-bridge-leads/index.ts ← cron-style sync from existing lead tables
+```
+
+## What I'm NOT including (tell me if you want any)
+- Email send-from-CRM (you already have the campaign tool)
+- Reporting/analytics charts (your admin already has insights)
+- AI chat inside the CRM (can add a Lovable AI "summarize this contact" button if you want)
+- Mobile app
+
+## Order of work
+1. Migrations + RLS + demo seed
+2. Shared CRM components (ContactsList, ContactDetail, Timeline)
+3. Companies + Deals pipeline (Kanban)
+4. CSV import + lead-table bridge
+5. Wire admin tab
+6. Build public `/crm-demo` page
+7. Add nav link + landing-page mention
 
