@@ -63,12 +63,15 @@ export const SEOOptimizer: React.FC = () => {
 
   useEffect(() => { fetchData(); }, []);
 
+  const adminHeaders = { "x-admin-code": "9822" };
+
   const runOptimization = async (route?: string) => {
     const label = route ?? "all";
     setRunning(label);
     try {
       const { data, error } = await supabase.functions.invoke("seo-manual-optimize", {
         body: route ? { routes: [route] } : {},
+        headers: adminHeaders,
       });
       if (error) throw error;
       toast({
@@ -89,7 +92,7 @@ export const SEOOptimizer: React.FC = () => {
 
   const rollback = async (logId: string) => {
     try {
-      const { error } = await supabase.functions.invoke("seo-rollback", { body: { log_id: logId } });
+      const { error } = await supabase.functions.invoke("seo-rollback", { body: { log_id: logId }, headers: adminHeaders });
       if (error) throw error;
       toast({ title: "Rolled back", description: "Previous SEO state restored." });
       await fetchData();
@@ -101,7 +104,7 @@ export const SEOOptimizer: React.FC = () => {
   const clearOverride = async (path: string) => {
     if (!confirm(`Clear AI override for ${path}? Page will revert to its built-in defaults.`)) return;
     try {
-      const { error } = await supabase.functions.invoke("seo-rollback", { body: { clear: path } });
+      const { error } = await supabase.functions.invoke("seo-rollback", { body: { clear: path }, headers: adminHeaders });
       if (error) throw error;
       toast({ title: "Override cleared", description: path });
       await fetchData();
