@@ -1,127 +1,90 @@
 
 
 ## Goal
-Push schema/SEO + AEO (Answer Engine Optimization for ChatGPT, Perplexity, Google AI Overviews, Gemini) to maximum. Current site has solid Org/FAQ/WebSite schema — but is missing the AEO-specific signals that get cited by AI engines.
+Build a self-optimizing SEO/AEO system that scans the site weekly, identifies what's ranking/trending in the AI consulting niche, and **auto-adjusts** keywords, meta descriptions, FAQ content, and schema across pages — without breaking brand voice.
 
-## Audit: What's Missing
+## How It Works (Weekly Loop)
 
-**Schema gaps:**
-- No `LocalBusiness` (only `ProfessionalService`) — blocks Google Maps / local pack
-- No `BreadcrumbList` on any page
-- No `Article` schema on blog posts (datePublished, author, wordCount, image)
-- No `Service` schema on individual service/tool pages
-- No `Person` schema for the founder
-- No `Review` / `AggregateRating` (forbidden per memory — skip)
-- No `HowTo` schema (huge AEO win for "how to implement AI" queries)
-- No `Speakable` schema (voice search / Alexa / Google Assistant)
-- No `VideoObject` (if any embeds)
-- No `WebPage` with `mainEntity` linking page to its primary topic
-
-**AEO-specific gaps (what ChatGPT/Perplexity/Google AI Overviews look for):**
-- No `llms.txt` file (the emerging standard — like robots.txt but for LLMs, tells them what to cite)
-- No question-formatted H2s on key pages (AI engines extract Q&A pairs)
-- FAQ schema only in index.html — should be on every relevant page with page-specific Qs
-- No clear "answer-first" content blocks (TL;DR boxes AI engines love to quote)
-- No `author` + `datePublished` + `dateModified` on blog posts (AEO trust signal)
-- No entity disambiguation (`sameAs` links to Wikipedia, Crunchbase, LinkedIn for brand)
-- No `mentions` schema linking content to known entities (OpenAI, Google, Anthropic, etc.)
-
-**Technical SEO gaps:**
-- Sitemap is static + missing 12+ routes + no blog posts + no `lastmod`
-- No image sitemap
-- No `Open Graph` article tags on blog (`article:published_time`, `article:author`, `article:tag`)
-- No prerendered HTML for bots (SPA limitation — partially fixed with noscript, can do more)
-
-## What I'll Build
-
-### 1. AEO Foundation (highest ROI — gets you cited by ChatGPT/Perplexity)
-
-**New file: `public/llms.txt`** — emerging standard. Tells LLMs which content to cite, brand facts, contact, services. Format:
-```
-# Aetheris AI
-> B2B AI consulting in Indianapolis...
-## Services
-- AI Strategy: /services
-- 14-Day Diagnostic: /assessment
-## Key Facts
-- Founded: ...
-- Phone: (317) 376-2110
+```text
+Sunday 3am ──► [1] SEO Audit Scan ──► [2] Trend Discovery ──► [3] AI Optimizer ──► [4] Apply Changes ──► [5] Log + Notify
+                  (own pages)         (Perplexity/web)        (Lovable AI)         (DB-driven)         (admin dash)
 ```
 
-**New file: `public/llms-full.txt`** — extended version with full service descriptions, pricing tiers, FAQ answers in plain markdown — what AI engines crawl and quote verbatim.
+**1. Self-scan** — Firecrawl crawls aetheris.technology, extracts current titles/descriptions/H1s/keywords per page.
 
-### 2. Page-Level Schema Upgrades
+**2. Trend discovery** — Perplexity API (already a connector option) queries: "top searched AI consulting keywords this week", "trending AEO queries Indianapolis B2B", "what AI overviews are citing for [niche]". Returns ranked keyword/question lists with sources.
 
-**New helper: `src/lib/schemas.ts`** — reusable JSON-LD builders:
-- `breadcrumbSchema(items)` 
-- `serviceSchema(name, description, price, areaServed)`
-- `articleSchema(post)` — for blog
-- `howToSchema(steps)` — for tool pages ("How to scan your website", "How to assess AI readiness")
-- `faqSchema(qa[])` — page-specific FAQs
-- `speakableSchema(cssSelectors)` — for voice
-- `localBusinessSchema()` — full LocalBusiness with hours, geo, payment, sameAs
+**3. AI optimizer** — Lovable AI (Gemini 2.5 Pro) takes (a) current page metadata, (b) trending keywords, (c) brand voice rules from memory → outputs optimized title, description, keywords, 3-5 fresh FAQ Q&As, TL;DR rewrite. Brand-locked: no forbidden phrases, keeps amber/aggressive tone.
 
-**Inject into pages:**
-- `BlogPostPage` → `Article` + `BreadcrumbList` + `Speakable` (TL;DR + headings)
-- `AssessmentPage`, `ScanPage`, `DiagnosticQuizPage`, `FrictionAuditPage` → `HowTo` + `SoftwareApplication` + page-specific `FAQPage`
-- `ServicesPage`, `AIConsultantPage`, etc. → `Service` schema with `Offer`, `areaServed`, `provider`
-- `AboutPage` → `Person` schema for founder + `Organization` `sameAs`
-- All pages → `BreadcrumbList`
-- `index.html` → upgrade `ProfessionalService` to `LocalBusiness` (add `openingHoursSpecification`, expand `sameAs`)
+**4. Apply** — Instead of editing source files (would require redeploy), changes are stored in a new `seo_overrides` table keyed by route. `SEOHead.tsx` reads overrides at render time and merges them with page defaults. Live in seconds, no rebuild.
 
-### 3. AEO Content Patterns (in existing components)
+**5. Log** — Every change written to `seo_optimization_log` with before/after, score delta, source trends. New "SEO Optimizer" tab in admin dashboard shows history + manual override/rollback.
 
-- Add **TL;DR / "Quick Answer" cards** at top of high-intent pages — AI engines extract these verbatim. Wrap in `data-speakable="true"` + `Speakable` schema.
-- Convert key H2s to **question format** ("What is the 14-Day Diagnostic?", "How much does AI consulting cost?", "Who needs an AI maturity assessment?")
-- Add per-page `FAQPage` schema with 3-5 questions specific to that page's intent
+## Architecture
 
-### 4. Sitemap Overhaul
+### New DB tables
+- `seo_overrides` — one row per route: `path, title, description, keywords, faqs (jsonb), tldr, applied_at, version`
+- `seo_optimization_log` — `route, before, after, trends_used, ai_reasoning, score_before, score_after, run_at`
+- `seo_trend_cache` — weekly Perplexity results so we don't re-query within 7 days
 
-Replace `public/sitemap.xml` with comprehensive version:
-- All 25+ static routes with `lastmod`, `changefreq`, `priority`
-- Image entries (`<image:image>`) for OG images
-- Add `<xhtml:link rel="alternate" hreflang="en-us">`
-- (Optional follow-up: wire `generate-sitemap` edge function for auto blog inclusion)
+All RLS: admin-only read/write via existing `is_admin()` function. Public anon SELECT on `seo_overrides` only (needed for SEOHead to render).
 
-### 5. Open Graph / Article Meta
+### New edge functions
+- **`seo-weekly-optimize`** (cron, Sundays 3am ET)
+  - Crawls site map → for each route: Firecrawl scrape → grab current SEO state
+  - Calls `seo-discover-trends` for fresh trends
+  - For each route: call Lovable AI with brand rules + trends → get optimized payload
+  - Upsert into `seo_overrides`, write log row
+  - Send admin notification email summary
+- **`seo-discover-trends`** — Perplexity `sonar-pro` queries for niche/local trends, structured JSON output, cache in `seo_trend_cache`
+- **`seo-manual-optimize`** — admin-triggered single-page or full-site re-run (button in dashboard)
+- **`seo-rollback`** — restore prior version from log
 
-In `BlogPostPage`, add via Helmet:
-- `<meta property="article:published_time">`
-- `<meta property="article:modified_time">`
-- `<meta property="article:author">`
-- `<meta property="article:section">`
-- `<meta property="article:tag">` (one per tag)
+### Cron
+`pg_cron` + `pg_net` job: every Sunday 03:00 → invoke `seo-weekly-optimize`.
 
-### 6. Entity Authority (`sameAs`)
+### Frontend integration
+- `SEOHead.tsx` — fetch override for current path on mount (cached per session), merge with passed props (override wins for title/desc/keywords/faqs)
+- New admin page section `SEOOptimizer.tsx` in AdminDashboard:
+  - Last run timestamp + next run countdown
+  - Per-route table: current title/desc, score delta, last optimized
+  - "Run now" button (full or per-route)
+  - "View changes" diff modal
+  - Rollback button per entry
+  - Trend keywords used this cycle
 
-Expand Org schema `sameAs` to include all known brand profiles → tells AI engines "this is the same entity":
-- LinkedIn company + founder
-- Crunchbase (if exists)
-- GitHub org (if exists)
-- Twitter/X
-- ctoguy.ai
+### Brand safety guardrails (in AI prompt)
+- Pull rules from memory: amber/gold accents, aggressive tone, no testimonials/social proof, no "magic robot", high-end positioning, Indianapolis local
+- Title length 50-60 chars, desc 140-155
+- Never remove "Aetheris", "Indianapolis", core service terms
+- Reject output if forbidden phrases detected → retry once → fallback to existing
 
-## Files Touched
+### Connectors needed
+- **Perplexity** — for trend discovery (will prompt user to connect)
+- **Firecrawl** — already connected ✓
+
+## Files
 
 **New:**
-- `public/llms.txt`
-- `public/llms-full.txt`
-- `src/lib/schemas.ts`
+- `supabase/functions/seo-weekly-optimize/index.ts`
+- `supabase/functions/seo-discover-trends/index.ts`
+- `supabase/functions/seo-manual-optimize/index.ts`
+- `supabase/functions/seo-rollback/index.ts`
+- `src/components/admin/SEOOptimizer.tsx`
+- `src/hooks/useSEOOverride.ts`
 
 **Edited:**
-- `index.html` — `LocalBusiness` upgrade, expanded `sameAs`, opening hours
-- `public/sitemap.xml` — full route list + lastmod + images
-- `src/components/SEOHead.tsx` — accept `breadcrumbs` + `faqs` + `speakable` props, auto-emit schemas
-- `src/pages/BlogPostPage.tsx` — Article schema + article:* OG tags + Speakable
-- `src/pages/AssessmentPage.tsx`, `ScanPage.tsx`, `DiagnosticQuizPage.tsx`, `FrictionAuditPage.tsx` — HowTo + page FAQ + breadcrumbs
-- `src/pages/ServicesPage.tsx`, `AIConsultantPage.tsx`, `MarketingStrategistPage.tsx`, `SalesCompassPage.tsx` — Service schema + breadcrumbs
-- `src/pages/AboutPage.tsx` — Person schema for founder + breadcrumbs
-- `src/pages/Home.tsx` — TL;DR/answer-first card, Speakable schema
-- `src/components/CEOProfile.tsx` or AboutPage — `data-speakable` attributes
+- `src/components/SEOHead.tsx` — fetch + merge overrides
+- `src/pages/AdminDashboard.tsx` — add SEO Optimizer tab
+- `supabase/config.toml` — register new functions (verify_jwt false for cron, true for admin endpoints)
+
+**DB migrations:** 3 new tables + RLS + cron job
 
 ## Out of Scope
-- True SSR (Lovable SPA limitation)
-- New blog content (separate request)
-- Vertical landing pages per industry (separate request)
-- Backlink building (off-platform)
+- Editing static page source files (overrides happen at render time — keeps git clean)
+- Auto-publishing new blog posts (separate feature)
+- A/B testing variants (could add later — log already supports versioning)
+
+## Approval needed for
+- Connecting **Perplexity** (required for trend discovery — alternative: skip trends, just optimize from current rankings)
 
