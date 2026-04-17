@@ -88,6 +88,12 @@ async function optimizeRoute(
   trends: unknown,
   LOVABLE_API_KEY: string,
 ) {
+  const pathHint = route.path.startsWith("/ai-for-")
+    ? "\nROUTE TYPE: Industry vertical landing page — keep the industry name AND 'Indianapolis' in the title/description when natural. Use industry-specific keywords."
+    : route.path.startsWith("/blog/")
+    ? "\nROUTE TYPE: Long-form blog post — title should stay close to the original H1 (don't rewrite the topic). FAQ section is the HIGHEST PRIORITY for AEO citations — make answers quotable by ChatGPT/Perplexity/Google AI Overviews."
+    : "";
+
   const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -96,7 +102,7 @@ async function optimizeRoute(
       messages: [
         {
           role: "system",
-          content: `You are the SEO/AEO optimizer for Aetheris AI.\n${BRAND_RULES}\n\nGiven the current page metadata + trending keywords + page intent, output an optimized payload. Reasoning should briefly explain which trends drove the changes.`,
+          content: `You are the SEO/AEO optimizer for Aetheris AI.\n${BRAND_RULES}${pathHint}\n\nGiven the current page metadata + trending keywords + page intent, output an optimized payload. Reasoning should briefly explain which trends drove the changes.`,
         },
         {
           role: "user",
