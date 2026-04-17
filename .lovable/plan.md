@@ -1,55 +1,127 @@
 
 
 ## Goal
-Add the full SEO keyword/service taxonomy (Strategy, Governance, Technology, Marketing/Ops + long-tail B2B/ROI/vertical terms) across the site so we rank for high-intent AI consulting searches.
+Push schema/SEO + AEO (Answer Engine Optimization for ChatGPT, Perplexity, Google AI Overviews, Gemini) to maximum. Current site has solid Org/FAQ/WebSite schema — but is missing the AEO-specific signals that get cited by AI engines.
 
-## Where Each Keyword Cluster Lands
+## Audit: What's Missing
 
-**1. `index.html` — global meta + schema**
-- Expand `<meta name="keywords">` with all 4 service clusters + long-tail phrases ("AI consulting for healthcare", "AI adoption roadmap", "reduce operational costs with AI", etc.)
-- Expand `<noscript>` block with keyword-rich H1/H2 copy bots can read without JS
-- Upgrade Organization JSON-LD with `hasOfferCatalog` listing all 24 service offerings as `OfferCatalog` → `Service` items
+**Schema gaps:**
+- No `LocalBusiness` (only `ProfessionalService`) — blocks Google Maps / local pack
+- No `BreadcrumbList` on any page
+- No `Article` schema on blog posts (datePublished, author, wordCount, image)
+- No `Service` schema on individual service/tool pages
+- No `Person` schema for the founder
+- No `Review` / `AggregateRating` (forbidden per memory — skip)
+- No `HowTo` schema (huge AEO win for "how to implement AI" queries)
+- No `Speakable` schema (voice search / Alexa / Google Assistant)
+- No `VideoObject` (if any embeds)
+- No `WebPage` with `mainEntity` linking page to its primary topic
 
-**2. `src/components/SEOHead.tsx` — per-page keywords prop**
-- Add optional `keywords?: string` prop → emits `<meta name="keywords">`
-- Add `og:image:alt` + `hreflang="en-us"`
-- Smart title suffix (only append " | Aetheris AI" when title has room)
+**AEO-specific gaps (what ChatGPT/Perplexity/Google AI Overviews look for):**
+- No `llms.txt` file (the emerging standard — like robots.txt but for LLMs, tells them what to cite)
+- No question-formatted H2s on key pages (AI engines extract Q&A pairs)
+- FAQ schema only in index.html — should be on every relevant page with page-specific Qs
+- No clear "answer-first" content blocks (TL;DR boxes AI engines love to quote)
+- No `author` + `datePublished` + `dateModified` on blog posts (AEO trust signal)
+- No entity disambiguation (`sameAs` links to Wikipedia, Crunchbase, LinkedIn for brand)
+- No `mentions` schema linking content to known entities (OpenAI, Google, Anthropic, etc.)
 
-**3. New section: `src/components/ServiceCapabilities.tsx`**
-A 4-column visible section on Home + Services pages showing:
-- **Strategy & Consulting** — AI Strategy, Digital Transformation, Use Case Prioritization, AI Maturity Assessment, Build vs. Buy, ROI Analysis
-- **Governance & Ethics** — Responsible AI, AI Ethics, GDPR/EU AI Act, Bias Mitigation, XAI, Risk Management
-- **Technology & Applications** — Generative AI, ML, NLP, LLMs, AI Agents, Computer Vision
-- **Marketing & Operations** — Automation Strategy, AI Agents, Workflow Automation, Data Analytics, Performance Optimization, Conversational AI
+**Technical SEO gaps:**
+- Sitemap is static + missing 12+ routes + no blog posts + no `lastmod`
+- No image sitemap
+- No `Open Graph` article tags on blog (`article:published_time`, `article:author`, `article:tag`)
+- No prerendered HTML for bots (SPA limitation — partially fixed with noscript, can do more)
 
-This gives bots crawlable keyword-rich H2/H3/list content (not just meta tags — actual indexed body copy) while reinforcing positioning to humans. Dark glass cards, amber accents, matches existing visual identity.
+## What I'll Build
 
-**4. Per-page keyword targeting (SEOHead `keywords` prop)**
-- Home: B2B AI consulting + Indianapolis + ROI cluster
-- `/services` + `/solutions`: full taxonomy
-- `/ai-consultant`: "AI consultant Indianapolis", "AI strategy consulting", "AI maturity assessment"
-- `/marketing-strategist`: "AI marketing automation", "conversational AI"
-- `/sales-compass`: "AI sales automation", "workflow automation"
-- `/assessment`: "AI readiness assessment", "AI maturity audit"
-- `/diagnostic-quiz`: "business diagnostic", "operational efficiency AI"
-- `/scan`: "AI website analysis", "digital transformation audit"
-- Vertical pages (when applicable): "AI for healthcare", "AI for logistics", "AI for construction", etc.
+### 1. AEO Foundation (highest ROI — gets you cited by ChatGPT/Perplexity)
 
-**5. Long-tail blog hook (no new posts, just schema)**
-Add `Article` + `BreadcrumbList` JSON-LD to `BlogPostPage` if not already present, with keyword-aware description fallback.
+**New file: `public/llms.txt`** — emerging standard. Tells LLMs which content to cite, brand facts, contact, services. Format:
+```
+# Aetheris AI
+> B2B AI consulting in Indianapolis...
+## Services
+- AI Strategy: /services
+- 14-Day Diagnostic: /assessment
+## Key Facts
+- Founded: ...
+- Phone: (317) 376-2110
+```
 
-## Files Changed
-- **Edit:** `index.html` (keywords, noscript, OfferCatalog schema)
-- **Edit:** `src/components/SEOHead.tsx` (keywords prop, og:image:alt, hreflang)
-- **New:** `src/components/ServiceCapabilities.tsx` (4-cluster visible section)
-- **Edit:** `src/pages/Home.tsx` (mount ServiceCapabilities)
-- **Edit:** `src/pages/ServicesPage.tsx` (mount ServiceCapabilities)
-- **Edit:** ~8 page files to pass `keywords` prop to SEOHead (AI Consultant, Marketing Strategist, Sales Compass, Assessment, Diagnostic, Scan, Solutions, About)
-- **Edit:** `src/pages/BlogPostPage.tsx` (Article + BreadcrumbList schema if missing)
+**New file: `public/llms-full.txt`** — extended version with full service descriptions, pricing tiers, FAQ answers in plain markdown — what AI engines crawl and quote verbatim.
 
-No DB, no edge functions, no new dependencies.
+### 2. Page-Level Schema Upgrades
+
+**New helper: `src/lib/schemas.ts`** — reusable JSON-LD builders:
+- `breadcrumbSchema(items)` 
+- `serviceSchema(name, description, price, areaServed)`
+- `articleSchema(post)` — for blog
+- `howToSchema(steps)` — for tool pages ("How to scan your website", "How to assess AI readiness")
+- `faqSchema(qa[])` — page-specific FAQs
+- `speakableSchema(cssSelectors)` — for voice
+- `localBusinessSchema()` — full LocalBusiness with hours, geo, payment, sameAs
+
+**Inject into pages:**
+- `BlogPostPage` → `Article` + `BreadcrumbList` + `Speakable` (TL;DR + headings)
+- `AssessmentPage`, `ScanPage`, `DiagnosticQuizPage`, `FrictionAuditPage` → `HowTo` + `SoftwareApplication` + page-specific `FAQPage`
+- `ServicesPage`, `AIConsultantPage`, etc. → `Service` schema with `Offer`, `areaServed`, `provider`
+- `AboutPage` → `Person` schema for founder + `Organization` `sameAs`
+- All pages → `BreadcrumbList`
+- `index.html` → upgrade `ProfessionalService` to `LocalBusiness` (add `openingHoursSpecification`, expand `sameAs`)
+
+### 3. AEO Content Patterns (in existing components)
+
+- Add **TL;DR / "Quick Answer" cards** at top of high-intent pages — AI engines extract these verbatim. Wrap in `data-speakable="true"` + `Speakable` schema.
+- Convert key H2s to **question format** ("What is the 14-Day Diagnostic?", "How much does AI consulting cost?", "Who needs an AI maturity assessment?")
+- Add per-page `FAQPage` schema with 3-5 questions specific to that page's intent
+
+### 4. Sitemap Overhaul
+
+Replace `public/sitemap.xml` with comprehensive version:
+- All 25+ static routes with `lastmod`, `changefreq`, `priority`
+- Image entries (`<image:image>`) for OG images
+- Add `<xhtml:link rel="alternate" hreflang="en-us">`
+- (Optional follow-up: wire `generate-sitemap` edge function for auto blog inclusion)
+
+### 5. Open Graph / Article Meta
+
+In `BlogPostPage`, add via Helmet:
+- `<meta property="article:published_time">`
+- `<meta property="article:modified_time">`
+- `<meta property="article:author">`
+- `<meta property="article:section">`
+- `<meta property="article:tag">` (one per tag)
+
+### 6. Entity Authority (`sameAs`)
+
+Expand Org schema `sameAs` to include all known brand profiles → tells AI engines "this is the same entity":
+- LinkedIn company + founder
+- Crunchbase (if exists)
+- GitHub org (if exists)
+- Twitter/X
+- ctoguy.ai
+
+## Files Touched
+
+**New:**
+- `public/llms.txt`
+- `public/llms-full.txt`
+- `src/lib/schemas.ts`
+
+**Edited:**
+- `index.html` — `LocalBusiness` upgrade, expanded `sameAs`, opening hours
+- `public/sitemap.xml` — full route list + lastmod + images
+- `src/components/SEOHead.tsx` — accept `breadcrumbs` + `faqs` + `speakable` props, auto-emit schemas
+- `src/pages/BlogPostPage.tsx` — Article schema + article:* OG tags + Speakable
+- `src/pages/AssessmentPage.tsx`, `ScanPage.tsx`, `DiagnosticQuizPage.tsx`, `FrictionAuditPage.tsx` — HowTo + page FAQ + breadcrumbs
+- `src/pages/ServicesPage.tsx`, `AIConsultantPage.tsx`, `MarketingStrategistPage.tsx`, `SalesCompassPage.tsx` — Service schema + breadcrumbs
+- `src/pages/AboutPage.tsx` — Person schema for founder + breadcrumbs
+- `src/pages/Home.tsx` — TL;DR/answer-first card, Speakable schema
+- `src/components/CEOProfile.tsx` or AboutPage — `data-speakable` attributes
 
 ## Out of Scope
-- Writing new blog posts targeting each long-tail term (separate request)
-- Vertical landing pages per industry (e.g., dedicated `/ai-for-healthcare` page) — can follow up
+- True SSR (Lovable SPA limitation)
+- New blog content (separate request)
+- Vertical landing pages per industry (separate request)
+- Backlink building (off-platform)
 
