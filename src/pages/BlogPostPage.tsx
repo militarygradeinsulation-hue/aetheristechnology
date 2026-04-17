@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
 import { BlogMidCTA } from '@/components/BlogMidCTA';
+import { articleSchema, breadcrumbSchema, speakableSchema, combineSchemas } from '@/lib/schemas';
 
 const SITE_URL = 'https://aetheris.technology';
 
@@ -108,41 +109,28 @@ const BlogPostPage = () => {
   const featuredImage = slug ? getImageForSlug(slug) : null;
   const postUrl = `${SITE_URL}/blog/${slug}`;
 
-  // Article + Breadcrumb JSON-LD
-  const articleJsonLd = post ? {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Article",
-        "headline": post.title,
-        "description": post.meta_description || post.excerpt,
-        "author": {
-          "@type": "Person",
-          "name": post.author,
-          "url": "https://www.linkedin.com/in/aisystemsarchitect"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "Aetheris AI",
-          "logo": { "@type": "ImageObject", "url": `${SITE_URL}/aetheris-logo.png` }
-        },
-        "datePublished": post.published_at,
-        "dateModified": post.updated_at,
-        "image": post.featured_image || featuredImage || `${SITE_URL}/aetheris-logo.png`,
-        "mainEntityOfPage": { "@type": "WebPage", "@id": postUrl },
-        "url": postUrl,
-        "keywords": (post.tags || []).join(', '),
-      },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
-          { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
-          { "@type": "ListItem", "position": 3, "name": post.title, "item": postUrl },
-        ],
-      },
-    ],
-  } : undefined;
+  // Combined Article + Breadcrumb + Speakable JSON-LD
+  const articleJsonLd = post
+    ? combineSchemas(
+        articleSchema({
+          title: post.title,
+          description: post.meta_description || post.excerpt,
+          author: post.author,
+          datePublished: post.published_at,
+          dateModified: post.updated_at,
+          image: post.featured_image || featuredImage || undefined,
+          url: postUrl,
+          keywords: post.tags || [],
+          section: post.location_focus || 'AI Consulting',
+        }),
+        breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Blog', path: '/blog' },
+          { name: post.title, path: `/blog/${slug}` },
+        ]),
+        speakableSchema(['h1', '.tldr', 'article p:first-of-type'])
+      )
+    : undefined;
 
   const blogKeywords = post
     ? [...(post.tags || []), 'AI consulting Indianapolis', 'AI strategy', 'B2B AI consulting'].join(', ')
@@ -165,6 +153,13 @@ const BlogPostPage = () => {
             imageAlt={post.title}
             keywords={blogKeywords}
             jsonLd={articleJsonLd}
+            articleMeta={{
+              publishedTime: post.published_at || undefined,
+              modifiedTime: post.updated_at || undefined,
+              author: post.author,
+              section: post.location_focus || 'AI Consulting',
+              tags: post.tags || [],
+            }}
           />
         )}
         
@@ -259,6 +254,21 @@ const BlogPostPage = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* AEO TL;DR — AI engines extract this verbatim */}
+                  {post.excerpt && (
+                    <div
+                      className="tldr glass rounded-xl border border-amber/30 p-4 md:p-5 mb-6"
+                      data-speakable="true"
+                    >
+                      <div className="text-xs font-bold text-amber uppercase tracking-wider mb-1">
+                        TL;DR
+                      </div>
+                      <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex flex-wrap gap-2">
