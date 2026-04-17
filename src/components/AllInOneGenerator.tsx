@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   ScanText,
   Library as LibraryIcon,
+  Globe,
+  Stethoscope,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -56,6 +58,38 @@ export const AllInOneGenerator: React.FC = () => {
   const [states, setStates] = useState<Record<string, RunState>>({});
 
   const jobs = (): ToolJob[] => [
+    {
+      key: 'scan',
+      label: 'Website Scan (gaps & revenue leaks)',
+      toolType: 'website_scan',
+      icon: Globe,
+      fn: 'scan-website',
+      body: () => ({ url: form.url.trim() }),
+      titleFor: () => `${form.businessName || form.url} — Website Scan`,
+    },
+    {
+      key: 'diagnose',
+      label: 'What\'s Wrong Diagnostic',
+      toolType: 'whats_wrong',
+      icon: Stethoscope,
+      fn: 'diagnose-whats-wrong',
+      body: () => ({
+        issues: [
+          'Not enough leads',
+          'Low conversion rate',
+          'Inconsistent sales pipeline',
+          'Weak brand positioning',
+        ],
+        notes: [
+          form.businessName && `Business: ${form.businessName}`,
+          form.industry && `Industry: ${form.industry}`,
+          form.product && `Offer: ${form.product}`,
+          form.targetCustomer && `Customer: ${form.targetCustomer}`,
+          form.goals && `Goals: ${form.goals}`,
+        ].filter(Boolean).join('\n'),
+      }),
+      titleFor: () => `${form.businessName || form.url} — What's Wrong Diagnostic`,
+    },
     {
       key: 'social',
       label: 'Social Content (LinkedIn, FB, Ads)',
@@ -190,6 +224,9 @@ export const AllInOneGenerator: React.FC = () => {
     setStates(initial);
 
     let completed = 0;
+    let succeeded = 0;
+    let failed = 0;
+    let skipped = 0;
     const total = allJobs.length;
 
     // Run in parallel — each updates state independently as it finishes
@@ -197,17 +234,19 @@ export const AllInOneGenerator: React.FC = () => {
       allJobs.map(async (job) => {
         const result = await runOne(job);
         completed++;
+        if (result.status === 'success') succeeded++;
+        else if (result.status === 'error') failed++;
+        else if (result.status === 'skipped') skipped++;
         setProgress(Math.round((completed / total) * 100));
         setStates((prev) => ({ ...prev, [job.key]: result }));
       }),
     );
 
-    const successCount = Object.values(initial).length; // rebuild from latest state in toast
     setRunning(false);
     setProgress(100);
     toast({
       title: 'All-in-one run complete',
-      description: `Finished ${completed} of ${total} tools. Check My Library to view and download results.`,
+      description: `${succeeded} saved · ${failed} failed · ${skipped} skipped (of ${total} tools). Check My Library.`,
     });
   };
 
