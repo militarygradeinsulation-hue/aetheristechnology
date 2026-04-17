@@ -1,19 +1,31 @@
-// PIN-based admin login. Verifies PIN server-side, ensures a fixed admin user exists,
-// promotes them to admin, and returns a usable session for the client.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+// PIN-only admin login. Validates the PIN and returns a short HMAC-signed token.
+// No DB calls, no Supabase Auth, no user creation — purely a fast PIN check.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const ADMIN_PIN = "9822";
-const PIN_ADMIN_EMAIL = "pin-admin@aetheris.local";
-// Deterministic strong password for the PIN-bound admin account.
-const PIN_ADMIN_PASSWORD = "Aetheris-PinAdmin-9822-Secure!";
+const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+async function signToken(exp: number, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`${ADMIN_PIN}.${exp}`));
+  const hex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${exp}.${hex}`;
+}
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { pin } = await req.json().catch(() => ({}));
@@ -24,59 +36,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const admin = createClient(
-      supabaseUrl,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const exp = Date.now() + TOKEN_TTL_MS;
+    const token = await signToken(exp, secret);
 
-    // Find or create the PIN admin user via direct DB lookup (fast).
-    let userId: string | null = null;
-    const { data: profileRow } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("email", PIN_ADMIN_EMAIL)
-      .maybeSingle();
-
-    if (profileRow?.id) {
-      userId = profileRow.id;
-    } else {
-      const { data: created, error: createErr } = await admin.auth.admin.createUser({
-        email: PIN_ADMIN_EMAIL,
-        password: PIN_ADMIN_PASSWORD,
-        email_confirm: true,
-      });
-      if (createErr) {
-        // Likely already exists — fall back to a paginated lookup once.
-        const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-        const existing = list?.users?.find((u) => u.email === PIN_ADMIN_EMAIL);
-        if (!existing) throw createErr;
-        userId = existing.id;
-      } else {
-        userId = created.user!.id;
-      }
-    }
-
-    // Ensure admin row exists (idempotent upsert avoids extra RPC round-trip).
-    await admin.from("admin_users").upsert({ user_id: userId }, { onConflict: "user_id" });
-
-    const authClient = createClient(
-      supabaseUrl,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { auth: { autoRefreshToken: false, persistSession: false } },
-    );
-    const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
-      email: PIN_ADMIN_EMAIL,
-      password: PIN_ADMIN_PASSWORD,
+    return new Response(JSON.stringify({ ok: true, token }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-    if (authError || !authData.session) {
-      throw authError ?? new Error("Failed to create admin session");
-    }
-
-    return new Response(
-      JSON.stringify({ ok: true, session: authData.session }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
   } catch (e) {
     console.error("admin-pin-login error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {

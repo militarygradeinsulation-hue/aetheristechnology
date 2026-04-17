@@ -54,56 +54,65 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <PageViewTracker />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/why-us" element={<WhyUsPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:slug" element={<BlogPostPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/assessment" element={<AssessmentPage />} />
-            <Route path="/scan" element={<ScanPage />} />
-            <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
-            <Route path="/careers" element={<CareersPage />} />
-            <Route path="/unsubscribe" element={<UnsubscribePage />} />
-            <Route path="/marketing-studio" element={<MarketingStudioPage />} />
-            <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
-            <Route path="/ai-consultant" element={<AIConsultantPage />} />
-            <Route path="/sales-compass" element={<SalesCompassPage />} />
-            <Route path="/checkout/return" element={<CheckoutReturn />} />
-            <Route path="/content-generator" element={<ContentGeneratorPage />} />
-            <Route path="/sales-scripts" element={<SalesScriptsPage />} />
-            <Route path="/content-calendar" element={<ContentCalendarPage />} />
-            <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
-            <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
-            <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
-            <Route path="/friction-audit" element={<FrictionAuditPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
-            <Route path="/my-subscription" element={<MySubscriptionPage />} />
-            <Route path="/industries" element={<IndustriesPage />} />
-            <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
-            <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
-            <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
-            <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
-            <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
-            <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <FloatingContact />
-          <SalesChat />
-        </AuthProvider>
+        <Routes>
+          {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          {/* All other routes use the shared AuthProvider */}
+          <Route
+            path="/*"
+            element={
+              <AuthProvider>
+                <PageViewTracker />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/why-us" element={<WhyUsPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/resources" element={<ResourcesPage />} />
+                  <Route path="/assessment" element={<AssessmentPage />} />
+                  <Route path="/scan" element={<ScanPage />} />
+                  <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
+                  <Route path="/careers" element={<CareersPage />} />
+                  <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                  <Route path="/marketing-studio" element={<MarketingStudioPage />} />
+                  <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
+                  <Route path="/ai-consultant" element={<AIConsultantPage />} />
+                  <Route path="/sales-compass" element={<SalesCompassPage />} />
+                  <Route path="/checkout/return" element={<CheckoutReturn />} />
+                  <Route path="/content-generator" element={<ContentGeneratorPage />} />
+                  <Route path="/sales-scripts" element={<SalesScriptsPage />} />
+                  <Route path="/content-calendar" element={<ContentCalendarPage />} />
+                  <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
+                  <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
+                  <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
+                  <Route path="/friction-audit" element={<FrictionAuditPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
+                  <Route path="/my-subscription" element={<MySubscriptionPage />} />
+                  <Route path="/industries" element={<IndustriesPage />} />
+                  <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
+                  <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
+                  <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
+                  <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
+                  <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
+                  <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <FloatingContact />
+                <SalesChat />
+              </AuthProvider>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
