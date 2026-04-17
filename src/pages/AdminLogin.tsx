@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +12,11 @@ const AdminLogin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signIn } = useAuth();
+  const [user, setUser] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ? { id: data.user.id } : null));
+  }, []);
 
   // If already signed in, check admin status and route accordingly
   useEffect(() => {
