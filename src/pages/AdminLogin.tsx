@@ -60,10 +60,10 @@ const AdminLogin: React.FC = () => {
             <Lock className="w-8 h-8 text-amber" />
           </div>
           <h1 className="text-2xl font-bold text-foreground font-display">Admin Access</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sign in with PIN or admin account</p>
+          <p className="text-muted-foreground text-sm mt-1">Enter your PIN to continue</p>
         </div>
 
-        <form onSubmit={handlePinSubmit} className="space-y-3 mb-6">
+        <form onSubmit={handlePinSubmit} className="space-y-3">
           <Input
             type="password"
             inputMode="numeric"
@@ -75,33 +75,6 @@ const AdminLogin: React.FC = () => {
           />
           <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={pinLoading}>
             {pinLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock with PIN'}
-          </Button>
-        </form>
-
-        <div className="relative mb-4">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-          <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground">or sign in</span></div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          <Button type="submit" variant="outline" className="w-full" disabled={loading}>
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Sign In'}
           </Button>
         </form>
       </div>
