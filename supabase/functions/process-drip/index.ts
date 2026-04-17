@@ -9,6 +9,13 @@ const corsHeaders = {
 
 const OUTLOOK_GATEWAY = "https://connector-gateway.lovable.dev/microsoft_outlook";
 
+function appendSignature(body: string, signature: string): string {
+  if (!signature) return body;
+  // Skip if body already contains the signature or an aetheris.technology link
+  if (body.includes("aetheris.technology") || body.includes(signature.slice(0, 30))) return body;
+  return `${body}\n${signature}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
