@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Play, Send, Sparkles } from 'lucide-react';
+import { Loader2, Send, Sparkles, Inbox } from 'lucide-react';
 
 interface Settings {
   is_active: boolean;
@@ -17,10 +17,11 @@ interface Props {
   saving: boolean;
   onSendBatch: () => Promise<void>;
   onGenerateWave: () => Promise<void>;
-  busy: { send: boolean; generate: boolean };
+  onCheckReplies: () => Promise<void>;
+  busy: { send: boolean; generate: boolean; replies: boolean };
 }
 
-export const MasterControls: React.FC<Props> = ({ settings, onChange, onSave, saving, onSendBatch, onGenerateWave, busy }) => {
+export const MasterControls: React.FC<Props> = ({ settings, onChange, onSave, saving, onSendBatch, onGenerateWave, onCheckReplies, busy }) => {
   return (
     <div className="glass p-6 rounded-xl space-y-5">
       <div className="flex items-center justify-between">
@@ -56,6 +57,10 @@ export const MasterControls: React.FC<Props> = ({ settings, onChange, onSave, sa
         <Button variant="outline" onClick={onGenerateWave} disabled={busy.generate}>
           {busy.generate ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
           Generate Next Wave
+        </Button>
+        <Button variant="outline" onClick={onCheckReplies} disabled={busy.replies}>
+          {busy.replies ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Inbox className="w-4 h-4 mr-1" />}
+          Check Inbox For Replies
         </Button>
       </div>
     </div>

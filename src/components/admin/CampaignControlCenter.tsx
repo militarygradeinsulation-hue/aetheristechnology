@@ -8,6 +8,7 @@ import { LinksLibrary, LinkItem } from './campaign/LinksLibrary';
 import { ImageGenerator } from './campaign/ImageGenerator';
 import { PlaybookAttachments } from './campaign/PlaybookAttachments';
 import { TemplateEditor } from './campaign/TemplateEditor';
+import { LeadsManager } from './campaign/LeadsManager';
 import { CampaignActivity } from '@/components/CampaignActivity';
 
 interface Settings {
@@ -33,7 +34,7 @@ export const CampaignControlCenter: React.FC = () => {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [busy, setBusy] = useState({ send: false, generate: false });
+  const [busy, setBusy] = useState({ send: false, generate: false, replies: false });
 
   const load = async () => {
     setLoading(true);
@@ -87,8 +88,23 @@ export const CampaignControlCenter: React.FC = () => {
     try {
       // Auto-activate so the send is not silently blocked by the paused flag.
       if (!settings.is_active) await persist({ is_active: true });
-      const { data, error } = await supabase.functions.invoke('process-drip', { body: {} });
+
+      // First send pass.
+      let { data, error } = await supabase.functions.invoke('process-drip', { body: {} });
       if (error) throw error;
+
+      // If nothing was due, automatically pull in the next wave of imported
+      // prospects, generate their emails, and try sending again.
+      const msg: string = data?.message || '';
+      if (msg.toLowerCase().includes('no pending emails')) {
+        toast({ title: 'No emails due', description: 'Pulling next wave of imported leads...' });
+        const gen = await supabase.functions.invoke('generate-drip-batch', { body: { batchSize: 10 } });
+        if (gen.error) throw gen.error;
+        const retry = await supabase.functions.invoke('process-drip', { body: {} });
+        if (retry.error) throw retry.error;
+        data = retry.data;
+      }
+
       toast({ title: 'Batch processed', description: data?.message || data?.error || 'Done' });
     } catch (e) {
       toast({ title: 'Send failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
@@ -110,6 +126,19 @@ export const CampaignControlCenter: React.FC = () => {
     }
   };
 
+  const checkReplies = async () => {
+    setBusy(b => ({ ...b, replies: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke('handle-drip-replies', { body: {} });
+      if (error) throw error;
+      toast({ title: 'Inbox scanned', description: data?.message || 'Done' });
+    } catch (e) {
+      toast({ title: 'Reply check failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
+    } finally {
+      setBusy(b => ({ ...b, replies: false }));
+    }
+  };
+
   if (loading) {
     return <div className="glass p-12 rounded-xl flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin" /> Loading campaign control center...</div>;
   }
@@ -123,8 +152,11 @@ export const CampaignControlCenter: React.FC = () => {
         saving={saving}
         onSendBatch={sendBatch}
         onGenerateWave={generateWave}
+        onCheckReplies={checkReplies}
         busy={busy}
       />
+
+      <LeadsManager />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SenderIdentity
