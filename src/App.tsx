@@ -43,6 +43,8 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SubscriberOnboardingPage from "./pages/SubscriberOnboardingPage";
 import MySubscriptionPage from "./pages/MySubscriptionPage";
+import IndustriesPage from "./pages/IndustriesPage";
+import VerticalLandingPage from "./pages/VerticalLandingPage";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +91,13 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
             <Route path="/my-subscription" element={<MySubscriptionPage />} />
+            <Route path="/industries" element={<IndustriesPage />} />
+            <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
+            <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
+            <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
+            <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
+            <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
+            <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
