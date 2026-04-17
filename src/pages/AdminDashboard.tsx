@@ -133,8 +133,9 @@ const AdminDashboard: React.FC = () => {
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     clearAdminToken();
+    try { await supabase.auth.signOut(); } catch { /* ignore */ }
     navigate('/admin/login', { replace: true });
   };
 
