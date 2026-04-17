@@ -1,48 +1,104 @@
 
 
 ## Goal
-Make the 6 new vertical landing pages and the 5 long-tail blog posts get auto-optimized by the weekly SEO/AEO loop — same brand-locked AI rewrites the rest of the site already gets.
+Turn the existing drip campaign system into a full power-house in the admin dashboard: a single "Email Campaigns" tab where admins can start/pause campaigns, customize email templates, generate AI images, attach playbooks, and insert pre-made website links into emails.
 
-## Current Gap
-The `seo-weekly-optimize` edge function has a hardcoded `ROUTES` array of 12 paths. The new pages aren't in it, so:
-- Vertical pages (`/ai-for-healthcare`, etc.) get their **static** SEO from `verticals.ts` only — no weekly AI rewrites
-- Blog posts get their **static** title/description from the DB — no weekly schema/FAQ refresh
-- The `useSEOOverride` hook on these pages does nothing because no override row exists
+## Context Found
+- `drip_sequences` (steps as JSON), `drip_prospects`, `drip_emails` tables exist
+- `process-drip` edge function sends pre-generated emails via Outlook (100/day cap)
+- `generate-drip-batch` pre-generates email content per prospect
+- `CampaignActivity.tsx` already shows live stats (sent/pending/failed/hot prospects)
+- `playbooks` storage bucket exists, `admin_library` table exists
+- `generate-blog-images` proves Lovable AI image generation pattern (Gemini 2.5 flash image)
+- Cron currently drives `process-drip` automatically — need an admin on/off switch
 
-The schema/FAQ/Speakable/HowTo machinery on these pages **is** working — it's just frozen. The auto-optimizer never touches it.
+## Plan
 
-## Fix
+### 1. Database (one migration)
+- Add `campaign_settings` table (singleton row): `is_active boolean`, `daily_limit int`, `from_name`, `from_email`, `signature_html`, `default_links jsonb` (array of `{label, url}`), `updated_at`
+- Add `campaign_assets` table: `id`, `type` ('image'|'playbook'|'link'), `name`, `url`, `metadata jsonb`, `created_at` — for reusable items in the email composer
+- RLS: admin-only via `is_admin(auth.uid())`
+- Seed `campaign_settings` with one row + the site's main CTAs (Scan, Diagnostic, Strategy Call, Playbooks) as `default_links`
 
-### 1. Extend static route list (vertical pages)
-In `seo-weekly-optimize/index.ts`, add the 7 new static routes to `ROUTES`:
-- `/industries`
-- `/ai-for-healthcare`, `/ai-for-finance`, `/ai-for-logistics`, `/ai-for-construction`, `/ai-for-manufacturing`, `/ai-for-saas`
+### 2. New edge function: `campaign-image-generator`
+- Accepts `prompt` + optional `style`
+- Calls Lovable AI Gateway with `google/gemini-2.5-flash-image`
+- Uploads result to `playbooks` bucket under `campaign-images/`
+- Inserts row in `campaign_assets`
+- Returns public URL
+- Admin-gated via `is_admin` check
 
-Each with an industry-specific `intent` string to guide the AI.
+### 3. Update `process-drip`
+- Read `campaign_settings.is_active` at start — if false, return early ("paused")
+- Use `daily_limit` from settings (instead of hardcoded 100)
+- Inject `signature_html` into outgoing email body if template doesn't already include one
 
-### 2. Dynamic blog route inclusion
-At runtime inside the function, query `blog_posts` where `is_published = true` and append each as `{ path: "/blog/<slug>", intent: "Long-form blog — <title>" }`. This keeps it future-proof — any new blog posts get optimized automatically without code changes.
+### 4. Update `generate-drip-batch`
+- Pull `default_links` from settings and pass to AI prompt so generated emails embed real CTA buttons (e.g. Scan link, Strategy Call link)
+- Pass `from_name` for personalization
+- Allow optional `attachment_urls[]` (playbook PDFs) — append as styled link block at email bottom
 
-### 3. Token-cost guardrail
-- Cap dynamic blog routes at 25 newest posts per run (prevents runaway cost as blog grows)
-- Keep the existing per-route try/catch so one failure doesn't kill the run
+### 5. New admin component: `CampaignControlCenter.tsx`
+Single tab inside AdminDashboard with sub-sections:
 
-### 4. Brand rules tweak for blogs vs verticals
-Add a tiny conditional in the optimizer prompt: if path starts with `/ai-for-` add "industry vertical landing page — keep industry name + Indianapolis in title/desc"; if path starts with `/blog/` add "long-form blog — title stays close to original H1, FAQ section is highest priority for AEO citations."
+**a. Master Controls (top)**
+- Big on/off toggle: "Campaign Active" → updates `campaign_settings.is_active`
+- Daily limit input
+- "Send Next Batch Now" button → invokes `process-drip` manually
+- "Generate Next Wave" button → invokes `generate-drip-batch`
 
-### 5. Admin dashboard reflection
-The existing `SEOOptimizer.tsx` already lists all routes from the override/log tables — it'll auto-show the new ones once the optimizer runs. No UI changes needed.
+**b. Sender Identity**
+- From name, from email, signature HTML editor (textarea with preview)
 
-## Files
+**c. Pre-Made Links Library**
+- Editable list of `{label, url}` pairs (the CTAs that AI can embed)
+- Pre-seeded with: Free Scan, Diagnostic Quiz, Book Strategy Call, Playbooks Library, Industries pages
+- Click a row to copy `<a>` snippet to clipboard for manual use
 
-**Edited (one file):**
-- `supabase/functions/seo-weekly-optimize/index.ts` — add 7 static routes, dynamic blog query, intent-aware prompt addendum
+**d. Image Generator**
+- Prompt input + "Generate Image" button → calls `campaign-image-generator`
+- Grid of previously generated images (from `campaign_assets` where type='image')
+- Click image → copies its `<img>` tag to clipboard
 
-**Optional one-time action after deploy:**
-- Click "Run Full Optimization Now" in the admin SEO panel to immediately optimize the 18+ routes (rather than waiting for Sunday cron)
+**e. Playbook Attachments**
+- Lists files in `playbooks` storage bucket
+- Toggle "Auto-attach to next batch" per playbook → stored in `campaign_assets`
+- Used by `generate-drip-batch` when building emails
+
+**f. Template Preview / Edit**
+- Lists `drip_sequences` with their steps
+- Inline edit each step's prompt template (subject + body skeleton)
+- "Regenerate pending emails" button → deletes pending `drip_emails` rows so next `generate-drip-batch` rebuilds them with new templates
+
+**g. Live Activity (existing)**
+- Embeds the existing `CampaignActivity` component below the controls
+
+### 6. AdminDashboard wiring
+- Add `'campaigns'` tab key, label "📨 Campaign Powerhouse"
+- Move existing `CampaignActivity` rendering inside the new `CampaignControlCenter` (or keep `events` tab as activity-only and add separate `campaigns` tab — recommend **merging**: rename existing `events` tab to `campaigns` and render `CampaignControlCenter`)
+
+## Files to Create/Edit
+
+**Create:**
+- `supabase/migrations/<ts>_campaign_powerhouse.sql`
+- `supabase/functions/campaign-image-generator/index.ts`
+- `src/components/admin/CampaignControlCenter.tsx`
+- `src/components/admin/campaign/MasterControls.tsx`
+- `src/components/admin/campaign/SenderIdentity.tsx`
+- `src/components/admin/campaign/LinksLibrary.tsx`
+- `src/components/admin/campaign/ImageGenerator.tsx`
+- `src/components/admin/campaign/PlaybookAttachments.tsx`
+- `src/components/admin/campaign/TemplateEditor.tsx`
+
+**Edit:**
+- `supabase/functions/process-drip/index.ts` — read settings, honor pause toggle
+- `supabase/functions/generate-drip-batch/index.ts` — inject links + signature + attachments into AI prompt
+- `src/pages/AdminDashboard.tsx` — replace `events` tab with `CampaignControlCenter`
+- `supabase/config.toml` — add `verify_jwt = false` for `campaign-image-generator` (uses in-code admin check via JWT)
 
 ## Out of Scope
-- Changing how the optimizer applies overrides (already works via `seo_overrides` table)
-- A/B variants per route (logged for future)
-- Optimizing legal/utility pages like `/terms`, `/login` (intentionally excluded)
+- A/B testing variants per template
+- Per-prospect personalization tokens beyond name/business (already supported)
+- Email open/click tracking pixels (Outlook-sent, no built-in tracking)
+- Building a marketing-style sequence designer UI (drag-drop step builder)
 
