@@ -54,18 +54,49 @@ export const AllInOneGenerator: React.FC = () => {
     goals: '',
   });
   const [running, setRunning] = useState(false);
+  const [inferring, setInferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [states, setStates] = useState<Record<string, RunState>>({});
 
-  const jobs = (): ToolJob[] => [
+  const inferFromUrl = async (urlOverride?: string): Promise<typeof form | null> => {
+    const targetUrl = (urlOverride ?? form.url).trim();
+    if (!targetUrl) {
+      toast({ title: 'Website URL required', description: 'Paste a URL first.', variant: 'destructive' });
+      return null;
+    }
+    setInferring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('infer-business-context', { body: { url: targetUrl } });
+      if (error || !data || data.error) throw new Error(error?.message || data?.error || 'Inference failed');
+      const next = {
+        url: data.url || targetUrl,
+        businessName: data.businessName || '',
+        industry: data.industry || '',
+        product: data.product || '',
+        targetCustomer: data.targetCustomer || '',
+        goals: data.goals || '',
+      };
+      setForm(next);
+      toast({ title: 'Auto-filled from website', description: `${next.businessName || 'Business'} · ${next.industry || 'industry detected'}` });
+      return next;
+    } catch (err: any) {
+      console.error('[infer] failed:', err);
+      toast({ title: 'Could not auto-fill', description: err.message || 'You can still fill the fields manually.', variant: 'destructive' });
+      return null;
+    } finally {
+      setInferring(false);
+    }
+  };
+
+  const jobs = (f: typeof form = form): ToolJob[] => [
     {
       key: 'scan',
       label: 'Website Scan (gaps & revenue leaks)',
       toolType: 'website_scan',
       icon: Globe,
       fn: 'scan-website',
-      body: () => ({ url: form.url.trim() }),
-      titleFor: () => `${form.businessName || form.url} — Website Scan`,
+      body: () => ({ url: f.url.trim() }),
+      titleFor: () => `${f.businessName || f.url} — Website Scan`,
     },
     {
       key: 'diagnose',
@@ -81,14 +112,14 @@ export const AllInOneGenerator: React.FC = () => {
           'Weak brand positioning',
         ],
         notes: [
-          form.businessName && `Business: ${form.businessName}`,
-          form.industry && `Industry: ${form.industry}`,
-          form.product && `Offer: ${form.product}`,
-          form.targetCustomer && `Customer: ${form.targetCustomer}`,
-          form.goals && `Goals: ${form.goals}`,
+          f.businessName && `Business: ${f.businessName}`,
+          f.industry && `Industry: ${f.industry}`,
+          f.product && `Offer: ${f.product}`,
+          f.targetCustomer && `Customer: ${f.targetCustomer}`,
+          f.goals && `Goals: ${f.goals}`,
         ].filter(Boolean).join('\n'),
       }),
-      titleFor: () => `${form.businessName || form.url} — What's Wrong Diagnostic`,
+      titleFor: () => `${f.businessName || f.url} — What's Wrong Diagnostic`,
     },
     {
       key: 'social',
@@ -96,8 +127,8 @@ export const AllInOneGenerator: React.FC = () => {
       toolType: 'social_content',
       icon: Megaphone,
       fn: 'generate-social-content',
-      body: () => ({ url: form.url.trim() }),
-      titleFor: (d) => `${d?.businessName || form.businessName || form.url} — Social Pack`,
+      body: () => ({ url: f.url.trim() }),
+      titleFor: (d) => `${d?.businessName || f.businessName || f.url} — Social Pack`,
     },
     {
       key: 'calendar',
@@ -106,11 +137,11 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Calendar,
       fn: 'generate-content-calendar',
       body: () => ({
-        industry: form.industry || form.businessName || 'general business',
-        goals: form.goals || 'grow brand awareness and inbound leads',
+        industry: f.industry || f.businessName || 'general business',
+        goals: f.goals || 'grow brand awareness and inbound leads',
         platforms: 'LinkedIn, Facebook, Instagram',
       }),
-      titleFor: () => `${form.industry || form.businessName || form.url} — 30-Day Calendar`,
+      titleFor: () => `${f.industry || f.businessName || f.url} — 30-Day Calendar`,
     },
     {
       key: 'sales',
@@ -119,13 +150,13 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Phone,
       fn: 'generate-sales-scripts',
       body: () => ({
-        industry: form.industry || form.businessName || 'general business',
-        product: form.product || form.businessName || 'core offer',
-        targetCustomer: form.targetCustomer || 'mid-market decision makers',
+        industry: f.industry || f.businessName || 'general business',
+        product: f.product || f.businessName || 'core offer',
+        targetCustomer: f.targetCustomer || 'mid-market decision makers',
         objections: '',
       }),
-      skipReason: () => (!form.industry && !form.product && !form.businessName ? 'Add an industry or product to generate sales scripts.' : null),
-      titleFor: () => `${form.industry || form.businessName} — Sales Scripts`,
+      skipReason: () => (!f.industry && !f.product && !f.businessName ? 'Add an industry or product to generate sales scripts.' : null),
+      titleFor: () => `${f.industry || f.businessName} — Sales Scripts`,
     },
     {
       key: 'followup',
@@ -134,11 +165,11 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Mail,
       fn: 'generate-follow-up-plan',
       body: () => ({
-        businessType: form.industry || form.businessName || 'general business',
+        businessType: f.industry || f.businessName || 'general business',
         salesCycleLength: '14-30 days',
         currentTools: 'Email + phone + LinkedIn',
       }),
-      titleFor: () => `${form.industry || form.businessName} — Follow-Up Plan`,
+      titleFor: () => `${f.industry || f.businessName} — Follow-Up Plan`,
     },
     {
       key: 'brand',
@@ -147,12 +178,12 @@ export const AllInOneGenerator: React.FC = () => {
       icon: AlertTriangle,
       fn: 'generate-brand-contradictions',
       body: () => ({
-        url: form.url.trim(),
+        url: f.url.trim(),
         socialLinks: '',
-        idealCustomer: form.targetCustomer || 'mid-market decision makers',
+        idealCustomer: f.targetCustomer || 'mid-market decision makers',
         desiredPerception: ['Premium', 'Trusted', 'Expert'],
       }),
-      titleFor: () => `${form.businessName || form.url} — Brand Contradictions`,
+      titleFor: () => `${f.businessName || f.url} — Brand Contradictions`,
     },
     {
       key: 'friction',
@@ -161,12 +192,12 @@ export const AllInOneGenerator: React.FC = () => {
       icon: ScanText,
       fn: 'generate-friction-audit',
       body: () => ({
-        url: form.url.trim(),
+        url: f.url.trim(),
         desiredTone: ['Confident', 'Direct', 'Premium'],
-        industry: form.industry || form.businessName || 'general business',
-        targetCustomer: form.targetCustomer || 'mid-market decision makers',
+        industry: f.industry || f.businessName || 'general business',
+        targetCustomer: f.targetCustomer || 'mid-market decision makers',
       }),
-      titleFor: () => `${form.businessName || form.url} — Friction Audit`,
+      titleFor: () => `${f.businessName || f.url} — Friction Audit`,
     },
     {
       key: 'questions',
@@ -175,18 +206,18 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Brain,
       fn: 'generate-strategic-questions',
       body: () => ({
-        industry: form.industry || form.businessName || 'general business',
+        industry: f.industry || f.businessName || 'general business',
         companySize: '11-50',
         yearsInBusiness: '3-10',
-        mainProduct: form.product || form.businessName || 'core offer',
+        mainProduct: f.product || f.businessName || 'core offer',
         growthStage: 'Growth',
         biggestFrustration: 'Inconsistent lead flow and low conversion',
         pressureAreas: ['Sales', 'Marketing'],
         revenueRange: '$1M-$10M',
-        goal: form.goals || 'Predictable inbound pipeline',
+        goal: f.goals || 'Predictable inbound pipeline',
       }),
-      skipReason: () => (!form.industry && !form.businessName ? 'Add an industry or business name to generate strategic questions.' : null),
-      titleFor: () => `${form.industry || form.businessName} — Strategic Questions`,
+      skipReason: () => (!f.industry && !f.businessName ? 'Add an industry or business name to generate strategic questions.' : null),
+      titleFor: () => `${f.industry || f.businessName} — Strategic Questions`,
     },
   ];
 
@@ -216,9 +247,19 @@ export const AllInOneGenerator: React.FC = () => {
       toast({ title: 'Website URL required', description: 'Enter the website to analyze.', variant: 'destructive' });
       return;
     }
+
+    // Auto-infer business profile if user hasn't filled details
+    let workingForm = form;
+    const needsInference = !form.businessName && !form.industry && !form.product && !form.targetCustomer;
+    if (needsInference) {
+      const inferred = await inferFromUrl(form.url);
+      if (inferred) workingForm = inferred;
+      // continue even if inference fails — tools will fall back to URL-only
+    }
+
     setRunning(true);
     setProgress(0);
-    const allJobs = jobs();
+    const allJobs = jobs(workingForm);
     const initial: Record<string, RunState> = {};
     allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
     setStates(initial);
@@ -332,17 +373,32 @@ export const AllInOneGenerator: React.FC = () => {
         <div className="flex flex-wrap gap-2 mt-6">
           <Button
             onClick={handleRun}
-            disabled={running || !form.url.trim()}
+            disabled={running || inferring || !form.url.trim()}
             className="bg-amber hover:bg-amber/90 text-background font-bold px-6"
           >
             {running ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running all tools...
               </>
+            ) : inferring ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Reading website...
+              </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" /> Run Every Tool
               </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => inferFromUrl()}
+            disabled={running || inferring || !form.url.trim()}
+          >
+            {inferring ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Auto-filling...</>
+            ) : (
+              <>Auto-fill from website</>
             )}
           </Button>
           {!running && Object.keys(states).length > 0 && (
@@ -351,8 +407,9 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Takes about 60–120 seconds. Tools run in parallel and each saves to your library independently — even if one
-          fails, the others still complete.
+          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
+          site, infer your business profile, then run all 9 tools in parallel (~60–120 seconds). Each result saves to
+          your library independently.
         </p>
       </div>
 
