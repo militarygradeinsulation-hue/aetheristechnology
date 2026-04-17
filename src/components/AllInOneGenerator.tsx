@@ -448,8 +448,8 @@ export const AllInOneGenerator: React.FC = () => {
 
         <p className="text-xs text-muted-foreground mt-3">
           Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
-          site, infer your business profile, then run all 9 tools in parallel (~60–120 seconds). Each result saves to
-          your library independently.
+          site, infer your business profile, then run all 9 tools in staggered batches (~90–180 seconds). If a tool gets
+          rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
         </p>
       </div>
 
