@@ -107,3 +107,6 @@ verify_jwt = true
 
 [functions.admin-library]
 verify_jwt = true
+
+[functions.campaign-image-generator]
+verify_jwt = false

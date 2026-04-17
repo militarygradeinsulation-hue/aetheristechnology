@@ -21,7 +21,13 @@ const EMAIL_1_BODY_HTML = `<p>Quick question.</p>
 Website: theaiformarketing.com<br>
 <a href="https://linkedin.com/in/aisystemsarchitect">linkedin.com/in/aisystemsarchitect</a></p>`;
 
-async function generateFollowUpEmails(prospect: any, steps: any[], apiKey: string) {
+interface CampaignContext {
+  fromName: string;
+  defaultLinks: { label: string; url: string }[];
+  attachments: { name: string; url: string }[];
+}
+
+async function generateFollowUpEmails(prospect: any, steps: any[], apiKey: string, ctx: CampaignContext) {
   // We only AI-generate emails 2..N (index 1..N-1). Email 1 is fixed.
   const followUps = steps.slice(1);
   if (followUps.length === 0) return [];
@@ -30,6 +36,16 @@ async function generateFollowUpEmails(prospect: any, steps: any[], apiKey: strin
   const stepsDescription = followUps.map((s: any, i: number) =>
     `Email ${i + 2}: ${s.body_prompt}`
   ).join("\n");
+
+  const linksBlock = ctx.defaultLinks.length
+    ? "Available CTA links you can naturally embed (use AT MOST ONE per email unless the email purpose specifies otherwise):\n" +
+      ctx.defaultLinks.map(l => `- ${l.label}: ${l.url}`).join("\n")
+    : "";
+
+  const attachmentBlock = ctx.attachments.length
+    ? "\nAttachments to mention/link in Email 3 (or wherever the prompt suggests offering a resource):\n" +
+      ctx.attachments.map(a => `- ${a.name}: ${a.url}`).join("\n")
+    : "";
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -42,33 +58,34 @@ async function generateFollowUpEmails(prospect: any, steps: any[], apiKey: strin
       messages: [
         {
           role: "system",
-          content: `You are Joseph Toney's follow-up email writer. Joseph runs Aetheris Technology (aetheris.technology) and helps local businesses capture leads, follow up automatically, and automate branding.
+          content: `You are ${ctx.fromName}'s follow-up email writer. ${ctx.fromName} runs Aetheris Technology (aetheris.technology) and helps local businesses capture leads, follow up automatically, and automate branding.
 
-Joseph's first email already went out, the verbatim "Quick question" script: a soft ask about knowing any business owner who'd want a free walkthrough of his AI system. Now write the follow-ups.
+${ctx.fromName}'s first email already went out, the verbatim "Quick question" script: a soft ask about knowing any business owner who'd want a free walkthrough of his AI system. Now write the follow-ups.
 
 You write like a MASTER SALESMAN trained in Sandler and Chris Voss tactical empathy. Your job is NOT to pitch. It is to get the prospect to open up so they stop assuming this is sales and start actually thinking about their own problem.
 
 Psychological playbook for every follow-up:
-1. PATTERN INTERRUPT the opener. Name the elephant. Examples: "totally fair if you read the first one and thought 'here we go, another sales pitch'", "you probably ignored the first email, and honestly I would too", "I am guessing this looks like every other cold email you delete".
-2. TACTICAL EMPATHY LABEL. Show you understand their world before asking anything. Examples: "sounds like you have follow-up handled, or you would have replied", "guessing leads aren't actually the bottleneck for [their business type], it's what happens after the lead", "most [industry] owners I talk to aren't worried about more leads, they're worried about the ones already slipping through".
-3. ONE BOLD CALIBRATED QUESTION. Never multiple. Use "what" or "how", never yes/no. Examples: "what's the real dollar cost when a lead goes cold for you?", "what would have to be true for you to actually look at something like this?", "when a customer ghosts you after the first contact, what do you usually blame?", "how many of last month's leads do you think you actually closed, honestly?".
-4. LOSS FRAMING tied to their industry when relevant. "Most [industry] owners I work with are bleeding 2 to 3 leads a week and have no idea." "The owners who lose the most aren't the ones with bad service, they're the ones with slow follow-up."
-5. REFRAME OBJECTIONS as curiosity, not pressure. "When you say not interested, is that 'not now', 'not this', or 'not me'?"
-6. Goal of every email is to get a REPLY, not a sale. Make replying feel low-stakes and human.
+1. PATTERN INTERRUPT the opener. Name the elephant.
+2. TACTICAL EMPATHY LABEL. Show you understand their world before asking anything.
+3. ONE BOLD CALIBRATED QUESTION. Never multiple. Use "what" or "how", never yes/no.
+4. LOSS FRAMING tied to their industry when relevant.
+5. REFRAME OBJECTIONS as curiosity, not pressure.
+6. Goal of every email is to get a REPLY, not a sale.
 
 Hard rules:
-- NEVER use dashes as punctuation. No em dashes, no en dashes, no hyphens as separators. Use periods, commas, or new sentences.
+- NEVER use dashes as punctuation. No em dashes, no en dashes, no hyphens as separators.
 - NEVER suggest a call, meeting, demo, consultation, calendar link, or scheduled interaction. Offer free walkthroughs only when they ask.
 - NEVER pressure. No urgency. No "limited spots".
-- Under 120 words. Short paragraphs. Conversational. Sounds like a sharp friend who happens to know tech.
-- No corporate language. No "I hope this finds you well". No buzzwords.
-- Sign off as "Joseph".
-- Only ONE link maximum per email, aetheris.technology (unless the email purpose specifies otherwise like the playbook email).
-- Reference their specific business or industry naturally. Show you looked.`,
+- Under 120 words. Short paragraphs. Conversational.
+- Sign off as "${ctx.fromName.split(' ')[0]}".
+- Reference their specific business or industry naturally.
+
+${linksBlock}
+${attachmentBlock}`,
         },
         {
           role: "user",
-          content: `Write ${followUps.length} follow-up emails as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags only, no links in HTML unless the email purpose specifies a link).
+          content: `Write ${followUps.length} follow-up emails as a JSON array. Each element must have "subject" and "body_html" (use simple HTML with <p> tags; you may include <a> tags for the CTA links provided in the system prompt).
 
 Prospect info:
 Business: ${prospect.business_name || "Unknown"}
@@ -81,9 +98,7 @@ Context: ${scraped.context || "No additional context"}
 Email purposes:
 ${stepsDescription}
 
-For Email 3 specifically: Offer them a free playbook called "The Sales Process Reengineering Playbook" and include this link in the HTML: ${PLAYBOOK_URL}. Frame it as "I made this thing, thought you might find it useful, no strings."
-
-Return ONLY a JSON array of ${followUps.length} objects with "subject" and "body_html". No dashes anywhere. Sign off as just "Joseph".`,
+Return ONLY a JSON array of ${followUps.length} objects with "subject" and "body_html". No dashes anywhere. Sign off as just "${ctx.fromName.split(' ')[0]}".`,
         },
       ],
     }),
@@ -134,6 +149,25 @@ serve(async (req) => {
       });
     }
 
+    // Load campaign context (sender name + CTA links + attached playbooks)
+    const { data: settings } = await supabase
+      .from("campaign_settings")
+      .select("from_name, default_links")
+      .eq("id", 1)
+      .maybeSingle();
+
+    const { data: attachedAssets } = await supabase
+      .from("campaign_assets")
+      .select("name, url")
+      .eq("type", "playbook")
+      .eq("is_attached", true);
+
+    const ctx: CampaignContext = {
+      fromName: settings?.from_name || "Joseph Toney",
+      defaultLinks: ((settings?.default_links as any[]) || []).filter(l => l?.label && l?.url),
+      attachments: (attachedAssets || []) as { name: string; url: string }[],
+    };
+
     const { data: prospects, error: prospErr } = await supabase
       .from("drip_prospects")
       .select("*")
@@ -156,7 +190,7 @@ serve(async (req) => {
       const results = await Promise.allSettled(
         chunk.map(async (prospect) => {
           // Generate only emails 2..N
-          const followUps = await generateFollowUpEmails(prospect, steps, LOVABLE_API_KEY);
+          const followUps = await generateFollowUpEmails(prospect, steps, LOVABLE_API_KEY, ctx);
           if (followUps === null) throw new Error("generation failed");
 
           const emailRows = steps.map((step: any, i: number) => {
