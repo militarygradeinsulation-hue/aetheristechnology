@@ -203,7 +203,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? '📨 Campaign' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : '📚 My Library'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? '📨 Campaign' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : '✨ SEO/AEO Auto-Optimizer'}
             </button>
           ))}
         </div>
