@@ -1,0 +1,395 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import {
+  Sparkles,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Megaphone,
+  Phone,
+  Calendar,
+  Mail,
+  Brain,
+  AlertTriangle,
+  ScanText,
+  Library as LibraryIcon,
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
+
+type RunStatus = 'idle' | 'running' | 'success' | 'error' | 'skipped';
+
+interface ToolJob {
+  key: string;
+  label: string;
+  toolType: string;
+  icon: React.ElementType;
+  fn: string;
+  body: () => Record<string, unknown>;
+  titleFor: (data: any) => string;
+  /** Soft-skip if required input is missing, with friendly note. */
+  skipReason?: () => string | null;
+}
+
+interface RunState {
+  status: RunStatus;
+  message?: string;
+  durationMs?: number;
+}
+
+export const AllInOneGenerator: React.FC = () => {
+  const [form, setForm] = useState({
+    url: '',
+    businessName: '',
+    industry: '',
+    product: '',
+    targetCustomer: '',
+    goals: '',
+  });
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [states, setStates] = useState<Record<string, RunState>>({});
+
+  const jobs = (): ToolJob[] => [
+    {
+      key: 'social',
+      label: 'Social Content (LinkedIn, FB, Ads)',
+      toolType: 'social_content',
+      icon: Megaphone,
+      fn: 'generate-social-content',
+      body: () => ({ url: form.url.trim() }),
+      titleFor: (d) => `${d?.businessName || form.businessName || form.url} — Social Pack`,
+    },
+    {
+      key: 'calendar',
+      label: '30-Day Content Calendar',
+      toolType: 'content_calendar',
+      icon: Calendar,
+      fn: 'generate-content-calendar',
+      body: () => ({
+        industry: form.industry || form.businessName || 'general business',
+        goals: form.goals || 'grow brand awareness and inbound leads',
+        platforms: 'LinkedIn, Facebook, Instagram',
+      }),
+      titleFor: () => `${form.industry || form.businessName || form.url} — 30-Day Calendar`,
+    },
+    {
+      key: 'sales',
+      label: 'Sales Scripts',
+      toolType: 'sales_scripts',
+      icon: Phone,
+      fn: 'generate-sales-scripts',
+      body: () => ({
+        industry: form.industry || form.businessName || 'general business',
+        product: form.product || form.businessName || 'core offer',
+        targetCustomer: form.targetCustomer || 'mid-market decision makers',
+        objections: '',
+      }),
+      skipReason: () => (!form.industry && !form.product && !form.businessName ? 'Add an industry or product to generate sales scripts.' : null),
+      titleFor: () => `${form.industry || form.businessName} — Sales Scripts`,
+    },
+    {
+      key: 'followup',
+      label: 'Follow-Up Plan',
+      toolType: 'follow_up_plan',
+      icon: Mail,
+      fn: 'generate-follow-up-plan',
+      body: () => ({
+        businessType: form.industry || form.businessName || 'general business',
+        salesCycleLength: '14-30 days',
+        currentTools: 'Email + phone + LinkedIn',
+      }),
+      titleFor: () => `${form.industry || form.businessName} — Follow-Up Plan`,
+    },
+    {
+      key: 'brand',
+      label: 'Brand Contradictions',
+      toolType: 'brand_contradictions',
+      icon: AlertTriangle,
+      fn: 'generate-brand-contradictions',
+      body: () => ({
+        url: form.url.trim(),
+        socialLinks: '',
+        idealCustomer: form.targetCustomer || 'mid-market decision makers',
+        desiredPerception: ['Premium', 'Trusted', 'Expert'],
+      }),
+      titleFor: () => `${form.businessName || form.url} — Brand Contradictions`,
+    },
+    {
+      key: 'friction',
+      label: 'Friction Vocabulary Audit',
+      toolType: 'friction_audit',
+      icon: ScanText,
+      fn: 'generate-friction-audit',
+      body: () => ({
+        url: form.url.trim(),
+        desiredTone: ['Confident', 'Direct', 'Premium'],
+        industry: form.industry || form.businessName || 'general business',
+        targetCustomer: form.targetCustomer || 'mid-market decision makers',
+      }),
+      titleFor: () => `${form.businessName || form.url} — Friction Audit`,
+    },
+    {
+      key: 'questions',
+      label: 'Strategic Questions',
+      toolType: 'strategic_questions',
+      icon: Brain,
+      fn: 'generate-strategic-questions',
+      body: () => ({
+        industry: form.industry || form.businessName || 'general business',
+        companySize: '11-50',
+        yearsInBusiness: '3-10',
+        mainProduct: form.product || form.businessName || 'core offer',
+        growthStage: 'Growth',
+        biggestFrustration: 'Inconsistent lead flow and low conversion',
+        pressureAreas: ['Sales', 'Marketing'],
+        revenueRange: '$1M-$10M',
+        goal: form.goals || 'Predictable inbound pipeline',
+      }),
+      skipReason: () => (!form.industry && !form.businessName ? 'Add an industry or business name to generate strategic questions.' : null),
+      titleFor: () => `${form.industry || form.businessName} — Strategic Questions`,
+    },
+  ];
+
+  const runOne = async (job: ToolJob): Promise<RunState> => {
+    const skip = job.skipReason?.();
+    if (skip) return { status: 'skipped', message: skip };
+    const started = Date.now();
+    try {
+      const { data, error } = await supabase.functions.invoke(job.fn, { body: job.body() });
+      if (error || !data) throw new Error(error?.message || 'No data returned');
+      // Save to library
+      await saveToAdminLibrary({
+        tool_type: job.toolType,
+        title: `${job.titleFor(data)} — ${new Date().toLocaleDateString()}`,
+        input_data: { source: 'all-in-one', ...form, ...job.body() },
+        output_data: data,
+      }).catch((e) => console.error(`Library save failed for ${job.key}:`, e));
+      return { status: 'success', durationMs: Date.now() - started };
+    } catch (err: any) {
+      console.error(`[all-in-one] ${job.key} failed:`, err);
+      return { status: 'error', message: err.message || 'Unknown error', durationMs: Date.now() - started };
+    }
+  };
+
+  const handleRun = async () => {
+    if (!form.url.trim()) {
+      toast({ title: 'Website URL required', description: 'Enter the website to analyze.', variant: 'destructive' });
+      return;
+    }
+    setRunning(true);
+    setProgress(0);
+    const allJobs = jobs();
+    const initial: Record<string, RunState> = {};
+    allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
+    setStates(initial);
+
+    let completed = 0;
+    const total = allJobs.length;
+
+    // Run in parallel — each updates state independently as it finishes
+    await Promise.all(
+      allJobs.map(async (job) => {
+        const result = await runOne(job);
+        completed++;
+        setProgress(Math.round((completed / total) * 100));
+        setStates((prev) => ({ ...prev, [job.key]: result }));
+      }),
+    );
+
+    const successCount = Object.values(initial).length; // rebuild from latest state in toast
+    setRunning(false);
+    setProgress(100);
+    toast({
+      title: 'All-in-one run complete',
+      description: `Finished ${completed} of ${total} tools. Check My Library to view and download results.`,
+    });
+  };
+
+  const reset = () => {
+    setStates({});
+    setProgress(0);
+  };
+
+  const successCount = Object.values(states).filter((s) => s.status === 'success').length;
+  const errorCount = Object.values(states).filter((s) => s.status === 'error').length;
+  const skippedCount = Object.values(states).filter((s) => s.status === 'skipped').length;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="glass rounded-xl p-6 sm:p-8 border border-border">
+        <div className="flex items-center gap-3 mb-2">
+          <Sparkles className="w-6 h-6 text-amber" />
+          <h2 className="text-2xl font-bold text-foreground font-display">All-In-One: Run Every Tool</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          Enter a website URL and a few quick details. We'll run every tool in your toolkit at once and save each result
+          to <span className="text-amber">My Library</span>.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2">
+            <Label>Website URL *</Label>
+            <Input
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
+              placeholder="https://example.com"
+              disabled={running}
+            />
+          </div>
+          <div>
+            <Label>Business Name</Label>
+            <Input
+              value={form.businessName}
+              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+              placeholder="Acme Co."
+              disabled={running}
+            />
+          </div>
+          <div>
+            <Label>Industry</Label>
+            <Input
+              value={form.industry}
+              onChange={(e) => setForm({ ...form, industry: e.target.value })}
+              placeholder="e.g. SaaS, Healthcare, Construction"
+              disabled={running}
+            />
+          </div>
+          <div>
+            <Label>Main Product / Service</Label>
+            <Input
+              value={form.product}
+              onChange={(e) => setForm({ ...form, product: e.target.value })}
+              placeholder="What do they sell?"
+              disabled={running}
+            />
+          </div>
+          <div>
+            <Label>Target Customer</Label>
+            <Input
+              value={form.targetCustomer}
+              onChange={(e) => setForm({ ...form, targetCustomer: e.target.value })}
+              placeholder="Mid-market ops leaders"
+              disabled={running}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Primary Goal</Label>
+            <Textarea
+              value={form.goals}
+              onChange={(e) => setForm({ ...form, goals: e.target.value })}
+              placeholder="e.g. Predictable inbound pipeline, expand into enterprise, increase trial-to-paid conversion"
+              rows={2}
+              disabled={running}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-6">
+          <Button
+            onClick={handleRun}
+            disabled={running || !form.url.trim()}
+            className="bg-amber hover:bg-amber/90 text-background font-bold px-6"
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running all tools...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" /> Run Every Tool
+              </>
+            )}
+          </Button>
+          {!running && Object.keys(states).length > 0 && (
+            <Button variant="outline" onClick={reset}>Clear results</Button>
+          )}
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-3">
+          Takes about 60–120 seconds. Tools run in parallel and each saves to your library independently — even if one
+          fails, the others still complete.
+        </p>
+      </div>
+
+      {(running || Object.keys(states).length > 0) && (
+        <div className="glass rounded-xl p-6 border border-border">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 className="text-lg font-bold text-foreground font-display">Progress</h3>
+            <div className="flex items-center gap-3 text-xs">
+              {successCount > 0 && (
+                <span className="text-green-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> {successCount} done
+                </span>
+              )}
+              {errorCount > 0 && (
+                <span className="text-red-400 flex items-center gap-1">
+                  <XCircle className="w-3.5 h-3.5" /> {errorCount} failed
+                </span>
+              )}
+              {skippedCount > 0 && (
+                <span className="text-muted-foreground">{skippedCount} skipped</span>
+              )}
+            </div>
+          </div>
+          <Progress value={progress} className="h-2 mb-4" />
+          <div className="space-y-2">
+            {jobs().map((job) => {
+              const state = states[job.key] || { status: 'idle' as RunStatus };
+              const Icon = job.icon;
+              return (
+                <div
+                  key={job.key}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/40"
+                >
+                  <Icon className="w-4 h-4 text-amber flex-shrink-0" />
+                  <span className="flex-1 text-sm font-medium text-foreground">{job.label}</span>
+                  <div className="flex items-center gap-2 text-xs">
+                    {state.status === 'running' && (
+                      <span className="flex items-center gap-1 text-amber">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running
+                      </span>
+                    )}
+                    {state.status === 'success' && (
+                      <span className="flex items-center gap-1 text-green-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Library
+                        {state.durationMs ? <span className="text-muted-foreground">· {(state.durationMs / 1000).toFixed(1)}s</span> : null}
+                      </span>
+                    )}
+                    {state.status === 'error' && (
+                      <span className="flex items-center gap-1 text-red-400" title={state.message}>
+                        <XCircle className="w-3.5 h-3.5" /> Failed
+                      </span>
+                    )}
+                    {state.status === 'skipped' && (
+                      <span className="text-muted-foreground" title={state.message}>Skipped</span>
+                    )}
+                    {state.status === 'idle' && <span className="text-muted-foreground">Queued</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {!running && successCount > 0 && (
+            <div className="mt-5 p-4 rounded-lg bg-amber/5 border border-amber/30 flex items-start gap-3">
+              <LibraryIcon className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-foreground">All results are in your Library</p>
+                <p className="text-xs text-muted-foreground">
+                  Switch to the <span className="text-amber font-semibold">My Library</span> tab to view, download as
+                  PDF, or copy any result.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};

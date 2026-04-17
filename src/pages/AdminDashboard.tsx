@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles } from 'lucide-react';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -12,15 +12,17 @@ import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
+import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { AdminLibrary } from '@/components/AdminLibrary';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 
-type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
 
-const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType }[] = [
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
+  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
   { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
   { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
@@ -426,13 +428,22 @@ const AdminDashboard: React.FC = () => {
                     <button
                       key={tool.key}
                       onClick={() => setActiveTool(tool.key)}
-                      className="glass p-6 rounded-xl text-left hover:border-amber/40 border border-border transition-colors group"
+                      className={`glass p-6 rounded-xl text-left border transition-colors group ${
+                        tool.featured
+                          ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3'
+                          : 'border-border hover:border-amber/40'
+                      }`}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                          tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'
+                        }`}>
                           <tool.icon className="w-5 h-5 text-amber" />
                         </div>
                         <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
+                        {tool.featured && (
+                          <span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{tool.description}</p>
                     </button>
@@ -444,6 +455,7 @@ const AdminDashboard: React.FC = () => {
                 <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
                 </Button>
+                {activeTool === 'allinone' && <AllInOneGenerator />}
                 {activeTool === 'social' && <SocialContentGenerator adminMode />}
                 {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
                 {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
