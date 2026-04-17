@@ -54,8 +54,39 @@ export const AllInOneGenerator: React.FC = () => {
     goals: '',
   });
   const [running, setRunning] = useState(false);
+  const [inferring, setInferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [states, setStates] = useState<Record<string, RunState>>({});
+
+  const inferFromUrl = async (urlOverride?: string): Promise<typeof form | null> => {
+    const targetUrl = (urlOverride ?? form.url).trim();
+    if (!targetUrl) {
+      toast({ title: 'Website URL required', description: 'Paste a URL first.', variant: 'destructive' });
+      return null;
+    }
+    setInferring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('infer-business-context', { body: { url: targetUrl } });
+      if (error || !data || data.error) throw new Error(error?.message || data?.error || 'Inference failed');
+      const next = {
+        url: data.url || targetUrl,
+        businessName: data.businessName || '',
+        industry: data.industry || '',
+        product: data.product || '',
+        targetCustomer: data.targetCustomer || '',
+        goals: data.goals || '',
+      };
+      setForm(next);
+      toast({ title: 'Auto-filled from website', description: `${next.businessName || 'Business'} · ${next.industry || 'industry detected'}` });
+      return next;
+    } catch (err: any) {
+      console.error('[infer] failed:', err);
+      toast({ title: 'Could not auto-fill', description: err.message || 'You can still fill the fields manually.', variant: 'destructive' });
+      return null;
+    } finally {
+      setInferring(false);
+    }
+  };
 
   const jobs = (): ToolJob[] => [
     {
