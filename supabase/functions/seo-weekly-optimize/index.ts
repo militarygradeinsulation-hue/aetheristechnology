@@ -24,6 +24,13 @@ const ROUTES: Array<{ path: string; intent: string }> = [
   { path: "/about", intent: "About + founder bio — trust/authority" },
   { path: "/why-us", intent: "Differentiation page — competitive positioning" },
   { path: "/solutions", intent: "Solutions overview" },
+  { path: "/industries", intent: "Industries hub — vertical AI solutions overview" },
+  { path: "/ai-for-healthcare", intent: "AI for Healthcare — Indianapolis vertical landing, HIPAA + clinical ops" },
+  { path: "/ai-for-finance", intent: "AI for Finance — Indianapolis vertical landing, risk + compliance + automation" },
+  { path: "/ai-for-logistics", intent: "AI for Logistics — Indianapolis vertical landing, routing + fleet + warehouse" },
+  { path: "/ai-for-construction", intent: "AI for Construction — Indianapolis vertical landing, bids + safety + scheduling" },
+  { path: "/ai-for-manufacturing", intent: "AI for Manufacturing — Indianapolis vertical landing, predictive maintenance + quality" },
+  { path: "/ai-for-saas", intent: "AI for SaaS — vertical landing, churn + product-led growth + support automation" },
 ];
 
 const SITE_URL = "https://aetheris.technology";
@@ -81,6 +88,12 @@ async function optimizeRoute(
   trends: unknown,
   LOVABLE_API_KEY: string,
 ) {
+  const pathHint = route.path.startsWith("/ai-for-")
+    ? "\nROUTE TYPE: Industry vertical landing page — keep the industry name AND 'Indianapolis' in the title/description when natural. Use industry-specific keywords."
+    : route.path.startsWith("/blog/")
+    ? "\nROUTE TYPE: Long-form blog post — title should stay close to the original H1 (don't rewrite the topic). FAQ section is the HIGHEST PRIORITY for AEO citations — make answers quotable by ChatGPT/Perplexity/Google AI Overviews."
+    : "";
+
   const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -89,7 +102,7 @@ async function optimizeRoute(
       messages: [
         {
           role: "system",
-          content: `You are the SEO/AEO optimizer for Aetheris AI.\n${BRAND_RULES}\n\nGiven the current page metadata + trending keywords + page intent, output an optimized payload. Reasoning should briefly explain which trends drove the changes.`,
+          content: `You are the SEO/AEO optimizer for Aetheris AI.\n${BRAND_RULES}${pathHint}\n\nGiven the current page metadata + trending keywords + page intent, output an optimized payload. Reasoning should briefly explain which trends drove the changes.`,
         },
         {
           role: "user",
@@ -168,9 +181,25 @@ Deno.serve(async (req) => {
     let body: { routes?: string[]; run_type?: string } = {};
     try { body = await req.json(); } catch { /* GET / cron */ }
 
+    // Build route list: static ROUTES + dynamic blog posts (capped to control AI cost)
+    const BLOG_CAP = 25;
+    const { data: blogRows } = await supabase
+      .from("blog_posts")
+      .select("slug, title")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false })
+      .limit(BLOG_CAP);
+
+    const blogRoutes: Array<{ path: string; intent: string }> = (blogRows ?? []).map((b: { slug: string; title: string }) => ({
+      path: `/blog/${b.slug}`,
+      intent: `Long-form blog — ${b.title}`,
+    }));
+
+    const allRoutes = [...ROUTES, ...blogRoutes];
+
     const targetRoutes = body.routes?.length
-      ? ROUTES.filter(r => body.routes!.includes(r.path))
-      : ROUTES;
+      ? allRoutes.filter(r => body.routes!.includes(r.path))
+      : allRoutes;
     const runType = body.run_type ?? "weekly";
 
     // 1. Get trends (cached or fresh)
