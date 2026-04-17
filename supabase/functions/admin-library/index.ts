@@ -6,26 +6,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Same passcode used by /admin/login (sessionStorage flag)
-const ADMIN_PASSCODE = "9822";
+async function requireAdmin(req: Request): Promise<{ ok: true } | { ok: false; res: Response }> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+  if (isAdmin !== true) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  return { ok: true };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const body = await req.json();
-    const { action, passcode } = body;
-
-    if (passcode !== ADMIN_PASSCODE) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const { action } = body;
 
     if (action === "list") {
       const { data, error } = await supabase

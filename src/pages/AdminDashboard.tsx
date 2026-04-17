@@ -106,13 +106,30 @@ const AdminDashboard: React.FC = () => {
     }
   }, [toast]);
 
-  // Auto-refresh every 30 seconds
+  // Verify admin status via Supabase Auth + is_admin() RPC, then auto-refresh every 30s
   useEffect(() => {
-    const isAuth = sessionStorage.getItem('admin_authenticated') === 'true';
-    if (!isAuth) { navigate('/admin/login', { replace: true }); return; }
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const verifyAndLoad = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      if (!user) { navigate('/admin/login', { replace: true }); return; }
+
+      const { data: isAdmin, error } = await supabase.rpc('is_admin', { _user_id: user.id });
+      if (cancelled) return;
+      if (error || isAdmin !== true) {
+        await supabase.auth.signOut();
+        navigate('/admin/login', { replace: true });
+        return;
+      }
+
+      fetchData();
+      interval = setInterval(fetchData, 30000);
+    };
+
+    verifyAndLoad();
+    return () => { cancelled = true; if (interval) clearInterval(interval); };
   }, [navigate, fetchData]);
 
   const toggleRead = async (id: string, current: boolean) => {
@@ -120,32 +137,25 @@ const AdminDashboard: React.FC = () => {
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/admin/login', { replace: true });
   };
 
   const fetchInsights = async () => {
     setLoadingInsights(true);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-insights', {
-        body: {
-          stats,
-          topPages,
-          recentLeads: submissions.slice(0, 5).map(s => ({
-            name: s.name, company: s.company, service_interest: s.service_interest, created_at: s.created_at,
-          })),
-          eventBreakdown,
-        },
-      });
+      // No body needed: server fetches analytics from DB to prevent client tampering
+      const { data, error } = await supabase.functions.invoke('admin-insights', { body: {} });
       if (error) throw error;
       if (data?.error) {
         toast({ title: 'AI Error', description: data.error, variant: 'destructive' });
       } else {
         setRecommendations(data.recommendations);
       }
-    } catch (err: any) {
-      toast({ title: 'Failed to get insights', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Failed to get insights', description: msg, variant: 'destructive' });
     } finally {
       setLoadingInsights(false);
     }

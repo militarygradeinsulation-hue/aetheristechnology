@@ -1,15 +1,81 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function requireAdmin(req: Request): Promise<{ ok: true } | { ok: false; res: Response }> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+  if (isAdmin !== true) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  return { ok: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { stats, topPages, recentLeads, eventBreakdown } = await req.json();
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
+    // Fetch analytics data server-side from DB (don't trust client-supplied values)
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    const [eventsRes, leadsRes] = await Promise.all([
+      admin.from("site_events").select("event_type, event_data").order("created_at", { ascending: false }).limit(1000),
+      admin.from("contact_submissions").select("name, company, service_interest, created_at").order("created_at", { ascending: false }).limit(5),
+    ]);
+
+    const events = eventsRes.data || [];
+    const recentLeads = leadsRes.data || [];
+
+    const sessionIds = new Set<string>();
+    let pageViews = 0;
+    let linkedInClicks = 0;
+    const pageCounts: Record<string, number> = {};
+    const eventCounts: Record<string, number> = {};
+
+    for (const e of events as Array<{ event_type: string; event_data: Record<string, unknown> | null }>) {
+      eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1;
+      const data = (e.event_data || {}) as Record<string, unknown>;
+      const sid = typeof data.session_id === "string" ? data.session_id : null;
+      if (sid) sessionIds.add(sid);
+      if (e.event_type === "page_view") {
+        pageViews++;
+        const page = typeof data.page === "string" ? data.page : "unknown";
+        pageCounts[page] = (pageCounts[page] || 0) + 1;
+      }
+      if (e.event_type === "linkedin_click") linkedInClicks++;
+    }
+
+    const { count: formSubmissions } = await admin.from("contact_submissions").select("*", { count: "exact", head: true });
+
+    const stats = {
+      visitors: sessionIds.size,
+      pageViews,
+      linkedInClicks,
+      formSubmissions: formSubmissions ?? 0,
+    };
+    const topPages = Object.entries(pageCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([page, views]) => ({ page, views }));
+    const eventBreakdown = Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).map(([type, count]) => ({ type, count }));
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -35,13 +101,13 @@ OVERVIEW:
 - Conversion Rate: ${stats.formSubmissions > 0 && stats.visitors > 0 ? ((stats.formSubmissions / stats.visitors) * 100).toFixed(1) : '0'}%
 
 TOP PAGES BY VIEWS:
-${topPages.map((p: any) => `- ${p.page}: ${p.views} views`).join('\n')}
+${topPages.map((p) => `- ${p.page}: ${p.views} views`).join('\n')}
 
 EVENT BREAKDOWN:
-${eventBreakdown.map((e: any) => `- ${e.type}: ${e.count}`).join('\n')}
+${eventBreakdown.map((e) => `- ${e.type}: ${e.count}`).join('\n')}
 
 RECENT LEADS (last 5):
-${recentLeads.map((l: any) => `- ${l.name} (${l.company || 'No company'}) - Interest: ${l.service_interest || 'General'} - ${l.created_at}`).join('\n')}
+${recentLeads.map((l) => `- ${l.name} (${l.company || 'No company'}) - Interest: ${l.service_interest || 'General'} - ${l.created_at}`).join('\n')}
 
 Based on this data, give me 4-6 specific recommendations to improve traffic, engagement, and conversions. Prioritize by potential impact.`;
 
