@@ -54,8 +54,8 @@ export const SEOOptimizer: React.FC = () => {
       supabase.from("seo_overrides").select("*").order("applied_at", { ascending: false }),
       supabase.from("seo_optimization_log").select("*").order("run_at", { ascending: false }).limit(50),
     ]);
-    setOverrides((ovRes.data as SEOOverride[]) || []);
-    setLogs((logRes.data as SEOLog[]) || []);
+    setOverrides((ovRes.data as unknown as SEOOverride[]) || []);
+    setLogs((logRes.data as unknown as SEOLog[]) || []);
     setLoading(false);
   };
 
