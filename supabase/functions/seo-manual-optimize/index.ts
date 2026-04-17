@@ -1,22 +1,40 @@
 // Admin-triggered SEO optimization: single route or full run.
-// Gated by admin passcode header (matches AdminLogin client-side gate).
+// Validates Supabase JWT and admin status server-side.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-code",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_CODE = "9822";
+async function requireAdmin(req: Request): Promise<{ ok: true } | { ok: false; res: Response }> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+  if (isAdmin !== true) {
+    return { ok: false, res: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
+  }
+  return { ok: true };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const adminCode = req.headers.get("x-admin-code");
-    if (adminCode !== ADMIN_CODE) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
 
     const body = await req.json().catch(() => ({}));
     const isSingleRoute = Array.isArray(body?.routes) && body.routes.length === 1;
@@ -31,14 +49,11 @@ Deno.serve(async (req) => {
     });
 
     if (isSingleRoute) {
-      // Single route: small enough to wait for and return real results.
       const res = await upstream;
       const data = await res.json();
       return new Response(JSON.stringify(data), { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Full run: fire-and-forget so we beat the 150s edge timeout.
-    // Results land in seo_optimization_log as each route completes.
     // @ts-expect-error EdgeRuntime is provided by Supabase Edge Functions runtime
     EdgeRuntime.waitUntil(
       upstream
