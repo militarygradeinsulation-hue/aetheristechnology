@@ -17,7 +17,7 @@ const AdminLogin: React.FC = () => {
   const [user, setUser] = useState<{ id: string } | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ? { id: data.user.id } : null));
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ? { id: data.session.user.id } : null));
   }, []);
 
   useEffect(() => {
@@ -80,11 +80,11 @@ const AdminLogin: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('admin-pin-login', { body: { pin } });
       if (error || !data?.ok) throw new Error(data?.error || error?.message || 'Invalid PIN');
 
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: data.session?.access_token,
+        refresh_token: data.session?.refresh_token,
       });
-      if (signInErr) throw signInErr;
+      if (sessionError) throw sessionError;
 
       navigate('/admin', { replace: true });
     } catch (err) {

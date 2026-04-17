@@ -24,8 +24,9 @@ Deno.serve(async (req) => {
       });
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      supabaseUrl,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
@@ -59,8 +60,21 @@ Deno.serve(async (req) => {
     // Ensure admin row exists (idempotent upsert avoids extra RPC round-trip).
     await admin.from("admin_users").upsert({ user_id: userId }, { onConflict: "user_id" });
 
+    const authClient = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    );
+    const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
+      email: PIN_ADMIN_EMAIL,
+      password: PIN_ADMIN_PASSWORD,
+    });
+    if (authError || !authData.session) {
+      throw authError ?? new Error("Failed to create admin session");
+    }
+
     return new Response(
-      JSON.stringify({ ok: true, email: PIN_ADMIN_EMAIL, password: PIN_ADMIN_PASSWORD }),
+      JSON.stringify({ ok: true, session: authData.session }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
