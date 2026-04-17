@@ -89,23 +89,75 @@ export const CampaignControlCenter: React.FC = () => {
       // Auto-activate so the send is not silently blocked by the paused flag.
       if (!settings.is_active) await persist({ is_active: true });
 
-      // First send pass.
-      let { data, error } = await supabase.functions.invoke('process-drip', { body: {} });
-      if (error) throw error;
+      let totalSent = 0;
+      let totalSkipped = 0;
+      let totalFailed = 0;
+      let lastMessage = '';
+      let stopReason = '';
 
-      // If nothing was due, automatically pull in the next wave of imported
-      // prospects, generate their emails, and try sending again.
-      const msg: string = data?.message || '';
-      if (msg.toLowerCase().includes('no pending emails')) {
-        toast({ title: 'No emails due', description: 'Pulling next wave of imported leads...' });
-        const gen = await supabase.functions.invoke('generate-drip-batch', { body: { batchSize: 10 } });
-        if (gen.error) throw gen.error;
-        const retry = await supabase.functions.invoke('process-drip', { body: {} });
-        if (retry.error) throw retry.error;
-        data = retry.data;
+      // Hard safety cap on iterations so we cannot infinite-loop.
+      const MAX_ITERATIONS = 25;
+
+      const parseCounts = (msg: string) => {
+        const m = msg.match(/(\d+)\s+sent,\s+(\d+)\s+skipped,\s+(\d+)\s+failed/i);
+        if (!m) return null;
+        return { sent: Number(m[1]), skipped: Number(m[2]), failed: Number(m[3]) };
+      };
+
+      for (let i = 0; i < MAX_ITERATIONS; i++) {
+        const { data, error } = await supabase.functions.invoke('process-drip', { body: {} });
+        if (error) throw error;
+        const msg: string = data?.message || '';
+        lastMessage = msg;
+
+        const lower = msg.toLowerCase();
+
+        if (lower.includes('daily limit reached') || lower.includes('campaign is paused')) {
+          stopReason = msg;
+          break;
+        }
+
+        const counts = parseCounts(msg);
+        if (counts) {
+          totalSent += counts.sent;
+          totalSkipped += counts.skipped;
+          totalFailed += counts.failed;
+          // If we got 0 sent and 0 skipped from a non-empty pass, stop to avoid spinning.
+          if (counts.sent === 0 && counts.skipped === 0 && counts.failed === 0) {
+            stopReason = msg;
+            break;
+          }
+          // Otherwise continue immediately to drain more due emails.
+          continue;
+        }
+
+        if (lower.includes('no pending emails')) {
+          // Generate a fresh wave from imported prospects and try again.
+          const gen = await supabase.functions.invoke('generate-drip-batch', { body: { batchSize: 10 } });
+          if (gen.error) throw gen.error;
+          const genMsg: string = gen.data?.message || '';
+          const genLower = genMsg.toLowerCase();
+          // If generation produced nothing new, stop.
+          if (
+            genLower.includes('no prospects') ||
+            genLower.includes('no new prospects') ||
+            genLower.includes('0 emails generated') ||
+            genLower.includes('generated 0')
+          ) {
+            stopReason = `No more leads to send. ${genMsg}`.trim();
+            break;
+          }
+          // Loop again to send the freshly generated wave.
+          continue;
+        }
+
+        // Unknown response — stop and surface it.
+        stopReason = msg || 'Unknown response';
+        break;
       }
 
-      toast({ title: 'Batch processed', description: data?.message || data?.error || 'Done' });
+      const summary = `Sent ${totalSent}, skipped ${totalSkipped}, failed ${totalFailed}. ${stopReason || lastMessage}`.trim();
+      toast({ title: 'Batch complete', description: summary });
     } catch (e) {
       toast({ title: 'Send failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
     } finally {
