@@ -75,8 +75,10 @@ export const SEOOptimizer: React.FC = () => {
       });
       if (error) throw error;
       toast({
-        title: "Optimization complete",
-        description: `Processed ${data?.results?.length ?? 0} route(s).`,
+        title: data?.queued ? "Optimization started" : "Optimization complete",
+        description: data?.queued
+          ? "Running in background — refresh in 2-3 minutes to see results."
+          : `Processed ${data?.results?.length ?? 0} route(s).`,
       });
       await fetchData();
     } catch (e) {
