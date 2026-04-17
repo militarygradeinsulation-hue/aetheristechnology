@@ -40,13 +40,14 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-    <!-- Organization Schema -->
+    <!-- LocalBusiness + ProfessionalService Schema (combined for max SEO + AEO surface) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ProfessionalService",
+      "@type": ["LocalBusiness", "ProfessionalService", "Organization"],
+      "@id": "https://aetheris.technology/#organization",
       "name": "Aetheris AI",
-      "alternateName": "Aetheris Technology",
+      "alternateName": ["Aetheris Technology", "Aetheris"],
       "url": "https://aetheris.technology",
       "logo": "https://aetheris.technology/aetheris-logo.png",
       "image": "https://aetheris.technology/aetheris-logo.png",
@@ -65,6 +66,14 @@
         "latitude": 39.7684,
         "longitude": -86.1581
       },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "08:00",
+          "closes": "18:00"
+        }
+      ],
       "areaServed": [
         { "@type": "Country", "name": "United States" },
         { "@type": "State", "name": "Indiana" },
@@ -87,15 +96,43 @@
       "currenciesAccepted": "USD",
       "paymentAccepted": "Cash, Credit Card, Bank Transfer, Invoice",
       "openingHours": "Mo-Fr 08:00-18:00",
+      "knowsAbout": [
+        "Artificial Intelligence",
+        "Machine Learning",
+        "Large Language Models",
+        "Generative AI",
+        "AI Agents",
+        "Natural Language Processing",
+        "Computer Vision",
+        "Workflow Automation",
+        "Conversational AI",
+        "AI Strategy",
+        "AI Maturity Assessment",
+        "AI ROI Analysis",
+        "Responsible AI",
+        "AI Ethics",
+        "GDPR",
+        "EU AI Act",
+        "Bias Mitigation",
+        "Explainable AI",
+        "Digital Transformation",
+        "CRM Automation",
+        "Data Analytics"
+      ],
       "sameAs": [
         "https://www.linkedin.com/in/aisystemsarchitect",
-        "https://ctoguy.ai"
+        "https://ctoguy.ai",
+        "https://aetheristechnology.lovable.app"
       ],
       "founder": {
         "@type": "Person",
         "name": "Aetheris AI Founder",
         "jobTitle": "CEO & AI Systems Architect",
-        "url": "https://www.linkedin.com/in/aisystemsarchitect"
+        "url": "https://www.linkedin.com/in/aisystemsarchitect",
+        "sameAs": [
+          "https://www.linkedin.com/in/aisystemsarchitect",
+          "https://ctoguy.ai"
+        ]
       },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
