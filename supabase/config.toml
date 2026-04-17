@@ -94,10 +94,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.seo-manual-optimize]
-verify_jwt = true
+verify_jwt = false
 
 [functions.seo-rollback]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-aeo-blog-batch]
 verify_jwt = false
