@@ -98,3 +98,6 @@ verify_jwt = true
 
 [functions.seo-rollback]
 verify_jwt = true
+
+[functions.generate-aeo-blog-batch]
+verify_jwt = false

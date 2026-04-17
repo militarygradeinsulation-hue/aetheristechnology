@@ -38,6 +38,8 @@ const ALL_ROUTES = [
   "/", "/services", "/ai-consultant", "/marketing-strategist", "/sales-compass",
   "/assessment", "/scan", "/diagnostic-quiz", "/friction-audit",
   "/about", "/why-us", "/solutions",
+  "/industries", "/ai-for-healthcare", "/ai-for-finance", "/ai-for-logistics",
+  "/ai-for-construction", "/ai-for-manufacturing", "/ai-for-saas",
 ];
 
 export const SEOOptimizer: React.FC = () => {
@@ -128,10 +130,31 @@ export const SEOOptimizer: React.FC = () => {
             </p>
           )}
         </div>
-        <Button onClick={() => runOptimization()} disabled={running !== null}>
-          {running === "all" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-          Run Full Optimization Now
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            disabled={running !== null}
+            onClick={async () => {
+              setRunning("aeo-blogs");
+              try {
+                const { data, error } = await supabase.functions.invoke("generate-aeo-blog-batch", { body: {} });
+                if (error) throw error;
+                toast({ title: "AEO blog batch complete", description: `${data?.results?.length ?? 0} posts processed.` });
+              } catch (e) {
+                toast({ title: "AEO blog batch failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+              } finally {
+                setRunning(null);
+              }
+            }}
+          >
+            {running === "aeo-blogs" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            Generate AEO Blog Batch
+          </Button>
+          <Button onClick={() => runOptimization()} disabled={running !== null}>
+            {running === "all" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Run Full Optimization Now
+          </Button>
+        </div>
       </div>
 
       {/* Routes table */}
