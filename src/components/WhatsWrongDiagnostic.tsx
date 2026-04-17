@@ -188,10 +188,10 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             <span className="text-sm text-muted-foreground">Smart Diagnostic</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
-            Tell Me What&apos;s <span className="text-gradient-amber">Wrong</span>
+            Tell Us What&apos;s <span className="text-gradient-amber">Broken</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Pick the problems you&apos;re dealing with. I&apos;ll analyze them and recommend exactly what you need.
+            Pick what&apos;s slowing you down. We&apos;ll pinpoint the root cause and prescribe exactly what to fix first.
           </p>
         </div>
 

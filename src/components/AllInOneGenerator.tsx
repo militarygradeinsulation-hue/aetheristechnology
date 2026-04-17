@@ -221,13 +221,49 @@ export const AllInOneGenerator: React.FC = () => {
     },
   ];
 
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 3) => {
+    let lastErr: any = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke(fn, { body });
+        if (error) {
+          // Try to read response body for a real error message
+          const ctx: any = (error as any).context;
+          let detail = error.message || '';
+          if (ctx && typeof ctx.json === 'function') {
+            try { const j = await ctx.json(); detail = j?.error || detail; } catch { /* ignore */ }
+          }
+          // Retry transient errors (429 rate-limit, 5xx)
+          const isTransient = /rate.?limit|429|timeout|503|502|504|non-2xx/i.test(detail) || ctx?.status === 429 || (ctx?.status >= 500 && ctx?.status < 600);
+          if (isTransient && attempt < maxAttempts) {
+            await sleep(1500 * attempt + Math.random() * 1000);
+            continue;
+          }
+          throw new Error(detail || 'Edge function error');
+        }
+        if (!data) throw new Error('No data returned');
+        return data;
+      } catch (e: any) {
+        lastErr = e;
+        const msg = String(e?.message || '');
+        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx/i.test(msg)) {
+          await sleep(1500 * attempt + Math.random() * 1000);
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw lastErr || new Error('Failed after retries');
+  };
+
   const runOne = async (job: ToolJob): Promise<RunState> => {
     const skip = job.skipReason?.();
     if (skip) return { status: 'skipped', message: skip };
     const started = Date.now();
     try {
-      const { data, error } = await supabase.functions.invoke(job.fn, { body: job.body() });
-      if (error || !data) throw new Error(error?.message || 'No data returned');
+      const data = await invokeWithRetry(job.fn, job.body());
       // Save to library
       await saveToAdminLibrary({
         tool_type: job.toolType,
@@ -270,18 +306,22 @@ export const AllInOneGenerator: React.FC = () => {
     let skipped = 0;
     const total = allJobs.length;
 
-    // Run in parallel — each updates state independently as it finishes
-    await Promise.all(
-      allJobs.map(async (job) => {
-        const result = await runOne(job);
-        completed++;
-        if (result.status === 'success') succeeded++;
-        else if (result.status === 'error') failed++;
-        else if (result.status === 'skipped') skipped++;
-        setProgress(Math.round((completed / total) * 100));
-        setStates((prev) => ({ ...prev, [job.key]: result }));
-      }),
-    );
+    // Run in staggered batches of 3 to avoid AI gateway rate limits
+    const BATCH_SIZE = 3;
+    for (let i = 0; i < allJobs.length; i += BATCH_SIZE) {
+      const batch = allJobs.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (job) => {
+          const result = await runOne(job);
+          completed++;
+          if (result.status === 'success') succeeded++;
+          else if (result.status === 'error') failed++;
+          else if (result.status === 'skipped') skipped++;
+          setProgress(Math.round((completed / total) * 100));
+          setStates((prev) => ({ ...prev, [job.key]: result }));
+        }),
+      );
+    }
 
     setRunning(false);
     setProgress(100);
@@ -408,8 +448,8 @@ export const AllInOneGenerator: React.FC = () => {
 
         <p className="text-xs text-muted-foreground mt-3">
           Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
-          site, infer your business profile, then run all 9 tools in parallel (~60–120 seconds). Each result saves to
-          your library independently.
+          site, infer your business profile, then run all 9 tools in staggered batches (~90–180 seconds). If a tool gets
+          rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
         </p>
       </div>
 
@@ -441,32 +481,37 @@ export const AllInOneGenerator: React.FC = () => {
               return (
                 <div
                   key={job.key}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/40"
+                  className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-card/40"
                 >
-                  <Icon className="w-4 h-4 text-amber flex-shrink-0" />
-                  <span className="flex-1 text-sm font-medium text-foreground">{job.label}</span>
-                  <div className="flex items-center gap-2 text-xs">
-                    {state.status === 'running' && (
-                      <span className="flex items-center gap-1 text-amber">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running
-                      </span>
-                    )}
-                    {state.status === 'success' && (
-                      <span className="flex items-center gap-1 text-green-400">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Library
-                        {state.durationMs ? <span className="text-muted-foreground">· {(state.durationMs / 1000).toFixed(1)}s</span> : null}
-                      </span>
-                    )}
-                    {state.status === 'error' && (
-                      <span className="flex items-center gap-1 text-red-400" title={state.message}>
-                        <XCircle className="w-3.5 h-3.5" /> Failed
-                      </span>
-                    )}
-                    {state.status === 'skipped' && (
-                      <span className="text-muted-foreground" title={state.message}>Skipped</span>
-                    )}
-                    {state.status === 'idle' && <span className="text-muted-foreground">Queued</span>}
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-amber flex-shrink-0" />
+                    <span className="flex-1 text-sm font-medium text-foreground">{job.label}</span>
+                    <div className="flex items-center gap-2 text-xs">
+                      {state.status === 'running' && (
+                        <span className="flex items-center gap-1 text-amber">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running
+                        </span>
+                      )}
+                      {state.status === 'success' && (
+                        <span className="flex items-center gap-1 text-green-400">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Library
+                          {state.durationMs ? <span className="text-muted-foreground">· {(state.durationMs / 1000).toFixed(1)}s</span> : null}
+                        </span>
+                      )}
+                      {state.status === 'error' && (
+                        <span className="flex items-center gap-1 text-red-400">
+                          <XCircle className="w-3.5 h-3.5" /> Failed
+                        </span>
+                      )}
+                      {state.status === 'skipped' && (
+                        <span className="text-muted-foreground">Skipped</span>
+                      )}
+                      {state.status === 'idle' && <span className="text-muted-foreground">Queued</span>}
+                    </div>
                   </div>
+                  {(state.status === 'error' || state.status === 'skipped') && state.message && (
+                    <p className="text-[11px] text-muted-foreground pl-7 leading-snug">{state.message}</p>
+                  )}
                 </div>
               );
             })}
