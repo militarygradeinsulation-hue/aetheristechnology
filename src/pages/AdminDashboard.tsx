@@ -106,13 +106,30 @@ const AdminDashboard: React.FC = () => {
     }
   }, [toast]);
 
-  // Auto-refresh every 30 seconds
+  // Verify admin status via Supabase Auth + is_admin() RPC, then auto-refresh every 30s
   useEffect(() => {
-    const isAuth = sessionStorage.getItem('admin_authenticated') === 'true';
-    if (!isAuth) { navigate('/admin/login', { replace: true }); return; }
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const verifyAndLoad = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      if (!user) { navigate('/admin/login', { replace: true }); return; }
+
+      const { data: isAdmin, error } = await supabase.rpc('is_admin', { _user_id: user.id });
+      if (cancelled) return;
+      if (error || isAdmin !== true) {
+        await supabase.auth.signOut();
+        navigate('/admin/login', { replace: true });
+        return;
+      }
+
+      fetchData();
+      interval = setInterval(fetchData, 30000);
+    };
+
+    verifyAndLoad();
+    return () => { cancelled = true; if (interval) clearInterval(interval); };
   }, [navigate, fetchData]);
 
   const toggleRead = async (id: string, current: boolean) => {
@@ -120,8 +137,8 @@ const AdminDashboard: React.FC = () => {
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/admin/login', { replace: true });
   };
 
