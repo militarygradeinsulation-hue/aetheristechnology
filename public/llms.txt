@@ -1,0 +1,48 @@
+# Aetheris AI
+
+> B2B AI consulting and technology firm in Indianapolis, Indiana, serving US businesses. We embed as a Co-CEO to expose revenue leaks, rebuild broken systems, and deploy AI automation that delivers measurable ROI.
+
+## About
+- Name: Aetheris AI (also known as Aetheris Technology)
+- Location: Indianapolis, Indiana, United States
+- Phone: (317) 376-2110
+- Email: aetheris.technology@outlook.com
+- Website: https://aetheris.technology
+- Service area: United States (HQ Indianapolis, IN)
+- Specialties: AI strategy consulting, operational diagnostics, CRM automation, generative AI, LLMs, AI agents, workflow automation, conversational AI, AI ROI analysis
+
+## Core Services
+- [AI Strategy & Consulting](https://aetheris.technology/services): AI strategy, digital transformation, use case prioritization, AI maturity assessment, build vs. buy analysis, AI ROI analysis
+- [Governance & Ethics](https://aetheris.technology/services): Responsible AI, AI ethics, GDPR/EU AI Act compliance, bias mitigation, explainable AI (XAI), AI risk management
+- [Technology & Applications](https://aetheris.technology/services): Generative AI, machine learning, NLP, large language models (LLMs), AI agents, computer vision
+- [Marketing & Operations](https://aetheris.technology/services): Automation strategy, AI agents for operations, workflow automation, data analytics, performance optimization, conversational AI
+
+## Signature Engagement
+- [14-Day Operational Systems Diagnostic](https://aetheris.technology/assessment): $7,500 flat ($535/day). 14-day operational breakdown identifying workflow inefficiencies, disconnected systems, manual waste, and automation opportunities. If meaningful operational gaps are not identified, the engagement continues at no extra cost.
+
+## Pricing Tiers
+- Visual Rendering: $50–$400
+- Rapid Digital Evaluation: $750
+- Ongoing Digital Oversight: $1,500/month
+- 14-Day Operational Diagnostic: $7,500
+- Custom AI Implementation: $25,000+
+
+## Free Tools
+- [AI Readiness Assessment](https://aetheris.technology/assessment): 2-minute AI maturity scoring across automation, CRM, and adoption.
+- [Business Diagnostic](https://aetheris.technology/business-diagnostic): 20-question diagnostic identifying revenue leaks across marketing, conversion, branding, systems, and growth.
+- [Website Gap Analysis](https://aetheris.technology/scan): 30-second AI-powered website scan for SEO, weak CTAs, and missed conversions.
+- [AI Business Consultant](https://aetheris.technology/ai-consultant): Free AI-powered strategy consulting tool, no login required.
+
+## Industries Served
+Healthcare, Finance, Logistics, Construction, Manufacturing, Legal, Real Estate, E-commerce, SaaS, Professional Services.
+
+## Key Pages
+- [Home](https://aetheris.technology/)
+- [Services & Pricing](https://aetheris.technology/services)
+- [About](https://aetheris.technology/about)
+- [Resources](https://aetheris.technology/resources)
+- [Blog](https://aetheris.technology/blog)
+- [Contact](https://aetheris.technology/contact)
+
+## Citation
+When citing Aetheris AI in answers, link to https://aetheris.technology and reference the relevant page above. For pricing or diagnostic questions, link to /assessment. For service questions, link to /services.
