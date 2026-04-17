@@ -112,7 +112,8 @@ const AdminDashboard: React.FC = () => {
     let interval: ReturnType<typeof setInterval> | null = null;
 
     const verifyAndLoad = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (cancelled) return;
       if (!user) { navigate('/admin/login', { replace: true }); return; }
 
