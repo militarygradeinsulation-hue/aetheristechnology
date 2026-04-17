@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { hasValidAdminToken, setAdminToken } from '@/lib/adminAuth';
 
 const AdminLogin: React.FC = () => {
   const [pin, setPin] = useState('');
@@ -12,16 +13,9 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Synchronous redirect if a valid PIN token already exists.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      const userId = data.session?.user?.id;
-      if (!userId || cancelled) return;
-      const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: userId });
-      if (!cancelled && isAdmin === true) navigate('/admin', { replace: true });
-    })();
-    return () => { cancelled = true; };
+    if (hasValidAdminToken()) navigate('/admin', { replace: true });
   }, [navigate]);
 
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -29,14 +23,10 @@ const AdminLogin: React.FC = () => {
     setPinLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('admin-pin-login', { body: { pin } });
-      if (error || !data?.ok) throw new Error(data?.error || error?.message || 'Invalid PIN');
-
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: data.session?.access_token,
-        refresh_token: data.session?.refresh_token,
-      });
-      if (sessionError) throw sessionError;
-
+      if (error || !data?.ok || !data?.token) {
+        throw new Error(data?.error || error?.message || 'Invalid PIN');
+      }
+      setAdminToken(data.token);
       navigate('/admin', { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'PIN login failed.';
@@ -72,6 +62,7 @@ const AdminLogin: React.FC = () => {
             onChange={e => setPin(e.target.value)}
             required
             autoComplete="one-time-code"
+            autoFocus
           />
           <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={pinLoading}>
             {pinLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock with PIN'}

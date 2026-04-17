@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getAdminToken } from "@/lib/adminAuth";
 
 export interface AdminLibraryItem {
   id: string;
@@ -10,6 +11,11 @@ export interface AdminLibraryItem {
   created_at: string;
 }
 
+function adminHeaders(): Record<string, string> {
+  const token = getAdminToken();
+  return token ? { "x-admin-token": token } : {};
+}
+
 export async function saveToAdminLibrary(args: {
   tool_type: string;
   title: string;
@@ -19,6 +25,7 @@ export async function saveToAdminLibrary(args: {
 }) {
   const { data, error } = await supabase.functions.invoke("admin-library", {
     body: { action: "save", ...args },
+    headers: adminHeaders(),
   });
   if (error) throw error;
   return data?.item as AdminLibraryItem;
@@ -27,6 +34,7 @@ export async function saveToAdminLibrary(args: {
 export async function listAdminLibrary(): Promise<AdminLibraryItem[]> {
   const { data, error } = await supabase.functions.invoke("admin-library", {
     body: { action: "list" },
+    headers: adminHeaders(),
   });
   if (error) throw error;
   return (data?.items || []) as AdminLibraryItem[];
@@ -35,6 +43,7 @@ export async function listAdminLibrary(): Promise<AdminLibraryItem[]> {
 export async function deleteFromAdminLibrary(id: string) {
   const { error } = await supabase.functions.invoke("admin-library", {
     body: { action: "delete", id },
+    headers: adminHeaders(),
   });
   if (error) throw error;
 }

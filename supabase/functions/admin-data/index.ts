@@ -1,3 +1,5 @@
+// PIN-token-gated admin data endpoint. Reads/writes the dashboard tables using
+// the service role so we don't need a Supabase Auth session for the admin UI.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
@@ -25,55 +27,28 @@ serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const { action } = body;
 
-    if (action === "list") {
-      const { data, error } = await supabase
-        .from("admin_library")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return new Response(JSON.stringify({ items: data || [] }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (action === "dashboard") {
+      const [subRes, evtRes] = await Promise.all([
+        supabase.from("contact_submissions").select("*").order("created_at", { ascending: false }),
+        supabase.from("site_events").select("*").order("created_at", { ascending: false }).limit(1000),
+      ]);
+      return new Response(
+        JSON.stringify({ submissions: subRes.data || [], events: evtRes.data || [] }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    if (action === "save") {
-      const { tool_type, title, input_data, output_data, file_url } = body;
-      if (!tool_type || !title) {
-        return new Response(JSON.stringify({ error: "tool_type and title required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const { data, error } = await supabase
-        .from("admin_library")
-        .insert({
-          tool_type,
-          title,
-          input_data: input_data || {},
-          output_data: output_data || {},
-          file_url: file_url || null,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return new Response(JSON.stringify({ item: data }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (action === "delete") {
-      const { id } = body;
+    if (action === "toggle_read") {
+      const { id, is_read } = body;
       if (!id) {
         return new Response(JSON.stringify({ error: "id required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { error } = await supabase.from("admin_library").delete().eq("id", id);
+      const { error } = await supabase.from("contact_submissions").update({ is_read }).eq("id", id);
       if (error) throw error;
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -81,14 +56,12 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("admin-library error:", e);
+    console.error("admin-data error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
