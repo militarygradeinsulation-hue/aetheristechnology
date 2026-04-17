@@ -101,3 +101,9 @@ verify_jwt = false
 
 [functions.generate-aeo-blog-batch]
 verify_jwt = false
+
+[functions.admin-insights]
+verify_jwt = true
+
+[functions.admin-library]
+verify_jwt = true
