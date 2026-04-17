@@ -88,7 +88,7 @@ export const AllInOneGenerator: React.FC = () => {
     }
   };
 
-  const jobs = (): ToolJob[] => [
+  const jobs = (f: typeof form = form): ToolJob[] => [
     {
       key: 'scan',
       label: 'Website Scan (gaps & revenue leaks)',
