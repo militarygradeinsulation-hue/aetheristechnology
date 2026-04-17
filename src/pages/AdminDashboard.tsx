@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database } from 'lucide-react';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -14,6 +14,7 @@ import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { AdminLibrary } from '@/components/AdminLibrary';
+import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
@@ -60,7 +61,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'seo'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
@@ -204,7 +205,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'events', 'insights', 'tools', 'library', 'seo'] as const).map(tab => (
+          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -216,7 +217,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : '✨ SEO/AEO Auto-Optimizer'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : '✨ SEO/AEO Auto-Optimizer'}
             </button>
           ))}
         </div>
@@ -471,6 +472,9 @@ const AdminDashboard: React.FC = () => {
 
         {/* My Library */}
         {activeTab === 'library' && <AdminLibrary />}
+
+        {/* CRM */}
+        {activeTab === 'crm' && <AdminCrm />}
 
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}

@@ -284,6 +284,224 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_companies: {
+        Row: {
+          created_at: string
+          id: string
+          industry: string | null
+          location: string | null
+          name: string
+          notes: string | null
+          size: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          name: string
+          notes?: string | null
+          size?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          name?: string
+          notes?: string | null
+          size?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      crm_contacts: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          owner: string | null
+          phone: string | null
+          source: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          owner?: string | null
+          phone?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          owner?: string | null
+          phone?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "crm_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deals: {
+        Row: {
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          expected_close_date: string | null
+          id: string
+          notes: string | null
+          position: number
+          stage: Database["public"]["Enums"]["crm_deal_stage"]
+          title: string
+          updated_at: string
+          value_cents: number
+        }
+        Insert: {
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          stage?: Database["public"]["Enums"]["crm_deal_stage"]
+          title: string
+          updated_at?: string
+          value_cents?: number
+        }
+        Update: {
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          stage?: Database["public"]["Enums"]["crm_deal_stage"]
+          title?: string
+          updated_at?: string
+          value_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "crm_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_demo_data: {
+        Row: {
+          data: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_interactions: {
+        Row: {
+          body: string | null
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          metadata: Json
+          occurred_at: string
+          subject: string | null
+          type: Database["public"]["Enums"]["crm_interaction_type"]
+        }
+        Insert: {
+          body?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          subject?: string | null
+          type?: Database["public"]["Enums"]["crm_interaction_type"]
+        }
+        Update: {
+          body?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          subject?: string | null
+          type?: Database["public"]["Enums"]["crm_interaction_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interactions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diagnostic_leads: {
         Row: {
           answers: Json
@@ -1204,6 +1422,14 @@ export type Database = {
         | "contacted"
         | "converted"
         | "expired"
+      crm_deal_stage: "lead" | "qualified" | "proposal" | "won" | "lost"
+      crm_interaction_type:
+        | "call"
+        | "email"
+        | "meeting"
+        | "note"
+        | "form"
+        | "task"
       tool_type:
         | "social_content"
         | "sales_scripts"
@@ -1345,6 +1571,15 @@ export const Constants = {
         "contacted",
         "converted",
         "expired",
+      ],
+      crm_deal_stage: ["lead", "qualified", "proposal", "won", "lost"],
+      crm_interaction_type: [
+        "call",
+        "email",
+        "meeting",
+        "note",
+        "form",
+        "task",
       ],
       tool_type: [
         "social_content",

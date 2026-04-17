@@ -45,6 +45,7 @@ import SubscriberOnboardingPage from "./pages/SubscriberOnboardingPage";
 import MySubscriptionPage from "./pages/MySubscriptionPage";
 import IndustriesPage from "./pages/IndustriesPage";
 import VerticalLandingPage from "./pages/VerticalLandingPage";
+import CrmDemoPage from "./pages/CrmDemoPage";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => (
                   <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
                   <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
                   <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
+                  <Route path="/crm-demo" element={<CrmDemoPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
