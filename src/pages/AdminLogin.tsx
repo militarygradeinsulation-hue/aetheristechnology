@@ -7,71 +7,22 @@ import { Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
-  const [loading, setLoading] = useState(false);
   const [pinLoading, setPinLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<{ id: string } | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ? { id: data.session.user.id } : null));
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    const check = async () => {
-      if (!user) return;
-      const { data, error } = await supabase.rpc('is_admin', { _user_id: user.id });
-      if (cancelled) return;
-      if (!error && data === true) {
-        navigate('/admin', { replace: true });
-      }
-    };
-    check();
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user?.id;
+      if (!userId || cancelled) return;
+      const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: userId });
+      if (!cancelled && isAdmin === true) navigate('/admin', { replace: true });
+    })();
     return () => { cancelled = true; };
-  }, [user, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin + '/admin/login' },
-        });
-        if (signUpError) throw signInError;
-      }
-
-      const { data: { user: signedInUser } } = await supabase.auth.getUser();
-      if (!signedInUser) {
-        toast({ title: 'Check your email', description: 'Confirm your email, then sign in again.' });
-        return;
-      }
-
-      await supabase.rpc('promote_if_first_admin', { _user_id: signedInUser.id });
-
-      const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin', { _user_id: signedInUser.id });
-      if (rpcError) throw rpcError;
-
-      if (isAdmin === true) {
-        navigate('/admin', { replace: true });
-      } else {
-        await supabase.auth.signOut();
-        toast({ title: 'Access Denied', description: 'This account does not have admin privileges.', variant: 'destructive' });
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Sign-in failed.';
-      toast({ title: 'Sign-in failed', description: msg, variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [navigate]);
 
   const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
