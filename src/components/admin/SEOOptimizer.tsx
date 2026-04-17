@@ -144,7 +144,12 @@ export const SEOOptimizer: React.FC = () => {
               try {
                 const { data, error } = await supabase.functions.invoke("generate-aeo-blog-batch", { body: {} });
                 if (error) throw error;
-                toast({ title: "AEO blog batch complete", description: `${data?.results?.length ?? 0} posts processed.` });
+                toast({
+                  title: data?.queued ? "AEO blog batch started" : "AEO blog batch complete",
+                  description: data?.queued
+                    ? `Generating ${data?.topic_count ?? 5} posts in background — check the blog in 3-5 minutes.`
+                    : `${data?.results?.length ?? 0} posts processed.`,
+                });
               } catch (e) {
                 toast({ title: "AEO blog batch failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
               } finally {
