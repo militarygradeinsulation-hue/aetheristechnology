@@ -56,18 +56,24 @@ export const CampaignControlCenter: React.FC = () => {
 
   const patch = (p: Partial<Settings>) => setSettings(prev => ({ ...prev, ...p }));
 
+  const persist = async (overrides?: Partial<Settings>) => {
+    const next = { ...settings, ...(overrides || {}) };
+    const { error } = await supabase.from('campaign_settings').update({
+      is_active: next.is_active,
+      daily_limit: next.daily_limit,
+      from_name: next.from_name,
+      from_email: next.from_email,
+      signature_html: next.signature_html,
+      default_links: next.default_links as unknown as never,
+    }).eq('id', 1);
+    if (error) throw error;
+    setSettings(next);
+  };
+
   const save = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase.from('campaign_settings').update({
-        is_active: settings.is_active,
-        daily_limit: settings.daily_limit,
-        from_name: settings.from_name,
-        from_email: settings.from_email,
-        signature_html: settings.signature_html,
-        default_links: settings.default_links as unknown as never,
-      }).eq('id', 1);
-      if (error) throw error;
+      await persist();
       toast({ title: 'Saved', description: 'Campaign settings updated.' });
     } catch (e) {
       toast({ title: 'Save failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
@@ -79,9 +85,11 @@ export const CampaignControlCenter: React.FC = () => {
   const sendBatch = async () => {
     setBusy(b => ({ ...b, send: true }));
     try {
+      // Auto-activate so the send is not silently blocked by the paused flag.
+      if (!settings.is_active) await persist({ is_active: true });
       const { data, error } = await supabase.functions.invoke('process-drip', { body: {} });
       if (error) throw error;
-      toast({ title: 'Batch processed', description: data?.message || 'Done' });
+      toast({ title: 'Batch processed', description: data?.message || data?.error || 'Done' });
     } catch (e) {
       toast({ title: 'Send failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
     } finally {
@@ -94,7 +102,7 @@ export const CampaignControlCenter: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-drip-batch', { body: { batchSize: 10 } });
       if (error) throw error;
-      toast({ title: 'Wave generated', description: data?.message || 'Done' });
+      toast({ title: 'Wave generated', description: data?.message || data?.error || 'Done' });
     } catch (e) {
       toast({ title: 'Generation failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
     } finally {
