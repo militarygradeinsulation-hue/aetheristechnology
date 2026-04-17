@@ -247,9 +247,19 @@ export const AllInOneGenerator: React.FC = () => {
       toast({ title: 'Website URL required', description: 'Enter the website to analyze.', variant: 'destructive' });
       return;
     }
+
+    // Auto-infer business profile if user hasn't filled details
+    let workingForm = form;
+    const needsInference = !form.businessName && !form.industry && !form.product && !form.targetCustomer;
+    if (needsInference) {
+      const inferred = await inferFromUrl(form.url);
+      if (inferred) workingForm = inferred;
+      // continue even if inference fails — tools will fall back to URL-only
+    }
+
     setRunning(true);
     setProgress(0);
-    const allJobs = jobs();
+    const allJobs = jobs(workingForm);
     const initial: Record<string, RunState> = {};
     allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
     setStates(initial);
