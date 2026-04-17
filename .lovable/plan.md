@@ -1,104 +1,66 @@
 
 
 ## Goal
-Turn the existing drip campaign system into a full power-house in the admin dashboard: a single "Email Campaigns" tab where admins can start/pause campaigns, customize email templates, generate AI images, attach playbooks, and insert pre-made website links into emails.
+Make PIN 9822 unlock the admin area instantly. Strip every check that's currently slowing it down.
 
-## Context Found
-- `drip_sequences` (steps as JSON), `drip_prospects`, `drip_emails` tables exist
-- `process-drip` edge function sends pre-generated emails via Outlook (100/day cap)
-- `generate-drip-batch` pre-generates email content per prospect
-- `CampaignActivity.tsx` already shows live stats (sent/pending/failed/hot prospects)
-- `playbooks` storage bucket exists, `admin_library` table exists
-- `generate-blog-images` proves Lovable AI image generation pattern (Gemini 2.5 flash image)
-- Cron currently drives `process-drip` automatically — need an admin on/off switch
+## What's slow today
+1. `admin-pin-login` edge function does, in sequence: profile lookup → upsert into `admin_users` → spin up a second Supabase client → `signInWithPassword`. The auth logs show that single password sign-in takes 150–375 ms on its own, plus cold-start.
+2. After PIN succeeds, the client calls `setSession(...)` (network round-trip to Supabase Auth) before navigating.
+3. `AdminLogin` runs an extra `getSession` + `is_admin` RPC on mount.
+4. `AdminDashboard` then re-runs `getSession` + `is_admin` RPC before showing anything.
+5. The whole admin tree is wrapped in `AuthProvider`, which on every mount fires `onAuthStateChange` + `getSession` + a `profiles` SELECT + possible `profiles` INSERT — all triggered again by the PIN sign-in event.
 
-## Plan
+That's why "verifying" feels long: 4–6 sequential network calls before the dashboard renders.
 
-### 1. Database (one migration)
-- Add `campaign_settings` table (singleton row): `is_active boolean`, `daily_limit int`, `from_name`, `from_email`, `signature_html`, `default_links jsonb` (array of `{label, url}`), `updated_at`
-- Add `campaign_assets` table: `id`, `type` ('image'|'playbook'|'link'), `name`, `url`, `metadata jsonb`, `created_at` — for reusable items in the email composer
-- RLS: admin-only via `is_admin(auth.uid())`
-- Seed `campaign_settings` with one row + the site's main CTAs (Scan, Diagnostic, Strategy Call, Playbooks) as `default_links`
+## Plan — rip it out
 
-### 2. New edge function: `campaign-image-generator`
-- Accepts `prompt` + optional `style`
-- Calls Lovable AI Gateway with `google/gemini-2.5-flash-image`
-- Uploads result to `playbooks` bucket under `campaign-images/`
-- Inserts row in `campaign_assets`
-- Returns public URL
-- Admin-gated via `is_admin` check
+### 1. Replace the edge function with a trivial PIN check
+Rewrite `supabase/functions/admin-pin-login/index.ts` to:
+- Validate `pin === "9822"`.
+- Return `{ ok: true, token: "<server-signed short token>" }` (HMAC of pin + timestamp using `SUPABASE_SERVICE_ROLE_KEY` as secret, valid for ~12h).
+- No DB calls. No `signInWithPassword`. No user creation. No `admin_users` table.
 
-### 3. Update `process-drip`
-- Read `campaign_settings.is_active` at start — if false, return early ("paused")
-- Use `daily_limit` from settings (instead of hardcoded 100)
-- Inject `signature_html` into outgoing email body if template doesn't already include one
+This eliminates ~400–800 ms of backend work and a cold-start path.
 
-### 4. Update `generate-drip-batch`
-- Pull `default_links` from settings and pass to AI prompt so generated emails embed real CTA buttons (e.g. Scan link, Strategy Call link)
-- Pass `from_name` for personalization
-- Allow optional `attachment_urls[]` (playbook PDFs) — append as styled link block at email bottom
+### 2. Client stores PIN session locally, no Supabase auth involved
+In `AdminLogin.tsx`:
+- On submit, POST PIN to the function. On `ok`, write `localStorage.setItem('aetheris_admin_token', token)` and `navigate('/admin')`.
+- Remove the `useEffect` that calls `getSession` + `is_admin`. Replace with a synchronous check: if `localStorage` has a non-expired token, redirect immediately.
+- Keep the "Back to website" link and the PIN input — nothing else.
 
-### 5. New admin component: `CampaignControlCenter.tsx`
-Single tab inside AdminDashboard with sub-sections:
+### 3. Isolate admin from `AuthProvider`
+In `App.tsx`:
+- Move `<Route path="/admin/*">` and `<Route path="/admin/login">` **outside** `<AuthProvider>` (render them in a parallel `<Routes>` block, or wrap only non-admin routes in `AuthProvider`).
+- Result: visiting `/admin/login` no longer triggers `onAuthStateChange`, the `profiles` SELECT/INSERT, or any Supabase auth bootstrapping.
 
-**a. Master Controls (top)**
-- Big on/off toggle: "Campaign Active" → updates `campaign_settings.is_active`
-- Daily limit input
-- "Send Next Batch Now" button → invokes `process-drip` manually
-- "Generate Next Wave" button → invokes `generate-drip-batch`
+### 4. Strip admin verification from the dashboard
+In `AdminDashboard.tsx`:
+- Delete the `verifyAndLoad` block that calls `getSession` + `is_admin`.
+- Replace with synchronous: read `aetheris_admin_token` from localStorage; if missing/expired → `navigate('/admin/login')`; otherwise call `fetchData()` immediately.
+- `handleLogout` becomes `localStorage.removeItem('aetheris_admin_token'); navigate('/admin/login')` — no `supabase.auth.signOut()`.
 
-**b. Sender Identity**
-- From name, from email, signature HTML editor (textarea with preview)
+### 5. Keep the admin-only edge functions working
+`admin-library` and `admin-insights` currently expect a Supabase user with `is_admin`. Switch them to accept the PIN token in an `x-admin-token` header and verify it with the same HMAC. Quick, no DB lookup.
 
-**c. Pre-Made Links Library**
-- Editable list of `{label, url}` pairs (the CTAs that AI can embed)
-- Pre-seeded with: Free Scan, Diagnostic Quiz, Book Strategy Call, Playbooks Library, Industries pages
-- Click a row to copy `<a>` snippet to clipboard for manual use
+### 6. Memory update
+Update `mem://features/admin-analytics-hub` to note: PIN 9822 is the only admin auth; admin pages do not use Supabase Auth or `AuthProvider`.
 
-**d. Image Generator**
-- Prompt input + "Generate Image" button → calls `campaign-image-generator`
-- Grid of previously generated images (from `campaign_assets` where type='image')
-- Click image → copies its `<img>` tag to clipboard
+## Files to change
+- `supabase/functions/admin-pin-login/index.ts` — rewrite
+- `supabase/functions/admin-library/index.ts` — accept PIN token instead of JWT
+- `supabase/functions/admin-insights/index.ts` — accept PIN token instead of JWT
+- `src/pages/AdminLogin.tsx` — remove session/RPC checks, store token locally
+- `src/pages/AdminDashboard.tsx` — remove session/RPC verification, use localStorage
+- `src/App.tsx` — move admin routes outside `AuthProvider`
+- `mem://features/admin-analytics-hub` — note new auth model
 
-**e. Playbook Attachments**
-- Lists files in `playbooks` storage bucket
-- Toggle "Auto-attach to next batch" per playbook → stored in `campaign_assets`
-- Used by `generate-drip-batch` when building emails
+## Trade-off (FYI)
+Without a real Supabase session, the admin dashboard's direct DB queries (`contact_submissions`, `site_events`) will run as the **anon role**. Those tables currently rely on RLS that requires `is_admin(auth.uid())`, so they'd return zero rows. Two options:
+- **A (recommended for speed):** route those reads through a new `admin-data` edge function that checks the PIN token and uses the service role to fetch.
+- **B:** keep an invisible service-account session, but that puts us back where we started.
 
-**f. Template Preview / Edit**
-- Lists `drip_sequences` with their steps
-- Inline edit each step's prompt template (subject + body skeleton)
-- "Regenerate pending emails" button → deletes pending `drip_emails` rows so next `generate-drip-batch` rebuilds them with new templates
+I'll go with **A** — one extra edge function (`admin-data`) is cheaper than the 4-call verification chain we have now.
 
-**g. Live Activity (existing)**
-- Embeds the existing `CampaignActivity` component below the controls
-
-### 6. AdminDashboard wiring
-- Add `'campaigns'` tab key, label "📨 Campaign Powerhouse"
-- Move existing `CampaignActivity` rendering inside the new `CampaignControlCenter` (or keep `events` tab as activity-only and add separate `campaigns` tab — recommend **merging**: rename existing `events` tab to `campaigns` and render `CampaignControlCenter`)
-
-## Files to Create/Edit
-
-**Create:**
-- `supabase/migrations/<ts>_campaign_powerhouse.sql`
-- `supabase/functions/campaign-image-generator/index.ts`
-- `src/components/admin/CampaignControlCenter.tsx`
-- `src/components/admin/campaign/MasterControls.tsx`
-- `src/components/admin/campaign/SenderIdentity.tsx`
-- `src/components/admin/campaign/LinksLibrary.tsx`
-- `src/components/admin/campaign/ImageGenerator.tsx`
-- `src/components/admin/campaign/PlaybookAttachments.tsx`
-- `src/components/admin/campaign/TemplateEditor.tsx`
-
-**Edit:**
-- `supabase/functions/process-drip/index.ts` — read settings, honor pause toggle
-- `supabase/functions/generate-drip-batch/index.ts` — inject links + signature + attachments into AI prompt
-- `src/pages/AdminDashboard.tsx` — replace `events` tab with `CampaignControlCenter`
-- `supabase/config.toml` — add `verify_jwt = false` for `campaign-image-generator` (uses in-code admin check via JWT)
-
-## Out of Scope
-- A/B testing variants per template
-- Per-prospect personalization tokens beyond name/business (already supported)
-- Email open/click tracking pixels (Outlook-sent, no built-in tracking)
-- Building a marketing-style sequence designer UI (drag-drop step builder)
+## Result
+PIN submit → 1 edge call (~50–150 ms) → navigate. Dashboard renders immediately and pulls data in the background. No `getSession`, no `is_admin` RPC, no `AuthProvider` involvement.
 
