@@ -181,9 +181,25 @@ Deno.serve(async (req) => {
     let body: { routes?: string[]; run_type?: string } = {};
     try { body = await req.json(); } catch { /* GET / cron */ }
 
+    // Build route list: static ROUTES + dynamic blog posts (capped to control AI cost)
+    const BLOG_CAP = 25;
+    const { data: blogRows } = await supabase
+      .from("blog_posts")
+      .select("slug, title")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false })
+      .limit(BLOG_CAP);
+
+    const blogRoutes: Array<{ path: string; intent: string }> = (blogRows ?? []).map((b: { slug: string; title: string }) => ({
+      path: `/blog/${b.slug}`,
+      intent: `Long-form blog — ${b.title}`,
+    }));
+
+    const allRoutes = [...ROUTES, ...blogRoutes];
+
     const targetRoutes = body.routes?.length
-      ? ROUTES.filter(r => body.routes!.includes(r.path))
-      : ROUTES;
+      ? allRoutes.filter(r => body.routes!.includes(r.path))
+      : allRoutes;
     const runType = body.run_type ?? "weekly";
 
     // 1. Get trends (cached or fresh)
