@@ -145,24 +145,17 @@ const AdminDashboard: React.FC = () => {
   const fetchInsights = async () => {
     setLoadingInsights(true);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-insights', {
-        body: {
-          stats,
-          topPages,
-          recentLeads: submissions.slice(0, 5).map(s => ({
-            name: s.name, company: s.company, service_interest: s.service_interest, created_at: s.created_at,
-          })),
-          eventBreakdown,
-        },
-      });
+      // No body needed: server fetches analytics from DB to prevent client tampering
+      const { data, error } = await supabase.functions.invoke('admin-insights', { body: {} });
       if (error) throw error;
       if (data?.error) {
         toast({ title: 'AI Error', description: data.error, variant: 'destructive' });
       } else {
         setRecommendations(data.recommendations);
       }
-    } catch (err: any) {
-      toast({ title: 'Failed to get insights', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Failed to get insights', description: msg, variant: 'destructive' });
     } finally {
       setLoadingInsights(false);
     }
