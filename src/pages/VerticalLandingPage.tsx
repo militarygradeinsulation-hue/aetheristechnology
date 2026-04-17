@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Sparkles, Target, Shield, Cpu, Megaphone } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
@@ -18,7 +18,8 @@ const CATEGORY_ICONS: Record<VerticalUseCase['category'], React.ComponentType<{ 
 };
 
 const VerticalLandingPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '');
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const vertical = slug ? VERTICAL_BY_SLUG[slug] : undefined;
