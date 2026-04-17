@@ -221,13 +221,49 @@ export const AllInOneGenerator: React.FC = () => {
     },
   ];
 
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 3) => {
+    let lastErr: any = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke(fn, { body });
+        if (error) {
+          // Try to read response body for a real error message
+          const ctx: any = (error as any).context;
+          let detail = error.message || '';
+          if (ctx && typeof ctx.json === 'function') {
+            try { const j = await ctx.json(); detail = j?.error || detail; } catch { /* ignore */ }
+          }
+          // Retry transient errors (429 rate-limit, 5xx)
+          const isTransient = /rate.?limit|429|timeout|503|502|504|non-2xx/i.test(detail) || ctx?.status === 429 || (ctx?.status >= 500 && ctx?.status < 600);
+          if (isTransient && attempt < maxAttempts) {
+            await sleep(1500 * attempt + Math.random() * 1000);
+            continue;
+          }
+          throw new Error(detail || 'Edge function error');
+        }
+        if (!data) throw new Error('No data returned');
+        return data;
+      } catch (e: any) {
+        lastErr = e;
+        const msg = String(e?.message || '');
+        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx/i.test(msg)) {
+          await sleep(1500 * attempt + Math.random() * 1000);
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw lastErr || new Error('Failed after retries');
+  };
+
   const runOne = async (job: ToolJob): Promise<RunState> => {
     const skip = job.skipReason?.();
     if (skip) return { status: 'skipped', message: skip };
     const started = Date.now();
     try {
-      const { data, error } = await supabase.functions.invoke(job.fn, { body: job.body() });
-      if (error || !data) throw new Error(error?.message || 'No data returned');
+      const data = await invokeWithRetry(job.fn, job.body());
       // Save to library
       await saveToAdminLibrary({
         tool_type: job.toolType,
