@@ -13,7 +13,6 @@ import { BrandContradictionFinder } from '@/components/BrandContradictionFinder'
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AdminLibrary } from '@/components/AdminLibrary';
-import { CampaignActivity } from '@/components/CampaignActivity';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 
