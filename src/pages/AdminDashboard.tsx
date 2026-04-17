@@ -14,6 +14,7 @@ import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AdminLibrary } from '@/components/AdminLibrary';
 import { CampaignActivity } from '@/components/CampaignActivity';
+import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 
 type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -56,7 +57,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'seo'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
@@ -190,7 +191,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'events', 'insights', 'tools', 'library'] as const).map(tab => (
+          {(['overview', 'submissions', 'events', 'insights', 'tools', 'library', 'seo'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -447,6 +448,9 @@ const AdminDashboard: React.FC = () => {
 
         {/* My Library */}
         {activeTab === 'library' && <AdminLibrary />}
+
+        {/* SEO Auto-Optimizer */}
+        {activeTab === 'seo' && <SEOOptimizer />}
       </div>
     </div>
   );
