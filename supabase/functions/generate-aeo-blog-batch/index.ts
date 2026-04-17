@@ -386,62 +386,63 @@ serve(async (req) => {
     const url = new URL(req.url);
     const force = url.searchParams.get("force") === "true";
 
-    const results: Array<{ slug: string; status: string; error?: string }> = [];
-
-    for (const topic of TOPICS) {
-      try {
-        // Idempotency check
-        const { data: existing } = await supabase
-          .from("blog_posts")
-          .select("id, content")
-          .eq("slug", topic.slug)
-          .maybeSingle();
-
-        if (existing && !force && existing.content && existing.content.length > 1000) {
-          results.push({ slug: topic.slug, status: "skipped_exists" });
-          continue;
-        }
-
-        const { title, content } = await generatePost(topic, LOVABLE_API_KEY);
-
-        const payload = {
-          slug: topic.slug,
-          title,
-          content,
-          excerpt: topic.excerpt,
-          meta_description: topic.metaDescription,
-          tags: topic.tags,
-          author: "Aetheris AI Team",
-          is_published: true,
-          published_at: new Date().toISOString(),
-        };
-
-        if (existing) {
-          const { error } = await supabase
+    // Fire-and-forget: 5 posts × Gemini Pro will exceed the 150s edge timeout.
+    // Background job writes results directly to blog_posts as each completes.
+    const job = (async () => {
+      for (const topic of TOPICS) {
+        try {
+          const { data: existing } = await supabase
             .from("blog_posts")
-            .update(payload)
-            .eq("id", existing.id);
-          if (error) throw error;
-          results.push({ slug: topic.slug, status: "updated" });
-        } else {
-          const { error } = await supabase
-            .from("blog_posts")
-            .insert(payload);
-          if (error) throw error;
-          results.push({ slug: topic.slug, status: "created" });
+            .select("id, content")
+            .eq("slug", topic.slug)
+            .maybeSingle();
+
+          if (existing && !force && existing.content && existing.content.length > 1000) {
+            console.log(`[aeo-batch] skipped ${topic.slug} (already exists)`);
+            continue;
+          }
+
+          const { title, content } = await generatePost(topic, LOVABLE_API_KEY);
+
+          const payload = {
+            slug: topic.slug,
+            title,
+            content,
+            excerpt: topic.excerpt,
+            meta_description: topic.metaDescription,
+            tags: topic.tags,
+            author: "Aetheris AI Team",
+            is_published: true,
+            published_at: new Date().toISOString(),
+          };
+
+          if (existing) {
+            const { error } = await supabase.from("blog_posts").update(payload).eq("id", existing.id);
+            if (error) throw error;
+            console.log(`[aeo-batch] updated ${topic.slug}`);
+          } else {
+            const { error } = await supabase.from("blog_posts").insert(payload);
+            if (error) throw error;
+            console.log(`[aeo-batch] created ${topic.slug}`);
+          }
+        } catch (e) {
+          console.error(`[aeo-batch] error on ${topic.slug}:`, e instanceof Error ? e.message : String(e));
         }
-      } catch (e) {
-        results.push({
-          slug: topic.slug,
-          status: "error",
-          error: e instanceof Error ? e.message : String(e),
-        });
       }
-    }
+      console.log("[aeo-batch] all topics processed");
+    })();
+
+    // @ts-expect-error EdgeRuntime is provided by Supabase Edge Functions runtime
+    EdgeRuntime.waitUntil(job);
 
     return new Response(
-      JSON.stringify({ ok: true, results }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      JSON.stringify({
+        ok: true,
+        queued: true,
+        topic_count: TOPICS.length,
+        message: "Batch started in background. Check the blog_posts table or function logs in 3-5 minutes.",
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 202 }
     );
   } catch (e) {
     return new Response(
