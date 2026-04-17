@@ -682,6 +682,111 @@ export type Database = {
           },
         ]
       }
+      seo_optimization_log: {
+        Row: {
+          after: Json | null
+          ai_reasoning: string | null
+          before: Json | null
+          id: string
+          route: string
+          run_at: string
+          run_type: string
+          score_after: number | null
+          score_before: number | null
+          status: string
+          trends_used: Json | null
+        }
+        Insert: {
+          after?: Json | null
+          ai_reasoning?: string | null
+          before?: Json | null
+          id?: string
+          route: string
+          run_at?: string
+          run_type?: string
+          score_after?: number | null
+          score_before?: number | null
+          status?: string
+          trends_used?: Json | null
+        }
+        Update: {
+          after?: Json | null
+          ai_reasoning?: string | null
+          before?: Json | null
+          id?: string
+          route?: string
+          run_at?: string
+          run_type?: string
+          score_after?: number | null
+          score_before?: number | null
+          status?: string
+          trends_used?: Json | null
+        }
+        Relationships: []
+      }
+      seo_overrides: {
+        Row: {
+          applied_at: string
+          created_at: string
+          description: string | null
+          faqs: Json | null
+          id: string
+          keywords: string | null
+          path: string
+          title: string | null
+          tldr: string | null
+          version: number
+        }
+        Insert: {
+          applied_at?: string
+          created_at?: string
+          description?: string | null
+          faqs?: Json | null
+          id?: string
+          keywords?: string | null
+          path: string
+          title?: string | null
+          tldr?: string | null
+          version?: number
+        }
+        Update: {
+          applied_at?: string
+          created_at?: string
+          description?: string | null
+          faqs?: Json | null
+          id?: string
+          keywords?: string | null
+          path?: string
+          title?: string | null
+          tldr?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      seo_trend_cache: {
+        Row: {
+          fetched_at: string
+          id: string
+          source: string | null
+          topic: string
+          trends: Json
+        }
+        Insert: {
+          fetched_at?: string
+          id?: string
+          source?: string | null
+          topic: string
+          trends?: Json
+        }
+        Update: {
+          fetched_at?: string
+          id?: string
+          source?: string | null
+          topic?: string
+          trends?: Json
+        }
+        Relationships: []
+      }
       site_events: {
         Row: {
           created_at: string

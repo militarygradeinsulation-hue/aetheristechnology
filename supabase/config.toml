@@ -86,3 +86,15 @@ verify_jwt = false
 
 [functions.generate-drip-batch]
 verify_jwt = false
+
+[functions.seo-discover-trends]
+verify_jwt = false
+
+[functions.seo-weekly-optimize]
+verify_jwt = false
+
+[functions.seo-manual-optimize]
+verify_jwt = true
+
+[functions.seo-rollback]
+verify_jwt = true

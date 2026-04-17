@@ -8,6 +8,7 @@ import {
   type BreadcrumbItem,
   type FAQItem,
 } from '@/lib/schemas';
+import { useSEOOverride } from '@/hooks/useSEOOverride';
 
 interface SEOHeadProps {
   title: string;
@@ -69,9 +70,16 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   speakable,
   articleMeta,
 }) => {
+  // Live AI-optimized override (DB-driven, applied at render time)
+  const override = useSEOOverride(path);
+  const effectiveTitle = override?.title || title;
+  const effectiveDescription = override?.description || description;
+  const effectiveKeywords = override?.keywords || keywords;
+  const effectiveFaqs = (override?.faqs && override.faqs.length > 0) ? override.faqs : faqs;
+
   const fullUrl = `${SITE_URL}${path}`;
-  const fullTitle = finalizeTitle(title);
-  const fullDescription = truncate(description, MAX_DESC);
+  const fullTitle = finalizeTitle(effectiveTitle);
+  const fullDescription = truncate(effectiveDescription, MAX_DESC);
   const ogImage = image || OG_IMAGE;
   const ogImageAlt = imageAlt || DEFAULT_IMAGE_ALT;
 
@@ -79,7 +87,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   const schemas: Record<string, unknown>[] = [];
   if (jsonLd) schemas.push(jsonLd);
   if (breadcrumbs && breadcrumbs.length > 0) schemas.push(breadcrumbSchema(breadcrumbs));
-  if (faqs && faqs.length > 0) schemas.push(faqSchema(faqs));
+  if (effectiveFaqs && effectiveFaqs.length > 0) schemas.push(faqSchema(effectiveFaqs));
   if (speakable && speakable.length > 0) schemas.push(speakableSchema(speakable));
 
   const combinedSchema =
@@ -93,7 +101,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={fullDescription} />
-      {keywords && <meta name="keywords" content={keywords} />}
+      {effectiveKeywords && <meta name="keywords" content={effectiveKeywords} />}
       <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
       <link rel="canonical" href={fullUrl} />
       <link rel="alternate" hrefLang="en-us" href={fullUrl} />
