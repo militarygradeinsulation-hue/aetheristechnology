@@ -15,6 +15,7 @@ import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AdminLibrary } from '@/components/AdminLibrary';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
+import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 
 type ToolKey = 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -69,13 +70,18 @@ const AdminDashboard: React.FC = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [subRes, evtRes] = await Promise.all([
-        supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
-        supabase.from('site_events').select('*').order('created_at', { ascending: false }).limit(1000),
-      ]);
+      const token = getAdminToken();
+      if (!token) { navigate('/admin/login', { replace: true }); return; }
 
-      const subs = (subRes.data || []) as ContactSubmission[];
-      const evts = (evtRes.data || []) as SiteEvent[];
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'dashboard' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const subs = (data?.submissions || []) as ContactSubmission[];
+      const evts = (data?.events || []) as SiteEvent[];
 
       setSubmissions(subs);
       setEvents(evts);
@@ -104,50 +110,43 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
-  // Verify admin status via Supabase Auth + is_admin() RPC, then auto-refresh every 30s
+  // Synchronous PIN-token gate. Renders dashboard immediately and loads data in the background.
   useEffect(() => {
-    let cancelled = false;
-    let interval: ReturnType<typeof setInterval> | null = null;
-
-    const verifyAndLoad = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (cancelled) return;
-      if (!user) { navigate('/admin/login', { replace: true }); return; }
-
-      const { data: isAdmin, error } = await supabase.rpc('is_admin', { _user_id: user.id });
-      if (cancelled) return;
-      if (error || isAdmin !== true) {
-        await supabase.auth.signOut();
-        navigate('/admin/login', { replace: true });
-        return;
-      }
-
-      fetchData();
-      interval = setInterval(fetchData, 30000);
-    };
-
-    verifyAndLoad();
-    return () => { cancelled = true; if (interval) clearInterval(interval); };
+    if (!hasValidAdminToken()) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, [navigate, fetchData]);
 
   const toggleRead = async (id: string, current: boolean) => {
-    await supabase.from('contact_submissions').update({ is_read: !current }).eq('id', id);
+    const token = getAdminToken();
+    if (!token) return;
+    await supabase.functions.invoke('admin-data', {
+      body: { action: 'toggle_read', id, is_read: !current },
+      headers: { 'x-admin-token': token },
+    });
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    clearAdminToken();
     navigate('/admin/login', { replace: true });
   };
 
   const fetchInsights = async () => {
     setLoadingInsights(true);
     try {
-      // No body needed: server fetches analytics from DB to prevent client tampering
-      const { data, error } = await supabase.functions.invoke('admin-insights', { body: {} });
+      const token = getAdminToken();
+      if (!token) { navigate('/admin/login', { replace: true }); return; }
+      const { data, error } = await supabase.functions.invoke('admin-insights', {
+        body: {},
+        headers: { 'x-admin-token': token },
+      });
       if (error) throw error;
       if (data?.error) {
         toast({ title: 'AI Error', description: data.error, variant: 'destructive' });
