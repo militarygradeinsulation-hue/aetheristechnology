@@ -13,9 +13,10 @@ const AboutPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="About Aetheris AI — Your Co-CEO for Operations"
-        description="AI business consulting in Indianapolis. We embed into your operation, expose inefficiencies, and deploy automation. Serving the US."
+        title="About Aetheris AI — Co-CEO for Operations"
+        description="B2B AI consulting in Indianapolis. We embed into operations, expose inefficiencies, deploy AI agents and automation. US-wide."
         path="/about"
+        keywords="AI consultant Indianapolis, B2B AI consulting, technology consultant, AI strategy consulting, fix your business consulting, digital transformation consultant"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "AboutPage",

@@ -13,8 +13,9 @@ const AssessmentPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Free AI Readiness Assessment | Aetheris AI"
-        description="2-minute AI Readiness Assessment. See where your business stands on automation, CRM, and AI adoption. Instant score + recommendations."
+        description="2-minute AI Maturity Assessment. Score your AI readiness across automation, CRM, and adoption. Instant roadmap."
         path="/assessment"
+        keywords="AI readiness assessment, AI maturity assessment, AI maturity audit, AI adoption roadmap, AI strategy consulting, use case prioritization, build vs buy AI, AI ROI analysis"
       />
       <Background />
       <div className="relative z-10">

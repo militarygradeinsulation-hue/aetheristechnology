@@ -14,8 +14,9 @@ const DiagnosticQuizPage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
         title="Free Business Diagnostic | Aetheris AI"
-        description="Find where your business is quietly losing money. Free 20-question diagnostic with personalized score and actionable recommendations."
+        description="Find revenue leaks fast. 20-question business diagnostic + AI operational efficiency score. Free, instant results."
         path="/business-diagnostic"
+        keywords="business diagnostic, operational efficiency AI, reduce operational costs with AI, AI maturity assessment, fix your business, AI consulting Indianapolis, revenue leak diagnostic"
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebPage',

@@ -7,9 +7,10 @@ const MarketingStrategistPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
-        title="Marketing Hub — Free AI Strategy | Aetheris AI"
-        description="Free AI-powered marketing strategy recommendations for your business. No login required. Indianapolis-based consulting."
+        title="Free AI Marketing Strategist | Aetheris AI"
+        description="AI marketing automation and conversational AI strategy. Free tool — no login. Indianapolis-based AI consulting."
         path="/marketing-strategist"
+        keywords="AI marketing automation, conversational AI, AI marketing strategist, marketing workflow automation, AI for marketing, performance optimization, AI consultant Indianapolis"
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">
         <Link
