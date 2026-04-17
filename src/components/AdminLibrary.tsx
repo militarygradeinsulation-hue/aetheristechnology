@@ -44,7 +44,16 @@ export const AdminLibrary: React.FC = () => {
     toast({ title: 'Copied to clipboard' });
   };
 
-  const handleDownload = (item: AdminLibraryItem) => {
+  const handleDownloadPdf = (item: AdminLibraryItem) => {
+    try {
+      downloadLibraryItemAsPdf(item);
+      toast({ title: 'PDF downloaded' });
+    } catch (e: any) {
+      toast({ title: 'Download failed', description: e.message, variant: 'destructive' });
+    }
+  };
+
+  const handleDownloadText = (item: AdminLibraryItem) => {
     const safeTitle = item.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
     const ext = item.tool_type === 'playbook' ? 'md' : 'txt';
     downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(item));
