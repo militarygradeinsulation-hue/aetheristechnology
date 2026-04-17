@@ -328,12 +328,12 @@ const AdminDashboard: React.FC = () => {
                     eventsSubTab === t ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {t === 'campaign' ? '📨 Campaign' : '🌐 Site Activity'}
+                  {t === 'campaign' ? '📨 Powerhouse' : '🌐 Site Activity'}
                 </button>
               ))}
             </div>
 
-            {eventsSubTab === 'campaign' && <CampaignActivity />}
+            {eventsSubTab === 'campaign' && <CampaignControlCenter />}
 
             {eventsSubTab === 'site' && (
               <div>
