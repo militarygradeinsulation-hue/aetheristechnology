@@ -12,9 +12,10 @@ const ScanPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Free Website Gap Analysis | Aetheris AI"
-        description="Scan your site in 30 seconds. AI finds SEO issues, weak CTAs, and missed conversions — with revenue leak estimates."
+        title="Free AI Website Gap Analysis | Aetheris AI"
+        description="AI website analysis in 30 seconds. SEO, weak CTAs, missed conversions — with digital transformation audit + revenue leak estimates."
         path="/scan"
+        keywords="AI website analysis, digital transformation audit, website SEO scan, conversion optimization audit, AI consulting Indianapolis, revenue leak analysis, performance optimization"
       />
       <Background />
       <div className="relative z-10">

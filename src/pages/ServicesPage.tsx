@@ -3,6 +3,7 @@ import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Services } from '@/components/Services';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { ServiceCapabilities } from '@/components/ServiceCapabilities';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -13,16 +14,17 @@ const ServicesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Consulting & AI Automation Services | Aetheris AI"
-        description="From $50 visual renders to $25K+ custom AI builds. Diagnostics, CRM, sales automation, and digital oversight. Indianapolis-based."
+        title="AI Consulting Services & Pricing | Aetheris AI"
+        description="AI strategy, governance, automation, and ML/LLM implementation. From $50 visual renders to $25K+ custom AI builds. Indianapolis."
         path="/services"
+        keywords="AI consulting services, AI strategy consulting, AI maturity assessment, build vs buy AI, AI ROI analysis, responsible AI, AI ethics, GDPR AI compliance, generative AI consulting, LLM implementation, AI agents, workflow automation, conversational AI, digital transformation consultant, technology consultant Indianapolis"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Service",
-          "serviceType": "Business Consulting & AI Automation",
+          "serviceType": "AI Consulting & Automation",
           "provider": { "@type": "Organization", "name": "Aetheris AI", "url": "https://aetheris.technology" },
           "areaServed": { "@type": "Country", "name": "United States" },
-          "description": "Full-spectrum business consulting services including operational diagnostics, CRM development, AI automation strategy, and ongoing digital oversight."
+          "description": "Full-spectrum AI consulting: strategy, governance, generative AI, LLMs, AI agents, workflow automation, and ROI analysis."
         }}
       />
       <Background />
@@ -30,6 +32,7 @@ const ServicesPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <ServicesPricing />
+          <ServiceCapabilities />
           <Services />
         </div>
         <Footer />
