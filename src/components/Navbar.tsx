@@ -44,10 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const navItems = [
     { label: 'Home', href: '/', special: true },
     { label: 'Solution Store', href: '/services', special: true },
+    { label: 'Industries', href: '/industries' },
     { label: 'Blog', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'Free Diagnostic', href: '/business-diagnostic' },
-    { label: 'Careers', href: '/careers' },
     { label: 'About', href: '/about' },
   ];
 
