@@ -11,6 +11,15 @@ const SalesCompassPage = () => {
         description="AI sales automation and workflow guidance to sharpen strategy and close more deals. Free tool, no login."
         path="/sales-compass"
         keywords="AI sales automation, workflow automation, AI sales agents, conversational AI, sales AI consultant, B2B AI consulting, sales process automation"
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Sales Compass', path: '/sales-compass' },
+        ]}
+        faqs={[
+          { question: 'What is the AI Sales Compass?', answer: 'A free Aetheris AI tool that produces sales strategy, workflow automation recommendations, and AI agent playbooks tailored to your sales motion.' },
+          { question: 'How does AI improve B2B sales?', answer: 'AI compresses prospecting and follow-up via lead-scoring agents, auto-personalized outbound, conversational qualification, and CRM hygiene automation — letting reps spend more time closing.' },
+          { question: 'Is the Sales Compass really free?', answer: 'Yes. No login, no credit card. For full sales operations rebuilds we offer Rapid Evaluation ($750), 14-Day Diagnostic ($7,500), or Custom Implementation ($25,000+).' },
+        ]}
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">
         <Link
