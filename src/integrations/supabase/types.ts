@@ -143,6 +143,69 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_assets: {
+        Row: {
+          created_at: string
+          id: string
+          is_attached: boolean
+          metadata: Json
+          name: string
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_attached?: boolean
+          metadata?: Json
+          name: string
+          type: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_attached?: boolean
+          metadata?: Json
+          name?: string
+          type?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      campaign_settings: {
+        Row: {
+          daily_limit: number
+          default_links: Json
+          from_email: string
+          from_name: string
+          id: number
+          is_active: boolean
+          signature_html: string
+          updated_at: string
+        }
+        Insert: {
+          daily_limit?: number
+          default_links?: Json
+          from_email?: string
+          from_name?: string
+          id?: number
+          is_active?: boolean
+          signature_html?: string
+          updated_at?: string
+        }
+        Update: {
+          daily_limit?: number
+          default_links?: Json
+          from_email?: string
+          from_name?: string
+          id?: number
+          is_active?: boolean
+          signature_html?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       claim_codes: {
         Row: {
           code: string
