@@ -9,7 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pinLoading, setPinLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -18,7 +20,6 @@ const AdminLogin: React.FC = () => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user ? { id: data.user.id } : null));
   }, []);
 
-  // If already signed in, check admin status and route accordingly
   useEffect(() => {
     let cancelled = false;
     const check = async () => {
@@ -37,16 +38,14 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Try sign-in first; if user doesn't exist, attempt sign-up (for first-admin bootstrap).
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
-        // Attempt sign-up so the first admin can self-bootstrap.
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin + '/admin/login' },
         });
-        if (signUpError) throw signInError; // surface original sign-in error
+        if (signUpError) throw signInError;
       }
 
       const { data: { user: signedInUser } } = await supabase.auth.getUser();
@@ -55,7 +54,6 @@ const AdminLogin: React.FC = () => {
         return;
       }
 
-      // Bootstrap: if no admin exists yet, promote this user to admin.
       await supabase.rpc('promote_if_first_admin', { _user_id: signedInUser.id });
 
       const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin', { _user_id: signedInUser.id });
@@ -75,6 +73,28 @@ const AdminLogin: React.FC = () => {
     }
   };
 
+  const handlePinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-pin-login', { body: { pin } });
+      if (error || !data?.ok) throw new Error(data?.error || error?.message || 'Invalid PIN');
+
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInErr) throw signInErr;
+
+      navigate('/admin', { replace: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'PIN login failed.';
+      toast({ title: 'PIN login failed', description: msg, variant: 'destructive' });
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="glass p-8 rounded-2xl max-w-sm w-full">
@@ -83,8 +103,29 @@ const AdminLogin: React.FC = () => {
             <Lock className="w-8 h-8 text-amber" />
           </div>
           <h1 className="text-2xl font-bold text-foreground font-display">Admin Access</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sign in with your admin account</p>
+          <p className="text-muted-foreground text-sm mt-1">Sign in with PIN or admin account</p>
         </div>
+
+        <form onSubmit={handlePinSubmit} className="space-y-3 mb-6">
+          <Input
+            type="password"
+            inputMode="numeric"
+            placeholder="PIN"
+            value={pin}
+            onChange={e => setPin(e.target.value)}
+            required
+            autoComplete="one-time-code"
+          />
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={pinLoading}>
+            {pinLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock with PIN'}
+          </Button>
+        </form>
+
+        <div className="relative mb-4">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground">or sign in</span></div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="email"
@@ -102,8 +143,8 @@ const AdminLogin: React.FC = () => {
             required
             autoComplete="current-password"
           />
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock'}
+          <Button type="submit" variant="outline" className="w-full" disabled={loading}>
+            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Sign In'}
           </Button>
         </form>
       </div>
