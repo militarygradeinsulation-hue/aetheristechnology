@@ -373,17 +373,32 @@ export const AllInOneGenerator: React.FC = () => {
         <div className="flex flex-wrap gap-2 mt-6">
           <Button
             onClick={handleRun}
-            disabled={running || !form.url.trim()}
+            disabled={running || inferring || !form.url.trim()}
             className="bg-amber hover:bg-amber/90 text-background font-bold px-6"
           >
             {running ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running all tools...
               </>
+            ) : inferring ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Reading website...
+              </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" /> Run Every Tool
               </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => inferFromUrl()}
+            disabled={running || inferring || !form.url.trim()}
+          >
+            {inferring ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Auto-filling...</>
+            ) : (
+              <>Auto-fill from website</>
             )}
           </Button>
           {!running && Object.keys(states).length > 0 && (
@@ -392,8 +407,9 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Takes about 60–120 seconds. Tools run in parallel and each saves to your library independently — even if one
-          fails, the others still complete.
+          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
+          site, infer your business profile, then run all 9 tools in parallel (~60–120 seconds). Each result saves to
+          your library independently.
         </p>
       </div>
 
