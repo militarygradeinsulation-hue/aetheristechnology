@@ -38,6 +38,8 @@ const ALL_ROUTES = [
   "/", "/services", "/ai-consultant", "/marketing-strategist", "/sales-compass",
   "/assessment", "/scan", "/diagnostic-quiz", "/friction-audit",
   "/about", "/why-us", "/solutions",
+  "/industries", "/ai-for-healthcare", "/ai-for-finance", "/ai-for-logistics",
+  "/ai-for-construction", "/ai-for-manufacturing", "/ai-for-saas",
 ];
 
 export const SEOOptimizer: React.FC = () => {
