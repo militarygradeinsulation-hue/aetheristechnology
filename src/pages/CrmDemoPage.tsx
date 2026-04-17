@@ -21,6 +21,7 @@ const CrmDemoPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
+        path="/crm-demo"
         title="Live CRM Demo | Aetheris AI"
         description="Walk through a live demo of the Aetheris CRM — contacts, companies, deals pipeline, and activity timeline. Sample data only."
       />
