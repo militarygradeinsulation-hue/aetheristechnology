@@ -149,6 +149,25 @@ serve(async (req) => {
       });
     }
 
+    // Load campaign context (sender name + CTA links + attached playbooks)
+    const { data: settings } = await supabase
+      .from("campaign_settings")
+      .select("from_name, default_links")
+      .eq("id", 1)
+      .maybeSingle();
+
+    const { data: attachedAssets } = await supabase
+      .from("campaign_assets")
+      .select("name, url")
+      .eq("type", "playbook")
+      .eq("is_attached", true);
+
+    const ctx: CampaignContext = {
+      fromName: settings?.from_name || "Joseph Toney",
+      defaultLinks: ((settings?.default_links as any[]) || []).filter(l => l?.label && l?.url),
+      attachments: (attachedAssets || []) as { name: string; url: string }[],
+    };
+
     const { data: prospects, error: prospErr } = await supabase
       .from("drip_prospects")
       .select("*")
@@ -171,7 +190,7 @@ serve(async (req) => {
       const results = await Promise.allSettled(
         chunk.map(async (prospect) => {
           // Generate only emails 2..N
-          const followUps = await generateFollowUpEmails(prospect, steps, LOVABLE_API_KEY);
+          const followUps = await generateFollowUpEmails(prospect, steps, LOVABLE_API_KEY, ctx);
           if (followUps === null) throw new Error("generation failed");
 
           const emailRows = steps.map((step: any, i: number) => {
