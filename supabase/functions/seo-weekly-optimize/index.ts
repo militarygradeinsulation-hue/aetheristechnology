@@ -24,6 +24,13 @@ const ROUTES: Array<{ path: string; intent: string }> = [
   { path: "/about", intent: "About + founder bio — trust/authority" },
   { path: "/why-us", intent: "Differentiation page — competitive positioning" },
   { path: "/solutions", intent: "Solutions overview" },
+  { path: "/industries", intent: "Industries hub — vertical AI solutions overview" },
+  { path: "/ai-for-healthcare", intent: "AI for Healthcare — Indianapolis vertical landing, HIPAA + clinical ops" },
+  { path: "/ai-for-finance", intent: "AI for Finance — Indianapolis vertical landing, risk + compliance + automation" },
+  { path: "/ai-for-logistics", intent: "AI for Logistics — Indianapolis vertical landing, routing + fleet + warehouse" },
+  { path: "/ai-for-construction", intent: "AI for Construction — Indianapolis vertical landing, bids + safety + scheduling" },
+  { path: "/ai-for-manufacturing", intent: "AI for Manufacturing — Indianapolis vertical landing, predictive maintenance + quality" },
+  { path: "/ai-for-saas", intent: "AI for SaaS — vertical landing, churn + product-led growth + support automation" },
 ];
 
 const SITE_URL = "https://aetheris.technology";
