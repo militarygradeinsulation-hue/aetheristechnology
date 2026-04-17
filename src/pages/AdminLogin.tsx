@@ -34,11 +34,26 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn(email, password);
+      // Try sign-in first; if user doesn't exist, attempt sign-up (for first-admin bootstrap).
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        // Attempt sign-up so the first admin can self-bootstrap.
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin + '/admin/login' },
+        });
+        if (signUpError) throw signInError; // surface original sign-in error
+      }
 
-      // Verify admin status server-side via SECURITY DEFINER function
       const { data: { user: signedInUser } } = await supabase.auth.getUser();
-      if (!signedInUser) throw new Error('Sign-in did not produce a session.');
+      if (!signedInUser) {
+        toast({ title: 'Check your email', description: 'Confirm your email, then sign in again.' });
+        return;
+      }
+
+      // Bootstrap: if no admin exists yet, promote this user to admin.
+      await supabase.rpc('promote_if_first_admin', { _user_id: signedInUser.id });
 
       const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin', { _user_id: signedInUser.id });
       if (rpcError) throw rpcError;
