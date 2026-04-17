@@ -108,28 +108,45 @@ const BlogPostPage = () => {
   const featuredImage = slug ? getImageForSlug(slug) : null;
   const postUrl = `${SITE_URL}/blog/${slug}`;
 
-  // Article JSON-LD schema
+  // Article + Breadcrumb JSON-LD
   const articleJsonLd = post ? {
     "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": post.title,
-    "description": post.meta_description || post.excerpt,
-    "author": {
-      "@type": "Person",
-      "name": post.author,
-      "url": "https://www.linkedin.com/in/aisystemsarchitect"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Aetheris AI",
-      "logo": { "@type": "ImageObject", "url": `${SITE_URL}/aetheris-logo.png` }
-    },
-    "datePublished": post.published_at,
-    "dateModified": post.updated_at,
-    "image": post.featured_image || featuredImage || `${SITE_URL}/aetheris-logo.png`,
-    "mainEntityOfPage": { "@type": "WebPage", "@id": postUrl },
-    "url": postUrl,
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": post.title,
+        "description": post.meta_description || post.excerpt,
+        "author": {
+          "@type": "Person",
+          "name": post.author,
+          "url": "https://www.linkedin.com/in/aisystemsarchitect"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Aetheris AI",
+          "logo": { "@type": "ImageObject", "url": `${SITE_URL}/aetheris-logo.png` }
+        },
+        "datePublished": post.published_at,
+        "dateModified": post.updated_at,
+        "image": post.featured_image || featuredImage || `${SITE_URL}/aetheris-logo.png`,
+        "mainEntityOfPage": { "@type": "WebPage", "@id": postUrl },
+        "url": postUrl,
+        "keywords": (post.tags || []).join(', '),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
+          { "@type": "ListItem", "position": 3, "name": post.title, "item": postUrl },
+        ],
+      },
+    ],
   } : undefined;
+
+  const blogKeywords = post
+    ? [...(post.tags || []), 'AI consulting Indianapolis', 'AI strategy', 'B2B AI consulting'].join(', ')
+    : undefined;
 
   return (
     <div className="relative min-h-screen">
@@ -145,6 +162,8 @@ const BlogPostPage = () => {
             path={`/blog/${slug}`}
             type="article"
             image={post.featured_image || featuredImage || undefined}
+            imageAlt={post.title}
+            keywords={blogKeywords}
             jsonLd={articleJsonLd}
           />
         )}
