@@ -6,19 +6,31 @@ import { BlogCard } from './BlogCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Skeleton } from './ui/skeleton';
 
+const BLOG_CARD_SELECT = 'id, title, slug, excerpt, author, published_at, tags, location_focus, featured_image';
+const BLOG_QUERY_TIMEOUT_MS = 8000;
+
 export const BlogList: React.FC = () => {
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const query = supabase
         .from('blog_posts')
-        .select('*')
+        .select(BLOG_CARD_SELECT)
         .eq('is_published', true)
         .order('published_at', { ascending: false });
-      
+
+      const result = await Promise.race([
+        query,
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error('Timed out loading blog posts')), BLOG_QUERY_TIMEOUT_MS);
+        }),
+      ]);
+
+      const { data, error } = result;
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
+    retry: 1,
   });
 
   return (
