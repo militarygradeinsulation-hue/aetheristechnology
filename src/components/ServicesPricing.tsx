@@ -263,7 +263,7 @@ export const ServicesPricing: React.FC = () => {
                 }`}
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Monthly
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">SAVE</span>
+                <span className="text-[10px] bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full font-semibold tracking-[0.12em] uppercase">Save</span>
               </button>
             </div>
           </div>
@@ -303,18 +303,18 @@ export const ServicesPricing: React.FC = () => {
                   <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
 
                   {/* Success Stat */}
-                  <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 rounded-md px-2.5 py-2">
-                    <Percent className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                    <span className="text-xs text-emerald-400 font-medium leading-tight">{service.successStat}</span>
+                  <div className="flex items-start gap-2 mb-4 bg-amber/[0.06] border border-amber/25 rounded-md px-3 py-2.5">
+                    <Percent className="w-3.5 h-3.5 text-amber flex-shrink-0 mt-0.5" />
+                    <span className="text-xs text-foreground/85 font-medium leading-snug tracking-[0.01em]">{service.successStat}</span>
                   </div>
 
                   {/* Price */}
                   <div className="flex items-baseline gap-2 mb-4">
                     {billingMode === 'monthly' && service.monthlyPriceId ? (
                       <>
-                        <span className="text-2xl font-bold text-primary font-display">{service.monthlyPricing}</span>
-                        <span className="text-xs text-muted-foreground line-through">{service.pricing}</span>
-                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">-{service.monthlySavePercent}%</span>
+                        <span className="text-2xl font-bold text-gradient-amber font-display">{service.monthlyPricing}</span>
+                        <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
+                        <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
                       </>
                     ) : (
                       <>
@@ -392,9 +392,9 @@ export const ServicesPricing: React.FC = () => {
                       <div className="flex items-baseline gap-2 flex-wrap">
                         {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                           <>
-                            <span className="text-2xl font-bold text-primary font-display">{expandedService.monthlyPricing}</span>
-                            <span className="text-sm text-muted-foreground line-through">{expandedService.pricing}</span>
-                            <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">-{expandedService.monthlySavePercent}%</span>
+                            <span className="text-2xl font-bold text-gradient-amber font-display">{expandedService.monthlyPricing}</span>
+                            <span className="text-sm text-muted-foreground/70 line-through">{expandedService.pricing}</span>
+                            <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{expandedService.monthlySavePercent}%</span>
                           </>
                         ) : (
                           <>
@@ -407,9 +407,9 @@ export const ServicesPricing: React.FC = () => {
                   </div>
 
                   {/* Success stat */}
-                  <div className="flex items-center gap-2 mb-5 bg-emerald-500/10 rounded-lg px-3 py-2.5">
-                    <Percent className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <span className="text-sm text-emerald-400 font-medium">{expandedService.successStat}</span>
+                  <div className="flex items-start gap-2.5 mb-5 bg-amber/[0.06] border border-amber/25 rounded-lg px-3.5 py-3">
+                    <Percent className="w-4 h-4 text-amber flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground/90 font-medium leading-snug tracking-[0.01em]">{expandedService.successStat}</span>
                   </div>
 
                   {/* Long description */}
