@@ -35,7 +35,7 @@ export const ThePitch: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display text-float">
               What I <span className="text-amber glow-text">Actually Do</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -47,7 +47,7 @@ export const ThePitch: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-6">
           {services.map((service, index) => (
             <RevealOnScroll key={service.title} delay={0.1 + index * 0.1}>
-              <div className="glass glass-hover p-8 rounded-xl h-full">
+              <div className="glass glass-hover glass-shine shimmer-border hover-lift p-8 rounded-xl h-full">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <service.icon className="w-6 h-6 text-amber" />
@@ -70,7 +70,7 @@ export const ThePitch: React.FC = () => {
         </div>
 
         <RevealOnScroll delay={0.6}>
-          <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-amber/30">
+          <div className="mt-12 text-center glass glass-shine hover-lift p-8 rounded-xl border-2 border-amber/30 animate-glow-pulse">
             <p className="text-2xl font-bold text-foreground mb-4 font-display">
               That's what a Co-CEO does for your business.
             </p>

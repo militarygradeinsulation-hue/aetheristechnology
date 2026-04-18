@@ -67,7 +67,7 @@ const VerticalLandingPage: React.FC = () => {
               <Sparkles className="w-4 h-4" />
               {vertical.heroEyebrow}
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 leading-tight text-float">
               {vertical.heroHeadline}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -91,7 +91,7 @@ const VerticalLandingPage: React.FC = () => {
         {/* PAIN HOOK */}
         <section className="py-12 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="glass rounded-2xl p-8 border-l-4 border-amber">
+            <div className="glass glass-shine hover-lift rounded-2xl p-8 border-l-4 border-amber">
               <p className="text-lg md:text-xl text-foreground/90 italic">
                 {vertical.painHook}
               </p>
@@ -102,7 +102,7 @@ const VerticalLandingPage: React.FC = () => {
         {/* TL;DR — Speakable */}
         <section className="py-12 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="glass rounded-2xl p-8 border border-amber/20">
+            <div className="glass glass-shine shimmer-border hover-lift rounded-2xl p-8 border border-amber/20 animate-glow-pulse">
               <div className="flex items-center gap-2 mb-3 text-amber font-semibold uppercase text-sm tracking-wider">
                 <Sparkles className="w-4 h-4" /> Quick Answer
               </div>
@@ -116,7 +116,7 @@ const VerticalLandingPage: React.FC = () => {
         {/* USE CASES */}
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center text-float">
               How Aetheris AI deploys in {vertical.industry}
             </h2>
             <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
@@ -126,7 +126,7 @@ const VerticalLandingPage: React.FC = () => {
               {vertical.useCases.map((uc) => {
                 const Icon = CATEGORY_ICONS[uc.category];
                 return (
-                  <div key={uc.title} className="glass rounded-2xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
+                  <div key={uc.title} className="glass glass-shine shimmer-border hover-lift rounded-2xl p-6 border border-border/50 hover:border-amber/40">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 rounded-xl bg-amber/10 flex items-center justify-center flex-shrink-0">
                         <Icon className="w-6 h-6 text-amber" />
@@ -147,18 +147,18 @@ const VerticalLandingPage: React.FC = () => {
         {/* STATS / ROI */}
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center text-float">
               The {vertical.industry} numbers
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {vertical.stats.map((s) => (
-                <div key={s.label} className="glass rounded-xl p-6 text-center border border-border/50">
+                <div key={s.label} className="glass glass-shine hover-lift rounded-xl p-6 text-center border border-border/50">
                   <div className="text-3xl md:text-4xl font-bold text-amber mb-2">{s.value}</div>
                   <div className="text-xs md:text-sm text-muted-foreground">{s.label}</div>
                 </div>
               ))}
             </div>
-            <div className="glass rounded-2xl p-8 max-w-4xl mx-auto">
+            <div className="glass glass-shine hover-lift rounded-2xl p-8 max-w-4xl mx-auto">
               <h3 className="text-xl font-bold mb-3 text-amber">ROI angle</h3>
               <p className="text-foreground/90 text-lg leading-relaxed">{vertical.roiAngle}</p>
             </div>
@@ -168,7 +168,7 @@ const VerticalLandingPage: React.FC = () => {
         {/* HOW-TO STEPS */}
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center text-float">
               How AI transforms {vertical.industry.toLowerCase()} — 5 steps
             </h2>
             <p className="text-muted-foreground text-center mb-10">
@@ -176,7 +176,7 @@ const VerticalLandingPage: React.FC = () => {
             </p>
             <ol className="space-y-4">
               {vertical.howToSteps.map((step, i) => (
-                <li key={step.name} className="glass rounded-xl p-6 border border-border/50 flex gap-5">
+                <li key={step.name} className="glass glass-shine hover-lift rounded-xl p-6 border border-border/50 flex gap-5">
                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber text-background font-bold text-xl flex items-center justify-center">
                     {i + 1}
                   </div>
@@ -193,12 +193,12 @@ const VerticalLandingPage: React.FC = () => {
         {/* FAQs */}
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-10 text-center text-float">
               {vertical.industry} AI: questions buyers actually ask
             </h2>
             <div className="space-y-4">
               {vertical.faqs.map((faq) => (
-                <details key={faq.question} className="glass rounded-xl p-6 border border-border/50 group">
+                <details key={faq.question} className="glass glass-shine hover-lift rounded-xl p-6 border border-border/50 group">
                   <summary className="font-bold text-lg cursor-pointer list-none flex items-center justify-between">
                     {faq.question}
                     <span className="text-amber text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -212,8 +212,8 @@ const VerticalLandingPage: React.FC = () => {
 
         {/* CTA */}
         <section className="py-20 px-4">
-          <div className="max-w-3xl mx-auto text-center glass rounded-2xl p-10 border border-amber/30">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
+          <div className="max-w-3xl mx-auto text-center glass glass-shine shimmer-border hover-lift rounded-2xl p-10 border border-amber/30 animate-glow-pulse">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4 text-float">
               Ready to deploy AI in your {vertical.industry.toLowerCase()} operation?
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
