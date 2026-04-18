@@ -17,6 +17,9 @@ import healthcareImg from '@/assets/industry-healthcare.jpg';
 import automotiveImg from '@/assets/industry-automotive.jpg';
 
 export const Services: React.FC = () => {
+  const { user } = useAuth();
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+
   const services = [
     {
       icon: Brain,
@@ -24,6 +27,8 @@ export const Services: React.FC = () => {
       description: 'We assess your data landscape and recommend the right ML approach. From feasibility studies to model selection guidance.',
       features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
       pricing: 'From $2,500',
+      priceId: 'consulting_ml_strategy_once',
+      ctaLabel: 'Buy — $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Full Analytics Package', cost: '$500' },
@@ -36,6 +41,8 @@ export const Services: React.FC = () => {
       description: 'We identify automation opportunities in your operations and design intelligent workflows tailored to your team.',
       features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
       pricing: 'From $299',
+      priceId: 'consulting_automation_once',
+      ctaLabel: 'Buy — $299',
       relatedServices: [
         { name: 'Strategy Blueprint', cost: '$299' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
@@ -48,6 +55,8 @@ export const Services: React.FC = () => {
       description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
       features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
       pricing: 'From $2,500',
+      priceId: 'consulting_ai_implementation_once',
+      ctaLabel: 'Buy — $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
@@ -60,6 +69,8 @@ export const Services: React.FC = () => {
       description: 'We help you build a data-driven culture with the right infrastructure, governance, and analytics strategy.',
       features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
       pricing: 'From $500',
+      priceId: 'consulting_data_strategy_once',
+      ctaLabel: 'Buy — $500',
       relatedServices: [
         { name: 'Full Analytics Package', cost: '$500' },
         { name: 'Website Evaluation', cost: '$500' },
@@ -72,6 +83,9 @@ export const Services: React.FC = () => {
       description: 'End-to-end strategic guidance for your AI journey. We help leadership teams make confident, informed decisions.',
       features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
       pricing: 'From $5,000/mo',
+      priceId: 'consulting_ai_transformation_monthly',
+      ctaLabel: 'Subscribe — $5,000/mo',
+      isMonthly: true,
       relatedServices: [
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
@@ -84,6 +98,8 @@ export const Services: React.FC = () => {
       description: 'We audit your existing AI systems and recommend improvements for speed, accuracy, and cost efficiency.',
       features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
       pricing: 'From $500',
+      priceId: 'consulting_performance_once',
+      ctaLabel: 'Buy — $500',
       relatedServices: [
         { name: 'Full Analytics Package', cost: '$500' },
         { name: 'Digital Snapshot', cost: '$125' },
