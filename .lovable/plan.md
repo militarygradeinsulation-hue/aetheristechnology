@@ -1,90 +1,58 @@
 
 
-The user uploaded files from a different "CTOguy.ai Project Vision" project (a project management dashboard with team workload, tasks, AI chatbot). They want me to:
-1. Build a **full CRM** into the admin backend to consolidate/clean things up
-2. **Showcase this custom CRM as a demo on the front-end** for clients to see
+## The real bug
 
-The TO-DO.json hints at CRM scope: contacts, interactions, leads, pipeline stages, CSV import.
+All 9 tools are succeeding — the database confirms it. What "didn't work" is the **library viewer renders wrong/empty content** for 3 tools and dumps **raw JSON** for 2 others, because field names in the renderer don't match what the edge functions actually return.
 
-Looking at current state — there's already `drip_prospects` (basically leads), `contact_submissions`, `assessment_leads`, `diagnostic_leads`, `subscriber_profiles`, `purchases`. These are scattered. A real CRM should unify them into Contacts + Companies + Deals + Interactions.
+## Fixes — all in `src/components/LibraryItemRenderer.tsx`
 
-Let me ask one clarifying question about scope so I don't overbuild, then present the plan.
+### 1. `FollowUpPlanView` — currently empty
+Real shape: `{ overview, days[{day, channel, action, template, subject, timing, goal, tips}], objectionResponses[{trigger, response}] }`
+- Render the `overview` paragraph at top
+- Map over `days` (not `steps`), use `day.action`, `day.template`, `day.subject`, `day.timing`, `day.goal`, `day.tips`
+- Add `objectionResponses` section
 
-Actually — the request is clear enough. Let me present a plan with sensible defaults and let the user prune.
+### 2. `FrictionAuditView` — currently empty
+Real shape: `{ frictionScore, overallAssessment, flaggedPhrases[{originalPhrase, category, issue, severity, suggestedReplacement, context}], toneAlignment{currentTone, desiredTone, gap, recommendations}, strongerCTAs[{current, replacement, whyBetter}], topPriorityFixes[], copyStrengths[] }`
+- Score gauge + overall assessment header (mirror BrandContradictions style)
+- Map `flaggedPhrases` with severity badge, category chip, issue, replacement, context
+- Tone alignment card
+- Stronger CTAs grid
+- Priority fixes + copy strengths lists
 
----
+### 3. `StrategicQuestionsView` — currently empty
+Real shape: `{ companySnapshot, top10CriticalQuestions[{question, category, urgency, whyItMatters}], categories{leadership, sales, marketing, operations, hiringAndPeople, pricingAndOffer, customerJourney, growthAndExpansion}, questionsYouProbablyArentAsking[], leadershipTeamDiscussion[], workshopPrompts[] }`
+- Company snapshot intro
+- Top 10 critical questions with urgency badges
+- Tabbed/sectioned categories (8 buckets)
+- "Questions you probably aren't asking" highlight section
+- Leadership team discussion + workshop prompts
 
-# Plan: Aetheris CRM (Admin tool + Public demo)
+### 4. NEW `WebsiteScanView` — currently raw JSON dump
+Real shape: `{ score, grade, companyName, executiveSummary, gaps[{category, severity, title, description, annualCost, recommendedFix, projectedROI}], roadmap[{month, action, estimatedCost, projectedRecovery}], roiTable[], nextSteps[], competitiveBrief }`
+- Reuse the **same visual style as the public `WebsiteScanner.tsx`**: ScoreGauge ring (0–100 + grade), revenue-leak banner, GapCard list (severity icons, annualCost, ROI), roadmap timeline, ROI table, next steps, competitive brief
+- Lift simplified versions of `ScoreGauge` and `GapCard` into the renderer file (no Stripe/lock UI — pure read view)
 
-## What you'll get
+### 5. NEW `WhatsWrongView` — currently raw JSON dump
+Real shape: `{ diagnosis, urgentFix, recommendedPackage{name, price, description, whyThisFits}, additionalServices[{name, price, reason}], estimatedRevenueLeak, nextStep }`
+- Match the original `WhatsWrongDiagnostic.tsx` results layout: Diagnosis card → "Fix This First" destructive card → revenue leak banner → "Recommended For You" amber card → "Also Consider" list → next-step footer
 
-**1. A unified CRM inside `/admin`** — one place that ties together every contact, lead, and deal. Cleans up the scattered tables (drip prospects, contact submissions, assessment/diagnostic leads, purchases) by surfacing them as one timeline per person.
-
-**2. A live demo CRM on the public site** at `/crm-demo` — read-only, sandboxed sample data, branded to look exactly like the real admin tool. Shareable link for client pitches.
-
-## Scope
-
-### Data model (new tables)
-- `crm_companies` — name, website, industry, size, notes
-- `crm_contacts` — name, email, phone, title, company_id, owner, tags
-- `crm_deals` — title, contact_id, value, stage (Lead → Qualified → Proposal → Won/Lost), close date
-- `crm_interactions` — contact_id, type (call/email/meeting/note), subject, body, occurred_at
-- `crm_demo_data` — pre-seeded fictional companies/contacts/deals for the public demo (separate so the demo is never polluted with real data)
-
-All tables: RLS locked to `is_admin(auth.uid())` for the real CRM; demo table is publicly readable.
-
-### Admin CRM UI (new tab in `/admin`)
-- **Contacts list** — searchable, filterable by tag/owner, CSV import
-- **Contact detail** — profile + interaction timeline + linked deals + linked company
-- **Companies list + detail** — same pattern
-- **Deals pipeline** — Kanban board with drag-and-drop between stages
-- **Interactions log** — quick-add call/email/meeting/note from any contact
-- **Auto-import bridges**:
-  - New `contact_submissions` → auto-create CRM contact + "Inbound form" interaction
-  - New `drip_prospects` → CRM contact tagged "outbound"
-  - New `purchases` → CRM deal marked Won
-  - New `diagnostic_leads` / `assessment_leads` → contact + scored interaction
-
-### Public Demo (`/crm-demo`)
-- Same UI components, fed from `crm_demo_data` (fictional brands like "Northpoint Logistics", "Helix Medical", etc.)
-- Banner: "Live demo of the Aetheris CRM — sample data only"
-- Read-only: drag/edit interactions show a toast "Demo mode — sign up to enable editing"
-- Linked from `/services` and a new nav entry "See our CRM"
-
-## File changes (high level)
-
-```text
-NEW  supabase/migrations/* — 5 tables + RLS + seed demo data
-NEW  src/components/crm/
-       ContactsList.tsx
-       ContactDetail.tsx
-       CompaniesList.tsx
-       DealsPipeline.tsx        ← Kanban drag-drop (use @dnd-kit)
-       InteractionTimeline.tsx
-       QuickInteractionModal.tsx
-       CsvImportDialog.tsx
-       CrmShell.tsx             ← shared layout (used by admin + demo)
-NEW  src/lib/crm.ts             ← typed query helpers
-NEW  src/pages/CrmDemoPage.tsx  ← public read-only demo
-EDIT src/pages/AdminDashboard.tsx — add "CRM" tab
-EDIT src/App.tsx — add /crm-demo route
-EDIT supabase/functions/admin-data/index.ts — CRM read endpoints
-NEW  supabase/functions/crm-import-csv/index.ts
-NEW  supabase/functions/crm-bridge-leads/index.ts ← cron-style sync from existing lead tables
+### 6. Wire both new views into the switch
+```ts
+case 'website_scan':  return <WebsiteScanView {...props} />;
+case 'whats_wrong':   return <WhatsWrongView {...props} />;
 ```
 
-## What I'm NOT including (tell me if you want any)
-- Email send-from-CRM (you already have the campaign tool)
-- Reporting/analytics charts (your admin already has insights)
-- AI chat inside the CRM (can add a Lovable AI "summarize this contact" button if you want)
-- Mobile app
+## Files touched
+- `src/components/LibraryItemRenderer.tsx` (only file)
 
-## Order of work
-1. Migrations + RLS + demo seed
-2. Shared CRM components (ContactsList, ContactDetail, Timeline)
-3. Companies + Deals pipeline (Kanban)
-4. CSV import + lead-table bridge
-5. Wire admin tab
-6. Build public `/crm-demo` page
-7. Add nav link + landing-page mention
+## Out of scope (no edge function or All-In-One changes needed)
+- Edge functions are returning correct data
+- All-In-One generator is saving everything correctly
+- No DB / migration changes
 
+<lov-actions>
+<lov-suggestion message="Approved — implement the renderer fixes, then I'll open My Library and click each of the 5 items to verify they all render with proper styled views (no raw JSON, no empty lists).">Approve & implement</lov-suggestion>
+<lov-suggestion message="Also update src/lib/generateLibraryPdf.ts so the PDF exports for follow-up plan, friction audit, strategic questions, website scan, and what's wrong include the same full sections as the new library views.">Also fix PDF exports</lov-suggestion>
+<lov-suggestion message="Add a 'Re-run this tool' button on each library item detail page that re-invokes the edge function with the original input_data and replaces the saved output.">Add per-item re-run button</lov-suggestion>
+</lov-actions>
