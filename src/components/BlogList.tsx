@@ -5,31 +5,51 @@ import { supabase } from '@/integrations/supabase/client';
 import { BlogCard } from './BlogCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Skeleton } from './ui/skeleton';
+import { blogPostsSnapshot } from '@/data/blogPostsSnapshot';
 
 const BLOG_CARD_SELECT = 'id, title, slug, excerpt, author, published_at, tags, location_focus, featured_image';
 const BLOG_QUERY_TIMEOUT_MS = 8000;
 
+interface BlogListPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  author: string;
+  published_at: string | null;
+  tags: string[] | null;
+  location_focus: string | null;
+  featured_image: string | null;
+}
+
+const SNAPSHOT_POSTS = blogPostsSnapshot as unknown as BlogListPost[];
+
 export const BlogList: React.FC = () => {
-  const { data: posts, isLoading, error } = useQuery({
+  const { data: posts, isLoading, error } = useQuery<BlogListPost[]>({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      const query = supabase
-        .from('blog_posts')
-        .select(BLOG_CARD_SELECT)
-        .eq('is_published', true)
-        .order('published_at', { ascending: false });
+      try {
+        const query = supabase
+          .from('blog_posts')
+          .select(BLOG_CARD_SELECT)
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
 
-      const result = await Promise.race([
-        query,
-        new Promise<never>((_, reject) => {
-          window.setTimeout(() => reject(new Error('Timed out loading blog posts')), BLOG_QUERY_TIMEOUT_MS);
-        }),
-      ]);
+        const result = await Promise.race([
+          query,
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error('Timed out loading blog posts')), BLOG_QUERY_TIMEOUT_MS);
+          }),
+        ]);
 
-      const { data, error } = result;
-      if (error) throw error;
-      return data ?? [];
+        const { data, error } = result;
+        if (error) throw error;
+        return (data as BlogListPost[] | null) ?? SNAPSHOT_POSTS;
+      } catch {
+        return SNAPSHOT_POSTS;
+      }
     },
+    initialData: SNAPSHOT_POSTS,
     retry: 1,
   });
 
