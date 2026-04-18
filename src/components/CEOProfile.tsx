@@ -20,7 +20,7 @@ export const CEOProfile: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display text-float">
               Meet the <span className="text-amber glow-text">Leadership</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -34,7 +34,7 @@ export const CEOProfile: React.FC = () => {
           <div className="flex-1 flex justify-center">
             <RevealOnScroll>
               <TiltCard>
-                <div className="glass p-10 rounded-2xl max-w-lg">
+                <div className="glass glass-shine shimmer-border hover-lift p-10 rounded-2xl max-w-lg animate-glow-pulse">
                   <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-amber/30 shadow-2xl relative group">
                     <div style={{ padding: '100% 0 0 0', position: 'relative' }}>
                       <iframe
@@ -97,7 +97,7 @@ export const CEOProfile: React.FC = () => {
 
           <div className="flex-1 space-y-6">
             <RevealOnScroll delay={0.2}>
-              <h3 className="text-3xl font-bold text-foreground mb-6 font-display">
+              <h3 className="text-3xl font-bold text-foreground mb-6 font-display text-float">
                 Strategic Business Architect & AI Growth Expert
               </h3>
               
@@ -115,7 +115,7 @@ export const CEOProfile: React.FC = () => {
                   employees, he brings military precision to business execution.
                 </p>
 
-                <div className="glass p-6 rounded-xl mt-6">
+                <div className="glass glass-shine hover-lift p-6 rounded-xl mt-6">
                   <p className="italic text-foreground">
                     "I don't just lead teams—I build the systems myself: coded, tested, deployed. 
                     Whether working with aerospace contractors or small businesses, I deliver results 
@@ -123,7 +123,7 @@ export const CEOProfile: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="glass p-6 rounded-xl mt-6">
+                <div className="glass glass-shine hover-lift p-6 rounded-xl mt-6">
                   <h4 className="text-lg font-bold text-amber mb-4">Hear It In My Own Words</h4>
                   <iframe 
                     width="100%" 
@@ -139,7 +139,7 @@ export const CEOProfile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="glass p-6 rounded-xl mt-6">
+                <div className="glass glass-shine hover-lift p-6 rounded-xl mt-6">
                   <h4 className="text-lg font-bold text-amber mb-4">🎥 Watch: CEO Video</h4>
                   <p className="text-muted-foreground mb-4 text-sm">
                     See Joseph Toney share his vision and approach to AI-driven business growth.
@@ -160,9 +160,9 @@ export const CEOProfile: React.FC = () => {
                     { label: 'Marines Led', value: '200+' },
                     { label: 'Lead Flow Increase', value: '60%' },
                     { label: 'Revenue Managed', value: '$25M' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="glass p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-amber font-display">{stat.value}</div>
+                  ].map((stat, idx) => (
+                    <div key={stat.label} className="glass glass-shine hover-lift p-4 rounded-lg" style={{ animationDelay: `${idx * 0.15}s` }}>
+                      <div className="text-2xl font-bold text-amber font-display animate-float-slow">{stat.value}</div>
                       <div className="text-sm text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
