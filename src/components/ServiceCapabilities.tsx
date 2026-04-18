@@ -1,5 +1,7 @@
 import React from 'react';
 import { Brain, ShieldCheck, Cpu, Zap } from 'lucide-react';
+import { ParallaxTilt } from './ParallaxTilt';
+import { RevealOnScroll } from './RevealOnScroll';
 
 interface Cluster {
   icon: React.ElementType;
@@ -73,7 +75,7 @@ export const ServiceCapabilities: React.FC = () => {
           </span>
           <h2
             id="capabilities-heading"
-            className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4"
+            className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4 text-float"
           >
             From <span className="text-gradient-amber">AI Strategy</span> to Deployed Systems
           </h2>
@@ -85,32 +87,35 @@ export const ServiceCapabilities: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {CLUSTERS.map((cluster) => {
+          {CLUSTERS.map((cluster, idx) => {
             const Icon = cluster.icon;
             return (
-              <article
-                key={cluster.title}
-                className="glass rounded-2xl p-6 border border-border hover:border-amber/40 transition-colors flex flex-col"
-              >
-                <div className="w-12 h-12 rounded-xl bg-amber/10 border border-amber/20 flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-amber" aria-hidden="true" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground font-display mb-2">
-                  {cluster.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">{cluster.tagline}</p>
-                <ul className="space-y-2 mt-auto">
-                  {cluster.items.map((item) => (
-                    <li
-                      key={item}
-                      className="text-sm text-foreground/85 flex items-start gap-2"
-                    >
-                      <span className="text-amber mt-1.5 shrink-0 w-1 h-1 rounded-full bg-amber" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
+              <RevealOnScroll key={cluster.title} variant="float" delay={idx * 0.06}>
+                <ParallaxTilt intensity={0.5} className="h-full">
+                  <article
+                    className="glass glass-shine shimmer-border hover-lift rounded-2xl p-6 border border-border hover:border-amber/40 flex flex-col h-full"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-amber/10 border border-amber/20 flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-amber" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground font-display mb-2">
+                      {cluster.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">{cluster.tagline}</p>
+                    <ul className="space-y-2 mt-auto">
+                      {cluster.items.map((item) => (
+                        <li
+                          key={item}
+                          className="text-sm text-foreground/85 flex items-start gap-2"
+                        >
+                          <span className="text-amber mt-1.5 shrink-0 w-1 h-1 rounded-full bg-amber" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                </ParallaxTilt>
+              </RevealOnScroll>
             );
           })}
         </div>

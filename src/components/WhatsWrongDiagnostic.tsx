@@ -321,7 +321,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
           {step === 'results' && recommendation && (
             <motion.div key="results" ref={resultsRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="space-y-6">
-                <div className="glass p-6 rounded-2xl border border-border/50">
+                <div className="glass glass-shine hover-lift p-6 rounded-2xl border border-border/50 animate-shimmer-in">
                   <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-amber" />
                     Your Diagnosis
@@ -329,7 +329,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   <p className="text-muted-foreground leading-relaxed">{recommendation.diagnosis}</p>
                 </div>
 
-                <div className="glass p-6 rounded-2xl border border-destructive/30 bg-destructive/5">
+                <div className="glass glass-shine hover-lift p-6 rounded-2xl border border-destructive/30 bg-destructive/5 animate-shimmer-in">
                   <h3 className="text-lg font-bold text-destructive mb-2">Fix This First</h3>
                   <p className="text-foreground/90">{recommendation.urgentFix}</p>
                 </div>
@@ -339,7 +339,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   <p className="text-3xl font-bold text-amber mt-1">{recommendation.estimatedRevenueLeak}</p>
                 </div>
 
-                <div className="glass p-6 rounded-2xl border-2 border-primary/50">
+                <div className="glass glass-shine hover-lift p-6 rounded-2xl border-2 border-primary/50 animate-shimmer-in">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckCircle className="w-5 h-5 text-primary" />
                     <h3 className="text-lg font-bold text-foreground">Recommended For You</h3>

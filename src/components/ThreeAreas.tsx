@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
+import { ParallaxTilt } from './ParallaxTilt';
 import { Brain, Bot, Code, Database, Sparkles, Zap } from 'lucide-react';
 import digitalStrategyThumb from '@/assets/digital-strategy-thumb.jpg';
 import brandingMessageThumb from '@/assets/branding-message-thumb.jpg';
@@ -140,21 +141,23 @@ export const ThreeAreas: React.FC = () => {
           </div>
         </RevealOnScroll>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {areas.map((area) => (
-            <RevealOnScroll key={area.title}>
-              <div className="glass rounded-2xl overflow-hidden border border-border hover:border-amber/40 transition-colors h-full">
-                {area.id === 'digital-strategy' ? (
-                  <DigitalStrategyTile />
-                ) : area.id === 'branding' ? (
-                  <BrandingMessageTile />
-                ) : area.id === 'internal-systems' ? (
-                  <InternalSystemsTile />
-                ) : null}
-                <div className="p-8 text-center">
-                  <h3 className="text-xl font-bold text-foreground font-display mb-3">{area.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{area.description}</p>
+          {areas.map((area, idx) => (
+            <RevealOnScroll key={area.title} variant="float" delay={idx * 0.08}>
+              <ParallaxTilt intensity={0.6}>
+                <div className="glass glass-shine shimmer-border hover-lift rounded-2xl overflow-hidden border border-border hover:border-amber/40 h-full">
+                  {area.id === 'digital-strategy' ? (
+                    <DigitalStrategyTile />
+                  ) : area.id === 'branding' ? (
+                    <BrandingMessageTile />
+                  ) : area.id === 'internal-systems' ? (
+                    <InternalSystemsTile />
+                  ) : null}
+                  <div className="p-8 text-center">
+                    <h3 className="text-xl font-bold text-foreground font-display mb-3">{area.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{area.description}</p>
+                  </div>
                 </div>
-              </div>
+              </ParallaxTilt>
             </RevealOnScroll>
           ))}
         </div>
