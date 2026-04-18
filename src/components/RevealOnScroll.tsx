@@ -49,34 +49,15 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-
-    // If already in viewport on mount, reveal immediately (handles above-the-fold content)
-    const rect = node.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if (inView) {
-      setIsVisible(true);
-      return;
-    }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(node);
-        }
+        if (entry.isIntersecting) setIsVisible(true);
       },
-      { threshold: 0.1, rootMargin: '0px 0px -10% 0px' }
+      { threshold: 0.1 }
     );
     observer.observe(node);
     return () => observer.unobserve(node);
   }, []);
-
-  // Safety net: if something prevents the observer from firing, force-reveal after 1s
-  useEffect(() => {
-    if (isVisible) return;
-    const t = setTimeout(() => setIsVisible(true), 1000);
-    return () => clearTimeout(t);
-  }, [isVisible]);
 
   const v = VARIANTS[variant];
 
