@@ -87,7 +87,7 @@ export const ServiceAreas: React.FC = () => {
               <MapPin className="w-4 h-4" />
               Based in Indianapolis, Serving All of Indiana
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display text-float">
               AI Solutions for{' '}
               <span className="text-gradient-amber">
                 Indiana Businesses
@@ -109,7 +109,7 @@ export const ServiceAreas: React.FC = () => {
               { icon: Briefcase, value: '6+', label: 'Industries' },
               { icon: MapPin, value: '100%', label: 'Remote Capable' },
             ].map((stat, index) => (
-              <div key={index} className="glass rounded-xl p-6 text-center">
+              <div key={index} className="glass glass-shine hover-lift rounded-xl p-6 text-center">
                 <stat.icon className="w-8 h-8 text-amber mx-auto mb-3" />
                 <div className="text-3xl font-bold text-foreground mb-1 font-display">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -122,8 +122,8 @@ export const ServiceAreas: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {indianaCities.map((city, index) => (
             <RevealOnScroll key={city.name} delay={index * 0.05}>
-              <div className={`glass rounded-xl p-6 h-full transition-all duration-300 hover:scale-[1.02] ${
-                city.isHeadquarters ? 'ring-2 ring-amber' : ''
+              <div className={`glass glass-shine shimmer-border hover-lift rounded-xl p-6 h-full ${
+                city.isHeadquarters ? 'ring-2 ring-amber animate-glow-pulse' : ''
               }`}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -161,8 +161,8 @@ export const ServiceAreas: React.FC = () => {
 
         {/* Beyond Indiana Section */}
         <RevealOnScroll>
-          <div className="glass rounded-2xl p-8 md:p-12 text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
+          <div className="glass glass-shine hover-lift rounded-2xl p-8 md:p-12 text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display text-float">
               Don't See Your City?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">

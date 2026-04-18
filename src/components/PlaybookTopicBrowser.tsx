@@ -94,7 +94,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
     <section className="pb-16 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 font-display">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 font-display text-float">
             Build Your Own <span className="text-amber glow-text">Playbook</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -136,7 +136,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
               <button
                 key={topic.title}
                 onClick={() => setSelectedTopic(topic)}
-                className="glass p-5 rounded-xl border border-border hover:border-amber/30 transition-all text-left group"
+                className="glass glass-shine shimmer-border hover-lift p-5 rounded-xl border border-border hover:border-amber/30 transition-all text-left group"
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">

@@ -54,7 +54,7 @@ export const TechLogos: React.FC = () => {
         {[...technologies, ...technologies].map((tech, index) => (
           <div
             key={index}
-            className="flex-shrink-0 glass px-8 py-4 rounded-lg border border-amber/20"
+            className="flex-shrink-0 glass glass-shine hover-lift px-8 py-4 rounded-lg border border-amber/20"
           >
             <span className="text-lg font-semibold text-muted-foreground whitespace-nowrap">
               {tech}

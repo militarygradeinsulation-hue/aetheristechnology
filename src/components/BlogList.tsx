@@ -31,7 +31,7 @@ export const BlogList: React.FC = () => {
               <BookOpen className="w-4 h-4" />
               AI Education for Business Leaders
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display text-float">
               Stop Guessing.{' '}
               <span className="text-gradient-amber">
                 Start Understanding.
@@ -80,7 +80,7 @@ export const BlogList: React.FC = () => {
 
         {/* Newsletter CTA */}
         <RevealOnScroll>
-          <div className="mt-20 glass rounded-2xl p-8 md:p-12 text-center">
+          <div className="mt-20 glass glass-shine hover-lift rounded-2xl p-8 md:p-12 text-center animate-glow-pulse">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
               Stop Wasting Money on Broken Systems
             </h2>
