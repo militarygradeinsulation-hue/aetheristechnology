@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
+import { ParallaxTilt } from './ParallaxTilt';
 import hookAiThumb from '@/assets/hook-ai-thumb.jpg';
 import marketingHubThumb from '@/assets/marketing-hub-thumb.jpg';
 import blogThumb from '@/assets/blog-thumb.jpg';
@@ -125,37 +126,39 @@ export const FreeTools: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-8">
             <span className="text-amber font-bold text-xl md:text-2xl tracking-wide uppercase mb-2 block">Enjoy my Stuff</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3 text-float">
               Free Tools & <span className="text-gradient-amber">Resources</span>
             </h2>
             <p className="text-muted-foreground text-xl md:text-2xl">Try before you talk — no strings attached.</p>
           </div>
         </RevealOnScroll>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {tools.map((tool) => (
-            <RevealOnScroll key={tool.title}>
-              <Link
-                to={tool.path}
-                className="glass rounded-xl border border-border hover:border-amber/40 transition-colors flex flex-col h-full group overflow-hidden"
-              >
-                <div className="w-full aspect-square overflow-hidden">
-                  <img
-                    src={tool.thumbnail}
-                    alt={tool.title}
-                    loading="lazy"
-                    width={512}
-                    height={512}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-6 pt-3 flex flex-col flex-1">
-                  <h3 className="text-lg font-bold text-foreground font-display mb-2">{tool.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4 flex-1">{tool.description}</p>
-                  <span className="text-amber text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Try It Free <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </Link>
+          {tools.map((tool, idx) => (
+            <RevealOnScroll key={tool.title} variant="float" delay={(idx % 4) * 0.05}>
+              <ParallaxTilt intensity={0.4} className="h-full">
+                <Link
+                  to={tool.path}
+                  className="glass glass-shine shimmer-border hover-lift rounded-xl border border-border hover:border-amber/40 flex flex-col h-full group overflow-hidden"
+                >
+                  <div className="w-full aspect-square overflow-hidden">
+                    <img
+                      src={tool.thumbnail}
+                      alt={tool.title}
+                      loading="lazy"
+                      width={512}
+                      height={512}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-6 pt-3 flex flex-col flex-1">
+                    <h3 className="text-lg font-bold text-foreground font-display mb-2">{tool.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 flex-1">{tool.description}</p>
+                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Try It Free <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </Link>
+              </ParallaxTilt>
             </RevealOnScroll>
           ))}
         </div>
