@@ -1,6 +1,9 @@
-import React from 'react';
-import { Brain, Code, Database, Sparkles, Zap, Bot, Building2, Package, UtensilsCrossed, HardHat, Heart, Wrench } from 'lucide-react';
+import React, { useState } from 'react';
+import { Brain, Code, Database, Sparkles, Zap, Bot, Building2, Package, UtensilsCrossed, HardHat, Heart, Wrench, ShoppingCart, X, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { RevealOnScroll } from './RevealOnScroll';
+import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
+import { useAuth } from '@/contexts/AuthContext';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
 import luminaInteriorImg from '@/assets/lumina-interior-design.jpg';
@@ -14,6 +17,9 @@ import healthcareImg from '@/assets/industry-healthcare.jpg';
 import automotiveImg from '@/assets/industry-automotive.jpg';
 
 export const Services: React.FC = () => {
+  const { user } = useAuth();
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+
   const services = [
     {
       icon: Brain,
@@ -21,6 +27,8 @@ export const Services: React.FC = () => {
       description: 'We assess your data landscape and recommend the right ML approach. From feasibility studies to model selection guidance.',
       features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
       pricing: 'From $2,500',
+      priceId: 'consulting_ml_strategy_once',
+      ctaLabel: 'Buy — $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Full Analytics Package', cost: '$500' },
@@ -33,6 +41,8 @@ export const Services: React.FC = () => {
       description: 'We identify automation opportunities in your operations and design intelligent workflows tailored to your team.',
       features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
       pricing: 'From $299',
+      priceId: 'consulting_automation_once',
+      ctaLabel: 'Buy — $299',
       relatedServices: [
         { name: 'Strategy Blueprint', cost: '$299' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
@@ -45,6 +55,8 @@ export const Services: React.FC = () => {
       description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
       features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
       pricing: 'From $2,500',
+      priceId: 'consulting_ai_implementation_once',
+      ctaLabel: 'Buy — $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
@@ -57,6 +69,8 @@ export const Services: React.FC = () => {
       description: 'We help you build a data-driven culture with the right infrastructure, governance, and analytics strategy.',
       features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
       pricing: 'From $500',
+      priceId: 'consulting_data_strategy_once',
+      ctaLabel: 'Buy — $500',
       relatedServices: [
         { name: 'Full Analytics Package', cost: '$500' },
         { name: 'Website Evaluation', cost: '$500' },
@@ -69,6 +83,9 @@ export const Services: React.FC = () => {
       description: 'End-to-end strategic guidance for your AI journey. We help leadership teams make confident, informed decisions.',
       features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
       pricing: 'From $5,000/mo',
+      priceId: 'consulting_ai_transformation_monthly',
+      ctaLabel: 'Subscribe — $5,000/mo',
+      isMonthly: true,
       relatedServices: [
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
@@ -81,6 +98,8 @@ export const Services: React.FC = () => {
       description: 'We audit your existing AI systems and recommend improvements for speed, accuracy, and cost efficiency.',
       features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
       pricing: 'From $500',
+      priceId: 'consulting_performance_once',
+      ctaLabel: 'Buy — $500',
       relatedServices: [
         { name: 'Full Analytics Package', cost: '$500' },
         { name: 'Digital Snapshot', cost: '$125' },
@@ -133,6 +152,28 @@ export const Services: React.FC = () => {
       solutions: ['Diagnostic Automation', 'Parts Management', 'Service Scheduling'],
     },
   ];
+
+  // Embedded Stripe checkout overlay
+  if (checkoutPriceId) {
+    const isMonthly = checkoutPriceId.endsWith('_monthly');
+    const returnUrl = isMonthly
+      ? `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=subscription`
+      : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+    return (
+      <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPriceId(null)}>
+        <div className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <button onClick={() => setCheckoutPriceId(null)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <X className="w-5 h-5" /> Cancel
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={returnUrl} customerEmail={user?.email || undefined} metadata={user ? { userId: user.id } : undefined} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section id="services" className="relative py-24 px-4">
@@ -200,6 +241,17 @@ export const Services: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Buy / Subscribe button */}
+                <div className="mt-auto pt-4">
+                  <button
+                    onClick={() => setCheckoutPriceId(service.priceId)}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
+                  >
+                    {service.isMonthly ? <RefreshCw className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                    {service.ctaLabel}
+                  </button>
                 </div>
               </div>
             </RevealOnScroll>

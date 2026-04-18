@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Info, Brain, FileText, RefreshCw } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Brain, FileText, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+
 interface ServiceTile {
   icon: React.ElementType;
   title: string;
@@ -227,9 +228,11 @@ export const ServicesPricing: React.FC = () => {
     );
   }
 
+  const expandedService = expandedIdx !== null ? services[expandedIdx] : null;
+
   return (
     <section className="relative py-24 px-4 bg-gradient-to-b from-secondary/20 to-background">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-14">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
@@ -266,178 +269,236 @@ export const ServicesPricing: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        {/* Tile Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {/* Tile Grid — bigger tiles, click to expand */}
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 ${
+            expandedIdx !== null ? 'blur-md scale-[0.98] pointer-events-none select-none' : ''
+          }`}
+        >
           {services.map((service, index) => {
             const isSelected = selectedIds.has(index);
             return (
               <RevealOnScroll key={service.title} delay={0.03 + index * 0.04}>
                 <div
-                  className={`glass rounded-xl p-4 flex flex-col h-full transition-all duration-200 group relative ${
+                  onClick={() => setExpandedIdx(index)}
+                  className={`glass rounded-xl p-6 flex flex-col h-full transition-all duration-200 group relative cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10 ${
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
                   }`}
                 >
                   {service.badge && (
-                    <span className="absolute -top-2 right-3 text-[9px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="absolute -top-2 right-4 text-[10px] font-bold bg-primary/20 text-primary px-2.5 py-1 rounded-full uppercase tracking-wider">
                       {service.badge}
                     </span>
                   )}
 
                   {/* Icon + Title */}
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-md bg-primary/15 flex items-center justify-center flex-shrink-0">
-                      <service.icon className="w-4 h-4 text-primary" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                      <service.icon className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="text-sm font-bold text-foreground font-display leading-tight">{service.title}</h3>
+                    <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-muted-foreground mb-2 flex-1 leading-relaxed">{service.description}</p>
+                  <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
 
                   {/* Success Stat */}
-                  <div className="flex items-center gap-1.5 mb-3 bg-emerald-500/10 rounded-md px-2 py-1.5">
-                    <Percent className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                    <span className="text-[10px] text-emerald-400 font-medium leading-tight">{service.successStat}</span>
+                  <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 rounded-md px-2.5 py-2">
+                    <Percent className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span className="text-xs text-emerald-400 font-medium leading-tight">{service.successStat}</span>
                   </div>
 
                   {/* Price */}
-                  <div className="flex items-baseline gap-1.5 mb-3">
+                  <div className="flex items-baseline gap-2 mb-4">
                     {billingMode === 'monthly' && service.monthlyPriceId ? (
                       <>
-                        <span className="text-lg font-bold text-primary font-display">{service.monthlyPricing}</span>
-                        <span className="text-[10px] text-muted-foreground line-through">{service.pricing}</span>
-                        <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">-{service.monthlySavePercent}%</span>
+                        <span className="text-2xl font-bold text-primary font-display">{service.monthlyPricing}</span>
+                        <span className="text-xs text-muted-foreground line-through">{service.pricing}</span>
+                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">-{service.monthlySavePercent}%</span>
                       </>
                     ) : (
                       <>
-                        <span className="text-lg font-bold text-primary font-display">{service.pricing}</span>
-                        <span className="text-[10px] text-muted-foreground">{service.pricingDetail}</span>
+                        <span className="text-2xl font-bold text-primary font-display">{service.pricing}</span>
+                        <span className="text-xs text-muted-foreground">{service.pricingDetail}</span>
                       </>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {billingMode === 'monthly' && service.monthlyPriceId ? (
-                      <button
-                        onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
-                        className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
-                      >
-                        <RefreshCw className="w-3 h-3" /> Subscribe
-                      </button>
-                    ) : service.priceId ? (
-                      <button
-                        onClick={() => setCheckoutPriceId(service.priceId!)}
-                        className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
-                      >
-                        <ShoppingCart className="w-3 h-3" /> Buy
-                      </button>
-                    ) : null}
-                    <button
-                      onClick={() => setExpandedIdx(expandedIdx === index ? null : index)}
-                      className="inline-flex items-center gap-1.5 glass-hover border border-border px-3 py-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:border-primary/40"
-                    >
-                      <Info className="w-3 h-3" /> Details
-                    </button>
+                  {/* Footer hint + bundle checkbox */}
+                  <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                    <span className="text-xs text-primary font-semibold">Click for details →</span>
                     {service.bundleable && (
                       <button
-                        onClick={() => toggleSelect(index)}
-                        className={`ml-auto w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                        onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
+                        className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
                           isSelected
                             ? 'bg-primary border-primary text-primary-foreground'
                             : 'border-border hover:border-primary/60'
                         }`}
                         title="Add to bundle"
                       >
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {isSelected && <Check className="w-4 h-4" />}
                       </button>
                     )}
                   </div>
-
-                  {/* Expandable Detail Panel */}
-                  <AnimatePresence>
-                    {expandedIdx === index && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="mt-3 pt-3 border-t border-border/50 space-y-3">
-                          <p className="text-xs text-muted-foreground leading-relaxed">{service.longDescription}</p>
-                          
-                          <div>
-                            <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5">What You Get</div>
-                            <ul className="space-y-1">
-                              {service.deliverables.map((d) => (
-                                <li key={d} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <Check className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
-                                  {d}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          {service.includes && service.includes.length > 0 && (
-                            <div className="bg-secondary/30 rounded-lg p-2.5">
-                              <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5">Services Included (if purchased separately)</div>
-                              <div className="space-y-1">
-                                {service.includes.map((inc) => (
-                                  <div key={inc.name} className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground">{inc.name}</span>
-                                    <span className="font-semibold text-primary">{inc.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          <div className="bg-primary/5 rounded-lg p-2.5">
-                            <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Why It's Valuable</div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{service.whyValuable}</p>
-                          </div>
-
-                          <div className="flex items-center gap-2 pt-1">
-                            {billingMode === 'monthly' && service.monthlyPriceId ? (
-                              <button
-                                onClick={() => setCheckoutPriceId(service.monthlyPriceId!)}
-                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
-                              >
-                                <RefreshCw className="w-3.5 h-3.5" /> Subscribe — {service.monthlyPricing}
-                              </button>
-                            ) : service.priceId ? (
-                              <button
-                                onClick={() => setCheckoutPriceId(service.priceId!)}
-                                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-xs font-semibold transition-colors active:scale-[0.97]"
-                              >
-                                <ShoppingCart className="w-3.5 h-3.5" /> Buy Now — {service.pricing}
-                              </button>
-                            ) : null}
-                            <Link
-                              to="/contact"
-                              className="inline-flex items-center gap-1.5 glass-hover border border-border px-4 py-2 rounded-md text-xs font-medium text-foreground transition-colors"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" /> Talk to Us
-                            </Link>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
               </RevealOnScroll>
             );
           })}
         </div>
 
+        {/* Center-screen Expanded Detail Modal */}
+        <AnimatePresence>
+          {expandedService && expandedIdx !== null && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-background/60 backdrop-blur-md"
+              onClick={() => setExpandedIdx(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card border border-primary/30 rounded-2xl shadow-2xl shadow-primary/20"
+              >
+                {/* Close */}
+                <button
+                  onClick={() => setExpandedIdx(null)}
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="p-6 md:p-8">
+                  {expandedService.badge && (
+                    <span className="inline-block text-[10px] font-bold bg-primary/20 text-primary px-2.5 py-1 rounded-full uppercase tracking-wider mb-3">
+                      {expandedService.badge}
+                    </span>
+                  )}
+
+                  {/* Header */}
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                      <expandedService.icon className="w-7 h-7 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-8">
+                      <h3 className="text-2xl md:text-3xl font-bold text-foreground font-display mb-1">{expandedService.title}</h3>
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
+                          <>
+                            <span className="text-2xl font-bold text-primary font-display">{expandedService.monthlyPricing}</span>
+                            <span className="text-sm text-muted-foreground line-through">{expandedService.pricing}</span>
+                            <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">-{expandedService.monthlySavePercent}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-2xl font-bold text-primary font-display">{expandedService.pricing}</span>
+                            <span className="text-sm text-muted-foreground">{expandedService.pricingDetail}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Success stat */}
+                  <div className="flex items-center gap-2 mb-5 bg-emerald-500/10 rounded-lg px-3 py-2.5">
+                    <Percent className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm text-emerald-400 font-medium">{expandedService.successStat}</span>
+                  </div>
+
+                  {/* Long description */}
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">{expandedService.longDescription}</p>
+
+                  {/* Deliverables */}
+                  <div className="mb-6">
+                    <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">What You Get</div>
+                    <ul className="space-y-2">
+                      {expandedService.deliverables.map((d) => (
+                        <li key={d} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Includes */}
+                  {expandedService.includes && expandedService.includes.length > 0 && (
+                    <div className="bg-secondary/30 rounded-lg p-4 mb-6">
+                      <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2">Services Included (if purchased separately)</div>
+                      <div className="space-y-1.5">
+                        {expandedService.includes.map((inc) => (
+                          <div key={inc.name} className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">{inc.name}</span>
+                            <span className="font-semibold text-primary">{inc.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Why it's valuable */}
+                  <div className="bg-primary/5 rounded-lg p-4 mb-6 border border-primary/10">
+                    <div className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Why It's Valuable</div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{expandedService.whyValuable}</p>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
+                      <button
+                        onClick={() => setCheckoutPriceId(expandedService.monthlyPriceId!)}
+                        className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
+                      >
+                        <RefreshCw className="w-4 h-4" /> Subscribe — {expandedService.monthlyPricing}
+                      </button>
+                    ) : expandedService.priceId ? (
+                      <button
+                        onClick={() => setCheckoutPriceId(expandedService.priceId!)}
+                        className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
+                      >
+                        <ShoppingCart className="w-4 h-4" /> Buy Now — {expandedService.pricing}
+                      </button>
+                    ) : null}
+                    {expandedService.bundleable && (
+                      <button
+                        onClick={() => { toggleSelect(expandedIdx); }}
+                        className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97] border-2 ${
+                          selectedIds.has(expandedIdx)
+                            ? 'bg-primary/15 border-primary text-primary'
+                            : 'border-border text-foreground hover:border-primary/60'
+                        }`}
+                      >
+                        {selectedIds.has(expandedIdx) ? <><Check className="w-4 h-4" /> In Bundle</> : <><Percent className="w-4 h-4" /> Add to Bundle</>}
+                      </button>
+                    )}
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center gap-2 glass-hover border border-border px-5 py-3 rounded-lg text-sm font-medium text-foreground transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Talk to Us
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Mix & Match Bundle Bar */}
-        {selectedItems.length > 0 && (
+        {selectedItems.length > 0 && expandedIdx === null && (
           <div className="sticky bottom-4 z-50 mt-6">
             <div className="glass border border-primary/30 rounded-xl p-4 md:p-5 max-w-3xl mx-auto shadow-2xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="flex items-center gap-2.5 flex-shrink-0">
                   <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <Percent className="w-4.5 h-4.5 text-primary" />
+                    <Percent className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-foreground font-display">
