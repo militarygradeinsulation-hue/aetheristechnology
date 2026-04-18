@@ -231,7 +231,7 @@ export const Services: React.FC = () => {
                 </div>
 
                 {/* Related paid services */}
-                <div className="pt-4 border-t border-border/40">
+                <div className="mt-auto pt-4 border-t border-border/40">
                   <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-2">Starts With</div>
                   <div className="space-y-1.5">
                     {service.relatedServices.map((rs) => (
