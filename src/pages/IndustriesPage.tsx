@@ -9,8 +9,6 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { VERTICALS } from '@/config/verticals';
-import { ParallaxTilt } from '@/components/ParallaxTilt';
-import { RevealOnScroll } from '@/components/RevealOnScroll';
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Healthcare: Heart,
@@ -64,13 +62,13 @@ const IndustriesPage: React.FC = () => {
               <Building2 className="w-4 h-4" />
               AI by Industry
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 leading-tight text-float">
+            <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 leading-tight">
               Generic AI consultants ship generic deployments.
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Pick your industry. We already know where the bleeding is.
             </p>
-            <div className="glass glass-shine shimmer-border hover-lift rounded-2xl p-6 max-w-3xl mx-auto border border-amber/20 animate-glow-pulse">
+            <div className="glass rounded-2xl p-6 max-w-3xl mx-auto border border-amber/20">
               <p className="tldr text-lg text-foreground leading-relaxed">
                 Industry expertise compresses AI time-to-ROI by months. Aetheris AI ships deep playbooks for healthcare, finance, logistics, construction, manufacturing, and SaaS — built around the workflows actually bleeding revenue.
               </p>
@@ -81,26 +79,23 @@ const IndustriesPage: React.FC = () => {
         <section className="py-12 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {VERTICALS.map((v, idx) => {
+              {VERTICALS.map((v) => {
                 const Icon = ICONS[v.industry] || Building2;
                 return (
-                  <RevealOnScroll key={v.slug} delay={idx * 0.08} variant="shimmer-in">
-                    <ParallaxTilt intensity={0.7}>
-                      <Link
-                        to={`/${v.slug}`}
-                        className="glass glass-shine shimmer-border hover-lift rounded-2xl p-6 border border-border/50 hover:border-amber/50 transition-all group block h-full"
-                      >
-                        <div className="w-14 h-14 rounded-xl bg-amber/10 flex items-center justify-center mb-4 group-hover:bg-amber/20 transition-colors animate-float-slow">
-                          <Icon className="w-7 h-7 text-amber" />
-                        </div>
-                        <h2 className="text-2xl font-bold font-display mb-2">{v.industry}</h2>
-                        <p className="text-muted-foreground mb-4">{v.heroSubheadline}</p>
-                        <div className="text-amber font-semibold inline-flex items-center gap-1">
-                          Explore {v.industry} AI <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </Link>
-                    </ParallaxTilt>
-                  </RevealOnScroll>
+                  <Link
+                    key={v.slug}
+                    to={`/${v.slug}`}
+                    className="glass rounded-2xl p-6 border border-border/50 hover:border-amber/50 transition-all hover:-translate-y-1 group"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-amber/10 flex items-center justify-center mb-4 group-hover:bg-amber/20 transition-colors">
+                      <Icon className="w-7 h-7 text-amber" />
+                    </div>
+                    <h2 className="text-2xl font-bold font-display mb-2">{v.industry}</h2>
+                    <p className="text-muted-foreground mb-4">{v.heroSubheadline}</p>
+                    <div className="text-amber font-semibold inline-flex items-center gap-1">
+                      Explore {v.industry} AI <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </Link>
                 );
               })}
             </div>
@@ -108,8 +103,8 @@ const IndustriesPage: React.FC = () => {
         </section>
 
         <section className="py-16 px-4">
-          <div className="max-w-3xl mx-auto text-center glass glass-shine shimmer-border hover-lift rounded-2xl p-10 border border-amber/30 animate-glow-pulse">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4 text-float">
+          <div className="max-w-3xl mx-auto text-center glass rounded-2xl p-10 border border-amber/30">
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
               Don't see your industry?
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
@@ -117,12 +112,12 @@ const IndustriesPage: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/assessment">
-                <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold cursor-glow hover-lift">
+                <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
                   Free AI Readiness Score <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="outline" className="hover-lift">
+                <Button size="lg" variant="outline">
                   Book a Strategy Call
                 </Button>
               </Link>

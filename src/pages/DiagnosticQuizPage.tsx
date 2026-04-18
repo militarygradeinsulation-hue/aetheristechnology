@@ -57,10 +57,10 @@ const DiagnosticQuizPage: React.FC = () => {
       <Navbar onContactClick={() => setIsContactOpen(true)} />
       <main className="relative z-10 pt-32 pb-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="rounded-2xl border border-border bg-background/90 backdrop-blur-xl p-6 md:p-10 shadow-2xl glass-shine shimmer-border hover-lift">
+          <div className="rounded-2xl border border-border bg-background/90 backdrop-blur-xl p-6 md:p-10 shadow-2xl">
             <div className="text-center mb-8">
               <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔥 Free Business Diagnostic</span>
-              <h1 className="text-4xl md:text-5xl font-bold font-display mt-3 text-foreground text-float">
+              <h1 className="text-4xl md:text-5xl font-bold font-display mt-3 text-foreground">
                 Where Is Your Business<br />Quietly Losing Money?
               </h1>
               <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
@@ -91,7 +91,7 @@ const DiagnosticQuizPage: React.FC = () => {
       <div className="relative z-10 pt-10 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔍 Bonus Tool</span>
-          <h2 className="text-3xl md:text-4xl font-bold font-display mt-3 text-foreground text-float">
+          <h2 className="text-3xl md:text-4xl font-bold font-display mt-3 text-foreground">
             Want a Deeper Look at Your Website?
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
