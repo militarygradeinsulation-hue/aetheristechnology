@@ -1,5 +1,7 @@
 import React from 'react';
 import { Brain, ShieldCheck, Cpu, Zap } from 'lucide-react';
+import { ParallaxTilt } from './ParallaxTilt';
+import { RevealOnScroll } from './RevealOnScroll';
 
 interface Cluster {
   icon: React.ElementType;
