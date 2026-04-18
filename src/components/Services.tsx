@@ -1,6 +1,9 @@
-import React from 'react';
-import { Brain, Code, Database, Sparkles, Zap, Bot, Building2, Package, UtensilsCrossed, HardHat, Heart, Wrench } from 'lucide-react';
+import React, { useState } from 'react';
+import { Brain, Code, Database, Sparkles, Zap, Bot, Building2, Package, UtensilsCrossed, HardHat, Heart, Wrench, ShoppingCart, X, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { RevealOnScroll } from './RevealOnScroll';
+import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
+import { useAuth } from '@/contexts/AuthContext';
 import crmDemoVideo from '@/assets/crm-demo-video.mp4';
 import leadGeneratorImg from '@/assets/lead-generator.jpg';
 import luminaInteriorImg from '@/assets/lumina-interior-design.jpg';
