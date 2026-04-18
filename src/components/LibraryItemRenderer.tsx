@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Linkedin, Facebook, Megaphone, Phone, Mail, Calendar, MessageCircle, AlertTriangle, Search } from 'lucide-react';
+import {
+  Copy, Check, Linkedin, Facebook, Megaphone, Phone, Mail, Calendar,
+  MessageCircle, AlertTriangle, Search, Globe, TrendingDown, TrendingUp,
+  Stethoscope, Sparkles, Target, Users, DollarSign, Briefcase, Lightbulb,
+  ChevronRight, Zap,
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
 
@@ -26,6 +31,40 @@ const SectionTitle = ({ icon: Icon, label, count, color = 'text-amber' }: any) =
   </div>
 );
 
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: 'text-red-400 bg-red-500/20',
+  high: 'text-amber bg-amber/20',
+  moderate: 'text-primary bg-primary/20',
+  medium: 'text-primary bg-primary/20',
+  low: 'text-muted-foreground bg-muted/30',
+};
+
+const URGENCY_COLORS: Record<string, string> = {
+  critical: 'text-red-400 bg-red-500/20',
+  high: 'text-amber bg-amber/20',
+  medium: 'text-primary bg-primary/20',
+  low: 'text-muted-foreground bg-muted/30',
+};
+
+const ScoreGauge = ({ score, max = 100, label, invert = false }: { score: number; max?: number; label: string; invert?: boolean }) => {
+  // invert=true means LOWER scores are better (e.g. friction)
+  const pct = Math.max(0, Math.min(100, (score / max) * 100));
+  const good = invert ? pct < 40 : pct >= 70;
+  const mid = invert ? pct < 70 : pct >= 40;
+  const color = good ? 'text-green-400' : mid ? 'text-amber' : 'text-red-400';
+  return (
+    <div className="glass rounded-xl p-6 border border-border text-center">
+      <h3 className="text-lg font-bold text-foreground font-display mb-2">{label}</h3>
+      <div className={`text-5xl font-bold font-display ${color}`}>
+        {score}<span className="text-xl text-muted-foreground">/{max}</span>
+      </div>
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// SOCIAL CONTENT
+// ────────────────────────────────────────────────────────────────────────────
 const PostCard = ({ post, id, copiedId, setCopiedId }: any) => {
   const text = `${post.hook || ''}\n\n${post.body || ''}\n\n${post.cta || ''}`.trim();
   return (
@@ -72,6 +111,9 @@ const SocialContentView = ({ data, copiedId, setCopiedId }: any) => (
   </div>
 );
 
+// ────────────────────────────────────────────────────────────────────────────
+// CONTENT CALENDAR
+// ────────────────────────────────────────────────────────────────────────────
 const ContentCalendarView = ({ data, copiedId, setCopiedId }: any) => {
   const days = data.days || [];
   return (
@@ -103,6 +145,9 @@ const ContentCalendarView = ({ data, copiedId, setCopiedId }: any) => {
   );
 };
 
+// ────────────────────────────────────────────────────────────────────────────
+// SALES SCRIPTS
+// ────────────────────────────────────────────────────────────────────────────
 const SalesScriptsView = ({ data, copiedId, setCopiedId }: any) => {
   const sections = [
     { key: 'coldCalls', label: 'Cold Call Scripts', icon: Phone },
@@ -141,66 +186,223 @@ const SalesScriptsView = ({ data, copiedId, setCopiedId }: any) => {
   );
 };
 
+// ────────────────────────────────────────────────────────────────────────────
+// FOLLOW-UP PLAN
+// ────────────────────────────────────────────────────────────────────────────
 const FollowUpPlanView = ({ data, copiedId, setCopiedId }: any) => {
-  const steps = data.steps || data.touches || data.plan || [];
+  const days = data.days || data.steps || data.touches || data.plan || [];
+  const objections = data.objectionResponses || [];
   return (
-    <div>
-      <SectionTitle icon={Calendar} label="Follow-Up Sequence" count={steps.length} />
-      <div className="space-y-3">
-        {steps.map((s: any, i: number) => {
-          const text = `Day ${s.day || s.dayNumber || i + 1} — ${s.channel || ''}\n${s.subject ? `Subject: ${s.subject}\n` : ''}${s.message || s.body || s.script || ''}`;
-          return (
-            <div key={i} className="relative glass rounded-lg p-4 border border-border">
-              <CopyBtn text={text} id={`fu-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
-              <div className="flex items-center gap-2 mb-2 flex-wrap pr-8">
-                <span className="text-xs font-bold text-background bg-amber rounded-full px-2 py-0.5">Day {s.day || s.dayNumber || i + 1}</span>
-                {s.channel && <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{s.channel}</span>}
-                {s.goal && <span className="text-xs text-muted-foreground">{s.goal}</span>}
+    <div className="space-y-6">
+      {data.overview && (
+        <div className="glass rounded-xl p-5 border border-border">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.overview}</p>
+        </div>
+      )}
+
+      <div>
+        <SectionTitle icon={Calendar} label="Follow-Up Sequence" count={days.length} />
+        <div className="space-y-3">
+          {days.map((s: any, i: number) => {
+            const dayNum = s.day || s.dayNumber || i + 1;
+            const body = s.template || s.message || s.body || s.script || '';
+            const text = `Day ${dayNum} — ${s.channel || ''} (${s.timing || ''})\n${s.action ? `Action: ${s.action}\n` : ''}${s.subject ? `Subject: ${s.subject}\n` : ''}${body}\n${s.tips ? `\nTips: ${s.tips}` : ''}`;
+            return (
+              <div key={i} className="relative glass rounded-lg p-4 border border-border">
+                <CopyBtn text={text} id={`fu-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                <div className="flex items-center gap-2 mb-2 flex-wrap pr-8">
+                  <span className="text-xs font-bold text-background bg-amber rounded-full px-2 py-0.5">Day {dayNum}</span>
+                  {s.channel && <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{s.channel}</span>}
+                  {s.timing && <span className="text-xs text-muted-foreground">{s.timing}</span>}
+                </div>
+                {s.action && <p className="text-sm font-bold text-amber mb-2">{s.action}</p>}
+                {s.goal && <p className="text-xs text-muted-foreground mb-2"><span className="text-amber font-semibold">Goal: </span>{s.goal}</p>}
+                {s.subject && <p className="text-sm font-bold text-foreground mb-1">Subject: {s.subject}</p>}
+                {body && <p className="text-sm text-muted-foreground whitespace-pre-line">{body}</p>}
+                {s.tips && (
+                  <div className="mt-3 bg-primary/5 rounded-lg p-3">
+                    <p className="text-[10px] font-bold text-primary uppercase mb-1">Tips</p>
+                    <p className="text-xs text-muted-foreground">{s.tips}</p>
+                  </div>
+                )}
               </div>
-              {s.subject && <p className="text-sm font-bold text-foreground mb-1">Subject: {s.subject}</p>}
-              {(s.message || s.body || s.script) && <p className="text-sm text-muted-foreground whitespace-pre-line">{s.message || s.body || s.script}</p>}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {objections.length > 0 && (
+        <div>
+          <SectionTitle icon={MessageCircle} label="Objection Responses" count={objections.length} />
+          <div className="space-y-3">
+            {objections.map((o: any, i: number) => {
+              const text = `Objection: ${o.trigger || o.objection || ''}\nResponse: ${o.response || ''}`;
+              return (
+                <div key={i} className="relative glass rounded-lg p-4 border border-border">
+                  <CopyBtn text={text} id={`obj-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                  <p className="text-sm font-bold text-red-400 mb-2 pr-8">"{o.trigger || o.objection}"</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">{o.response}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// STRATEGIC QUESTIONS
+// ────────────────────────────────────────────────────────────────────────────
+const CATEGORY_LABELS: Record<string, { label: string; icon: any }> = {
+  leadership: { label: 'Leadership', icon: Users },
+  sales: { label: 'Sales', icon: TrendingUp },
+  marketing: { label: 'Marketing', icon: Megaphone },
+  operations: { label: 'Operations', icon: Briefcase },
+  hiringAndPeople: { label: 'Hiring & People', icon: Users },
+  pricingAndOffer: { label: 'Pricing & Offer', icon: DollarSign },
+  customerJourney: { label: 'Customer Journey', icon: Target },
+  growthAndExpansion: { label: 'Growth & Expansion', icon: TrendingUp },
 };
 
 const StrategicQuestionsView = ({ data, copiedId, setCopiedId }: any) => {
-  const questions = data.questions || data.strategicQuestions || [];
+  const top10 = data.top10CriticalQuestions || data.questions || data.strategicQuestions || [];
+  const categories = data.categories || {};
+  const probably = data.questionsYouProbablyArentAsking || [];
+  const team = data.leadershipTeamDiscussion || [];
+  const workshop = data.workshopPrompts || [];
+
   return (
-    <div>
-      <SectionTitle icon={Search} label="Strategic Questions" count={questions.length} />
-      <div className="space-y-3">
-        {questions.map((q: any, i: number) => {
-          const qText = typeof q === 'string' ? q : (q.question || q.text || '');
-          return (
-            <div key={i} className="relative glass rounded-lg p-4 border border-border">
-              <CopyBtn text={qText} id={`q-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
-              <p className="text-sm font-bold text-foreground pr-8">{i + 1}. {qText}</p>
-              {q.purpose && <p className="text-xs text-muted-foreground mt-2"><span className="text-amber font-semibold">Why: </span>{q.purpose}</p>}
-              {q.followUp && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-semibold">Follow-up: </span>{q.followUp}</p>}
-            </div>
-          );
-        })}
-      </div>
+    <div className="space-y-6">
+      {data.companySnapshot && (
+        <div className="glass rounded-xl p-5 border border-border">
+          <h4 className="text-xs font-bold text-amber uppercase tracking-wide mb-2">Company Snapshot</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.companySnapshot}</p>
+        </div>
+      )}
+
+      {top10.length > 0 && (
+        <div>
+          <SectionTitle icon={Search} label="Top 10 Critical Questions" count={top10.length} />
+          <div className="space-y-3">
+            {top10.map((q: any, i: number) => {
+              const qText = typeof q === 'string' ? q : (q.question || q.text || '');
+              const text = `${i + 1}. ${qText}${q.whyItMatters ? `\n\nWhy it matters: ${q.whyItMatters}` : ''}`;
+              return (
+                <div key={i} className="relative glass rounded-lg p-4 border border-border">
+                  <CopyBtn text={text} id={`q-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                  <div className="flex items-start justify-between gap-2 mb-2 pr-8">
+                    <p className="text-sm font-bold text-foreground">{i + 1}. {qText}</p>
+                    {q.urgency && (
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${URGENCY_COLORS[q.urgency] || URGENCY_COLORS.medium}`}>
+                        {q.urgency}
+                      </span>
+                    )}
+                  </div>
+                  {q.category && <p className="text-[10px] uppercase text-primary font-bold mb-2">{q.category}</p>}
+                  {q.whyItMatters && (
+                    <p className="text-xs text-muted-foreground"><span className="text-amber font-semibold">Why it matters: </span>{q.whyItMatters}</p>
+                  )}
+                  {q.purpose && !q.whyItMatters && (
+                    <p className="text-xs text-muted-foreground"><span className="text-amber font-semibold">Why: </span>{q.purpose}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {Object.keys(categories).length > 0 && (
+        <div>
+          <SectionTitle icon={Briefcase} label="Questions by Category" />
+          <div className="space-y-4">
+            {Object.entries(categories).map(([key, qs]: [string, any]) => {
+              const meta = CATEGORY_LABELS[key] || { label: key, icon: Briefcase };
+              const Icon = meta.icon;
+              const arr: any[] = Array.isArray(qs) ? qs : [];
+              if (arr.length === 0) return null;
+              return (
+                <div key={key} className="glass rounded-lg p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Icon className="w-4 h-4 text-amber" />
+                    <h5 className="text-sm font-bold text-foreground uppercase tracking-wide">{meta.label}</h5>
+                    <span className="text-xs text-muted-foreground">({arr.length})</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {arr.map((q: any, i: number) => {
+                      const qText = typeof q === 'string' ? q : (q.question || q.text || '');
+                      return (
+                        <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                          <ChevronRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span>{qText}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {probably.length > 0 && (
+        <div>
+          <SectionTitle icon={Lightbulb} label="Questions You Probably Aren't Asking" count={probably.length} color="text-amber" />
+          <div className="space-y-2">
+            {probably.map((q: any, i: number) => {
+              const qText = typeof q === 'string' ? q : (q.question || q.text || '');
+              return (
+                <div key={i} className="glass rounded-lg p-3 border border-amber/30 bg-amber/5">
+                  <p className="text-sm text-foreground">{qText}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {team.length > 0 && (
+        <div>
+          <SectionTitle icon={Users} label="Leadership Team Discussion" count={team.length} />
+          <ul className="space-y-2">
+            {team.map((q: any, i: number) => (
+              <li key={i} className="text-sm text-muted-foreground flex gap-2 glass rounded-lg p-3 border border-border">
+                <span className="text-amber font-bold flex-shrink-0">{i + 1}.</span>
+                <span>{typeof q === 'string' ? q : (q.question || q.text || '')}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {workshop.length > 0 && (
+        <div>
+          <SectionTitle icon={Sparkles} label="Workshop Prompts" count={workshop.length} />
+          <ul className="space-y-2">
+            {workshop.map((q: any, i: number) => (
+              <li key={i} className="text-sm text-muted-foreground flex gap-2 glass rounded-lg p-3 border border-border">
+                <span className="text-primary font-bold flex-shrink-0">→</span>
+                <span>{typeof q === 'string' ? q : (q.question || q.text || q.prompt || '')}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
 
-const SEVERITY_COLORS: Record<string, string> = {
-  critical: 'text-red-400 bg-red-500/20',
-  high: 'text-amber bg-amber/20',
-  moderate: 'text-primary bg-primary/20',
-};
-
+// ────────────────────────────────────────────────────────────────────────────
+// BRAND CONTRADICTIONS
+// ────────────────────────────────────────────────────────────────────────────
 const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
   const items = data.contradictions || data.findings || [];
   const score = data.contradictionScore;
   return (
     <div className="space-y-6">
-      {/* Score + overall assessment */}
       {(score !== undefined || data.overallAssessment) && (
         <div className="glass rounded-xl p-6 border border-border text-center">
           <h3 className="text-lg font-bold text-foreground font-display mb-2">Brand Alignment Score</h3>
@@ -214,7 +416,6 @@ const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
         </div>
       )}
 
-      {/* Contradictions */}
       <div>
         <SectionTitle icon={AlertTriangle} label="Brand Contradictions" count={items.length} color="text-red-400" />
         <div className="space-y-4">
@@ -280,7 +481,6 @@ const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
         </div>
       </div>
 
-      {/* Priority Fixes */}
       {Array.isArray(data.priorityFixes) && data.priorityFixes.length > 0 && (
         <div>
           <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Priority Fixes</h4>
@@ -295,7 +495,6 @@ const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
         </div>
       )}
 
-      {/* Hidden Strengths */}
       {Array.isArray(data.hiddenStrengths) && data.hiddenStrengths.length > 0 && (
         <div>
           <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Hidden Strengths</h4>
@@ -312,28 +511,407 @@ const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
   );
 };
 
+// ────────────────────────────────────────────────────────────────────────────
+// FRICTION AUDIT
+// ────────────────────────────────────────────────────────────────────────────
 const FrictionAuditView = ({ data, copiedId, setCopiedId }: any) => {
-  const items = data.findings || data.frictionPoints || data.audit || [];
+  const flagged = data.flaggedPhrases || data.findings || data.frictionPoints || data.audit || [];
+  const tone = data.toneAlignment;
+  const ctas = data.strongerCTAs || [];
+  const priorityFixes = data.topPriorityFixes || data.priorityFixes || [];
+  const strengths = data.copyStrengths || [];
+  const score = data.frictionScore;
+
   return (
-    <div>
-      <SectionTitle icon={AlertTriangle} label="Friction Points" count={items.length} color="text-amber" />
-      <div className="space-y-3">
-        {items.map((f: any, i: number) => {
-          const text = `${f.phrase || f.term || f.title}\nWhy it hurts: ${f.problem || f.issue}\nReplace with: ${f.suggestion || f.replacement}`;
-          return (
-            <div key={i} className="relative glass rounded-lg p-4 border border-border">
-              <CopyBtn text={text} id={`fr-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
-              {(f.phrase || f.term || f.title) && <p className="text-sm font-bold text-amber mb-2 pr-8">"{f.phrase || f.term || f.title}"</p>}
-              {(f.problem || f.issue) && <p className="text-xs text-muted-foreground mb-1"><span className="text-red-400 font-semibold">Problem: </span>{f.problem || f.issue}</p>}
-              {(f.suggestion || f.replacement) && <p className="text-xs text-primary"><span className="font-semibold">Replace with: </span>{f.suggestion || f.replacement}</p>}
+    <div className="space-y-6">
+      {(score !== undefined || data.overallAssessment) && (
+        <div className="glass rounded-xl p-6 border border-border text-center">
+          <h3 className="text-lg font-bold text-foreground font-display mb-2">Friction Score</h3>
+          {score !== undefined && (
+            <div className={`text-5xl font-bold font-display mb-2 ${score < 40 ? 'text-green-400' : score < 70 ? 'text-amber' : 'text-red-400'}`}>
+              {score}<span className="text-xl text-muted-foreground">/100</span>
             </div>
-          );
-        })}
-      </div>
+          )}
+          <p className="text-[10px] text-muted-foreground uppercase mb-2">(lower is better)</p>
+          {data.overallAssessment && <p className="text-sm text-muted-foreground max-w-2xl mx-auto">{data.overallAssessment}</p>}
+        </div>
+      )}
+
+      {flagged.length > 0 && (
+        <div>
+          <SectionTitle icon={AlertTriangle} label="Flagged Phrases" count={flagged.length} color="text-amber" />
+          <div className="space-y-3">
+            {flagged.map((f: any, i: number) => {
+              const phrase = f.originalPhrase || f.phrase || f.term || f.title;
+              const replacement = f.suggestedReplacement || f.suggestion || f.replacement;
+              const issue = f.issue || f.problem;
+              const text = `"${phrase}"\nIssue: ${issue}\nReplace with: "${replacement}"\n${f.context ? `Context: ${f.context}` : ''}`;
+              return (
+                <div key={i} className="relative glass rounded-lg p-4 border border-border">
+                  <CopyBtn text={text} id={`fr-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                  <div className="flex items-start justify-between gap-2 mb-2 pr-8">
+                    {phrase && <p className="text-sm font-bold text-amber">"{phrase}"</p>}
+                    {f.severity && (
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${SEVERITY_COLORS[f.severity] || SEVERITY_COLORS.moderate}`}>
+                        {f.severity}
+                      </span>
+                    )}
+                  </div>
+                  {f.category && <p className="text-[10px] uppercase text-primary font-bold mb-2">{f.category}</p>}
+                  {issue && <p className="text-xs text-muted-foreground mb-2"><span className="text-red-400 font-semibold">Issue: </span>{issue}</p>}
+                  {replacement && (
+                    <div className="bg-green-500/5 rounded-lg p-3 mb-2">
+                      <p className="text-[10px] font-bold text-green-400 uppercase mb-1">Replace With</p>
+                      <p className="text-xs text-foreground">"{replacement}"</p>
+                    </div>
+                  )}
+                  {f.context && <p className="text-xs text-muted-foreground italic">Context: {f.context}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {tone && (
+        <div>
+          <SectionTitle icon={MessageCircle} label="Tone Alignment" />
+          <div className="glass rounded-lg p-5 border border-border space-y-3">
+            <div className="grid md:grid-cols-2 gap-3">
+              {tone.currentTone && (
+                <div className="bg-red-500/5 rounded-lg p-3">
+                  <p className="text-[10px] font-bold text-red-400 uppercase mb-1">Current Tone</p>
+                  <p className="text-xs text-muted-foreground">{tone.currentTone}</p>
+                </div>
+              )}
+              {tone.desiredTone && (
+                <div className="bg-green-500/5 rounded-lg p-3">
+                  <p className="text-[10px] font-bold text-green-400 uppercase mb-1">Desired Tone</p>
+                  <p className="text-xs text-muted-foreground">{tone.desiredTone}</p>
+                </div>
+              )}
+            </div>
+            {tone.gap && <p className="text-xs text-muted-foreground"><span className="text-amber font-semibold">Gap: </span>{tone.gap}</p>}
+            {Array.isArray(tone.recommendations) && tone.recommendations.length > 0 && (
+              <ul className="space-y-1">
+                {tone.recommendations.map((r: string, i: number) => (
+                  <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                    <ChevronRight className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {ctas.length > 0 && (
+        <div>
+          <SectionTitle icon={Zap} label="Stronger CTAs" count={ctas.length} />
+          <div className="grid md:grid-cols-2 gap-3">
+            {ctas.map((c: any, i: number) => (
+              <div key={i} className="glass rounded-lg p-4 border border-border">
+                <div className="bg-red-500/5 rounded-lg p-2 mb-2">
+                  <p className="text-[10px] font-bold text-red-400 uppercase mb-1">Current</p>
+                  <p className="text-xs text-muted-foreground">"{c.current}"</p>
+                </div>
+                <div className="bg-green-500/5 rounded-lg p-2 mb-2">
+                  <p className="text-[10px] font-bold text-green-400 uppercase mb-1">Replace With</p>
+                  <p className="text-xs text-foreground font-semibold">"{c.replacement}"</p>
+                </div>
+                {c.whyBetter && <p className="text-xs text-muted-foreground"><span className="text-amber font-semibold">Why: </span>{c.whyBetter}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {priorityFixes.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Top Priority Fixes</h4>
+          <div className="space-y-2">
+            {priorityFixes.map((f: string, i: number) => (
+              <div key={i} className="glass rounded-lg p-3 border border-border flex items-start gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                <p className="text-sm text-muted-foreground">{f}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {strengths.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Copy Strengths</h4>
+          <div className="space-y-2">
+            {strengths.map((s: string, i: number) => (
+              <div key={i} className="glass rounded-lg p-3 border border-green-500/20">
+                <p className="text-sm text-muted-foreground">{s}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
+// ────────────────────────────────────────────────────────────────────────────
+// WEBSITE SCAN
+// ────────────────────────────────────────────────────────────────────────────
+const WebsiteScanView = ({ data, copiedId, setCopiedId }: any) => {
+  const score = data.score;
+  const grade = data.grade;
+  const gaps = data.gaps || [];
+  const roadmap = data.roadmap || [];
+  const roiTable = data.roiTable || [];
+  const nextSteps = data.nextSteps || [];
+
+  return (
+    <div className="space-y-6">
+      {/* Score header */}
+      <div className="glass rounded-xl p-6 border border-border text-center">
+        {data.companyName && <p className="text-xs text-muted-foreground uppercase mb-2">{data.companyName}</p>}
+        <h3 className="text-lg font-bold text-foreground font-display mb-2">Website Health Score</h3>
+        {score !== undefined && (
+          <div className={`text-6xl font-bold font-display mb-1 ${score >= 70 ? 'text-green-400' : score >= 40 ? 'text-amber' : 'text-red-400'}`}>
+            {score}<span className="text-2xl text-muted-foreground">/100</span>
+          </div>
+        )}
+        {grade && <p className="text-2xl font-bold text-amber mb-3">Grade: {grade}</p>}
+        {data.executiveSummary && <p className="text-sm text-muted-foreground max-w-2xl mx-auto">{data.executiveSummary}</p>}
+      </div>
+
+      {/* Gaps */}
+      {gaps.length > 0 && (
+        <div>
+          <SectionTitle icon={TrendingDown} label="Revenue Leaks & Gaps" count={gaps.length} color="text-red-400" />
+          <div className="space-y-4">
+            {gaps.map((g: any, i: number) => {
+              const text = `${g.title}\nCategory: ${g.category}\nSeverity: ${g.severity}\n${g.description}\nAnnual Cost: ${g.annualCost}\nFix: ${g.recommendedFix}\nROI: ${g.projectedROI}`;
+              return (
+                <div key={i} className="relative glass rounded-lg p-5 border border-border">
+                  <CopyBtn text={text} id={`gap-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                  <div className="flex items-start justify-between gap-2 mb-2 pr-8">
+                    <div>
+                      {g.category && <p className="text-[10px] uppercase text-primary font-bold mb-1">{g.category}</p>}
+                      {g.title && <p className="text-base font-bold text-foreground">{g.title}</p>}
+                    </div>
+                    {g.severity && (
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${SEVERITY_COLORS[g.severity] || SEVERITY_COLORS.moderate}`}>
+                        {g.severity}
+                      </span>
+                    )}
+                  </div>
+                  {g.description && <p className="text-sm text-muted-foreground mb-3">{g.description}</p>}
+                  <div className="grid md:grid-cols-2 gap-3 mb-3">
+                    {g.annualCost && (
+                      <div className="bg-red-500/5 rounded-lg p-3 flex items-center gap-2">
+                        <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-[10px] font-bold text-red-400 uppercase">Annual Cost</p>
+                          <p className="text-sm text-foreground font-semibold">{g.annualCost}</p>
+                        </div>
+                      </div>
+                    )}
+                    {g.projectedROI && (
+                      <div className="bg-green-500/5 rounded-lg p-3 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-[10px] font-bold text-green-400 uppercase">Projected ROI</p>
+                          <p className="text-sm text-foreground font-semibold">{g.projectedROI}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {g.recommendedFix && (
+                    <div className="bg-primary/5 rounded-lg p-3">
+                      <p className="text-[10px] font-bold text-primary uppercase mb-1">Recommended Fix</p>
+                      <p className="text-xs text-muted-foreground">{g.recommendedFix}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Roadmap */}
+      {roadmap.length > 0 && (
+        <div>
+          <SectionTitle icon={Calendar} label="Implementation Roadmap" count={roadmap.length} />
+          <div className="space-y-2">
+            {roadmap.map((r: any, i: number) => (
+              <div key={i} className="glass rounded-lg p-4 border border-border flex items-start gap-3">
+                <span className="text-xs font-bold text-background bg-amber rounded-full px-3 py-1 flex-shrink-0">{r.month || `M${i + 1}`}</span>
+                <div className="flex-1">
+                  {r.action && <p className="text-sm font-semibold text-foreground mb-1">{r.action}</p>}
+                  <div className="flex gap-4 text-xs text-muted-foreground">
+                    {r.estimatedCost && <span><span className="text-amber font-semibold">Cost: </span>{r.estimatedCost}</span>}
+                    {r.projectedRecovery && <span><span className="text-green-400 font-semibold">Recovery: </span>{r.projectedRecovery}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ROI Table */}
+      {roiTable.length > 0 && (
+        <div>
+          <SectionTitle icon={DollarSign} label="ROI Summary" />
+          <div className="glass rounded-lg border border-border overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border bg-muted/20">
+                <tr>
+                  {Object.keys(roiTable[0]).map((k) => (
+                    <th key={k} className="px-4 py-2 text-left text-[10px] uppercase text-amber font-bold">{k}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {roiTable.map((row: any, i: number) => (
+                  <tr key={i} className="border-b border-border/50 last:border-0">
+                    {Object.values(row).map((v: any, j: number) => (
+                      <td key={j} className="px-4 py-2 text-muted-foreground">{String(v)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Next Steps */}
+      {nextSteps.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Next Steps</h4>
+          <div className="space-y-2">
+            {nextSteps.map((s: string, i: number) => (
+              <div key={i} className="glass rounded-lg p-3 border border-border flex items-start gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                <p className="text-sm text-muted-foreground">{s}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Competitive brief */}
+      {data.competitiveBrief && (
+        <div>
+          <SectionTitle icon={Target} label="Competitive Brief" />
+          <div className="glass rounded-lg p-5 border border-border">
+            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{data.competitiveBrief}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// WHAT'S WRONG
+// ────────────────────────────────────────────────────────────────────────────
+const WhatsWrongView = ({ data, copiedId, setCopiedId }: any) => {
+  const pkg = data.recommendedPackage;
+  const additional = data.additionalServices || [];
+
+  return (
+    <div className="space-y-5">
+      {/* Diagnosis */}
+      {data.diagnosis && (
+        <div className="glass rounded-xl p-5 border border-border">
+          <div className="flex items-center gap-2 mb-2">
+            <Stethoscope className="w-5 h-5 text-amber" />
+            <h4 className="text-sm font-bold text-amber uppercase tracking-wide">Diagnosis</h4>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">{data.diagnosis}</p>
+        </div>
+      )}
+
+      {/* Urgent Fix */}
+      {data.urgentFix && (
+        <div className="rounded-xl p-5 border border-red-500/40 bg-red-500/5">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <h4 className="text-sm font-bold text-red-400 uppercase tracking-wide">Fix This First</h4>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">{data.urgentFix}</p>
+        </div>
+      )}
+
+      {/* Revenue Leak */}
+      {data.estimatedRevenueLeak && (
+        <div className="rounded-xl p-5 border border-amber/40 bg-amber/5 flex items-center gap-3">
+          <TrendingDown className="w-6 h-6 text-amber flex-shrink-0" />
+          <div>
+            <p className="text-[10px] font-bold text-amber uppercase mb-1">Estimated Revenue Leak</p>
+            <p className="text-base font-bold text-foreground">{data.estimatedRevenueLeak}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Package */}
+      {pkg && (
+        <div className="rounded-xl p-5 border border-amber/40 bg-amber/5">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-amber" />
+            <h4 className="text-sm font-bold text-amber uppercase tracking-wide">Recommended For You</h4>
+          </div>
+          <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
+            {pkg.name && <p className="text-lg font-bold text-foreground font-display">{pkg.name}</p>}
+            {pkg.price && <span className="text-base font-bold text-amber">{pkg.price}</span>}
+          </div>
+          {pkg.description && <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>}
+          {pkg.whyThisFits && (
+            <div className="bg-background/40 rounded-lg p-3">
+              <p className="text-[10px] font-bold text-primary uppercase mb-1">Why This Fits</p>
+              <p className="text-xs text-muted-foreground">{pkg.whyThisFits}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Also Consider */}
+      {additional.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Also Consider</h4>
+          <div className="space-y-2">
+            {additional.map((s: any, i: number) => (
+              <div key={i} className="glass rounded-lg p-4 border border-border">
+                <div className="flex items-start justify-between gap-3 mb-1 flex-wrap">
+                  {s.name && <p className="text-sm font-bold text-foreground">{s.name}</p>}
+                  {s.price && <span className="text-sm font-bold text-amber">{s.price}</span>}
+                </div>
+                {s.reason && <p className="text-xs text-muted-foreground">{s.reason}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Next Step */}
+      {data.nextStep && (
+        <div className="glass rounded-xl p-5 border border-primary/30 bg-primary/5">
+          <div className="flex items-center gap-2 mb-2">
+            <ChevronRight className="w-5 h-5 text-primary" />
+            <h4 className="text-sm font-bold text-primary uppercase tracking-wide">Next Step</h4>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">{data.nextStep}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// PLAYBOOK
+// ────────────────────────────────────────────────────────────────────────────
 const PlaybookView = ({ data, fileUrl }: any) => (
   <div className="text-center py-8">
     <div className="glass rounded-xl p-8 border border-border">
@@ -349,6 +927,9 @@ const PlaybookView = ({ data, fileUrl }: any) => (
   </div>
 );
 
+// ────────────────────────────────────────────────────────────────────────────
+// SWITCH
+// ────────────────────────────────────────────────────────────────────────────
 export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const data = item.output_data as any;
@@ -366,6 +947,8 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'strategic_questions': return <StrategicQuestionsView {...props} />;
     case 'brand_contradictions': return <BrandContradictionsView {...props} />;
     case 'friction_audit': return <FrictionAuditView {...props} />;
+    case 'website_scan': return <WebsiteScanView {...props} />;
+    case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
     default:
       return (
