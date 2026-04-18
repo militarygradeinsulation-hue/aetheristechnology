@@ -29,7 +29,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             "With me you're paying for <span className="text-amber">honesty &amp; accuracy</span> — not overhead while calling it <span className="text-amber">'productivity'</span>."
           </p>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] font-display tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] font-display tracking-tight text-float">
             <span className="text-foreground">Your brand is losing customers because it </span>
             <span className="text-gradient-amber">looks outdated</span>
             <span className="text-foreground"> and your systems </span>
@@ -44,7 +44,12 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help" onClick={() => trackEvent('click', { label: 'email_hero', location: 'hero' })}>
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground group"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground group hover-lift animate-glow-pulse cursor-glow"
+                onMouseMove={(e) => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+                  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+                }}
               >
                 <Mail className="mr-2 w-5 h-5" />
                 Email Me — Let's Talk
@@ -54,7 +59,12 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <Button
                 size="lg"
                 variant="outline"
-                className="glass-hover border-border group"
+                className="glass-hover border-border group hover-lift cursor-glow"
+                onMouseMove={(e) => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+                  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+                }}
               >
                 <Phone className="mr-2 w-5 h-5" />
                 Call (317) 376-2110
@@ -64,7 +74,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <Button
                 size="lg"
                 variant="outline"
-                className="glass-hover border-amber/30 text-amber hover:bg-amber/10 group"
+                className="glass-hover border-amber/30 text-amber hover:bg-amber/10 group hover-lift"
               >
                 See the Diagnostic
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
