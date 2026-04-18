@@ -189,25 +189,125 @@ const StrategicQuestionsView = ({ data, copiedId, setCopiedId }: any) => {
   );
 };
 
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: 'text-red-400 bg-red-500/20',
+  high: 'text-amber bg-amber/20',
+  moderate: 'text-primary bg-primary/20',
+};
+
 const BrandContradictionsView = ({ data, copiedId, setCopiedId }: any) => {
   const items = data.contradictions || data.findings || [];
+  const score = data.contradictionScore;
   return (
-    <div>
-      <SectionTitle icon={AlertTriangle} label="Brand Contradictions" count={items.length} color="text-red-400" />
-      <div className="space-y-3">
-        {items.map((c: any, i: number) => {
-          const text = `${c.title || c.contradiction}\nClaim: ${c.claim}\nReality: ${c.reality}\nFix: ${c.fix || c.recommendation}`;
-          return (
-            <div key={i} className="relative glass rounded-lg p-4 border border-border">
-              <CopyBtn text={text} id={`bc-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
-              {(c.title || c.contradiction) && <p className="text-sm font-bold text-red-400 mb-2 pr-8">{c.title || c.contradiction}</p>}
-              {c.claim && <p className="text-xs text-muted-foreground mb-1"><span className="text-amber font-semibold">Claim: </span>{c.claim}</p>}
-              {c.reality && <p className="text-xs text-muted-foreground mb-1"><span className="text-amber font-semibold">Reality: </span>{c.reality}</p>}
-              {(c.fix || c.recommendation) && <p className="text-xs text-primary mt-2"><span className="font-semibold">Fix: </span>{c.fix || c.recommendation}</p>}
+    <div className="space-y-6">
+      {/* Score + overall assessment */}
+      {(score !== undefined || data.overallAssessment) && (
+        <div className="glass rounded-xl p-6 border border-border text-center">
+          <h3 className="text-lg font-bold text-foreground font-display mb-2">Brand Alignment Score</h3>
+          {score !== undefined && (
+            <div className={`text-5xl font-bold font-display mb-2 ${score >= 70 ? 'text-green-400' : score >= 40 ? 'text-amber' : 'text-red-400'}`}>
+              {score}<span className="text-xl text-muted-foreground">/100</span>
             </div>
-          );
-        })}
+          )}
+          {data.businessName && <p className="text-xs text-muted-foreground mb-2">{data.businessName}</p>}
+          {data.overallAssessment && <p className="text-sm text-muted-foreground max-w-2xl mx-auto">{data.overallAssessment}</p>}
+        </div>
+      )}
+
+      {/* Contradictions */}
+      <div>
+        <SectionTitle icon={AlertTriangle} label="Brand Contradictions" count={items.length} color="text-red-400" />
+        <div className="space-y-4">
+          {items.map((c: any, i: number) => {
+            const title = c.title || c.contradiction;
+            const fix = c.fix || c.recommendedFix || c.recommendation;
+            const text = `${title}\n${c.description || ''}\nEmotional Impact: ${c.emotionalImpact || ''}\nBuyer Perception: ${c.buyerPerception || ''}\nFix: ${fix || ''}\nBefore: ${c.beforeAfter?.before || ''}\nAfter: ${c.beforeAfter?.after || ''}`;
+            return (
+              <div key={i} className="relative glass rounded-lg p-5 border border-border">
+                <CopyBtn text={text} id={`bc-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                <div className="flex items-start justify-between mb-2 pr-8 gap-2">
+                  {title && <p className="text-sm font-bold text-red-400">{title}</p>}
+                  {c.severity && (
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${SEVERITY_COLORS[c.severity] || SEVERITY_COLORS.moderate}`}>
+                      {c.severity}
+                    </span>
+                  )}
+                </div>
+                {c.description && <p className="text-sm text-muted-foreground mb-3">{c.description}</p>}
+                {c.claim && <p className="text-xs text-muted-foreground mb-1"><span className="text-amber font-semibold">Claim: </span>{c.claim}</p>}
+                {c.reality && <p className="text-xs text-muted-foreground mb-1"><span className="text-amber font-semibold">Reality: </span>{c.reality}</p>}
+                {(c.emotionalImpact || c.buyerPerception) && (
+                  <div className="grid md:grid-cols-2 gap-3 mb-3">
+                    {c.emotionalImpact && (
+                      <div className="bg-red-500/5 rounded-lg p-3">
+                        <p className="text-[10px] font-bold text-red-400 uppercase mb-1">Emotional Impact</p>
+                        <p className="text-xs text-muted-foreground">{c.emotionalImpact}</p>
+                      </div>
+                    )}
+                    {c.buyerPerception && (
+                      <div className="bg-amber/5 rounded-lg p-3">
+                        <p className="text-[10px] font-bold text-amber uppercase mb-1">Buyer Perception</p>
+                        <p className="text-xs text-muted-foreground">{c.buyerPerception}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {fix && (
+                  <div className="bg-primary/5 rounded-lg p-3 mb-3">
+                    <p className="text-[10px] font-bold text-primary uppercase mb-1">Recommended Fix</p>
+                    <p className="text-xs text-muted-foreground">{fix}</p>
+                  </div>
+                )}
+                {c.beforeAfter && (c.beforeAfter.before || c.beforeAfter.after) && (
+                  <div className="grid md:grid-cols-2 gap-3 text-xs">
+                    {c.beforeAfter.before && (
+                      <div className="bg-red-500/5 rounded-lg p-2">
+                        <span className="font-bold text-red-400">Before: </span>
+                        <span className="text-muted-foreground">{c.beforeAfter.before}</span>
+                      </div>
+                    )}
+                    {c.beforeAfter.after && (
+                      <div className="bg-green-500/5 rounded-lg p-2">
+                        <span className="font-bold text-green-400">After: </span>
+                        <span className="text-muted-foreground">{c.beforeAfter.after}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Priority Fixes */}
+      {Array.isArray(data.priorityFixes) && data.priorityFixes.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Priority Fixes</h4>
+          <div className="space-y-2">
+            {data.priorityFixes.map((f: string, i: number) => (
+              <div key={i} className="glass rounded-lg p-3 border border-border flex items-start gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                <p className="text-sm text-muted-foreground">{f}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Strengths */}
+      {Array.isArray(data.hiddenStrengths) && data.hiddenStrengths.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold text-foreground font-display mb-3 uppercase tracking-wide">Hidden Strengths</h4>
+          <div className="space-y-2">
+            {data.hiddenStrengths.map((s: string, i: number) => (
+              <div key={i} className="glass rounded-lg p-3 border border-green-500/20">
+                <p className="text-sm text-muted-foreground">{s}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
