@@ -153,6 +153,28 @@ export const Services: React.FC = () => {
     },
   ];
 
+  // Embedded Stripe checkout overlay
+  if (checkoutPriceId) {
+    const isMonthly = checkoutPriceId.endsWith('_monthly');
+    const returnUrl = isMonthly
+      ? `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=subscription`
+      : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+    return (
+      <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPriceId(null)}>
+        <div className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <button onClick={() => setCheckoutPriceId(null)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <X className="w-5 h-5" /> Cancel
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={returnUrl} customerEmail={user?.email || undefined} metadata={user ? { userId: user.id } : undefined} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <section id="services" className="relative py-24 px-4">
       <div className="max-w-7xl mx-auto">
@@ -209,7 +231,7 @@ export const Services: React.FC = () => {
                 </div>
 
                 {/* Related paid services */}
-                <div className="mt-auto pt-4 border-t border-border/40">
+                <div className="pt-4 border-t border-border/40">
                   <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-2">Starts With</div>
                   <div className="space-y-1.5">
                     {service.relatedServices.map((rs) => (
@@ -219,6 +241,17 @@ export const Services: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Buy / Subscribe button */}
+                <div className="mt-auto pt-4">
+                  <button
+                    onClick={() => setCheckoutPriceId(service.priceId)}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
+                  >
+                    {service.isMonthly ? <RefreshCw className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                    {service.ctaLabel}
+                  </button>
                 </div>
               </div>
             </RevealOnScroll>
