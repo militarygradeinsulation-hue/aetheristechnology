@@ -50,6 +50,7 @@
     /* Shadows */
     --shadow-glow: 0 0 20px hsl(36 90% 55% / 0.15), 0 0 60px hsl(36 90% 55% / 0.05);
     --shadow-card: 0 10px 40px hsl(0 0% 0% / 0.5);
+    --shadow-lift: 0 20px 60px -10px hsl(36 90% 55% / 0.25), 0 10px 30px -10px hsl(0 0% 0% / 0.6);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -136,6 +137,172 @@
     50% {
       opacity: 0.8;
       filter: drop-shadow(0 0 16px hsl(var(--amber-glow) / 0.8));
+    }
+  }
+
+  /* ===== New futuristic motion primitives ===== */
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes float-slow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes shimmer-sweep {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(250%) skewX(-20deg); }
+    }
+
+    @keyframes glow-breathe {
+      0%, 100% {
+        box-shadow: 0 0 20px hsl(var(--amber-glow) / 0.25),
+                    0 0 40px hsl(var(--amber-glow) / 0.1);
+      }
+      50% {
+        box-shadow: 0 0 30px hsl(var(--amber-glow) / 0.45),
+                    0 0 80px hsl(var(--amber-glow) / 0.2);
+      }
+    }
+
+    @keyframes border-rotate {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes shimmer-in {
+      0% { opacity: 0; transform: translateY(20px); filter: blur(8px); }
+      100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    .animate-float-slow {
+      animation: float-slow 7s ease-in-out infinite;
+    }
+
+    .animate-glow-pulse {
+      animation: glow-breathe 3.5s ease-in-out infinite;
+    }
+
+    .animate-shimmer-in {
+      animation: shimmer-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .text-float {
+      animation: float-slow 7s ease-in-out infinite;
+      text-shadow: 0 0 24px hsl(var(--amber-glow) / 0.18);
+    }
+
+    /* Glass shine — diagonal highlight that sweeps across on hover */
+    .glass-shine {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .glass-shine::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.04) 40%,
+        hsl(var(--amber-glow) / 0.18) 50%,
+        hsl(var(--amber-glow) / 0.04) 60%,
+        transparent 100%
+      );
+      transform: translateX(-150%) skewX(-20deg);
+      pointer-events: none;
+      z-index: 1;
+      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-shine:hover::before {
+      transform: translateX(250%) skewX(-20deg);
+    }
+
+    /* Hover lift — tactile rise + amber halo */
+    .hover-lift {
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.35s ease;
+      will-change: transform;
+    }
+    .hover-lift:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lift);
+    }
+
+    /* Animated gradient border */
+    .shimmer-border {
+      position: relative;
+    }
+    .shimmer-border::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.5) 25%,
+        hsl(var(--amber-glow) / 0.15) 50%,
+        hsl(var(--amber-glow) / 0.5) 75%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: border-rotate 6s linear infinite;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .shimmer-border:hover::after {
+      opacity: 1;
+    }
+
+    /* Cursor-reactive amber glow on CTAs */
+    .cursor-glow {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .cursor-glow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        180px circle at var(--mx, 50%) var(--my, 50%),
+        hsl(var(--amber-glow) / 0.35),
+        transparent 70%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .cursor-glow:hover::before {
+      opacity: 1;
+    }
+    .cursor-glow > * {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  /* Reduced-motion fallback: still apply hover-lift state-change but skip continuous motion */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-slow,
+    .animate-pulse-glow,
+    .animate-glow-pulse,
+    .text-float {
+      animation: none !important;
     }
   }
 }
