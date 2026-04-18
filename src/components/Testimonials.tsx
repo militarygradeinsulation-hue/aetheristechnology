@@ -50,7 +50,7 @@ export const Testimonials: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-display text-float">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-display">
               What Our{' '}
               <span className="text-gradient-amber">
                 Clients Say
@@ -76,7 +76,7 @@ export const Testimonials: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
               <RevealOnScroll key={testimonial.id} delay={index * 0.1}>
-                <div className="glass glass-shine shimmer-border hover-lift rounded-xl p-8 h-full flex flex-col">
+                <div className="glass rounded-xl p-8 h-full flex flex-col">
                   {/* Rating */}
                   <div className="flex gap-1 mb-4">
                     {renderStars(testimonial.rating)}

@@ -70,7 +70,7 @@ export const ToolsCapabilities: React.FC = () => {
             <span className="text-xs uppercase tracking-[0.3em] text-primary font-semibold mb-3 block">
               Full-Stack Business Intelligence
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4 text-float">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
               Tools & <span className="text-primary glow-text">Capabilities</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -82,7 +82,7 @@ export const ToolsCapabilities: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {CATEGORIES.map((cat, i) => (
             <RevealOnScroll key={cat.title} delay={i * 0.08}>
-              <div className="glass glass-shine shimmer-border hover-lift rounded-xl p-6 h-full border border-border/30 hover:border-primary/30 group">
+              <div className="glass rounded-xl p-6 h-full border border-border/30 hover:border-primary/30 transition-colors duration-300 group">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <cat.icon className="w-4.5 h-4.5 text-primary" />

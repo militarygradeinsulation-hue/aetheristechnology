@@ -136,7 +136,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
   return (
     <Link 
       to={`/blog/${post.slug}`}
-      className="block glass glass-shine shimmer-border hover-lift rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg group h-full"
+      className="block glass rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group h-full"
     >
       {/* Featured Image */}
       <div className="h-48 bg-gradient-to-br from-primary/20 to-amber/20 overflow-hidden relative">
