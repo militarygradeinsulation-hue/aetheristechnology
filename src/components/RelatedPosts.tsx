@@ -26,8 +26,9 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = ({ currentPostId, tags 
         if (error) throw error;
         return data || [];
       } catch {
-        return (blogPostsSnapshot as Array<{ id: string; title: string; slug: string; excerpt: string; published_at: string | null; tags: string[] | null }> )
+        return Array.from(blogPostsSnapshot as ReadonlyArray<{ id: string; title: string; slug: string; excerpt: string; published_at: string | null; tags: readonly string[] | null }>)
           .filter((post) => post.id !== currentPostId && (post.tags || []).some((tag) => tags.includes(tag)))
+          .map((post) => ({ ...post, tags: post.tags ? [...post.tags] : null }))
           .slice(0, 3);
       }
     },
