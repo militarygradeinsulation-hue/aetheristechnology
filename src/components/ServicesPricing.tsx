@@ -281,7 +281,7 @@ export const ServicesPricing: React.FC = () => {
               <RevealOnScroll key={service.title} delay={0.03 + index * 0.04}>
                 <div
                   onClick={() => setExpandedIdx(index)}
-                  className={`glass rounded-xl p-6 flex flex-col h-full transition-all duration-200 group relative cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10 ${
+                  className={`glass glass-shine shimmer-border hover-lift rounded-xl p-6 flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 ${
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
                   }`}
                 >

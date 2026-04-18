@@ -204,7 +204,7 @@ export const Services: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <RevealOnScroll key={service.title} delay={index * 0.1}>
-              <div className="glass glass-hover p-8 rounded-xl h-full group cursor-pointer flex flex-col">
+              <div className="glass glass-hover glass-shine shimmer-border hover-lift p-8 rounded-xl h-full group cursor-pointer flex flex-col">
                 <div className="mb-6">
                   <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <service.icon className="w-7 h-7 text-amber" />
