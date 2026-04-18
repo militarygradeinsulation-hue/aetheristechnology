@@ -18,8 +18,23 @@ import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
 import { BlogMidCTA } from '@/components/BlogMidCTA';
 import { articleSchema, breadcrumbSchema, speakableSchema, combineSchemas } from '@/lib/schemas';
+import { blogPostsSnapshot } from '@/data/blogPostsSnapshot';
 
 const SITE_URL = 'https://aetheris.technology';
+const BLOG_POST_SNAPSHOT = blogPostsSnapshot as unknown as Array<{
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  author: string;
+  published_at: string | null;
+  tags: string[] | null;
+  location_focus: string | null;
+  featured_image: string | null;
+  content: string;
+  meta_description: string | null;
+  updated_at: string;
+}>;
 
 // Clean up encoding artifacts
 const cleanText = (text: string): string => {
@@ -94,16 +109,20 @@ const BlogPostPage = () => {
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['blog-post', slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_published', true)
+          .maybeSingle();
+        if (error) throw error;
+        return data ?? BLOG_POST_SNAPSHOT.find((entry) => entry.slug === slug) ?? null;
+      } catch {
+        return BLOG_POST_SNAPSHOT.find((entry) => entry.slug === slug) ?? null;
+      }
     },
+    initialData: BLOG_POST_SNAPSHOT.find((entry) => entry.slug === slug) ?? null,
   });
 
   const featuredImage = slug ? getImageForSlug(slug) : null;

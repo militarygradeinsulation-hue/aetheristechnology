@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getImageForSlug } from '@/components/BlogCard';
+import { blogPostsSnapshot } from '@/data/blogPostsSnapshot';
 
 interface RelatedPostsProps {
   currentPostId: string;
@@ -14,15 +15,21 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = ({ currentPostId, tags 
     queryKey: ['related-posts', currentPostId],
     queryFn: async () => {
       if (!tags || tags.length === 0) return [];
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('id, title, slug, excerpt, published_at, tags')
-        .eq('is_published', true)
-        .neq('id', currentPostId)
-        .overlaps('tags', tags)
-        .limit(3);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('id, title, slug, excerpt, published_at, tags')
+          .eq('is_published', true)
+          .neq('id', currentPostId)
+          .overlaps('tags', tags)
+          .limit(3);
+        if (error) throw error;
+        return data || [];
+      } catch {
+        return (blogPostsSnapshot as Array<{ id: string; title: string; slug: string; excerpt: string; published_at: string | null; tags: string[] | null }> )
+          .filter((post) => post.id !== currentPostId && (post.tags || []).some((tag) => tags.includes(tag)))
+          .slice(0, 3);
+      }
     },
     enabled: !!currentPostId && !!tags?.length,
   });
