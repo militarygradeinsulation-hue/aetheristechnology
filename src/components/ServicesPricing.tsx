@@ -121,13 +121,13 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
-    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
+    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
     monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,750/mo', monthlyPriceRaw: 175000, monthlySavePercent: 30,
-    description: 'Find exactly where money is leaking in your operation.',
+    description: 'The deep operational breakdown that precedes any custom build.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
-    longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
+    longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency. This is the foundational step before any custom implementation engagement begins.',
     deliverables: ['Full operational workflow mapping', 'Time & cost waste analysis per department', 'System integration gap assessment', 'Automation opportunity identification', 'Employee productivity insights', 'Prioritized fix-it roadmap with ROI estimates'],
-    whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Fixing one major inefficiency recovers $2K–$10K/month.',
+    whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Foundational step toward custom implementation — fixing one major inefficiency recovers $2K–$10K/month.',
     includes: [{ name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Strategy Blueprint', value: '$299' }, { name: 'Operational Workflow Mapping', value: 'included' }, { name: 'Automation Roadmap', value: 'included' }],
   },
   {
