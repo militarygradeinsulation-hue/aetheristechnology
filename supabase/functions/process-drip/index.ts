@@ -8,12 +8,29 @@ const corsHeaders = {
 };
 
 const OUTLOOK_GATEWAY = "https://connector-gateway.lovable.dev/microsoft_outlook";
+const MAX_ATTEMPTS = 3;
 
 function appendSignature(body: string, signature: string): string {
   if (!signature) return body;
-  // Skip if body already contains the signature or an aetheris.technology link
   if (body.includes("aetheris.technology") || body.includes(signature.slice(0, 30))) return body;
   return `${body}\n${signature}`;
+}
+
+// Decide whether an Outlook error is a hard rejection (give up + mark prospect bounced)
+// vs a transient/throttled error (retry later).
+function classifyOutlookError(status: number, body: string): "hard" | "soft" {
+  const lower = body.toLowerCase();
+  if (status === 429) return "soft";
+  if (status >= 500) return "soft";
+  if (
+    lower.includes("recipient") &&
+    (lower.includes("rejected") || lower.includes("not found") || lower.includes("invalid"))
+  ) return "hard";
+  if (lower.includes("invalidrecipients") || lower.includes("submissionquotaexceeded")) return "hard";
+  if (lower.includes("mailboxnotenabledforrest") || lower.includes("erroraccessdenied")) return "hard";
+  // Default: treat 4xx as hard so we don't burn retries on truly bad payloads
+  if (status >= 400 && status < 500) return "hard";
+  return "soft";
 }
 
 serve(async (req) => {
@@ -33,7 +50,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Read campaign settings (active toggle, daily limit, signature)
     const { data: settings } = await supabase
       .from("campaign_settings")
       .select("is_active, daily_limit, signature_html")
@@ -49,7 +65,6 @@ serve(async (req) => {
     const DAILY_LIMIT = settings.daily_limit || 100;
     const signatureHtml: string = settings.signature_html || "";
 
-    // Check how many emails were already sent today
     const todayMidnight = new Date();
     todayMidnight.setUTCHours(0, 0, 0, 0);
 
@@ -70,7 +85,6 @@ serve(async (req) => {
 
     const batchSize = Math.min(remaining, 25);
 
-    // Get pending emails that are due AND have pre-generated content
     const { data: pendingEmails, error: fetchErr } = await supabase
       .from("drip_emails")
       .select("*, drip_prospects(*)")
@@ -91,16 +105,18 @@ serve(async (req) => {
     let sent = 0;
     let skipped = 0;
     let failed = 0;
+    let retried = 0;
 
     for (const email of pendingEmails) {
       const prospect = email.drip_prospects;
 
-      // Skip if prospect has replied, unsubscribed, or bounced
       if (!prospect || ["replied", "unsubscribed", "bounced"].includes(prospect.status)) {
         await supabase.from("drip_emails").update({ status: "skipped" }).eq("id", email.id);
         skipped++;
         continue;
       }
+
+      const nextAttempt = (email.attempt_count || 0) + 1;
 
       try {
         const sendRes = await fetch(`${OUTLOOK_GATEWAY}/me/sendMail`, {
@@ -123,30 +139,66 @@ serve(async (req) => {
 
         if (!sendRes.ok) {
           const errBody = await sendRes.text();
-          console.error(`Outlook send failed for ${prospect.email} [${sendRes.status}]:`, errBody);
-          await supabase.from("drip_emails").update({ status: "failed" }).eq("id", email.id);
-          failed++;
+          const status = sendRes.status;
+          const errorMessage = `[${status}] ${errBody}`.slice(0, 2000);
+          console.error(`Outlook send failed for ${prospect.email}:`, errorMessage);
+
+          const kind = classifyOutlookError(status, errBody);
+
+          if (kind === "soft" && nextAttempt < MAX_ATTEMPTS) {
+            // Retry later — push scheduled_for out by 1h, keep status pending
+            const retryAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+            await supabase.from("drip_emails").update({
+              status: "pending",
+              attempt_count: nextAttempt,
+              scheduled_for: retryAt,
+              error_message: errorMessage,
+            }).eq("id", email.id);
+            retried++;
+          } else {
+            await supabase.from("drip_emails").update({
+              status: "failed",
+              attempt_count: nextAttempt,
+              error_message: errorMessage,
+            }).eq("id", email.id);
+            failed++;
+
+            // Auto-mark prospect as bounced for hard rejections so we stop sending to them
+            if (kind === "hard") {
+              await supabase.from("drip_prospects")
+                .update({ status: "bounced" })
+                .eq("id", prospect.id);
+            }
+          }
           continue;
         }
 
         await supabase
           .from("drip_emails")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
+          .update({
+            status: "sent",
+            sent_at: new Date().toISOString(),
+            attempt_count: nextAttempt,
+            error_message: null,
+          })
           .eq("id", email.id);
 
         sent++;
-
-        // Rate limit: 2 second delay between sends
         await new Promise((r) => setTimeout(r, 2000));
       } catch (emailErr) {
-        console.error(`Error processing email ${email.id}:`, emailErr);
-        await supabase.from("drip_emails").update({ status: "failed" }).eq("id", email.id);
+        const msg = emailErr instanceof Error ? emailErr.message : "Unknown error";
+        console.error(`Error processing email ${email.id}:`, msg);
+        await supabase.from("drip_emails").update({
+          status: "failed",
+          attempt_count: nextAttempt,
+          error_message: msg.slice(0, 2000),
+        }).eq("id", email.id);
         failed++;
       }
     }
 
     return new Response(
-      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed. Daily total: ${(sentToday || 0) + sent}/${DAILY_LIMIT}` }),
+      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed, ${retried} retry-scheduled. Daily total: ${(sentToday || 0) + sent}/${DAILY_LIMIT}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
