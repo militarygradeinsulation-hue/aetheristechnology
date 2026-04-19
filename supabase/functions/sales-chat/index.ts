@@ -26,7 +26,7 @@ AVAILABLE PACKAGES (use these exact price IDs when recommending):
    - Builds authority and trust
    - Best for: companies who know something is wrong but don't know what
 
-3. **Full Analytics Package** — $500 (price_id: full_analytics_package_once)
+3. **Strategic Discovery Audit** — $500 (price_id: full_analytics_package_once)
    - Full website & social media scan + marketing diagnostics + CRM analysis
    - Normally $1,200+ — limited-time pricing
    - Best for: companies wanting comprehensive audit without the diagnostic commitment
@@ -43,8 +43,8 @@ AVAILABLE PACKAGES (use these exact price IDs when recommending):
    - Best for: companies ready to transform, not just diagnose
 
 UPSELL STRATEGIES:
-- If someone asks about Digital Snapshot → suggest Full Analytics Package ("For the same price you get 4x the depth")
-- If someone needs website help → suggest bundling Website Evaluation + Full Analytics Package
+- If someone asks about Digital Snapshot → suggest Strategic Discovery Audit ("For the same price you get 4x the depth")
+- If someone needs website help → suggest bundling Website Evaluation + Strategic Discovery Audit
 - If they describe systemic issues → push toward 14-Day Diagnostic
 - If they need ongoing help → Fractional CTO/CMO is the play
 - Always mention the $500 Analytics Package is normally $1,200+ (limited time)
