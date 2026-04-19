@@ -47,7 +47,7 @@ const TermsPage = () => {
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-3 font-display">Contact</h2>
                 <p>For questions regarding these terms, please contact us at{' '}
-                  <a href="mailto:aetheris.technology@outlook.com" className="text-amber hover:underline">aetheris.technology@outlook.com</a>.
+                  <a href="mailto:hello@aetheris.technology" className="text-amber hover:underline">hello@aetheris.technology</a>.
                 </p>
               </div>
             </div>

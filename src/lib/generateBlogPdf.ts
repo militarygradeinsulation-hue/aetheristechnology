@@ -138,7 +138,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
   pdf.setTextColor(...gray);
   pdf.text('Aetheris AI Studio', margin, pageH - 20);
   pdf.setFontSize(8);
-  pdf.text('aetheris.technology@outlook.com  |  (317) 376-2110', margin, pageH - 14);
+  pdf.text('hello@aetheris.technology  |  (317) 376-2110', margin, pageH - 14);
 
   // Accent bar at bottom
   pdf.setFillColor(...brandColor);
@@ -263,7 +263,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
 
   // Contact info
   const contactItems = [
-    { icon: '📧', text: 'aetheris.technology@outlook.com' },
+    { icon: '📧', text: 'hello@aetheris.technology' },
     { icon: '📞', text: '(317) 376-2110' },
     { icon: '🔗', text: 'linkedin.com/in/aisystemsarchitect' },
   ];

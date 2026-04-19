@@ -125,11 +125,13 @@ export const FreeTools: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-8">
-            <span className="text-amber font-bold text-xl md:text-2xl tracking-wide uppercase mb-2 block">Enjoy my Stuff</span>
+            <span className="text-amber font-bold text-sm md:text-base tracking-[0.18em] uppercase mb-3 block">See Our AI in Action</span>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3 text-float">
-              Free Tools & <span className="text-gradient-amber">Resources</span>
+              Capability <span className="text-gradient-amber">Demonstrations</span>
             </h2>
-            <p className="text-muted-foreground text-xl md:text-2xl">Try before you talk — no strings attached.</p>
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              These are working examples of the AI systems we deploy for clients. Use them free — and see what custom-built versions could do for your business.
+            </p>
           </div>
         </RevealOnScroll>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -153,8 +155,8 @@ export const FreeTools: React.FC = () => {
                   <div className="p-6 pt-3 flex flex-col flex-1">
                     <h3 className="text-lg font-bold text-foreground font-display mb-2">{tool.title}</h3>
                     <p className="text-sm text-muted-foreground mb-4 flex-1">{tool.description}</p>
-                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Try It Free <ArrowRight className="w-4 h-4" />
+                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all tracking-wide">
+                      Explore Tool <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
                 </Link>

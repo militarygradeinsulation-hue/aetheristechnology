@@ -6,7 +6,7 @@
 - Name: Aetheris AI (also known as Aetheris Technology)
 - Location: Indianapolis, Indiana, United States
 - Phone: (317) 376-2110
-- Email: aetheris.technology@outlook.com
+- Email: hello@aetheris.technology
 - Website: https://aetheris.technology
 - Service area: United States (HQ Indianapolis, IN)
 - Specialties: AI strategy consulting, operational diagnostics, CRM automation, generative AI, LLMs, AI agents, workflow automation, conversational AI, AI ROI analysis

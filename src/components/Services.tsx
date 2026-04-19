@@ -31,7 +31,7 @@ export const Services: React.FC = () => {
       ctaLabel: 'Buy — $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
-        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Strategic Discovery Audit', cost: '$500' },
         { name: 'Strategy Blueprint', cost: '$299' },
       ],
     },
@@ -72,7 +72,7 @@ export const Services: React.FC = () => {
       priceId: 'consulting_data_strategy_once',
       ctaLabel: 'Buy — $500',
       relatedServices: [
-        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Strategic Discovery Audit', cost: '$500' },
         { name: 'Website Evaluation', cost: '$500' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
       ],
@@ -101,7 +101,7 @@ export const Services: React.FC = () => {
       priceId: 'consulting_performance_once',
       ctaLabel: 'Buy — $500',
       relatedServices: [
-        { name: 'Full Analytics Package', cost: '$500' },
+        { name: 'Strategic Discovery Audit', cost: '$500' },
         { name: 'Digital Snapshot', cost: '$125' },
         { name: 'Strategy Blueprint', cost: '$299' },
       ],

@@ -43,8 +43,8 @@ export const Footer: React.FC = () => {
                 <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium" onClick={() => trackEvent('click', { label: 'phone', location: 'footer' })}>
                   📞 (317) 376-2110
                 </a>
-                <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all" onClick={() => trackEvent('click', { label: 'email', location: 'footer' })}>
-                  ✉️ aetheris.technology@outlook.com
+                <a href="mailto:hello@aetheris.technology" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium break-all" onClick={() => trackEvent('click', { label: 'email', location: 'footer' })}>
+                  ✉️ hello@aetheris.technology
                 </a>
               </div>
             </div>
@@ -75,7 +75,7 @@ export const Footer: React.FC = () => {
 
             <div>
               <h4 className="font-bold text-foreground mb-4">Contact</h4>
-              <a href="mailto:aetheris.technology@outlook.com" className="text-sm text-muted-foreground hover:text-amber transition-colors block">aetheris.technology@outlook.com</a>
+              <a href="mailto:hello@aetheris.technology" className="text-sm text-muted-foreground hover:text-amber transition-colors block">hello@aetheris.technology</a>
               <a href="tel:+13173762110" className="text-sm text-muted-foreground hover:text-amber transition-colors block mt-2">(317) 376-2110</a>
               <p className="text-sm text-muted-foreground mt-2">Indianapolis, Indiana</p>
               <a 

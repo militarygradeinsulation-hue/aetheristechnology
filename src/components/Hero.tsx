@@ -41,7 +41,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help" onClick={() => trackEvent('click', { label: 'email_hero', location: 'hero' })}>
+            <a href="mailto:hello@aetheris.technology?subject=I%20Need%20Help" onClick={() => trackEvent('click', { label: 'email_hero', location: 'hero' })}>
               <Button
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground group hover-lift animate-glow-pulse cursor-glow"

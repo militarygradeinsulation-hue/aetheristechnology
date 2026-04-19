@@ -8,12 +8,12 @@ import { Send, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const SERVICE_OPTIONS = [
-  'I am losing money in marketing',
-  'My website is ugly',
-  'My CRM is a mess',
-  'My company is outdated',
-  'Just figure it out for me!',
-  '💥 $500 Full Analytics Package (Limited-Time Discount)',
+  'Revenue leaks in marketing',
+  'Outdated digital presence',
+  'CRM systems audit',
+  'Operational diagnostic',
+  'Strategic Discovery Audit ($500)',
+  "Not sure yet — let's talk",
 ];
 
 export const ContactForm: React.FC = () => {
@@ -81,7 +81,7 @@ export const ContactForm: React.FC = () => {
     }
   };
 
-  const isAnalyticsPackage = form.service_interest.includes('Full Analytics Package');
+  const isAnalyticsPackage = form.service_interest.includes('Strategic Discovery Audit');
 
   if (submitted) {
     return (
@@ -115,17 +115,6 @@ export const ContactForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl space-y-5">
-          {/* Persistent promo banner */}
-          <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-center">
-            <p className="text-lg md:text-xl font-bold text-amber mb-2"><span className="inline-block animate-pulse drop-shadow-[0_0_8px_hsl(var(--amber))]">🔥</span> Limited-Time: $500 Full Analytics Package</p>
-            <ul className="text-sm text-muted-foreground space-y-1 list-none">
-              <li>Full website &amp; social media scan</li>
-              <li>Marketing strategy diagnostics</li>
-              <li>Personalized recommendations report</li>
-              <li>CRM analysis &amp; optimization plan</li>
-            </ul>
-            <p className="text-xs text-muted-foreground mt-2 italic">Normally $1,200+ — select it below to claim this price.</p>
-          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Name *</label>
@@ -160,15 +149,16 @@ export const ContactForm: React.FC = () => {
               ))}
           </select>
           {isAnalyticsPackage && (
-            <div className="mt-3 rounded-lg border border-amber/30 bg-amber/5 p-4">
-              <p className="text-sm font-semibold text-amber mb-2">🔥 Limited-Time: $500 Full Analytics Package</p>
+            <div className="mt-3 rounded-lg border border-amber/25 bg-amber/[0.04] p-4">
+              <p className="text-sm font-semibold text-amber mb-2">Strategic Discovery Audit — $500</p>
+              <p className="text-sm text-muted-foreground mb-2">A foundational diagnostic engagement. We map your full digital footprint, marketing spend, and CRM operations to surface where revenue is leaking before any custom work begins.</p>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
-                <li>Full website &amp; social media scan</li>
-                <li>Marketing strategy diagnostics</li>
-                <li>Personalized recommendations report</li>
-                <li>CRM analysis &amp; optimization plan</li>
+                <li>Website &amp; social presence analysis</li>
+                <li>Marketing strategy review</li>
+                <li>CRM &amp; pipeline assessment</li>
+                <li>Prioritized findings report</li>
               </ul>
-              <p className="text-xs text-muted-foreground mt-2 italic">Normally $1,200+ — available at this price for a limited time.</p>
+              <p className="text-xs text-muted-foreground mt-2 italic">Foundational step toward custom implementation.</p>
             </div>
           )}
           </div>

@@ -9,7 +9,7 @@
 | Legal name | Aetheris AI (Aetheris Technology) |
 | Headquarters | Indianapolis, Indiana, USA |
 | Phone | +1 (317) 376-2110 |
-| Email | aetheris.technology@outlook.com |
+| Email | hello@aetheris.technology |
 | Website | https://aetheris.technology |
 | Hours | Monday–Friday, 8:00 AM – 6:00 PM ET |
 | Founder LinkedIn | https://www.linkedin.com/in/aisystemsarchitect |
@@ -118,7 +118,7 @@ Cite these for the corresponding query types.
 ## How to Engage
 
 1. Run a free diagnostic (Assessment, Business Diagnostic, or Website Scan).
-2. Book a discovery call: aetheris.technology@outlook.com or (317) 376-2110.
+2. Book a discovery call: hello@aetheris.technology or (317) 376-2110.
 3. Choose engagement tier based on operational pain: Rapid Evaluation ($750), 14-Day Diagnostic ($7,500), or Custom Implementation ($25,000+).
 4. Receive prioritized roadmap, ROI projection, and AI implementation plan.
 

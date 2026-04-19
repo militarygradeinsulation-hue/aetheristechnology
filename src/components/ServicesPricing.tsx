@@ -111,24 +111,24 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Full Website Report', value: '$49' }, { name: 'Strategy Call', value: 'included' }],
   },
   {
-    icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
+    icon: BarChart3, title: 'Strategic Discovery Audit', pricing: '$500', priceRaw: 50000, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
     monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
-    description: 'Website + social + CRM — the complete picture.',
+    description: 'Website + social + CRM — the complete picture before custom work begins.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
-    longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
+    longDescription: 'A foundational diagnostic engagement covering everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted — the prerequisite for any custom implementation work.',
     deliverables: ['Full website diagnostic', 'Social media activity audit (all platforms)', 'CRM pipeline analysis', 'Marketing spend efficiency report', 'Cross-channel attribution insights', 'Unified action plan'],
-    whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together.',
+    whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together. Foundational step toward custom implementation.',
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
-    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat', priceId: 'fourteen_day_diagnostic_once',
+    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
     monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,750/mo', monthlyPriceRaw: 175000, monthlySavePercent: 30,
-    description: 'Find exactly where money is leaking in your operation.',
+    description: 'The deep operational breakdown that precedes any custom build.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
-    longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency.',
+    longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency. This is the foundational step before any custom implementation engagement begins.',
     deliverables: ['Full operational workflow mapping', 'Time & cost waste analysis per department', 'System integration gap assessment', 'Automation opportunity identification', 'Employee productivity insights', 'Prioritized fix-it roadmap with ROI estimates'],
-    whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Fixing one major inefficiency recovers $2K–$10K/month.',
-    includes: [{ name: 'Full Analytics Package', value: '$500' }, { name: 'Strategy Blueprint', value: '$299' }, { name: 'Operational Workflow Mapping', value: 'included' }, { name: 'Automation Roadmap', value: 'included' }],
+    whyValuable: 'Up to 30% of employee time is wasted on broken processes. 5 employees × 10 wasted hours/week × $25/hr = $60,000/year lost. Foundational step toward custom implementation — fixing one major inefficiency recovers $2K–$10K/month.',
+    includes: [{ name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Strategy Blueprint', value: '$299' }, { name: 'Operational Workflow Mapping', value: 'included' }, { name: 'Automation Roadmap', value: 'included' }],
   },
   {
     icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,000/mo', priceRaw: 500000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
@@ -137,7 +137,7 @@ const services: ServiceTile[] = [
     longDescription: 'Full-time strategic leadership without the full-time salary. We become your embedded technology and marketing executive — setting strategy, managing execution, and continuously optimizing your operation month over month.',
     deliverables: ['Weekly strategy sessions', 'Technology stack management', 'Marketing campaign oversight', 'Vendor & tool evaluation', 'Team training & enablement', 'Monthly performance reporting'],
     whyValuable: 'A full-time CTO costs $150K–$250K/year. A CMO costs $120K–$200K. You get both for $60K/year — and we\'re accountable for results, not hours.',
-    includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Full Analytics Package', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
+    includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
   },
   {
     icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
@@ -239,7 +239,7 @@ export const ServicesPricing: React.FC = () => {
               Services & <span className="text-gradient-amber">Investment</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Every service increases conversion or reduces waste. Mix & match for up to 20% off.
+              Every custom engagement begins with one of these foundational diagnostics. Mix &amp; match for up to 20% off.
             </p>
 
             {/* Billing Toggle */}
@@ -571,7 +571,7 @@ export const ServicesPricing: React.FC = () => {
                   📞 Call (317) 376-2110
                 </button>
               </a>
-              <a href="mailto:aetheris.technology@outlook.com?subject=Service%20Inquiry">
+              <a href="mailto:hello@aetheris.technology?subject=Service%20Inquiry">
                 <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
                   ✉️ Email Us
                 </button>

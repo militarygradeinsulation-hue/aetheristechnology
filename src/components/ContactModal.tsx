@@ -35,13 +35,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             </div>
           </a>
 
-          <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('click', { label: 'email', location: 'contact_modal' })}>
+          <a href="mailto:hello@aetheris.technology?subject=I%20Need%20Help%20With%20My%20Business" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('click', { label: 'email', location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Mail className="w-6 h-6 text-amber" />
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Email Us</div>
-              <div className="text-foreground font-medium">aetheris.technology@outlook.com</div>
+              <div className="text-foreground font-medium">hello@aetheris.technology</div>
             </div>
           </a>
 

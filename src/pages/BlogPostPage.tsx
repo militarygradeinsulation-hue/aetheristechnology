@@ -325,7 +325,7 @@ const BlogPostPage = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                     <a 
-                      href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Operational%20Systems%20Diagnostic"
+                      href="mailto:hello@aetheris.technology?subject=14-Day%20Operational%20Systems%20Diagnostic"
                       className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium"
                     >
                       Book Your Diagnostic
@@ -340,10 +340,10 @@ const BlogPostPage = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
                     <a 
-                      href="mailto:aetheris.technology@outlook.com" 
+                      href="mailto:hello@aetheris.technology" 
                       className="hover:text-amber transition-colors"
                     >
-                      📧 aetheris.technology@outlook.com
+                      📧 hello@aetheris.technology
                     </a>
                     <a 
                       href="https://www.linkedin.com/in/aisystemsarchitect" 

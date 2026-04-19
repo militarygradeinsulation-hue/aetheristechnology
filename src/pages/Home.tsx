@@ -39,7 +39,7 @@ const Home = () => {
           "logo": "https://aetheris.technology/aetheris-logo.png",
           "description": "B2B AI consulting and technology firm specializing in AI strategy, operational diagnostics, CRM automation, LLMs, AI agents, and workflow automation for US businesses.",
           "telephone": "+1-317-376-2110",
-          "email": "aetheris.technology@outlook.com",
+          "email": "hello@aetheris.technology",
           "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
           "geo": { "@type": "GeoCoordinates", "latitude": 39.7684, "longitude": -86.1581 },
           "priceRange": "$50 - $25,000+",

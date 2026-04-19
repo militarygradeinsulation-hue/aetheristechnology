@@ -90,7 +90,7 @@ export const BlogList: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a 
-                href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Operational%20Systems%20Diagnostic" 
+                href="mailto:hello@aetheris.technology?subject=14-Day%20Operational%20Systems%20Diagnostic" 
                 className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium"
               >
                 <span>Book Your Diagnostic</span>

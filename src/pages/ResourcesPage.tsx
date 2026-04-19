@@ -143,7 +143,7 @@ const ResourcesPage = () => {
                         <Phone className="mr-2 w-5 h-5" /> Call Now — (317) 376-2110
                       </Button>
                     </a>
-                    <a href="mailto:aetheris.technology@outlook.com?subject=14-Day%20Diagnostic%20Inquiry">
+                    <a href="mailto:hello@aetheris.technology?subject=14-Day%20Diagnostic%20Inquiry">
                       <Button size="lg" variant="outline" className="glass-hover border-border">
                         <Mail className="mr-2 w-5 h-5" /> Email to Start
                       </Button>
