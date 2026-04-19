@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -10,7 +9,7 @@ const BlogPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-background">
       <SEOHead
         title="AI & Business Strategy Blog | Aetheris AI"
         description="Insights on AI automation, operational efficiency, CRM, and digital marketing failures. Updated daily with actionable intelligence."
@@ -29,7 +28,6 @@ const BlogPage = () => {
           }
         }}
       />
-      <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <BlogList />

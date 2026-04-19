@@ -24,7 +24,7 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const btnClass = "inline-flex items-center gap-2 px-3 py-2 rounded-lg glass border border-border text-sm text-muted-foreground hover:text-amber hover:border-amber/40 transition-colors";
+  const btnClass = "inline-flex items-center gap-2 px-3 py-2 rounded-lg glass border border-border text-sm text-muted-foreground hover:text-amber hover:border-amber/40";
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
