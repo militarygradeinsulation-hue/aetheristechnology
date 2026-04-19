@@ -111,13 +111,13 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Full Website Report', value: '$49' }, { name: 'Strategy Call', value: 'included' }],
   },
   {
-    icon: BarChart3, title: 'Full Analytics Package', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time · was $1,200+', priceId: 'full_analytics_package_once', badge: 'LIMITED', bundleable: true,
+    icon: BarChart3, title: 'Strategic Discovery Audit', pricing: '$500', priceRaw: 50000, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
     monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
-    description: 'Website + social + CRM — the complete picture.',
+    description: 'Website + social + CRM — the complete picture before custom work begins.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
-    longDescription: 'Everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted.',
+    longDescription: 'A foundational diagnostic engagement covering everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted — the prerequisite for any custom implementation work.',
     deliverables: ['Full website diagnostic', 'Social media activity audit (all platforms)', 'CRM pipeline analysis', 'Marketing spend efficiency report', 'Cross-channel attribution insights', 'Unified action plan'],
-    whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together.',
+    whyValuable: 'Disconnected data costs companies 20–30% in wasted marketing spend. Companies typically find $3,000–$10,000/month in recoverable waste when all channels are audited together. Foundational step toward custom implementation.',
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
@@ -239,7 +239,7 @@ export const ServicesPricing: React.FC = () => {
               Services & <span className="text-gradient-amber">Investment</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Every service increases conversion or reduces waste. Mix & match for up to 20% off.
+              Every custom engagement begins with one of these foundational diagnostics. Mix &amp; match for up to 20% off.
             </p>
 
             {/* Billing Toggle */}
