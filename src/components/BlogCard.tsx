@@ -136,7 +136,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
   return (
     <Link 
       to={`/blog/${post.slug}`}
-      className="block glass rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group h-full"
+      className="block glass rounded-xl overflow-hidden h-full"
     >
       {/* Featured Image */}
       <div className="h-48 bg-gradient-to-br from-primary/20 to-amber/20 overflow-hidden relative">
@@ -146,7 +146,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
             alt={post.title}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -176,7 +176,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold mb-3 group-hover:text-amber transition-colors line-clamp-2 font-display">
+        <h3 className="text-xl font-bold mb-3 line-clamp-2 font-display">
           {post.title}
         </h3>
 
@@ -206,7 +206,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         </div>
 
         {/* Read More */}
-        <div className="flex items-center gap-2 text-amber text-sm font-medium group-hover:gap-3 transition-all">
+        <div className="flex items-center gap-2 text-amber text-sm font-medium">
           Read More <ArrowRight className="w-4 h-4" />
         </div>
       </div>

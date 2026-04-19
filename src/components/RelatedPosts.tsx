@@ -36,12 +36,12 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = ({ currentPostId, tags 
         {posts.map((post) => {
           const img = getImageForSlug(post.slug);
           return (
-            <Link key={post.id} to={`/blog/${post.slug}`} className="glass rounded-xl overflow-hidden hover:border-amber/40 border border-transparent transition-colors group">
+            <Link key={post.id} to={`/blog/${post.slug}`} className="glass rounded-xl overflow-hidden border border-transparent hover:border-amber/40">
               {img && (
-                <img src={img} alt={post.title} className="w-full h-40 object-cover" loading="lazy" />
+                <img src={img} alt={post.title} className="w-full h-40 object-cover" loading="lazy" decoding="async" />
               )}
               <div className="p-4">
-                <h3 className="font-semibold text-sm leading-tight group-hover:text-amber transition-colors line-clamp-2">{post.title}</h3>
+                <h3 className="font-semibold text-sm leading-tight line-clamp-2">{post.title}</h3>
                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
               </div>
             </Link>

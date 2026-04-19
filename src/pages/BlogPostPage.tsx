@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, Calendar, User, MapPin, Download, Loader2 } from 'lucide-react';
-import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -137,9 +136,7 @@ const BlogPostPage = () => {
     : undefined;
 
   return (
-    <div className="relative min-h-screen">
-      <Background />
-      
+    <div className="relative min-h-screen bg-background">
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
@@ -172,10 +169,8 @@ const BlogPostPage = () => {
             </Link>
 
             {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-12 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-                <Skeleton className="h-96 w-full" />
+              <div className="text-center py-20">
+                <p className="text-muted-foreground">Loading article…</p>
               </div>
             ) : error || !post ? (
               <div className="text-center py-20">
