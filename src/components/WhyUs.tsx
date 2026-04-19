@@ -5,8 +5,8 @@ import { ComparisonChart } from './ComparisonChart';
 
 export const WhyUs: React.FC = () => {
   const benefits = [
-    'Hands-on consulting that delivers real results',
-    'Proven track record with 200+ client engagements',
+    'Hands-on consulting that delivers measurable results',
+    'Proven track record across 200+ client engagements',
     'Ongoing advisory support and strategy reviews',
     'Scalable strategies designed for long-term growth',
     'ROI-focused recommendations and roadmaps',
@@ -22,7 +22,7 @@ export const WhyUs: React.FC = () => {
               Why Choose <span className="text-amber glow-text">Aetheris AI</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              We don't just advise—we partner with you to build the future of your business.
+              We don't just advise — we partner with you to build the future of your business.
             </p>
           </div>
         </RevealOnScroll>
@@ -46,9 +46,9 @@ export const WhyUs: React.FC = () => {
               </div>
 
               <p className="text-muted-foreground pt-6">
-                Stop navigating AI alone. With Aetheris AI consulting, you get expert 
-                guidance backed by real-world experience. We handle the strategy and 
-                complexity—you focus on growing your business.
+                Stop navigating AI alone. With Aetheris AI consulting, you get expert
+                guidance backed by real-world experience. We handle the strategy and
+                complexity — you focus on growing your business.
               </p>
             </div>
 

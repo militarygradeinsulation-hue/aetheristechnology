@@ -22,22 +22,22 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
             <Sparkles className="w-4 h-4 text-amber animate-pulse-glow" />
-            <span className="text-sm text-muted-foreground">Business Consulting &amp; Digital Intelligence</span>
+            <span className="text-sm text-muted-foreground">B2B AI Consulting &amp; Co-CEO Partnership</span>
           </div>
 
           <p className="text-lg md:text-xl font-semibold text-foreground/90 italic max-w-3xl mx-auto">
-            "With me you're paying for <span className="text-amber">honesty &amp; accuracy</span> — not overhead while calling it <span className="text-amber">'productivity'</span>."
+            "With us, you're paying for <span className="text-amber">honesty &amp; accuracy</span> — not overhead disguised as <span className="text-amber">'productivity'</span>."
           </p>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] font-display tracking-tight text-float">
-            <span className="text-foreground">Your brand is losing customers because it </span>
-            <span className="text-gradient-amber">looks outdated</span>
-            <span className="text-foreground"> and your systems </span>
+            <span className="text-foreground">Most brands are quietly losing revenue to </span>
+            <span className="text-gradient-amber">outdated digital presence</span>
+            <span className="text-foreground"> and systems that </span>
             <span className="text-gradient-amber">can't keep up.</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-body">
-            I fix your digital presence, sharpen your brand message, and rebuild the internal systems bleeding your revenue.
+            We expose where it's leaking — then rebuild the digital presence, brand message, and internal systems to stop it.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -52,7 +52,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 }}
               >
                 <Mail className="mr-2 w-5 h-5" />
-                Email Me — Let's Talk
+                Start the Conversation
               </Button>
             </a>
             <a href="tel:+13173762110" onClick={() => trackEvent('click', { label: 'call_now', location: 'hero' })}>
@@ -70,15 +70,18 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 Call (317) 376-2110
               </Button>
             </a>
-            <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('click', { label: 'see_diagnostic', location: 'hero' })}>
-              <Button
-                size="lg"
-                variant="outline"
-                className="glass-hover border-amber/30 text-amber hover:bg-amber/10 group hover-lift"
-              >
-                See the Diagnostic
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
+          </div>
+
+          <div className="pt-2">
+            <a
+              href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('click', { label: 'see_diagnostic', location: 'hero' })}
+              className="inline-flex items-center gap-1 text-sm text-amber/80 hover:text-amber transition-colors group"
+            >
+              See the 14-Day Operational Diagnostic
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
         </motion.div>

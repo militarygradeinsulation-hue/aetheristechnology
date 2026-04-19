@@ -86,29 +86,29 @@ export const ServiceCapabilities: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {CLUSTERS.map((cluster, idx) => {
             const Icon = cluster.icon;
             return (
               <RevealOnScroll key={cluster.title} variant="float" delay={idx * 0.06}>
-                <ParallaxTilt intensity={0.5} className="h-full">
+                <ParallaxTilt intensity={0.3} className="h-full">
                   <article
-                    className="glass glass-shine shimmer-border hover-lift rounded-2xl p-6 border border-border hover:border-amber/40 flex flex-col h-full"
+                    className="group glass hover:glass-shine hover-lift rounded-2xl p-7 border border-border/60 hover:border-amber/40 flex flex-col h-full transition-all"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-amber/10 border border-amber/20 flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-amber" aria-hidden="true" />
+                    <div className="w-11 h-11 rounded-xl bg-amber/[0.08] border border-amber/15 flex items-center justify-center mb-5">
+                      <Icon className="w-5 h-5 text-amber" aria-hidden="true" />
                     </div>
-                    <h3 className="text-xl font-bold text-foreground font-display mb-2">
+                    <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
                       {cluster.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-4">{cluster.tagline}</p>
-                    <ul className="space-y-2 mt-auto">
+                    <p className="text-sm text-muted-foreground mb-5 leading-relaxed">{cluster.tagline}</p>
+                    <ul className="space-y-2.5 mt-auto pt-4 border-t border-border/30">
                       {cluster.items.map((item) => (
                         <li
                           key={item}
-                          className="text-sm text-foreground/85 flex items-start gap-2"
+                          className="text-sm text-foreground/80 flex items-start gap-2.5"
                         >
-                          <span className="text-amber mt-1.5 shrink-0 w-1 h-1 rounded-full bg-amber" />
+                          <span className="mt-2 shrink-0 w-1 h-1 rounded-full bg-amber/60" />
                           <span>{item}</span>
                         </li>
                       ))}
