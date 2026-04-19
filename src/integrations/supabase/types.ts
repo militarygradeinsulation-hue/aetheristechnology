@@ -546,8 +546,10 @@ export type Database = {
       }
       drip_emails: {
         Row: {
+          attempt_count: number
           body_html: string | null
           created_at: string
+          error_message: string | null
           id: string
           outlook_message_id: string | null
           prospect_id: string
@@ -559,8 +561,10 @@ export type Database = {
           subject: string | null
         }
         Insert: {
+          attempt_count?: number
           body_html?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
           outlook_message_id?: string | null
           prospect_id: string
@@ -572,8 +576,10 @@ export type Database = {
           subject?: string | null
         }
         Update: {
+          attempt_count?: number
           body_html?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
           outlook_message_id?: string | null
           prospect_id?: string
