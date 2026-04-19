@@ -1,32 +1,63 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { BookOpen, ArrowRight, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogCard } from './BlogCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Skeleton } from './ui/skeleton';
+import { Button } from './ui/button';
+
+const PAGE_SIZE = 12;
 
 export const BlogList: React.FC = () => {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
   const { data: posts, isLoading, error } = useQuery({
-    queryKey: ['blog-posts'],
+    queryKey: ['blog-posts-list'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select('*')
+        .select('id, title, slug, excerpt, author, published_at, tags, location_focus, featured_image')
         .eq('is_published', true)
         .order('published_at', { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
   });
+
+  // Top tags for filter chips
+  const topTags = useMemo(() => {
+    if (!posts) return [];
+    const counts = new Map<string, number>();
+    posts.forEach((p) => {
+      (p.tags || []).forEach((t) => {
+        if (t === 'TheArchitect' || t === 'AetherisTechnology') return;
+        counts.set(t, (counts.get(t) || 0) + 1);
+      });
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([tag]) => tag);
+  }, [posts]);
+
+  const filteredPosts = useMemo(() => {
+    if (!posts) return [];
+    if (!activeTag) return posts;
+    return posts.filter((p) => (p.tags || []).includes(activeTag));
+  }, [posts, activeTag]);
+
+  const visiblePosts = filteredPosts.slice(0, visibleCount);
+  const remaining = filteredPosts.length - visiblePosts.length;
 
   return (
     <section className="pt-32 pb-20 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <RevealOnScroll>
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-amber text-sm font-medium mb-6">
               <BookOpen className="w-4 h-4" />
               AI Education for Business Leaders
@@ -38,16 +69,56 @@ export const BlogList: React.FC = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              We break down exactly how businesses waste money on AI, marketing, and disconnected systems — 
+              We break down exactly how businesses waste money on AI, marketing, and disconnected systems —
               with real numbers, real costs, and real solutions. No fluff. No hype.
             </p>
           </div>
         </RevealOnScroll>
 
+        {/* Stats + Tag Filter */}
+        {!isLoading && posts && posts.length > 0 && (
+          <div className="mb-8 space-y-4">
+            <div className="text-center text-sm text-muted-foreground">
+              <span className="text-amber font-semibold">{filteredPosts.length}</span>
+              {' '}article{filteredPosts.length !== 1 ? 's' : ''}
+              {activeTag && <> tagged <span className="text-foreground">#{activeTag.replace(/\s+/g, '')}</span></>}
+            </div>
+            {topTags.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2">
+                {activeTag && (
+                  <button
+                    onClick={() => { setActiveTag(null); setVisibleCount(PAGE_SIZE); }}
+                    className="inline-flex items-center gap-1 text-xs bg-amber/20 text-amber px-3 py-1.5 rounded-full hover:bg-amber/30 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                    Clear filter
+                  </button>
+                )}
+                {topTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      setActiveTag(activeTag === tag ? null : tag);
+                      setVisibleCount(PAGE_SIZE);
+                    }}
+                    className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
+                      activeTag === tag
+                        ? 'bg-amber text-background'
+                        : 'glass text-muted-foreground hover:text-amber'
+                    }`}
+                  >
+                    #{tag.replace(/\s+/g, '')}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Blog Posts Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="glass rounded-xl p-6">
                 <Skeleton className="h-48 w-full mb-4 rounded-lg" />
                 <Skeleton className="h-6 w-3/4 mb-2" />
@@ -62,18 +133,32 @@ export const BlogList: React.FC = () => {
               Unable to load blog posts. Please try again later.
             </p>
           </div>
-        ) : posts && posts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post, index) => (
-              <RevealOnScroll key={post.id} delay={index * 0.1}>
-                <BlogCard post={post} />
-              </RevealOnScroll>
-            ))}
-          </div>
+        ) : visiblePosts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {visiblePosts.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
+            </div>
+
+            {remaining > 0 && (
+              <div className="mt-12 flex justify-center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="gap-2"
+                >
+                  Load More ({remaining} remaining)
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground">
-              No blog posts available yet. Check back soon!
+              {activeTag ? 'No posts match this tag.' : 'No blog posts available yet. Check back soon!'}
             </p>
           </div>
         )}
@@ -85,20 +170,20 @@ export const BlogList: React.FC = () => {
               Stop Wasting Money on Broken Systems
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM 
+              Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM
               systems — and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a 
-                href="mailto:hello@aetheris.technology?subject=14-Day%20Operational%20Systems%20Diagnostic" 
+              <a
+                href="mailto:hello@aetheris.technology?subject=14-Day%20Operational%20Systems%20Diagnostic"
                 className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium"
               >
                 <span>Book Your Diagnostic</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
-              <a 
-                href="https://www.linkedin.com/in/aisystemsarchitect" 
-                target="_blank" 
+              <a
+                href="https://www.linkedin.com/in/aisystemsarchitect"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 text-amber hover:text-amber/80 transition-colors"
               >
