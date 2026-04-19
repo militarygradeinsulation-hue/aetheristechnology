@@ -7,75 +7,52 @@ import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+// Consolidated to 4 high-signal categories — keeps the "no fluff" promise
 const ISSUE_CATEGORIES = [
   {
-    id: 'marketing',
-    label: 'Marketing is not working',
+    id: 'brand-digital',
+    label: 'Brand & Digital Presence',
+    emoji: '\u{1F3AF}',
+    issues: [
+      'Website looks outdated or unprofessional',
+      'Customers do not understand what we do',
+      'Visitors land but never convert',
+      'Brand sounds like everyone else',
+      'Messaging does not match the quality of our work',
+    ],
+  },
+  {
+    id: 'marketing-sales',
+    label: 'Marketing & Sales Pipeline',
     emoji: '\u{1F4B8}',
     issues: [
-      'Spending money on ads with no ROI',
-      'No idea where my leads actually come from',
-      'Social media feels pointless',
-      'My competitors are outranking me everywhere',
-      'I do not have a content strategy',
-    ],
-  },
-  {
-    id: 'website',
-    label: 'My website is a problem',
-    emoji: '\u{1F5A5}',
-    issues: [
-      'It looks outdated or unprofessional',
-      'People visit but never convert',
-      'It is slow or broken on mobile',
-      'No clear call-to-action',
-      'I am embarrassed to send people to it',
-    ],
-  },
-  {
-    id: 'sales',
-    label: 'Sales are stalling',
-    emoji: '\u{1F4C9}',
-    issues: [
-      'Leads go cold because I do not follow up fast enough',
+      'Spending on ads with no measurable ROI',
+      'No idea where leads actually come from',
+      'Leads go cold — follow-up is too slow or inconsistent',
       'No repeatable sales process',
-      'I close deals but cannot scale it',
-      'Do not know what to say on sales calls',
       'Losing deals to cheaper competitors',
     ],
   },
   {
-    id: 'operations',
-    label: 'Internal systems are broken',
+    id: 'operations-crm',
+    label: 'Operations & CRM Systems',
     emoji: '\u{2699}',
     issues: [
-      'My CRM is a mess or I do not have one',
+      'CRM is a mess or does not exist',
       'Team is doing busywork instead of revenue work',
-      'No automation - everything is manual',
+      'Everything is manual — no automation',
       'Data lives in spreadsheets and sticky notes',
-      'I cannot track what is actually working',
+      'Cannot track what is actually working',
     ],
   },
   {
-    id: 'brand',
-    label: 'Brand and positioning feels off',
-    emoji: '\u{1F3AF}',
-    issues: [
-      'Customers do not understand what I do',
-      'I sound like everyone else in my industry',
-      'Pricing feels wrong but I do not know why',
-      'No clear differentiator',
-      'My messaging does not match my quality',
-    ],
-  },
-  {
-    id: 'growth',
-    label: 'Growth has flatlined',
+    id: 'growth-strategy',
+    label: 'Growth & Strategic Direction',
     emoji: '\u{1F680}',
     issues: [
-      'Revenue is stuck and I do not know how to break through',
-      'I am the bottleneck in my own business',
-      'Tried everything and nothing moves the needle',
+      'Revenue is stuck and we cannot break through',
+      'Leadership is the bottleneck',
+      'Tried everything — nothing moves the needle',
       'Do not know which problem to solve first',
       'Need a real strategy, not more tactics',
     ],
@@ -191,7 +168,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             Tell Us What&apos;s <span className="text-gradient-amber">Broken</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Pick what&apos;s slowing you down. We&apos;ll pinpoint the root cause and prescribe exactly what to fix first.
+            Pick the area that&apos;s slowing you down. We&apos;ll pinpoint the root cause and prescribe exactly what to fix first.
           </p>
         </div>
 
@@ -272,8 +249,8 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             <motion.div key="notes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="glass p-6 md:p-8 rounded-2xl space-y-5">
                 <div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">Anything else I should know?</h3>
-                  <p className="text-sm text-muted-foreground">Optional &mdash; but the more detail you give, the sharper the recommendation.</p>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Anything else we should know?</h3>
+                  <p className="text-sm text-muted-foreground">Optional &mdash; but the more detail you give, the sharper our recommendation.</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">

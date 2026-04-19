@@ -7,7 +7,7 @@ export const ThePitch: React.FC = () => {
     {
       icon: Users,
       title: 'Lead Generation',
-      description: 'I build systems that find and qualify prospects automatically — so your pipeline stays full without you chasing.',
+      description: 'We build systems that find and qualify prospects automatically — so your pipeline stays full without you chasing.',
       tags: ['AUTO-PROSPECTING', 'LEAD SCORING', 'ROUTING'],
     },
     {
@@ -25,7 +25,7 @@ export const ThePitch: React.FC = () => {
     {
       icon: BarChart3,
       title: 'You Focus on Your Business',
-      description: 'I handle the systems, the automation, and the infrastructure. You do what you do best — and collect the revenue.',
+      description: 'We handle the systems, the automation, and the infrastructure. You do what you do best — and collect the revenue.',
       tags: ['CORE FOCUS', 'FULL AUTOMATION', 'SCALE REVENUE'],
     },
   ];
@@ -36,10 +36,10 @@ export const ThePitch: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              What I <span className="text-amber glow-text">Actually Do</span>
+              What We <span className="text-amber glow-text">Actually Do</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              I step into your business, find the gaps bleeding revenue, and build the systems to fix them.
+              We step into your business, find the gaps bleeding revenue, and build the systems to fix them.
             </p>
           </div>
         </RevealOnScroll>
@@ -75,7 +75,7 @@ export const ThePitch: React.FC = () => {
               That's what a Co-CEO does for your business.
             </p>
             <p className="text-lg text-muted-foreground mb-6">
-              I find the gaps. I build the systems. You run your business.
+              We find the gaps. We build the systems. You run your business.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a href="tel:+13173762110">

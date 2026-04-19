@@ -239,7 +239,7 @@ export const ServicesPricing: React.FC = () => {
               Services & <span className="text-gradient-amber">Investment</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Every custom engagement begins with one of these foundational diagnostics. Mix &amp; match for up to 20% off.
+              Strategic engagement begins with a foundational diagnostic — investment scaled to scope of inquiry. Mix &amp; match for up to 20% off.
             </p>
 
             {/* Billing Toggle */}
@@ -286,8 +286,14 @@ export const ServicesPricing: React.FC = () => {
                   }`}
                 >
                   {service.badge && (
-                    <span className="absolute -top-2 right-4 text-[10px] font-bold bg-primary/20 text-primary px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {service.badge}
+                    <span
+                      className={`absolute -top-2 right-4 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
+                        service.badge === 'FOUNDATIONAL'
+                          ? 'bg-amber/[0.08] text-amber border-amber/40'
+                          : 'bg-primary/20 text-primary border-primary/30'
+                      }`}
+                    >
+                      {service.badge === 'FOUNDATIONAL' ? 'Foundational Engagement' : service.badge}
                     </span>
                   )}
 
@@ -377,8 +383,14 @@ export const ServicesPricing: React.FC = () => {
 
                 <div className="p-6 md:p-8">
                   {expandedService.badge && (
-                    <span className="inline-block text-[10px] font-bold bg-primary/20 text-primary px-2.5 py-1 rounded-full uppercase tracking-wider mb-3">
-                      {expandedService.badge}
+                    <span
+                      className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border mb-3 ${
+                        expandedService.badge === 'FOUNDATIONAL'
+                          ? 'bg-amber/[0.08] text-amber border-amber/40'
+                          : 'bg-primary/20 text-primary border-primary/30'
+                      }`}
+                    >
+                      {expandedService.badge === 'FOUNDATIONAL' ? 'Foundational Engagement' : expandedService.badge}
                     </span>
                   )}
 

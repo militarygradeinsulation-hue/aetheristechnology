@@ -100,26 +100,27 @@ export const CEOProfile: React.FC = () => {
               <h3 className="text-3xl font-bold text-foreground mb-6 font-display">
                 Strategic Business Architect & AI Growth Expert
               </h3>
-              
+
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  With 20 years of proven experience building high-impact systems that fuel growth, 
-                  Joseph Toney is a Marine Corps leader turned AI strategist who personally codes 
-                  solutions that scale revenue across industries.
+                  With 20 years of proven experience building high-impact systems that fuel growth,
+                  Joseph Toney leads the Aetheris AI team — a Marine Corps veteran turned AI strategist
+                  who personally architects the solutions our clients deploy.
                 </p>
-                
+
                 <p>
-                  As CEO and Founder of Aetheris AI (formerly CTOguy), Joseph operates with a CEO mindset, 
-                  merging data, strategy, and execution to build marketing engines that move the needle. 
-                  From commanding 200+ Marines in the United States Marine Corps to scaling teams of 60+ 
-                  employees, he brings military precision to business execution.
+                  As Founder of Aetheris AI (formerly CTOguy), Joseph operates with a CEO mindset,
+                  merging data, strategy, and execution to build marketing engines that move the needle.
+                  From commanding 200+ Marines in the United States Marine Corps to scaling teams of 60+
+                  employees, he brings military precision to business execution. The Aetheris AI team
+                  pairs that operational discipline with deep AI engineering capacity.
                 </p>
 
                 <div className="glass p-6 rounded-xl mt-6">
                   <p className="italic text-foreground">
-                    "I don't just lead teams—I build the systems myself: coded, tested, deployed. 
-                    Whether working with aerospace contractors or small businesses, I deliver results 
-                    that leaders can measure."
+                    "We don't just lead teams — we build the systems ourselves: coded, tested, deployed.
+                    Whether the client is an aerospace contractor or a regional SMB, we deliver results
+                    leaders can measure."
                   </p>
                 </div>
 
@@ -170,12 +171,20 @@ export const CEOProfile: React.FC = () => {
 
                 <div className="pt-4 space-y-2 text-sm">
                   <p>
-                    <span className="text-amber font-semibold">Education:</span> Master's in Marketing (4.0 GPA) • 
+                    <span className="text-amber font-semibold">Education:</span> Master's in Marketing (4.0 GPA) •
                     Doctorate in Strategic Media starting 2026
                   </p>
                   <p>
-                    <span className="text-amber font-semibold">Certifications:</span> IBM AI Engineering • 
+                    <span className="text-amber font-semibold">Certifications:</span> IBM AI Engineering •
                     Harvard AI for Business • Google Analytics & Ads Expert
+                  </p>
+                  <p>
+                    <span className="text-amber font-semibold">Domains:</span> AI strategy & implementation •
+                    LLM workflow architecture • CRM/ERP systems • Marketing automation • Operational diagnostics
+                  </p>
+                  <p>
+                    <span className="text-amber font-semibold">Industries Served:</span> Aerospace & defense •
+                    Healthcare • Logistics • Construction • Professional services • SaaS
                   </p>
                 </div>
               </div>

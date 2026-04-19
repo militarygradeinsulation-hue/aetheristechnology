@@ -6,6 +6,7 @@ import { ThreeAreas } from '@/components/ThreeAreas';
 import { FreeTools } from '@/components/FreeTools';
 import { ServiceCapabilities } from '@/components/ServiceCapabilities';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
+import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 import { ContactForm } from '@/components/ContactForm';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -66,7 +67,7 @@ const Home = () => {
               <strong className="text-foreground">Aetheris AI</strong> is a B2B AI consulting firm in
               Indianapolis, Indiana that embeds as a Co-CEO with US businesses to expose revenue leaks,
               rebuild broken operational systems, and deploy AI agents, LLMs, and workflow automation.
-              Engagements range from a $750 Rapid Digital Evaluation to a $7,500 14-Day Operational
+              Engagements range from a $750 Rapid Strategic Evaluation to a $7,500 14-Day Operational
               Diagnostic and $25,000+ custom AI implementations. Call (317) 376-2110.
             </p>
           </div>
@@ -75,6 +76,7 @@ const Home = () => {
         <ThreeAreas />
         <ServiceCapabilities />
         <FreeTools />
+        <VerifiableOutcomes />
         <WhatsWrongDiagnostic />
         <ContactForm />
         <Footer />

@@ -107,10 +107,10 @@ export const ContactForm: React.FC = () => {
 
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
-            Tell Me What's <span className="text-gradient-amber">Broken</span>
+            Tell Us What's <span className="text-gradient-amber">Broken</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            No fluff. Tell me what's going on in your business and I'll tell you exactly what I'd do about it.
+            No fluff. Tell us what's going on in your business and we'll tell you exactly what we'd do about it.
           </p>
         </div>
 
@@ -168,7 +168,7 @@ export const ContactForm: React.FC = () => {
               name="message"
               value={form.message}
               onChange={handleChange}
-              placeholder="Tell me what's not working in your business — the more detail, the better my response."
+              placeholder="Tell us what's not working in your business — the more detail, the sharper our response."
               required
               maxLength={2000}
               rows={5}
