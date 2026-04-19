@@ -16,39 +16,43 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const syncProfile = async (user: User) => {
+  const { error } = await supabase.from('profiles').upsert(
+    {
+      id: user.id,
+      full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+      email: user.email,
+    },
+    { onConflict: 'id' }
+  );
+
+  if (error) {
+    console.error('Profile sync failed', error);
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const applySession = (session: Session | null) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Create profile on first sign-in (covers both email and OAuth)
-      if (event === 'SIGNED_IN' && session?.user) {
-        const { data: existing } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', session.user.id)
-          .maybeSingle();
-
-        if (!existing) {
-          await supabase.from('profiles').insert({
-            id: session.user.id,
-            full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || null,
-            email: session.user.email,
-          });
-        }
-      }
-    });
+    };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      applySession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      applySession(session);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        void syncProfile(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
