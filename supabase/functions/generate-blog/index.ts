@@ -249,7 +249,7 @@ ${brandedFramework}
 
 **Your products deserve a digital presence that matches their quality. Let's build it.**
 
-📧 [aetheris.technology@outlook.com](mailto:aetheris.technology@outlook.com)
+📧 [hello@aetheris.technology](mailto:hello@aetheris.technology)
 📞 (317) 376-2110
 🔗 [Connect with Joseph Toney on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 🌐 [aetheris.technology](https://aetheris.technology)

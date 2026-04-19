@@ -23,7 +23,7 @@ const ContactPage = () => {
             "@type": "Organization",
             "name": "Aetheris AI",
             "telephone": "+1-317-376-2110",
-            "email": "aetheris.technology@outlook.com",
+            "email": "hello@aetheris.technology",
             "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" }
           }
         }}
