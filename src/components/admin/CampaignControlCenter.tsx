@@ -10,6 +10,7 @@ import { PlaybookAttachments } from './campaign/PlaybookAttachments';
 import { TemplateEditor } from './campaign/TemplateEditor';
 import { LeadsManager } from './campaign/LeadsManager';
 import { CampaignActivity } from '@/components/CampaignActivity';
+import { FailedSends } from './campaign/FailedSends';
 
 interface Settings {
   is_active: boolean;
@@ -224,6 +225,8 @@ export const CampaignControlCenter: React.FC = () => {
       </div>
 
       <ImageGenerator />
+
+      <FailedSends />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PlaybookAttachments />
