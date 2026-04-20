@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, Mail, Phone, MapPin, Linkedin, ArrowRight } from 'lucide-react';
+import { X, Mail, Phone, MapPin, Linkedin, ArrowRight, Calendar } from 'lucide-react';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 interface ContactModalProps {
   isOpen: boolean;
