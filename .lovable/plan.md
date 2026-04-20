@@ -1,65 +1,49 @@
 
 
-## Add Structural DNA Theft Framework to Content System
+## Rebrand Blog Cards to Case File Format with Architect Logo
 
 ### What this does
 
-Adds the "steal structure, not voice" principle and the 13-person influence list as a structural reference layer in the content generation prompt. The AI will model post structures after proven formats from Hormozi, Naval, Jocko, Rory Sutherland, and others — without copying their voice. Also saves the full framework to project memory.
+Replaces all per-post blog images with "The Architect" logo and adds sequential case file numbering (CASE FILE #001, #002, etc.) to every blog card. Each card shows the industry label "Commercial playground manufacturer" and the case file ID as a forensic badge.
 
 ### Technical details
 
-**1. New memory file: `mem://marketing/structural-influences`**
+**1. Copy uploaded image to project: `src/assets/architect-logo.jpg`**
 
-Stores the full framework:
-- Core principle: steal structure, not voice
-- Who NOT to steal from (AI consulting, playground industry, format-owners)
-- Who TO steal from, organized by tier:
-  - Tier 1 (direct voice cousins): Hormozi, Rory Sutherland, Naval, Jocko
-  - Tier 2 (adjacent-industry operators): Tommy Mello, Sam Parr, Codie Sanchez
-  - Tier 3 (structure masters): Justin Welsh, Daniel Priestley, Harry Dry
-  - Tier 4 (wildcards): Morgan Housel, Derek Sivers, Jon Matzner
-- For each: what to steal and which of the five formats it maps to
+Copy `user-uploads://architect-logo.jpg` into `src/assets/` so it can be imported as an ES6 module.
 
-**2. Update edge function prompt: `supabase/functions/generate-social-content/index.ts`**
+**2. Update `src/components/BlogCard.tsx`**
 
-Add a new section before the Seven Rules called "STRUCTURAL DNA — STEAL STRUCTURE, NOT VOICE" that instructs the AI:
+- Remove all 26+ individual blog image imports and the `blogImages`, `keywordImageMap`, `allImages` maps, and `getImageForSlug` function
+- Import the single Architect logo image
+- Accept a new `index` prop (0-based position in the sorted list) to compute the case file number
+- Replace the image area: show the Architect logo centered on a dark background
+- Add a "CASE FILE #XXX" badge overlay (top-left of the image, crimson background, mono font) where XXX is zero-padded 3-digit number based on index (newest = highest number)
+- Add "Industry: Commercial playground manufacturer" as a subtle label below the tags or above the title
+- Keep the "Aetheris AI Studio" watermark in bottom-right
+- Export `getImageForSlug` as a no-op or remove it (check if it's used elsewhere)
 
-- Case Files should use Hormozi's "named framework + reveal-then-math" structure and Harry Dry's 3-beat (situation, decision, result) pacing
-- Leak of the Week should use Rory Sutherland's "everybody thinks X but actually Y" reversal hook
-- Operator's Journal should use Naval's aphoristic stacking and Morgan Housel's "one thing I've noticed" meditation format
-- Contrarian posts should use Codie Sanchez's "here's what nobody tells you" frame
-- Hooks should follow Justin Welsh's scroll-stop formulas — flat declarative, specific number, pattern interrupt
-- All posts should use Hormozi-style short-paragraph pacing (1-3 lines max)
-- Jocko's command-style sentences for Case Files that use ownership framing
-- Sam Parr's "I met a guy who..." narrative openers for story-driven Case Files
-- Tommy Mello's operational granularity and specific-revenue hooks
+**3. Update `src/components/BlogList.tsx`**
 
-Add explicit guardrails:
-- Never mimic the voice of anyone in AI consulting
-- Never echo playground/parks industry voices
-- Steal bones, not skin — the structure is invisible to the reader
+- Pass `index` prop to each `BlogCard` — computed as `(totalCount - currentIndex)` so the newest post gets the highest case file number
+- No other changes needed
 
-**3. Update memory: `mem://marketing/content-architecture`**
+**4. Check for other usages of `getImageForSlug`**
 
-Add a "Structural Influences" section referencing the principle and the tier list, with a pointer to the full memory file.
-
-**4. Update memory: `mem://index.md`**
-
-Add reference to the structural influences memory file.
+Search for imports of this function in BlogPostPage or elsewhere and update if needed to use the Architect logo.
 
 ### Files touched
 
 | File | Action |
 |------|--------|
-| `mem://marketing/structural-influences` | New — full 13-person influence framework with steal-targets per format |
-| `mem://marketing/content-architecture` | Add structural influences section |
-| `mem://index.md` | Add reference |
-| `supabase/functions/generate-social-content/index.ts` | Add structural DNA instructions to prompt (before the Seven Rules) |
+| `src/assets/architect-logo.jpg` | New — copied from upload |
+| `src/components/BlogCard.tsx` | Replace all images with Architect logo, add CASE FILE badge + industry label |
+| `src/components/BlogList.tsx` | Pass index prop to BlogCard |
+| Any file importing `getImageForSlug` | Update to use Architect logo |
 
 ### What does NOT change
 
-- The five-format architecture — identical
-- UI rendering in SocialContentGenerator — no changes needed
-- Blog/playbook generation — untouched
-- LinkedIn posting queue — unrelated
+- Blog post content, slugs, tags, excerpts — all identical
+- Blog detail page layout — only the list/card view changes
+- Content generation system — unrelated
 
