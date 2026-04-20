@@ -29,7 +29,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <img
               src={architectLogo}
               alt="The Architect — Aetheris Business Forensics Operator badge"
-              className="w-56 md:w-72 h-auto rounded-full shadow-2xl"
+              className="w-[28rem] md:w-[36rem] h-auto rounded-full shadow-2xl"
               loading="eager"
             />
           </div>
