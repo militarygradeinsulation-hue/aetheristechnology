@@ -116,3 +116,9 @@ verify_jwt = false
 
 [functions.infer-business-context]
 verify_jwt = false
+
+[functions.rb2b-webhook]
+verify_jwt = false
+
+[functions.export-retargeting-audience]
+verify_jwt = false
