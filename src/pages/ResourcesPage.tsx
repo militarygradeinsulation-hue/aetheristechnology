@@ -65,15 +65,18 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 font-display">
-                Strategic <span className="text-amber glow-text">Playbooks</span>
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                Field Manuals
+              </div>
+              <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground mb-4">
+                Playbooks from the field.
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-                The frameworks, data, and methodologies behind our Co-CEO consulting model. 
-                Download them. Study them. Then call us when you realize you need help executing.
+                The frameworks behind The Leak Audit™ — the patterns we see bleeding revenue across operations, 
+                marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                Built from real engagements. Backed by 2026 market data. No fluff.
+                Free to download. The hard part is implementing them — that's what we get hired for.
               </p>
             </RevealOnScroll>
           </div>
@@ -128,29 +131,33 @@ const ResourcesPage = () => {
         <section className="pb-24 px-4">
           <div className="max-w-4xl mx-auto">
             <RevealOnScroll>
-              <div className="glass p-10 md:p-14 rounded-2xl border-2 border-amber/30 text-center relative overflow-hidden">
+              <div className="glass p-10 md:p-14 rounded-sm border-2 border-amber/30 text-center relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber/10 rounded-full blur-3xl" />
                 <div className="relative z-10">
-                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-display">
-                    Reading Won't Fix Your <span className="text-gradient-amber">Business</span>
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                    Reading ≠ Sealing
+                  </div>
+                  <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
+                    Playbooks show the pattern. The <span className="text-crimson">Forensic Diagnostic</span> shows your wound.
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                    These playbooks show you what's broken. The 14-Day Operational Systems Diagnostic shows you exactly where — and builds the systems to fix it.
+                    Free playbooks teach the patterns we see across businesses. The Forensic Diagnostic ($2,500 flat) 
+                    names the leaks bleeding <em>your</em> revenue right now — and credits in full toward the rebuild.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="tel:+13173762110">
-                      <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                        <Phone className="mr-2 w-5 h-5" /> Call Now — (317) 376-2110
+                    <a href="/leak-audit">
+                      <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
+                        Run the Free Leak Audit™ <ArrowRight className="ml-2 w-5 h-5" />
                       </Button>
                     </a>
-                    <a href="mailto:hello@aetheris.technology?subject=14-Day%20Diagnostic%20Inquiry">
+                    <a href="tel:+13173762110">
+                      <Button size="lg" variant="outline" className="glass-hover border-border">
+                        <Phone className="mr-2 w-5 h-5" /> (317) 376-2110
+                      </Button>
+                    </a>
+                    <a href="mailto:hello@aetheris.technology?subject=Forensic%20Diagnostic%20Inquiry">
                       <Button size="lg" variant="outline" className="glass-hover border-border">
                         <Mail className="mr-2 w-5 h-5" /> Email to Start
-                      </Button>
-                    </a>
-                    <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer">
-                      <Button size="lg" variant="outline" className="glass-hover border-amber/30 text-amber hover:bg-amber/10">
-                        View the Diagnostic <ArrowRight className="ml-2 w-5 h-5" />
                       </Button>
                     </a>
                   </div>

@@ -14,11 +14,14 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              Let's Find What's <span className="text-gradient-amber">Costing You</span>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+              Open a Case
+            </div>
+            <h2 className="font-forensic text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              Let's find where you're <span className="text-crimson">leaking</span>.
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              No pitch decks. No runaround. Pick the way that's easiest for you and let's talk about what's actually going on in your business.
+              No pitch decks. No funnels. Pick the channel that's easiest, and we'll start the autopsy.
             </p>
           </div>
         </RevealOnScroll>
@@ -82,35 +85,38 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
           </RevealOnScroll>
         </div>
 
-        {/* The 14-Day Diagnostic CTA */}
+        {/* The Forensic Diagnostic CTA */}
         <RevealOnScroll delay={0.5}>
-          <div className="max-w-4xl mx-auto glass p-10 md:p-14 rounded-2xl border-2 border-amber/30 text-center relative overflow-hidden">
+          <div className="max-w-4xl mx-auto glass p-10 md:p-14 rounded-sm border-2 border-amber/30 text-center relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber/10 rounded-full blur-3xl" />
             
             <div className="relative z-10">
-              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-display">
-                The 14-Day Operational Systems Diagnostic
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                Operator-Led Investigation · $2,500 Flat
+              </div>
+              <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
+                The Forensic Diagnostic
               </h3>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                I spend 14 days inside your business — your CRM, your marketing, your sales pipeline, 
-                your team workflows — and show you exactly where the money is leaking. No guesswork. Just numbers.
+                14 days inside your operation — CRM, inboxes, sales pipeline, team workflows. 
+                Every leak named, traced, and dollar-quantified in a sealed case file. Applied toward engagement if you proceed.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="glass p-4 rounded-xl">
+                <div className="glass p-4 rounded-sm border border-border/40">
                   <Clock className="w-6 h-6 text-amber mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-foreground">14 Days Deep</p>
-                  <p className="text-xs text-muted-foreground">Full operational audit</p>
+                  <p className="text-sm font-semibold text-foreground">14-Day Investigation</p>
+                  <p className="text-xs text-muted-foreground">Operator embedded, not observing</p>
                 </div>
-                <div className="glass p-4 rounded-xl">
+                <div className="glass p-4 rounded-sm border border-border/40">
                   <Shield className="w-6 h-6 text-amber mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-foreground">Co-CEO Model</p>
-                  <p className="text-xs text-muted-foreground">I work alongside you, not above you</p>
+                  <p className="text-sm font-semibold text-foreground">Sealed Case File</p>
+                  <p className="text-xs text-muted-foreground">Every leak named & quantified</p>
                 </div>
-                <div className="glass p-4 rounded-xl">
+                <div className="glass p-4 rounded-sm border border-border/40">
                   <ArrowRight className="w-6 h-6 text-amber mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-foreground">Real Deliverables</p>
-                  <p className="text-xs text-muted-foreground">Actionable systems, not a PDF</p>
+                  <p className="text-sm font-semibold text-foreground">Credited Toward Fix</p>
+                  <p className="text-xs text-muted-foreground">$2,500 applied to engagement</p>
                 </div>
               </div>
 
@@ -118,25 +124,19 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-amber hover:bg-amber/90 text-background">
                     <Calendar className="mr-2 w-5 h-5" />
-                    Book a Meeting
+                    Book the Diagnostic
+                  </Button>
+                </a>
+                <a href="/leak-audit">
+                  <Button size="lg" variant="outline" className="glass-hover border-amber/30 text-amber hover:bg-amber/10">
+                    Run the Free Leak Audit™
+                    <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </a>
                 <a href="tel:+13173762110">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <Phone className="mr-2 w-5 h-5" />
-                    Call to Start — (317) 376-2110
-                  </Button>
-                </a>
-                <a href="mailto:hello@aetheris.technology?subject=14-Day%20Diagnostic%20Inquiry&body=I%27m%20interested%20in%20the%2014-Day%20Operational%20Systems%20Diagnostic.%20Here%27s%20a%20bit%20about%20my%20business%3A%0A%0A">
                   <Button size="lg" variant="outline" className="glass-hover border-border">
-                    Email to Start
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </a>
-                <a href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="glass-hover border-amber/30 text-amber hover:bg-amber/10">
-                    View Full Diagnostic Breakdown
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                    <Phone className="mr-2 w-5 h-5" />
+                    (317) 376-2110
                   </Button>
                 </a>
               </div>

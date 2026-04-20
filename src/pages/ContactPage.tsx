@@ -13,15 +13,15 @@ const ContactPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Contact Aetheris AI — Indianapolis Consulting"
-        description="Ready to fix what's broken? AI business consulting in Indianapolis. Call (317) 376-2110 or start the 14-Day Operational Diagnostic."
+        title="Contact the Forensics Operator | Aetheris Indianapolis"
+        description="Find where your business is leaking. Call (317) 376-2110, email hello@aetheris.technology, or run the free Leak Audit™. Indianapolis, US-wide."
         path="/contact"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "ContactPage",
           "mainEntity": {
             "@type": "Organization",
-            "name": "Aetheris AI",
+            "name": "Aetheris",
             "telephone": "+1-317-376-2110",
             "email": "hello@aetheris.technology",
             "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" }
