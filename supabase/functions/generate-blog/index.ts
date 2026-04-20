@@ -316,6 +316,15 @@ ${brandedFramework}
 
 ## WRITING RULES
 
+### FORENSIC BLOG STYLE — NON-NEGOTIABLE
+- Lead with the forensic frame. First 3 lines match Case File DNA — a finding, not an intro.
+- H2s as dossier section markers: "THE INVENTORY", "THE AUTOPSY", "THE MATH", "THE FIX", "THE PATTERN"
+- Numbers stay in digits, currency stays explicit, time frames stay specific. "$1.4M/year" not "millions."
+- Break every 3-4 sentences. Air on the page is part of the brand.
+- Every blog ends with a single clean CTA — the 14-Point Leak Audit, no alternatives, no "also consider."
+- No generic intro paragraphs. No "In today's rapidly evolving business landscape…" Start in the middle.
+- ONE-SENTENCE TEST: Could an AI-consultant LinkedIn bot have written this? If yes, rewrite until the answer is no.
+
 ### Title Rules
 - Under 60 characters
 - Must signal operational/revenue forensics — not generic marketing advice
