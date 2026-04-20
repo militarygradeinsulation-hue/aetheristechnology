@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock } from 'lucide-react';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -63,7 +63,10 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook'>('overview');
+  const [syncingOutlook, setSyncingOutlook] = useState(false);
+  const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
+  const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
@@ -207,19 +210,20 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors'] as const).map(tab => (
+          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors', 'outlook'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
+                if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
                 if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : '🏢 Visitor Companies'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : '📤 Outlook Sync'}
             </button>
           ))}
         </div>
@@ -486,6 +490,86 @@ const AdminDashboard: React.FC = () => {
 
         {/* Visitor Companies */}
         {activeTab === 'visitors' && <VisitorCompaniesPanel />}
+
+        {/* Outlook Sync + Posting Schedule */}
+        {activeTab === 'outlook' && (
+          <div className="space-y-8">
+            {/* Sync Button */}
+            <div className="glass p-6 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2">
+                    <Send className="w-5 h-5 text-amber" /> Sync Content to Outlook
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Pushes all published blogs and playbooks as draft emails in your Outlook mailbox for your AI to pull and post to social media.
+                  </p>
+                </div>
+                <Button onClick={handleOutlookSync} disabled={syncingOutlook} size="lg">
+                  {syncingOutlook ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                  {syncingOutlook ? 'Syncing...' : 'Sync Now'}
+                </Button>
+              </div>
+
+              {syncResults && (
+                <div className="space-y-2 mt-4">
+                  <p className="text-sm font-medium text-foreground">
+                    ✅ {syncResults.filter(r => r.status === 'synced').length} synced · 
+                    ⚠️ {syncResults.filter(r => r.status.startsWith('error')).length} errors · 
+                    📦 {syncResults.length} total
+                  </p>
+                  <div className="max-h-60 overflow-y-auto space-y-1">
+                    {syncResults.map((r, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm">
+                        <span className={`px-2 py-0.5 rounded text-xs font-mono ${
+                          r.status === 'synced' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {r.type}
+                        </span>
+                        <span className="text-foreground truncate flex-1">{r.title}</span>
+                        <span className={`text-xs ${r.status === 'synced' ? 'text-green-400' : 'text-red-400'}`}>{r.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Posting Schedule */}
+            <div className="glass p-6 rounded-xl">
+              <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2 mb-4">
+                <Clock className="w-5 h-5 text-amber" /> LinkedIn Posting Schedule
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Weekly content framework based on the LinkedIn Growth Strategy. Your secondary AI should follow this calendar when pulling drafts.
+              </p>
+
+              {postingSchedule.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">Loading schedule...</div>
+              ) : (
+                <div className="space-y-3">
+                  {postingSchedule
+                    .sort((a, b) => a.day_of_week - b.day_of_week)
+                    .map(slot => (
+                      <div key={slot.id} className="flex items-center gap-4 bg-secondary/30 p-4 rounded-lg">
+                        <div className="w-12 h-12 rounded-lg bg-amber/10 flex items-center justify-center">
+                          <span className="text-amber font-bold font-mono text-sm">{slot.day_name}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-foreground">{slot.content_type}</div>
+                          <div className="text-sm text-muted-foreground">{slot.strategic_goal}</div>
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">{slot.post_time?.slice(0, 5) || '09:00'}</div>
+                        {slot.notes && (
+                          <div className="text-xs text-muted-foreground max-w-48 truncate" title={slot.notes}>{slot.notes}</div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
