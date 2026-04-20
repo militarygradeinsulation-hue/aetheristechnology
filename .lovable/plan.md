@@ -1,67 +1,103 @@
 
 
-## Rebrand Social Content Generator to LinkedIn Growth Framework
+## Connect LinkedIn to Admin — Direct Posting with Auto-Schedule + Override
 
 ### What this does
 
-Rewrites the `generate-social-content` edge function prompt and the `SocialContentGenerator` component so the admin content pack follows the four-pillar LinkedIn growth framework: Brandjacking, Newsjacking, Namejacking, and Hot Takes, plus Authority posts — instead of generic "LinkedIn posts / Facebook posts / ad hooks."
+1. Stores your LinkedIn app credentials (Client ID and Client Secret) as secrets.
+2. Implements LinkedIn OAuth 2.0 authorization flow so you can authorize once from your admin dashboard.
+3. Creates a post queue system — posts auto-generate on schedule, but you can review, edit, skip, or force-post any item from the admin UI.
+4. Posts go out to LinkedIn via the Posts API (`POST https://api.linkedin.com/rest/posts`) using the `w_member_social` scope.
 
 ### Technical details
 
-**1. Rewrite edge function prompt: `supabase/functions/generate-social-content/index.ts`**
+**1. Store LinkedIn credentials as secrets**
 
-Replace the generic social media prompt (lines 70-89) with the LinkedIn Growth Framework prompt that instructs the AI to generate:
+Two secrets to add:
+- `LINKEDIN_CLIENT_ID` — your app's Client ID
+- `LINKEDIN_CLIENT_SECRET` — your app's Primary Client Secret
+
+**2. New table: `linkedin_tokens`**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | int (default 1) | Single-row config |
+| access_token | text | OAuth access token |
+| refresh_token | text | For token refresh |
+| expires_at | timestamptz | When access token expires |
+| linkedin_person_urn | text | `urn:li:person:{id}` for posting |
+| updated_at | timestamptz | Last token update |
+
+RLS: Service role only. Never exposed to client.
+
+**3. New table: `linkedin_post_queue`**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| content | text | Post text (commentary) |
+| format | text | brandjack, newsjack, namejack, hottake, authority |
+| source_type | text | blog, playbook, generated |
+| source_id | uuid | Optional FK to blog_posts/playbooks |
+| status | text | `queued`, `approved`, `posted`, `skipped` |
+| scheduled_for | timestamptz | When to auto-post |
+| posted_at | timestamptz | When it actually posted |
+| linkedin_post_id | text | LinkedIn post URN after posting |
+| created_at | timestamptz | |
+
+RLS: Admin-only via `is_admin()` + service role.
+
+**4. New edge function: `linkedin-auth`**
+
+Handles two actions:
+- `authorize` — Returns the LinkedIn OAuth URL (`https://www.linkedin.com/oauth/v2/authorization`) with redirect back to your admin page. Scopes: `openid profile w_member_social`.
+- `callback` — Exchanges the authorization code for access + refresh tokens, fetches your `urn:li:person` ID via `/v2/userinfo`, stores everything in `linkedin_tokens`.
+- `status` — Returns whether LinkedIn is connected (token exists and not expired).
+
+**5. New edge function: `linkedin-post`**
+
+Two modes:
+- `post` — Takes a post ID from the queue, calls `POST https://api.linkedin.com/rest/posts` with the content, marks it as `posted`.
+- `process-queue` — Finds all `queued` posts with `scheduled_for <= now()`, posts them in order (respecting LinkedIn rate limits), updates status. Can be triggered by cron or manually.
+- `queue-from-content` — Takes generated social content (from the LinkedIn Growth Content Pack) and adds it to the queue with scheduled times based on the posting schedule.
+
+Both functions validate the admin token and use the stored LinkedIn access token.
+
+**6. Admin UI: New "LinkedIn" tab in AdminDashboard**
+
+Replaces/extends the Outlook tab or sits alongside it:
+
+- **Connection status**: Shows whether LinkedIn is authorized, with a "Connect LinkedIn" button that triggers the OAuth flow.
+- **Post Queue**: Table of upcoming posts with columns: Date, Format badge, Content preview, Status. Each row has buttons: "Post Now", "Edit", "Skip", "Approve".
+- **Quick Post**: Text area to compose and post immediately.
+- **Auto-Queue**: Button to pull from the latest LinkedIn Growth Content Pack results and queue them across the weekly schedule.
+- **History**: Recent posted items with LinkedIn post URN links.
+
+### OAuth redirect flow
 
 ```text
-{
-  "businessName": "...",
-  "brandjackPosts": [3 posts] — analyze a well-known brand decision through the business's lens
-  "newsjackPosts": [3 posts] — contextualize a trending industry event within 24-48hrs
-  "namejackPosts": [2 posts] — reference a leader the ICP follows, add unique perspective
-  "hotTakes": [2 posts] — contrarian positions that force agreement/disagreement
-  "authorityPosts": [3 posts] — niche deep-dives, case studies, expertise Q&A
-  "weeklySchedule": [5 entries] — Mon-Fri mapped to the strategic weekly mix
-}
+Admin clicks "Connect LinkedIn"
+  → Edge function returns OAuth URL
+  → Browser redirects to linkedin.com/oauth/v2/authorization
+  → User authorizes
+  → LinkedIn redirects to https://aetheris.technology/admin?linkedin_callback=true&code=xxx
+  → Admin page detects the callback, sends code to linkedin-auth edge function
+  → Edge function exchanges code for tokens, stores in linkedin_tokens
+  → Admin page shows "Connected ✓"
 ```
 
-Each post object keeps `hook`, `body`, `cta` but adds:
-- `format`: brandjack | newsjack | namejack | hottake | authority
-- `targetEntity`: the brand/person/event being referenced
-- `soWhatSentence`: the one-sentence "so what?" pass
-- `strategicGoal`: reach | trust | proof | visibility | retention
-
-The system prompt enforces the three pre-publishing stress tests:
-- "So What?" sentence test
-- Anxiety test for hot takes
-- Insight rule (entity is evidence, not the subject)
-
-**2. Update component: `src/components/SocialContentGenerator.tsx`**
-
-- Replace the three sections (LinkedIn / Facebook / Ad Hooks) with five sections matching the framework pillars: Brandjacking, Newsjacking, Namejacking, Hot Takes, Authority
-- Each card shows the `format` badge, `targetEntity`, the hook/body/cta, and the `soWhatSentence`
-- Add a "Weekly Schedule" section at the bottom showing the Mon-Fri content calendar with strategic goals
-- Update the summary text from "25 pieces" to "13 strategic posts + weekly schedule"
-- Admin mode: all posts visible, no paywall
-- Public mode: show 1 per category free, paywall the rest (keeps existing paywall/checkout logic)
-- Update phase labels to match new flow: "Scraping website...", "Analyzing brand position...", "Generating Brandjack posts...", "Crafting Hot Takes...", "Building weekly schedule..."
-
-**3. Update page title: `src/pages/ContentGeneratorPage.tsx`**
-
-- Change heading from generic "Social Content Generator" to "LinkedIn Growth Content Pack"
-- Update subtitle to reference the four growth formats
-
-### Files touched
+### Files to create/modify
 
 | File | Action |
 |------|--------|
-| `supabase/functions/generate-social-content/index.ts` | Rewrite AI prompt to four-pillar framework |
-| `src/components/SocialContentGenerator.tsx` | Restructure results into 5 format sections + schedule |
-| `src/pages/ContentGeneratorPage.tsx` | Update page heading/subtitle |
+| `supabase/functions/linkedin-auth/index.ts` | New — OAuth flow + token storage |
+| `supabase/functions/linkedin-post/index.ts` | New — Post to LinkedIn + queue processing |
+| `src/pages/AdminDashboard.tsx` | Add LinkedIn tab with connection status, queue, and quick post |
+| Database migration | Create `linkedin_tokens` and `linkedin_post_queue` tables |
 
 ### What does NOT change
 
-- Website scraping logic (Firecrawl) — identical
-- Paywall / Stripe checkout flow — same mechanism, same price
-- Admin library save — same structure
-- The separate `content_posting_schedule` table and Outlook sync — unrelated system
+- Outlook sync — stays as-is, separate concern
+- Content generation — untouched
+- Existing posting schedule table — reused for timing
 
