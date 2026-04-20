@@ -889,6 +889,27 @@ export type Database = {
         }
         Relationships: []
       }
+      prerender_cache: {
+        Row: {
+          etag: string
+          generated_at: string
+          html: string
+          route: string
+        }
+        Insert: {
+          etag: string
+          generated_at?: string
+          html: string
+          route: string
+        }
+        Update: {
+          etag?: string
+          generated_at?: string
+          html?: string
+          route?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
