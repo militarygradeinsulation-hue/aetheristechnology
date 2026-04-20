@@ -5,6 +5,9 @@ import josephToney from '@/assets/joseph-toney.jpg';
 import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 
 export const CEOProfile: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
   useEffect(() => {
     if (!document.getElementById('linkedin-badge-script')) {
       const script = document.createElement('script');
@@ -37,33 +40,27 @@ export const CEOProfile: React.FC = () => {
               <TiltCard>
                 <div className="glass p-10 rounded-2xl max-w-lg">
                   <div className="w-72 h-72 mx-auto mb-8 rounded-full overflow-hidden border-4 border-amber/30 shadow-2xl relative group">
-                    <div style={{ padding: '100% 0 0 0', position: 'relative' }}>
-                      <iframe
-                        src="https://player.vimeo.com/video/1169431542?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
-                        frameBorder="0"
-                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        style={{ position: 'absolute', top: '50%', left: '50%', width: '180%', height: '180%', transform: 'translate(-50%, -50%)' }}
-                        title="Joseph Toney - CEO"
-                        id="ceo-vimeo-player"
-                      />
-                    </div>
+                    <video
+                      ref={videoRef}
+                      src={josephToneyVideo}
+                      poster={josephToney}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
                     <button
                       onClick={() => {
-                        const iframe = document.getElementById('ceo-vimeo-player') as HTMLIFrameElement;
-                        if (iframe) {
-                          const src = iframe.src;
-                          if (src.includes('muted=1')) {
-                            iframe.src = src.replace('muted=1', 'muted=0');
-                          } else {
-                            iframe.src = src.replace('muted=0', 'muted=1');
-                          }
-                        }
+                        const v = videoRef.current;
+                        if (!v) return;
+                        v.muted = !v.muted;
+                        setMuted(v.muted);
                       }}
                       className="absolute bottom-2 right-2 z-10 bg-background/80 backdrop-blur-sm border border-amber/30 rounded-full w-8 h-8 flex items-center justify-center text-amber hover:bg-amber/20 transition-colors opacity-0 group-hover:opacity-100"
-                      aria-label="Toggle mute"
+                      aria-label={muted ? 'Unmute video' : 'Mute video'}
                     >
-                      🔊
+                      {muted ? '🔇' : '🔊'}
                     </button>
                   </div>
                   
