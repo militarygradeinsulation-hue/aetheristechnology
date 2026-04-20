@@ -17,6 +17,8 @@ import { AdminLibrary } from '@/components/AdminLibrary';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
+import { RetargetingPanel } from '@/components/admin/RetargetingPanel';
+import { VisitorCompaniesPanel } from '@/components/admin/VisitorCompaniesPanel';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
@@ -61,7 +63,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors'>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const [eventFilter, setEventFilter] = useState('');
   const [eventsSubTab, setEventsSubTab] = useState<EventsSubTab>('campaign');
@@ -205,7 +207,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo'] as const).map(tab => (
+          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -217,7 +219,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : '✨ SEO/AEO Auto-Optimizer'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : '🏢 Visitor Companies'}
             </button>
           ))}
         </div>
@@ -478,6 +480,12 @@ const AdminDashboard: React.FC = () => {
 
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}
+
+        {/* Retargeting */}
+        {activeTab === 'retargeting' && <RetargetingPanel />}
+
+        {/* Visitor Companies */}
+        {activeTab === 'visitors' && <VisitorCompaniesPanel />}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { FloatingContact } from "@/components/FloatingContact";
 import { SalesChat } from "@/components/SalesChat";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
+import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "./pages/Home";
 import ServicesPage from "./pages/ServicesPage";
@@ -66,6 +67,7 @@ const App = () => (
             element={
               <AuthProvider>
                 <PageViewTracker />
+                <RetargetingPixel />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/services" element={<ServicesPage />} />
