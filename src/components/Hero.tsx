@@ -26,12 +26,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           className="space-y-6"
         >
           <div className="flex justify-center">
-            <img
-              src={architectLogo}
-              alt="The Architect — Aetheris Business Forensics Operator badge"
-              className="w-40 md:w-52 h-auto rounded-full shadow-2xl"
-              loading="eager"
-            />
+            <div className="[perspective:1000px] inline-block">
+              <img
+                src={architectLogo}
+                alt="The Architect — Aetheris Business Forensics Operator badge"
+                className="w-40 md:w-52 h-auto rounded-full shadow-2xl coin-spin cursor-pointer"
+                loading="eager"
+              />
+            </div>
           </div>
 
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-sm border-amber/30">
