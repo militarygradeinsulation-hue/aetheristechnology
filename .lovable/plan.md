@@ -1,56 +1,158 @@
 
 
-## What you're asking
+# Aetheris Design System — Colors, Typography & Style
 
-Replace the current Vimeo video of Joseph Toney on the About page with the new MP4 you just uploaded (`video_2026-04-20_13-48-31.mp4`).
+This is the complete visual language used across the site. Sourced directly from `tailwind.config.ts`, `src/index.css`, and `mem://style/forensic-identity`.
 
-## Where the video appears today
+---
 
-The CEO video lives in `src/components/CEOProfile.tsx` (Vimeo iframe ID `1169431542`), embedded in a circular avatar frame on `/about`. It autoplays, loops, and is muted with a click-to-unmute button.
+## 1. Color Palette
 
-## The plan
+All colors are stored as **HSL CSS variables** in `src/index.css` and exposed through Tailwind tokens (`bg-background`, `text-foreground`, `border-amber`, etc.). Never hardcode hex.
 
-### 1. Add the uploaded MP4 as a project asset
-- Copy `user-uploads://video_2026-04-20_13-48-31.mp4` → `src/assets/joseph-toney-intro.mp4`
-- Imported as an ES module so Vite bundles + hashes it (matches the existing `crm-demo-video.mp4` pattern already in `src/assets/`).
+### Core surface tokens
 
-### 2. Swap the Vimeo iframe for a native `<video>` element in `CEOProfile.tsx`
-- Replace the entire `<iframe src="https://player.vimeo.com/video/1169431542...">` block with:
-  ```tsx
-  <video
-    src={josephToneyVideo}
-    autoPlay
-    muted
-    loop
-    playsInline
-    poster={josephToney}  // existing JPG as fallback frame
-    className="absolute inset-0 w-full h-full object-cover"
-  />
-  ```
-- Keep the circular crop, amber border, and the existing mute toggle button — but rewire it to flip `videoEl.muted` instead of swapping iframe src params (cleaner, no reload flash).
-- Drop the now-unused Vimeo-specific `padding: 100% 0 0 0` wrapper since `<video>` handles aspect ratio with the parent's `aspect-square`-equivalent box.
+| Token | HSL | Usage |
+|---|---|---|
+| `--background` | `220 15% 8%` | Page background — near-black charcoal |
+| `--foreground` | `40 10% 92%` | Primary text — warm off-white |
+| `--card` | `220 14% 12%` | Card surface |
+| `--card-foreground` | `40 10% 92%` | Text on cards |
+| `--popover` | `220 14% 10%` | Dropdowns, modals |
+| `--surface-elevated` | `220 14% 14%` | Glass panels, elevated UI |
+| `--surface-overlay` | `220 14% 10%` | Overlay backdrops |
+| `--muted` | `220 12% 16%` | Subtle backgrounds |
+| `--muted-foreground` | `220 10% 55%` | Secondary text, labels |
+| `--border` | `220 12% 20%` | Default border |
+| `--input` | `220 12% 20%` | Form input border |
 
-### 3. Leave everything else alone
-- `OperatorBio.tsx` (the new forensic bio on `/about`) keeps using the still photo `joseph-toney.jpg` — the photo there reads better in the case-file aesthetic than a looping video. Confirm if you want that one swapped to video too.
-- `Services.tsx` Vimeo embeds (services explainers, not Joseph) — untouched.
-- `LeakAuditPage` HubSpot link — untouched.
+### Brand accents
 
-## Files touched
+| Token | HSL | Usage |
+|---|---|---|
+| `--primary` / `--amber-glow` | `36 90% 55%` | **Amber** — primary CTAs, glows, highlights, brand accent |
+| `--accent` | `36 70% 45%` | Deeper amber for hover/active states |
+| `--ring` | `36 90% 55%` | Focus ring |
+| `--secondary` | `220 12% 18%` | Neutral secondary buttons |
 
-**Created**
-- `src/assets/joseph-toney-intro.mp4` (copied from upload)
+### Forensic signal — crimson (use sparingly)
 
-**Edited**
-- `src/components/CEOProfile.tsx` (Vimeo iframe → native `<video>` with new asset; mute button rewired)
+| Token | HSL | Usage |
+|---|---|---|
+| `--crimson` | `0 65% 38%` | **Reserved exclusively for "leak" signals** — dollar bleeds, "ACTIVE" stamps, the word *leaking* |
+| `--crimson-deep` | `0 70% 28%` | Crimson hover/depth |
+| `--destructive` | `0 72% 51%` | Errors, destructive actions only |
 
-## Validation
+**Crimson rule:** never use crimson decoratively. It signals revenue loss, active investigations, or critical alerts. Amber remains the brand color.
 
-- Load `/about` (or wherever `CEOProfile` is mounted) → new video autoplays muted in the circular avatar frame, loops cleanly.
-- Click the speaker button → audio toggles without a reload flash.
-- Network tab → no request to `player.vimeo.com/video/1169431542`; one request for the bundled `joseph-toney-intro.[hash].mp4`.
-- Mobile Safari → `playsInline` keeps it inside the frame instead of forcing fullscreen.
+---
 
-## One quick question before I build
+## 2. Gradients & Shadows
 
-The `OperatorBio` block on `/about` (the forensic operator dossier) currently uses the **still photo**. Want me to also swap that to the new video, or keep the still there and only update the `CEOProfile` component? Default if you don't reply: still photo stays in `OperatorBio`, video only replaces in `CEOProfile`.
+```
+--gradient-primary: linear-gradient(135deg, hsl(36 90% 55%), hsl(40 85% 70%));
+--gradient-glow:    linear-gradient(90deg, transparent, hsl(36 90% 55% / 0.3), transparent);
+
+--shadow-glow:  0 0 20px hsl(36 90% 55% / 0.15), 0 0 60px hsl(36 90% 55% / 0.05);
+--shadow-card:  0 10px 40px hsl(0 0% 0% / 0.5);
+--shadow-lift:  0 20px 60px -10px hsl(36 90% 55% / 0.25), 0 10px 30px -10px hsl(0 0% 0% / 0.6);
+```
+
+Utility classes: `.glow-amber`, `.glow-text`, `.gradient-radial-amber`, `.text-gradient-amber`.
+
+---
+
+## 3. Typography
+
+Four typefaces, each with a strict role.
+
+| Token | Family | Use |
+|---|---|---|
+| `font-body` | **Inter** (300/400/500/600) | All body copy, UI, forms |
+| `font-display` | **Space Grotesk** (300–700) | Default headings (h1–h6), navigation, buttons |
+| `font-forensic` | **Fraunces** serif (400–700, opsz 9–144) | Autopsy headlines, case-file titles, dossier copy — forensic moments only |
+| `font-case` | **JetBrains Mono** (400/500/600) | Case-file micro-labels, "CASE FILE #047", eyebrow tags, status stamps |
+
+Headings default to Space Grotesk via a global rule in `src/index.css`. Switch to `font-forensic` for forensic content; switch to `font-case` (uppercase, tracked-wide, small) for forensic micro-labels.
+
+**Forensic typographic pattern:**
+```
+font-case text-[10px] uppercase tracking-widest text-amber  ← micro-label
+font-forensic text-3xl md:text-4xl font-bold text-foreground ← headline
+font-body text-base text-muted-foreground                    ← supporting copy
+```
+
+---
+
+## 4. Layout & Shape
+
+- **Border radius:** `--radius: 0.75rem` → `rounded-lg`. Modifiers `rounded-md` (`-2px`), `rounded-sm` (`-4px`).
+- **Container:** centered, `2rem` padding, max-width `1400px` at 2xl.
+- **Spacing rhythm:** Tailwind defaults; sections typically `py-10` to `py-20`.
+
+---
+
+## 5. Glass & Motion Utilities
+
+Defined in `src/index.css`:
+
+- `.glass` — translucent elevated surface with backdrop blur and 0.5 border opacity
+- `.glass-hover` — adds amber halo + border tint on hover
+- `.glass-shine` — diagonal amber shine sweep on hover
+- `.hover-lift` — tactile rise (`-6px translateY`) + amber lift shadow
+- `.shimmer-border` — animated amber gradient border, fades in on hover
+- `.cursor-glow` — radial amber glow that follows the cursor (CTAs)
+- `.animate-float-slow` — 7s gentle vertical float
+- `.animate-glow-pulse` — 3.5s breathing amber glow
+- `.animate-pulse-glow` — drop-shadow amber pulse
+- `.animate-shimmer-in` — entrance animation (blur + rise)
+- `.text-float` — floating heading with soft amber text-shadow
+
+All motion respects `prefers-reduced-motion: reduce` — continuous animations disable, hover state-changes still fire.
+
+Tailwind keyframes: `fade-in` (10px rise), `scale-in` (0.96 → 1), `accordion-down/up`.
+
+---
+
+## 6. Forensic Field Kit Components
+
+The brand-defining visual pattern. Used on `CaseFileCard.tsx`, leak callouts, autopsy posts.
+
+**Anatomy:**
+- `font-case` micro-header: `CASE FILE #047` (top-left)
+- Status stamp top-right: amber border `SEALED` or crimson border `ACTIVE`
+- `font-forensic` subject line
+- Body copy in `font-body`
+- Dollar bled: `font-forensic text-3xl font-bold text-crimson tracking-tight`
+- Corner cross-hair details: `border-t border-r border-amber/40` (top-right), `border-b border-l` (bottom-left)
+- `glass` surface, `border-border/60`
+
+---
+
+## 7. Image & Asset Rules
+
+- All AI-generated images carry **"Aetheris AI Studio"** watermark, bottom-right.
+- Photography: dark, high-contrast, never bright/sunny stock.
+- Icons: `lucide-react` only, `text-amber` or `text-muted-foreground`.
+
+---
+
+## 8. Forbidden
+
+- No bright/light backgrounds (white, pastels, light gray)
+- No purple/teal/pink accents — amber is the only brand color
+- No crimson used decoratively — leak signal only
+- No serif fonts outside `font-forensic` forensic moments
+- No emoji in UI copy
+- No generic AI-guru gradients (purple→pink, teal→cyan)
+- No social proof popups, testimonial carousels, or floating purchase nudges
+- No hard-coded color hexes — always tokens
+
+---
+
+## TL;DR
+
+**Colors:** Charcoal background `220 15% 8%`, warm off-white text `40 10% 92%`, amber primary `36 90% 55%`, crimson signal `0 65% 38%` (leaks only).
+**Type:** Inter body, Space Grotesk headings, Fraunces forensic serif, JetBrains Mono case-file labels.
+**Feel:** Dark forensic dossier — glass surfaces, amber glow, crimson where blood is.
 
