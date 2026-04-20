@@ -1,49 +1,63 @@
 
 
-## Rebrand Blog Cards to Case File Format with Architect Logo
+## Content Calendar View with AI Assistant for Admin Library
 
 ### What this does
 
-Replaces all per-post blog images with "The Architect" logo and adds sequential case file numbering (CASE FILE #001, #002, etc.) to every blog card. Each card shows the industry label "Commercial playground manufacturer" and the case file ID as a forensic badge.
+Replaces the flat list view of saved social content in the admin Library tab with an interactive calendar UI showing posts mapped to dates. Adds an AI chat sidebar where you can talk to an assistant to personalize content — add prospect names, swap industries, tweak hooks — and have edits saved back.
 
 ### Technical details
 
-**1. Copy uploaded image to project: `src/assets/architect-logo.jpg`**
+**1. New component: `src/components/admin/ContentCalendar.tsx`**
 
-Copy `user-uploads://architect-logo.jpg` into `src/assets/` so it can be imported as an ES6 module.
+- Monthly calendar grid (custom-built, not the DayPicker widget) showing the current month with navigation arrows
+- Each day cell shows dots/badges for saved content items created on that date
+- Clicking a day opens a side panel showing all library items for that date with their rendered previews
+- Filter by tool type (social content, content calendar, sales scripts, etc.)
+- Items are pulled from the existing `listAdminLibrary()` function, grouped by `created_at` date
+- Color-coded dots per tool type (amber = social content, crimson = brand contradictions, blue = strategic questions, etc.)
 
-**2. Update `src/components/BlogCard.tsx`**
+**2. New component: `src/components/admin/ContentAI.tsx`**
 
-- Remove all 26+ individual blog image imports and the `blogImages`, `keywordImageMap`, `allImages` maps, and `getImageForSlug` function
-- Import the single Architect logo image
-- Accept a new `index` prop (0-based position in the sorted list) to compute the case file number
-- Replace the image area: show the Architect logo centered on a dark background
-- Add a "CASE FILE #XXX" badge overlay (top-left of the image, crimson background, mono font) where XXX is zero-padded 3-digit number based on index (newest = highest number)
-- Add "Industry: Commercial playground manufacturer" as a subtle label below the tags or above the title
-- Keep the "Aetheris AI Studio" watermark in bottom-right
-- Export `getImageForSlug` as a no-op or remove it (check if it's used elsewhere)
+- Chat panel (right sidebar or drawer) with an AI assistant
+- User can select a library item and ask things like "Add John Smith's name to this case file" or "Change the industry to HVAC" or "Make the hook more aggressive"
+- Streams responses from a new edge function
+- When the AI returns modified content, a "Save Changes" button updates the library item's `output_data` via the existing admin-library edge function (new `update` action)
 
-**3. Update `src/components/BlogList.tsx`**
+**3. New edge function: `supabase/functions/content-assistant/index.ts`**
 
-- Pass `index` prop to each `BlogCard` — computed as `(totalCount - currentIndex)` so the newest post gets the highest case file number
-- No other changes needed
+- Accepts: `messages` array (conversation history) + `context` (the selected library item's output_data and tool_type)
+- System prompt instructs the AI to act as a forensic content editor — it can modify any field in the content structure, add names, swap details, rewrite hooks
+- Uses Lovable AI gateway (`google/gemini-2.5-flash`) with streaming
+- Returns modified content as structured JSON via tool calling so it can be saved back
+- Admin-token protected
 
-**4. Check for other usages of `getImageForSlug`**
+**4. Update edge function: `supabase/functions/admin-library/index.ts`**
 
-Search for imports of this function in BlogPostPage or elsewhere and update if needed to use the Architect logo.
+- Add new `action: "update"` that accepts `id` and `output_data` (partial or full) and updates the row
+- Admin-token protected (same as existing actions)
+
+**5. Update `src/pages/AdminDashboard.tsx`**
+
+- Replace the `library` tab content: show `ContentCalendar` component instead of the flat `AdminLibrary` list
+- Add a toggle or sub-tab to switch between calendar view and list view (keep the existing `AdminLibrary` component as a fallback)
 
 ### Files touched
 
 | File | Action |
 |------|--------|
-| `src/assets/architect-logo.jpg` | New — copied from upload |
-| `src/components/BlogCard.tsx` | Replace all images with Architect logo, add CASE FILE badge + industry label |
-| `src/components/BlogList.tsx` | Pass index prop to BlogCard |
-| Any file importing `getImageForSlug` | Update to use Architect logo |
+| `src/components/admin/ContentCalendar.tsx` | New — monthly grid calendar with library items |
+| `src/components/admin/ContentAI.tsx` | New — AI chat sidebar for editing content |
+| `supabase/functions/content-assistant/index.ts` | New — streaming AI edge function for content editing |
+| `supabase/functions/admin-library/index.ts` | Add `update` action |
+| `src/pages/AdminDashboard.tsx` | Swap library tab to calendar + AI layout |
+| `src/lib/adminLibrary.ts` | Add `updateAdminLibraryItem()` function |
 
 ### What does NOT change
 
-- Blog post content, slugs, tags, excerpts — all identical
-- Blog detail page layout — only the list/card view changes
-- Content generation system — unrelated
+- Content generation tools — identical
+- Save-to-library flow — same mechanism
+- LinkedIn posting queue — unrelated
+- Paywall / Stripe — unrelated
+- Public-facing pages — untouched
 
