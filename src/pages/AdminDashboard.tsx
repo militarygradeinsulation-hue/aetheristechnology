@@ -170,6 +170,35 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchSchedule = async () => {
+    const { data } = await supabase
+      .from('content_posting_schedule')
+      .select('*')
+      .order('day_of_week');
+    if (data) setPostingSchedule(data as any);
+  };
+
+  const handleOutlookSync = async () => {
+    setSyncingOutlook(true);
+    setSyncResults(null);
+    try {
+      const token = getAdminToken();
+      if (!token) { navigate('/admin/login', { replace: true }); return; }
+      const { data, error } = await supabase.functions.invoke('sync-content-to-outlook', {
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSyncResults(data.results || []);
+      toast({ title: 'Sync Complete', description: data.message });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Sync Failed', description: msg, variant: 'destructive' });
+    } finally {
+      setSyncingOutlook(false);
+    }
+  };
+
   const filteredEvents = eventFilter
     ? events.filter(e => e.event_type.includes(eventFilter))
     : events;
