@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, MessageCircle, X, Linkedin } from 'lucide-react';
+import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -43,6 +44,16 @@ export const FloatingContact: React.FC = () => {
             >
               <Linkedin className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">LinkedIn</span>
+            </a>
+            <a
+              href={BOOK_MEETING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-amber px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
+              onClick={() => trackEvent('book_meeting_click', { location: 'floating' })}
+            >
+              <Calendar className="w-5 h-5 text-background" />
+              <span className="text-sm font-bold text-background">Book a Meeting</span>
             </a>
             <a
               href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
@@ -107,10 +118,10 @@ const StickyContactBar: React.FC = () => {
           <Linkedin className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">LinkedIn</span>
         </a>
-        <Link to="/contact" className="flex flex-col items-center gap-1 bg-primary rounded-lg px-4 py-2" onClick={() => trackEvent('click', { label: 'book', location: 'sticky_bar' })}>
-          <MessageCircle className="w-5 h-5 text-primary-foreground" />
+        <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 bg-primary rounded-lg px-4 py-2" onClick={() => trackEvent('book_meeting_click', { location: 'sticky_bar' })}>
+          <Calendar className="w-5 h-5 text-primary-foreground" />
           <span className="text-[10px] font-bold text-primary-foreground">Book</span>
-        </Link>
+        </a>
       </div>
     </div>
   );
