@@ -75,7 +75,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook' | 'linkedin'>('overview');
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
@@ -86,6 +86,14 @@ const AdminDashboard: React.FC = () => {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [topPages, setTopPages] = useState<{ page: string; views: number }[]>([]);
   const [eventBreakdown, setEventBreakdown] = useState<{ type: string; count: number }[]>([]);
+  // LinkedIn state
+  const [linkedinConnected, setLinkedinConnected] = useState<boolean | null>(null);
+  const [linkedinPersonUrn, setLinkedinPersonUrn] = useState('');
+  const [linkedinQueue, setLinkedinQueue] = useState<LinkedInQueueItem[]>([]);
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
+  const [quickPostContent, setQuickPostContent] = useState('');
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
