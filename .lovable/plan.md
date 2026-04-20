@@ -1,92 +1,148 @@
 
 
-## What you're asking
+## Status check first
 
-Make Aetheris **visible to AI crawlers** (ChatGPT, Claude, Perplexity, Googlebot's first pass, LinkedIn previews) — not just rendered-after-JS visible. Today the site is a Vite SPA, so anything beyond `index.html` is invisible to crawlers that don't execute JavaScript.
+Two things stand out before planning Phase 2:
 
-## Reality check on what you already have
+**1. The build error in your message is a Cloudflare R2 hiccup** ("StatusCode: 429 — Reduce your concurrent request rate"). That's a transient infra error on Lovable's deploy pipeline, not a code bug. The fix is to click **Publish** again — it will retry and succeed. No code change required.
 
-Before listing fixes, here's what's already shipped (so I don't waste a day re-doing it):
+**2. The verification steps you listed are manual checks** — view-source, disable-JS, Rich Results Test, LinkedIn Post Inspector, Search Console submit, Bing submit. Those are operator tasks for you, not build tasks for me. I can't open Search Console or LinkedIn Inspector for you. I'll list them at the end as your homework.
 
-- **`/llms.txt` and `/llms-full.txt`** — already present in `public/`, served at root. ✅
-- **JSON-LD structured data** — every key page emits Organization / Service / FAQPage / BreadcrumbList / Speakable schema via `SEOHead.tsx` + `src/lib/schemas.ts`. ✅
-- **Per-page `<title>`, meta description, OG, Twitter, canonical** — handled by `react-helmet-async` in `SEOHead.tsx`. ✅
-- **Sitemap** — `public/sitemap.xml` + a `generate-sitemap` edge function. ✅
-- **Live SEO override system** — `seo_overrides` table feeds `useSEOOverride` so titles/descriptions/FAQs update at render time. ✅
+So the actual build work in your message is the **Phase 2 prerender system**, scoped to the conversion-critical pages you flagged. That's the plan below.
 
-**What's actually broken:** all of the above is injected by `react-helmet-async` **after React mounts**. A non-JS crawler hitting `aetheris.technology/` sees only the static `<title>`/`<meta>` baked into `index.html` (currently generic) plus an empty `<div id="root">`. The hero copy, TL;DR, case files, FAQs, JSON-LD — none of it ships in the initial HTML response.
+---
 
-So the consultant's diagnosis is **correct on the symptom, partially wrong on the cause**: it's not that we lack schema or `llms.txt`. It's that the SPA never renders server-side, so the schema we already wrote never makes it into the first byte the crawler reads.
+## Phase 2 — Crawler-targeted edge-function prerender
 
-## The fix — prerendering, not migration
+### How it works
 
-We do **not** need to migrate to Next.js. Vite has a battle-tested solution: **`vite-plugin-prerender`** (or `react-snap` / `vite-plugin-prerender-spa`). It runs Puppeteer at build time, hits each route in headless Chrome, captures the fully-rendered HTML (including everything `react-helmet-async` injected), and writes static `.html` files into `dist/`.
+```
+Crawler request → Cloudflare → React app
+   ↓ (User-Agent matches bot)
+   ↓
+Edge Function: render-for-crawler
+   ↓
+   1. Check prerender_cache table for { route, html, generated_at }
+   2. If fresh (< 7 days) → return cached HTML
+   3. If stale or missing → fetch route's data from DB,
+      assemble static HTML server-side from a route-specific template,
+      cache it, return it
+   ↓
+Crawler gets fully-rendered HTML with hero, copy, JSON-LD baked in
+Real users get the SPA as normal (their UA doesn't match the bot list)
+```
 
-End result: a crawler hitting `/leak-audit` gets a fully-rendered HTML page with the real hero, real meta tags, real JSON-LD, real FAQ content — **zero changes to the React app, zero runtime cost, zero hosting changes**. JS still hydrates for users; crawlers just get the pre-baked snapshot.
+**Important constraint:** Lovable's hosting is Cloudflare in front of the Vite SPA. We cannot intercept requests at the CDN edge to swap responses based on User-Agent — Lovable doesn't expose Cloudflare Workers config. So the crawler-facing URL will be a **separate edge-function endpoint** (`https://ihdjpxhcaiaixmqxyqoe.supabase.co/functions/v1/render-for-crawler?path=/business-diagnostic`) rather than transparent UA-sniffing on the main domain.
 
-### Phase 1 — Prerender the marketing pages (the fix)
+**That means:** to actually serve the prerendered HTML to crawlers on `aetheris.technology`, we need Cloudflare Worker-level UA routing — which only you can configure in your Cloudflare dashboard for the custom domain. I'll provide the Worker script and exact setup instructions.
 
-1. **Install `vite-plugin-prerender`** and wire into `vite.config.ts`. Configure with Puppeteer, headless, and a route list of every public marketing page.
-2. **Route list to prerender** (initial set — not behind auth, not dynamic-id):
-   - `/`, `/about`, `/services`, `/why-us`, `/capabilities`, `/solutions`, `/industries`, `/contact`, `/careers`, `/terms`
-   - `/leak-audit`, `/scan`, `/assessment`, `/diagnostic`, `/friction-audit`, `/brand-contradictions`, `/strategic-questions`, `/sales-scripts`, `/follow-up-plan`, `/content-calendar`, `/content-generator`, `/sales-compass`, `/marketing-strategist`, `/marketing-studio`, `/ai-consultant`
-   - `/blog` (the index)
-   - `/resources`, `/service-areas`, all `/industries/:vertical` static slugs from `src/config/verticals.ts`
-3. **Blog post prerendering** — `BlogPostPage` is dynamic (`/blog/:slug`). Approach: at build time, query Supabase for all `published = true` slugs, feed that list into the prerender route array. ~174 posts → adds ~2 min to build, runs once per deploy. Acceptable.
-4. **Skip prerendering** for: admin (`/admin/*`), auth (`/login`, `/signup`, `/reset-password`), checkout return, anything user-specific. Those stay SPA-only — crawlers shouldn't see them anyway.
-5. **`index.html` baseline upgrade** — even with prerender, harden the static fallback:
-   - Replace generic `<title>` with the homepage title
-   - Add baseline `<meta name="description">`, OG image, OG title, Twitter card
-   - Add the homepage `Organization` JSON-LD inline (so even pre-prerender first-load and any unprerendered route still ships brand schema)
-   - Keep the existing `<noscript>` notice but rewrite it to be SEO-positive ("Aetheris — Business Forensics Operator. Indianapolis. (317) 376-2110.") instead of just "needs JavaScript"
+If you don't want to touch Cloudflare, the fallback is: keep Phase 1 hardening + submit each prerendered URL to Google/Bing manually as static snapshots. Less elegant but zero-infra.
 
-### Phase 2 — Verify the fix actually shipped
+### Scope — only the conversion tier
 
-After deploy:
-- `curl -A "Mozilla/5.0 (compatible; ChatGPT-User/1.0)" https://aetheris.technology/` — should return HTML containing "Your business is leaking", the TL;DR copy, the case file numbers, and inlined JSON-LD.
-- Same for `/leak-audit`, `/about`, a sample blog post.
-- Run through Google Rich Results Test → all schema types should validate.
-- LinkedIn Post Inspector on `/` and `/blog/[any-slug]` → should pull title + description + OG image.
+Your priority list, locked in:
 
-### Phase 3 — Marginal AI-discoverability boosters (cheap wins)
+| Page | Priority | Build |
+|---|---|---|
+| `/` | DONE | Skip — Phase 1 covers it |
+| `/business-diagnostic` | CRITICAL | ✅ Build |
+| `/about` | HIGH | ✅ Build |
+| `/leak-audit` | HIGH | ✅ Build |
+| `/services` | HIGH | ✅ Build (since LinkedIn posts will mention pricing) |
+| `/blog/:slug` (all published posts) | HIGH | ✅ Build (case-file content = LLM training fuel) |
+| `/contact`, `/terms`, `/privacy` | LOW | Skip |
+| Industry/vertical pages | LOW | Skip for now |
 
-- **Update `public/llms.txt`** to point at the now-prerendered key pages and the Forensics positioning (currently it's still on the old "AI Systems Architect" framing — confirmed via earlier file listing).
-- **Regenerate `public/llms-full.txt`** with the new forensic copy + Leak Audit methodology + pricing.
-- **Add `Author` + `mainEntityOfPage` schema** to blog posts (already in `articleSchema`, just confirm it's wired in `BlogPostPage`).
-- **Add a `WebSite` + `SearchAction` schema** to the homepage so AI crawlers know the site is searchable.
+`/case-files` doesn't exist yet — separate build (see "What I'd ship in parallel" below).
 
-## What I will NOT do
+### What gets built
 
-- **Migrate to Next.js.** Pointless cost. Prerender solves the same problem in 1 day with zero refactor.
-- **Add SSR runtime** (Vite SSR mode, Vercel functions, etc.). Adds infra complexity for marketing pages that never change per-user. Static prerendered HTML is faster, cheaper, and more crawler-friendly than SSR anyway.
-- **Touch the React app code.** Components, routes, state — all unchanged. The build pipeline is the only thing that changes.
-- **Prerender authed pages** — admin, login, checkout, my-subscription stay SPA.
+**Database**
+- New table `prerender_cache`: `route` (PK), `html` (text), `generated_at` (timestamptz), `etag` (text). RLS off — service-role only.
 
-## Files touched
+**Edge function: `render-for-crawler`**
+- Accepts `?path=/some-route`.
+- Looks up cache. Returns cached HTML if `generated_at > now() - 7 days`.
+- On miss: dispatches to a route-specific renderer (one function per template — homepage, business-diagnostic, about, leak-audit, services, blog-post). Each renderer:
+  - Pulls data from Supabase if needed (blog post body, FAQ overrides from `seo_overrides`, etc.)
+  - Assembles a self-contained HTML document: full `<head>` (title, meta, OG, canonical, JSON-LD), `<body>` with the hero, the body copy, the FAQ, the CTAs, and a `<link rel="canonical">` pointing back at `aetheris.technology/<route>`.
+  - Stores the rendered HTML in `prerender_cache`.
+- Returns `text/html` with `Cache-Control: public, max-age=3600`.
 
-**Edited**
-- `vite.config.ts` — add `vite-plugin-prerender` config, route list, Puppeteer options
-- `package.json` — add `vite-plugin-prerender` + `puppeteer` dev deps
-- `index.html` — upgrade static `<title>`, meta, OG, baseline JSON-LD, rewrite `<noscript>`
-- `public/llms.txt` + `public/llms-full.txt` — refresh to forensics positioning
+**Edge function: `prerender-cache-warmer` (scheduled, nightly cron)**
+- Iterates the route list (5 marketing pages + every published `blog_posts.slug`).
+- Calls `render-for-crawler` for each, forcing regeneration.
+- Logs success/failure count.
+
+**Cloudflare Worker (you deploy this in your CF dashboard)**
+- Single ~30-line script. On each request:
+  - Inspect `User-Agent` against a bot list (`GPTBot`, `ChatGPT-User`, `ClaudeBot`, `PerplexityBot`, `LinkedInBot`, `facebookexternalhit`, `Twitterbot`, `Slackbot`, `Bingbot`, `Googlebot`).
+  - Bot? Fetch from `https://ihdjpxhcaiaixmqxyqoe.supabase.co/functions/v1/render-for-crawler?path=<request.path>` and return its body.
+  - Real user? Pass through to the Lovable origin untouched.
+- I'll provide the exact script + step-by-step CF dashboard instructions in the final message.
+
+### Files touched
+
+**Database**
+- New migration: `prerender_cache` table
 
 **Created**
-- `scripts/get-prerender-routes.ts` — build-time script that fetches blog slugs + vertical slugs from Supabase and exports the full route list to the Vite plugin
+- `supabase/functions/render-for-crawler/index.ts` — main dispatcher + cache layer
+- `supabase/functions/render-for-crawler/templates/homepage.ts`
+- `supabase/functions/render-for-crawler/templates/business-diagnostic.ts`
+- `supabase/functions/render-for-crawler/templates/about.ts`
+- `supabase/functions/render-for-crawler/templates/leak-audit.ts`
+- `supabase/functions/render-for-crawler/templates/services.ts`
+- `supabase/functions/render-for-crawler/templates/blog-post.ts`
+- `supabase/functions/render-for-crawler/templates/_shared.ts` — common head builder, JSON-LD helpers
+- `supabase/functions/prerender-cache-warmer/index.ts`
+- `supabase/config.toml` — add `[functions.render-for-crawler] verify_jwt = false` (public crawler endpoint)
 
-## Validation
+**Edited**
+- None in the React app. Zero touch to user-facing code.
 
-- `npm run build` completes; `dist/` contains `index.html`, `about/index.html`, `leak-audit/index.html`, `blog/[slug]/index.html` for every published post — each with fully-rendered HTML, meta tags, and JSON-LD baked in.
-- `curl https://aetheris.technology/leak-audit` (no JS) returns the hero copy, the 7-step methodology section, and FAQ JSON-LD in the response body.
-- Google Rich Results Test on `/`, `/about`, `/blog/[any-slug]` → all schemas valid.
-- LinkedIn Post Inspector on the homepage → pulls correct title, description, OG image.
-- Real users: zero visible change. Same SPA, same React Router, same hydration. Pages just feel slightly faster on first paint because HTML arrives with content.
+### Validation
 
-## One decision before I build
+After build:
+- `curl "https://ihdjpxhcaiaixmqxyqoe.supabase.co/functions/v1/render-for-crawler?path=/business-diagnostic"` → returns full HTML with hero, 20-question intro, JSON-LD, OG tags. No JS.
+- Same for `/about`, `/leak-audit`, `/services`, `/blog/<slug>`.
+- After you wire the Cloudflare Worker: `curl -A "GPTBot" https://aetheris.technology/business-diagnostic` returns prerendered HTML; `curl -A "Mozilla/5.0..." https://aetheris.technology/business-diagnostic` returns the SPA.
+- `prerender_cache` table fills with 5 + N rows after first warmer run.
 
-The prerender step adds time to every deploy (≈10–15s for static pages, +~2 min if we prerender all 174 blog posts each time). Two options:
+---
 
-**A. Prerender everything every deploy** — simplest, always fresh, but every deploy is ~2.5 min longer.
-**B. Prerender static marketing pages on every deploy; prerender blog posts on a schedule (nightly cron or post-publish trigger)** — fast deploys, slight delay before a brand-new blog post is crawler-visible (max 24h, or instant if we wire a publish webhook).
+## What's NOT in this build
 
-Default if you don't reply: **A**. Simpler, and a 2.5-min deploy is fine for a marketing site that ships ~daily.
+- **Case Files page** — doesn't exist yet, separate build. I'll plan it next if you want.
+- **Leak Audit PDF** — separate build.
+- **Anonymized case-study page** — separate build.
+- **Sitemap regeneration** — already a function, fine as-is.
+- **Verification/recrawl tasks** — your homework, not buildable.
+
+---
+
+## Your homework after I ship Phase 2
+
+These are the operator checks you listed — I can't do these for you:
+
+1. **Re-publish** to clear the R2 429 error.
+2. **View-source `aetheris.technology/`** — confirm Phase 1 metadata, JSON-LD, and noscript hero copy are in the raw HTML.
+3. **Disable JS, reload `/`** — confirm hero copy renders.
+4. **Google Rich Results Test** on `/`, `/business-diagnostic`, `/about` (after Phase 2 ships).
+5. **`/llms.txt` + `/llms-full.txt`** — visit directly, confirm forensics positioning.
+6. **LinkedIn Post Inspector** on `/` — confirm OG card.
+7. **Submit to Google Search Console + Bing Webmaster Tools.**
+8. **Wire the Cloudflare Worker** in your CF dashboard using the script + instructions I'll deliver after the build.
+
+---
+
+## One question before I build
+
+Phase 2 only delivers value if crawlers actually hit the prerender endpoint. Two paths:
+
+**A. Build everything including the Cloudflare Worker script + instructions for you to deploy in your CF dashboard.** Crawlers hit `aetheris.technology` directly and transparently get prerendered HTML. Real fix. Requires you to do ~5 min of CF dashboard config.
+
+**B. Build the prerender endpoint only, no CF Worker. Add the prerendered URLs directly to the sitemap and submit to Google/Bing.** No CF config needed, but crawlers hitting the canonical aetheris.technology URLs still see the SPA — only crawlers that follow sitemap-listed prerender URLs see the rendered HTML. Weaker fix.
+
+Default if you don't reply: **A**. It's the only one that actually solves the problem.
 
