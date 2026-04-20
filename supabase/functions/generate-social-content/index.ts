@@ -67,7 +67,7 @@ serve(async (req) => {
 
     const truncated = siteContent.substring(0, 8000);
 
-    const prompt = `You are an expert social media strategist. Based on the following website content, generate social media content for this business.
+    const prompt = `You are an expert LinkedIn Growth Strategist operating under the Business Forensics methodology. Based on the following website content, generate a LinkedIn Growth Content Pack using the four-pillar strategic framework.
 
 WEBSITE CONTENT:
 ${truncated}
@@ -75,18 +75,37 @@ ${truncated}
 Generate the following in valid JSON format:
 {
   "businessName": "detected business name",
-  "linkedinPosts": [10 LinkedIn posts, each with "hook" (opening line), "body" (2-3 paragraphs), "cta" (call to action)],
-  "facebookPosts": [10 Facebook posts, each with "hook", "body", "cta"],
-  "adHooks": [5 ad hooks, each with "headline" (under 10 words), "subheadline", "cta"]
+  "brandjackPosts": [3 posts — analyze a well-known brand's decision/campaign/mistake through THIS business's unique lens],
+  "newsjackPosts": [3 posts — contextualize a trending industry event, explaining downstream effects for THIS business's audience],
+  "namejackPosts": [2 posts — reference a leader the ICP follows (e.g. Hormozi, Nadella, Bartlett) and redirect toward THIS business's expertise],
+  "hotTakes": [2 posts — genuinely contrarian positions that force agreement or disagreement, must pass the Anxiety Test],
+  "authorityPosts": [3 posts — niche deep-dives, case studies, forensic reports proving competence],
+  "weeklySchedule": [
+    {"day": "Monday", "format": "brandjack or newsjack", "goal": "New Audience Acquisition / Reach"},
+    {"day": "Tuesday", "format": "authority", "goal": "Deepen Trust with Existing Followers"},
+    {"day": "Wednesday", "format": "authority", "goal": "Prove Competence / Social Proof"},
+    {"day": "Thursday", "format": "namejack or hottake", "goal": "Scale Visibility / Industry Ecosystem"},
+    {"day": "Friday", "format": "authority", "goal": "Engagement / Retention"}
+  ]
 }
 
-Rules:
-- Make posts feel authentic, not corporate
-- LinkedIn posts should be professional but punchy, use line breaks
-- Facebook posts should be conversational and engaging
-- Ad hooks should be scroll-stopping and curiosity-driven
-- Reference the actual business, products, and value props from the site
-- Each post should be unique and cover different angles`;
+Each post object must have:
+- "hook": opening line (pattern interrupt, scroll-stopping)
+- "body": 2-3 paragraphs with line breaks, LinkedIn-native formatting
+- "cta": call to action
+- "format": "brandjack" | "newsjack" | "namejack" | "hottake" | "authority"
+- "targetEntity": the brand, person, or event being referenced (empty string for authority posts)
+- "soWhatSentence": one sentence answering "So what?" — the downstream implication
+- "strategicGoal": "reach" | "trust" | "proof" | "visibility" | "retention"
+
+CRITICAL RULES — Pre-Publishing Stress Tests:
+1. "So What?" Test: Every post MUST have a clear, one-sentence answer to "So what?" If you can't state the downstream implication, you're still summarizing.
+2. Anxiety Test (Hot Takes only): If the position wouldn't make someone nervous to publish, it's not contrarian enough. Force the reader to pick a side.
+3. Insight Rule: The brand/person/event is EVIDENCE for a point only THIS business would make. Never summarize — always contextualize.
+4. Contextualization > Summarization: Move beyond "what happened" to "why it matters" and "what's next."
+5. Make posts feel authentic, aggressive, and forensic — not corporate or generic.
+6. Each post must be unique and cover different angles of the business.
+7. Reference actual products, services, and value props from the scraped website.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -97,7 +116,7 @@ Rules:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a social media content expert. Return only valid JSON, no markdown fences." },
+          { role: "system", content: "You are a LinkedIn Growth Strategist and Business Forensics content expert. Return only valid JSON, no markdown fences. Every post must pass the So What test and use the entity as evidence for a proprietary insight." },
           { role: "user", content: prompt },
         ],
       }),

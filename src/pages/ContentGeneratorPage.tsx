@@ -12,8 +12,8 @@ const ContentGeneratorPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Social Content Generator | Aetheris AI"
-        description="Enter your URL, get 10 LinkedIn posts, 10 Facebook posts, and 5 ad hooks tailored to your brand. Free preview, full pack $29."
+        title="LinkedIn Growth Content Pack | Aetheris AI"
+        description="Scan your website. Get 13 strategic LinkedIn posts using Brandjacking, Newsjacking, Namejacking, and Hot Takes — built on the four-pillar growth framework."
         path="/content-generator"
       />
       <Background />
@@ -21,11 +21,11 @@ const ContentGeneratorPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-32 pb-16 px-4">
           <div className="text-center mb-10">
-            <span className="text-amber font-bold text-xl tracking-wide uppercase mb-2 block">AI Content Generator</span>
+            <span className="text-amber font-bold text-xl tracking-wide uppercase mb-2 block">LinkedIn Growth Framework</span>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">
-              Social Content <span className="text-gradient-amber">In Seconds</span>
+              Growth Content <span className="text-gradient-amber">In Seconds</span>
             </h1>
-            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Scan your website. Get 25 ready-to-post social media pieces tailored to your brand.</p>
+            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Scan your website. Get 13 strategic posts using Brandjacking, Newsjacking, Namejacking &amp; Hot Takes.</p>
           </div>
           <SocialContentGenerator />
         </div>
