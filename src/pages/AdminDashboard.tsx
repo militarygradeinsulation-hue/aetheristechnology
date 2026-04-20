@@ -380,20 +380,21 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors', 'outlook'] as const).map(tab => (
+          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors', 'linkedin', 'outlook'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
                 if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+                if (tab === 'linkedin') { fetchLinkedinStatus(); fetchLinkedinQueue(); }
                 if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : '📤 Outlook Sync'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
             </button>
           ))}
         </div>
