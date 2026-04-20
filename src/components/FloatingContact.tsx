@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, MessageCircle, X, Linkedin } from 'lucide-react';
+import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
