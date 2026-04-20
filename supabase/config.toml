@@ -131,3 +131,9 @@ verify_jwt = false
 
 [functions.sync-content-to-outlook]
 verify_jwt = false
+
+[functions.linkedin-auth]
+verify_jwt = false
+
+[functions.linkedin-post]
+verify_jwt = false
