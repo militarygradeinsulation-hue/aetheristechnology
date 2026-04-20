@@ -24,6 +24,18 @@ import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminA
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
 
+interface LinkedInQueueItem {
+  id: string;
+  content: string;
+  format: string | null;
+  source_type: string | null;
+  status: string;
+  scheduled_for: string | null;
+  posted_at: string | null;
+  linkedin_post_id: string | null;
+  created_at: string;
+}
+
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
   { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
@@ -63,7 +75,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook' | 'linkedin'>('overview');
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
@@ -74,6 +86,14 @@ const AdminDashboard: React.FC = () => {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [topPages, setTopPages] = useState<{ page: string; views: number }[]>([]);
   const [eventBreakdown, setEventBreakdown] = useState<{ type: string; count: number }[]>([]);
+  // LinkedIn state
+  const [linkedinConnected, setLinkedinConnected] = useState<boolean | null>(null);
+  const [linkedinPersonUrn, setLinkedinPersonUrn] = useState('');
+  const [linkedinQueue, setLinkedinQueue] = useState<LinkedInQueueItem[]>([]);
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
+  const [quickPostContent, setQuickPostContent] = useState('');
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -199,6 +219,127 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  // --- LinkedIn helpers ---
+  const fetchLinkedinStatus = async () => {
+    const token = getAdminToken();
+    if (!token) return;
+    try {
+      const { data } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'status' },
+        headers: { 'x-admin-token': token },
+      });
+      setLinkedinConnected(data?.connected || false);
+      setLinkedinPersonUrn(data?.personUrn || '');
+    } catch { setLinkedinConnected(false); }
+  };
+
+  const fetchLinkedinQueue = async () => {
+    const { data } = await supabase
+      .from('linkedin_post_queue')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (data) setLinkedinQueue(data as LinkedInQueueItem[]);
+  };
+
+  const handleLinkedinConnect = async () => {
+    const token = getAdminToken();
+    if (!token) return;
+    const redirectUri = `${window.location.origin}/admin`;
+    const { data } = await supabase.functions.invoke('linkedin-auth', {
+      body: { action: 'authorize', redirect_uri: redirectUri },
+      headers: { 'x-admin-token': token },
+    });
+    if (data?.url) window.location.href = data.url;
+  };
+
+  const handleLinkedinCallback = async (code: string) => {
+    const token = getAdminToken();
+    if (!token) return;
+    setLinkedinLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin`;
+      const { data, error } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'callback', code, redirect_uri: redirectUri },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        setLinkedinConnected(true);
+        setLinkedinPersonUrn(data.personUrn || '');
+        toast({ title: 'LinkedIn Connected', description: 'Your LinkedIn account is now linked.' });
+        // Clean URL
+        window.history.replaceState({}, '', '/admin');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'LinkedIn Connection Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handleQuickPost = async () => {
+    if (!quickPostContent.trim()) return;
+    setLinkedinLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('linkedin-post', {
+        body: { action: 'quick-post', content: quickPostContent },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Posted to LinkedIn!', description: `Post ID: ${data.linkedinPostId || 'sent'}` });
+      setQuickPostContent('');
+      fetchLinkedinQueue();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Post Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handlePostNow = async (postId: string) => {
+    setLinkedinLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('linkedin-post', {
+        body: { action: 'post', postId },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Posted!' });
+      fetchLinkedinQueue();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Post Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handleSkipPost = async (postId: string) => {
+    await supabase.from('linkedin_post_queue').update({ status: 'skipped' }).eq('id', postId);
+    fetchLinkedinQueue();
+  };
+
+  const handleSaveEdit = async (postId: string) => {
+    await supabase.from('linkedin_post_queue').update({ content: editingContent }).eq('id', postId);
+    setEditingPostId(null);
+    setEditingContent('');
+    fetchLinkedinQueue();
+  };
+
+  // Detect LinkedIn OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    if (code && state === 'admin_oauth') {
+      setActiveTab('linkedin');
+      handleLinkedinCallback(code);
+    }
+  }, []);
+
   const filteredEvents = eventFilter
     ? events.filter(e => e.event_type.includes(eventFilter))
     : events;
@@ -239,20 +380,21 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors', 'outlook'] as const).map(tab => (
+          {(['overview', 'submissions', 'crm', 'events', 'insights', 'tools', 'library', 'seo', 'retargeting', 'visitors', 'linkedin', 'outlook'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
                 if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+                if (tab === 'linkedin') { fetchLinkedinStatus(); fetchLinkedinQueue(); }
                 if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : '📤 Outlook Sync'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'crm' ? '🗂 CRM' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
             </button>
           ))}
         </div>
@@ -519,6 +661,110 @@ const AdminDashboard: React.FC = () => {
 
         {/* Visitor Companies */}
         {activeTab === 'visitors' && <VisitorCompaniesPanel />}
+
+        {/* LinkedIn */}
+        {activeTab === 'linkedin' && (
+          <div className="space-y-8">
+            {/* Connection Status */}
+            <div className="glass p-6 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2">
+                    <Linkedin className="w-5 h-5 text-blue-400" /> LinkedIn Connection
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {linkedinConnected === null ? 'Checking...' : linkedinConnected ? `Connected as ${linkedinPersonUrn}` : 'Not connected — authorize to post directly.'}
+                  </p>
+                </div>
+                {!linkedinConnected && (
+                  <Button onClick={handleLinkedinConnect} disabled={linkedinLoading} size="lg">
+                    {linkedinLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Linkedin className="w-4 h-4 mr-2" />}
+                    Connect LinkedIn
+                  </Button>
+                )}
+                {linkedinConnected && (
+                  <span className="text-sm text-green-400 font-semibold flex items-center gap-1">✅ Connected</span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Post */}
+            {linkedinConnected && (
+              <div className="glass p-6 rounded-xl">
+                <h3 className="text-lg font-bold text-foreground font-display mb-3">Quick Post</h3>
+                <textarea
+                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mb-3"
+                  placeholder="Write a LinkedIn post..."
+                  value={quickPostContent}
+                  onChange={e => setQuickPostContent(e.target.value)}
+                />
+                <Button onClick={handleQuickPost} disabled={linkedinLoading || !quickPostContent.trim()}>
+                  {linkedinLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                  Post Now
+                </Button>
+              </div>
+            )}
+
+            {/* Post Queue */}
+            <div className="glass p-6 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-foreground font-display">Post Queue</h3>
+                <Button variant="outline" size="sm" onClick={fetchLinkedinQueue}>
+                  <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+                </Button>
+              </div>
+              {linkedinQueue.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8">No posts in queue. Generate content from My Tools or use Quick Post.</p>
+              ) : (
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {linkedinQueue.map(item => (
+                    <div key={item.id} className={`bg-secondary/30 p-4 rounded-lg border-l-4 ${
+                      item.status === 'posted' ? 'border-l-green-500' : item.status === 'skipped' ? 'border-l-muted-foreground' : item.status === 'approved' ? 'border-l-blue-400' : 'border-l-amber'
+                    }`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span className={`text-xs px-2 py-0.5 rounded font-mono ${
+                              item.status === 'posted' ? 'bg-green-500/20 text-green-400' :
+                              item.status === 'skipped' ? 'bg-muted text-muted-foreground' :
+                              item.status === 'approved' ? 'bg-blue-500/20 text-blue-400' :
+                              'bg-amber/20 text-amber'
+                            }`}>{item.status}</span>
+                            {item.format && <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary font-mono">{item.format}</span>}
+                            {item.scheduled_for && <span className="text-xs text-muted-foreground">{new Date(item.scheduled_for).toLocaleString()}</span>}
+                          </div>
+                          {editingPostId === item.id ? (
+                            <div>
+                              <textarea
+                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mb-2"
+                                value={editingContent}
+                                onChange={e => setEditingContent(e.target.value)}
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleSaveEdit(item.id)}>Save</Button>
+                                <Button size="sm" variant="ghost" onClick={() => setEditingPostId(null)}>Cancel</Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4">{item.content}</p>
+                          )}
+                          {item.posted_at && <p className="text-xs text-muted-foreground mt-1">Posted: {new Date(item.posted_at).toLocaleString()}</p>}
+                        </div>
+                        {(item.status === 'queued' || item.status === 'approved') && (
+                          <div className="flex flex-col gap-1 shrink-0">
+                            <Button size="sm" onClick={() => handlePostNow(item.id)} disabled={linkedinLoading}>Post Now</Button>
+                            <Button size="sm" variant="outline" onClick={() => { setEditingPostId(item.id); setEditingContent(item.content); }}>Edit</Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleSkipPost(item.id)}>Skip</Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Outlook Sync + Posting Schedule */}
         {activeTab === 'outlook' && (
