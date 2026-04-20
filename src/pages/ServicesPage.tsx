@@ -36,20 +36,20 @@ const ServicesPage = () => {
   );
 
   const faqs = [
-    { question: 'How much does Aetheris AI consulting cost?', answer: 'Services range from $50 (visual rendering) to $25,000+ (custom AI implementation). Key tiers: Visual Rendering $50–$400, Rapid Digital Evaluation $750, Ongoing Digital Oversight $1,500/month, 14-Day Diagnostic $7,500, Custom AI Implementation $25,000+.' },
-    { question: 'What is the 14-Day Operational Diagnostic?', answer: 'A comprehensive 14-day operational breakdown identifying workflow inefficiencies, disconnected systems, and automation opportunities. Investment: $7,500 flat ($535/day). If meaningful operational gaps are not identified, the engagement continues at no extra cost.' },
-    { question: 'Do you serve businesses outside Indianapolis?', answer: 'Yes. Aetheris AI is headquartered in Indianapolis but serves businesses across the entire United States with remote and on-site engagements.' },
-    { question: 'Build vs. buy AI — which should I choose?', answer: 'Buy commodity AI (chatbots, transcription, generic copilots). Build when AI is core to competitive advantage, requires proprietary data, or must integrate deeply with bespoke workflows. We provide build vs. buy analysis as part of strategy consulting.' },
-    { question: 'How do I reduce operational costs with AI?', answer: 'Fastest gains: automate repetitive workflows (CRM, lead routing, reporting), deploy AI agents for inbound triage and follow-up, use LLMs to compress knowledge work, and replace manual reporting with real-time dashboards.' },
+    { question: 'What does the Forensic Diagnostic cost?', answer: 'The Forensic Diagnostic is $2,500 flat — 14 days inside your operation with operator-led investigation. It produces a sealed case file naming and quantifying every revenue leak. The full $2,500 is applied toward a Co-CEO engagement if you proceed.' },
+    { question: 'What is The Leak Audit™?', answer: 'A 7-step forensic methodology Aetheris runs on every business: Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. The free self-scan version lives at /leak-audit. The operator-led version is the Forensic Diagnostic.' },
+    { question: 'Do you serve businesses outside Indianapolis?', answer: 'Yes. Aetheris is headquartered in Indianapolis and runs forensic engagements with US businesses remotely and on-site.' },
+    { question: 'Why pay for a diagnosis instead of just hiring an agency?', answer: 'Because most "AI consultants" sell you the prescription before they\'ve done the autopsy. Paying $2,500 for the diagnosis filters tire-kickers, forces honest scope, and means the AI/automation/CRM work that follows is solving the actual leak — not the symptom.' },
+    { question: 'What gets fixed after the diagnostic?', answer: 'Whatever the leak demanded: AI agents for inbound triage and follow-up, workflow automation for stalled handoffs, CRM rebuilds for visibility, or human process redesign. The diagnostic dictates the prescription — not a pre-packaged service menu.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Consulting Services & Pricing | Aetheris AI"
-        description="AI strategy, governance, automation, and ML/LLM implementation. From $50 visual renders to $25K+ custom AI builds. Indianapolis."
+        title="Forensic Diagnostic & Engagements | Aetheris"
+        description="The Forensic Diagnostic is $2,500 — 14 days inside your business naming every revenue leak. Then we rebuild with AI, automation, and CRM. Indianapolis."
         path="/services"
-        keywords="AI consulting services, AI strategy consulting, AI maturity assessment, build vs buy AI, AI ROI analysis, responsible AI, AI ethics, GDPR AI compliance, generative AI consulting, LLM implementation, AI agents, workflow automation, conversational AI, digital transformation consultant, technology consultant Indianapolis"
+        keywords="forensic diagnostic, business autopsy, revenue leak audit, AI consulting Indianapolis, operational diagnostic, fractional CTO, AI agents, workflow automation, CRM implementation, business forensics operator"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Services & Pricing', path: '/services' },
