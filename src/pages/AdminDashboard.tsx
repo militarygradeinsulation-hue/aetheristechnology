@@ -480,6 +480,12 @@ const AdminDashboard: React.FC = () => {
 
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}
+
+        {/* Retargeting */}
+        {activeTab === 'retargeting' && <RetargetingPanel />}
+
+        {/* Visitor Companies */}
+        {activeTab === 'visitors' && <VisitorCompaniesPanel />}
       </div>
     </div>
   );
