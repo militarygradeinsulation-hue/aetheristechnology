@@ -802,6 +802,57 @@ export type Database = {
         }
         Relationships: []
       }
+      identified_visitors: {
+        Row: {
+          added_to_crm: boolean
+          company_domain: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          last_seen_at: string
+          location: string | null
+          pages_viewed: Json
+          person_email: string | null
+          person_linkedin_url: string | null
+          person_name: string | null
+          raw_payload: Json
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          added_to_crm?: boolean
+          company_domain?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          pages_viewed?: Json
+          person_email?: string | null
+          person_linkedin_url?: string | null
+          person_name?: string | null
+          raw_payload?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          added_to_crm?: boolean
+          company_domain?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          pages_viewed?: Json
+          person_email?: string | null
+          person_linkedin_url?: string | null
+          person_name?: string | null
+          raw_payload?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       playbooks: {
         Row: {
           created_at: string
@@ -931,6 +982,36 @@ export type Database = {
           linkedin_url?: string | null
           name?: string
           phone?: string | null
+        }
+        Relationships: []
+      }
+      retargeting_settings: {
+        Row: {
+          enabled: boolean
+          google_ads_id: string | null
+          id: number
+          linkedin_partner_id: string | null
+          meta_pixel_id: string | null
+          rb2b_script_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          google_ads_id?: string | null
+          id?: number
+          linkedin_partner_id?: string | null
+          meta_pixel_id?: string | null
+          rb2b_script_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          google_ads_id?: string | null
+          id?: number
+          linkedin_partner_id?: string | null
+          meta_pixel_id?: string | null
+          rb2b_script_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
