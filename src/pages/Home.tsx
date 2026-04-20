@@ -78,7 +78,6 @@ const Home = () => {
         <FreeTools />
         <VerifiableOutcomes />
         <WhatsWrongDiagnostic />
-        <ContactForm />
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
