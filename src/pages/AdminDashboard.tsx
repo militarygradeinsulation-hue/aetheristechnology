@@ -219,6 +219,127 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  // --- LinkedIn helpers ---
+  const fetchLinkedinStatus = async () => {
+    const token = getAdminToken();
+    if (!token) return;
+    try {
+      const { data } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'status' },
+        headers: { 'x-admin-token': token },
+      });
+      setLinkedinConnected(data?.connected || false);
+      setLinkedinPersonUrn(data?.personUrn || '');
+    } catch { setLinkedinConnected(false); }
+  };
+
+  const fetchLinkedinQueue = async () => {
+    const { data } = await supabase
+      .from('linkedin_post_queue')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (data) setLinkedinQueue(data as LinkedInQueueItem[]);
+  };
+
+  const handleLinkedinConnect = async () => {
+    const token = getAdminToken();
+    if (!token) return;
+    const redirectUri = `${window.location.origin}/admin`;
+    const { data } = await supabase.functions.invoke('linkedin-auth', {
+      body: { action: 'authorize', redirect_uri: redirectUri },
+      headers: { 'x-admin-token': token },
+    });
+    if (data?.url) window.location.href = data.url;
+  };
+
+  const handleLinkedinCallback = async (code: string) => {
+    const token = getAdminToken();
+    if (!token) return;
+    setLinkedinLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin`;
+      const { data, error } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'callback', code, redirect_uri: redirectUri },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        setLinkedinConnected(true);
+        setLinkedinPersonUrn(data.personUrn || '');
+        toast({ title: 'LinkedIn Connected', description: 'Your LinkedIn account is now linked.' });
+        // Clean URL
+        window.history.replaceState({}, '', '/admin');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'LinkedIn Connection Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handleQuickPost = async () => {
+    if (!quickPostContent.trim()) return;
+    setLinkedinLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('linkedin-post', {
+        body: { action: 'quick-post', content: quickPostContent },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Posted to LinkedIn!', description: `Post ID: ${data.linkedinPostId || 'sent'}` });
+      setQuickPostContent('');
+      fetchLinkedinQueue();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Post Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handlePostNow = async (postId: string) => {
+    setLinkedinLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('linkedin-post', {
+        body: { action: 'post', postId },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Posted!' });
+      fetchLinkedinQueue();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Post Failed', description: msg, variant: 'destructive' });
+    } finally { setLinkedinLoading(false); }
+  };
+
+  const handleSkipPost = async (postId: string) => {
+    await supabase.from('linkedin_post_queue').update({ status: 'skipped' }).eq('id', postId);
+    fetchLinkedinQueue();
+  };
+
+  const handleSaveEdit = async (postId: string) => {
+    await supabase.from('linkedin_post_queue').update({ content: editingContent }).eq('id', postId);
+    setEditingPostId(null);
+    setEditingContent('');
+    fetchLinkedinQueue();
+  };
+
+  // Detect LinkedIn OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    if (code && state === 'admin_oauth') {
+      setActiveTab('linkedin');
+      handleLinkedinCallback(code);
+    }
+  }, []);
+
   const filteredEvents = eventFilter
     ? events.filter(e => e.event_type.includes(eventFilter))
     : events;
