@@ -122,3 +122,9 @@ verify_jwt = false
 
 [functions.export-retargeting-audience]
 verify_jwt = false
+
+[functions.render-for-crawler]
+verify_jwt = false
+
+[functions.prerender-cache-warmer]
+verify_jwt = false
