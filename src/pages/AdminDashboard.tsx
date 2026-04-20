@@ -17,6 +17,8 @@ import { AdminLibrary } from '@/components/AdminLibrary';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
+import { RetargetingPanel } from '@/components/admin/RetargetingPanel';
+import { VisitorCompaniesPanel } from '@/components/admin/VisitorCompaniesPanel';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
