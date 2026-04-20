@@ -662,6 +662,110 @@ const AdminDashboard: React.FC = () => {
         {/* Visitor Companies */}
         {activeTab === 'visitors' && <VisitorCompaniesPanel />}
 
+        {/* LinkedIn */}
+        {activeTab === 'linkedin' && (
+          <div className="space-y-8">
+            {/* Connection Status */}
+            <div className="glass p-6 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2">
+                    <Linkedin className="w-5 h-5 text-blue-400" /> LinkedIn Connection
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {linkedinConnected === null ? 'Checking...' : linkedinConnected ? `Connected as ${linkedinPersonUrn}` : 'Not connected — authorize to post directly.'}
+                  </p>
+                </div>
+                {!linkedinConnected && (
+                  <Button onClick={handleLinkedinConnect} disabled={linkedinLoading} size="lg">
+                    {linkedinLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Linkedin className="w-4 h-4 mr-2" />}
+                    Connect LinkedIn
+                  </Button>
+                )}
+                {linkedinConnected && (
+                  <span className="text-sm text-green-400 font-semibold flex items-center gap-1">✅ Connected</span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Post */}
+            {linkedinConnected && (
+              <div className="glass p-6 rounded-xl">
+                <h3 className="text-lg font-bold text-foreground font-display mb-3">Quick Post</h3>
+                <textarea
+                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mb-3"
+                  placeholder="Write a LinkedIn post..."
+                  value={quickPostContent}
+                  onChange={e => setQuickPostContent(e.target.value)}
+                />
+                <Button onClick={handleQuickPost} disabled={linkedinLoading || !quickPostContent.trim()}>
+                  {linkedinLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                  Post Now
+                </Button>
+              </div>
+            )}
+
+            {/* Post Queue */}
+            <div className="glass p-6 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-foreground font-display">Post Queue</h3>
+                <Button variant="outline" size="sm" onClick={fetchLinkedinQueue}>
+                  <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+                </Button>
+              </div>
+              {linkedinQueue.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8">No posts in queue. Generate content from My Tools or use Quick Post.</p>
+              ) : (
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {linkedinQueue.map(item => (
+                    <div key={item.id} className={`bg-secondary/30 p-4 rounded-lg border-l-4 ${
+                      item.status === 'posted' ? 'border-l-green-500' : item.status === 'skipped' ? 'border-l-muted-foreground' : item.status === 'approved' ? 'border-l-blue-400' : 'border-l-amber'
+                    }`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span className={`text-xs px-2 py-0.5 rounded font-mono ${
+                              item.status === 'posted' ? 'bg-green-500/20 text-green-400' :
+                              item.status === 'skipped' ? 'bg-muted text-muted-foreground' :
+                              item.status === 'approved' ? 'bg-blue-500/20 text-blue-400' :
+                              'bg-amber/20 text-amber'
+                            }`}>{item.status}</span>
+                            {item.format && <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary font-mono">{item.format}</span>}
+                            {item.scheduled_for && <span className="text-xs text-muted-foreground">{new Date(item.scheduled_for).toLocaleString()}</span>}
+                          </div>
+                          {editingPostId === item.id ? (
+                            <div>
+                              <textarea
+                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mb-2"
+                                value={editingContent}
+                                onChange={e => setEditingContent(e.target.value)}
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleSaveEdit(item.id)}>Save</Button>
+                                <Button size="sm" variant="ghost" onClick={() => setEditingPostId(null)}>Cancel</Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4">{item.content}</p>
+                          )}
+                          {item.posted_at && <p className="text-xs text-muted-foreground mt-1">Posted: {new Date(item.posted_at).toLocaleString()}</p>}
+                        </div>
+                        {(item.status === 'queued' || item.status === 'approved') && (
+                          <div className="flex flex-col gap-1 shrink-0">
+                            <Button size="sm" onClick={() => handlePostNow(item.id)} disabled={linkedinLoading}>Post Now</Button>
+                            <Button size="sm" variant="outline" onClick={() => { setEditingPostId(item.id); setEditingContent(item.content); }}>Edit</Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleSkipPost(item.id)}>Skip</Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Outlook Sync + Posting Schedule */}
         {activeTab === 'outlook' && (
           <div className="space-y-8">
