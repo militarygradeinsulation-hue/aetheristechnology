@@ -5,6 +5,9 @@ import josephToney from '@/assets/joseph-toney.jpg';
 import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 
 export const OperatorBio: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
   return (
     <section id="about" className="relative py-20 px-4">
       <div className="max-w-6xl mx-auto">
