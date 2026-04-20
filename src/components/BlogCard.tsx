@@ -33,13 +33,13 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, caseFileNumber }) => {
       className="block glass rounded-xl overflow-hidden h-full group"
     >
       {/* Case File Image */}
-      <div className="h-48 bg-[#0c0c0c] overflow-hidden relative flex items-center justify-center">
+      <div className="h-64 bg-[#0c0c0c] overflow-hidden relative flex items-center justify-center">
         <img
           src={architectLogo}
           alt="The Architect"
           loading="lazy"
           decoding="async"
-          className="h-32 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+          className="h-48 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
         />
         {/* Case File Badge */}
         <span className="absolute top-2 left-2 text-[10px] font-bold tracking-widest text-white bg-crimson px-2 py-1 rounded font-mono uppercase">
