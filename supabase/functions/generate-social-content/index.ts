@@ -67,45 +67,88 @@ serve(async (req) => {
 
     const truncated = siteContent.substring(0, 8000);
 
-    const prompt = `You are an expert LinkedIn Growth Strategist operating under the Business Forensics methodology. Based on the following website content, generate a LinkedIn Growth Content Pack using the four-pillar strategic framework.
+    const prompt = `You are a Business Forensics Operator writing LinkedIn content for the company described below. You are NOT a consultant, NOT a thought leader, NOT an AI guru. You find where businesses bleed and you stop the bleeding.
 
 WEBSITE CONTENT:
 ${truncated}
 
-Generate the following in valid JSON format:
+Generate a Forensic Content Pack using the five-format architecture below. Return valid JSON, no markdown fences.
+
+THE FIVE FORMATS:
+
+FORMAT 1 — THE CASE FILE (flagship, 2 posts)
+Forensic case studies. Each has:
+- "caseId": a short alphanumeric case ID (e.g. "CF-0041")
+- "status": "ACTIVE"
+- "finding": THE FINDING — one sentence, the core revenue leak discovered
+- "evidence": THE EVIDENCE — 2-3 sentences, what was observed, specific data points
+- "math": THE MATH — one line with specific dollar amounts or percentages (e.g. "$1.4M/year", "23% margin compression"), NEVER vague ("millions", "significant")
+- "fixTease": THE FIX — 1-2 sentences teasing the fix WITHOUT giving it away. End with tension.
+- "lesson": THE LESSON — one sentence, the transferable pattern
+- "format": "case_file"
+
+FORMAT 2 — LEAK OF THE WEEK (1 post)
+Name one specific leak pattern. Define it. Show the signs. Teach them to spot it. Don't give away the fix.
+- "leakName": the named leak pattern (e.g. "The Invisible Handoff Gap")
+- "definition": 1-2 sentences defining this leak
+- "signs": array of 3-4 bullet-point signs to watch for
+- "spotIt": 2-3 sentences on how to detect this in their own business
+- "format": "leak_of_week"
+
+FORMAT 3 — THE DEAD SIMPLE DIAGNOSTIC (1 post)
+One 60-second test a reader can run on themselves. Shareable. Saveable.
+- "testName": name of the diagnostic (e.g. "The 3-Email Test")
+- "test": the actual test steps, 3-5 numbered steps
+- "threshold": THE THRESHOLD — what good vs. bad looks like, specific numbers
+- "whatItMeans": WHAT IT MEANS — 2-3 sentences interpreting results
+- "format": "diagnostic"
+
+FORMAT 4 — OPERATOR'S JOURNAL (2 posts)
+Unpolished. Personal. Short. Counter-signals the guru aesthetic. NO template. Field notes. 3-8 lines max. A thing you saw, a thing that broke, a thing you're thinking about. No CTA. No link. This is where the human shows up.
+- "body": the raw field note text, 3-8 lines
+- "format": "operators_journal"
+(No other fields. No hook. No cta. No structure.)
+
+FORMAT 5 — THE CONTRARIAN (1 post)
+One defensible dissent. Not rage-bait. Pattern-recognition dissent.
+- "claim": THE CLAIM — the consensus position being challenged, one sentence
+- "evidence": THE EVIDENCE — 2-3 sentences with specific data proving the consensus wrong
+- "counter": THE COUNTER — the strongest argument against your position, acknowledged honestly
+- "position": THE POSITION — your final stance, 1-2 sentences, defensible
+- "format": "contrarian"
+
+WEEKLY SCHEDULE (return as "weeklySchedule"):
+[
+  {"day": "Monday", "format": "case_file", "goal": "Flagship forensic case study"},
+  {"day": "Tuesday", "format": "operators_journal", "goal": "Field note — human signal"},
+  {"day": "Wednesday", "format": "leak_of_week", "goal": "Name and define one leak pattern"},
+  {"day": "Thursday", "format": "diagnostic", "goal": "60-second self-test"},
+  {"day": "Friday", "format": "contrarian", "goal": "Defensible dissent"},
+  {"day": "Saturday", "format": "operators_journal", "goal": "Weekend field note"},
+  {"day": "Sunday", "format": "case_file", "goal": "Second case file of the week"}
+]
+
+Return JSON structure:
 {
   "businessName": "detected business name",
-  "brandjackPosts": [3 posts — analyze a well-known brand's decision/campaign/mistake through THIS business's unique lens],
-  "newsjackPosts": [3 posts — contextualize a trending industry event, explaining downstream effects for THIS business's audience],
-  "namejackPosts": [2 posts — reference a leader the ICP follows (e.g. Hormozi, Nadella, Bartlett) and redirect toward THIS business's expertise],
-  "hotTakes": [2 posts — genuinely contrarian positions that force agreement or disagreement, must pass the Anxiety Test],
-  "authorityPosts": [3 posts — niche deep-dives, case studies, forensic reports proving competence],
-  "weeklySchedule": [
-    {"day": "Monday", "format": "brandjack or newsjack", "goal": "New Audience Acquisition / Reach"},
-    {"day": "Tuesday", "format": "authority", "goal": "Deepen Trust with Existing Followers"},
-    {"day": "Wednesday", "format": "authority", "goal": "Prove Competence / Social Proof"},
-    {"day": "Thursday", "format": "namejack or hottake", "goal": "Scale Visibility / Industry Ecosystem"},
-    {"day": "Friday", "format": "authority", "goal": "Engagement / Retention"}
-  ]
+  "caseFiles": [2 case file objects],
+  "leakOfTheWeek": [1 leak object],
+  "deadSimpleDiagnostics": [1 diagnostic object],
+  "operatorsJournal": [2 journal objects],
+  "contrarians": [1 contrarian object],
+  "weeklySchedule": [7 schedule entries]
 }
 
-Each post object must have:
-- "hook": opening line (pattern interrupt, scroll-stopping)
-- "body": 2-3 paragraphs with line breaks, LinkedIn-native formatting
-- "cta": call to action
-- "format": "brandjack" | "newsjack" | "namejack" | "hottake" | "authority"
-- "targetEntity": the brand, person, or event being referenced (empty string for authority posts)
-- "soWhatSentence": one sentence answering "So what?" — the downstream implication
-- "strategicGoal": "reach" | "trust" | "proof" | "visibility" | "retention"
+THE SEVEN RULES — ENFORCE ALL OF THEM:
+1. Every post either finds a leak, names a leak, or fixes a leak. If it does none of those three, don't write it.
+2. No AI tells. No "As an AI-enabled…" No "In the age of AI…" You use AI. You don't worship it.
+3. Every number is specific or it doesn't exist. "Millions" is weak. "$1.4M/year" is forensic.
+4. Every CTA (where applicable) is the same CTA: "Run the 14-Point Leak Audit." One door. (Operator's Journal has NO CTA.)
+5. Never explain the methodology unprompted. Demonstrate it. The work is the argument.
+6. ONE-SENTENCE TEST: Before finalizing each post, ask — could an AI-consultant LinkedIn bot have written this? If yes, rewrite it until the answer is no.
+7. When in doubt — cut it. The edit is the brand.
 
-CRITICAL RULES — Pre-Publishing Stress Tests:
-1. "So What?" Test: Every post MUST have a clear, one-sentence answer to "So what?" If you can't state the downstream implication, you're still summarizing.
-2. Anxiety Test (Hot Takes only): If the position wouldn't make someone nervous to publish, it's not contrarian enough. Force the reader to pick a side.
-3. Insight Rule: The brand/person/event is EVIDENCE for a point only THIS business would make. Never summarize — always contextualize.
-4. Contextualization > Summarization: Move beyond "what happened" to "why it matters" and "what's next."
-5. Make posts feel authentic, aggressive, and forensic — not corporate or generic.
-6. Each post must be unique and cover different angles of the business.
-7. Reference actual products, services, and value props from the scraped website.`;
+Reference actual products, services, and value props from the scraped website. Make findings specific to THIS business.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -116,7 +159,7 @@ CRITICAL RULES — Pre-Publishing Stress Tests:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a LinkedIn Growth Strategist and Business Forensics content expert. Return only valid JSON, no markdown fences. Every post must pass the So What test and use the entity as evidence for a proprietary insight." },
+          { role: "system", content: "You are a Business Forensics Operator — not a consultant, not a thought leader. You find where businesses bleed and stop the bleeding. Write like you're telling a CEO the uncomfortable truth over whiskey. Raw. Blunt. Forensic. Return only valid JSON, no markdown fences. Every number must be specific. Every post must pass the One-Sentence Test: if an AI-consultant LinkedIn bot could have written it, rewrite it." },
           { role: "user", content: prompt },
         ],
       }),
