@@ -1,158 +1,92 @@
 
 
-# Aetheris Design System — Colors, Typography & Style
+## What you're asking
 
-This is the complete visual language used across the site. Sourced directly from `tailwind.config.ts`, `src/index.css`, and `mem://style/forensic-identity`.
+Make Aetheris **visible to AI crawlers** (ChatGPT, Claude, Perplexity, Googlebot's first pass, LinkedIn previews) — not just rendered-after-JS visible. Today the site is a Vite SPA, so anything beyond `index.html` is invisible to crawlers that don't execute JavaScript.
 
----
+## Reality check on what you already have
 
-## 1. Color Palette
+Before listing fixes, here's what's already shipped (so I don't waste a day re-doing it):
 
-All colors are stored as **HSL CSS variables** in `src/index.css` and exposed through Tailwind tokens (`bg-background`, `text-foreground`, `border-amber`, etc.). Never hardcode hex.
+- **`/llms.txt` and `/llms-full.txt`** — already present in `public/`, served at root. ✅
+- **JSON-LD structured data** — every key page emits Organization / Service / FAQPage / BreadcrumbList / Speakable schema via `SEOHead.tsx` + `src/lib/schemas.ts`. ✅
+- **Per-page `<title>`, meta description, OG, Twitter, canonical** — handled by `react-helmet-async` in `SEOHead.tsx`. ✅
+- **Sitemap** — `public/sitemap.xml` + a `generate-sitemap` edge function. ✅
+- **Live SEO override system** — `seo_overrides` table feeds `useSEOOverride` so titles/descriptions/FAQs update at render time. ✅
 
-### Core surface tokens
+**What's actually broken:** all of the above is injected by `react-helmet-async` **after React mounts**. A non-JS crawler hitting `aetheris.technology/` sees only the static `<title>`/`<meta>` baked into `index.html` (currently generic) plus an empty `<div id="root">`. The hero copy, TL;DR, case files, FAQs, JSON-LD — none of it ships in the initial HTML response.
 
-| Token | HSL | Usage |
-|---|---|---|
-| `--background` | `220 15% 8%` | Page background — near-black charcoal |
-| `--foreground` | `40 10% 92%` | Primary text — warm off-white |
-| `--card` | `220 14% 12%` | Card surface |
-| `--card-foreground` | `40 10% 92%` | Text on cards |
-| `--popover` | `220 14% 10%` | Dropdowns, modals |
-| `--surface-elevated` | `220 14% 14%` | Glass panels, elevated UI |
-| `--surface-overlay` | `220 14% 10%` | Overlay backdrops |
-| `--muted` | `220 12% 16%` | Subtle backgrounds |
-| `--muted-foreground` | `220 10% 55%` | Secondary text, labels |
-| `--border` | `220 12% 20%` | Default border |
-| `--input` | `220 12% 20%` | Form input border |
+So the consultant's diagnosis is **correct on the symptom, partially wrong on the cause**: it's not that we lack schema or `llms.txt`. It's that the SPA never renders server-side, so the schema we already wrote never makes it into the first byte the crawler reads.
 
-### Brand accents
+## The fix — prerendering, not migration
 
-| Token | HSL | Usage |
-|---|---|---|
-| `--primary` / `--amber-glow` | `36 90% 55%` | **Amber** — primary CTAs, glows, highlights, brand accent |
-| `--accent` | `36 70% 45%` | Deeper amber for hover/active states |
-| `--ring` | `36 90% 55%` | Focus ring |
-| `--secondary` | `220 12% 18%` | Neutral secondary buttons |
+We do **not** need to migrate to Next.js. Vite has a battle-tested solution: **`vite-plugin-prerender`** (or `react-snap` / `vite-plugin-prerender-spa`). It runs Puppeteer at build time, hits each route in headless Chrome, captures the fully-rendered HTML (including everything `react-helmet-async` injected), and writes static `.html` files into `dist/`.
 
-### Forensic signal — crimson (use sparingly)
+End result: a crawler hitting `/leak-audit` gets a fully-rendered HTML page with the real hero, real meta tags, real JSON-LD, real FAQ content — **zero changes to the React app, zero runtime cost, zero hosting changes**. JS still hydrates for users; crawlers just get the pre-baked snapshot.
 
-| Token | HSL | Usage |
-|---|---|---|
-| `--crimson` | `0 65% 38%` | **Reserved exclusively for "leak" signals** — dollar bleeds, "ACTIVE" stamps, the word *leaking* |
-| `--crimson-deep` | `0 70% 28%` | Crimson hover/depth |
-| `--destructive` | `0 72% 51%` | Errors, destructive actions only |
+### Phase 1 — Prerender the marketing pages (the fix)
 
-**Crimson rule:** never use crimson decoratively. It signals revenue loss, active investigations, or critical alerts. Amber remains the brand color.
+1. **Install `vite-plugin-prerender`** and wire into `vite.config.ts`. Configure with Puppeteer, headless, and a route list of every public marketing page.
+2. **Route list to prerender** (initial set — not behind auth, not dynamic-id):
+   - `/`, `/about`, `/services`, `/why-us`, `/capabilities`, `/solutions`, `/industries`, `/contact`, `/careers`, `/terms`
+   - `/leak-audit`, `/scan`, `/assessment`, `/diagnostic`, `/friction-audit`, `/brand-contradictions`, `/strategic-questions`, `/sales-scripts`, `/follow-up-plan`, `/content-calendar`, `/content-generator`, `/sales-compass`, `/marketing-strategist`, `/marketing-studio`, `/ai-consultant`
+   - `/blog` (the index)
+   - `/resources`, `/service-areas`, all `/industries/:vertical` static slugs from `src/config/verticals.ts`
+3. **Blog post prerendering** — `BlogPostPage` is dynamic (`/blog/:slug`). Approach: at build time, query Supabase for all `published = true` slugs, feed that list into the prerender route array. ~174 posts → adds ~2 min to build, runs once per deploy. Acceptable.
+4. **Skip prerendering** for: admin (`/admin/*`), auth (`/login`, `/signup`, `/reset-password`), checkout return, anything user-specific. Those stay SPA-only — crawlers shouldn't see them anyway.
+5. **`index.html` baseline upgrade** — even with prerender, harden the static fallback:
+   - Replace generic `<title>` with the homepage title
+   - Add baseline `<meta name="description">`, OG image, OG title, Twitter card
+   - Add the homepage `Organization` JSON-LD inline (so even pre-prerender first-load and any unprerendered route still ships brand schema)
+   - Keep the existing `<noscript>` notice but rewrite it to be SEO-positive ("Aetheris — Business Forensics Operator. Indianapolis. (317) 376-2110.") instead of just "needs JavaScript"
 
----
+### Phase 2 — Verify the fix actually shipped
 
-## 2. Gradients & Shadows
+After deploy:
+- `curl -A "Mozilla/5.0 (compatible; ChatGPT-User/1.0)" https://aetheris.technology/` — should return HTML containing "Your business is leaking", the TL;DR copy, the case file numbers, and inlined JSON-LD.
+- Same for `/leak-audit`, `/about`, a sample blog post.
+- Run through Google Rich Results Test → all schema types should validate.
+- LinkedIn Post Inspector on `/` and `/blog/[any-slug]` → should pull title + description + OG image.
 
-```
---gradient-primary: linear-gradient(135deg, hsl(36 90% 55%), hsl(40 85% 70%));
---gradient-glow:    linear-gradient(90deg, transparent, hsl(36 90% 55% / 0.3), transparent);
+### Phase 3 — Marginal AI-discoverability boosters (cheap wins)
 
---shadow-glow:  0 0 20px hsl(36 90% 55% / 0.15), 0 0 60px hsl(36 90% 55% / 0.05);
---shadow-card:  0 10px 40px hsl(0 0% 0% / 0.5);
---shadow-lift:  0 20px 60px -10px hsl(36 90% 55% / 0.25), 0 10px 30px -10px hsl(0 0% 0% / 0.6);
-```
+- **Update `public/llms.txt`** to point at the now-prerendered key pages and the Forensics positioning (currently it's still on the old "AI Systems Architect" framing — confirmed via earlier file listing).
+- **Regenerate `public/llms-full.txt`** with the new forensic copy + Leak Audit methodology + pricing.
+- **Add `Author` + `mainEntityOfPage` schema** to blog posts (already in `articleSchema`, just confirm it's wired in `BlogPostPage`).
+- **Add a `WebSite` + `SearchAction` schema** to the homepage so AI crawlers know the site is searchable.
 
-Utility classes: `.glow-amber`, `.glow-text`, `.gradient-radial-amber`, `.text-gradient-amber`.
+## What I will NOT do
 
----
+- **Migrate to Next.js.** Pointless cost. Prerender solves the same problem in 1 day with zero refactor.
+- **Add SSR runtime** (Vite SSR mode, Vercel functions, etc.). Adds infra complexity for marketing pages that never change per-user. Static prerendered HTML is faster, cheaper, and more crawler-friendly than SSR anyway.
+- **Touch the React app code.** Components, routes, state — all unchanged. The build pipeline is the only thing that changes.
+- **Prerender authed pages** — admin, login, checkout, my-subscription stay SPA.
 
-## 3. Typography
+## Files touched
 
-Four typefaces, each with a strict role.
+**Edited**
+- `vite.config.ts` — add `vite-plugin-prerender` config, route list, Puppeteer options
+- `package.json` — add `vite-plugin-prerender` + `puppeteer` dev deps
+- `index.html` — upgrade static `<title>`, meta, OG, baseline JSON-LD, rewrite `<noscript>`
+- `public/llms.txt` + `public/llms-full.txt` — refresh to forensics positioning
 
-| Token | Family | Use |
-|---|---|---|
-| `font-body` | **Inter** (300/400/500/600) | All body copy, UI, forms |
-| `font-display` | **Space Grotesk** (300–700) | Default headings (h1–h6), navigation, buttons |
-| `font-forensic` | **Fraunces** serif (400–700, opsz 9–144) | Autopsy headlines, case-file titles, dossier copy — forensic moments only |
-| `font-case` | **JetBrains Mono** (400/500/600) | Case-file micro-labels, "CASE FILE #047", eyebrow tags, status stamps |
+**Created**
+- `scripts/get-prerender-routes.ts` — build-time script that fetches blog slugs + vertical slugs from Supabase and exports the full route list to the Vite plugin
 
-Headings default to Space Grotesk via a global rule in `src/index.css`. Switch to `font-forensic` for forensic content; switch to `font-case` (uppercase, tracked-wide, small) for forensic micro-labels.
+## Validation
 
-**Forensic typographic pattern:**
-```
-font-case text-[10px] uppercase tracking-widest text-amber  ← micro-label
-font-forensic text-3xl md:text-4xl font-bold text-foreground ← headline
-font-body text-base text-muted-foreground                    ← supporting copy
-```
+- `npm run build` completes; `dist/` contains `index.html`, `about/index.html`, `leak-audit/index.html`, `blog/[slug]/index.html` for every published post — each with fully-rendered HTML, meta tags, and JSON-LD baked in.
+- `curl https://aetheris.technology/leak-audit` (no JS) returns the hero copy, the 7-step methodology section, and FAQ JSON-LD in the response body.
+- Google Rich Results Test on `/`, `/about`, `/blog/[any-slug]` → all schemas valid.
+- LinkedIn Post Inspector on the homepage → pulls correct title, description, OG image.
+- Real users: zero visible change. Same SPA, same React Router, same hydration. Pages just feel slightly faster on first paint because HTML arrives with content.
 
----
+## One decision before I build
 
-## 4. Layout & Shape
+The prerender step adds time to every deploy (≈10–15s for static pages, +~2 min if we prerender all 174 blog posts each time). Two options:
 
-- **Border radius:** `--radius: 0.75rem` → `rounded-lg`. Modifiers `rounded-md` (`-2px`), `rounded-sm` (`-4px`).
-- **Container:** centered, `2rem` padding, max-width `1400px` at 2xl.
-- **Spacing rhythm:** Tailwind defaults; sections typically `py-10` to `py-20`.
+**A. Prerender everything every deploy** — simplest, always fresh, but every deploy is ~2.5 min longer.
+**B. Prerender static marketing pages on every deploy; prerender blog posts on a schedule (nightly cron or post-publish trigger)** — fast deploys, slight delay before a brand-new blog post is crawler-visible (max 24h, or instant if we wire a publish webhook).
 
----
-
-## 5. Glass & Motion Utilities
-
-Defined in `src/index.css`:
-
-- `.glass` — translucent elevated surface with backdrop blur and 0.5 border opacity
-- `.glass-hover` — adds amber halo + border tint on hover
-- `.glass-shine` — diagonal amber shine sweep on hover
-- `.hover-lift` — tactile rise (`-6px translateY`) + amber lift shadow
-- `.shimmer-border` — animated amber gradient border, fades in on hover
-- `.cursor-glow` — radial amber glow that follows the cursor (CTAs)
-- `.animate-float-slow` — 7s gentle vertical float
-- `.animate-glow-pulse` — 3.5s breathing amber glow
-- `.animate-pulse-glow` — drop-shadow amber pulse
-- `.animate-shimmer-in` — entrance animation (blur + rise)
-- `.text-float` — floating heading with soft amber text-shadow
-
-All motion respects `prefers-reduced-motion: reduce` — continuous animations disable, hover state-changes still fire.
-
-Tailwind keyframes: `fade-in` (10px rise), `scale-in` (0.96 → 1), `accordion-down/up`.
-
----
-
-## 6. Forensic Field Kit Components
-
-The brand-defining visual pattern. Used on `CaseFileCard.tsx`, leak callouts, autopsy posts.
-
-**Anatomy:**
-- `font-case` micro-header: `CASE FILE #047` (top-left)
-- Status stamp top-right: amber border `SEALED` or crimson border `ACTIVE`
-- `font-forensic` subject line
-- Body copy in `font-body`
-- Dollar bled: `font-forensic text-3xl font-bold text-crimson tracking-tight`
-- Corner cross-hair details: `border-t border-r border-amber/40` (top-right), `border-b border-l` (bottom-left)
-- `glass` surface, `border-border/60`
-
----
-
-## 7. Image & Asset Rules
-
-- All AI-generated images carry **"Aetheris AI Studio"** watermark, bottom-right.
-- Photography: dark, high-contrast, never bright/sunny stock.
-- Icons: `lucide-react` only, `text-amber` or `text-muted-foreground`.
-
----
-
-## 8. Forbidden
-
-- No bright/light backgrounds (white, pastels, light gray)
-- No purple/teal/pink accents — amber is the only brand color
-- No crimson used decoratively — leak signal only
-- No serif fonts outside `font-forensic` forensic moments
-- No emoji in UI copy
-- No generic AI-guru gradients (purple→pink, teal→cyan)
-- No social proof popups, testimonial carousels, or floating purchase nudges
-- No hard-coded color hexes — always tokens
-
----
-
-## TL;DR
-
-**Colors:** Charcoal background `220 15% 8%`, warm off-white text `40 10% 92%`, amber primary `36 90% 55%`, crimson signal `0 65% 38%` (leaks only).
-**Type:** Inter body, Space Grotesk headings, Fraunces forensic serif, JetBrains Mono case-file labels.
-**Feel:** Dark forensic dossier — glass surfaces, amber glow, crimson where blood is.
+Default if you don't reply: **A**. Simpler, and a 2.5-min deploy is fine for a marketing site that ships ~daily.
 
