@@ -31,19 +31,19 @@ const IndustriesPage: React.FC = () => {
   );
 
   const faqs = [
-    { question: 'Which industries does Aetheris AI serve?', answer: 'Healthcare, Finance, Logistics, Construction, Manufacturing, and SaaS — with deep playbooks for each. Aetheris AI also serves Legal, Real Estate, E-commerce, and Professional Services on a custom-engagement basis.' },
-    { question: 'Why pick an industry-specific AI consultant?', answer: 'Generic AI consultants ship generic deployments. Industry expertise compresses time-to-ROI by months because the use cases, regulations, data patterns, and integration realities are already mapped.' },
-    { question: 'Do you offer AI consulting for industries not listed?', answer: 'Yes. The 6 vertical pages reflect our deepest playbooks. We engage in any industry where AI can compress operational cycle time or unlock pricing power. Book a discovery call to scope your industry.' },
-    { question: 'How fast can we deploy AI in our industry?', answer: 'Diagnostic and roadmap: 2 weeks. First pilot live: 4–8 weeks. Full operational deployment of 3 high-ROI use cases: 90–120 days. Aetheris AI runs a 14-Day Operational Diagnostic specifically scoped per industry.' },
+    { question: 'Do you specialize in one industry or many?', answer: 'Aetheris is a forensics operator first — the methodology (The Leak Audit™) works across any operation where revenue moves through systems and people. The vertical pages exist because the *patterns* of leaks differ by industry: lead-routing leaks bleed differently in healthcare than in construction.' },
+    { question: 'Why pick a forensics operator over a generic AI consultant?', answer: 'Generic AI consultants ship generic deployments. A forensics operator names the leak before prescribing the fix — so the AI, automation, or CRM you build is solving the actual wound, not the symptom.' },
+    { question: 'Do you serve industries not listed?', answer: 'Yes. The vertical pages reflect deeper pattern libraries. We engage in any industry where leaks compress cycle time, lose leads, or unlock pricing power. Run the free Leak Audit™ or book the Forensic Diagnostic to scope your case.' },
+    { question: 'How fast does the diagnosis happen?', answer: 'Self-scan: 14 minutes (free Leak Audit™). Operator-led Forensic Diagnostic: 14 days inside the operation. Sealed case file with each leak named and quantified delivered Day 14.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI by Industry | Healthcare, Finance, Logistics & More"
-        description="Industry-specific AI consulting for healthcare, finance, logistics, construction, manufacturing, and SaaS. Deep playbooks. Fast deployment."
+        title="Forensic Audits by Industry | Aetheris"
+        description="The Leak Audit™ — applied to healthcare, finance, logistics, construction, manufacturing, and SaaS. Find where revenue is bleeding, then rebuild."
         path="/industries"
-        keywords="AI by industry, AI for healthcare, AI for finance, AI for logistics, AI for construction, AI for manufacturing, AI for SaaS, industry AI consulting"
+        keywords="business forensics by industry, revenue leak audit healthcare, AI for finance operations, logistics leak audit, construction operational diagnostic, manufacturing AI consultant, SaaS revenue leaks"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Industries', path: '/industries' },
@@ -58,19 +58,21 @@ const IndustriesPage: React.FC = () => {
 
         <section className="pt-32 pb-12 px-4">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
-              AI by Industry
+              Forensics by Industry
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold font-display mb-6 leading-tight">
-              Generic AI consultants ship generic deployments.
+            <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Every industry leaks <span className="text-crimson">differently</span>.
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Pick your industry. We already know where the bleeding is.
+              Same methodology. Different wound patterns. Pick the file.
             </p>
-            <div className="glass rounded-2xl p-6 max-w-3xl mx-auto border border-amber/20">
+            <div className="glass rounded-sm p-6 max-w-3xl mx-auto border border-amber/20">
               <p className="tldr text-lg text-foreground leading-relaxed">
-                Industry expertise compresses AI time-to-ROI by months. Aetheris AI ships deep playbooks for healthcare, finance, logistics, construction, manufacturing, and SaaS — built around the workflows actually bleeding revenue.
+                The Leak Audit™ runs on any operation — but where the bleeding shows up changes by industry. 
+                Healthcare hemorrhages in intake & no-shows. Construction leaks at quote-follow-up. SaaS bleeds at trial-to-paid. 
+                Pick your file to see the leak patterns we've already mapped.
               </p>
             </div>
           </div>
@@ -103,22 +105,26 @@ const IndustriesPage: React.FC = () => {
         </section>
 
         <section className="py-16 px-4">
-          <div className="max-w-3xl mx-auto text-center glass rounded-2xl p-10 border border-amber/30">
-            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
-              Don't see your industry?
+          <div className="max-w-3xl mx-auto text-center glass rounded-sm p-10 border border-amber/30">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+              Industry Not Listed?
+            </div>
+            <h2 className="font-forensic text-3xl md:text-4xl font-bold mb-4">
+              The methodology travels.
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              We work with any operation where AI compresses cycle time or unlocks pricing power. Book a call.
+              If your business has leads, dollars, or hours moving through systems and people — there are leaks. 
+              Run the free self-scan or open a case.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/assessment">
+              <Link to="/leak-audit">
                 <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
-                  Free AI Readiness Score <ArrowRight className="ml-2 w-4 h-4" />
+                  Run the Free Leak Audit™ <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link to="/contact">
                 <Button size="lg" variant="outline">
-                  Book a Strategy Call
+                  Open a Case
                 </Button>
               </Link>
             </div>

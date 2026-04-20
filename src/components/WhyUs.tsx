@@ -5,12 +5,12 @@ import { ComparisonChart } from './ComparisonChart';
 
 export const WhyUs: React.FC = () => {
   const benefits = [
-    'Hands-on consulting that delivers measurable results',
-    'Proven track record across 200+ client engagements',
-    'Ongoing advisory support and strategy reviews',
-    'Scalable strategies designed for long-term growth',
-    'ROI-focused recommendations and roadmaps',
-    'Deep expertise across cutting-edge AI technologies',
+    'Operator-led — never an account manager, never a junior',
+    'Diagnosis before prescription — every leak named and quantified in dollars',
+    'The Leak Audit™ — a named, repeatable 7-step forensic methodology',
+    'Psychology + Marine + 20yr operator stack — behavioral leaks, not just tech leaks',
+    'Sealed case files — every engagement closes with verifiable, dollar-tied outcomes',
+    'No retainer ransom — flat-fee Forensic Diagnostic, applied toward engagement',
   ];
 
   return (
@@ -18,20 +18,23 @@ export const WhyUs: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              Why Choose <span className="text-amber glow-text">Aetheris AI</span>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+              Why Aetheris
+            </div>
+            <h2 className="font-forensic text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              Most consultants sell the prescription. <span className="text-crimson">We do the autopsy first.</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              We don't just advise — we partner with you to build the future of your business.
+              You can't fix what you can't see — and you can't see it from inside the building.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="glass p-8 md:p-12 rounded-2xl">
+        <div className="glass p-8 md:p-12 rounded-sm border border-border/60">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="flex-1 space-y-6">
-              <h3 className="text-3xl font-bold text-foreground mb-8 font-display">
-                The Difference is Clear
+              <h3 className="text-3xl font-bold text-foreground mb-8 font-forensic">
+                The forensic difference.
               </h3>
               
               <div className="space-y-4">
@@ -46,9 +49,9 @@ export const WhyUs: React.FC = () => {
               </div>
 
               <p className="text-muted-foreground pt-6">
-                Stop navigating AI alone. With Aetheris AI consulting, you get expert
-                guidance backed by real-world experience. We handle the strategy and
-                complexity — you focus on growing your business.
+                Generic AI consultants ship generic deployments. We name the wound, quantify the bleed, 
+                then close it with the right mix of AI agents, automation, CRM, and human process redesign — 
+                in that order.
               </p>
             </div>
 

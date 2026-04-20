@@ -43,12 +43,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems = [
     { label: 'Home', href: '/', special: true },
-    { label: 'Solution Store', href: '/services', special: true },
+    { label: 'Free Leak Audit™', href: '/leak-audit', special: true },
+    { label: 'Forensic Diagnostic', href: '/services' },
     { label: 'Industries', href: '/industries' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
-    { label: 'Free Diagnostic', href: '/business-diagnostic' },
-    { label: 'About', href: '/about' },
+    { label: 'The Operator', href: '/about' },
   ];
 
   const showStickyCTA = isScrolled;

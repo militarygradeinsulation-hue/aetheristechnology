@@ -31,13 +31,13 @@ export const Footer: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <img 
                   src={aetherisLogo} 
-                  alt="Aetheris AI Logo" 
+                  alt="Aetheris Logo" 
                   className="w-12 h-12 object-contain"
                 />
-                <span className="text-xl font-bold text-foreground font-display">Aetheris AI</span>
+                <span className="text-xl font-bold text-foreground font-forensic">Aetheris</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Business consulting &amp; digital intelligence. Your Co-CEO for operational systems.
+                Business Forensics Operator. We find where revenue is leaking — then rebuild with AI.
               </p>
               <div className="flex flex-col gap-2 mt-3">
                 <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium" onClick={() => trackEvent('click', { label: 'phone', location: 'footer' })}>
@@ -50,27 +50,24 @@ export const Footer: React.FC = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-foreground mb-4">What We Do</h4>
+              <h4 className="font-bold text-foreground mb-4">Methodology</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/services" className="hover:text-amber transition-colors">Business Consulting</Link></li>
-                <li><Link to="/services" className="hover:text-amber transition-colors">Operational Diagnostics</Link></li>
-                <li><Link to="/services" className="hover:text-amber transition-colors">CRM & Sales Systems</Link></li>
-                <li><Link to="/services" className="hover:text-amber transition-colors">AI & Automation Strategy</Link></li>
+                <li><Link to="/leak-audit" className="hover:text-amber transition-colors">Free Leak Audit™</Link></li>
+                <li><Link to="/services" className="hover:text-amber transition-colors">Forensic Diagnostic — $2,500</Link></li>
+                <li><Link to="/services" className="hover:text-amber transition-colors">Co-CEO Engagements</Link></li>
+                <li><Link to="/business-diagnostic" className="hover:text-amber transition-colors">20-Question Self-Diagnostic</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-foreground mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/about" className="hover:text-amber transition-colors">About Us</Link></li>
+                <li><Link to="/about" className="hover:text-amber transition-colors">The Operator</Link></li>
                 <li><Link to="/industries" className="hover:text-amber transition-colors">Industries</Link></li>
-                <li><Link to="/blog" className="hover:text-amber transition-colors">Blog</Link></li>
-                <li><Link to="/contact" className="hover:text-amber transition-colors">Contact</Link></li>
+                <li><Link to="/blog" className="hover:text-amber transition-colors">Field Notes</Link></li>
+                <li><Link to="/contact" className="hover:text-amber transition-colors">Open a Case</Link></li>
                 <li><Link to="/careers" className="hover:text-amber transition-colors">Careers</Link></li>
               </ul>
-              <p className="text-xs text-muted-foreground mt-3 italic">
-                We're a new startup seeking visionaries who understand the transformative power of AI.
-              </p>
             </div>
 
             <div>
