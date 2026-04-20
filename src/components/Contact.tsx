@@ -115,6 +115,12 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-background">
+                    <Calendar className="mr-2 w-5 h-5" />
+                    Book a Meeting
+                  </Button>
+                </a>
                 <a href="tel:+13173762110">
                   <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Phone className="mr-2 w-5 h-5" />
