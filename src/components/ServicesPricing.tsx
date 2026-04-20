@@ -235,11 +235,16 @@ export const ServicesPricing: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
-              Services & <span className="text-gradient-amber">Investment</span>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+              The Forensic Diagnostic — $2,500 · Applied toward engagement
+            </div>
+            <h2 className="font-forensic text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              You pay for the <span className="text-crimson italic">diagnosis.</span>{' '}
+              <br className="hidden md:block" />
+              Everything else is the prescription.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Strategic engagement begins with a foundational diagnostic — investment scaled to scope of inquiry. Mix &amp; match for up to 20% off.
+              Engagements start with the Forensic Diagnostic — operator-led, 14 days, every leak named and quantified. Then we prescribe (AI, automation, CRM, systems). Mix &amp; match for up to 20% off.
             </p>
 
             {/* Billing Toggle */}
