@@ -118,10 +118,10 @@ const StickyContactBar: React.FC = () => {
           <Linkedin className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">LinkedIn</span>
         </a>
-        <Link to="/contact" className="flex flex-col items-center gap-1 bg-primary rounded-lg px-4 py-2" onClick={() => trackEvent('click', { label: 'book', location: 'sticky_bar' })}>
-          <MessageCircle className="w-5 h-5 text-primary-foreground" />
+        <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 bg-primary rounded-lg px-4 py-2" onClick={() => trackEvent('book_meeting_click', { location: 'sticky_bar' })}>
+          <Calendar className="w-5 h-5 text-primary-foreground" />
           <span className="text-[10px] font-bold text-primary-foreground">Book</span>
-        </Link>
+        </a>
       </div>
     </div>
   );
