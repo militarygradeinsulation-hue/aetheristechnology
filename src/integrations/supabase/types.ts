@@ -284,6 +284,69 @@ export type Database = {
         }
         Relationships: []
       }
+      content_posting_schedule: {
+        Row: {
+          content_type: string
+          created_at: string
+          day_name: string
+          day_of_week: number
+          id: string
+          notes: string | null
+          post_time: string | null
+          strategic_goal: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          day_name: string
+          day_of_week: number
+          id?: string
+          notes?: string | null
+          post_time?: string | null
+          strategic_goal?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          day_name?: string
+          day_of_week?: number
+          id?: string
+          notes?: string | null
+          post_time?: string | null
+          strategic_goal?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_sync_log: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          outlook_message_id: string | null
+          synced_at: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          outlook_message_id?: string | null
+          synced_at?: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          outlook_message_id?: string | null
+          synced_at?: string
+        }
+        Relationships: []
+      }
       crm_companies: {
         Row: {
           created_at: string
