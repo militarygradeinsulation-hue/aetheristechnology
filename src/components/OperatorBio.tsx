@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { CaseFileCard } from './CaseFileCard';
 import josephToney from '@/assets/joseph-toney.jpg';
+import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 
 export const OperatorBio: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
   return (
     <section id="about" className="relative py-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -22,12 +26,29 @@ export const OperatorBio: React.FC = () => {
         <div className="grid lg:grid-cols-[auto_1fr] gap-10 items-start">
           <RevealOnScroll>
             <div className="glass rounded-lg border border-border/60 p-6 max-w-sm mx-auto">
-              <div className="aspect-square w-64 mx-auto rounded-md overflow-hidden border border-amber/30 mb-5">
-                <img
-                  src={josephToney}
-                  alt="Joseph Toney, Business Forensics Operator"
+              <div className="aspect-square w-64 mx-auto rounded-md overflow-hidden border border-amber/30 mb-5 relative group">
+                <video
+                  ref={videoRef}
+                  src={josephToneyVideo}
+                  poster={josephToney}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
                   className="w-full h-full object-cover"
                 />
+                <button
+                  onClick={() => {
+                    const v = videoRef.current;
+                    if (!v) return;
+                    v.muted = !v.muted;
+                    setMuted(v.muted);
+                  }}
+                  className="absolute bottom-2 right-2 z-10 bg-background/80 backdrop-blur-sm border border-amber/30 rounded-full w-8 h-8 flex items-center justify-center text-amber hover:bg-amber/20 transition-colors opacity-0 group-hover:opacity-100"
+                  aria-label={muted ? 'Unmute video' : 'Mute video'}
+                >
+                  {muted ? '🔇' : '🔊'}
+                </button>
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
                 Operator Profile
