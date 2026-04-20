@@ -125,8 +125,8 @@ export const BlogList: React.FC = () => {
         ) : visiblePosts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {visiblePosts.map((post) => (
-                <BlogCard key={post.id} post={post} />
+              {visiblePosts.map((post, idx) => (
+                <BlogCard key={post.id} post={post} caseFileNumber={filteredPosts.length - idx} />
               ))}
             </div>
 
