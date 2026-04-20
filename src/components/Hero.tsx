@@ -4,6 +4,7 @@ import { ArrowRight, Phone, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import architectLogo from '@/assets/architect-logo.jpg';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -24,6 +25,15 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           transition={{ duration: 0.8 }}
           className="space-y-6"
         >
+          <div className="flex justify-center">
+            <img
+              src={architectLogo}
+              alt="The Architect — Aetheris Business Forensics Operator badge"
+              className="w-40 md:w-52 h-auto rounded-full shadow-2xl"
+              loading="eager"
+            />
+          </div>
+
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-sm border-amber/30">
             <span className="font-case text-[10px] uppercase tracking-widest text-amber">
               Business Forensics Operator · Indianapolis
