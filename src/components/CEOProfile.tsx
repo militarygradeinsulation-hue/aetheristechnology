@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TiltCard } from './TiltCard';
 import { RevealOnScroll } from './RevealOnScroll';
 import josephToney from '@/assets/joseph-toney.jpg';
+import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 
 export const CEOProfile: React.FC = () => {
   useEffect(() => {
