@@ -67,6 +67,7 @@ const App = () => (
             element={
               <AuthProvider>
                 <PageViewTracker />
+                <RetargetingPixel />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/services" element={<ServicesPage />} />
