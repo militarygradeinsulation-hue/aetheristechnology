@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
+import { LeakAuditMethod } from '@/components/LeakAuditMethod';
+import { CaseFileCard } from '@/components/CaseFileCard';
+import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { ThreeAreas } from '@/components/ThreeAreas';
 import { FreeTools } from '@/components/FreeTools';
-import { ServiceCapabilities } from '@/components/ServiceCapabilities';
-import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
-import { ContactForm } from '@/components/ContactForm';
+import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -16,36 +17,36 @@ const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const faqs = [
-    { question: 'What does Aetheris AI do?', answer: 'Aetheris AI is a B2B AI consulting and technology firm in Indianapolis. We embed as a Co-CEO to expose revenue leaks, rebuild broken systems, and deploy AI automation (LLMs, agents, workflow automation) that delivers measurable ROI.' },
-    { question: 'How do I implement AI in my business?', answer: 'Start with an AI Maturity Assessment to identify high-ROI use cases, then prioritize a small number of pilots that target measurable operational pain. Aetheris AI\'s 14-Day Operational Diagnostic produces a prioritized roadmap and AI/automation plan.' },
-    { question: 'How much does AI consulting cost?', answer: 'Aetheris AI services range from $50 (visual rendering) to $25,000+ (custom AI implementation). Key tiers: Rapid Evaluation $750, Ongoing Oversight $1,500/month, 14-Day Diagnostic $7,500, Custom AI $25,000+.' },
-    { question: 'Does Aetheris AI serve businesses outside Indianapolis?', answer: 'Yes. We are headquartered in Indianapolis, Indiana but serve businesses across the entire United States with remote and on-site engagements.' },
+    { question: 'What is a Leak Audit™?', answer: 'A 7-step forensic process Aetheris runs on every business: Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. We name where revenue is leaking (lead capture, response time, operational drag, trust gaps) and put a real annual dollar figure on each leak before we touch a system.' },
+    { question: 'How do you find revenue leaks in a business?', answer: 'We run reconnaissance on every system, channel, and handoff — CRMs, inboxes, forms, dashboards, the spreadsheets nobody admits to. Then we trace each lead and dollar from entry to exit and identify where they stall, vanish, or duplicate. Output: a sealed case file with each leak named and quantified.' },
+    { question: 'How much does the Forensic Diagnostic cost?', answer: 'The Forensic Diagnostic is a flat $2,500 — 14 days inside your operation with operator-led investigation. Applied toward a Co-CEO engagement if you proceed. The free Leak Audit (self-scan) is the door opener.' },
+    { question: 'Does Aetheris serve businesses outside Indianapolis?', answer: 'Yes. Headquartered in Indianapolis, Indiana — we run forensic engagements with US businesses remotely and on-site.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Aetheris AI — Indianapolis AI Consulting & Automation"
-        description="B2B AI consulting in Indianapolis. AI strategy, automation, CRM, and ROI analysis. Reduce operational costs with AI. (317) 376-2110."
+        title="Business Forensics Operator — Find Where You're Leaking | Aetheris"
+        description="We run forensic audits on operations, marketing & systems — find where revenue is leaking, then rebuild with AI. Indianapolis-based. (317) 376-2110."
         path="/"
-        keywords="AI consultant Indianapolis, B2B AI consulting, AI strategy consulting, AI ROI analysis, AI adoption roadmap, how to implement AI in business, reduce operational costs with AI, technology consultant Indianapolis, digital transformation Indiana, CRM automation Indianapolis"
+        keywords="business forensics, revenue leak audit, AI consultant Indianapolis, B2B AI consulting, operational diagnostic, business autopsy, AI strategy consulting, sales leak finder, fix your business consulting, technology consultant Indianapolis"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         faqs={faqs}
         speakable={['h1', '.tldr', 'h2']}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "ProfessionalService",
-          "name": "Aetheris AI",
+          "name": "Aetheris",
           "url": "https://aetheris.technology",
           "logo": "https://aetheris.technology/aetheris-logo.png",
-          "description": "B2B AI consulting and technology firm specializing in AI strategy, operational diagnostics, CRM automation, LLMs, AI agents, and workflow automation for US businesses.",
+          "description": "Business Forensics Operator. We run forensic audits on operations, marketing, and systems to find where revenue is leaking — then rebuild with AI, automation, and CRM. Indianapolis-based, US-wide.",
           "telephone": "+1-317-376-2110",
           "email": "hello@aetheris.technology",
           "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
           "geo": { "@type": "GeoCoordinates", "latitude": 39.7684, "longitude": -86.1581 },
-          "priceRange": "$50 - $25,000+",
+          "priceRange": "$0 - $25,000+",
           "areaServed": { "@type": "Country", "name": "United States" },
-          "serviceType": ["AI Strategy Consulting", "AI Maturity Assessment", "Digital Transformation", "Generative AI", "LLM Implementation", "AI Agents", "Workflow Automation", "Conversational AI", "Responsible AI", "AI ROI Analysis"],
+          "serviceType": ["Business Forensics", "Revenue Leak Audit", "Operational Diagnostic", "AI Strategy Consulting", "AI Agents", "Workflow Automation", "CRM Implementation", "Co-CEO Embed"],
           "sameAs": ["https://www.linkedin.com/in/aisystemsarchitect", "https://ctoguy.ai"],
         }}
       />
@@ -54,27 +55,64 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
-        {/* AEO TL;DR — extracted by ChatGPT, Perplexity, Google AI Overviews */}
-        <section className="px-4 -mt-4 md:-mt-8 mb-8">
+        {/* AEO TL;DR */}
+        <section className="px-4 -mt-2 md:-mt-6 mb-10">
           <div
-            className="tldr glass rounded-xl border border-amber/30 p-5 md:p-6 max-w-3xl mx-auto"
+            className="tldr glass rounded-sm border border-amber/30 p-5 md:p-6 max-w-3xl mx-auto"
             data-speakable="true"
           >
-            <div className="text-xs font-bold text-amber uppercase tracking-wider mb-2">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               Quick Answer
             </div>
             <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
-              <strong className="text-foreground">Aetheris AI</strong> is a B2B AI consulting firm in
-              Indianapolis, Indiana that embeds as a Co-CEO with US businesses to expose revenue leaks,
-              rebuild broken operational systems, and deploy AI agents, LLMs, and workflow automation.
-              Engagements range from a $750 Rapid Strategic Evaluation to a $7,500 14-Day Operational
-              Diagnostic and $25,000+ custom AI implementations. Call (317) 376-2110.
+              <strong className="text-foreground">Aetheris</strong> is a Business Forensics Operator
+              based in Indianapolis. We run a 7-step methodology — <em>The Leak Audit™</em> — on
+              operations, marketing, and systems to find exactly where revenue is bleeding out, then
+              rebuild it with AI agents, automation, and CRM. The free self-scan is at{' '}
+              <strong>/leak-audit</strong>. The operator-led <strong>Forensic Diagnostic</strong> is{' '}
+              <strong>$2,500 flat</strong>, applied toward engagement.
             </p>
           </div>
         </section>
 
+        {/* Sample case files — credibility before methodology */}
+        <section className="px-4 py-10">
+          <div className="max-w-5xl mx-auto">
+            <RevealOnScroll>
+              <div className="text-center mb-8">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                  Field Reports
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
+                  What we've found inside other businesses.
+                </h2>
+              </div>
+            </RevealOnScroll>
+            <div className="grid md:grid-cols-3 gap-4">
+              <CaseFileCard
+                caseNumber={47}
+                businessType="$4M services firm"
+                leakFound="Inbound leads dying inside one Gmail inbox — no routing, no SLA, no second touch."
+                amountBled="$380K / yr"
+              />
+              <CaseFileCard
+                caseNumber={62}
+                businessType="Regional B2B SaaS"
+                leakFound="73% of priced proposals never followed up after Day 3."
+                amountBled="$610K / yr"
+              />
+              <CaseFileCard
+                caseNumber={74}
+                businessType="Construction sub, $8M"
+                leakFound="Owner bottleneck on every quote — 11 days avg time-to-bid."
+                amountBled="$1.1M / yr"
+              />
+            </div>
+          </div>
+        </section>
+
+        <LeakAuditMethod />
         <ThreeAreas />
-        <ServiceCapabilities />
         <FreeTools />
         <VerifiableOutcomes />
         <WhatsWrongDiagnostic />

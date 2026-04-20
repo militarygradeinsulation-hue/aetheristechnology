@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
-import { CEOProfile } from '@/components/CEOProfile';
+import { OperatorBio } from '@/components/OperatorBio';
 import { TechLogos } from '@/components/TechLogos';
 import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 import { Footer } from '@/components/Footer';
@@ -17,32 +17,32 @@ const AboutPage = () => {
       '@type': 'AboutPage',
       mainEntity: {
         '@type': 'Organization',
-        name: 'Aetheris AI',
-        description: 'B2B AI consulting firm operating on a Co-CEO model — embedded in operations to expose revenue leaks and deploy AI automation.',
+        name: 'Aetheris',
+        description: 'Business Forensics Operator. Runs The Leak Audit™ methodology on B2B operations to expose revenue leaks before deploying AI, automation, or CRM.',
         foundingLocation: { '@type': 'Place', name: 'Indianapolis, Indiana' },
       },
     },
     personSchema(
-      'Aetheris AI Founder',
-      'CEO & AI Systems Architect',
-      'Founder of Aetheris AI. Embeds as Co-CEO with B2B clients to expose operational revenue leaks and deploy AI agents, LLM workflows, and end-to-end automation.',
+      'Joseph Toney',
+      'Business Forensics Operator',
+      'Founder of Aetheris. Marine Corps veteran with a psychology background. Runs forensic audits on B2B operations to expose revenue leaks, then rebuilds with AI agents, automation, and CRM.',
       ['https://www.linkedin.com/in/aisystemsarchitect', 'https://ctoguy.ai']
     )
   );
 
   const faqs = [
-    { question: 'Who is Aetheris AI?', answer: 'A B2B AI consulting and technology firm headquartered in Indianapolis, Indiana. Aetheris AI embeds as a Co-CEO with US businesses to expose revenue leaks, rebuild broken systems, and deploy AI automation that delivers measurable ROI.' },
-    { question: 'What does "Co-CEO model" mean?', answer: 'Instead of a traditional consulting engagement that hands over a deck, Aetheris AI embeds operationally — sitting next to leadership, owning outcomes, and shipping working AI systems alongside existing teams.' },
-    { question: 'Where is Aetheris AI based?', answer: 'Indianapolis, Indiana. We serve clients across the entire United States with remote and on-site engagements.' },
+    { question: 'Who is Joseph Toney?', answer: 'Founder of Aetheris and a Business Forensics Operator. Marine Corps veteran with a psychology degree and 20 years building production systems. Runs The Leak Audit™ methodology on B2B operations to find where revenue is bleeding before deploying any AI or automation.' },
+    { question: 'What does "Business Forensics Operator" mean?', answer: 'Not a consultant. Not an agency. An operator who autopsies businesses — names every revenue leak, quantifies the dollar bleed, and then rebuilds the systems that hid the leaks in the first place.' },
+    { question: 'Where is Aetheris based?', answer: 'Indianapolis, Indiana. Forensic engagements run with US businesses remotely and on-site.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="About Aetheris AI — Co-CEO for Operations"
-        description="B2B AI consulting in Indianapolis. We embed into operations, expose inefficiencies, deploy AI agents and automation. US-wide."
+        title="Joseph Toney — Business Forensics Operator | Aetheris"
+        description="Marine veteran, psychology background, 20 years building systems. Runs forensic audits on B2B operations to find revenue leaks before deploying AI."
         path="/about"
-        keywords="AI consultant Indianapolis, B2B AI consulting, technology consultant, AI strategy consulting, fix your business consulting, digital transformation consultant"
+        keywords="Joseph Toney, business forensics operator, AI consultant Indianapolis, revenue leak audit, B2B operations consultant, fix your business consulting"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'About', path: '/about' },
@@ -55,7 +55,7 @@ const AboutPage = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
-          <CEOProfile />
+          <OperatorBio />
           <VerifiableOutcomes />
           <TechLogos />
         </div>
