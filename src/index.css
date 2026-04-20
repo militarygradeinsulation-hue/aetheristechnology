@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -42,6 +42,10 @@
     --surface-elevated: 220 14% 14%;
     --surface-overlay: 220 14% 10%;
     --amber-glow: 36 90% 55%;
+
+    /* Forensic accent — oxidized red, used sparingly for leak callouts & case files */
+    --crimson: 0 65% 38%;
+    --crimson-deep: 0 70% 28%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(36 90% 55%), hsl(40 85% 70%));

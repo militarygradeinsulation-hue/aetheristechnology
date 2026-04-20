@@ -139,6 +139,13 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://aetheris.technology/leak-audit</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://aetheris.technology/assessment</loc>
     <lastmod>2026-04-17</lastmod>
     <changefreq>monthly</changefreq>

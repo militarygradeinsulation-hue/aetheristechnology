@@ -16,6 +16,8 @@ export default {
       fontFamily: {
         display: ["Space Grotesk", "sans-serif"],
         body: ["Inter", "sans-serif"],
+        forensic: ["Fraunces", "Georgia", "serif"],
+        case: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -54,6 +56,10 @@ export default {
         amber: {
           DEFAULT: "hsl(var(--amber-glow))",
           glow: "hsl(var(--amber-glow))",
+        },
+        crimson: {
+          DEFAULT: "hsl(var(--crimson))",
+          deep: "hsl(var(--crimson-deep))",
         },
       },
       borderRadius: {
