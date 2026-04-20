@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { CaseFileCard } from './CaseFileCard';
 import josephToney from '@/assets/joseph-toney.jpg';
+import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 
 export const OperatorBio: React.FC = () => {
   return (
