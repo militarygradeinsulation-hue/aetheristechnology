@@ -43,3 +43,7 @@ type: feature
 ## Weekly Rotation
 
 Mon: Case File | Tue: Operator's Journal | Wed: Leak of the Week | Thu: Diagnostic | Fri: Contrarian | Sat: Operator's Journal | Sun: Case File
+
+## Structural Influences
+
+Core principle: steal structure, not voice. Model post architectures after proven formats from adjacent categories. See [Structural Influences](mem://marketing/structural-influences) for the full 13-person tier list and format-to-influence mapping.
