@@ -1,76 +1,67 @@
 
 
-## Send Blogs & Playbooks to Outlook + Create LinkedIn Posting Schedule
+## Rebrand Social Content Generator to LinkedIn Growth Framework
 
 ### What this does
 
-1. Creates a new edge function `sync-content-to-outlook` that reads published blog posts and playbooks from the database, formats them as draft emails in your Outlook mailbox (organized in a dedicated folder), so your other AI can pull from the drafts and post to social media.
-
-2. Creates a `content_posting_schedule` table to store your weekly posting calendar with the LinkedIn growth framework baked in.
-
-3. Seeds the schedule with the strategic weekly mix from the framework you provided.
+Rewrites the `generate-social-content` edge function prompt and the `SocialContentGenerator` component so the admin content pack follows the four-pillar LinkedIn growth framework: Brandjacking, Newsjacking, Namejacking, and Hot Takes, plus Authority posts — instead of generic "LinkedIn posts / Facebook posts / ad hooks."
 
 ### Technical details
 
-**1. New edge function: `supabase/functions/sync-content-to-outlook/index.ts`**
+**1. Rewrite edge function prompt: `supabase/functions/generate-social-content/index.ts`**
 
-- Fetches all published `blog_posts` and `playbooks` from the database
-- For each item, creates a **draft email** in your Outlook mailbox via the connector gateway (`POST /me/messages`) with:
-  - Subject: `[BLOG] {title}` or `[PLAYBOOK] {title}`
-  - Body (HTML): The blog content or playbook description + file URL
-  - Tags/growth format included in the body for your AI to parse
-- Tracks which items have been synced using a new `content_sync_log` table (prevents duplicates)
-- Can be triggered manually from admin or scheduled via cron
+Replace the generic social media prompt (lines 70-89) with the LinkedIn Growth Framework prompt that instructs the AI to generate:
 
-**2. New table: `content_sync_log`**
+```text
+{
+  "businessName": "...",
+  "brandjackPosts": [3 posts] — analyze a well-known brand decision through the business's lens
+  "newsjackPosts": [3 posts] — contextualize a trending industry event within 24-48hrs
+  "namejackPosts": [2 posts] — reference a leader the ICP follows, add unique perspective
+  "hotTakes": [2 posts] — contrarian positions that force agreement/disagreement
+  "authorityPosts": [3 posts] — niche deep-dives, case studies, expertise Q&A
+  "weeklySchedule": [5 entries] — Mon-Fri mapped to the strategic weekly mix
+}
+```
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| content_type | text | `blog` or `playbook` |
-| content_id | uuid | FK to blog_posts or playbooks |
-| synced_at | timestamptz | When it was sent to Outlook |
-| outlook_message_id | text | The draft message ID from Outlook |
+Each post object keeps `hook`, `body`, `cta` but adds:
+- `format`: brandjack | newsjack | namejack | hottake | authority
+- `targetEntity`: the brand/person/event being referenced
+- `soWhatSentence`: the one-sentence "so what?" pass
+- `strategicGoal`: reach | trust | proof | visibility | retention
 
-RLS: Admin-only access via `is_admin()` function.
+The system prompt enforces the three pre-publishing stress tests:
+- "So What?" sentence test
+- Anxiety test for hot takes
+- Insight rule (entity is evidence, not the subject)
 
-**3. New table: `content_posting_schedule`**
+**2. Update component: `src/components/SocialContentGenerator.tsx`**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| day_of_week | int | 0=Sun through 6=Sat |
-| day_name | text | Mon, Tue, etc. |
-| content_type | text | Growth format label |
-| strategic_goal | text | What this slot achieves |
-| post_time | time | Suggested posting time |
-| notes | text | Additional guidance |
+- Replace the three sections (LinkedIn / Facebook / Ad Hooks) with five sections matching the framework pillars: Brandjacking, Newsjacking, Namejacking, Hot Takes, Authority
+- Each card shows the `format` badge, `targetEntity`, the hook/body/cta, and the `soWhatSentence`
+- Add a "Weekly Schedule" section at the bottom showing the Mon-Fri content calendar with strategic goals
+- Update the summary text from "25 pieces" to "13 strategic posts + weekly schedule"
+- Admin mode: all posts visible, no paywall
+- Public mode: show 1 per category free, paywall the rest (keeps existing paywall/checkout logic)
+- Update phase labels to match new flow: "Scraping website...", "Analyzing brand position...", "Generating Brandjack posts...", "Crafting Hot Takes...", "Building weekly schedule..."
 
-RLS: Public read, admin write.
+**3. Update page title: `src/pages/ContentGeneratorPage.tsx`**
 
-**4. Seed the schedule** with the LinkedIn framework:
-
-| Day | Content Type | Strategic Goal |
-|-----|-------------|----------------|
-| Mon | Brandjack or Newsjack | New Audience Acquisition / Reach |
-| Tue | Authority / Niche Deep-Dive | Deepen Trust with Existing Followers |
-| Wed | Case Study / Forensic Report | Prove Competence / Social Proof |
-| Thu | Namejack or Hot Take | Scale Visibility / Industry Ecosystem |
-| Fri | Niche Expertise / Q&A | Engagement / Retention |
-
-**5. Admin UI addition** — Add a "Sync to Outlook" button in the admin dashboard that triggers the edge function and shows sync status.
+- Change heading from generic "Social Content Generator" to "LinkedIn Growth Content Pack"
+- Update subtitle to reference the four growth formats
 
 ### Files touched
 
 | File | Action |
 |------|--------|
-| `supabase/functions/sync-content-to-outlook/index.ts` | New edge function |
-| `src/pages/AdminDashboard.tsx` | Add sync button + schedule view |
-| Database migration | Create `content_sync_log` and `content_posting_schedule` tables |
+| `supabase/functions/generate-social-content/index.ts` | Rewrite AI prompt to four-pillar framework |
+| `src/components/SocialContentGenerator.tsx` | Restructure results into 5 format sections + schedule |
+| `src/pages/ContentGeneratorPage.tsx` | Update page heading/subtitle |
 
 ### What does NOT change
 
-- Blog/playbook generation logic — untouched
-- Existing drip campaign system — separate concern
-- No new secrets needed — `MICROSOFT_OUTLOOK_API_KEY` and `LOVABLE_API_KEY` already configured
+- Website scraping logic (Firecrawl) — identical
+- Paywall / Stripe checkout flow — same mechanism, same price
+- Admin library save — same structure
+- The separate `content_posting_schedule` table and Outlook sync — unrelated system
 
