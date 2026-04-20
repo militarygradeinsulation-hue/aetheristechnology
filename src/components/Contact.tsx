@@ -1,7 +1,8 @@
 import React from 'react';
-import { Mail, MapPin, Phone, Linkedin, ArrowRight, Clock, Shield } from 'lucide-react';
+import { Mail, MapPin, Phone, Linkedin, ArrowRight, Clock, Shield, Calendar } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Button } from './ui/button';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 interface ContactProps {
   onContactClick: () => void;
