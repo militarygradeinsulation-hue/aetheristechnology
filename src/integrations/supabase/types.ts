@@ -916,6 +916,72 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_post_queue: {
+        Row: {
+          content: string
+          created_at: string
+          format: string | null
+          id: string
+          linkedin_post_id: string | null
+          posted_at: string | null
+          scheduled_for: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          format?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string | null
+          scheduled_for?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          format?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string | null
+          scheduled_for?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      linkedin_tokens: {
+        Row: {
+          access_token: string | null
+          expires_at: string | null
+          id: number
+          linkedin_person_urn: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          expires_at?: string | null
+          id?: number
+          linkedin_person_urn?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          expires_at?: string | null
+          id?: number
+          linkedin_person_urn?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       playbooks: {
         Row: {
           created_at: string
