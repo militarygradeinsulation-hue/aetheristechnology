@@ -1,63 +1,86 @@
 
 
-## Content Calendar View with AI Assistant for Admin Library
+# Site Self-Sufficiency Audit
 
-### What this does
+## Current State: What IS Automated (works without you)
 
-Replaces the flat list view of saved social content in the admin Library tab with an interactive calendar UI showing posts mapped to dates. Adds an AI chat sidebar where you can talk to an assistant to personalize content — add prospect names, swap industries, tweak hooks — and have edits saved back.
+| Flow | Status | How it works |
+|------|--------|-------------|
+| Free tools (Scanner, Diagnostic, Strategic Questions, Brand Contradictions, Friction Audit, Social Content, Sales Scripts, Content Calendar, Follow-Up Plan) | COMPLETE | AI generates results client-side or via edge functions instantly |
+| Monthly subscriptions | COMPLETE | Stripe invoice.paid webhook triggers `monthly-delivery` edge function, which generates AI content and delivers automatically |
+| Subscriber onboarding | COMPLETE | Post-subscription checkout redirects to onboarding form that captures business context |
+| Custom playbook purchases | COMPLETE | Webhook triggers `generate-custom-playbook` edge function, PDF generated and stored automatically |
+| Blog / Playbook content | COMPLETE | Auto-generated via admin tools, published to public pages |
+| Auth (signup, login, Google OAuth) | COMPLETE | Standard flow with email verification |
 
-### Technical details
+## The Gap: What Is NOT Automated
 
-**1. New component: `src/components/admin/ContentCalendar.tsx`**
+**Most one-time paid services fall through to a dead end.** When someone buys any of these, the checkout return page shows:
 
-- Monthly calendar grid (custom-built, not the DayPicker widget) showing the current month with navigation arrows
-- Each day cell shows dots/badges for saved content items created on that date
-- Clicking a day opens a side panel showing all library items for that date with their rendered previews
-- Filter by tool type (social content, content calendar, sales scripts, etc.)
-- Items are pulled from the existing `listAdminLibrary()` function, grouped by `created_at` date
-- Color-coded dots per tool type (amber = social content, crimson = brand contradictions, blue = strategic questions, etc.)
+> "Payment Complete! We'll be in touch within 24 hours."
 
-**2. New component: `src/components/admin/ContentAI.tsx`**
+That means **you have to manually follow up** for these purchases:
 
-- Chat panel (right sidebar or drawer) with an AI assistant
-- User can select a library item and ask things like "Add John Smith's name to this case file" or "Change the industry to HVAC" or "Make the hook more aggressive"
-- Streams responses from a new edge function
-- When the AI returns modified content, a "Save Changes" button updates the library item's `output_data` via the existing admin-library edge function (new `update` action)
+| Service | Price | What should happen | What actually happens |
+|---------|-------|-------------------|----------------------|
+| Full Website Report | $49 | Auto-generate full scan PDF | Generic "we'll be in touch" |
+| Digital Snapshot | $125 | Auto-generate snapshot PDF | Generic "we'll be in touch" |
+| Strategy Blueprint | $299 | Auto-generate blueprint | Generic "we'll be in touch" |
+| Social Content Pack | $29 | Auto-generate 25 posts | Generic "we'll be in touch" |
+| Sales Script Pack | $49 | Auto-generate scripts | Generic "we'll be in touch" |
+| Content Calendar | $29 | Auto-generate calendar | Generic "we'll be in touch" |
+| Follow-Up Plan | $49 | Auto-generate cadence | Generic "we'll be in touch" |
+| Strategic Question Engine | $79 | Auto-generate questions | Generic "we'll be in touch" |
+| Brand Contradiction Finder | $99 | Auto-generate audit | Generic "we'll be in touch" |
+| Friction Vocabulary Audit | $69 | Auto-generate audit | Generic "we'll be in touch" |
+| Website Evaluation | $500 | Includes a strategy call | Needs manual intervention (by design) |
+| Strategic Discovery Audit | $500 | Multi-system audit | Needs manual intervention (by design) |
+| 14-Day Diagnostic | $2,500 | Operator-led engagement | Needs manual intervention (by design) |
+| Fractional CTO/CMO | $5,000/mo | Ongoing human engagement | Needs manual intervention (by design) |
 
-**3. New edge function: `supabase/functions/content-assistant/index.ts`**
+**The irony**: The free tools already generate the same content (social posts, scripts, calendars, questions, contradictions, friction audits) for free. Paying customers get LESS than free users -- they get a "we'll be in touch" message instead of instant results.
 
-- Accepts: `messages` array (conversation history) + `context` (the selected library item's output_data and tool_type)
-- System prompt instructs the AI to act as a forensic content editor — it can modify any field in the content structure, add names, swap details, rewrite hooks
-- Uses Lovable AI gateway (`google/gemini-2.5-flash`) with streaming
-- Returns modified content as structured JSON via tool calling so it can be saved back
-- Admin-token protected
+## Also: Bundle checkout is not automated
 
-**4. Update edge function: `supabase/functions/admin-library/index.ts`**
+The "Mix & Match Bundle" bar links to `/contact?bundle=...` -- it sends the user to a contact form instead of Stripe checkout. No automated payment or delivery.
 
-- Add new `action: "update"` that accepts `id` and `output_data` (partial or full) and updates the row
-- Admin-token protected (same as existing actions)
+## Recommended Fix
 
-**5. Update `src/pages/AdminDashboard.tsx`**
+### Services that CAN be fully automated (the AI already exists)
 
-- Replace the `library` tab content: show `ContentCalendar` component instead of the flat `AdminLibrary` list
-- Add a toggle or sub-tab to switch between calendar view and list view (keep the existing `AdminLibrary` component as a fallback)
+For these 10 services, the free tool versions already generate the output. The fix is:
 
-### Files touched
+1. **In the webhook** (`payments-webhook`): detect each `priceId`, trigger the corresponding AI generation edge function, store the result, and email the customer a download link.
+2. **On the checkout return page**: poll for the generated result (like the playbook flow already does) and show a download button when ready.
+3. **Bundle checkout**: Route bundles through Stripe checkout (not the contact form) using a combined line-item session, then auto-generate all items.
 
-| File | Action |
+### Services that SHOULD stay manual
+
+Website Evaluation ($500), Strategic Discovery Audit ($500), 14-Day Diagnostic ($2,500), Fractional CTO/CMO ($5,000/mo), Visual Rendering, and Custom Implementation all involve human operator work. These are correct as-is -- payment triggers a notification to you.
+
+### Implementation plan
+
+**Step 1 -- Create a `purchase_deliverables` table** to track what was purchased and its generation status (pending/generating/ready/failed) with a `file_url` column.
+
+**Step 2 -- Update `payments-webhook`**: On `checkout.session.completed` for automatable price IDs, insert a row into `purchase_deliverables` and invoke the corresponding generation edge function.
+
+**Step 3 -- Create a `generate-purchase-delivery` edge function** that takes a deliverable ID, runs the appropriate AI tool (reusing existing generation logic), stores output as PDF/JSON in the `playbooks` storage bucket, updates the row with `file_url`, and sends a delivery email.
+
+**Step 4 -- Update `CheckoutReturn.tsx`**: For automatable purchases, poll `purchase_deliverables` for status and show a download button when ready (same pattern as the playbook flow).
+
+**Step 5 -- Fix bundle checkout**: Replace the contact form link with a Stripe checkout session that includes all selected line items, then auto-generate all deliverables post-payment.
+
+**Step 6 -- Add email delivery**: Send the customer an email with download links so they don't have to stay on the return page.
+
+### Files to modify/create
+
+| File | Change |
 |------|--------|
-| `src/components/admin/ContentCalendar.tsx` | New — monthly grid calendar with library items |
-| `src/components/admin/ContentAI.tsx` | New — AI chat sidebar for editing content |
-| `supabase/functions/content-assistant/index.ts` | New — streaming AI edge function for content editing |
-| `supabase/functions/admin-library/index.ts` | Add `update` action |
-| `src/pages/AdminDashboard.tsx` | Swap library tab to calendar + AI layout |
-| `src/lib/adminLibrary.ts` | Add `updateAdminLibraryItem()` function |
+| New migration | Create `purchase_deliverables` table |
+| `supabase/functions/payments-webhook/index.ts` | Add auto-delivery triggers for 10 price IDs |
+| New: `supabase/functions/generate-purchase-delivery/index.ts` | Unified delivery generator |
+| `src/pages/CheckoutReturn.tsx` | Add polling + download for deliverable purchases |
+| `src/components/ServicesPricing.tsx` | Fix bundle bar to use Stripe checkout instead of contact form |
 
-### What does NOT change
-
-- Content generation tools — identical
-- Save-to-library flow — same mechanism
-- LinkedIn posting queue — unrelated
-- Paywall / Stripe — unrelated
-- Public-facing pages — untouched
+This is a significant build. Shall I proceed?
 
