@@ -1063,6 +1063,65 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_deliverables: {
+        Row: {
+          created_at: string
+          email: string
+          error_message: string | null
+          file_url: string | null
+          id: string
+          input_data: Json
+          output_data: Json
+          price_id: string
+          purchase_id: string | null
+          status: string
+          stripe_session_id: string
+          tool_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          error_message?: string | null
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          price_id: string
+          purchase_id?: string | null
+          status?: string
+          stripe_session_id: string
+          tool_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          price_id?: string
+          purchase_id?: string | null
+          status?: string
+          stripe_session_id?: string
+          tool_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_deliverables_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchases: {
         Row: {
           amount_total: number | null

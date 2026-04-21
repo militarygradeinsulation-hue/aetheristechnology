@@ -7,6 +7,20 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+// Map price IDs to tool types for auto-delivery
+const AUTOMATABLE_PRICES: Record<string, string> = {
+  scan_full_report_once: "website_report",
+  digital_snapshot_once: "digital_snapshot",
+  scan_strategy_blueprint_once: "strategy_blueprint",
+  social_content_pack_once: "social_content",
+  sales_script_pack_once: "sales_scripts",
+  content_calendar_once: "content_calendar",
+  follow_up_plan_once: "follow_up_plan",
+  strategic_question_engine_once: "strategic_questions",
+  brand_contradiction_finder_once: "brand_contradictions",
+  friction_vocabulary_audit_once: "friction_audit",
+};
+
 serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -55,8 +69,11 @@ serve(async (req) => {
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   console.log("Checkout completed:", session.id, "mode:", session.mode);
   if (session.mode === 'payment') {
+    const email = session.customer_email || session.customer_details?.email;
+    const userId = session.metadata?.userId || null;
+
     const { error } = await supabase.from("purchases").insert({
-      email: session.customer_email || session.customer_details?.email,
+      email,
       stripe_session_id: session.id,
       stripe_customer_id: session.customer,
       amount_total: session.amount_total,
@@ -64,6 +81,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       status: session.payment_status,
       environment: env,
       metadata: session.metadata || {},
+      user_id: userId,
     });
     if (error) console.error("Insert purchase error:", error);
 
@@ -93,22 +111,86 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         if (pbError) {
           console.error("Insert generated_playbooks error:", pbError);
         } else if (pb) {
-          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-          const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-          fetch(`${SUPABASE_URL}/functions/v1/generate-custom-playbook`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({ playbookId: pb.id }),
-          }).catch(e => console.error("Trigger generation error:", e));
+          triggerFunction("generate-custom-playbook", { playbookId: pb.id });
         }
       } catch (e) {
         console.error("Playbook generation trigger error:", e);
       }
     }
+
+    // Auto-deliver automatable purchases
+    const priceId = session.metadata?.priceId;
+    if (priceId && AUTOMATABLE_PRICES[priceId]) {
+      const toolType = AUTOMATABLE_PRICES[priceId];
+      console.log("Auto-delivering:", priceId, "->", toolType);
+
+      const { data: deliverable, error: dErr } = await supabase
+        .from("purchase_deliverables")
+        .insert({
+          stripe_session_id: session.id,
+          email: email || "",
+          user_id: userId,
+          price_id: priceId,
+          tool_type: toolType,
+          status: "pending",
+          input_data: session.metadata || {},
+        })
+        .select()
+        .single();
+
+      if (dErr) {
+        console.error("Insert deliverable error:", dErr);
+      } else if (deliverable) {
+        triggerFunction("generate-purchase-delivery", { deliverableId: deliverable.id });
+      }
+    }
+
+    // Handle bundle purchases (multiple deliverables)
+    if (session.metadata?.bundle_items) {
+      try {
+        const bundleItems: string[] = JSON.parse(session.metadata.bundle_items);
+        for (const itemPriceId of bundleItems) {
+          const toolType = AUTOMATABLE_PRICES[itemPriceId];
+          if (!toolType) continue;
+
+          const { data: deliverable, error: dErr } = await supabase
+            .from("purchase_deliverables")
+            .insert({
+              stripe_session_id: session.id,
+              email: email || "",
+              user_id: userId,
+              price_id: itemPriceId,
+              tool_type: toolType,
+              status: "pending",
+              input_data: session.metadata || {},
+            })
+            .select()
+            .single();
+
+          if (dErr) {
+            console.error("Insert bundle deliverable error:", dErr);
+          } else if (deliverable) {
+            triggerFunction("generate-purchase-delivery", { deliverableId: deliverable.id });
+          }
+        }
+      } catch (e) {
+        console.error("Bundle delivery trigger error:", e);
+      }
+    }
   }
+}
+
+function triggerFunction(name: string, body: Record<string, unknown>) {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+    body: JSON.stringify(body),
+  }).catch(e => console.error(`Trigger ${name} error:`, e));
 }
 
 async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
@@ -116,7 +198,6 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const priceId = item?.price?.metadata?.lovable_external_id || item?.price?.id;
   const productId = item?.price?.product;
 
-  // Extract userId from metadata, fall back to email lookup
   let userId = subscription.metadata?.userId || null;
   if (!userId) {
     const email = subscription.customer_email || subscription.customer_details?.email;
@@ -176,20 +257,15 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
 }
 
 async function handleInvoicePaid(invoice: any) {
-  // Only trigger for subscription invoices (not one-time payments)
   if (!invoice.subscription) return;
   console.log("Invoice paid for subscription:", invoice.subscription);
 
-  // Trigger the monthly-delivery edge function
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
   try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/monthly-delivery`, {
+    const resp = await fetch(`${Deno.env.get("SUPABASE_URL")!}/functions/v1/monthly-delivery`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!}`,
       },
       body: JSON.stringify({
         subscription_id: invoice.subscription,

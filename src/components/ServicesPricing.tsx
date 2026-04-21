@@ -190,6 +190,7 @@ export const ServicesPricing: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
+  const [checkoutBundleItems, setCheckoutBundleItems] = useState<string[] | null>(null);
 
   const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
 
@@ -207,9 +208,31 @@ export const ServicesPricing: React.FC = () => {
   const discountedTotal = Math.round(subtotal * (1 - discount));
 
   const isMonthlyCheckout = checkoutPriceId?.endsWith('_monthly');
-  const checkoutReturnUrl = isMonthlyCheckout
-    ? `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=subscription`
-    : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+
+  const AUTOMATABLE_PRICES = new Set([
+    'scan_full_report_once', 'digital_snapshot_once', 'scan_strategy_blueprint_once',
+    'social_content_pack_once', 'sales_script_pack_once', 'content_calendar_once',
+    'follow_up_plan_once', 'strategic_question_engine_once', 'brand_contradiction_finder_once',
+    'friction_vocabulary_audit_once',
+  ]);
+
+  const getReturnUrl = (pid: string) => {
+    if (pid.endsWith('_monthly')) {
+      return `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=subscription`;
+    }
+    if (AUTOMATABLE_PRICES.has(pid)) {
+      return `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=deliverable`;
+    }
+    return `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+  };
+
+  const checkoutReturnUrl = checkoutPriceId ? getReturnUrl(checkoutPriceId) : '';
+
+  const checkoutMetadata: Record<string, string> = {
+    ...(user ? { userId: user.id } : {}),
+    ...(checkoutPriceId ? { priceId: checkoutPriceId } : {}),
+    ...(checkoutBundleItems ? { bundle_items: JSON.stringify(checkoutBundleItems) } : {}),
+  };
 
   if (checkoutPriceId) {
     return (
@@ -221,7 +244,7 @@ export const ServicesPricing: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 overflow-auto p-4">
-            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} customerEmail={user?.email || undefined} metadata={user ? { userId: user.id } : undefined} />
+            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} customerEmail={user?.email || undefined} metadata={checkoutMetadata} />
           </div>
         </div>
       </div>
@@ -544,12 +567,23 @@ export const ServicesPricing: React.FC = () => {
                       {billingMode === 'monthly' && <span className="text-xs font-normal text-muted-foreground">/mo</span>}
                     </div>
                   </div>
-                  <Link
-                    to={`/contact?bundle=${selectedItems.map(s => s.title).join(',')}&total=${discountedTotal}`}
+                  <button
+                    onClick={() => {
+                      // Use the first item's priceId for checkout; pass all items in metadata
+                      const firstItem = selectedItems[0];
+                      const pid = billingMode === 'monthly' && firstItem.monthlyPriceId
+                        ? firstItem.monthlyPriceId
+                        : firstItem.priceId!;
+                      const bundlePriceIds = selectedItems.map(s =>
+                        billingMode === 'monthly' && s.monthlyPriceId ? s.monthlyPriceId! : s.priceId!
+                      );
+                      setCheckoutBundleItems(bundlePriceIds);
+                      setCheckoutPriceId(pid);
+                    }}
                     className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
                   >
                     <ShoppingCart className="w-4 h-4" /> Get Bundle
-                  </Link>
+                  </button>
                   <button
                     onClick={() => setSelectedIds(new Set())}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
