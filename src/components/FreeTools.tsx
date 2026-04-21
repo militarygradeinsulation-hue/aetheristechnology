@@ -5,9 +5,6 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { ParallaxTilt } from './ParallaxTilt';
 import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
 import scannerThumb from '@/assets/scanner-thumb.jpg';
-import marketingHubThumb from '@/assets/marketing-hub-thumb.jpg';
-import consultantThumb from '@/assets/consultant-thumb.jpg';
-import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
 import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
 
 interface Tool {
@@ -30,24 +27,6 @@ const tools: Tool[] = [
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and conversion gaps.",
     path: '/scan',
-  },
-  {
-    thumbnail: marketingHubThumb,
-    title: 'Marketing Hub',
-    description: 'AI strategist that builds a custom marketing plan for your business.',
-    path: '/marketing-strategist',
-  },
-  {
-    thumbnail: consultantThumb,
-    title: 'AI Business Consultant',
-    description: 'Instant AI-powered consulting advice tailored to your operation.',
-    path: '/ai-consultant',
-  },
-  {
-    thumbnail: salesCompassThumb,
-    title: 'Sales Compass',
-    description: 'AI-powered sales guidance to sharpen your strategy and pipeline.',
-    path: '/sales-compass',
   },
   {
     thumbnail: strategicQuestionsThumb,

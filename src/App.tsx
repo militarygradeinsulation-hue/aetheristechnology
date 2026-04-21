@@ -26,10 +26,6 @@ import NotFound from "./pages/NotFound";
 import DiagnosticQuizPage from "./pages/DiagnosticQuizPage";
 import CareersPage from "./pages/CareersPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
-import MarketingStudioPage from "./pages/MarketingStudioPage";
-import MarketingStrategistPage from "./pages/MarketingStrategistPage";
-import AIConsultantPage from "./pages/AIConsultantPage";
-import SalesCompassPage from "./pages/SalesCompassPage";
 import CheckoutReturn from "./pages/CheckoutReturn";
 import ContentGeneratorPage from "./pages/ContentGeneratorPage";
 import SalesScriptsPage from "./pages/SalesScriptsPage";
@@ -84,10 +80,6 @@ const App = () => (
                   <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                   <Route path="/careers" element={<CareersPage />} />
                   <Route path="/unsubscribe" element={<UnsubscribePage />} />
-                  <Route path="/marketing-studio" element={<MarketingStudioPage />} />
-                  <Route path="/marketing-strategist" element={<MarketingStrategistPage />} />
-                  <Route path="/ai-consultant" element={<AIConsultantPage />} />
-                  <Route path="/sales-compass" element={<SalesCompassPage />} />
                   <Route path="/checkout/return" element={<CheckoutReturn />} />
                   <Route path="/content-generator" element={<ContentGeneratorPage />} />
                   <Route path="/sales-scripts" element={<SalesScriptsPage />} />
