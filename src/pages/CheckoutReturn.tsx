@@ -410,6 +410,19 @@ export default function CheckoutReturn() {
                 </>
               ) : isSubscription ? (
                 <SubscriptionReturn sessionId={sessionId!} />
+              ) : isPlaybookUnlock ? (
+                <>
+                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold text-foreground mb-3 font-display">Playbook Unlocked!</h1>
+                  <p className="text-muted-foreground mb-6">
+                    Your playbook is now available for download.
+                  </p>
+                  <Link to="/resources">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+                      <Download className="w-5 h-5" /> Go to Playbooks
+                    </Button>
+                  </Link>
+                </>
               ) : showDeliverable ? (
                 <DeliverableReturn sessionId={sessionId!} />
               ) : (
