@@ -7,7 +7,7 @@ Updated: now
 - Primary domain: https://aetheris.technology. Target SEO: Indianapolis, Indiana.
 - Intellectual Property exclusively owned by CTOguy.ai.
 - Positioning: **Business Forensics Operator**. Hook: "Your business is leaking. You just can't see it from the inside."
-- Methodology: **The Leak Audit™** (7 steps). Free self-scan at /leak-audit. Operator-led = **Forensic Diagnostic $2,500** flat, applied toward engagement.
+- Methodology: **The Leak Audit™** (7 steps). Free self-scan at /leak-audit. Operator-led = **Forensic Diagnostic $2,900** flat, applied toward engagement.
 - Tone: Aggressive, blunt, non-corporate. Forensic > influencer. Operator > consultant.
 - Visuals: Dark charcoal + amber. **Crimson accent reserved for "leak" signal only** (dollar bleeds, ACTIVE stamps, the word "leaking"). Fraunces serif for autopsy headlines, JetBrains Mono for case-file micro-labels. Space Grotesk + Inter unchanged for body/UI.
 - Generated Images: Must have "Aetheris AI Studio" watermark bottom-right.

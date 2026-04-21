@@ -1,17 +1,32 @@
 ---
 name: Pricing & Business Model
-description: Consulting pricing tiers using playbook prices as source of truth, Stripe product IDs, and Sales Rep commissions
+description: Consulting pricing tiers using playbook prices as source of truth, Stripe product IDs, Sales Rep commissions, and rep codes
 type: feature
 ---
 - **Source of truth: Rep Playbook prices** (used for Stripe products and Services page)
-- Stripe Products (playbook-aligned):
-  - Digital Snapshot: $125 (digital_snapshot_once)
-  - Website Evaluation: $500 (website_evaluation_once)
-  - Full Analytics Package: $500 (full_analytics_package_once) — normally $1,200+
-  - 14-Day Diagnostic: $2,500 (fourteen_day_diagnostic_once)
-  - Fractional CTO/CMO: $5,000/mo (fractional_cto_cmo_monthly)
+- Stripe Products (playbook-aligned, raised ~15-20% to cover 10% rep commission):
+  - Social Content Pack: $39 (social_content_pack_once) / $25/mo
+  - Content Calendar: $39 (content_calendar_once) / $25/mo
+  - Sales Script Pack: $59 (sales_script_pack_once) / $39/mo
+  - Follow-Up Plan: $59 (follow_up_plan_once) / $39/mo
+  - Full Website Report: $59 (scan_full_report_once) / $39/mo
+  - Friction Vocabulary Audit: $79 (friction_vocabulary_audit_once) / $49/mo
+  - Strategic Question Engine: $99 (strategic_question_engine_once) / $59/mo
+  - Brand Contradiction Finder: $119 (brand_contradiction_finder_once) / $69/mo
+  - Digital Snapshot: $149 (digital_snapshot_once) / $99/mo
+  - Strategy Blueprint: $349 (scan_strategy_blueprint_once) / $249/mo
+  - Website Evaluation: $599 (website_evaluation_once) / $419/mo
+  - Strategic Discovery Audit: $599 (full_analytics_package_once) / $419/mo
+  - 14-Day Diagnostic: $2,900 (fourteen_day_diagnostic_once) / $1,990/mo
+  - Fractional CTO/CMO: $5,900/mo (fractional_cto_cmo_monthly)
+  - Playbook Unlock: $29 (playbook_unlock_once)
 - Non-Stripe services (contact only): Visual Rendering ($50–$400), Custom Implementation ($25K+)
-- The 14-Day Diagnostic ($2,500) is the core entry point. Guarantee: if no operational gaps found, engagement continues free until diagnosis.
-- Independent Sales Reps: 8-25% commission, given "Rep Playbook" PDF upon signup via /careers.
+- The 14-Day Diagnostic ($2,900) is the core entry point.
+- **Rep Commission System**: 10 six-digit codes in `rep_codes` table, 10% default commission rate.
+  - Codes: 482917, 739254, 156843, 624781, 895326, 317469, 568192, 743058, 281637, 964523
+  - Tracked via metadata.rep_code in Stripe checkout → purchases.rep_code column
+  - Commission auto-calculated via increment_rep_sales DB function
+  - Admin dashboard shows rep performance panel
+- Independent Sales Reps: 10% commission (was 8-25%), given "Rep Playbook" PDF upon signup via /careers.
 - User accounts: email/password + Google OAuth. Purchases linked to user_id.
 - Post-purchase: Both Buy Now buttons and Contact CTAs on all services.

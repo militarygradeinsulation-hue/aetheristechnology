@@ -69,6 +69,57 @@ interface SiteEvent {
   created_at: string;
 }
 
+function RepPerformancePanel() {
+  const [repCodes, setRepCodes] = useState<{ id: string; code: string; rep_name: string; rep_email: string | null; commission_rate: number; is_active: boolean; total_sales_cents: number; total_commission_cents: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from('rep_codes').select('*').order('total_sales_cents', { ascending: false }).then(({ data }) => {
+      if (data) setRepCodes(data as any);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <div className="glass p-6 rounded-xl text-center text-muted-foreground">Loading rep data…</div>;
+  if (repCodes.length === 0) return null;
+
+  const fmt = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+  return (
+    <div className="glass p-6 rounded-xl">
+      <h3 className="text-lg font-bold text-foreground font-display mb-4 flex items-center gap-2">
+        <Users className="w-5 h-5 text-amber" /> Rep Performance
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border text-left text-muted-foreground">
+              <th className="pb-2 pr-4">Code</th>
+              <th className="pb-2 pr-4">Rep</th>
+              <th className="pb-2 pr-4">Rate</th>
+              <th className="pb-2 pr-4">Total Sales</th>
+              <th className="pb-2 pr-4">Commission Owed</th>
+              <th className="pb-2">Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            {repCodes.map(r => (
+              <tr key={r.id} className="border-b border-border/50">
+                <td className="py-2 pr-4 font-mono text-amber">{r.code}</td>
+                <td className="py-2 pr-4 text-foreground">{r.rep_name || '—'}</td>
+                <td className="py-2 pr-4 text-muted-foreground">{(r.commission_rate * 100).toFixed(0)}%</td>
+                <td className="py-2 pr-4 text-foreground font-medium">{fmt(r.total_sales_cents)}</td>
+                <td className="py-2 pr-4 text-amber font-medium">{fmt(r.total_commission_cents)}</td>
+                <td className="py-2">{r.is_active ? '✅' : '❌'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -462,6 +513,9 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Rep Performance */}
+            <RepPerformancePanel />
           </div>
         )}
 
