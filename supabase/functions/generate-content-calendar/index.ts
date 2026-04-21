@@ -81,8 +81,21 @@ Rules:
 
     const aiData = await aiRes.json();
     let raw = aiData.choices?.[0]?.message?.content || "";
+    if (!raw) throw new Error("AI returned empty response");
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const result = JSON.parse(raw);
+    // Find first { and last } to extract JSON object
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start === -1 || end === -1) throw new Error("No JSON found in AI response");
+    raw = raw.substring(start, end + 1);
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch {
+      // Try fixing trailing commas
+      const cleaned = raw.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]");
+      result = JSON.parse(cleaned);
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
