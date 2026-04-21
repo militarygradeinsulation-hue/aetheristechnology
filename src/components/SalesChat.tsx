@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, ShoppingCart } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, ShoppingCart, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
+import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -12,13 +14,27 @@ const INITIAL_MESSAGE: Msg = {
   content: "Hey — I'm the Aetheris Sales Advisor. I help business owners figure out exactly what's broken in their digital presence and what to do about it.\n\nWhat's going on in your business? What's the biggest headache right now?",
 };
 
+const CONTACT_LINKS = [
+  { href: 'tel:+13173762110', icon: Phone, label: 'Call', eventLabel: 'phone' },
+  { href: 'mailto:hello@aetheris.technology?subject=I%20Need%20Help%20With%20My%20Business', icon: Mail, label: 'Email', eventLabel: 'email' },
+  { href: 'https://www.linkedin.com/in/aisystemsarchitect', icon: Linkedin, label: 'LinkedIn', eventLabel: 'linkedin', external: true },
+  { href: BOOK_MEETING_URL, icon: Calendar, label: 'Book', eventLabel: 'book_meeting', external: true, highlight: true },
+];
+
 export const SalesChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+  const [showPulse, setShowPulse] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { trackEvent } = useTrackEvent();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowPulse(false), 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -121,9 +137,7 @@ export const SalesChat: React.FC = () => {
     );
   }
 
-  // Custom renderer for checkout links
   const renderContent = (content: string) => {
-    // Replace checkout links with buttons
     const parts = content.split(/\[([^\]]+)\]\(checkout:([^)]+)\)/g);
     if (parts.length === 1) {
       return <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2"><ReactMarkdown>{content}</ReactMarkdown></div>;
@@ -158,29 +172,59 @@ export const SalesChat: React.FC = () => {
 
   return (
     <>
-      {/* Chat toggle button */}
+      {/* Single floating button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 right-6 z-50 w-14 h-14 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all"
-          aria-label="Open sales chat"
+          className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 ${
+            showPulse ? 'animate-pulse' : ''
+          }`}
+          aria-label="Chat with us"
         >
-          <MessageCircle className="w-6 h-6 text-primary-foreground" />
+          {showPulse && (
+            <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+          )}
+          <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
         </button>
       )}
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[520px] max-h-[calc(100vh-120px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[560px] max-h-[calc(100vh-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
-            <div>
-              <h3 className="font-bold text-foreground text-sm">Aetheris Sales Advisor</h3>
-              <p className="text-[10px] text-muted-foreground">Ask me anything about our services</p>
+          <div className="px-4 py-3 border-b border-border bg-card">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h3 className="font-bold text-foreground text-sm">Aetheris Sales Advisor</h3>
+                <p className="text-[10px] text-muted-foreground">Ask me anything or reach out directly</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
-              <X className="w-5 h-5" />
-            </button>
+            {/* Quick contact links */}
+            <div className="flex items-center gap-1">
+              {CONTACT_LINKS.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <a
+                    key={link.eventLabel}
+                    href={link.href}
+                    target={link.external ? '_blank' : undefined}
+                    rel={link.external ? 'noopener noreferrer' : undefined}
+                    onClick={() => trackEvent('click', { label: link.eventLabel, location: 'chat_header' })}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                      link.highlight
+                        ? 'bg-amber text-background hover:bg-amber/90'
+                        : 'bg-muted text-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {link.label}
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
           {/* Messages */}
@@ -231,6 +275,45 @@ export const SalesChat: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Mobile sticky bar */}
+      <StickyContactBar />
     </>
+  );
+};
+
+const StickyContactBar: React.FC = () => {
+  const [visible, setVisible] = useState(false);
+  const { trackEvent } = useTrackEvent();
+
+  useEffect(() => {
+    const handleScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden glass border-t border-border py-2 px-4 animate-in slide-in-from-bottom duration-300">
+      <div className="flex items-center justify-around max-w-lg mx-auto">
+        <a href="tel:+13173762110" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('click', { label: 'phone', location: 'sticky_bar' })}>
+          <Phone className="w-5 h-5 text-amber" />
+          <span className="text-[10px] text-muted-foreground">Call</span>
+        </a>
+        <a href="mailto:hello@aetheris.technology?subject=I%20Need%20Help%20With%20My%20Business" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('click', { label: 'email', location: 'sticky_bar' })}>
+          <Mail className="w-5 h-5 text-amber" />
+          <span className="text-[10px] text-muted-foreground">Email</span>
+        </a>
+        <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
+          <Linkedin className="w-5 h-5 text-amber" />
+          <span className="text-[10px] text-muted-foreground">LinkedIn</span>
+        </a>
+        <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 bg-primary rounded-lg px-4 py-2" onClick={() => trackEvent('book_meeting_click', { location: 'sticky_bar' })}>
+          <Calendar className="w-5 h-5 text-primary-foreground" />
+          <span className="text-[10px] font-bold text-primary-foreground">Book</span>
+        </a>
+      </div>
+    </div>
   );
 };
