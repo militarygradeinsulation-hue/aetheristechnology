@@ -72,6 +72,8 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     const email = session.customer_email || session.customer_details?.email;
     const userId = session.metadata?.userId || null;
 
+    const repCode = session.metadata?.rep_code || null;
+
     const { error } = await supabase.from("purchases").insert({
       email,
       stripe_session_id: session.id,
@@ -82,8 +84,37 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       environment: env,
       metadata: session.metadata || {},
       user_id: userId,
+      rep_code: repCode,
     });
     if (error) console.error("Insert purchase error:", error);
+
+    // Track rep commission
+    if (repCode && session.amount_total) {
+      const amount = session.amount_total;
+      // Fetch commission rate
+      const { data: rep } = await supabase
+        .from("rep_codes")
+        .select("commission_rate")
+        .eq("code", repCode)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (rep) {
+        const commission = Math.floor(amount * Number(rep.commission_rate));
+        await supabase.rpc("increment_rep_sales" as any, {
+          _code: repCode,
+          _sales: amount,
+          _commission: commission,
+        }).then(({ error: rpcErr }) => {
+          if (rpcErr) {
+            // Fallback: direct update won't work via rpc, log it
+            console.error("Rep commission rpc error:", rpcErr);
+          } else {
+            console.log("Rep commission tracked:", repCode, "amount:", amount, "commission:", commission);
+          }
+        });
+      }
+    }
 
     // Check if this is a scan report purchase
     if (session.metadata?.scan_type === 'report' && session.metadata?.tier) {

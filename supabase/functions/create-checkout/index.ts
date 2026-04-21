@@ -37,8 +37,12 @@ serve(async (req) => {
       ...(customerEmail && { customer_email: customerEmail }),
     };
 
-    // Pass metadata if provided (e.g., for custom playbook purchases)
+    // Pass metadata if provided (e.g., for custom playbook purchases, rep codes)
     if (metadata && typeof metadata === 'object') {
+      // Sanitize rep_code
+      if (metadata.rep_code && (typeof metadata.rep_code !== 'string' || !/^\d{6}$/.test(metadata.rep_code))) {
+        delete metadata.rep_code;
+      }
       sessionParams.metadata = metadata;
       if (isRecurring) {
         sessionParams.subscription_data = { metadata };

@@ -221,7 +221,7 @@ const ResourcesPage = () => {
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks — $25 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
+                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks — $29 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
               </p>
             </RevealOnScroll>
           </div>
