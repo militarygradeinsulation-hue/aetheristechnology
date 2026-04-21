@@ -23,7 +23,24 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<Player | null>(null);
 
+  useEffect(() => {
+    if (iframeRef.current) {
+      const p = new Player(iframeRef.current);
+      playerRef.current = p;
+      p.on('play', () => setIsPlaying(true));
+      p.on('pause', () => setIsPlaying(false));
+      return () => { p.off('play'); p.off('pause'); };
+    }
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    if (!playerRef.current) return;
+    if (isPlaying) { playerRef.current.pause(); } else { playerRef.current.play(); }
+  }, [isPlaying]);
   const { data: playbooks, isLoading } = useQuery({
     queryKey: ['playbooks'],
     queryFn: async () => {
