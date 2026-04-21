@@ -5,7 +5,7 @@ import { Hero } from '@/components/Hero';
 import { LeakAuditMethod } from '@/components/LeakAuditMethod';
 import { CaseFileCard } from '@/components/CaseFileCard';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { ThreeAreas } from '@/components/ThreeAreas';
+
 import { FreeTools } from '@/components/FreeTools';
 import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
@@ -112,7 +112,7 @@ const Home = () => {
         </section>
 
         <LeakAuditMethod />
-        <ThreeAreas />
+        
         <FreeTools />
         <VerifiableOutcomes />
         <WhatsWrongDiagnostic />
