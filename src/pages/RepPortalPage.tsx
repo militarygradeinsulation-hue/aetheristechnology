@@ -110,7 +110,7 @@ const RepPortalPage: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-green-500">Active</p>
+                <p className="text-2xl font-bold text-primary">Active</p>
               </CardContent>
             </Card>
           </div>
