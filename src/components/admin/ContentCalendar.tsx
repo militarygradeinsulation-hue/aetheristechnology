@@ -117,6 +117,40 @@ export const ContentCalendar: React.FC = () => {
     if (viewItem?.id === updated.id) setViewItem(updated);
   };
 
+  const renderItemCard = (item: AdminLibraryItem) => {
+    const out = item.output_data as Record<string, any>;
+    const existingImg = out?._generated_image_url as string | undefined;
+    const imagePrompt = item.title || out?.businessName || 'business operations';
+    return (
+      <div key={item.id} className="glass rounded-lg p-3 border border-border space-y-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
+          <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+          <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+        <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
+        <PostImageGenerator
+          prompt={imagePrompt}
+          libraryItemId={item.id}
+          existingImageUrl={existingImg}
+          compact
+          onImageGenerated={(url) => {
+            const updated = { ...item, output_data: { ...out, _generated_image_url: url } };
+            handleItemUpdated(updated);
+            import('@/lib/adminLibrary').then(m => m.updateAdminLibraryItem(item.id, { ...out, _generated_image_url: url })).catch(() => {});
+          }}
+        />
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+        </div>
+      </div>
+    );
+  };
+
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
