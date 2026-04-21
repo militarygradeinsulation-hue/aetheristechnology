@@ -67,7 +67,7 @@ const ResourcesPage = () => {
             <RevealOnScroll>
               <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8 border border-border">
                 <iframe
-                  src="https://player.vimeo.com/video/1185171761?autoplay=1&muted=1&loop=1&background=1"
+                  src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
                   className="w-full h-full"
                   allow="autoplay; fullscreen"
                   allowFullScreen
