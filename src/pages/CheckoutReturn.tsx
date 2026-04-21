@@ -296,9 +296,11 @@ export default function CheckoutReturn() {
   const topic = searchParams.get("topic");
 
   const isPlaybook = type === "playbook";
+  const isPlaybookUnlock = type === "playbook_unlock";
   const isScanReport = type === "scan_report";
   const isSubscription = type === "subscription";
   const isDeliverable = type === "deliverable" || type === "bundle";
+  const playbookId = searchParams.get("playbook_id");
 
   const { data: playbook } = useQuery({
     queryKey: ['generated-playbook', sessionId],
