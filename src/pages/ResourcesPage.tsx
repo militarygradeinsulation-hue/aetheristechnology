@@ -4,12 +4,15 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import Player from '@vimeo/player';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -21,11 +24,17 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   BarChart3,
 };
 
+const FREE_PLAYBOOK_COUNT = 3;
+
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
+  const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (iframeRef.current) {
@@ -41,19 +50,98 @@ const ResourcesPage = () => {
     if (!playerRef.current) return;
     if (isPlaying) { playerRef.current.pause(); } else { playerRef.current.play(); }
   }, [isPlaying]);
+
   const { data: playbooks, isLoading } = useQuery({
     queryKey: ['playbooks'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('playbooks')
         .select('*')
-        .order('published_at', { ascending: false });
+        .order('published_at', { ascending: true });
       if (error) throw error;
       return data;
     },
   });
 
+  // Check which playbooks the user has purchased
+  const { data: purchasedPlaybookIds } = useQuery({
+    queryKey: ['purchased-playbooks', user?.id],
+    queryFn: async () => {
+      if (!user) return new Set<string>();
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('metadata')
+        .eq('user_id', user.id);
+      if (error) return new Set<string>();
+      const ids = new Set<string>();
+      (data || []).forEach((p: any) => {
+        if (p.metadata?.playbook_id) ids.add(p.metadata.playbook_id);
+      });
+      return ids;
+    },
+    enabled: !!user,
+  });
+
   const existingTitles = (playbooks || []).map(p => p.title);
+
+  const handlePlaybookAction = (playbook: any, index: number) => {
+    const isFree = index < FREE_PLAYBOOK_COUNT;
+    const isPurchased = purchasedPlaybookIds?.has(playbook.id);
+
+    if (isFree || isPurchased) {
+      // Direct download
+      window.open(playbook.file_url, '_blank');
+      return;
+    }
+
+    // Need to purchase
+    if (!user) {
+      navigate('/login?redirect=/resources');
+      return;
+    }
+
+    setCheckoutPlaybookId(playbook.id);
+    setCheckoutPlaybookTitle(playbook.title);
+  };
+
+  if (checkoutPlaybookId) {
+    return (
+      <div className="relative min-h-screen">
+        <Background />
+        <div className="relative z-10">
+          <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+          <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPlaybookId(null)}>
+            <div className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Unlock Playbook</p>
+                  <p className="text-xs text-muted-foreground">{checkoutPlaybookTitle}</p>
+                </div>
+                <button onClick={() => setCheckoutPlaybookId(null)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="w-5 h-5" /> Cancel
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                <StripeEmbeddedCheckout
+                  priceId="playbook_unlock_once"
+                  customerEmail={user?.email || undefined}
+                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=playbook_unlock&playbook_id=${checkoutPlaybookId}`}
+                  metadata={{
+                    userId: user?.id || '',
+                    playbook_id: checkoutPlaybookId,
+                    playbook_title: checkoutPlaybookTitle,
+                    priceId: 'playbook_unlock_once',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <Footer />
+        </div>
+        <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -113,13 +201,13 @@ const ResourcesPage = () => {
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                Free to download. The hard part is implementing them — that's what we get hired for.
+                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks — $25 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
               </p>
             </RevealOnScroll>
           </div>
         </section>
 
-        {/* Free Playbooks */}
+        {/* Playbooks Grid */}
         <section className="pb-16 px-4">
           <div className="max-w-6xl mx-auto">
             {isLoading ? (
@@ -130,15 +218,42 @@ const ResourcesPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {(playbooks || []).map((resource, index) => {
                   const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
+                  const isFree = index < FREE_PLAYBOOK_COUNT;
+                  const isPurchased = purchasedPlaybookIds?.has(resource.id);
+                  const isUnlocked = isFree || isPurchased;
+
                   return (
                     <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                      <div className="glass p-8 rounded-2xl border border-border hover:border-amber/30 transition-all group h-full flex flex-col">
+                      <div className={`glass p-8 rounded-2xl border transition-all group h-full flex flex-col ${
+                        isUnlocked
+                          ? 'border-border hover:border-amber/30'
+                          : 'border-border/50 hover:border-primary/30'
+                      }`}>
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">
-                            <IconComp className="w-6 h-6 text-amber" />
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isUnlocked
+                              ? 'bg-primary/20 group-hover:bg-primary/30'
+                              : 'bg-secondary/50 group-hover:bg-secondary/70'
+                          }`}>
+                            {isUnlocked ? (
+                              <IconComp className="w-6 h-6 text-amber" />
+                            ) : (
+                              <Lock className="w-5 h-5 text-muted-foreground" />
+                            )}
                           </div>
-                          <div>
-                            <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                              {isFree && (
+                                <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
+                              )}
+                              {!isFree && isPurchased && (
+                                <span className="text-[10px] font-bold bg-primary/15 text-primary border border-primary/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Unlocked</span>
+                              )}
+                              {!isUnlocked && (
+                                <span className="text-[10px] font-bold bg-secondary text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">$25</span>
+                              )}
+                            </div>
                             <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
                           </div>
                         </div>
@@ -148,11 +263,20 @@ const ResourcesPage = () => {
                             <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                           ))}
                         </div>
-                        <a href={resource.file_url} download className="block">
-                          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-                            <Download className="w-4 h-4" /> Download PDF
-                          </Button>
-                        </a>
+                        <Button
+                          onClick={() => handlePlaybookAction(resource, index)}
+                          className={`w-full gap-2 ${
+                            isUnlocked
+                              ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                              : 'bg-secondary hover:bg-secondary/80 text-foreground border border-border'
+                          }`}
+                        >
+                          {isUnlocked ? (
+                            <><Download className="w-4 h-4" /> Download PDF</>
+                          ) : (
+                            <><ShoppingCart className="w-4 h-4" /> Unlock — $25</>
+                          )}
+                        </Button>
                       </div>
                     </RevealOnScroll>
                   );
