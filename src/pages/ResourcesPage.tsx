@@ -83,14 +83,24 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
-              <div className="w-72 h-72 md:w-96 md:h-96 mx-auto rounded-full overflow-hidden mb-8">
-                <iframe
-                  src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
-                  className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
-                  allow="autoplay; fullscreen"
-                  allowFullScreen
-                  title="Aetheris Playbooks"
-                />
+              <div className="relative w-72 h-72 md:w-96 md:h-96 mx-auto mb-8 group">
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <iframe
+                    ref={iframeRef}
+                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
+                    className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    title="Aetheris Playbooks"
+                  />
+                </div>
+                <button
+                  onClick={togglePlay}
+                  className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
+                  aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                </button>
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Field Manuals
