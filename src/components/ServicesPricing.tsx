@@ -29,8 +29,8 @@ interface ServiceTile {
 
 const services: ServiceTile[] = [
   {
-    icon: Search, title: 'Full Website Report', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
-    monthlyPriceId: 'scan_full_report_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
+    icon: Search, title: 'Full Website Report', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
+    monthlyPriceId: 'scan_full_report_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
     successStat: '91% of businesses found at least 3 fixable revenue leaks',
     longDescription: 'Our AI scans your entire website and produces a comprehensive diagnostic covering every technical, content, and conversion gap. You get revenue leak estimates, competitive positioning data, and a downloadable PDF you can share with your team.',
@@ -38,8 +38,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses lose $1,000–$5,000/month from invisible website issues. This report makes them visible in minutes — not weeks of consulting.',
   },
   {
-    icon: Search, title: 'Digital Snapshot', pricing: '$125', priceRaw: 12500, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
-    monthlyPriceId: 'digital_snapshot_monthly', monthlyPricing: '$79/mo', monthlyPriceRaw: 7900, monthlySavePercent: 37,
+    icon: Search, title: 'Digital Snapshot', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
+    monthlyPriceId: 'digital_snapshot_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Automated report showing where you\'re bleeding revenue online.',
     successStat: '87% recover the cost within 30 days of acting on findings',
     longDescription: 'A deeper automated analysis of your digital footprint — website performance, SEO health, content gaps, and conversion friction. This is the door opener that shows exactly what\'s broken before you spend a dime fixing it.',
@@ -47,8 +47,8 @@ const services: ServiceTile[] = [
     whyValuable: 'You can\'t fix what you can\'t see. This snapshot reveals blind spots that are costing you money every single day — for less than the cost of one hour of consulting.',
   },
   {
-    icon: BarChart3, title: 'Strategy Blueprint', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
-    monthlyPriceId: 'scan_strategy_blueprint_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
+    icon: BarChart3, title: 'Strategy Blueprint', pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
+    monthlyPriceId: 'scan_strategy_blueprint_monthly', monthlyPricing: '$249/mo', monthlyPriceRaw: 24900, monthlySavePercent: 29,
     description: 'Full report + CRM plan + implementation specs + content calendar.',
     successStat: '3.2x avg revenue improvement within 90 days of implementation',
     longDescription: 'Everything in the Full Report plus a complete CRM implementation plan, system architecture blueprint, 30-day content calendar, and specific "Fix This" items with implementation specs. This is a full strategic roadmap — not just a diagnosis.',
@@ -57,8 +57,8 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Full Website Report', value: '$49' }, { name: 'Content Calendar', value: '$29' }, { name: 'CRM Plan', value: 'included' }],
   },
   {
-    icon: Share2, title: 'Social Content Pack', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
-    monthlyPriceId: 'social_content_pack_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
+    icon: Share2, title: 'Social Content Pack', pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
+    monthlyPriceId: 'social_content_pack_monthly', monthlyPricing: '$25/mo', monthlyPriceRaw: 2500, monthlySavePercent: 36,
     description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
     successStat: '74% see measurable engagement increase within 2 weeks',
     longDescription: 'We scan your website and generate 25 ready-to-post social media pieces tailored to your brand voice, audience, and industry. Each post includes a hook, body copy, CTA, and hashtag suggestions.',
@@ -66,8 +66,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Hiring a copywriter for 25 posts costs $500+. A social media manager charges $2,000+/month. Get a month of content in minutes for $29.',
   },
   {
-    icon: Phone, title: 'Sales Script Pack', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
-    monthlyPriceId: 'sales_script_pack_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
+    icon: Phone, title: 'Sales Script Pack', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
+    monthlyPriceId: 'sales_script_pack_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: 'Call scripts, objection handlers & follow-up templates.',
     successStat: '68% of sales teams report higher close rates within 1 month',
     longDescription: 'AI-generated sales scripts customized to your industry, product, and target customer. Includes a complete cold call script, warm call script, 5 objection handlers with reframes, and 3 follow-up templates for email, SMS, and voicemail.',
@@ -75,8 +75,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Sales teams with scripts close 30% more deals. One extra closed deal per month at $500+ = 10x ROI on a $49 investment.',
   },
   {
-    icon: Calendar, title: 'Content Calendar', pricing: '$29', priceRaw: 2900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
-    monthlyPriceId: 'content_calendar_monthly', monthlyPricing: '$19/mo', monthlyPriceRaw: 1900, monthlySavePercent: 34,
+    icon: Calendar, title: 'Content Calendar', pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
+    monthlyPriceId: 'content_calendar_monthly', monthlyPricing: '$25/mo', monthlyPriceRaw: 2500, monthlySavePercent: 36,
     description: '30 days of topics, hooks, captions & posting times.',
     successStat: '82% post consistently for 30+ days (vs. 23% without a plan)',
     longDescription: 'A full 30-day content calendar with daily post ideas, proven hooks, captions, content types (carousel, video, text), hashtags, and optimal posting times — all generated for your specific industry and goals.',
@@ -84,8 +84,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Content consistency is the #1 growth lever on social media. This eliminates the "what do I post today" problem for an entire month — for less than a coffee per day.',
   },
   {
-    icon: Mail, title: 'Follow-Up Plan', pricing: '$49', priceRaw: 4900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
-    monthlyPriceId: 'follow_up_plan_monthly', monthlyPricing: '$29/mo', monthlyPriceRaw: 2900, monthlySavePercent: 41,
+    icon: Mail, title: 'Follow-Up Plan', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
+    monthlyPriceId: 'follow_up_plan_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: '14-day multi-channel sales cadence with templates.',
     successStat: '76% of users recover at least 1 lost deal within 14 days',
     longDescription: 'A complete 14-day follow-up system covering email, SMS, phone calls, and LinkedIn touches. Every touchpoint is scripted, timed, and designed to re-engage leads without being annoying.',
@@ -101,8 +101,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Visuals with people increase engagement by 38%. High-quality imagery boosts conversion by up to 30%. One improved image helps win one deal on a $25K–$150K+ project.',
   },
   {
-    icon: Globe, title: 'Website Evaluation', pricing: '$500', priceRaw: 50000, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
-    monthlyPriceId: 'website_evaluation_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
+    icon: Globe, title: 'Website Evaluation', pricing: '$599', priceRaw: 59900, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
+    monthlyPriceId: 'website_evaluation_monthly', monthlyPricing: '$419/mo', monthlyPriceRaw: 41900, monthlySavePercent: 30,
     description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
     successStat: '93% implement at least 3 changes within 7 days of the call',
     longDescription: 'A focused, human-reviewed tear-down of your messaging clarity, CTA placement, conversion flow, and market positioning. Includes a live strategy call to walk through every finding and prioritize next steps.',
@@ -111,8 +111,8 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Full Website Report', value: '$49' }, { name: 'Strategy Call', value: 'included' }],
   },
   {
-    icon: BarChart3, title: 'Strategic Discovery Audit', pricing: '$500', priceRaw: 50000, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
-    monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$349/mo', monthlyPriceRaw: 34900, monthlySavePercent: 30,
+    icon: BarChart3, title: 'Strategic Discovery Audit', pricing: '$599', priceRaw: 59900, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
+    monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$419/mo', monthlyPriceRaw: 41900, monthlySavePercent: 30,
     description: 'Website + social + CRM — the complete picture before custom work begins.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
     longDescription: 'A foundational diagnostic engagement covering everything in the Digital Snapshot and Website Evaluation, plus deep social media and CRM audits. This connects the dots across every channel so you can see exactly where marketing spend is being wasted — the prerequisite for any custom implementation work.',
@@ -121,8 +121,8 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
-    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,500', priceRaw: 250000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
-    monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,750/mo', monthlyPriceRaw: 175000, monthlySavePercent: 30,
+    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,900', priceRaw: 290000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
+    monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,990/mo', monthlyPriceRaw: 199000, monthlySavePercent: 31,
     description: 'The deep operational breakdown that precedes any custom build.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
     longDescription: 'A complete operational breakdown over 14 days — where workflows break, time gets wasted, systems disconnect, and manual work should be automated. We embed into your operation and surface every inefficiency. This is the foundational step before any custom implementation engagement begins.',
@@ -131,7 +131,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Strategy Blueprint', value: '$299' }, { name: 'Operational Workflow Mapping', value: 'included' }, { name: 'Automation Roadmap', value: 'included' }],
   },
   {
-    icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,000/mo', priceRaw: 500000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
+    icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,900/mo', priceRaw: 590000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
     description: 'Ongoing strategic leadership + execution.',
     successStat: '4.1x avg ROI within first 6 months of engagement',
     longDescription: 'Full-time strategic leadership without the full-time salary. We become your embedded technology and marketing executive — setting strategy, managing execution, and continuously optimizing your operation month over month.',
@@ -140,8 +140,8 @@ const services: ServiceTile[] = [
     includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
   },
   {
-    icon: Brain, title: 'Strategic Question Engine', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
-    monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
+    icon: Brain, title: 'Strategic Question Engine', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
     description: 'Custom question map exposing blind spots across 8 departments.',
     successStat: '84% discover critical blind spots they hadn\'t considered',
     longDescription: 'A business clarity engine that generates sharp, specific questions organized by leadership, sales, marketing, operations, hiring, pricing, customer journey, and growth. Not generic — tailored to your exact company profile.',
@@ -149,8 +149,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Business owners are drowning in advice. Very few people help them think clearly. This tool comes in like a surgeon and says "here are the questions your business has earned."',
   },
   {
-    icon: Search, title: 'Brand Contradiction Finder', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
-    monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
+    icon: Search, title: 'Brand Contradiction Finder', pricing: '$119', priceRaw: 11900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$69/mo', monthlyPriceRaw: 6900, monthlySavePercent: 42,
     description: 'See where your brand says one thing but signals another.',
     successStat: '79% see conversion lift after fixing top contradiction',
     longDescription: 'We scrape your website and branding to compare message versus signal across 5 layers: visual identity, tone, pricing, process, and trust. Buyers feel contradictions immediately — this tool makes them visible.',
@@ -158,8 +158,8 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses think they need more traffic. Sometimes they just need to stop sending mixed signals. One contradiction fix can increase conversion 10-30%.',
   },
   {
-    icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$69', priceRaw: 6900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
-    monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 43,
+    icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: 'Find the exact words weakening your trust and authority.',
     successStat: '71% report stronger brand perception within 2 weeks of edits',
     longDescription: 'We scan your entire website copy for vague language, corporate filler, weak emotional language, risky wording, and flat CTAs. Every flagged phrase gets a specific replacement that fits your desired brand tone.',

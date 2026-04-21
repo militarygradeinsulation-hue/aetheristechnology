@@ -1131,6 +1131,7 @@ export type Database = {
           environment: string
           id: string
           metadata: Json | null
+          rep_code: string | null
           status: string | null
           stripe_customer_id: string | null
           stripe_session_id: string
@@ -1144,6 +1145,7 @@ export type Database = {
           environment?: string
           id?: string
           metadata?: Json | null
+          rep_code?: string | null
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id: string
@@ -1157,10 +1159,47 @@ export type Database = {
           environment?: string
           id?: string
           metadata?: Json | null
+          rep_code?: string | null
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      rep_codes: {
+        Row: {
+          code: string
+          commission_rate: number
+          created_at: string
+          id: string
+          is_active: boolean
+          rep_email: string | null
+          rep_name: string
+          total_commission_cents: number
+          total_sales_cents: number
+        }
+        Insert: {
+          code: string
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rep_email?: string | null
+          rep_name?: string
+          total_commission_cents?: number
+          total_sales_cents?: number
+        }
+        Update: {
+          code?: string
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rep_email?: string | null
+          rep_name?: string
+          total_commission_cents?: number
+          total_sales_cents?: number
         }
         Relationships: []
       }
@@ -1690,6 +1729,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      increment_rep_sales: {
+        Args: { _code: string; _commission: number; _sales: number }
+        Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       move_to_dlq: {
