@@ -184,14 +184,30 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
     const id = `${sectionKey}-${index}`;
     const props = { post, visible, copyFn: copyToClipboard, copiedId, id };
 
+    let card: React.ReactNode = null;
     switch (sectionKey) {
-      case 'case_file': return <CaseFileCard key={id} {...props} />;
-      case 'leak_of_week': return <LeakCard key={id} {...props} />;
-      case 'diagnostic': return <DiagnosticCard key={id} {...props} />;
-      case 'operators_journal': return <JournalCard key={id} post={post} visible={visible} />;
-      case 'contrarian': return <ContrarianCard key={id} {...props} />;
-      default: return null;
+      case 'case_file': card = <CaseFileCard {...props} />; break;
+      case 'leak_of_week': card = <LeakCard {...props} />; break;
+      case 'diagnostic': card = <DiagnosticCard {...props} />; break;
+      case 'operators_journal': card = <JournalCard post={post} visible={visible} />; break;
+      case 'contrarian': card = <ContrarianCard {...props} />; break;
     }
+
+    const imagePrompt = post.finding || post.leakName || post.question || post.entry || post.claim || 'business operations forensic analysis';
+
+    return (
+      <div key={id} className="space-y-2">
+        {card}
+        {adminMode && visible && (
+          <PostImageGenerator
+            prompt={imagePrompt}
+            postIndex={index}
+            compact
+            onImageGenerated={() => {}}
+          />
+        )}
+      </div>
+    );
   };
 
   return (
