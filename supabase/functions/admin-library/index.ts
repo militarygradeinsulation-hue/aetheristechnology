@@ -65,6 +65,26 @@ serve(async (req) => {
       });
     }
 
+    if (action === "update") {
+      const { id, output_data } = body;
+      if (!id || !output_data) {
+        return new Response(JSON.stringify({ error: "id and output_data required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data, error } = await supabase
+        .from("admin_library")
+        .update({ output_data })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return new Response(JSON.stringify({ item: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "delete") {
       const { id } = body;
       if (!id) {
