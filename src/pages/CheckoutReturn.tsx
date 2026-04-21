@@ -115,44 +115,7 @@ function DeliverableReturn({ sessionId }: { sessionId: string }) {
   }
 
   if (allReady) {
-    return (
-      <>
-        <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-foreground mb-3 font-display">
-          {deliverables.length > 1 ? 'Your Bundle is Ready!' : 'Your Content is Ready!'}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {deliverables.length > 1
-            ? `All ${deliverables.length} deliverables have been generated.`
-            : 'Your AI-generated content is ready to use.'}
-        </p>
-        <div className="space-y-3 max-w-md mx-auto mb-6">
-          {deliverables.map((d: any) => (
-            <div key={d.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{formatToolType(d.tool_type)}</span>
-              </div>
-              {d.file_url ? (
-                <a href={d.file_url} download>
-                  <Button size="sm" variant="outline" className="gap-1">
-                    <Download className="w-3.5 h-3.5" /> Download
-                  </Button>
-                </a>
-              ) : (
-                <span className="text-xs text-primary font-medium">✓ Generated</span>
-              )}
-            </div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          A copy has also been sent to your email.
-        </p>
-        <Link to="/" className="text-primary hover:underline font-medium">
-          &larr; Back to Home
-        </Link>
-      </>
-    );
+    return <DeliverableReadyView deliverables={deliverables} />;
   }
 
   // Some failed
