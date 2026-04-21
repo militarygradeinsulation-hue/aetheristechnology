@@ -104,6 +104,16 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
             <Calendar className="w-6 h-6 text-amber" />
             <h2 className="text-2xl font-bold text-foreground font-display">Build Your Content Calendar</h2>
           </div>
+          <div className="mb-5">
+            <Label>Website (auto-fill from your site)</Label>
+            <div className="flex gap-2 mt-1">
+              <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="e.g. yourcompany.com" />
+              <Button type="button" variant="outline" onClick={handleInferFromWebsite} disabled={inferring || !form.website.trim()} className="shrink-0">
+                {inferring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+                <span className="ml-1.5">{inferring ? 'Reading…' : 'Auto-fill'}</span>
+              </Button>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div><Label>Industry *</Label><Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} placeholder="e.g. Fitness, SaaS, Real Estate" /></div>
             <div><Label>Goals</Label><Input value={form.goals} onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="e.g. Lead gen, brand awareness" /></div>
