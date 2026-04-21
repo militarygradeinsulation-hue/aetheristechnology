@@ -65,6 +65,15 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
+              <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8 border border-border">
+                <iframe
+                  src="https://player.vimeo.com/video/1185171761?autoplay=1&muted=1&loop=1&background=1"
+                  className="w-full h-full"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title="Aetheris Playbooks"
+                />
+              </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Field Manuals
               </div>
