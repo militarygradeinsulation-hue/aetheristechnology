@@ -165,6 +165,26 @@ const ResourcesPage = () => {
         }}
       />
       <Background />
+
+      {/* Heartbeat line */}
+      <div className="fixed top-0 left-0 w-full z-50 pointer-events-none overflow-hidden" style={{ height: '4px' }}>
+        <svg
+          viewBox="0 0 1200 40"
+          preserveAspectRatio="none"
+          className="w-[200%] h-full"
+          style={{ animation: 'heartbeat-scroll 3s linear infinite' }}
+        >
+          <polyline
+            points="0,20 180,20 200,20 220,5 240,35 260,10 280,30 300,20 320,20 600,20 780,20 800,20 820,5 840,35 860,10 880,30 900,20 920,20 1200,20"
+            fill="none"
+            stroke="hsl(var(--crimson))"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
