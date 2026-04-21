@@ -567,12 +567,23 @@ export const ServicesPricing: React.FC = () => {
                       {billingMode === 'monthly' && <span className="text-xs font-normal text-muted-foreground">/mo</span>}
                     </div>
                   </div>
-                  <Link
-                    to={`/contact?bundle=${selectedItems.map(s => s.title).join(',')}&total=${discountedTotal}`}
+                  <button
+                    onClick={() => {
+                      // Use the first item's priceId for checkout; pass all items in metadata
+                      const firstItem = selectedItems[0];
+                      const pid = billingMode === 'monthly' && firstItem.monthlyPriceId
+                        ? firstItem.monthlyPriceId
+                        : firstItem.priceId!;
+                      const bundlePriceIds = selectedItems.map(s =>
+                        billingMode === 'monthly' && s.monthlyPriceId ? s.monthlyPriceId! : s.priceId!
+                      );
+                      setCheckoutBundleItems(bundlePriceIds);
+                      setCheckoutPriceId(pid);
+                    }}
                     className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
                   >
                     <ShoppingCart className="w-4 h-4" /> Get Bundle
-                  </Link>
+                  </button>
                   <button
                     onClick={() => setSelectedIds(new Set())}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
