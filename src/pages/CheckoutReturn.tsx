@@ -1,9 +1,12 @@
-import { useSearchParams, Link } from "react-router-dom";
-import { CheckCircle, Loader2, Download, AlertCircle, Package } from "lucide-react";
+import { useState } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { CheckCircle, Loader2, Download, AlertCircle, Package, Gift, Sparkles } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { TOPIC_POOL } from "@/components/PlaybookTopicBrowser";
 
 function SubscriptionReturn({ sessionId }: { sessionId: string }) {
   const { data: subscription, isLoading } = useQuery({
@@ -45,6 +48,118 @@ function SubscriptionReturn({ sessionId }: { sessionId: string }) {
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
           Set Up My AI Consultant &rarr;
         </Button>
+      </Link>
+    </>
+  );
+}
+
+function DeliverableReadyView({ deliverables }: { deliverables: any[] }) {
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [claimed, setClaimed] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClaimPlaybook = async () => {
+    if (!selectedTopic || !user) {
+      if (!user) navigate('/login?redirect=/resources');
+      return;
+    }
+    const topic = TOPIC_POOL.find(t => t.title === selectedTopic);
+    if (!topic) return;
+
+    const { error } = await supabase.from('generated_playbooks').insert({
+      user_id: user.id,
+      topic_title: topic.title,
+      topic_data: topic as any,
+      status: 'pending',
+      stripe_session_id: null,
+    });
+
+    if (!error) {
+      await supabase.functions.invoke('generate-custom-playbook', {
+        body: { topicTitle: topic.title, userId: user.id },
+      });
+      setClaimed(true);
+    }
+  };
+
+  return (
+    <>
+      <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+      <h1 className="text-3xl font-bold text-foreground mb-3 font-display">
+        {deliverables.length > 1 ? 'Your Bundle is Ready!' : 'Your Content is Ready!'}
+      </h1>
+      <p className="text-muted-foreground mb-6">
+        {deliverables.length > 1
+          ? `All ${deliverables.length} deliverables have been generated.`
+          : 'Your AI-generated content is ready to use.'}
+      </p>
+      <div className="space-y-3 max-w-md mx-auto mb-6">
+        {deliverables.map((d: any) => (
+          <div key={d.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">{formatToolType(d.tool_type)}</span>
+            </div>
+            {d.file_url ? (
+              <a href={d.file_url} download>
+                <Button size="sm" variant="outline" className="gap-1">
+                  <Download className="w-3.5 h-3.5" /> Download
+                </Button>
+              </a>
+            ) : (
+              <span className="text-xs text-primary font-medium">✓ Generated</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Bonus Playbook Picker */}
+      {!claimed ? (
+        <div className="max-w-md mx-auto mb-6 p-4 bg-amber/[0.06] border border-amber/25 rounded-xl">
+          <div className="flex items-center gap-2 mb-3">
+            <Gift className="w-5 h-5 text-amber" />
+            <span className="text-sm font-bold text-foreground">Bonus: Pick a Free Playbook</span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            As a thank you for your purchase, choose any strategic playbook — on us.
+          </p>
+          <select
+            value={selectedTopic || ''}
+            onChange={(e) => setSelectedTopic(e.target.value || null)}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground mb-3"
+          >
+            <option value="">Select a playbook topic...</option>
+            {TOPIC_POOL.map(t => (
+              <option key={t.title} value={t.title}>{t.title}</option>
+            ))}
+          </select>
+          <Button
+            onClick={handleClaimPlaybook}
+            disabled={!selectedTopic}
+            className="w-full bg-amber hover:bg-amber/90 text-background gap-2"
+            size="sm"
+          >
+            <Sparkles className="w-4 h-4" /> Claim Free Playbook
+          </Button>
+        </div>
+      ) : (
+        <div className="max-w-md mx-auto mb-6 p-4 bg-primary/[0.06] border border-primary/25 rounded-xl">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-primary" />
+            <span className="text-sm font-bold text-foreground">Playbook claimed!</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Your free playbook is being generated. Check <Link to="/resources" className="text-primary hover:underline">Playbooks</Link> in a few minutes.
+          </p>
+        </div>
+      )}
+
+      <p className="text-sm text-muted-foreground mb-4">
+        A copy has also been sent to your email.
+      </p>
+      <Link to="/" className="text-primary hover:underline font-medium">
+        &larr; Back to Home
       </Link>
     </>
   );
@@ -112,44 +227,7 @@ function DeliverableReturn({ sessionId }: { sessionId: string }) {
   }
 
   if (allReady) {
-    return (
-      <>
-        <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-foreground mb-3 font-display">
-          {deliverables.length > 1 ? 'Your Bundle is Ready!' : 'Your Content is Ready!'}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {deliverables.length > 1
-            ? `All ${deliverables.length} deliverables have been generated.`
-            : 'Your AI-generated content is ready to use.'}
-        </p>
-        <div className="space-y-3 max-w-md mx-auto mb-6">
-          {deliverables.map((d: any) => (
-            <div key={d.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{formatToolType(d.tool_type)}</span>
-              </div>
-              {d.file_url ? (
-                <a href={d.file_url} download>
-                  <Button size="sm" variant="outline" className="gap-1">
-                    <Download className="w-3.5 h-3.5" /> Download
-                  </Button>
-                </a>
-              ) : (
-                <span className="text-xs text-primary font-medium">✓ Generated</span>
-              )}
-            </div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          A copy has also been sent to your email.
-        </p>
-        <Link to="/" className="text-primary hover:underline font-medium">
-          &larr; Back to Home
-        </Link>
-      </>
-    );
+    return <DeliverableReadyView deliverables={deliverables} />;
   }
 
   // Some failed
@@ -218,9 +296,11 @@ export default function CheckoutReturn() {
   const topic = searchParams.get("topic");
 
   const isPlaybook = type === "playbook";
+  const isPlaybookUnlock = type === "playbook_unlock";
   const isScanReport = type === "scan_report";
   const isSubscription = type === "subscription";
   const isDeliverable = type === "deliverable" || type === "bundle";
+  const playbookId = searchParams.get("playbook_id");
 
   const { data: playbook } = useQuery({
     queryKey: ['generated-playbook', sessionId],
@@ -330,6 +410,19 @@ export default function CheckoutReturn() {
                 </>
               ) : isSubscription ? (
                 <SubscriptionReturn sessionId={sessionId!} />
+              ) : isPlaybookUnlock ? (
+                <>
+                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold text-foreground mb-3 font-display">Playbook Unlocked!</h1>
+                  <p className="text-muted-foreground mb-6">
+                    Your playbook is now available for download.
+                  </p>
+                  <Link to="/resources">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+                      <Download className="w-5 h-5" /> Go to Playbooks
+                    </Button>
+                  </Link>
+                </>
               ) : showDeliverable ? (
                 <DeliverableReturn sessionId={sessionId!} />
               ) : (
