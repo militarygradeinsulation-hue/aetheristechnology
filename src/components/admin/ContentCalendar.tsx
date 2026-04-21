@@ -126,11 +126,32 @@ export const ContentCalendar: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="w-5 h-5" /></Button>
-          <h2 className="text-2xl font-bold text-foreground font-display min-w-[220px] text-center">{monthLabel}</h2>
-          <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="w-5 h-5" /></Button>
+          {viewMode === 'calendar' && (
+            <>
+              <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="w-5 h-5" /></Button>
+              <h2 className="text-2xl font-bold text-foreground font-display min-w-[220px] text-center">{monthLabel}</h2>
+              <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="w-5 h-5" /></Button>
+            </>
+          )}
+          {viewMode !== 'calendar' && (
+            <h2 className="text-2xl font-bold text-foreground font-display">My Library</h2>
+          )}
         </div>
-        <span className="text-xs text-muted-foreground">{items.length} total saved</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground mr-2">{filtered.length} items</span>
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            {([['calendar', CalendarDays], ['list', List], ['grid', LayoutGrid]] as const).map(([mode, Icon]) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`p-1.5 transition-colors ${viewMode === mode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                title={mode.charAt(0).toUpperCase() + mode.slice(1)}
+              >
+                <Icon className="w-4 h-4" />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Type filter */}
