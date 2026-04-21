@@ -1,9 +1,12 @@
-import { useSearchParams, Link } from "react-router-dom";
-import { CheckCircle, Loader2, Download, AlertCircle, Package } from "lucide-react";
+import { useState } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { CheckCircle, Loader2, Download, AlertCircle, Package, Gift, Sparkles } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { TOPIC_POOL } from "@/components/PlaybookTopicBrowser";
 
 function SubscriptionReturn({ sessionId }: { sessionId: string }) {
   const { data: subscription, isLoading } = useQuery({
