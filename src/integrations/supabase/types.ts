@@ -1730,6 +1730,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      increment_rep_sales: {
+        Args: { _code: string; _commission: number; _sales: number }
+        Returns: undefined
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
