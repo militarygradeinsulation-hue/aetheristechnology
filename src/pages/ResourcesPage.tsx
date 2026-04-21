@@ -65,10 +65,10 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
-              <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8">
+              <div className="w-72 h-72 md:w-96 md:h-96 mx-auto rounded-full overflow-hidden mb-8">
                 <iframe
                   src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
-                  className="w-full h-full"
+                  className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
                   allow="autoplay; fullscreen"
                   allowFullScreen
                   title="Aetheris Playbooks"
