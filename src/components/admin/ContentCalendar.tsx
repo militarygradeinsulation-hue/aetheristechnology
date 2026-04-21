@@ -42,6 +42,8 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+type ViewMode = 'calendar' | 'list' | 'grid';
+
 export const ContentCalendar: React.FC = () => {
   const [items, setItems] = useState<AdminLibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +52,7 @@ export const ContentCalendar: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [aiItem, setAiItem] = useState<AdminLibraryItem | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
