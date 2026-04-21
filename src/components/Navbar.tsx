@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             <img 
               src={aetherisLogo} 
               alt="Aetheris Business Forensics" 
-              className="w-16 h-16 object-contain select-none"
+              className="w-20 h-20 object-contain select-none transition-transform duration-300 ease-out hover:scale-125"
               draggable={false}
             />
           </Link>
