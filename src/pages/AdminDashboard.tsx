@@ -95,6 +95,7 @@ const AdminDashboard: React.FC = () => {
   const [quickPostContent, setQuickPostContent] = useState('');
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
+  const [libraryViewMode, setLibraryViewMode] = useState<ViewMode>('calendar');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
