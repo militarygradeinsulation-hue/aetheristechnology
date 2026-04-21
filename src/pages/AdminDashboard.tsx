@@ -462,6 +462,9 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Rep Performance */}
+            <RepPerformancePanel />
           </div>
         )}
 
