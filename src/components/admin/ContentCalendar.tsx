@@ -174,16 +174,9 @@ export const ContentCalendar: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground mr-2">{filtered.length} items</span>
           <div className="flex border border-border rounded-lg overflow-hidden">
-            {([['calendar', CalendarDays], ['list', List], ['grid', LayoutGrid]] as const).map(([mode, Icon]) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`p-1.5 transition-colors ${viewMode === mode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                title={mode.charAt(0).toUpperCase() + mode.slice(1)}
-              >
-                <Icon className="w-4 h-4" />
-              </button>
-            ))}
+            <button onClick={() => setViewMode('calendar')} className={`p-1.5 transition-colors ${viewMode === 'calendar' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`} title="Calendar"><CalendarDays className="w-4 h-4" /></button>
+            <button onClick={() => setViewMode('list')} className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`} title="List"><List className="w-4 h-4" /></button>
+            <button onClick={() => setViewMode('grid')} className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`} title="Grid"><LayoutGrid className="w-4 h-4" /></button>
           </div>
         </div>
       </div>
