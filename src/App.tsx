@@ -45,6 +45,7 @@ import VerticalLandingPage from "./pages/VerticalLandingPage";
 import CrmDemoPage from "./pages/CrmDemoPage";
 import CapabilitiesPage from "./pages/CapabilitiesPage";
 import LeakAuditPage from "./pages/LeakAuditPage";
+import RepPortalPage from "./pages/RepPortalPage";
 
 const queryClient = new QueryClient();
 
@@ -104,7 +105,8 @@ const App = () => (
                   <Route path="/crm-demo" element={<CrmDemoPage />} />
                   <Route path="/capabilities" element={<CapabilitiesPage />} />
                   <Route path="/leak-audit" element={<LeakAuditPage />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="/rep-portal" element={<RepPortalPage />} />
+                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 
