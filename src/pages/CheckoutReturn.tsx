@@ -1,18 +1,14 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { CheckCircle, Loader2, Download, AlertCircle } from "lucide-react";
+import { CheckCircle, Loader2, Download, AlertCircle, Package } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 function SubscriptionReturn({ sessionId }: { sessionId: string }) {
-  // Look up the actual subscription UUID from the Stripe session ID
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['subscription-by-session', sessionId],
     queryFn: async () => {
-      // The webhook stores stripe_subscription_id, not session_id.
-      // But checkout.session.completed fires first with session.subscription = stripe sub id
-      // We poll for a subscription that was recently created (within last 5 min)
       const { data, error } = await supabase
         .from('subscriptions')
         .select('id')
@@ -54,18 +50,179 @@ function SubscriptionReturn({ sessionId }: { sessionId: string }) {
   );
 }
 
+function DeliverableReturn({ sessionId }: { sessionId: string }) {
+  const { data: deliverables, isLoading } = useQuery({
+    queryKey: ['purchase-deliverables', sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('purchase_deliverables')
+        .select('*')
+        .eq('stripe_session_id', sessionId);
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: (query) => {
+      const items = query.state.data;
+      if (!items || items.length === 0) return 2000;
+      const allDone = items.every((d: any) => d.status === 'ready' || d.status === 'failed');
+      return allDone ? false : 3000;
+    },
+  });
+
+  if (isLoading || !deliverables || deliverables.length === 0) {
+    return (
+      <>
+        <Loader2 className="w-16 h-16 text-amber mx-auto mb-4 animate-spin" />
+        <h1 className="text-3xl font-bold text-foreground mb-3 font-display">Generating Your Content...</h1>
+        <p className="text-muted-foreground mb-6">Our AI is building your deliverables. This usually takes 1-2 minutes.</p>
+      </>
+    );
+  }
+
+  const allReady = deliverables.every((d: any) => d.status === 'ready');
+  const anyFailed = deliverables.some((d: any) => d.status === 'failed');
+  const anyPending = deliverables.some((d: any) => d.status === 'pending' || d.status === 'generating');
+
+  if (anyPending) {
+    return (
+      <>
+        <Loader2 className="w-16 h-16 text-amber mx-auto mb-4 animate-spin" />
+        <h1 className="text-3xl font-bold text-foreground mb-3 font-display">Generating Your Content...</h1>
+        <p className="text-muted-foreground mb-6">
+          {deliverables.length > 1
+            ? `Generating ${deliverables.length} deliverables. This usually takes 1-2 minutes.`
+            : 'Our AI is building your deliverable. This usually takes 1-2 minutes.'}
+        </p>
+        <div className="space-y-2 text-left max-w-sm mx-auto">
+          {deliverables.map((d: any) => (
+            <div key={d.id} className="flex items-center gap-2 text-sm">
+              {d.status === 'ready' ? (
+                <CheckCircle className="w-4 h-4 text-primary" />
+              ) : d.status === 'failed' ? (
+                <AlertCircle className="w-4 h-4 text-destructive" />
+              ) : (
+                <Loader2 className="w-4 h-4 text-amber animate-spin" />
+              )}
+              <span className="text-foreground">{formatToolType(d.tool_type)}</span>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  if (allReady) {
+    return (
+      <>
+        <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+        <h1 className="text-3xl font-bold text-foreground mb-3 font-display">
+          {deliverables.length > 1 ? 'Your Bundle is Ready!' : 'Your Content is Ready!'}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {deliverables.length > 1
+            ? `All ${deliverables.length} deliverables have been generated.`
+            : 'Your AI-generated content is ready to use.'}
+        </p>
+        <div className="space-y-3 max-w-md mx-auto mb-6">
+          {deliverables.map((d: any) => (
+            <div key={d.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">{formatToolType(d.tool_type)}</span>
+              </div>
+              {d.file_url ? (
+                <a href={d.file_url} download>
+                  <Button size="sm" variant="outline" className="gap-1">
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </Button>
+                </a>
+              ) : (
+                <span className="text-xs text-primary font-medium">✓ Generated</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          A copy has also been sent to your email.
+        </p>
+        <Link to="/" className="text-primary hover:underline font-medium">
+          &larr; Back to Home
+        </Link>
+      </>
+    );
+  }
+
+  // Some failed
+  return (
+    <>
+      <AlertCircle className="w-16 h-16 text-amber mx-auto mb-4" />
+      <h1 className="text-2xl font-bold text-foreground mb-3 font-display">Partial Generation</h1>
+      <p className="text-muted-foreground mb-6">
+        Some items were generated successfully, but others had issues.
+      </p>
+      <div className="space-y-3 max-w-md mx-auto mb-6">
+        {deliverables.map((d: any) => (
+          <div key={d.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              {d.status === 'ready' ? (
+                <CheckCircle className="w-4 h-4 text-primary" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-destructive" />
+              )}
+              <span className="text-sm font-medium text-foreground">{formatToolType(d.tool_type)}</span>
+            </div>
+            {d.status === 'ready' && d.file_url ? (
+              <a href={d.file_url} download>
+                <Button size="sm" variant="outline" className="gap-1">
+                  <Download className="w-3.5 h-3.5" /> Download
+                </Button>
+              </a>
+            ) : d.status === 'ready' ? (
+              <span className="text-xs text-primary font-medium">✓ Generated</span>
+            ) : (
+              <span className="text-xs text-destructive font-medium">Failed</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="text-muted-foreground text-sm mb-4">
+        Contact us at <a href="tel:+13173762110" className="text-primary font-semibold">(317) 376-2110</a> for help with failed items.
+      </p>
+      <Link to="/" className="text-primary hover:underline font-medium">
+        &larr; Back to Home
+      </Link>
+    </>
+  );
+}
+
+function formatToolType(toolType: string): string {
+  const labels: Record<string, string> = {
+    social_content: "Social Content Pack",
+    sales_scripts: "Sales Script Pack",
+    content_calendar: "Content Calendar",
+    follow_up_plan: "Follow-Up Plan",
+    strategic_questions: "Strategic Question Engine",
+    brand_contradictions: "Brand Contradiction Finder",
+    friction_audit: "Friction Vocabulary Audit",
+    website_report: "Full Website Report",
+    digital_snapshot: "Digital Snapshot",
+    strategy_blueprint: "Strategy Blueprint",
+  };
+  return labels[toolType] || toolType;
+}
+
 export default function CheckoutReturn() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const type = searchParams.get("type");
   const topic = searchParams.get("topic");
-  const scanUrl = searchParams.get("scan_url");
 
   const isPlaybook = type === "playbook";
   const isScanReport = type === "scan_report";
   const isSubscription = type === "subscription";
+  const isDeliverable = type === "deliverable" || type === "bundle";
 
-  const { data: playbook, isLoading: playbookLoading } = useQuery({
+  const { data: playbook } = useQuery({
     queryKey: ['generated-playbook', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,6 +240,23 @@ export default function CheckoutReturn() {
       return 3000;
     },
   });
+
+  // Check if this session has deliverables (auto-detect if type not set)
+  const { data: hasDeliverables } = useQuery({
+    queryKey: ['check-deliverables', sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('purchase_deliverables')
+        .select('id')
+        .eq('stripe_session_id', sessionId!)
+        .limit(1);
+      if (error) throw error;
+      return data && data.length > 0;
+    },
+    enabled: !!sessionId && !isPlaybook && !isScanReport && !isSubscription && !isDeliverable,
+  });
+
+  const showDeliverable = isDeliverable || hasDeliverables;
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,6 +330,8 @@ export default function CheckoutReturn() {
                 </>
               ) : isSubscription ? (
                 <SubscriptionReturn sessionId={sessionId!} />
+              ) : showDeliverable ? (
+                <DeliverableReturn sessionId={sessionId!} />
               ) : (
                 <>
                   <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
