@@ -7,6 +7,21 @@ import josephToneyVideo from '@/assets/joseph-toney-intro.mp4';
 export const OperatorBio: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  const hasPlayedOnce = useRef(false);
+
+  React.useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const handleEnded = () => {
+      if (!hasPlayedOnce.current) {
+        hasPlayedOnce.current = true;
+        v.muted = true;
+        setMuted(true);
+      }
+    };
+    v.addEventListener('ended', handleEnded);
+    return () => v.removeEventListener('ended', handleEnded);
+  }, []);
 
   return (
     <section id="about" className="relative py-20 px-4">
