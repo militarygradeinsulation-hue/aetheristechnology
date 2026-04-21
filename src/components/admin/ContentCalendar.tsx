@@ -167,79 +167,114 @@ export const ContentCalendar: React.FC = () => {
       {loading ? (
         <div className="glass p-12 rounded-xl text-center"><Loader2 className="w-8 h-8 animate-spin text-amber mx-auto" /></div>
       ) : (
-        <div className="flex gap-4 flex-col lg:flex-row">
-          {/* Calendar grid */}
-          <div className="flex-1">
-            <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                <div key={d} className="bg-muted/50 p-2 text-center text-xs font-bold text-muted-foreground">{d}</div>
-              ))}
-              {cells.map((day, idx) => {
-                if (day === null) return <div key={`e-${idx}`} className="bg-background/50 min-h-[80px]" />;
-                const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayData = byDate[key] || [];
-                const isSelected = selectedDay === key;
-                const isToday = key === dateKey(new Date());
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedDay(isSelected ? null : key)}
-                    className={`bg-background min-h-[80px] p-1.5 text-left transition-colors hover:bg-muted/30 relative ${isSelected ? 'ring-2 ring-primary' : ''}`}
-                  >
-                    <span className={`text-xs font-mono ${isToday ? 'text-amber font-bold' : 'text-muted-foreground'}`}>{day}</span>
-                    {dayData.length > 0 && (
-                      <div className="flex flex-wrap gap-0.5 mt-1">
-                        {dayData.slice(0, 5).map((item, i) => (
-                          <span key={i} className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} title={TOOL_LABELS[item.tool_type] || item.tool_type} />
-                        ))}
-                        {dayData.length > 5 && <span className="text-[9px] text-muted-foreground">+{dayData.length - 5}</span>}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Side panel — items for selected day */}
-          {selectedDay && (
-            <div className="w-full lg:w-[340px] space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-foreground font-display">{new Date(selectedDay + 'T12:00:00').toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedDay(null)}><X className="w-4 h-4" /></Button>
+        <>
+          {viewMode === 'calendar' && (
+            <div className="flex gap-4 flex-col lg:flex-row">
+              {/* Calendar grid */}
+              <div className="flex-1">
+                <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                    <div key={d} className="bg-muted/50 p-2 text-center text-xs font-bold text-muted-foreground">{d}</div>
+                  ))}
+                  {cells.map((day, idx) => {
+                    if (day === null) return <div key={`e-${idx}`} className="bg-background/50 min-h-[80px]" />;
+                    const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayData = byDate[key] || [];
+                    const isSelected = selectedDay === key;
+                    const isToday = key === dateKey(new Date());
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setSelectedDay(isSelected ? null : key)}
+                        className={`bg-background min-h-[80px] p-1.5 text-left transition-colors hover:bg-muted/30 relative ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                      >
+                        <span className={`text-xs font-mono ${isToday ? 'text-amber font-bold' : 'text-muted-foreground'}`}>{day}</span>
+                        {dayData.length > 0 && (
+                          <div className="flex flex-wrap gap-0.5 mt-1">
+                            {dayData.slice(0, 5).map((item, i) => (
+                              <span key={i} className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} title={TOOL_LABELS[item.tool_type] || item.tool_type} />
+                            ))}
+                            {dayData.length > 5 && <span className="text-[9px] text-muted-foreground">+{dayData.length - 5}</span>}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              {dayItems.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No content saved on this day.</p>
+
+              {/* Side panel — items for selected day */}
+              {selectedDay && (
+                <div className="w-full lg:w-[340px] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-foreground font-display">{new Date(selectedDay + 'T12:00:00').toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedDay(null)}><X className="w-4 h-4" /></Button>
+                  </div>
+                  {dayItems.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No content saved on this day.</p>
+                  ) : (
+                    dayItems.map(item => renderItemCard(item))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {viewMode === 'list' && (
+            <div className="space-y-2">
+              {filtered.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8">No saved content yet.</p>
               ) : (
-                dayItems.map(item => {
-                  const out = item.output_data as Record<string, any>;
-                  const existingImg = out?._generated_image_url as string | undefined;
-                  const imagePrompt = item.title || out?.businessName || 'business operations';
-                  return (
-                    <div key={item.id} className="glass rounded-lg p-3 border border-border space-y-2">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
-                        <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
-                        <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
+                filtered.map(item => (
+                  <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-center gap-4">
+                    <span className={`w-3 h-3 rounded-full shrink-0 ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
-                      <PostImageGenerator
-                        prompt={imagePrompt}
-                        libraryItemId={item.id}
-                        existingImageUrl={existingImg}
-                        compact
-                        onImageGenerated={(url) => {
-                          const updated = { ...item, output_data: { ...out, _generated_image_url: url } };
-                          handleItemUpdated(updated);
-                          import('@/lib/adminLibrary').then(m => m.updateAdminLibraryItem(item.id, { ...out, _generated_image_url: url })).catch(() => {});
-                        }}
-                      />
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-red-400" /></Button>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+                        <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filtered.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8 col-span-full">No saved content yet.</p>
+              ) : (
+                filtered.map(item => {
+                  const out = item.output_data as Record<string, any>;
+                  const imgUrl = out?._generated_image_url as string | undefined;
+                  return (
+                    <div key={item.id} className="glass rounded-xl border border-border overflow-hidden flex flex-col">
+                      {imgUrl && (
+                        <img src={imgUrl} alt="" className="w-full h-32 object-cover" />
+                      )}
+                      <div className="p-3 flex-1 flex flex-col">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
+                          <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+                        </div>
+                        <p className="text-sm font-bold text-foreground line-clamp-2 mb-1">{item.title}</p>
+                        <span className="text-[10px] text-muted-foreground mt-auto">{new Date(item.created_at).toLocaleDateString()}</span>
+                        <div className="flex gap-1 mt-2">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)}><MessageSquare className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -247,7 +282,7 @@ export const ContentCalendar: React.FC = () => {
               )}
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* View modal */}
