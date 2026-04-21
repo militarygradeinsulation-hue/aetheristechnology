@@ -3,7 +3,7 @@ import { Menu, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import aetherisLogo from '@/assets/aetheris-logo.png';
+import aetherisLogo from '@/assets/aetheris-new-logo.png';
 
 interface NavbarProps {
   onContactClick: () => void;
