@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
+import Player from '@vimeo/player';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   TrendingUp,
@@ -22,7 +23,24 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<Player | null>(null);
 
+  useEffect(() => {
+    if (iframeRef.current) {
+      const p = new Player(iframeRef.current);
+      playerRef.current = p;
+      p.on('play', () => setIsPlaying(true));
+      p.on('pause', () => setIsPlaying(false));
+      return () => { p.off('play'); p.off('pause'); };
+    }
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    if (!playerRef.current) return;
+    if (isPlaying) { playerRef.current.pause(); } else { playerRef.current.play(); }
+  }, [isPlaying]);
   const { data: playbooks, isLoading } = useQuery({
     queryKey: ['playbooks'],
     queryFn: async () => {
@@ -65,14 +83,24 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
-              <div className="w-72 h-72 md:w-96 md:h-96 mx-auto rounded-full overflow-hidden mb-8">
-                <iframe
-                  src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
-                  className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
-                  allow="autoplay; fullscreen"
-                  allowFullScreen
-                  title="Aetheris Playbooks"
-                />
+              <div className="relative w-72 h-72 md:w-96 md:h-96 mx-auto mb-8 group">
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <iframe
+                    ref={iframeRef}
+                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
+                    className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    title="Aetheris Playbooks"
+                  />
+                </div>
+                <button
+                  onClick={togglePlay}
+                  className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
+                  aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                </button>
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Field Manuals
