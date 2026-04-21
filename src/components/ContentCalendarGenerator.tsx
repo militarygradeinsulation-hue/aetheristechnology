@@ -17,7 +17,7 @@ const PHASES = [
 ];
 
 export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
-  const [form, setForm] = useState({ industry: '', goals: '', platforms: '' });
+  const [form, setForm] = useState({ industry: '', goals: '', platforms: '', website: '' });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
@@ -25,6 +25,27 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
   const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [inferring, setInferring] = useState(false);
+
+  const handleInferFromWebsite = async () => {
+    if (!form.website.trim()) return;
+    setInferring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('infer-business-context', { body: { url: form.website.trim() } });
+      if (error || !data) throw new Error(error?.message || 'Could not read website');
+      setForm(prev => ({
+        ...prev,
+        industry: data.industry || prev.industry,
+        goals: data.goals || prev.goals,
+        platforms: prev.platforms,
+      }));
+      toast({ title: 'Auto-filled!', description: `Detected: ${data.businessName || data.industry}` });
+    } catch (err: any) {
+      toast({ title: 'Could not read site', description: err.message, variant: 'destructive' });
+    } finally {
+      setInferring(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!form.industry.trim()) return;
