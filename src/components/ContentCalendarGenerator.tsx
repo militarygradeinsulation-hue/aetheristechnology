@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Lock, Copy, Check, Calendar, X } from 'lucide-react';
+import { Lock, Copy, Check, Calendar, X, Globe, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
@@ -17,7 +17,7 @@ const PHASES = [
 ];
 
 export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
-  const [form, setForm] = useState({ industry: '', goals: '', platforms: '' });
+  const [form, setForm] = useState({ industry: '', goals: '', platforms: '', website: '' });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
@@ -25,6 +25,27 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
   const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [inferring, setInferring] = useState(false);
+
+  const handleInferFromWebsite = async () => {
+    if (!form.website.trim()) return;
+    setInferring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('infer-business-context', { body: { url: form.website.trim() } });
+      if (error || !data) throw new Error(error?.message || 'Could not read website');
+      setForm(prev => ({
+        ...prev,
+        industry: data.industry || prev.industry,
+        goals: data.goals || prev.goals,
+        platforms: prev.platforms,
+      }));
+      toast({ title: 'Auto-filled!', description: `Detected: ${data.businessName || data.industry}` });
+    } catch (err: any) {
+      toast({ title: 'Could not read site', description: err.message, variant: 'destructive' });
+    } finally {
+      setInferring(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!form.industry.trim()) return;
@@ -82,6 +103,16 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-amber" />
             <h2 className="text-2xl font-bold text-foreground font-display">Build Your Content Calendar</h2>
+          </div>
+          <div className="mb-5">
+            <Label>Website (auto-fill from your site)</Label>
+            <div className="flex gap-2 mt-1">
+              <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="e.g. yourcompany.com" />
+              <Button type="button" variant="outline" onClick={handleInferFromWebsite} disabled={inferring || !form.website.trim()} className="shrink-0">
+                {inferring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+                <span className="ml-1.5">{inferring ? 'Reading…' : 'Auto-fill'}</span>
+              </Button>
+            </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div><Label>Industry *</Label><Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} placeholder="e.g. Fitness, SaaS, Real Estate" /></div>
