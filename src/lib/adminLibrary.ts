@@ -55,13 +55,8 @@ export async function deleteFromAdminLibrary(id: string) {
     headers: adminHeaders(),
   });
   if (error) throw error;
-}
-  const { error } = await supabase.functions.invoke("admin-library", {
-    body: { action: "delete", id },
-    headers: adminHeaders(),
-  });
-  if (error) throw error;
-}
+
+
 
 /** Convert a tool result into plain text for copy/download. */
 export function formatLibraryItemAsText(item: AdminLibraryItem): string {
