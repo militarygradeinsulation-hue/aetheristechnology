@@ -60,7 +60,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [aiItem, setAiItem] = useState<AdminLibraryItem | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
+  
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
