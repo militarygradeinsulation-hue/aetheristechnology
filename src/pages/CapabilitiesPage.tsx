@@ -8,14 +8,10 @@ import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { ParallaxTilt } from '@/components/ParallaxTilt';
 import { SEOHead } from '@/components/SEOHead';
-import hookAiThumb from '@/assets/hook-ai-thumb.jpg';
-import marketingHubThumb from '@/assets/marketing-hub-thumb.jpg';
 import blogThumb from '@/assets/blog-thumb.jpg';
 import playbooksThumb from '@/assets/playbooks-thumb.jpg';
 import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
 import scannerThumb from '@/assets/scanner-thumb.jpg';
-import consultantThumb from '@/assets/consultant-thumb.jpg';
-import salesCompassThumb from '@/assets/sales-compass-thumb.jpg';
 import contentGenThumb from '@/assets/content-generator-thumb.jpg';
 import salesScriptsThumb from '@/assets/sales-scripts-thumb.jpg';
 import contentCalendarThumb from '@/assets/content-calendar-thumb.jpg';
@@ -38,12 +34,9 @@ const tools: Tool[] = [
   { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', description: 'Expose blind spots across leadership, sales, and operations.', path: '/strategic-questions', category: 'Diagnostic' },
   { thumbnail: brandContradictionsThumb, title: 'Brand Contradiction Finder', description: 'See where your brand says one thing but signals another.', path: '/brand-contradictions', category: 'Brand' },
   { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', description: 'Find the words quietly weakening trust and authority.', path: '/friction-audit', category: 'Brand' },
-  { thumbnail: marketingHubThumb, title: 'Marketing Hub', description: 'AI strategist that builds a custom marketing plan for your business.', path: '/marketing-strategist', category: 'Marketing' },
-  { thumbnail: consultantThumb, title: 'AI Business Consultant', description: 'Instant AI-powered consulting advice tailored to your operation.', path: '/ai-consultant', category: 'Marketing' },
-  { thumbnail: hookAiThumb, title: 'Hook AI', description: 'AI-powered post creator for scroll-stopping content.', path: '/marketing-studio', category: 'Content' },
   { thumbnail: contentGenThumb, title: 'Social Content Generator', description: 'Scan your site — get 25 ready-to-post social pieces.', path: '/content-generator', category: 'Content' },
   { thumbnail: contentCalendarThumb, title: '30-Day Content Calendar', description: 'Daily post ideas, hooks, and topics for your industry.', path: '/content-calendar', category: 'Content' },
-  { thumbnail: salesCompassThumb, title: 'Sales Compass', description: 'AI-powered sales guidance to sharpen your strategy and pipeline.', path: '/sales-compass', category: 'Sales' },
+  
   { thumbnail: salesScriptsThumb, title: 'Sales Script Generator', description: 'AI call scripts, objection handlers, and follow-up templates.', path: '/sales-scripts', category: 'Sales' },
   { thumbnail: followUpThumb, title: 'Follow-Up System Plan', description: '14-day multi-channel sales cadence with templates.', path: '/follow-up-plan', category: 'Sales' },
   { thumbnail: blogThumb, title: 'Free Blog Articles', description: 'Actionable insights on AI, operations, and growth.', path: '/blog', category: 'Content' },
