@@ -55,7 +55,7 @@ export async function deleteFromAdminLibrary(id: string) {
     headers: adminHeaders(),
   });
   if (error) throw error;
-
+}
 
 
 /** Convert a tool result into plain text for copy/download. */
