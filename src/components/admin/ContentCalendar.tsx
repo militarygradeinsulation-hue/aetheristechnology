@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { ContentAI } from './ContentAI';
+import { PostImageGenerator } from './PostImageGenerator';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
