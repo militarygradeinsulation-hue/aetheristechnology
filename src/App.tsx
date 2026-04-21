@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { FloatingContact } from "@/components/FloatingContact";
+
 import { SalesChat } from "@/components/SalesChat";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
@@ -115,7 +115,7 @@ const App = () => (
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <FloatingContact />
+                
                 <SalesChat />
               </AuthProvider>
             }
