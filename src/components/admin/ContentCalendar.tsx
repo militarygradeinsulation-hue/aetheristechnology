@@ -42,9 +42,17 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-type ViewMode = 'calendar' | 'list' | 'grid';
+export type ViewMode = 'calendar' | 'list' | 'grid';
 
-export const ContentCalendar: React.FC = () => {
+interface ContentCalendarProps {
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
+}
+
+export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: externalViewMode, onViewModeChange }) => {
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>('calendar');
+  const viewMode = externalViewMode ?? internalViewMode;
+  const setViewMode = onViewModeChange ?? setInternalViewMode;
   const [items, setItems] = useState<AdminLibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -52,7 +60,7 @@ export const ContentCalendar: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [aiItem, setAiItem] = useState<AdminLibraryItem | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
+  
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
