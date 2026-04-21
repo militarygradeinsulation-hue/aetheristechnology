@@ -16,8 +16,6 @@ function appendSignature(body: string, signature: string): string {
   return `${body}\n${signature}`;
 }
 
-// Decide whether an Outlook error is a hard rejection (give up + mark prospect bounced)
-// vs a transient/throttled error (retry later).
 function classifyOutlookError(status: number, body: string): "hard" | "soft" {
   const lower = body.toLowerCase();
   if (status === 429) return "soft";
@@ -28,7 +26,6 @@ function classifyOutlookError(status: number, body: string): "hard" | "soft" {
   ) return "hard";
   if (lower.includes("invalidrecipients") || lower.includes("submissionquotaexceeded")) return "hard";
   if (lower.includes("mailboxnotenabledforrest") || lower.includes("erroraccessdenied")) return "hard";
-  // Default: treat 4xx as hard so we don't burn retries on truly bad payloads
   if (status >= 400 && status < 500) return "hard";
   return "soft";
 }
@@ -106,6 +103,7 @@ serve(async (req) => {
     let skipped = 0;
     let failed = 0;
     let retried = 0;
+    const bouncedProspectIds: string[] = [];
 
     for (const email of pendingEmails) {
       const prospect = email.drip_prospects;
@@ -146,7 +144,6 @@ serve(async (req) => {
           const kind = classifyOutlookError(status, errBody);
 
           if (kind === "soft" && nextAttempt < MAX_ATTEMPTS) {
-            // Retry later — push scheduled_for out by 1h, keep status pending
             const retryAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
             await supabase.from("drip_emails").update({
               status: "pending",
@@ -163,11 +160,11 @@ serve(async (req) => {
             }).eq("id", email.id);
             failed++;
 
-            // Auto-mark prospect as bounced for hard rejections so we stop sending to them
             if (kind === "hard") {
               await supabase.from("drip_prospects")
                 .update({ status: "bounced" })
                 .eq("id", prospect.id);
+              bouncedProspectIds.push(prospect.id);
             }
           }
           continue;
@@ -197,8 +194,42 @@ serve(async (req) => {
       }
     }
 
+    // --- Auto-replace bounced prospects ---
+    // Cancel all remaining pending emails for bounced prospects
+    let cancelledEmails = 0;
+    let replacementsGenerated = 0;
+
+    if (bouncedProspectIds.length > 0) {
+      for (const pid of bouncedProspectIds) {
+        const { count } = await supabase
+          .from("drip_emails")
+          .update({ status: "skipped", error_message: "Prospect bounced – cancelled" })
+          .eq("prospect_id", pid)
+          .eq("status", "pending")
+          .select("id", { count: "exact", head: true });
+        cancelledEmails += count || 0;
+      }
+
+      // Auto-generate replacements: one new prospect per bounced one
+      try {
+        const genRes = await supabase.functions.invoke("generate-drip-batch", {
+          body: { batchSize: bouncedProspectIds.length },
+        });
+        if (!genRes.error && genRes.data?.processed) {
+          replacementsGenerated = genRes.data.processed;
+        }
+        console.log(`Auto-replaced ${bouncedProspectIds.length} bounced prospects: generated ${replacementsGenerated} replacements`);
+      } catch (genErr) {
+        console.error("Auto-replacement generation failed:", genErr);
+      }
+    }
+
+    const bounceInfo = bouncedProspectIds.length > 0
+      ? `, ${bouncedProspectIds.length} bounced (${cancelledEmails} emails cancelled, ${replacementsGenerated} replacements queued)`
+      : "";
+
     return new Response(
-      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed, ${retried} retry-scheduled. Daily total: ${(sentToday || 0) + sent}/${DAILY_LIMIT}` }),
+      JSON.stringify({ message: `Processed: ${sent} sent, ${skipped} skipped, ${failed} failed, ${retried} retry-scheduled${bounceInfo}. Daily total: ${(sentToday || 0) + sent}/${DAILY_LIMIT}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
