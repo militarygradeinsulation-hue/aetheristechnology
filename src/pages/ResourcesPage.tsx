@@ -65,7 +65,7 @@ const ResourcesPage = () => {
         <section className="pt-32 pb-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <RevealOnScroll>
-              <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8 border border-border">
+              <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8">
                 <iframe
                   src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
                   className="w-full h-full"
