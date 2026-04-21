@@ -649,7 +649,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* My Library */}
-        {activeTab === 'library' && <AdminLibrary />}
+        {activeTab === 'library' && <ContentCalendar />}
 
         {/* CRM */}
         {activeTab === 'crm' && <AdminCrm />}
