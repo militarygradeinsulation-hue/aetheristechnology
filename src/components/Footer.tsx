@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
         {/* Minimized state — always visible */}
         <div className={`flex items-center justify-between py-4 transition-opacity duration-300 ${isHovered ? 'opacity-0 h-0 py-0' : 'opacity-100'}`}>
           <div className="flex items-center space-x-3">
-            <img src={aetherisLogo} alt="Aetheris AI Logo" className="w-8 h-8 object-contain" />
+            <img src={aetherisLogo} alt="Aetheris AI Logo" className="w-14 h-14 object-contain" />
             <span className="text-sm text-muted-foreground">© {currentYear} Aetheris AI</span>
           </div>
           <span className="text-xs text-muted-foreground/50">Hover for more</span>
@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
                 <img 
                   src={aetherisLogo} 
                   alt="Aetheris Logo" 
-                  className="w-12 h-12 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
                 <span className="text-xl font-bold text-foreground font-forensic">Aetheris</span>
               </div>
