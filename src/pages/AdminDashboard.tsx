@@ -14,6 +14,7 @@ import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { AdminLibrary } from '@/components/AdminLibrary';
+import { ContentCalendar } from '@/components/admin/ContentCalendar';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
@@ -648,7 +649,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* My Library */}
-        {activeTab === 'library' && <AdminLibrary />}
+        {activeTab === 'library' && <ContentCalendar />}
 
         {/* CRM */}
         {activeTab === 'crm' && <AdminCrm />}

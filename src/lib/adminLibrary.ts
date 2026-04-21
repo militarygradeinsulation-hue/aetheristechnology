@@ -40,6 +40,15 @@ export async function listAdminLibrary(): Promise<AdminLibraryItem[]> {
   return (data?.items || []) as AdminLibraryItem[];
 }
 
+export async function updateAdminLibraryItem(id: string, output_data: unknown): Promise<AdminLibraryItem> {
+  const { data, error } = await supabase.functions.invoke("admin-library", {
+    body: { action: "update", id, output_data },
+    headers: adminHeaders(),
+  });
+  if (error) throw error;
+  return data?.item as AdminLibraryItem;
+}
+
 export async function deleteFromAdminLibrary(id: string) {
   const { error } = await supabase.functions.invoke("admin-library", {
     body: { action: "delete", id },
@@ -47,6 +56,7 @@ export async function deleteFromAdminLibrary(id: string) {
   });
   if (error) throw error;
 }
+
 
 /** Convert a tool result into plain text for copy/download. */
 export function formatLibraryItemAsText(item: AdminLibraryItem): string {
