@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { ContentAI } from './ContentAI';
+import { PostImageGenerator } from './PostImageGenerator';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -186,23 +187,39 @@ export const ContentCalendar: React.FC = () => {
               {dayItems.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No content saved on this day.</p>
               ) : (
-                dayItems.map(item => (
-                  <div key={item.id} className="glass rounded-lg p-3 border border-border space-y-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
-                      <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
-                      <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                dayItems.map(item => {
+                  const out = item.output_data as Record<string, any>;
+                  const existingImg = out?._generated_image_url as string | undefined;
+                  const imagePrompt = item.title || out?.businessName || 'business operations';
+                  return (
+                    <div key={item.id} className="glass rounded-lg p-3 border border-border space-y-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`w-2 h-2 rounded-full ${TOOL_COLORS[item.tool_type] || 'bg-muted-foreground'}`} />
+                        <span className="text-[10px] font-bold uppercase text-amber">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+                        <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
+                      <PostImageGenerator
+                        prompt={imagePrompt}
+                        libraryItemId={item.id}
+                        existingImageUrl={existingImg}
+                        compact
+                        onImageGenerated={(url) => {
+                          const updated = { ...item, output_data: { ...out, _generated_image_url: url } };
+                          handleItemUpdated(updated);
+                          import('@/lib/adminLibrary').then(m => m.updateAdminLibraryItem(item.id, { ...out, _generated_image_url: url })).catch(() => {});
+                        }}
+                      />
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-red-400" /></Button>
+                      </div>
                     </div>
-                    <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-red-400" /></Button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
