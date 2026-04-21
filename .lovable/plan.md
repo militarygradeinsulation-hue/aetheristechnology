@@ -1,86 +1,92 @@
 
 
-# Site Self-Sufficiency Audit
+# Rep Commission Codes + Price Increase
 
-## Current State: What IS Automated (works without you)
+## Overview
+Create a rep referral code system (10 six-digit codes) and raise all product prices ~15-20% to absorb the 10% commission. When a customer enters a rep code at checkout, the sale is tracked to that rep for commission payouts.
 
-| Flow | Status | How it works |
-|------|--------|-------------|
-| Free tools (Scanner, Diagnostic, Strategic Questions, Brand Contradictions, Friction Audit, Social Content, Sales Scripts, Content Calendar, Follow-Up Plan) | COMPLETE | AI generates results client-side or via edge functions instantly |
-| Monthly subscriptions | COMPLETE | Stripe invoice.paid webhook triggers `monthly-delivery` edge function, which generates AI content and delivers automatically |
-| Subscriber onboarding | COMPLETE | Post-subscription checkout redirects to onboarding form that captures business context |
-| Custom playbook purchases | COMPLETE | Webhook triggers `generate-custom-playbook` edge function, PDF generated and stored automatically |
-| Blog / Playbook content | COMPLETE | Auto-generated via admin tools, published to public pages |
-| Auth (signup, login, Google OAuth) | COMPLETE | Standard flow with email verification |
+## New Prices (raised ~15-20%, rounded to clean price points)
 
-## The Gap: What Is NOT Automated
+| Service | Current | New Price | 10% Commission | Your Net |
+|---------|---------|-----------|----------------|----------|
+| Social Content Pack | $29 | $39 | $3.90 | $35.10 |
+| Content Calendar | $29 | $39 | $3.90 | $35.10 |
+| Sales Script Pack | $49 | $59 | $5.90 | $53.10 |
+| Follow-Up Plan | $49 | $59 | $5.90 | $53.10 |
+| Full Website Report | $49 | $59 | $5.90 | $53.10 |
+| Friction Vocabulary Audit | $69 | $79 | $7.90 | $71.10 |
+| Strategic Question Engine | $79 | $99 | $9.90 | $89.10 |
+| Brand Contradiction Finder | $99 | $119 | $11.90 | $107.10 |
+| Digital Snapshot | $125 | $149 | $14.90 | $134.10 |
+| Strategy Blueprint | $299 | $349 | $34.90 | $314.10 |
+| Website Evaluation | $500 | $599 | $59.90 | $539.10 |
+| Strategic Discovery Audit | $500 | $599 | $59.90 | $539.10 |
+| 14-Day Diagnostic | $2,500 | $2,900 | $290 | $2,610 |
+| Fractional CTO/CMO | $5,000/mo | $5,900/mo | $590/mo | $5,310/mo |
+| Playbook Unlock | $25 | $29 | $2.90 | $26.10 |
 
-**Most one-time paid services fall through to a dead end.** When someone buys any of these, the checkout return page shows:
+Monthly subscription prices will also be raised proportionally.
 
-> "Payment Complete! We'll be in touch within 24 hours."
+## Database: `rep_codes` Table
 
-That means **you have to manually follow up** for these purchases:
+New table with columns:
+- `id` (uuid, PK)
+- `code` (text, unique, 6 digits)
+- `rep_name` (text) -- assigned later when you pair codes to reps
+- `rep_email` (text, nullable)
+- `commission_rate` (numeric, default 0.10)
+- `is_active` (boolean, default true)
+- `total_sales_cents` (integer, default 0)
+- `total_commission_cents` (integer, default 0)
+- `created_at` (timestamptz)
 
-| Service | Price | What should happen | What actually happens |
-|---------|-------|-------------------|----------------------|
-| Full Website Report | $49 | Auto-generate full scan PDF | Generic "we'll be in touch" |
-| Digital Snapshot | $125 | Auto-generate snapshot PDF | Generic "we'll be in touch" |
-| Strategy Blueprint | $299 | Auto-generate blueprint | Generic "we'll be in touch" |
-| Social Content Pack | $29 | Auto-generate 25 posts | Generic "we'll be in touch" |
-| Sales Script Pack | $49 | Auto-generate scripts | Generic "we'll be in touch" |
-| Content Calendar | $29 | Auto-generate calendar | Generic "we'll be in touch" |
-| Follow-Up Plan | $49 | Auto-generate cadence | Generic "we'll be in touch" |
-| Strategic Question Engine | $79 | Auto-generate questions | Generic "we'll be in touch" |
-| Brand Contradiction Finder | $99 | Auto-generate audit | Generic "we'll be in touch" |
-| Friction Vocabulary Audit | $69 | Auto-generate audit | Generic "we'll be in touch" |
-| Website Evaluation | $500 | Includes a strategy call | Needs manual intervention (by design) |
-| Strategic Discovery Audit | $500 | Multi-system audit | Needs manual intervention (by design) |
-| 14-Day Diagnostic | $2,500 | Operator-led engagement | Needs manual intervention (by design) |
-| Fractional CTO/CMO | $5,000/mo | Ongoing human engagement | Needs manual intervention (by design) |
+RLS: Admin-only read/write. Service role full access.
 
-**The irony**: The free tools already generate the same content (social posts, scripts, calendars, questions, contradictions, friction audits) for free. Paying customers get LESS than free users -- they get a "we'll be in touch" message instead of instant results.
+Pre-populate 10 random 6-digit codes (unassigned, ready for you to name later).
 
-## Also: Bundle checkout is not automated
+## Database: Add `rep_code` column to `purchases` table
 
-The "Mix & Match Bundle" bar links to `/contact?bundle=...` -- it sends the user to a contact form instead of Stripe checkout. No automated payment or delivery.
+Add a nullable `rep_code` text column so every purchase records which rep (if any) referred it.
 
-## Recommended Fix
+## Checkout Flow Changes
 
-### Services that CAN be fully automated (the AI already exists)
+1. **`StripeEmbeddedCheckout`** -- Add an optional "Rep Code" input field above the Stripe form. When a valid 6-digit code is entered, it's validated against `rep_codes` and passed as metadata.
 
-For these 10 services, the free tool versions already generate the output. The fix is:
+2. **`create-checkout` edge function** -- Accept `repCode` in the request body, pass it into `session.metadata.rep_code`.
 
-1. **In the webhook** (`payments-webhook`): detect each `priceId`, trigger the corresponding AI generation edge function, store the result, and email the customer a download link.
-2. **On the checkout return page**: poll for the generated result (like the playbook flow already does) and show a download button when ready.
-3. **Bundle checkout**: Route bundles through Stripe checkout (not the contact form) using a combined line-item session, then auto-generate all items.
+3. **`payments-webhook`** -- On `checkout.session.completed`, if `metadata.rep_code` exists:
+   - Save it to the `purchases.rep_code` column
+   - Update `rep_codes.total_sales_cents` and `rep_codes.total_commission_cents`
 
-### Services that SHOULD stay manual
+## Stripe Product Price Updates
 
-Website Evaluation ($500), Strategic Discovery Audit ($500), 14-Day Diagnostic ($2,500), Fractional CTO/CMO ($5,000/mo), Visual Rendering, and Custom Implementation all involve human operator work. These are correct as-is -- payment triggers a notification to you.
+Recreate all prices with the new amounts using `batch_create_product` (new prices with same lookup keys automatically replace old ones).
 
-### Implementation plan
+## UI: ServicesPricing.tsx
 
-**Step 1 -- Create a `purchase_deliverables` table** to track what was purchased and its generation status (pending/generating/ready/failed) with a `file_url` column.
+Update all `priceRaw` and `pricing` display values to match the new prices.
 
-**Step 2 -- Update `payments-webhook`**: On `checkout.session.completed` for automatable price IDs, insert a row into `purchase_deliverables` and invoke the corresponding generation edge function.
+## Admin Visibility
 
-**Step 3 -- Create a `generate-purchase-delivery` edge function** that takes a deliverable ID, runs the appropriate AI tool (reusing existing generation logic), stores output as PDF/JSON in the `playbooks` storage bucket, updates the row with `file_url`, and sends a delivery email.
+Add a "Rep Performance" section to your admin dashboard showing each code, assigned rep, total sales, and commissions owed.
 
-**Step 4 -- Update `CheckoutReturn.tsx`**: For automatable purchases, poll `purchase_deliverables` for status and show a download button when ready (same pattern as the playbook flow).
+## Technical Details
 
-**Step 5 -- Fix bundle checkout**: Replace the contact form link with a Stripe checkout session that includes all selected line items, then auto-generate all deliverables post-payment.
+- 10 codes generated server-side via migration INSERT
+- Codes are 6-digit numeric strings (e.g., "482917")
+- Commission calculated as `amount_total * commission_rate` on each completed purchase
+- Rep code input is optional -- customers without a code check out normally
+- No discount is applied to the customer -- the code is purely for tracking
 
-**Step 6 -- Add email delivery**: Send the customer an email with download links so they don't have to stay on the return page.
-
-### Files to modify/create
+## Files Changed
 
 | File | Change |
 |------|--------|
-| New migration | Create `purchase_deliverables` table |
-| `supabase/functions/payments-webhook/index.ts` | Add auto-delivery triggers for 10 price IDs |
-| New: `supabase/functions/generate-purchase-delivery/index.ts` | Unified delivery generator |
-| `src/pages/CheckoutReturn.tsx` | Add polling + download for deliverable purchases |
-| `src/components/ServicesPricing.tsx` | Fix bundle bar to use Stripe checkout instead of contact form |
-
-This is a significant build. Shall I proceed?
+| New migration | Create `rep_codes` table, add `rep_code` to `purchases`, insert 10 codes |
+| `src/components/StripeEmbeddedCheckout.tsx` | Add rep code input field |
+| `src/components/ServicesPricing.tsx` | Update all prices |
+| `supabase/functions/create-checkout/index.ts` | Pass rep_code metadata |
+| `supabase/functions/payments-webhook/index.ts` | Track rep attribution on purchase |
+| `src/pages/AdminDashboard.tsx` | Add rep performance panel |
+| Stripe products | Recreate all prices at new amounts |
 
