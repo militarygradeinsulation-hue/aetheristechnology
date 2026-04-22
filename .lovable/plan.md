@@ -1,46 +1,37 @@
 
 
-# Rep Portal Login Page
+# Replace First Outreach Email with Vimeo Video
 
 ## Overview
-Create a dedicated Rep Portal page where sales reps can log in using their 6-digit code and email. Once authenticated, they see their sales performance dashboard (total sales, commissions earned, commission rate).
+Replace the current "Quick question" first email template in `generate-drip-batch` with a new email body centered around the Vimeo video link (https://vimeo.com/1185340441?fl=pl&fe=sh).
 
-## New Page: `/rep-portal`
+## Change
 
-A simple login form with two fields:
-- **Rep Code** (6-digit code)
-- **Email** (must match the `rep_email` on their `rep_codes` record)
+Update the `EMAIL_1_SUBJECT` and `EMAIL_1_BODY_HTML` constants in `supabase/functions/generate-drip-batch/index.ts`.
 
-On submit, validate the code and email against the `rep_codes` table. If matched, show a dashboard with their stats (total sales, total commission, commission rate, active status).
+**New email copy** (short, conversational, video-forward):
 
-No Supabase Auth involved -- this is a lightweight code+email lookup, similar to how admin PIN login works but simpler (no token needed since reps only see their own read-only stats).
+- **Subject**: "Saw this and thought of you"
+- **Body**: A brief 2-3 sentence intro that pattern-interrupts, then the Vimeo link as the focal point, followed by a soft one-line close. Signed off as "Joseph". No call-to-action for a meeting, no pressure, just curiosity-driven.
 
-## Database Change
+Example direction:
+```
+Most business owners don't realize how much revenue they lose
+to broken follow-up and invisible brand leaks.
 
-The `rep_codes` table already has `rep_email` (nullable). No schema change needed -- reps just need their email populated. The existing anon SELECT policy (`is_active = true`) already allows validation from the client.
+I put together a short walkthrough showing exactly what I mean:
+[Video Link]
 
-## Files
+Worth a look if you're curious.
+
+Joseph
+aetheris.technology
+```
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/RepPortalPage.tsx` | New page with code+email login form and stats dashboard |
-| `src/App.tsx` | Add `/rep-portal` route |
+| `supabase/functions/generate-drip-batch/index.ts` | Replace `EMAIL_1_SUBJECT` and `EMAIL_1_BODY_HTML` constants |
 
-## UI Flow
-
-1. Rep visits `/rep-portal`
-2. Enters their 6-digit code and email
-3. Client queries `rep_codes` where `code` matches and `is_active = true`
-4. If `rep_email` matches the entered email, show dashboard with:
-   - Rep name, code, commission rate
-   - Total sales (formatted from cents)
-   - Total commission earned
-   - Active status
-5. If no match or email mismatch, show error toast
-
-## Security Notes
-
-- The anon RLS policy only exposes active rep codes -- no sensitive data beyond what the rep already knows (their own stats)
-- Email matching adds a second factor so random code guesses don't reveal data
-- No write access for anon users on `rep_codes`
-
+After updating, the edge function will be redeployed so new batches use the updated template. Existing queued emails are unaffected.
