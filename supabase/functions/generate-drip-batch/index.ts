@@ -11,15 +11,13 @@ const PLAYBOOK_URL =
   "https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/playbooks/sales-process-reengineering.pdf";
 
 // Email 1 is ALWAYS this exact template. No AI personalization.
-const EMAIL_1_SUBJECT = "Quick question";
-const EMAIL_1_BODY_HTML = `<p>Quick question.</p>
-<p>I have been building a simple AI system that helps local businesses capture leads, follow up automatically, and automate branding so they stop losing customers.</p>
-<p>I am doing a few free walkthroughs while I dial the process in, and I wanted to ask if you know any business owner who might be open to a try it out and a quick conversation for feedback about it.</p>
-<p>No pressure at all if not. Just figured I would ask.</p>
-<p>Joseph Toney</p>
-<p><a href="https://aetheris.technology/">aetheris.technology</a><br>
-Website: theaiformarketing.com<br>
-<a href="https://linkedin.com/in/aisystemsarchitect">linkedin.com/in/aisystemsarchitect</a></p>`;
+const EMAIL_1_SUBJECT = "Saw this and thought of you";
+const EMAIL_1_BODY_HTML = `<p>Most business owners don't realize how much revenue they lose to broken follow-up and invisible brand leaks.</p>
+<p>I put together a short walkthrough showing exactly what I mean:</p>
+<p><a href="https://vimeo.com/1185340441?fl=pl&fe=sh">https://vimeo.com/1185340441?fl=pl&fe=sh</a></p>
+<p>Worth a look if you're curious.</p>
+<p>Joseph<br>
+<a href="https://aetheris.technology/">aetheris.technology</a></p>`;
 
 interface CampaignContext {
   fromName: string;
