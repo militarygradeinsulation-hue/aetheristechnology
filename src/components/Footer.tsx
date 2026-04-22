@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import aetherisLogo from '@/assets/aetheris-logo.png';
+import aetherisLogo from '@/assets/aetheris-new-logo.png';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
