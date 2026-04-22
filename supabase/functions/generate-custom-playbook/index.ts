@@ -332,7 +332,7 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
       file_url: urlData.publicUrl,
     }).eq("id", playbookId);
 
-    return new Response(JSON.stringify({ success: true, fileUrl: urlData.publicUrl }), {
+    return new Response(JSON.stringify({ success: true, fileUrl: urlData.publicUrl, playbookId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
