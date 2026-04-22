@@ -12,22 +12,42 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { playbookId } = await req.json();
+    const body = await req.json();
+    let playbookId: string;
+    let pb: any;
 
-    if (!playbookId) throw new Error("playbookId required");
-
-    // Get the pending playbook record
-    const { data: pb, error: fetchErr } = await supabase
-      .from("generated_playbooks")
-      .select("*")
-      .eq("id", playbookId)
-      .single();
-
-    if (fetchErr || !pb) throw new Error("Playbook record not found");
-    if (pb.status !== "pending") {
-      return new Response(JSON.stringify({ message: "Already processing" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (body.topicData) {
+      // Client sends topic data directly; create the record server-side
+      const td = body.topicData as { title: string; subtitle: string; pillar: string; tags: string[]; icon: string };
+      const { data: newPb, error: insertErr } = await supabase
+        .from("generated_playbooks")
+        .insert({
+          user_id: "00000000-0000-0000-0000-000000000000",
+          topic_title: td.title,
+          topic_data: td,
+          status: "pending",
+        })
+        .select()
+        .single();
+      if (insertErr || !newPb) throw new Error(insertErr?.message || "Failed to create playbook record");
+      playbookId = newPb.id;
+      pb = newPb;
+    } else if (body.playbookId) {
+      playbookId = body.playbookId;
+      const { data: existingPb, error: fetchErr } = await supabase
+        .from("generated_playbooks")
+        .select("*")
+        .eq("id", playbookId)
+        .single();
+      if (fetchErr || !existingPb) throw new Error("Playbook record not found");
+      if (existingPb.status !== "pending") {
+        return new Response(JSON.stringify({ message: "Already processing" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      pb = existingPb;
+    } else {
+      throw new Error("topicData or playbookId required");
     }
 
     // Mark as generating

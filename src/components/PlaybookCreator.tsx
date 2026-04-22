@@ -49,29 +49,16 @@ export const PlaybookCreator: React.FC = () => {
     try {
       const tagArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
 
-      // Step 1: insert pending playbook record
-      const { data: pbRecord, error: insertErr } = await supabase
-        .from('generated_playbooks')
-        .insert({
-          user_id: '00000000-0000-0000-0000-000000000000', // admin marker (RLS bypassed by service role in fn)
-          topic_title: form.title,
-          topic_data: {
+      const { data, error } = await supabase.functions.invoke('generate-custom-playbook', {
+        body: {
+          topicData: {
             title: form.title,
             subtitle: form.subtitle,
             pillar: form.pillar,
             tags: tagArray,
             icon: 'BookOpen',
           },
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (insertErr || !pbRecord) throw new Error(insertErr?.message || 'Failed to create playbook record');
-
-      // Step 2: invoke generation
-      const { data, error } = await supabase.functions.invoke('generate-custom-playbook', {
-        body: { playbookId: pbRecord.id },
+        },
       });
 
       clearInterval(interval);
@@ -80,12 +67,11 @@ export const PlaybookCreator: React.FC = () => {
       setProgress(100);
       setPhaseLabel('Done!');
 
-      // Step 3: save to admin library
       await saveToAdminLibrary({
         tool_type: 'playbook',
         title: form.title,
         input_data: { ...form, tags: tagArray },
-        output_data: { playbookId: pbRecord.id, fileUrl: data.fileUrl },
+        output_data: { playbookId: data.playbookId, fileUrl: data.fileUrl },
         file_url: data.fileUrl,
       });
 
