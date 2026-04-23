@@ -1,0 +1,69 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const SCOPES = [
+  "crm.objects.contacts.read",
+  "crm.objects.deals.read",
+  "crm.objects.companies.read",
+  "crm.schemas.contacts.read",
+  "crm.schemas.deals.read",
+  "oauth",
+].join(" ");
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const clientId = Deno.env.get("HUBSPOT_CLIENT_ID");
+    if (!clientId) {
+      return new Response(
+        JSON.stringify({ error: "HubSpot integration not yet configured. Add HUBSPOT_CLIENT_ID to enable." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Missing auth header");
+
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData.user) throw new Error("Not authenticated");
+
+    // Ensure account row exists
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: account } = await admin
+      .from("accounts")
+      .upsert({ user_id: userData.user.id }, { onConflict: "user_id" })
+      .select()
+      .single();
+
+    // State token = base64(account_id:nonce)
+    const nonce = crypto.randomUUID();
+    const state = btoa(`${account.id}:${nonce}`);
+
+    const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-oauth-callback`;
+    const authorizeUrl =
+      `https://app.hubspot.com/oauth/authorize?client_id=${clientId}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent(SCOPES)}` +
+      `&state=${encodeURIComponent(state)}`;
+
+    return new Response(JSON.stringify({ authorizeUrl }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
