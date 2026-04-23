@@ -420,6 +420,11 @@ const AdminDashboard: React.FC = () => {
             <span className="text-xs text-muted-foreground hidden sm:inline">Auto-refreshes every 30s</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link to="/app/dashboard">
+              <Button variant="outline" size="sm" title="Open HubSpot revenue recovery dashboard">
+                <Database className="w-4 h-4 mr-1 text-primary" /> HubSpot Hub
+              </Button>
+            </Link>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </Button>
