@@ -49,7 +49,7 @@ const AppReportDetail = () => {
     if (!id) return;
     const load = async () => {
       const { data } = await supabase.from("audit_runs").select("*").eq("id", id).maybeSingle();
-      setRun(data as AuditRun | null);
+      setRun(data as unknown as AuditRun | null);
       const { data: actions } = await supabase
         .from("pending_actions")
         .select("finding_key")
