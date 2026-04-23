@@ -2,10 +2,23 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-const APP_REDIRECT = (origin: string, params: string) => `${origin}/app/dashboard${params}`;
+const APP_ORIGINS = [
+  "https://aetheris.technology",
+  "https://aetheristechnology.lovable.app",
+  "https://id-preview--1b783889-c460-4e52-a4bd-950110dc395b.lovable.app",
+];
+
+const pickOrigin = (req: Request): string => {
+  const envUrl = Deno.env.get("APP_PUBLIC_URL");
+  if (envUrl) return envUrl.replace(/\/$/, "");
+  const referer = req.headers.get("referer") || "";
+  const match = APP_ORIGINS.find((o) => referer.startsWith(o));
+  if (match) return match;
+  return APP_ORIGINS[0];
+};
 
 const html = (origin: string, params: string) =>
-  `<!doctype html><meta http-equiv="refresh" content="0;url=${APP_REDIRECT(origin, params)}"><body style="font-family:system-ui;background:#0f1117;color:#e8e6e0;padding:40px;text-align:center">Redirecting…</body>`;
+  `<!doctype html><meta http-equiv="refresh" content="0;url=${origin}/app/dashboard${params}"><body style="font-family:system-ui;background:#0f1117;color:#e8e6e0;padding:40px;text-align:center">Redirecting…</body>`;
 
 serve(async (req) => {
   const url = new URL(req.url);
@@ -13,8 +26,7 @@ serve(async (req) => {
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
-  // Best-effort frontend origin — fall back to referer or env
-  const origin = req.headers.get("origin") || req.headers.get("referer")?.split("/").slice(0, 3).join("/") || Deno.env.get("APP_PUBLIC_URL") || "/";
+  const origin = pickOrigin(req);
 
   if (error) {
     return new Response(html(origin, `?error=${encodeURIComponent(error)}`), { headers: { "Content-Type": "text/html" } });
