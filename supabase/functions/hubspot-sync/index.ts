@@ -181,10 +181,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  let accountIdForError: string | null = null;
 
   try {
     const { account_id, mode = "incremental" } = await req.json();
     if (!account_id) throw new Error("Missing account_id");
+    accountIdForError = account_id;
 
     const encryptionKey = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
@@ -235,13 +237,18 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    const msg = (e as Error).message;
-    try {
-      const body = await req.clone().json();
-      if (body.account_id) {
-        await admin.from("accounts").update({ last_sync_status: "error", last_sync_error: msg }).eq("id", body.account_id);
+    const msg = (e as Error).message || String(e);
+    console.error("hubspot-sync failed:", msg, (e as Error).stack);
+    if (accountIdForError) {
+      try {
+        await admin
+          .from("accounts")
+          .update({ last_sync_status: "error", last_sync_error: msg })
+          .eq("id", accountIdForError);
+      } catch (writeErr) {
+        console.error("Failed to write error to account:", (writeErr as Error).message);
       }
-    } catch {}
+    }
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
