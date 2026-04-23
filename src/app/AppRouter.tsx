@@ -4,6 +4,8 @@ import AppLogin from "./pages/AppLogin";
 import AppSignup from "./pages/AppSignup";
 import AppDashboard from "./pages/AppDashboard";
 import AppSettings from "./pages/AppSettings";
+import AppReports from "./pages/AppReports";
+import AppReportDetail from "./pages/AppReportDetail";
 
 export const AppRouter = () => (
   <AuthProvider>
@@ -12,6 +14,8 @@ export const AppRouter = () => (
       <Route path="login" element={<AppLogin />} />
       <Route path="signup" element={<AppSignup />} />
       <Route path="dashboard" element={<AppDashboard />} />
+      <Route path="reports" element={<AppReports />} />
+      <Route path="reports/:id" element={<AppReportDetail />} />
       <Route path="settings" element={<AppSettings />} />
       <Route path="*" element={<Navigate to="dashboard" replace />} />
     </Routes>
