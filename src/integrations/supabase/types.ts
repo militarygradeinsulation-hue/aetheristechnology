@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          created_at: string
+          hubspot_access_token_encrypted: string | null
+          hubspot_access_token_expires_at: string | null
+          hubspot_connected_at: string | null
+          hubspot_portal_id: string | null
+          hubspot_refresh_token_encrypted: string | null
+          id: string
+          last_sync_at: string | null
+          last_sync_error: string | null
+          last_sync_status: string | null
+          sync_progress: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hubspot_access_token_encrypted?: string | null
+          hubspot_access_token_expires_at?: string | null
+          hubspot_connected_at?: string | null
+          hubspot_portal_id?: string | null
+          hubspot_refresh_token_encrypted?: string | null
+          id?: string
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
+          sync_progress?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hubspot_access_token_encrypted?: string | null
+          hubspot_access_token_expires_at?: string | null
+          hubspot_connected_at?: string | null
+          hubspot_portal_id?: string | null
+          hubspot_refresh_token_encrypted?: string | null
+          id?: string
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
+          sync_progress?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_library: {
         Row: {
           created_at: string
@@ -982,6 +1030,203 @@ export type Database = {
         }
         Relationships: []
       }
+      mirror_contacts: {
+        Row: {
+          account_id: string
+          created_date: string | null
+          email: string | null
+          first_name: string | null
+          hubspot_id: string
+          id: string
+          last_activity_date: string | null
+          last_name: string | null
+          lead_status: string | null
+          lifecycle_stage: string | null
+          owner_id: string | null
+          properties: Json
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          created_date?: string | null
+          email?: string | null
+          first_name?: string | null
+          hubspot_id: string
+          id?: string
+          last_activity_date?: string | null
+          last_name?: string | null
+          lead_status?: string | null
+          lifecycle_stage?: string | null
+          owner_id?: string | null
+          properties?: Json
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_date?: string | null
+          email?: string | null
+          first_name?: string | null
+          hubspot_id?: string
+          id?: string
+          last_activity_date?: string | null
+          last_name?: string | null
+          lead_status?: string | null
+          lifecycle_stage?: string | null
+          owner_id?: string | null
+          properties?: Json
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_contacts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mirror_deals: {
+        Row: {
+          account_id: string
+          amount: number | null
+          close_date: string | null
+          created_date: string | null
+          days_in_current_stage: number | null
+          deal_name: string | null
+          hubspot_id: string
+          id: string
+          last_activity_date: string | null
+          owner_id: string | null
+          pipeline: string | null
+          properties: Json
+          stage: string | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          amount?: number | null
+          close_date?: string | null
+          created_date?: string | null
+          days_in_current_stage?: number | null
+          deal_name?: string | null
+          hubspot_id: string
+          id?: string
+          last_activity_date?: string | null
+          owner_id?: string | null
+          pipeline?: string | null
+          properties?: Json
+          stage?: string | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number | null
+          close_date?: string | null
+          created_date?: string | null
+          days_in_current_stage?: number | null
+          deal_name?: string | null
+          hubspot_id?: string
+          id?: string
+          last_activity_date?: string | null
+          owner_id?: string | null
+          pipeline?: string | null
+          properties?: Json
+          stage?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_deals_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mirror_engagements: {
+        Row: {
+          account_id: string
+          contact_id: string | null
+          deal_id: string | null
+          hubspot_id: string
+          id: string
+          properties: Json
+          synced_at: string
+          timestamp: string | null
+          type: string
+        }
+        Insert: {
+          account_id: string
+          contact_id?: string | null
+          deal_id?: string | null
+          hubspot_id: string
+          id?: string
+          properties?: Json
+          synced_at?: string
+          timestamp?: string | null
+          type: string
+        }
+        Update: {
+          account_id?: string
+          contact_id?: string | null
+          deal_id?: string | null
+          hubspot_id?: string
+          id?: string
+          properties?: Json
+          synced_at?: string
+          timestamp?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_engagements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mirror_owners: {
+        Row: {
+          account_id: string
+          email: string | null
+          first_name: string | null
+          hubspot_id: string
+          id: string
+          last_name: string | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          email?: string | null
+          first_name?: string | null
+          hubspot_id: string
+          id?: string
+          last_name?: string | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          email?: string | null
+          first_name?: string | null
+          hubspot_id?: string
+          id?: string
+          last_name?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_owners_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbooks: {
         Row: {
           created_at: string
@@ -1722,9 +1967,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrypt_token: {
+        Args: { _ciphertext: string; _key: string }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      encrypt_token: {
+        Args: { _key: string; _plaintext: string }
+        Returns: string
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
