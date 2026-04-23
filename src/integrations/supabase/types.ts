@@ -140,6 +140,62 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_runs: {
+        Row: {
+          account_id: string
+          completed_at: string | null
+          created_at: string
+          current_stage: string | null
+          error_message: string | null
+          findings_count: number | null
+          id: string
+          progress: Json
+          report: Json
+          started_at: string
+          status: string
+          total_exposure_cents: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          completed_at?: string | null
+          created_at?: string
+          current_stage?: string | null
+          error_message?: string | null
+          findings_count?: number | null
+          id?: string
+          progress?: Json
+          report?: Json
+          started_at?: string
+          status?: string
+          total_exposure_cents?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          completed_at?: string | null
+          created_at?: string
+          current_stage?: string | null
+          error_message?: string | null
+          findings_count?: number | null
+          id?: string
+          progress?: Json
+          report?: Json
+          started_at?: string
+          status?: string
+          total_exposure_cents?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_runs_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
@@ -1223,6 +1279,126 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pattern_results: {
+        Row: {
+          account_id: string
+          audit_run_id: string
+          created_at: string
+          exposure_cents: number
+          formula: string | null
+          id: string
+          pattern_key: string
+          pattern_label: string
+          raw_data: Json
+          record_count: number
+          sample_ids: Json
+          time_period: string | null
+        }
+        Insert: {
+          account_id: string
+          audit_run_id: string
+          created_at?: string
+          exposure_cents?: number
+          formula?: string | null
+          id?: string
+          pattern_key: string
+          pattern_label: string
+          raw_data?: Json
+          record_count?: number
+          sample_ids?: Json
+          time_period?: string | null
+        }
+        Update: {
+          account_id?: string
+          audit_run_id?: string
+          created_at?: string
+          exposure_cents?: number
+          formula?: string | null
+          id?: string
+          pattern_key?: string
+          pattern_label?: string
+          raw_data?: Json
+          record_count?: number
+          sample_ids?: Json
+          time_period?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pattern_results_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pattern_results_audit_run_id_fkey"
+            columns: ["audit_run_id"]
+            isOneToOne: false
+            referencedRelation: "audit_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_actions: {
+        Row: {
+          account_id: string
+          action_type: string
+          approved_at: string | null
+          audit_run_id: string | null
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          finding_key: string
+          id: string
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          action_type: string
+          approved_at?: string | null
+          audit_run_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          finding_key: string
+          id?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          action_type?: string
+          approved_at?: string | null
+          audit_run_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          finding_key?: string
+          id?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_actions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_actions_audit_run_id_fkey"
+            columns: ["audit_run_id"]
+            isOneToOne: false
+            referencedRelation: "audit_runs"
             referencedColumns: ["id"]
           },
         ]
