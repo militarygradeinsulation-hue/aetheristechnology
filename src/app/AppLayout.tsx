@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, LogOut, Activity } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Activity, FileSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -52,6 +52,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <NavLink to="/app/dashboard" className={navItem} end>
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </NavLink>
+          <NavLink to="/app/reports" className={navItem}>
+            <FileSearch className="h-4 w-4" />
+            Audits
           </NavLink>
           <NavLink to="/app/settings" className={navItem}>
             <Settings className="h-4 w-4" />
