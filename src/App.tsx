@@ -46,6 +46,7 @@ import CrmDemoPage from "./pages/CrmDemoPage";
 import CapabilitiesPage from "./pages/CapabilitiesPage";
 import LeakAuditPage from "./pages/LeakAuditPage";
 import RepPortalPage from "./pages/RepPortalPage";
+import AppRouter from "./app/AppRouter";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,8 @@ const App = () => (
           {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          {/* Revenue Recovery Engine — isolated SaaS area */}
+          <Route path="/app/*" element={<AppRouter />} />
           {/* All other routes use the shared AuthProvider */}
           <Route
             path="/*"
