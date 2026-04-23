@@ -6,6 +6,7 @@ import { useAccount } from "../lib/useAccount";
 import { HubSpotConnectCard } from "../components/HubSpotConnectCard";
 import { SyncStatusCard } from "../components/SyncStatusCard";
 import { StatCard } from "../components/StatCard";
+import { RunAuditCard } from "../components/RunAuditCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -69,21 +70,23 @@ const AppDashboard = () => {
   }
 
   const isConnected = !!account?.hubspot_portal_id;
+  const hasData = stats.contacts > 0 || stats.deals > 0;
 
   return (
     <AppLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isConnected ? `Portal ${account?.hubspot_portal_id}` : "Get started by connecting your CRM"}
+          {isConnected ? `Portal ${account?.hubspot_portal_id}` : "Get started by connecting your CRM or loading demo data in Settings"}
         </p>
       </div>
 
-      {!isConnected ? (
+      {!isConnected && !hasData ? (
         <HubSpotConnectCard />
       ) : (
         <div className="space-y-6">
-          {account && <SyncStatusCard account={account} onRefresh={refetch} />}
+          {account && hasData && <RunAuditCard accountId={account.id} hasData={hasData} />}
+          {account && isConnected && <SyncStatusCard account={account} onRefresh={refetch} />}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Contacts" value={stats.contacts.toLocaleString()} icon={Users} />
             <StatCard label="Open deals" value={stats.deals.toLocaleString()} icon={Briefcase} />
@@ -93,12 +96,6 @@ const AppDashboard = () => {
               icon={DollarSign}
             />
             <StatCard label="Engagements" value={stats.engagements.toLocaleString()} icon={Activity} />
-          </div>
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="font-semibold mb-2">Audit engine</h3>
-            <p className="text-sm text-muted-foreground">
-              Pattern detection and Claude-powered analysis ship in Phase 2. Your data is mirrored and ready.
-            </p>
           </div>
         </div>
       )}

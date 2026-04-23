@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Unplug, RefreshCw } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { useAccount } from "../lib/useAccount";
+import { LoadDemoDataCard } from "../components/LoadDemoDataCard";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -93,6 +94,8 @@ const AppSettings = () => {
             <p className="text-sm text-muted-foreground">No HubSpot portal connected. Visit the dashboard to connect.</p>
           )}
         </div>
+
+        {account && <LoadDemoDataCard accountId={account.id} onSeeded={refetch} />}
       </div>
     </AppLayout>
   );
