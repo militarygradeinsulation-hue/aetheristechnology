@@ -46,6 +46,23 @@ serve(async (req) => {
     const [accountId] = decoded.split(":");
     if (!accountId) throw new Error("Invalid state");
 
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Idempotency: if this account already has a fresh HubSpot connection, skip the exchange.
+    // HubSpot one-time codes can be replayed by browser prefetch/back-button, which would 400 a second time.
+    const { data: existing } = await admin
+      .from("accounts")
+      .select("hubspot_portal_id, hubspot_connected_at")
+      .eq("id", accountId)
+      .maybeSingle();
+
+    if (existing?.hubspot_portal_id && existing?.hubspot_connected_at) {
+      const ageMs = Date.now() - new Date(existing.hubspot_connected_at).getTime();
+      if (ageMs < 5 * 60 * 1000) {
+        return new Response(html(origin, "?connected=1"), { headers: { "Content-Type": "text/html" } });
+      }
+    }
+
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-oauth-callback`;
 
     const tokenRes = await fetch("https://api.hubapi.com/oauth/v1/token", {
@@ -60,14 +77,19 @@ serve(async (req) => {
       }),
     });
 
-    if (!tokenRes.ok) throw new Error(`Token exchange failed: ${await tokenRes.text()}`);
+    if (!tokenRes.ok) {
+      const errBody = await tokenRes.text();
+      // If the code is being replayed but we already have a connection, treat as success.
+      if (existing?.hubspot_portal_id && /BAD_AUTH_CODE|invalid_grant|expired/i.test(errBody)) {
+        return new Response(html(origin, "?connected=1"), { headers: { "Content-Type": "text/html" } });
+      }
+      throw new Error(`Token exchange failed: ${errBody}`);
+    }
     const tokens = await tokenRes.json();
 
     // Fetch portal info
     const infoRes = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${tokens.access_token}`);
     const info = infoRes.ok ? await infoRes.json() : { hub_id: null };
-
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: encAccess } = await admin.rpc("encrypt_token", { _plaintext: tokens.access_token, _key: encryptionKey });
     const { data: encRefresh } = await admin.rpc("encrypt_token", { _plaintext: tokens.refresh_token, _key: encryptionKey });
