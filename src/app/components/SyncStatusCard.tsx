@@ -35,7 +35,7 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
   const isRunning = status === "running";
   const isStalled = isRunning && heartbeatAge > STALE_MS;
 
-  const startSync = async (mode: "initial" | "incremental") => {
+  const startSync = async (mode: "initial" | "incremental" | "resume") => {
     setSyncing(true);
     try {
       const { error } = await supabase.functions.invoke("hubspot-sync", {
