@@ -92,7 +92,7 @@ async function syncOwners(admin: SupabaseClient, accountId: string, accessToken:
 async function syncContacts(admin: SupabaseClient, accountId: string, accessToken: string, sinceMs: number, onProgress: (n: number) => Promise<void>) {
   let after: string | undefined;
   let total = 0;
-  const properties = "email,firstname,lastname,lifecyclestage,hs_lead_status,hubspot_owner_id,createdate,lastmodifieddate,notes_last_contacted";
+  const properties = "email,firstname,lastname,lifecyclestage,hs_lead_status,hubspot_owner_id,createdate,lastmodifieddate";
   do {
     const body = {
       filterGroups: [{ filters: [{ propertyName: "lastmodifieddate", operator: "GTE", value: sinceMs }] }],
@@ -121,7 +121,7 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
       lead_status: c.properties.hs_lead_status,
       owner_id: c.properties.hubspot_owner_id,
       created_date: c.properties.createdate || null,
-      last_activity_date: c.properties.notes_last_contacted || null,
+      last_activity_date: c.properties.notes_last_contacted || c.properties.lastmodifieddate || null,
       properties: c.properties,
       synced_at: new Date().toISOString(),
     }));
@@ -136,7 +136,7 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
 async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: string, sinceMs: number, onProgress: (n: number) => Promise<void>) {
   let after: string | undefined;
   let total = 0;
-  const properties = "dealname,amount,dealstage,pipeline,closedate,hubspot_owner_id,createdate,hs_lastmodifieddate,notes_last_contacted,days_to_close";
+  const properties = "dealname,amount,dealstage,pipeline,closedate,hubspot_owner_id,createdate,hs_lastmodifieddate";
   do {
     const body = {
       filterGroups: [{ filters: [{ propertyName: "hs_lastmodifieddate", operator: "GTE", value: sinceMs }] }],
@@ -165,7 +165,7 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
       close_date: d.properties.closedate || null,
       owner_id: d.properties.hubspot_owner_id,
       created_date: d.properties.createdate || null,
-      last_activity_date: d.properties.notes_last_contacted || null,
+      last_activity_date: d.properties.notes_last_contacted || d.properties.hs_lastmodifieddate || null,
       properties: d.properties,
       synced_at: new Date().toISOString(),
     }));
