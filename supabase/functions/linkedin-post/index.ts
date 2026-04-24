@@ -162,7 +162,7 @@ serve(async (req) => {
           }).eq("id", item.id);
           results.push({ id: item.id, status: "posted" });
         } catch (err) {
-          results.push({ id: item.id, status: "error", error: err.message });
+          results.push({ id: item.id, status: "error", error: err instanceof Error ? err.message : "Unknown error" });
         }
         // Rate limit: wait 2s between posts
         await new Promise(r => setTimeout(r, 2000));
@@ -206,7 +206,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("linkedin-post error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal error" }), {
+    const message = error instanceof Error ? error.message : "Internal error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

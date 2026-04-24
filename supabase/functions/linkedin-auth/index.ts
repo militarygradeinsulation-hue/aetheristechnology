@@ -135,7 +135,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("linkedin-auth error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal error" }), {
+    const message = error instanceof Error ? error.message : "Internal error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
