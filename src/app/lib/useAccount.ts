@@ -11,6 +11,7 @@ export interface Account {
   last_sync_status: string | null;
   last_sync_error: string | null;
   sync_progress: any;
+  updated_at?: string;
 }
 
 export const useAccount = () => {
