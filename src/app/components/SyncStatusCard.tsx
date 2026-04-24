@@ -78,7 +78,7 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => startSync(isStalled ? "initial" : "incremental")}
+          onClick={() => startSync(isStalled ? "resume" : "incremental")}
           disabled={syncing || (isRunning && !isStalled)}
           className="gap-2"
         >
