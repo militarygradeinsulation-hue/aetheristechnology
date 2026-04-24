@@ -58,6 +58,14 @@ serve(async (req) => {
       `&scope=${encodeURIComponent(SCOPES)}` +
       `&state=${encodeURIComponent(state)}`;
 
+    console.log("[hubspot-oauth-start] authorize URL built", {
+      client_id_preview: clientId.slice(0, 8),
+      redirect_uri: redirectUri,
+      redirect_uri_length: redirectUri.length,
+      account_id: account.id,
+      scopes: SCOPES,
+    });
+
     return new Response(JSON.stringify({ authorizeUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
