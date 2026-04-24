@@ -393,10 +393,10 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
 
       } else if (trimmed.startsWith("|")) {
         ensureSpace(10);
-        const cells = trimmed.split("|").filter(c => c.trim()).map(c => c.trim());
-        if (cells.some(c => /^[-:]+$/.test(c))) continue;
+        const cells = trimmed.split("|").filter((c: string) => c.trim()).map((c: string) => c.trim());
+        if (cells.some((c: string) => /^[-:]+$/.test(c))) continue;
 
-        const isHeader = cells.length > 0 && cells.every(c => c === c.toUpperCase() || (c.length > 0 && /[A-Z]/.test(c[0])));
+        const isHeader = cells.length > 0 && cells.every((c: string) => c === c.toUpperCase() || (c.length > 0 && /[A-Z]/.test(c[0])));
         doc.setFontSize(9);
         
         if (isHeader) {
@@ -417,7 +417,7 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
         }
         
         const colW = contentW / cells.length;
-        cells.forEach((cell, i) => {
+        cells.forEach((cell: string, i: number) => {
           doc.text(cell.substring(0, 35), margin + i * colW + 3, y);
         });
         y += 7;
