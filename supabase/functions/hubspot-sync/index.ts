@@ -144,13 +144,14 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
   let total = 0;
   const properties = "dealname,amount,dealstage,pipeline,closedate,hubspot_owner_id,createdate,hs_lastmodifieddate";
   do {
-    const body = {
+    const body: Record<string, unknown> = {
       filterGroups: [{ filters: [{ propertyName: "hs_lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
       properties: properties.split(","),
       sorts: [{ propertyName: "hs_lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
-      after,
     };
+    if (after) body.after = after;
+    console.log("[hubspot-sync] deals request", { sinceMs, after, body_preview: JSON.stringify(body).slice(0, 300) });
     const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/deals/search`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
@@ -160,7 +161,11 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
       await sleep(3000);
       continue;
     }
-    if (!res.ok) throw new Error(`Deals ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[hubspot-sync] deals FAILED", { status: res.status, body: errText, request: JSON.stringify(body) });
+      throw new Error(`Deals ${res.status}: ${errText}`);
+    }
     const data = await res.json();
     const rows = (data.results || []).map((d: any) => ({
       account_id: accountId,
