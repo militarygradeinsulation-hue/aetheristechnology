@@ -81,12 +81,11 @@ const AppDashboard = () => {
         </p>
       </div>
 
-      {!isConnected && !hasData ? (
-        <HubSpotConnectCard />
-      ) : (
-        <div className="space-y-6">
-          {account && hasData && <RunAuditCard accountId={account.id} hasData={hasData} />}
-          {account && isConnected && <SyncStatusCard account={account} onRefresh={refetch} />}
+      <div className="space-y-6">
+        {!isConnected && <HubSpotConnectCard />}
+        {account && hasData && <RunAuditCard accountId={account.id} hasData={hasData} />}
+        {account && isConnected && <SyncStatusCard account={account} onRefresh={refetch} />}
+        {hasData && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Contacts" value={stats.contacts.toLocaleString()} icon={Users} />
             <StatCard label="Open deals" value={stats.deals.toLocaleString()} icon={Briefcase} />
@@ -97,8 +96,8 @@ const AppDashboard = () => {
             />
             <StatCard label="Engagements" value={stats.engagements.toLocaleString()} icon={Activity} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </AppLayout>
   );
 };
