@@ -28,7 +28,7 @@ async function signToken(exp: number, secret: string): Promise<string> {
   return `${exp}.${hex}`;
 }
 
-async function ensureAdminUser(admin: ReturnType<typeof createClient>): Promise<string> {
+async function ensureAdminUser(admin: any): Promise<string> {
   // Try to find the existing admin user by email.
   const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
   if (listErr) throw listErr;
@@ -45,7 +45,7 @@ async function ensureAdminUser(admin: ReturnType<typeof createClient>): Promise<
   }
 
   // Ensure the user is in admin_users so is_admin() returns true.
-  await admin.from("admin_users").upsert(
+  await (admin.from("admin_users") as any).upsert(
     { user_id: user.id },
     { onConflict: "user_id", ignoreDuplicates: true },
   );
