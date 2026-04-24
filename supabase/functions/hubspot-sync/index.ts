@@ -9,6 +9,8 @@ const corsHeaders = {
 
 const HUBSPOT_API = "https://api.hubapi.com";
 const PAGE_SIZE = 100;
+const MAX_HUBSPOT_SEARCH_RESULTS = 10000;
+const MIN_SEARCH_WINDOW_MS = 1000;
 
 interface Account {
   id: string;
@@ -71,6 +73,40 @@ async function hubspotFetch(url: string, accessToken: string): Promise<any> {
   throw new Error("Rate limited after retries");
 }
 
+async function hubspotSearch(endpoint: string, accessToken: string, body: Record<string, unknown>, label: string): Promise<any> {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    console.log(`[hubspot-sync] ${label.toLowerCase()} request`, {
+      after: body.after ?? null,
+      body_preview: JSON.stringify(body).slice(0, 300),
+    });
+
+    const res = await fetch(`${HUBSPOT_API}${endpoint}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (res.status === 429) {
+      await sleep(3000 * (attempt + 1));
+      continue;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[hubspot-sync] ${label.toLowerCase()} FAILED`, {
+        status: res.status,
+        body: errText,
+        request: JSON.stringify(body),
+      });
+      throw new Error(`${label} ${res.status}: ${errText}`);
+    }
+
+    return res.json();
+  }
+
+  throw new Error(`${label} rate limited after retries`);
+}
+
 async function syncOwners(admin: SupabaseClient, accountId: string, accessToken: string) {
   let after: string | undefined;
   do {
@@ -90,102 +126,128 @@ async function syncOwners(admin: SupabaseClient, accountId: string, accessToken:
 }
 
 async function syncContacts(admin: SupabaseClient, accountId: string, accessToken: string, sinceMs: number, onProgress: (n: number) => Promise<void>) {
-  let after: string | undefined;
   let total = 0;
-  const properties = "email,firstname,lastname,lifecyclestage,hs_lead_status,hubspot_owner_id,createdate,lastmodifieddate";
-  do {
-    const body: Record<string, unknown> = {
-      filterGroups: [{ filters: [{ propertyName: "lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
-      properties: properties.split(","),
+  const properties = ["email", "firstname", "lastname", "lifecyclestage", "hs_lead_status", "hubspot_owner_id", "createdate", "lastmodifieddate"];
+
+  const syncRange = async (windowStartMs: number, windowEndMs: number): Promise<void> => {
+    const baseBody: Record<string, unknown> = {
+      filterGroups: [{
+        filters: [
+          { propertyName: "lastmodifieddate", operator: "GTE", value: String(windowStartMs) },
+          { propertyName: "lastmodifieddate", operator: "LT", value: String(windowEndMs) },
+        ],
+      }],
+      properties,
       sorts: [{ propertyName: "lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
     };
-    if (after) body.after = after;
-    console.log("[hubspot-sync] contacts request", { sinceMs, after, body_preview: JSON.stringify(body).slice(0, 300) });
-    const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/contacts/search`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.status === 429) {
-      await sleep(3000);
-      continue;
+
+    let data = await hubspotSearch("/crm/v3/objects/contacts/search", accessToken, baseBody, "Contacts");
+
+    if (typeof data.total === "number" && data.total > MAX_HUBSPOT_SEARCH_RESULTS) {
+      const windowSize = windowEndMs - windowStartMs;
+      if (windowSize <= MIN_SEARCH_WINDOW_MS) {
+        throw new Error(`Contacts window exceeded HubSpot search limit at ${new Date(windowStartMs).toISOString()}`);
+      }
+
+      const midpoint = windowStartMs + Math.floor(windowSize / 2);
+      console.warn("[hubspot-sync] splitting contacts window", { windowStartMs, windowEndMs, midpoint, total: data.total });
+      await syncRange(windowStartMs, midpoint);
+      await syncRange(midpoint, windowEndMs);
+      return;
     }
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("[hubspot-sync] contacts FAILED", { status: res.status, body: errText, request: JSON.stringify(body) });
-      throw new Error(`Contacts ${res.status}: ${errText}`);
+
+    while (true) {
+      const rows = (data.results || []).map((c: any) => ({
+        account_id: accountId,
+        hubspot_id: String(c.id),
+        email: c.properties.email,
+        first_name: c.properties.firstname,
+        last_name: c.properties.lastname,
+        lifecycle_stage: c.properties.lifecyclestage,
+        lead_status: c.properties.hs_lead_status,
+        owner_id: c.properties.hubspot_owner_id,
+        created_date: c.properties.createdate || null,
+        last_activity_date: c.properties.notes_last_contacted || c.properties.lastmodifieddate || null,
+        properties: c.properties,
+        synced_at: new Date().toISOString(),
+      }));
+
+      if (rows.length) await admin.from("mirror_contacts").upsert(rows, { onConflict: "account_id,hubspot_id" });
+      total += rows.length;
+      await onProgress(total);
+
+      const after = data.paging?.next?.after;
+      if (!after) break;
+
+      data = await hubspotSearch("/crm/v3/objects/contacts/search", accessToken, { ...baseBody, after }, "Contacts");
     }
-    const data = await res.json();
-    const rows = (data.results || []).map((c: any) => ({
-      account_id: accountId,
-      hubspot_id: String(c.id),
-      email: c.properties.email,
-      first_name: c.properties.firstname,
-      last_name: c.properties.lastname,
-      lifecycle_stage: c.properties.lifecyclestage,
-      lead_status: c.properties.hs_lead_status,
-      owner_id: c.properties.hubspot_owner_id,
-      created_date: c.properties.createdate || null,
-      last_activity_date: c.properties.notes_last_contacted || c.properties.lastmodifieddate || null,
-      properties: c.properties,
-      synced_at: new Date().toISOString(),
-    }));
-    if (rows.length) await admin.from("mirror_contacts").upsert(rows, { onConflict: "account_id,hubspot_id" });
-    total += rows.length;
-    after = data.paging?.next?.after;
-    await onProgress(total);
-  } while (after);
+  };
+
+  await syncRange(sinceMs, Date.now() + 1);
   return total;
 }
 
 async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: string, sinceMs: number, onProgress: (n: number) => Promise<void>) {
-  let after: string | undefined;
   let total = 0;
-  const properties = "dealname,amount,dealstage,pipeline,closedate,hubspot_owner_id,createdate,hs_lastmodifieddate";
-  do {
-    const body: Record<string, unknown> = {
-      filterGroups: [{ filters: [{ propertyName: "hs_lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
-      properties: properties.split(","),
+  const properties = ["dealname", "amount", "dealstage", "pipeline", "closedate", "hubspot_owner_id", "createdate", "hs_lastmodifieddate"];
+
+  const syncRange = async (windowStartMs: number, windowEndMs: number): Promise<void> => {
+    const baseBody: Record<string, unknown> = {
+      filterGroups: [{
+        filters: [
+          { propertyName: "hs_lastmodifieddate", operator: "GTE", value: String(windowStartMs) },
+          { propertyName: "hs_lastmodifieddate", operator: "LT", value: String(windowEndMs) },
+        ],
+      }],
+      properties,
       sorts: [{ propertyName: "hs_lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
     };
-    if (after) body.after = after;
-    console.log("[hubspot-sync] deals request", { sinceMs, after, body_preview: JSON.stringify(body).slice(0, 300) });
-    const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/deals/search`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.status === 429) {
-      await sleep(3000);
-      continue;
+
+    let data = await hubspotSearch("/crm/v3/objects/deals/search", accessToken, baseBody, "Deals");
+
+    if (typeof data.total === "number" && data.total > MAX_HUBSPOT_SEARCH_RESULTS) {
+      const windowSize = windowEndMs - windowStartMs;
+      if (windowSize <= MIN_SEARCH_WINDOW_MS) {
+        throw new Error(`Deals window exceeded HubSpot search limit at ${new Date(windowStartMs).toISOString()}`);
+      }
+
+      const midpoint = windowStartMs + Math.floor(windowSize / 2);
+      console.warn("[hubspot-sync] splitting deals window", { windowStartMs, windowEndMs, midpoint, total: data.total });
+      await syncRange(windowStartMs, midpoint);
+      await syncRange(midpoint, windowEndMs);
+      return;
     }
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("[hubspot-sync] deals FAILED", { status: res.status, body: errText, request: JSON.stringify(body) });
-      throw new Error(`Deals ${res.status}: ${errText}`);
+
+    while (true) {
+      const rows = (data.results || []).map((d: any) => ({
+        account_id: accountId,
+        hubspot_id: String(d.id),
+        deal_name: d.properties.dealname,
+        amount: d.properties.amount ? Number(d.properties.amount) : null,
+        stage: d.properties.dealstage,
+        pipeline: d.properties.pipeline,
+        close_date: d.properties.closedate || null,
+        owner_id: d.properties.hubspot_owner_id,
+        created_date: d.properties.createdate || null,
+        last_activity_date: d.properties.notes_last_contacted || d.properties.hs_lastmodifieddate || null,
+        properties: d.properties,
+        synced_at: new Date().toISOString(),
+      }));
+
+      if (rows.length) await admin.from("mirror_deals").upsert(rows, { onConflict: "account_id,hubspot_id" });
+      total += rows.length;
+      await onProgress(total);
+
+      const after = data.paging?.next?.after;
+      if (!after) break;
+
+      data = await hubspotSearch("/crm/v3/objects/deals/search", accessToken, { ...baseBody, after }, "Deals");
     }
-    const data = await res.json();
-    const rows = (data.results || []).map((d: any) => ({
-      account_id: accountId,
-      hubspot_id: String(d.id),
-      deal_name: d.properties.dealname,
-      amount: d.properties.amount ? Number(d.properties.amount) : null,
-      stage: d.properties.dealstage,
-      pipeline: d.properties.pipeline,
-      close_date: d.properties.closedate || null,
-      owner_id: d.properties.hubspot_owner_id,
-      created_date: d.properties.createdate || null,
-      last_activity_date: d.properties.notes_last_contacted || d.properties.hs_lastmodifieddate || null,
-      properties: d.properties,
-      synced_at: new Date().toISOString(),
-    }));
-    if (rows.length) await admin.from("mirror_deals").upsert(rows, { onConflict: "account_id,hubspot_id" });
-    total += rows.length;
-    after = data.paging?.next?.after;
-    await onProgress(total);
-  } while (after);
+  };
+
+  await syncRange(sinceMs, Date.now() + 1);
   return total;
 }
 
