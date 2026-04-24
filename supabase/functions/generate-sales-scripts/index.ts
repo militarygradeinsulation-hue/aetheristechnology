@@ -86,7 +86,7 @@ Rules:
     const aiData = await aiRes.json();
     let raw = aiData.choices?.[0]?.message?.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '');
+    raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '');
     const result = JSON.parse(raw);
 
     return new Response(JSON.stringify(result), {
@@ -94,7 +94,8 @@ Rules:
     });
   } catch (error) {
     console.error("generate-sales-scripts error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Failed to generate scripts" }), {
+    const message = error instanceof Error ? error.message : "Failed to generate scripts";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

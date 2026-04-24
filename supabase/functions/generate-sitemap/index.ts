@@ -66,7 +66,8 @@ ${urls.join("\n")}
       headers: { ...corsHeaders, "Content-Type": "application/xml" },
     });
   } catch (e) {
-    return new Response(`<error>${e.message}</error>`, {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    return new Response(`<error>${message}</error>`, {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/xml" },
     });

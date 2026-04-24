@@ -94,7 +94,8 @@ Rules:
     });
   } catch (error) {
     console.error("generate-follow-up-plan error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Failed to generate plan" }), {
+    const message = error instanceof Error ? error.message : "Failed to generate plan";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
