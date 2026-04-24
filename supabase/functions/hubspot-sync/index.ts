@@ -95,8 +95,9 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
   const properties = "email,firstname,lastname,lifecyclestage,hs_lead_status,hubspot_owner_id,createdate,lastmodifieddate";
   do {
     const body = {
-      filterGroups: [{ filters: [{ propertyName: "lastmodifieddate", operator: "GTE", value: sinceMs }] }],
+      filterGroups: [{ filters: [{ propertyName: "lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
       properties: properties.split(","),
+      sorts: [{ propertyName: "lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
       after,
     };
@@ -139,8 +140,9 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
   const properties = "dealname,amount,dealstage,pipeline,closedate,hubspot_owner_id,createdate,hs_lastmodifieddate";
   do {
     const body = {
-      filterGroups: [{ filters: [{ propertyName: "hs_lastmodifieddate", operator: "GTE", value: sinceMs }] }],
+      filterGroups: [{ filters: [{ propertyName: "hs_lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
       properties: properties.split(","),
+      sorts: [{ propertyName: "hs_lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
       after,
     };
