@@ -209,7 +209,8 @@ Reference actual products, services, and value props from the scraped website. M
     });
   } catch (error) {
     console.error("generate-social-content error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Failed to generate content" }), {
+    const message = error instanceof Error ? error.message : "Failed to generate content";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
