@@ -251,28 +251,14 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
   return total;
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  let accountIdForError: string | null = null;
-
+async function runSync(admin: SupabaseClient, account_id: string, mode: string) {
   try {
-    const { account_id, mode = "incremental" } = await req.json();
-    if (!account_id) throw new Error("Missing account_id");
-    accountIdForError = account_id;
-
     const encryptionKey = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
     const { data: account, error } = await admin.from("accounts").select("*").eq("id", account_id).single();
     if (error || !account) throw new Error("Account not found");
     if (!account.hubspot_refresh_token_encrypted) throw new Error("HubSpot not connected");
-
-    await admin
-      .from("accounts")
-      .update({ last_sync_status: "running", last_sync_error: null, sync_progress: { phase: "starting", percent: 0 } })
-      .eq("id", account_id);
 
     const accessToken = await getAccessToken(admin, account as Account, encryptionKey);
 
@@ -307,22 +293,46 @@ serve(async (req) => {
       })
       .eq("id", account_id);
 
-    return new Response(JSON.stringify({ ok: true, contacts: contactCount, deals: dealCount }), {
+    console.log("hubspot-sync completed:", { account_id, contactCount, dealCount });
+  } catch (e) {
+    const msg = (e as Error).message || String(e);
+    console.error("hubspot-sync failed:", msg, (e as Error).stack);
+    try {
+      await admin
+        .from("accounts")
+        .update({ last_sync_status: "error", last_sync_error: msg })
+        .eq("id", account_id);
+    } catch (writeErr) {
+      console.error("Failed to write error to account:", (writeErr as Error).message);
+    }
+  }
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+  try {
+    const { account_id, mode = "incremental" } = await req.json();
+    if (!account_id) throw new Error("Missing account_id");
+
+    // Mark as running synchronously so the UI immediately reflects state
+    await admin
+      .from("accounts")
+      .update({ last_sync_status: "running", last_sync_error: null, sync_progress: { phase: "starting", percent: 0 } })
+      .eq("id", account_id);
+
+    // Run the actual sync in the background — bypasses the 150s request timeout
+    // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+    EdgeRuntime.waitUntil(runSync(admin, account_id, mode));
+
+    return new Response(JSON.stringify({ ok: true, queued: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     const msg = (e as Error).message || String(e);
-    console.error("hubspot-sync failed:", msg, (e as Error).stack);
-    if (accountIdForError) {
-      try {
-        await admin
-          .from("accounts")
-          .update({ last_sync_status: "error", last_sync_error: msg })
-          .eq("id", accountIdForError);
-      } catch (writeErr) {
-        console.error("Failed to write error to account:", (writeErr as Error).message);
-      }
-    }
+    console.error("hubspot-sync invoke failed:", msg);
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
