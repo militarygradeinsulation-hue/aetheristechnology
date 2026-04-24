@@ -26,14 +26,26 @@ serve(async (req) => {
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
+  console.log("[hubspot-oauth-callback] incoming", {
+    method: req.method,
+    full_url: req.url,
+    has_code: !!code,
+    code_preview: code ? `${code.slice(0, 8)}…(${code.length} chars)` : null,
+    has_state: !!state,
+    error_param: error,
+    referer: req.headers.get("referer"),
+  });
+
   const origin = pickOrigin(req);
 
   if (error) {
+    console.warn("[hubspot-oauth-callback] OAuth error param", error);
     return new Response(html(origin, `?error=${encodeURIComponent(error)}`), { headers: { "Content-Type": "text/html" } });
   }
 
   try {
     if (!code || !state) throw new Error("Missing code or state");
+
 
     const clientId = Deno.env.get("HUBSPOT_CLIENT_ID");
     const clientSecret = Deno.env.get("HUBSPOT_CLIENT_SECRET");
