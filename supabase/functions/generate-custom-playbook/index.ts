@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -252,13 +257,13 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
         y += bLines.length * 6 + 3;
       } else if (trimmed.startsWith("|")) {
         ensureSpace(10);
-        const cells = trimmed.split("|").filter(c => c.trim()).map(c => c.trim());
-        if (cells.some(c => /^[-:]+$/.test(c))) continue;
+        const cells = trimmed.split("|").filter((c: string) => c.trim()).map((c: string) => c.trim());
+        if (cells.some((c: string) => /^[-:]+$/.test(c))) continue;
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(200, 195, 185);
         const colW = contentW / cells.length;
-        cells.forEach((cell, i) => { doc.text(cell.substring(0, 35), margin + i * colW + 3, y); });
+        cells.forEach((cell: string, i: number) => { doc.text(cell.substring(0, 35), margin + i * colW + 3, y); });
         y += 7;
       } else {
         ensureSpace(12);
