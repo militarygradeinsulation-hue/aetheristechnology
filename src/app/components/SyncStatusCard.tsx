@@ -43,7 +43,7 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
       });
       if (error) throw error;
       toast({
-        title: mode === "initial" ? "Full re-sync started" : "Sync started",
+        title: mode === "initial" ? "Full re-sync started" : mode === "resume" ? "Resuming sync" : "Sync started",
         description: "Running in the background — safe to close this tab.",
       });
       setTimeout(onRefresh, 1500);
