@@ -201,13 +201,13 @@ serve(async (req) => {
 
     if (bouncedProspectIds.length > 0) {
       for (const pid of bouncedProspectIds) {
-        const { count } = await supabase
+        const { data: skippedRows } = await supabase
           .from("drip_emails")
           .update({ status: "skipped", error_message: "Prospect bounced – cancelled" })
           .eq("prospect_id", pid)
           .eq("status", "pending")
-          .select("id", { count: "exact", head: true });
-        cancelledEmails += count || 0;
+          .select("id");
+        cancelledEmails += skippedRows?.length || 0;
       }
 
       // Auto-generate replacements: one new prospect per bounced one
