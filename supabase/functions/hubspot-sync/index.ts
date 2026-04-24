@@ -144,7 +144,7 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
 
     let data = await hubspotSearch("/crm/v3/objects/contacts/search", accessToken, baseBody, "Contacts");
 
-    if (typeof data.total === "number" && data.total > MAX_HUBSPOT_SEARCH_RESULTS) {
+    if (typeof data.total === "number" && data.total >= MAX_HUBSPOT_SEARCH_RESULTS) {
       const windowSize = windowEndMs - windowStartMs;
       if (windowSize <= MIN_SEARCH_WINDOW_MS) {
         throw new Error(`Contacts window exceeded HubSpot search limit at ${new Date(windowStartMs).toISOString()}`);
@@ -207,7 +207,7 @@ async function syncDeals(admin: SupabaseClient, accountId: string, accessToken: 
 
     let data = await hubspotSearch("/crm/v3/objects/deals/search", accessToken, baseBody, "Deals");
 
-    if (typeof data.total === "number" && data.total > MAX_HUBSPOT_SEARCH_RESULTS) {
+    if (typeof data.total === "number" && data.total >= MAX_HUBSPOT_SEARCH_RESULTS) {
       const windowSize = windowEndMs - windowStartMs;
       if (windowSize <= MIN_SEARCH_WINDOW_MS) {
         throw new Error(`Deals window exceeded HubSpot search limit at ${new Date(windowStartMs).toISOString()}`);
