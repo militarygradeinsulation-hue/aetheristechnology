@@ -102,7 +102,8 @@ Rules:
     });
   } catch (error) {
     console.error("generate-content-calendar error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Failed to generate calendar" }), {
+    const message = error instanceof Error ? error.message : "Failed to generate calendar";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

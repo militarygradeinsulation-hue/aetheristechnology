@@ -32,7 +32,7 @@ async function ensureAdminUser(admin: any): Promise<string> {
   // Try to find the existing admin user by email.
   const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
   if (listErr) throw listErr;
-  let user = list.users.find((u) => (u.email || "").toLowerCase() === ADMIN_EMAIL);
+  let user = list.users.find((u: { email?: string | null }) => (u.email || "").toLowerCase() === ADMIN_EMAIL);
 
   if (!user) {
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
