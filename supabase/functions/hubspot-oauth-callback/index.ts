@@ -77,6 +77,13 @@ serve(async (req) => {
 
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-oauth-callback`;
 
+    console.log("[hubspot-oauth-callback] token exchange request", {
+      client_id_preview: clientId.slice(0, 8),
+      redirect_uri: redirectUri,
+      redirect_uri_length: redirectUri.length,
+      account_id: accountId,
+    });
+
     const tokenRes = await fetch("https://api.hubapi.com/oauth/v1/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -91,13 +98,20 @@ serve(async (req) => {
 
     if (!tokenRes.ok) {
       const errBody = await tokenRes.text();
+      console.error("[hubspot-oauth-callback] token exchange FAILED", {
+        status: tokenRes.status,
+        body: errBody,
+        redirect_uri_used: redirectUri,
+      });
       // If the code is being replayed but we already have a connection, treat as success.
       if (existing?.hubspot_portal_id && /BAD_AUTH_CODE|invalid_grant|expired/i.test(errBody)) {
+        console.log("[hubspot-oauth-callback] treating replay as success (account already connected)");
         return new Response(html(origin, "?connected=1"), { headers: { "Content-Type": "text/html" } });
       }
       throw new Error(`Token exchange failed: ${errBody}`);
     }
     const tokens = await tokenRes.json();
+    console.log("[hubspot-oauth-callback] token exchange OK", { has_access: !!tokens.access_token, has_refresh: !!tokens.refresh_token, expires_in: tokens.expires_in });
 
     // Fetch portal info
     const infoRes = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${tokens.access_token}`);
