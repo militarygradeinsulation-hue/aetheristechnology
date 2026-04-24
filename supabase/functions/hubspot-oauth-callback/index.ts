@@ -91,8 +91,6 @@ serve(async (req) => {
     const infoRes = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${tokens.access_token}`);
     const info = infoRes.ok ? await infoRes.json() : { hub_id: null };
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
     const { data: encAccess } = await admin.rpc("encrypt_token", { _plaintext: tokens.access_token, _key: encryptionKey });
     const { data: encRefresh } = await admin.rpc("encrypt_token", { _plaintext: tokens.refresh_token, _key: encryptionKey });
 
