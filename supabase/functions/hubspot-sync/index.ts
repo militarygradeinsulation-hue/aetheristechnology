@@ -267,21 +267,24 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string) 
         ? Date.now() - 18 * 30 * 24 * 60 * 60 * 1000
         : new Date(account.last_sync_at).getTime() - 5 * 60 * 1000;
 
-    const setProgress = async (phase: string, percent: number) => {
-      await admin.from("accounts").update({ sync_progress: { phase, percent } }).eq("id", account_id);
+    const setProgress = async (phase: string, percent: number, extra: Record<string, unknown> = {}) => {
+      await admin
+        .from("accounts")
+        .update({ sync_progress: { phase, percent, heartbeat: new Date().toISOString(), ...extra } })
+        .eq("id", account_id);
     };
 
     await setProgress("Owners", 5);
     await syncOwners(admin, account_id, accessToken);
 
     await setProgress("Contacts", 20);
-    const contactCount = await syncContacts(admin, account_id, accessToken, sinceMs, async () => {
-      await setProgress("Contacts", 40);
+    const contactCount = await syncContacts(admin, account_id, accessToken, sinceMs, async (n) => {
+      await setProgress("Contacts", 40, { contacts: n });
     });
 
-    await setProgress("Deals", 60);
-    const dealCount = await syncDeals(admin, account_id, accessToken, sinceMs, async () => {
-      await setProgress("Deals", 80);
+    await setProgress("Deals", 60, { contacts: contactCount });
+    const dealCount = await syncDeals(admin, account_id, accessToken, sinceMs, async (n) => {
+      await setProgress("Deals", 80, { contacts: contactCount, deals: n });
     });
 
     await admin
@@ -289,7 +292,7 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string) 
       .update({
         last_sync_status: "success",
         last_sync_at: new Date().toISOString(),
-        sync_progress: { phase: "complete", percent: 100, contacts: contactCount, deals: dealCount },
+        sync_progress: { phase: "complete", percent: 100, contacts: contactCount, deals: dealCount, heartbeat: new Date().toISOString() },
       })
       .eq("id", account_id);
 
