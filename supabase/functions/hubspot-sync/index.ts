@@ -94,13 +94,14 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
   let total = 0;
   const properties = "email,firstname,lastname,lifecyclestage,hs_lead_status,hubspot_owner_id,createdate,lastmodifieddate";
   do {
-    const body = {
+    const body: Record<string, unknown> = {
       filterGroups: [{ filters: [{ propertyName: "lastmodifieddate", operator: "GTE", value: String(sinceMs) }] }],
       properties: properties.split(","),
       sorts: [{ propertyName: "lastmodifieddate", direction: "ASCENDING" }],
       limit: PAGE_SIZE,
-      after,
     };
+    if (after) body.after = after;
+    console.log("[hubspot-sync] contacts request", { sinceMs, after, body_preview: JSON.stringify(body).slice(0, 300) });
     const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/contacts/search`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
@@ -110,7 +111,11 @@ async function syncContacts(admin: SupabaseClient, accountId: string, accessToke
       await sleep(3000);
       continue;
     }
-    if (!res.ok) throw new Error(`Contacts ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[hubspot-sync] contacts FAILED", { status: res.status, body: errText, request: JSON.stringify(body) });
+      throw new Error(`Contacts ${res.status}: ${errText}`);
+    }
     const data = await res.json();
     const rows = (data.results || []).map((c: any) => ({
       account_id: accountId,
