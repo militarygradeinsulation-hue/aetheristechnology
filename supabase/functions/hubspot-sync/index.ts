@@ -399,7 +399,7 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
   }
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
