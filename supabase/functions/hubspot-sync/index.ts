@@ -370,21 +370,24 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         })
         .eq("id", account_id);
 
-      // Self re-invoke
+      // Self re-invoke — wrap in waitUntil so the worker isn't torn down before flush
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const reinvoke = fetch(`${supabaseUrl}/functions/v1/hubspot-sync`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ account_id, mode: "resume" }),
+      })
+        .then(() => console.log("[hubspot-sync] re-invoked successfully"))
+        .catch((invokeErr) => console.error("[hubspot-sync] failed to re-invoke:", (invokeErr as Error).message));
       try {
-        await fetch(`${supabaseUrl}/functions/v1/hubspot-sync`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ account_id, mode: "resume" }),
-        });
-        console.log("[hubspot-sync] re-invoked successfully");
-      } catch (invokeErr) {
-        console.error("[hubspot-sync] failed to re-invoke:", (invokeErr as Error).message);
+        // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+        EdgeRuntime.waitUntil(reinvoke);
+      } catch {
+        await reinvoke;
       }
       return;
     }
