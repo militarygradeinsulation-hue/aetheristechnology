@@ -164,12 +164,23 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
         </div>
       )}
 
+      {/* Reconnect hint when companies haven't been pulled — likely missing scope */}
+      {counts && counts.companies === 0 && !neverSynced && status === "success" && (
+        <div className="mt-3 text-xs text-muted-foreground bg-muted/30 border border-border rounded-md p-2">
+          No companies mirrored. If you recently expanded permissions, disconnect and reconnect HubSpot to grant the new scopes (companies, lists).
+        </div>
+      )}
+
       {/* Diagnostic counts — confirms data is actually flowing */}
       {counts && (
-        <div className="mt-4 pt-4 border-t border-border grid grid-cols-3 gap-3 text-center">
+        <div className="mt-4 pt-4 border-t border-border grid grid-cols-4 gap-3 text-center">
           <div>
             <div className="text-lg font-semibold">{counts.contacts.toLocaleString()}</div>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Contacts</div>
+          </div>
+          <div>
+            <div className="text-lg font-semibold">{counts.companies.toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Companies</div>
           </div>
           <div>
             <div className="text-lg font-semibold">{counts.deals.toLocaleString()}</div>
