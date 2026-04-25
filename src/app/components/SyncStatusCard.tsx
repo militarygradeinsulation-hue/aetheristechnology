@@ -21,7 +21,7 @@ const STALE_MS = 2 * 60 * 1000; // 2 minutes without heartbeat = stalled
 export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
   const [syncing, setSyncing] = useState(false);
   const [now, setNow] = useState(Date.now());
-  const [counts, setCounts] = useState<{ contacts: number; deals: number; owners: number } | null>(null);
+  const [counts, setCounts] = useState<{ contacts: number; deals: number; owners: number; companies: number } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,13 +33,19 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const [c, d, o] = await Promise.all([
+      const [c, d, o, co] = await Promise.all([
         supabase.from("mirror_contacts").select("*", { count: "exact", head: true }).eq("account_id", account.id),
         supabase.from("mirror_deals").select("*", { count: "exact", head: true }).eq("account_id", account.id),
         supabase.from("mirror_owners").select("*", { count: "exact", head: true }).eq("account_id", account.id),
+        supabase.from("mirror_companies").select("*", { count: "exact", head: true }).eq("account_id", account.id),
       ]);
       if (!cancelled) {
-        setCounts({ contacts: c.count ?? 0, deals: d.count ?? 0, owners: o.count ?? 0 });
+        setCounts({
+          contacts: c.count ?? 0,
+          deals: d.count ?? 0,
+          owners: o.count ?? 0,
+          companies: co.count ?? 0,
+        });
       }
     };
     load();
