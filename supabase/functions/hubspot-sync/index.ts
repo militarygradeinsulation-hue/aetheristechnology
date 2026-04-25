@@ -272,8 +272,11 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
       cursor = resumeCursor;
       console.log("[hubspot-sync] resuming", { phase: cursor.phase, windowStartMs: cursor.windowStartMs, after: cursor.after });
     } else {
+      // For "resume" with no cursor, fall back to initial-style window so the user
+      // doesn't get a silent no-op.
+      const effectiveMode = mode === "resume" ? "initial" : mode;
       const sinceMs =
-        mode === "initial" || !account.last_sync_at
+        effectiveMode === "initial" || !account.last_sync_at
           ? Date.now() - 18 * 30 * 24 * 60 * 60 * 1000
           : new Date(account.last_sync_at).getTime() - 5 * 60 * 1000;
       const endMs = Date.now() + 1;
