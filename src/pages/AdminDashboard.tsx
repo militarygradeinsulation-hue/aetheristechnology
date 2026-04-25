@@ -15,6 +15,7 @@ import { PlaybookCreator } from '@/components/PlaybookCreator';
 import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { AdminLibrary } from '@/components/AdminLibrary';
 import { ContentCalendar, type ViewMode } from '@/components/admin/ContentCalendar';
+import { ContentEngine } from '@/components/admin/ContentEngine';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
