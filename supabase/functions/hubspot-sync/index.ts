@@ -22,14 +22,17 @@ interface Account {
   last_sync_at: string | null;
 }
 
+type SyncPhase = "companies" | "contacts" | "deals";
+
 // Cursor stored in accounts.sync_progress.cursor when we yield mid-sync.
 interface SyncCursor {
-  phase: "contacts" | "deals";
+  phase: SyncPhase;
   sinceMs: number;
   endMs: number;
   windowStartMs: number;
   windowEndMs: number;
   after: string | null;
+  companyCount: number;
   contactCount: number;
   dealCount: number;
   mode: string;
@@ -96,7 +99,7 @@ async function hubspotFetch(url: string, accessToken: string): Promise<any> {
   throw new Error("Rate limited after retries");
 }
 
-async function hubspotSearch(endpoint: string, accessToken: string, body: Record<string, unknown>, label: string): Promise<any> {
+async function hubspotPost(endpoint: string, accessToken: string, body: Record<string, unknown>, label: string): Promise<any> {
   for (let attempt = 0; attempt < 4; attempt++) {
     const res = await fetch(`${HUBSPOT_API}${endpoint}`, {
       method: "POST",
@@ -123,7 +126,10 @@ async function hubspotSearch(endpoint: string, accessToken: string, body: Record
 
 async function syncOwners(admin: SupabaseClient, accountId: string, accessToken: string) {
   let after: string | undefined;
+  let pageNum = 0;
+  let total = 0;
   do {
+    pageNum++;
     const url = `${HUBSPOT_API}/crm/v3/owners?limit=${PAGE_SIZE}${after ? `&after=${after}` : ""}`;
     const data = await hubspotFetch(url, accessToken);
     const rows = (data.results || []).map((o: any) => ({
@@ -135,8 +141,81 @@ async function syncOwners(admin: SupabaseClient, accountId: string, accessToken:
       synced_at: new Date().toISOString(),
     }));
     if (rows.length) await admin.from("mirror_owners").upsert(rows, { onConflict: "account_id,hubspot_id" });
+    total += rows.length;
+    console.log("[hubspot-sync] owners page", { pageNum, returned: rows.length, hasNext: !!data.paging?.next?.after, paging: data.paging });
     after = data.paging?.next?.after;
   } while (after);
+  console.log("[hubspot-sync] owners complete", { totalOwners: total, pages: pageNum });
+}
+
+/**
+ * Fetch deal→contact and deal→company associations for a batch of deal IDs.
+ */
+async function syncDealAssociations(
+  admin: SupabaseClient,
+  accountId: string,
+  accessToken: string,
+  dealIds: string[],
+) {
+  if (!dealIds.length) return;
+
+  const inputs = dealIds.map((id) => ({ id }));
+
+  // Deal -> Contacts
+  try {
+    const contactAssoc = await hubspotPost(
+      "/crm/v4/associations/deals/contacts/batch/read",
+      accessToken,
+      { inputs },
+      "DealContacts",
+    );
+    const linkRows: any[] = [];
+    for (const result of contactAssoc.results || []) {
+      const dealId = String(result.from?.id ?? result._from?.id ?? "");
+      if (!dealId) continue;
+      for (const to of result.to || []) {
+        linkRows.push({
+          account_id: accountId,
+          deal_id: dealId,
+          contact_id: String(to.toObjectId ?? to.id),
+          synced_at: new Date().toISOString(),
+        });
+      }
+    }
+    if (linkRows.length) {
+      await admin.from("mirror_deal_contacts").upsert(linkRows, { onConflict: "account_id,deal_id,contact_id" });
+    }
+  } catch (e) {
+    console.warn("[hubspot-sync] deal->contact associations failed (continuing):", (e as Error).message);
+  }
+
+  // Deal -> Companies
+  try {
+    const companyAssoc = await hubspotPost(
+      "/crm/v4/associations/deals/companies/batch/read",
+      accessToken,
+      { inputs },
+      "DealCompanies",
+    );
+    const linkRows: any[] = [];
+    for (const result of companyAssoc.results || []) {
+      const dealId = String(result.from?.id ?? result._from?.id ?? "");
+      if (!dealId) continue;
+      for (const to of result.to || []) {
+        linkRows.push({
+          account_id: accountId,
+          deal_id: dealId,
+          company_id: String(to.toObjectId ?? to.id),
+          synced_at: new Date().toISOString(),
+        });
+      }
+    }
+    if (linkRows.length) {
+      await admin.from("mirror_deal_companies").upsert(linkRows, { onConflict: "account_id,deal_id,company_id" });
+    }
+  } catch (e) {
+    console.warn("[hubspot-sync] deal->company associations failed (continuing):", (e as Error).message);
+  }
 }
 
 /**
@@ -151,14 +230,31 @@ async function syncWindowed(
   startTime: number,
   setProgress: (extra: Record<string, unknown>) => Promise<void>,
 ): Promise<SyncCursor> {
-  const isContacts = cursor.phase === "contacts";
-  const endpoint = isContacts ? "/crm/v3/objects/contacts/search" : "/crm/v3/objects/deals/search";
-  const dateField = isContacts ? "lastmodifieddate" : "hs_lastmodifieddate";
-  const properties = isContacts
-    ? ["email", "firstname", "lastname", "lifecyclestage", "hs_lead_status", "hubspot_owner_id", "createdate", "lastmodifieddate"]
-    : ["dealname", "amount", "dealstage", "pipeline", "closedate", "hubspot_owner_id", "createdate", "hs_lastmodifieddate"];
-  const label = isContacts ? "Contacts" : "Deals";
-  const mirrorTable = isContacts ? "mirror_contacts" : "mirror_deals";
+  let endpoint: string;
+  let dateField: string;
+  let properties: string[];
+  let label: string;
+  let mirrorTable: string;
+
+  if (cursor.phase === "companies") {
+    endpoint = "/crm/v3/objects/companies/search";
+    dateField = "hs_lastmodifieddate";
+    properties = ["name", "domain", "industry", "hubspot_owner_id", "createdate", "hs_lastmodifieddate", "numberofemployees", "annualrevenue"];
+    label = "Companies";
+    mirrorTable = "mirror_companies";
+  } else if (cursor.phase === "contacts") {
+    endpoint = "/crm/v3/objects/contacts/search";
+    dateField = "lastmodifieddate";
+    properties = ["email", "firstname", "lastname", "lifecyclestage", "hs_lead_status", "hubspot_owner_id", "createdate", "lastmodifieddate"];
+    label = "Contacts";
+    mirrorTable = "mirror_contacts";
+  } else {
+    endpoint = "/crm/v3/objects/deals/search";
+    dateField = "hs_lastmodifieddate";
+    properties = ["dealname", "amount", "dealstage", "pipeline", "closedate", "hubspot_owner_id", "createdate", "hs_lastmodifieddate"];
+    label = "Deals";
+    mirrorTable = "mirror_deals";
+  }
 
   // Process windows of [windowStartMs, windowEndMs). Walk forward window-by-window
   // until we cover [sinceMs, endMs).
@@ -178,7 +274,7 @@ async function syncWindowed(
     };
 
     const reqBody: Record<string, unknown> = cursor.after ? { ...baseBody, after: cursor.after } : baseBody;
-    const data = await hubspotSearch(endpoint, accessToken, reqBody, label);
+    const data = await hubspotPost(endpoint, accessToken, reqBody, label);
 
     // If first page of a window blows past the search cap, halve the window.
     if (!cursor.after && typeof data.total === "number" && data.total >= MAX_HUBSPOT_SEARCH_RESULTS) {
@@ -190,47 +286,72 @@ async function syncWindowed(
       continue;
     }
 
-    const rows = (data.results || []).map((c: any) =>
-      isContacts
-        ? {
-            account_id: accountId,
-            hubspot_id: String(c.id),
-            email: c.properties.email,
-            first_name: c.properties.firstname,
-            last_name: c.properties.lastname,
-            lifecycle_stage: c.properties.lifecyclestage,
-            lead_status: c.properties.hs_lead_status,
-            owner_id: c.properties.hubspot_owner_id,
-            created_date: c.properties.createdate || null,
-            last_activity_date: c.properties.notes_last_contacted || c.properties.lastmodifieddate || null,
-            properties: c.properties,
-            synced_at: new Date().toISOString(),
-          }
-        : {
-            account_id: accountId,
-            hubspot_id: String(c.id),
-            deal_name: c.properties.dealname,
-            amount: c.properties.amount ? Number(c.properties.amount) : null,
-            stage: c.properties.dealstage,
-            pipeline: c.properties.pipeline,
-            close_date: c.properties.closedate || null,
-            owner_id: c.properties.hubspot_owner_id,
-            created_date: c.properties.createdate || null,
-            last_activity_date: c.properties.notes_last_contacted || c.properties.hs_lastmodifieddate || null,
-            properties: c.properties,
-            synced_at: new Date().toISOString(),
-          },
-    );
+    const results = data.results || [];
+    let rows: any[];
+
+    if (cursor.phase === "companies") {
+      rows = results.map((c: any) => ({
+        account_id: accountId,
+        hubspot_id: String(c.id),
+        name: c.properties.name,
+        domain: c.properties.domain,
+        industry: c.properties.industry,
+        owner_id: c.properties.hubspot_owner_id,
+        created_date: c.properties.createdate || null,
+        last_activity_date: c.properties.hs_lastmodifieddate || null,
+        num_employees: c.properties.numberofemployees ? Number(c.properties.numberofemployees) : null,
+        annual_revenue: c.properties.annualrevenue ? Number(c.properties.annualrevenue) : null,
+        properties: c.properties,
+        synced_at: new Date().toISOString(),
+      }));
+    } else if (cursor.phase === "contacts") {
+      rows = results.map((c: any) => ({
+        account_id: accountId,
+        hubspot_id: String(c.id),
+        email: c.properties.email,
+        first_name: c.properties.firstname,
+        last_name: c.properties.lastname,
+        lifecycle_stage: c.properties.lifecyclestage,
+        lead_status: c.properties.hs_lead_status,
+        owner_id: c.properties.hubspot_owner_id,
+        created_date: c.properties.createdate || null,
+        last_activity_date: c.properties.notes_last_contacted || c.properties.lastmodifieddate || null,
+        properties: c.properties,
+        synced_at: new Date().toISOString(),
+      }));
+    } else {
+      rows = results.map((c: any) => ({
+        account_id: accountId,
+        hubspot_id: String(c.id),
+        deal_name: c.properties.dealname,
+        amount: c.properties.amount ? Number(c.properties.amount) : null,
+        stage: c.properties.dealstage,
+        pipeline: c.properties.pipeline,
+        close_date: c.properties.closedate || null,
+        owner_id: c.properties.hubspot_owner_id,
+        created_date: c.properties.createdate || null,
+        last_activity_date: c.properties.notes_last_contacted || c.properties.hs_lastmodifieddate || null,
+        properties: c.properties,
+        synced_at: new Date().toISOString(),
+      }));
+    }
 
     if (rows.length) await admin.from(mirrorTable).upsert(rows, { onConflict: "account_id,hubspot_id" });
 
-    if (isContacts) cursor.contactCount += rows.length;
+    // For deals, fetch associations for the IDs we just upserted
+    if (cursor.phase === "deals" && rows.length) {
+      const dealIds = rows.map((r) => r.hubspot_id);
+      await syncDealAssociations(admin, accountId, accessToken, dealIds);
+    }
+
+    if (cursor.phase === "companies") cursor.companyCount += rows.length;
+    else if (cursor.phase === "contacts") cursor.contactCount += rows.length;
     else cursor.dealCount += rows.length;
 
     const next = data.paging?.next?.after ?? null;
 
-    // Update progress with current count (lightweight heartbeat)
     await setProgress({
+      companies: cursor.companyCount,
       contacts: cursor.contactCount,
       deals: cursor.dealCount,
     });
@@ -240,17 +361,25 @@ async function syncWindowed(
     } else {
       // Window done — advance to next window
       cursor.windowStartMs = cursor.windowEndMs;
-      cursor.windowEndMs = cursor.endMs; // try the rest of the range; will be halved if needed
+      cursor.windowEndMs = cursor.endMs;
       cursor.after = null;
     }
 
-    // Time check — if we're close to the wall clock, persist & yield
     if (Date.now() - startTime > INVOCATION_BUDGET_MS) {
       throw new TimeBudgetExceeded({ ...cursor });
     }
   }
 
   return cursor;
+}
+
+function phaseLabel(p: SyncPhase): string {
+  return p === "companies" ? "Companies" : p === "contacts" ? "Contacts" : "Deals";
+}
+
+function phasePercent(p: SyncPhase): number {
+  // owners(5) -> companies(25) -> contacts(55) -> deals(85) -> complete(100)
+  return p === "companies" ? 25 : p === "contacts" ? 55 : 85;
 }
 
 async function runSync(admin: SupabaseClient, account_id: string, mode: string, resumeCursor?: SyncCursor) {
@@ -267,13 +396,10 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
 
     const accessToken = await getAccessToken(admin, account as Account, encryptionKey);
 
-    // Determine cursor: either resume from saved state or start fresh
     if (resumeCursor) {
       cursor = resumeCursor;
       console.log("[hubspot-sync] resuming", { phase: cursor.phase, windowStartMs: cursor.windowStartMs, after: cursor.after });
     } else {
-      // For "resume" with no cursor, fall back to initial-style window so the user
-      // doesn't get a silent no-op.
       const effectiveMode = mode === "resume" ? "initial" : mode;
       const sinceMs =
         effectiveMode === "initial" || !account.last_sync_at
@@ -288,13 +414,15 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
 
       await syncOwners(admin, account_id, accessToken);
 
+      // Start with companies (must precede contacts/deals so associations resolve)
       cursor = {
-        phase: "contacts",
+        phase: "companies",
         sinceMs,
         endMs,
         windowStartMs: sinceMs,
         windowEndMs: endMs,
         after: null,
+        companyCount: 0,
         contactCount: 0,
         dealCount: 0,
         mode,
@@ -302,14 +430,12 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
     }
 
     const setProgress = async (extra: Record<string, unknown>) => {
-      const phaseLabel = cursor!.phase === "contacts" ? "Contacts" : "Deals";
-      const percent = cursor!.phase === "contacts" ? 40 : 75;
       await admin
         .from("accounts")
         .update({
           sync_progress: {
-            phase: phaseLabel,
-            percent,
+            phase: phaseLabel(cursor!.phase),
+            percent: phasePercent(cursor!.phase),
             heartbeat: new Date().toISOString(),
             cursor,
             ...extra,
@@ -318,10 +444,18 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         .eq("id", account_id);
     };
 
+    // Phase: companies
+    if (cursor.phase === "companies") {
+      cursor = await syncWindowed(admin, account_id, accessToken, cursor, startTime, setProgress);
+      cursor.phase = "contacts";
+      cursor.windowStartMs = cursor.sinceMs;
+      cursor.windowEndMs = cursor.endMs;
+      cursor.after = null;
+    }
+
     // Phase: contacts
     if (cursor.phase === "contacts") {
       cursor = await syncWindowed(admin, account_id, accessToken, cursor, startTime, setProgress);
-      // Done with contacts — transition to deals
       cursor.phase = "deals";
       cursor.windowStartMs = cursor.sinceMs;
       cursor.windowEndMs = cursor.endMs;
@@ -342,6 +476,7 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         sync_progress: {
           phase: "complete",
           percent: 100,
+          companies: cursor.companyCount,
           contacts: cursor.contactCount,
           deals: cursor.dealCount,
           heartbeat: new Date().toISOString(),
@@ -349,19 +484,19 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
       })
       .eq("id", account_id);
 
-    console.log("hubspot-sync completed:", { account_id, contacts: cursor.contactCount, deals: cursor.dealCount });
+    console.log("hubspot-sync completed:", { account_id, companies: cursor.companyCount, contacts: cursor.contactCount, deals: cursor.dealCount });
   } catch (e) {
     if (e instanceof TimeBudgetExceeded) {
-      // Persist cursor and re-invoke ourselves to continue in a fresh window
-      console.log("[hubspot-sync] yielding for re-invocation", { phase: e.cursor.phase, contacts: e.cursor.contactCount, deals: e.cursor.dealCount });
+      console.log("[hubspot-sync] yielding for re-invocation", { phase: e.cursor.phase, companies: e.cursor.companyCount, contacts: e.cursor.contactCount, deals: e.cursor.dealCount });
       await admin
         .from("accounts")
         .update({
           last_sync_status: "running",
           sync_progress: {
-            phase: e.cursor.phase === "contacts" ? "Contacts" : "Deals",
-            percent: e.cursor.phase === "contacts" ? 40 : 75,
+            phase: phaseLabel(e.cursor.phase),
+            percent: phasePercent(e.cursor.phase),
             heartbeat: new Date().toISOString(),
+            companies: e.cursor.companyCount,
             contacts: e.cursor.contactCount,
             deals: e.cursor.dealCount,
             cursor: e.cursor,
@@ -370,7 +505,6 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         })
         .eq("id", account_id);
 
-      // Self re-invoke — wrap in waitUntil so the worker isn't torn down before flush
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const reinvoke = fetch(`${supabaseUrl}/functions/v1/hubspot-sync`, {
@@ -416,7 +550,6 @@ Deno.serve(async (req: Request) => {
 
     let resumeCursor: SyncCursor | undefined;
 
-    // Look at current state — used for both "resume" and watchdog logic
     const { data: acct } = await admin
       .from("accounts")
       .select("sync_progress, last_sync_status")
@@ -434,19 +567,16 @@ Deno.serve(async (req: Request) => {
         console.warn("[hubspot-sync] resume requested but no cursor — restarting fresh initial scan");
       }
     } else {
-      // Refuse to start a brand-new sync on top of a healthy running one
       if (acct?.last_sync_status === "running" && !isStale) {
         return new Response(
           JSON.stringify({ ok: true, queued: false, reason: "already_running" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      // If stale-running and we have a cursor, prefer resuming over wiping progress
       if (isStale && sp.cursor && mode !== "initial") {
         console.log("[hubspot-sync] watchdog: taking over stale running sync via cursor");
         resumeCursor = sp.cursor;
       } else {
-        // Mark as running synchronously so the UI immediately reflects state
         await admin
           .from("accounts")
           .update({
@@ -458,7 +588,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Run the actual sync in the background — bypasses the 150s response timeout
     // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
     EdgeRuntime.waitUntil(runSync(admin, account_id, mode, resumeCursor));
 
