@@ -132,15 +132,23 @@ serve(async (req) => {
       })
       .eq("id", accountId);
 
-    // Trigger initial sync (fire and forget)
-    fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-sync`, {
+    // Trigger initial sync — wrap in waitUntil so the worker doesn't tear down before flush
+    const triggerInitial = fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-sync`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
       },
       body: JSON.stringify({ account_id: accountId, mode: "initial" }),
-    }).catch(() => {});
+    })
+      .then(() => console.log("[hubspot-oauth-callback] initial sync queued"))
+      .catch((e) => console.error("[hubspot-oauth-callback] initial sync trigger failed:", (e as Error).message));
+    try {
+      // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+      EdgeRuntime.waitUntil(triggerInitial);
+    } catch {
+      await triggerInitial;
+    }
 
     return new Response(html(origin, "?connected=1"), { headers: { "Content-Type": "text/html" } });
   } catch (e) {

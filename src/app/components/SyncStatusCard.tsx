@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, CheckCircle2, AlertCircle, Loader2, AlertTriangle } from "lucide-react";
+import { RefreshCw, CheckCircle2, AlertCircle, Loader2, AlertTriangle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,19 +21,40 @@ const STALE_MS = 2 * 60 * 1000; // 2 minutes without heartbeat = stalled
 export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
   const [syncing, setSyncing] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [counts, setCounts] = useState<{ contacts: number; deals: number; owners: number } | null>(null);
   const { toast } = useToast();
 
-  // Tick clock so "stale" detection updates without refetch
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(t);
   }, []);
 
+  // Live counts of mirrored data — confirms the sync is actually writing rows
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const [c, d, o] = await Promise.all([
+        supabase.from("mirror_contacts").select("*", { count: "exact", head: true }).eq("account_id", account.id),
+        supabase.from("mirror_deals").select("*", { count: "exact", head: true }).eq("account_id", account.id),
+        supabase.from("mirror_owners").select("*", { count: "exact", head: true }).eq("account_id", account.id),
+      ]);
+      if (!cancelled) {
+        setCounts({ contacts: c.count ?? 0, deals: d.count ?? 0, owners: o.count ?? 0 });
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [account.id, account.last_sync_at, account.sync_progress]);
+
   const status = account.last_sync_status;
-  const progress = (account.sync_progress as { percent?: number; phase?: string; heartbeat?: string; contacts?: number; deals?: number }) || {};
+  const progress = (account.sync_progress as { percent?: number; phase?: string; heartbeat?: string; contacts?: number; deals?: number; cursor?: unknown }) || {};
   const heartbeatAge = progress.heartbeat ? now - new Date(progress.heartbeat).getTime() : Infinity;
   const isRunning = status === "running";
   const isStalled = isRunning && heartbeatAge > STALE_MS;
+  const neverSynced = !account.last_sync_at;
+  const canResume = !!progress.cursor;
 
   const startSync = async (mode: "initial" | "incremental" | "resume") => {
     setSyncing(true);
@@ -43,8 +64,16 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
       });
       if (error) throw error;
       toast({
-        title: mode === "initial" ? "Full re-sync started" : mode === "resume" ? "Resuming sync" : "Sync started",
-        description: "Running in the background — safe to close this tab.",
+        title:
+          mode === "initial"
+            ? "Full scan started"
+            : mode === "resume"
+            ? "Resuming sync"
+            : "Sync started",
+        description:
+          mode === "initial"
+            ? "Pulling 18 months of contacts, deals, and owners. This runs in the background and may take several minutes."
+            : "Running in the background — safe to close this tab.",
       });
       setTimeout(onRefresh, 1500);
     } catch (err: any) {
@@ -66,25 +95,44 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
               <Loader2 className="h-4 w-4 text-primary animate-spin" />
             ) : status === "error" ? (
               <AlertCircle className="h-4 w-4 text-destructive" />
+            ) : neverSynced ? (
+              <PlayCircle className="h-4 w-4 text-muted-foreground" />
             ) : (
               <CheckCircle2 className="h-4 w-4 text-primary" />
             )}
             <span className="font-medium capitalize">
-              {isStalled ? "Stalled" : status || "Idle"}
+              {isStalled ? "Stalled" : neverSynced && !isRunning ? "Never synced" : status || "Idle"}
             </span>
           </div>
           <div className="text-xs text-muted-foreground mt-1">Last sync: {formatDate(account.last_sync_at)}</div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => startSync(isStalled ? "resume" : "incremental")}
-          disabled={syncing || (isRunning && !isStalled)}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-          {isStalled ? "Restart sync" : "Sync now"}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {neverSynced && !isRunning && (
+            <Button
+              size="sm"
+              onClick={() => startSync("initial")}
+              disabled={syncing}
+              className="gap-2"
+            >
+              <PlayCircle className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              Run full initial sync
+            </Button>
+          )}
+          {(!neverSynced || isRunning || isStalled) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                startSync(isStalled && canResume ? "resume" : neverSynced ? "initial" : "incremental")
+              }
+              disabled={syncing || (isRunning && !isStalled)}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              {isStalled ? "Restart sync" : "Sync now"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {isRunning && progress.percent !== undefined && (
@@ -107,6 +155,24 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
       {account.last_sync_error && !isRunning && (
         <div className="mt-3 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-2">
           {account.last_sync_error}
+        </div>
+      )}
+
+      {/* Diagnostic counts — confirms data is actually flowing */}
+      {counts && (
+        <div className="mt-4 pt-4 border-t border-border grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div className="text-lg font-semibold">{counts.contacts.toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Contacts</div>
+          </div>
+          <div>
+            <div className="text-lg font-semibold">{counts.deals.toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Deals</div>
+          </div>
+          <div>
+            <div className="text-lg font-semibold">{counts.owners.toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Owners</div>
+          </div>
         </div>
       )}
     </div>

@@ -272,8 +272,11 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
       cursor = resumeCursor;
       console.log("[hubspot-sync] resuming", { phase: cursor.phase, windowStartMs: cursor.windowStartMs, after: cursor.after });
     } else {
+      // For "resume" with no cursor, fall back to initial-style window so the user
+      // doesn't get a silent no-op.
+      const effectiveMode = mode === "resume" ? "initial" : mode;
       const sinceMs =
-        mode === "initial" || !account.last_sync_at
+        effectiveMode === "initial" || !account.last_sync_at
           ? Date.now() - 18 * 30 * 24 * 60 * 60 * 1000
           : new Date(account.last_sync_at).getTime() - 5 * 60 * 1000;
       const endMs = Date.now() + 1;
@@ -367,21 +370,24 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         })
         .eq("id", account_id);
 
-      // Self re-invoke
+      // Self re-invoke — wrap in waitUntil so the worker isn't torn down before flush
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const reinvoke = fetch(`${supabaseUrl}/functions/v1/hubspot-sync`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ account_id, mode: "resume" }),
+      })
+        .then(() => console.log("[hubspot-sync] re-invoked successfully"))
+        .catch((invokeErr) => console.error("[hubspot-sync] failed to re-invoke:", (invokeErr as Error).message));
       try {
-        await fetch(`${supabaseUrl}/functions/v1/hubspot-sync`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ account_id, mode: "resume" }),
-        });
-        console.log("[hubspot-sync] re-invoked successfully");
-      } catch (invokeErr) {
-        console.error("[hubspot-sync] failed to re-invoke:", (invokeErr as Error).message);
+        // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+        EdgeRuntime.waitUntil(reinvoke);
+      } catch {
+        await reinvoke;
       }
       return;
     }
@@ -410,29 +416,46 @@ Deno.serve(async (req: Request) => {
 
     let resumeCursor: SyncCursor | undefined;
 
+    // Look at current state — used for both "resume" and watchdog logic
+    const { data: acct } = await admin
+      .from("accounts")
+      .select("sync_progress, last_sync_status")
+      .eq("id", account_id)
+      .single();
+    const sp = (acct?.sync_progress as { cursor?: SyncCursor; heartbeat?: string }) || {};
+    const heartbeatAge = sp.heartbeat ? Date.now() - new Date(sp.heartbeat).getTime() : Infinity;
+    const STALE_MS = 5 * 60 * 1000;
+    const isStale = acct?.last_sync_status === "running" && heartbeatAge > STALE_MS;
+
     if (mode === "resume") {
-      // Load cursor from accounts.sync_progress
-      const { data: acct } = await admin
-        .from("accounts")
-        .select("sync_progress")
-        .eq("id", account_id)
-        .single();
-      const sp = (acct?.sync_progress as { cursor?: SyncCursor }) || {};
       if (sp.cursor) {
         resumeCursor = sp.cursor;
       } else {
-        console.warn("[hubspot-sync] resume requested but no cursor found — starting fresh incremental");
+        console.warn("[hubspot-sync] resume requested but no cursor — restarting fresh initial scan");
       }
     } else {
-      // Mark as running synchronously so the UI immediately reflects state
-      await admin
-        .from("accounts")
-        .update({
-          last_sync_status: "running",
-          last_sync_error: null,
-          sync_progress: { phase: "starting", percent: 0, heartbeat: new Date().toISOString() },
-        })
-        .eq("id", account_id);
+      // Refuse to start a brand-new sync on top of a healthy running one
+      if (acct?.last_sync_status === "running" && !isStale) {
+        return new Response(
+          JSON.stringify({ ok: true, queued: false, reason: "already_running" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      // If stale-running and we have a cursor, prefer resuming over wiping progress
+      if (isStale && sp.cursor && mode !== "initial") {
+        console.log("[hubspot-sync] watchdog: taking over stale running sync via cursor");
+        resumeCursor = sp.cursor;
+      } else {
+        // Mark as running synchronously so the UI immediately reflects state
+        await admin
+          .from("accounts")
+          .update({
+            last_sync_status: "running",
+            last_sync_error: null,
+            sync_progress: { phase: "starting", percent: 0, heartbeat: new Date().toISOString() },
+          })
+          .eq("id", account_id);
+      }
     }
 
     // Run the actual sync in the background — bypasses the 150s response timeout
