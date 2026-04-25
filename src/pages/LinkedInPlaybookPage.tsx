@@ -49,6 +49,39 @@ const SCRIPTS = [
   },
 ];
 
+const PILLARS = [
+  { num: '01', name: 'AI', focus: 'Operational AI, never hype.' },
+  { num: '02', name: 'Startups & Scaleups', focus: 'Growth-stage friction patterns.' },
+  { num: '03', name: 'Leadership', focus: 'Operator decisions, not platitudes.' },
+  { num: '04', name: 'Culture', focus: 'How teams actually break.' },
+  { num: '05', name: 'Personal Brand', focus: 'IP series + Operator\'s Journal.' },
+  { num: '06', name: 'Digital Business', focus: 'Revenue systems, leak math.' },
+];
+
+const HIDDEN_MOVES = [
+  { num: 1, name: 'Comment-Jack the Giants', tactic: 'Top-5 commenter on 30 leaders, sharp insight only', soWhat: 'Borrow distribution for free' },
+  { num: 2, name: 'The Audit Carousel', tactic: '10-slide teardown of anonymized $2M+ business problem', soWhat: 'Specificity sells without pitching' },
+  { num: 3, name: 'The Soft Front Door', tactic: 'End posts with "Comment [KEYWORD] for the PDF"', soWhat: 'Velocity spikes algo + warm DMs' },
+  { num: 4, name: 'Expensive Mistake Hook', tactic: '"$4M company lost 31% of leads due to [error]"', soWhat: 'Pain + specificity = scroll-stop' },
+  { num: 5, name: 'Reverse-Engineer Buyer Search', tactic: 'Search "looking for help with [service]" → Latest', soWhat: 'Real-time prospects in active pain' },
+  { num: 6, name: 'The Loom Audit Weapon', tactic: '3-min video teardown via DM', soWhat: '20–40% reply vs 1% cold InMail' },
+  { num: 7, name: 'Content Series Stacking', tactic: 'Numbered series ("Business Autopsy #14")', soWhat: 'Sticky followers fear missing #15' },
+  { num: 8, name: 'Mid-Manager DMs', tactic: 'Target Ops/Marketing Directors with helpful observations', soWhat: 'They\'re the actual buyers' },
+  { num: 9, name: 'Reciprocity Networks', tactic: '10 non-competing peers comment within 30 min', soWhat: 'Early engagement = quality signal' },
+];
+
+const PHASES = [
+  { range: 'Days 1–30', label: 'QUIT ZONE', actions: ['Define 6 pillars + Song Sheet', '100 thoughtful comments/week on giants', 'Establish daily choreography rhythm'] },
+  { range: 'Days 31–60', label: 'FLATLINE', actions: ['Launch Business Autopsy series', '50 Loom audits/week', 'Carousel cadence stable'] },
+  { range: 'Days 61–90', label: 'IGNITION', actions: ['3-step batching system live', 'VA for DM management', 'Newsletter launched (deplatform traffic)'] },
+];
+
+const GOLDEN_METRICS = [
+  { name: 'Daily Follower Growth', target: 'Trend > zero', why: 'Definitive brand health check' },
+  { name: 'Repost-to-Like Ratio', target: '20%', why: 'Proves content is "claimable" by others' },
+  { name: 'Newsletter Subscribers', target: 'Compounding', why: 'Rented attention → owned equity' },
+];
+
 const STORAGE_KEY = (date: string) => `lkin-playbook-${date}`;
 const START_KEY = 'lkin-playbook-start-date';
 
@@ -166,6 +199,23 @@ const LinkedInPlaybookPage: React.FC = () => {
             ))}
           </div>
 
+          {/* Six Content Pillars */}
+          <div className="mb-10">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">The Six Content Pillars</h2>
+              <span className="font-mono text-xs text-muted-foreground">EVERY POST MAPS TO ONE</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {PILLARS.map((p) => (
+                <Card key={p.num} className="p-4 border bg-background/50 backdrop-blur">
+                  <div className="font-mono text-xs text-amber tracking-widest mb-1">PILLAR {p.num}</div>
+                  <div className="font-display font-bold text-foreground mb-1">{p.name}</div>
+                  <p className="text-xs text-muted-foreground">{p.focus}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           {/* Main grid: choreography + curve */}
           <div className="grid lg:grid-cols-3 gap-6 mb-10">
             {/* Choreography */}
@@ -255,6 +305,78 @@ const LinkedInPlaybookPage: React.FC = () => {
                     </Button>
                   </div>
                   <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-sans leading-relaxed">{s.body}</pre>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* The 9 Hidden Moves */}
+          <div className="mt-12">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">The 9 Hidden Moves</h2>
+              <span className="font-mono text-xs text-muted-foreground">UNFILTERED PLAYBOOK</span>
+            </div>
+            <div className="grid md:grid-cols-3 gap-3">
+              {HIDDEN_MOVES.map((m) => (
+                <Card key={m.num} className="p-4 border bg-background/50 backdrop-blur">
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="font-mono text-2xl font-bold text-amber">#{m.num}</span>
+                    <span className="font-display font-bold text-foreground text-sm leading-tight">{m.name}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2"><span className="font-mono text-amber">DO →</span> {m.tactic}</div>
+                  <div className="text-xs text-foreground/80 italic"><span className="font-mono text-[hsl(var(--crimson))] not-italic">SO WHAT →</span> {m.soWhat}</div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* 90-Day Execution Plan */}
+          <div className="mt-12">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">90-Day Execution Plan</h2>
+              <span className="font-mono text-xs text-muted-foreground">CURRENT: DAY {dayNumber}</span>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              {PHASES.map((phase, i) => {
+                const startDay = i * 30;
+                const endDay = startDay + 30;
+                const isActive = dayNumber >= startDay && dayNumber < endDay;
+                const isPast = dayNumber >= endDay;
+                return (
+                  <Card
+                    key={phase.range}
+                    className={`p-5 border backdrop-blur transition ${
+                      isActive ? 'border-amber bg-amber/5' : isPast ? 'border-emerald-500/30 bg-emerald-500/5 opacity-70' : 'border-border bg-background/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-xs tracking-widest text-amber">{phase.range}</span>
+                      {isActive && <Badge className="bg-amber text-amber-foreground text-[10px]">ACTIVE</Badge>}
+                      {isPast && <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500">DONE</Badge>}
+                    </div>
+                    <div className="font-display text-xl font-bold text-foreground mb-3">{phase.label}</div>
+                    <ul className="space-y-1.5 text-sm text-muted-foreground">
+                      {phase.actions.map((a) => (
+                        <li key={a} className="flex gap-2"><span className="text-amber">·</span><span>{a}</span></li>
+                      ))}
+                    </ul>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Golden Metrics */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-display font-bold text-foreground mb-1">The Golden Metrics</h2>
+            <p className="text-sm text-muted-foreground mb-4">Three numbers. Ignore the rest.</p>
+            <div className="grid md:grid-cols-3 gap-3">
+              {GOLDEN_METRICS.map((m) => (
+                <Card key={m.name} className="p-5 border border-amber/30 bg-amber/5 backdrop-blur">
+                  <div className="font-mono text-xs tracking-wider text-amber mb-1">METRIC</div>
+                  <div className="font-display text-lg font-bold text-foreground mb-2">{m.name}</div>
+                  <div className="text-2xl font-mono font-bold text-foreground mb-2">{m.target}</div>
+                  <p className="text-xs text-muted-foreground">{m.why}</p>
                 </Card>
               ))}
             </div>
