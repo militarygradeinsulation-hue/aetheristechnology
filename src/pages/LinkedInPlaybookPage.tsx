@@ -49,6 +49,39 @@ const SCRIPTS = [
   },
 ];
 
+const PILLARS = [
+  { num: '01', name: 'AI', focus: 'Operational AI, never hype.' },
+  { num: '02', name: 'Startups & Scaleups', focus: 'Growth-stage friction patterns.' },
+  { num: '03', name: 'Leadership', focus: 'Operator decisions, not platitudes.' },
+  { num: '04', name: 'Culture', focus: 'How teams actually break.' },
+  { num: '05', name: 'Personal Brand', focus: 'IP series + Operator\'s Journal.' },
+  { num: '06', name: 'Digital Business', focus: 'Revenue systems, leak math.' },
+];
+
+const HIDDEN_MOVES = [
+  { num: 1, name: 'Comment-Jack the Giants', tactic: 'Top-5 commenter on 30 leaders, sharp insight only', soWhat: 'Borrow distribution for free' },
+  { num: 2, name: 'The Audit Carousel', tactic: '10-slide teardown of anonymized $2M+ business problem', soWhat: 'Specificity sells without pitching' },
+  { num: 3, name: 'The Soft Front Door', tactic: 'End posts with "Comment [KEYWORD] for the PDF"', soWhat: 'Velocity spikes algo + warm DMs' },
+  { num: 4, name: 'Expensive Mistake Hook', tactic: '"$4M company lost 31% of leads due to [error]"', soWhat: 'Pain + specificity = scroll-stop' },
+  { num: 5, name: 'Reverse-Engineer Buyer Search', tactic: 'Search "looking for help with [service]" → Latest', soWhat: 'Real-time prospects in active pain' },
+  { num: 6, name: 'The Loom Audit Weapon', tactic: '3-min video teardown via DM', soWhat: '20–40% reply vs 1% cold InMail' },
+  { num: 7, name: 'Content Series Stacking', tactic: 'Numbered series ("Business Autopsy #14")', soWhat: 'Sticky followers fear missing #15' },
+  { num: 8, name: 'Mid-Manager DMs', tactic: 'Target Ops/Marketing Directors with helpful observations', soWhat: 'They\'re the actual buyers' },
+  { num: 9, name: 'Reciprocity Networks', tactic: '10 non-competing peers comment within 30 min', soWhat: 'Early engagement = quality signal' },
+];
+
+const PHASES = [
+  { range: 'Days 1–30', label: 'QUIT ZONE', actions: ['Define 6 pillars + Song Sheet', '100 thoughtful comments/week on giants', 'Establish daily choreography rhythm'] },
+  { range: 'Days 31–60', label: 'FLATLINE', actions: ['Launch Business Autopsy series', '50 Loom audits/week', 'Carousel cadence stable'] },
+  { range: 'Days 61–90', label: 'IGNITION', actions: ['3-step batching system live', 'VA for DM management', 'Newsletter launched (deplatform traffic)'] },
+];
+
+const GOLDEN_METRICS = [
+  { name: 'Daily Follower Growth', target: 'Trend > zero', why: 'Definitive brand health check' },
+  { name: 'Repost-to-Like Ratio', target: '20%', why: 'Proves content is "claimable" by others' },
+  { name: 'Newsletter Subscribers', target: 'Compounding', why: 'Rented attention → owned equity' },
+];
+
 const STORAGE_KEY = (date: string) => `lkin-playbook-${date}`;
 const START_KEY = 'lkin-playbook-start-date';
 
