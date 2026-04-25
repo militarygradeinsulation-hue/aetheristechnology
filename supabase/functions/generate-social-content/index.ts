@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
+    const body = await req.json();
+    const { url } = body;
+    const autopsyNumber = typeof body.autopsyNumber === "number" ? body.autopsyNumber : Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) % 999;
     if (!url || typeof url !== "string") {
       return new Response(JSON.stringify({ error: "URL is required" }), {
         status: 400,
@@ -77,15 +79,19 @@ Generate a Forensic Content Pack using the five-format architecture below. Retur
 THE FIVE FORMATS:
 
 FORMAT 1 — THE CASE FILE (flagship, 2 posts)
-Forensic case studies. Each has:
+Forensic case studies. The Tuesday Case File is ALWAYS the Autopsy series — title format: "Autopsy #N: [vertical] — [the leak]" (N is provided as autopsyNumber). Each has:
 - "caseId": a short alphanumeric case ID (e.g. "CF-0041")
 - "status": "ACTIVE"
+- "hook": THE HOOK — MANDATORY formula = $[specific dollar] + [specific %] + [named wound]. Example: "This $4M HVAC company lost 31% of inbound leads from a single CRM field nobody touched in 2 years."
 - "finding": THE FINDING — one sentence, the core revenue leak discovered
 - "evidence": THE EVIDENCE — 2-3 sentences, what was observed, specific data points
 - "math": THE MATH — one line with specific dollar amounts or percentages (e.g. "$1.4M/year", "23% margin compression"), NEVER vague ("millions", "significant")
 - "fixTease": THE FIX — 1-2 sentences teasing the fix WITHOUT giving it away. End with tension.
 - "lesson": THE LESSON — one sentence, the transferable pattern
 - "format": "case_file"
+- "isAutopsy": boolean — true ONLY for the Tuesday post. If true, prepend title with "Autopsy #N:"
+- "isCarousel": boolean — at least ONE of the 2 case files per week MUST be a carousel
+- "carouselSlides": if isCarousel=true, array of 7-10 slide objects { "slideNumber": 1, "headline": "...", "body": "..." }
 
 FORMAT 2 — LEAK OF THE WEEK (1 post)
 Name one specific leak pattern. Define it. Show the signs. Teach them to spot it. Don't give away the fix.
@@ -96,12 +102,14 @@ Name one specific leak pattern. Define it. Show the signs. Teach them to spot it
 - "format": "leak_of_week"
 
 FORMAT 3 — THE DEAD SIMPLE DIAGNOSTIC (1 post)
-One 60-second test a reader can run on themselves. Shareable. Saveable.
+One 60-second test a reader can run on themselves. Shareable. Saveable. Carousel-eligible.
 - "testName": name of the diagnostic (e.g. "The 3-Email Test")
 - "test": the actual test steps, 3-5 numbered steps
 - "threshold": THE THRESHOLD — what good vs. bad looks like, specific numbers
 - "whatItMeans": WHAT IT MEANS — 2-3 sentences interpreting results
 - "format": "diagnostic"
+- "isCarousel": boolean — strongly preferred true (cheat-sheet format gets 7x dwell)
+- "carouselSlides": if isCarousel=true, array of 7-10 slide objects { "slideNumber": 1, "headline": "...", "body": "..." }
 
 FORMAT 4 — OPERATOR'S JOURNAL (2 posts)
 Unpolished. Personal. Short. Counter-signals the guru aesthetic. NO template. Field notes. 3-8 lines max. A thing you saw, a thing that broke, a thing you're thinking about. No CTA. No link. This is where the human shows up.
@@ -116,6 +124,23 @@ One defensible dissent. Not rage-bait. Pattern-recognition dissent.
 - "counter": THE COUNTER — the strongest argument against your position, acknowledged honestly
 - "position": THE POSITION — your final stance, 1-2 sentences, defensible
 - "format": "contrarian"
+
+═════════════════════════════════════════════════════════
+THE SOFT FRONT DOOR (mandatory on every CTA-eligible post)
+═════════════════════════════════════════════════════════
+Every post EXCEPT operators_journal MUST end with a "Soft Front Door" CTA — never a pitch.
+Format: "Comment [KEYWORD] for the [asset name]."
+Each post needs a UNIQUE keyword (e.g., AUTOPSY, BLEED, LEAK14, CHECKLIST, SCAN, FORENSIC, PROOF).
+The DM that follows sends the asset with ZERO pitch + ONE curious follow-up question.
+
+Add this object to every non-journal post:
+"softFrontDoor": {
+  "keyword": "AUTOPSY",
+  "assetName": "the 14-point HVAC leak checklist (PDF)",
+  "publicCta": "Comment AUTOPSY and I'll DM you the 14-point checklist I use to find this leak in any HVAC P&L.",
+  "dmScript": "Here's the checklist you asked for — [link]. No pitch.",
+  "followUpQuestion": "Quick curious question — when's the last time anyone audited [specific system from your business]?"
+}
 
 WEEKLY SCHEDULE (return as "weeklySchedule"):
 [
