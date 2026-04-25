@@ -46,6 +46,7 @@ import CrmDemoPage from "./pages/CrmDemoPage";
 import CapabilitiesPage from "./pages/CapabilitiesPage";
 import LeakAuditPage from "./pages/LeakAuditPage";
 import RepPortalPage from "./pages/RepPortalPage";
+import LinkedInPlaybookPage from "./pages/LinkedInPlaybookPage";
 import AppRouter from "./app/AppRouter";
 
 const queryClient = new QueryClient();
@@ -109,6 +110,7 @@ const App = () => (
                   <Route path="/capabilities" element={<CapabilitiesPage />} />
                   <Route path="/leak-audit" element={<LeakAuditPage />} />
                   <Route path="/rep-portal" element={<RepPortalPage />} />
+                  <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

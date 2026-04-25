@@ -19,6 +19,7 @@ Updated: now
 - [Brand Strategy](mem://business/brand-strategy) — Business Forensics Operator positioning, Leak Audit methodology, LinkedIn growth content framework (Brandjacking/Newsjacking/Namejacking/Hot Takes), proprietary frameworks
 - [Content Strategy](mem://marketing/content-strategy) — Automated blog/playbook schedules, LinkedIn 360 Brew
 - [Content Architecture](mem://marketing/content-architecture) — Five-format forensic content system (Case File, Leak of the Week, Diagnostic, Operator's Journal, Contrarian), seven rules, blog/playbook style guides
+- [LinkedIn Playbook](mem://marketing/linkedin-playbook) — Three Gears (Borrowed Distribution / Forensic Content / Surgical Outbound), Expensive Mistake hook formula, Soft Front Door funnel, Autopsy series, daily 5-block choreography, 90-day activation curve. Visible at /playbook/linkedin.
 - [Structural Influences](mem://marketing/structural-influences) — 13-person influence framework (Hormozi, Naval, Jocko, Sutherland, etc.), steal structure not voice, format-to-influence mapping
 - [Visual Identity](mem://style/visual-identity) — Dark theme aesthetics, typography, Vimeo demo rules
 - [Forensic Identity](mem://style/forensic-identity) — Case-file aesthetics, crimson rules, serif/mono typography for the forensics rebrand
