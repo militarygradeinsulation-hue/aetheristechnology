@@ -4,7 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
@@ -29,6 +29,7 @@ const FREE_PLAYBOOK_COUNT = 3;
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
   const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
   const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -40,9 +41,12 @@ const ResourcesPage = () => {
     if (iframeRef.current) {
       const p = new Player(iframeRef.current);
       playerRef.current = p;
+      // Ensure the player starts muted so autoplay works reliably
+      p.setVolume(0).catch(() => {});
       p.on('play', () => setIsPlaying(true));
       p.on('pause', () => setIsPlaying(false));
-      return () => { p.off('play'); p.off('pause'); };
+      p.on('volumechange', ({ volume }: { volume: number }) => setIsMuted(volume === 0));
+      return () => { p.off('play'); p.off('pause'); p.off('volumechange'); };
     }
   }, []);
 
@@ -50,6 +54,11 @@ const ResourcesPage = () => {
     if (!playerRef.current) return;
     if (isPlaying) { playerRef.current.pause(); } else { playerRef.current.play(); }
   }, [isPlaying]);
+
+  const toggleMute = useCallback(() => {
+    if (!playerRef.current) return;
+    playerRef.current.setVolume(isMuted ? 1 : 0).catch(() => {});
+  }, [isMuted]);
 
   const { data: playbooks, isLoading } = useQuery({
     queryKey: ['playbooks'],
@@ -195,13 +204,20 @@ const ResourcesPage = () => {
                 <div className="w-full h-full rounded-full overflow-hidden">
                   <iframe
                     ref={iframeRef}
-                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
+                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0"
                     className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
                     allow="autoplay; fullscreen"
                     allowFullScreen
                     title="Aetheris Playbooks"
                   />
                 </div>
+                <button
+                  onClick={toggleMute}
+                  className="absolute bottom-3 left-3 md:bottom-4 md:left-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
+                  aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
                 <button
                   onClick={togglePlay}
                   className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
