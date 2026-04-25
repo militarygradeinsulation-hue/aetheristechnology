@@ -71,6 +71,8 @@ serve(async (req) => {
 
     const prompt = `You are a Business Forensics Operator writing LinkedIn content for the company described below. You are NOT a consultant, NOT a thought leader, NOT an AI guru. You find where businesses bleed and you stop the bleeding.
 
+This week's Autopsy series number is: ${autopsyNumber}. Use it on the Tuesday Case File title: "Autopsy #${autopsyNumber}: [vertical] — [the leak]".
+
 WEBSITE CONTENT:
 ${truncated}
 
