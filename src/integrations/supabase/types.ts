@@ -1086,6 +1086,62 @@ export type Database = {
         }
         Relationships: []
       }
+      mirror_companies: {
+        Row: {
+          account_id: string
+          annual_revenue: number | null
+          created_date: string | null
+          domain: string | null
+          hubspot_id: string
+          id: string
+          industry: string | null
+          last_activity_date: string | null
+          name: string | null
+          num_employees: number | null
+          owner_id: string | null
+          properties: Json | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          annual_revenue?: number | null
+          created_date?: string | null
+          domain?: string | null
+          hubspot_id: string
+          id?: string
+          industry?: string | null
+          last_activity_date?: string | null
+          name?: string | null
+          num_employees?: number | null
+          owner_id?: string | null
+          properties?: Json | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          annual_revenue?: number | null
+          created_date?: string | null
+          domain?: string | null
+          hubspot_id?: string
+          id?: string
+          industry?: string | null
+          last_activity_date?: string | null
+          name?: string | null
+          num_employees?: number | null
+          owner_id?: string | null
+          properties?: Json | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_companies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mirror_contacts: {
         Row: {
           account_id: string
@@ -1135,6 +1191,64 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mirror_contacts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mirror_deal_companies: {
+        Row: {
+          account_id: string
+          company_id: string
+          deal_id: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          company_id: string
+          deal_id: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          company_id?: string
+          deal_id?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_deal_companies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mirror_deal_contacts: {
+        Row: {
+          account_id: string
+          contact_id: string
+          deal_id: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          contact_id: string
+          deal_id: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          contact_id?: string
+          deal_id?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mirror_deal_contacts_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
