@@ -712,6 +712,9 @@ const AdminDashboard: React.FC = () => {
         {/* My Library */}
         {activeTab === 'library' && <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />}
 
+        {/* Content Engine */}
+        {activeTab === 'engine' && <ContentEngine />}
+
         {/* CRM */}
         {activeTab === 'crm' && <AdminCrm />}
 
