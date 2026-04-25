@@ -29,6 +29,7 @@ const FREE_PLAYBOOK_COUNT = 3;
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
   const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
   const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -40,9 +41,12 @@ const ResourcesPage = () => {
     if (iframeRef.current) {
       const p = new Player(iframeRef.current);
       playerRef.current = p;
+      // Ensure the player starts muted so autoplay works reliably
+      p.setVolume(0).catch(() => {});
       p.on('play', () => setIsPlaying(true));
       p.on('pause', () => setIsPlaying(false));
-      return () => { p.off('play'); p.off('pause'); };
+      p.on('volumechange', ({ volume }: { volume: number }) => setIsMuted(volume === 0));
+      return () => { p.off('play'); p.off('pause'); p.off('volumechange'); };
     }
   }, []);
 
@@ -50,6 +54,11 @@ const ResourcesPage = () => {
     if (!playerRef.current) return;
     if (isPlaying) { playerRef.current.pause(); } else { playerRef.current.play(); }
   }, [isPlaying]);
+
+  const toggleMute = useCallback(() => {
+    if (!playerRef.current) return;
+    playerRef.current.setVolume(isMuted ? 1 : 0).catch(() => {});
+  }, [isMuted]);
 
   const { data: playbooks, isLoading } = useQuery({
     queryKey: ['playbooks'],
