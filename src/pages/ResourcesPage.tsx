@@ -4,7 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
