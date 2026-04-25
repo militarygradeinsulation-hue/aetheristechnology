@@ -204,13 +204,20 @@ const ResourcesPage = () => {
                 <div className="w-full h-full rounded-full overflow-hidden">
                   <iframe
                     ref={iframeRef}
-                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&title=0&byline=0&portrait=0"
+                    src="https://player.vimeo.com/video/1185171761?autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0"
                     className="w-[200%] h-[200%] -ml-[50%] -mt-[25%]"
                     allow="autoplay; fullscreen"
                     allowFullScreen
                     title="Aetheris Playbooks"
                   />
                 </div>
+                <button
+                  onClick={toggleMute}
+                  className="absolute bottom-3 left-3 md:bottom-4 md:left-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
+                  aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
                 <button
                   onClick={togglePlay}
                   className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10 w-10 h-10 rounded-full bg-amber/90 hover:bg-amber flex items-center justify-center text-background shadow-lg transition-all opacity-70 group-hover:opacity-100"
