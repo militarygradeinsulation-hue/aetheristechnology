@@ -310,7 +310,7 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
     doc.setTextColor(217, 158, 46);
     doc.setFont("helvetica", "bold");
     doc.text("(317) 376-2110", pageW / 2, contactY + 12, { align: "center" });
-    doc.text("hello@aetheris.technology", pageW / 2, contactY + 26, { align: "center" });
+    doc.text("aetheris.technology@outlook.com", pageW / 2, contactY + 26, { align: "center" });
     doc.text("aetheris.technology", pageW / 2, contactY + 40, { align: "center" });
     doc.setFontSize(9);
     doc.setTextColor(120, 115, 110);

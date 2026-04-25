@@ -390,7 +390,7 @@ const PlaybookSection = () => (
         </div>
         <div className="mt-8 p-6 rounded-lg bg-primary/10 border border-primary/20 text-center">
           <p className="text-lg font-semibold text-foreground mb-2">Questions? Need help with a prospect?</p>
-          <p className="text-muted-foreground">Email <a href="mailto:hello@aetheris.technology" className="text-primary hover:underline">hello@aetheris.technology</a> or call <a href="tel:+13173762110" className="text-primary hover:underline">(317) 376-2110</a></p>
+          <p className="text-muted-foreground">Email <a href="mailto:aetheris.technology@outlook.com" className="text-primary hover:underline">aetheris.technology@outlook.com</a> or call <a href="tel:+13173762110" className="text-primary hover:underline">(317) 376-2110</a></p>
         </div>
       </CardContent>
     </Card>

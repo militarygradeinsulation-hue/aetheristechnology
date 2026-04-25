@@ -44,14 +44,14 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
 
           <RevealOnScroll delay={0.2}>
             <a
-              href="mailto:hello@aetheris.technology?subject=I%20Need%20Help%20With%20My%20Business%20-%2014%20Day%20Diagnostic"
+              href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business%20-%2014%20Day%20Diagnostic"
               className="glass glass-hover p-8 rounded-2xl flex flex-col items-center text-center group hover:border-amber/30 border border-transparent transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
                 <Mail className="w-8 h-8 text-amber" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2 font-display">Send an Email</h3>
-              <p className="text-lg font-medium text-amber mb-2 break-all">hello@aetheris.technology</p>
+              <p className="text-lg font-medium text-amber mb-2 break-all">aetheris.technology@outlook.com</p>
               <p className="text-sm text-muted-foreground">Tap to email. We respond within 24 hours. Usually faster.</p>
             </a>
           </RevealOnScroll>
