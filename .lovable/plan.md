@@ -1,74 +1,85 @@
-# What's actually happening with your HubSpot connection
+## Reality check first — what's actually in your account right now
 
-## The good news
-The OAuth handshake **is working**. Your real HubSpot portal (`244481481`) connected successfully on 2026-04-24 at 22:44 UTC. Tokens (access + refresh) are encrypted and stored, and `hubspot-oauth-callback` did fire `hubspot-sync` immediately after.
-
-## The bad news — why no full scan finished
-Your account row currently shows:
+Pulled live from your database for portal `244481481`:
 
 ```text
-last_sync_status: error
-last_sync_at:     null
-last_sync_error:  "Sync interrupted by edge function timeout..."
-sync_progress:    {}     <-- empty
-mirror_contacts:  0 rows for this account
-mirror_deals:     2 rows
-mirror_owners:    50 rows
+last_sync_status: NULL  (was reset by the prior migration — clean slate)
+last_sync_error:  NULL
+sync_progress:    {}
+mirror_contacts:  48,675 rows
+mirror_deals:     0 rows
+mirror_owners:    2 rows
+mirror_companies: TABLE DOES NOT EXIST
 ```
 
-Three things broke the full scan:
+So the picture is a bit different from what you described:
 
-### 1. The previous "stalled sync" cleanup wiped the resume cursor
-A migration ran on 2026-04-24 that did:
-```sql
-UPDATE accounts SET last_sync_status='error', sync_progress='{}'
-WHERE last_sync_status='running';
+- The previous run actually **did** mirror 48,675 contacts before dying — not 0. Contacts ran first, made deep progress, then the worker tore down.
+- Owners is at **2**, not 50. (You may have been looking at the demo account `DEMO-12345`, which is seeded data.) HubSpot says you have very few real owners, or pagination broke after the first page.
+- Deals is genuinely **0** — the sync never reached the deals phase.
+- **There is no `mirror_companies` table at all.** Companies aren't being synced — they're just not in scope yet. Same for lists, forms, workflows, marketing data.
+
+## What to actually fix
+
+### 1. Add companies sync (currently missing entirely)
+
+Create `mirror_companies` table and add a `companies` phase to `hubspot-sync` between `owners` and `contacts`. Schema mirrors `mirror_deals` shape (id, name, domain, industry, owner_id, created_date, properties JSONB, synced_at). This is the big gap — without it, deal→company associations have nothing to point to.
+
+### 2. Fix sync ordering so associations resolve
+
+Current order: `owners → contacts → deals`. New order:
+```text
+owners → companies → contacts → deals
 ```
-That cleared the `cursor` field that `hubspot-sync` needs to resume. So when the UI's "Restart sync" button calls `mode: "resume"`, the function logs *"resume requested but no cursor found"* and silently does nothing useful — the SyncStatusCard's restart button can never actually restart this account.
+Owners and companies are reference data — they must exist before contacts/deals so foreign keys resolve. (Today there are no FK constraints between mirror tables, but the audit logic downstream depends on associations being lookup-able.)
 
-### 2. The auto-reinvocation chain is fragile
-`hubspot-sync` is built to yield at 110s and self-re-invoke via `fetch(.../hubspot-sync)`. But:
-- The re-invoke uses plain `fetch` with no `EdgeRuntime.waitUntil` wrapping it, so if the parent worker is torn down before the POST flushes, the chain dies.
-- The re-invoke posts `mode: "resume"` — which (as above) requires a saved cursor. If anything wipes `sync_progress` between yields (UI writes, the cleanup migration, a manual click), the resume becomes a no-op.
+### 3. Fix owners pagination
 
-### 3. The "Sync now" button on the dashboard sends `incremental`, not `initial`
-For an account that has **never successfully completed an initial sync** (`last_sync_at IS NULL`), an incremental run still works (the function falls back to an 18-month window), but it's the same code path that timed out the first time. There's no UI affordance to explicitly re-trigger a clean **initial** full scan.
+Owners endpoint uses `limit=100` and follows `paging.next.after`. The current code is correct in shape but only landed 2 rows. Add a debug log of `data.paging` per page so we can see whether HubSpot is returning a `next` cursor that we're discarding, or genuinely returning only 2 owners on page 1. If pagination is fine, 2 is the real number.
 
-### Why this account specifically failed
-Portal `244481481` is a real HubSpot portal. The HubSpot Search API returns max 10,000 results per query, so `hubspot-sync` walks date windows. With 18 months of contacts + deals at PAGE_SIZE=100 and aggressive rate limiting, the first invocation hit the 110s budget mid-window, yielded, the re-invoke either never landed or landed before the cursor was committed, and the sync sat in `running` until the cleanup migration killed it.
+### 4. Pull deal↔contact and deal↔company associations
 
-(For contrast: the demo account `DEMO-12345` shows `success` with 143,223 "contacts" because that data was inserted directly by `seed-demo-data`, not by `hubspot-sync`.)
+The Search API returns objects but **not their associations**. Add a third call per deal page using `/crm/v4/associations/deals/contacts/batch/read` and `/crm/v4/associations/deals/companies/batch/read` (batch size 100, IDs from the page just fetched). Store in two new join tables: `mirror_deal_contacts(account_id, deal_id, contact_id)` and `mirror_deal_companies(account_id, deal_id, company_id)`. This is what makes a "find this deal's contact" spot-check possible.
 
----
+### 5. Confirm scope coverage
 
-## The fix
+Current OAuth scopes requested by `hubspot-oauth-start`:
+```text
+crm.objects.contacts.read
+crm.objects.deals.read
+crm.objects.companies.read
+crm.objects.owners.read
+crm.schemas.contacts.read
+crm.schemas.deals.read
+oauth
+```
 
-### A. Make `hubspot-sync` actually durable
-1. **Persist the cursor more aggressively** — write it after every page (not just at yield) so a crashed worker can always be resumed.
-2. **Wrap the re-invoke in `EdgeRuntime.waitUntil`** so the parent doesn't tear down before the POST flushes.
-3. **Auto-fallback to `initial` when `mode='resume'` is requested but no cursor exists** instead of silently doing nothing — log a warning and start a fresh windowed scan from `last_sync_at` (or 18 months back if null).
-4. **Add a watchdog**: if `last_sync_status='running'` and heartbeat is older than 5 min, the next invocation should treat it as crashed and resume/restart instead of refusing.
+Missing for a complete CRM audit: `crm.lists.read`, `crm.schemas.companies.read`. Marketing/automation scopes (`content`, `forms`, `automation`) are out of scope for the current sync — flagging but not adding unless you want marketing audit too.
 
-### B. Reset this specific account so it can sync cleanly
-Run a migration that, for account `31916151-ef5b-463f-bc24-2ed1a91ccfee`, clears `last_sync_status`, `last_sync_error`, and `sync_progress` so the next click starts a clean initial scan.
+Adding scopes requires the user to **re-authorize** HubSpot (disconnect → reconnect). Will make this clear in UI.
 
-### C. Make the UI honest about state
-In `SyncStatusCard`:
-1. When `last_sync_at IS NULL` and status is `error` or `idle`, show a **"Run full initial sync"** button that invokes `hubspot-sync` with `mode: "initial"` (not `incremental`).
-2. Keep the existing "Sync now" / "Restart sync" buttons for the post-initial case.
-3. Show "Never synced" instead of just the error text when `last_sync_at IS NULL`.
+### 6. Watchdog & cursor durability — already fixed last round, but verify
 
-### D. Add a simple visible diagnostic
-Show portal id, token expiry, last heartbeat timestamp, and counts of mirror_contacts / mirror_deals / mirror_owners on the SyncStatusCard so you can see at a glance whether data is actually flowing.
+The previous round added `EdgeRuntime.waitUntil` on the re-invoke and a 5-min stale-heartbeat takeover. Will spot-check by tailing edge logs after the run starts.
 
----
+### 7. Account is already reset
+
+Account row for portal `244481481` currently shows `last_sync_status: NULL`, `sync_progress: {}`, no error. The "Run full initial sync" button will fire cleanly. No further reset migration needed.
 
 ## Files I'll touch
 
-- `supabase/functions/hubspot-sync/index.ts` — durability fixes (A1–A4)
-- `supabase/functions/hubspot-oauth-callback/index.ts` — wrap initial-sync trigger in `EdgeRuntime.waitUntil`
-- `src/app/components/SyncStatusCard.tsx` — initial-vs-incremental UX, diagnostic block
-- `src/app/lib/useAccount.ts` — expose mirror table counts (small select)
-- New migration — reset the stuck account row so the next click starts fresh
+- **New migration**: create `mirror_companies`, `mirror_deal_contacts`, `mirror_deal_companies` tables with RLS (account-scoped, same policy pattern as `mirror_contacts`)
+- `supabase/functions/hubspot-sync/index.ts` — add `companies` phase, reorder phases, add associations fetch after deals page, add pagination debug log on owners
+- `supabase/functions/hubspot-oauth-start/index.ts` — add `crm.lists.read` and `crm.schemas.companies.read` scopes
+- `src/app/components/SyncStatusCard.tsx` — show companies count in diagnostic strip (4 cells instead of 3); show a "Reconnect for new permissions" hint when scopes have expanded
+- `src/integrations/supabase/types.ts` — auto-regenerated after migration
 
-After this lands, click **Run full initial sync** on the dashboard once and the scan will complete across as many auto-reinvocations as it needs, persisting progress every page.
+## What I'm explicitly not doing
+
+- Not adding marketing/forms/workflows sync. That's a separate phase and would double the function runtime. Flag for follow-up.
+- Not changing the 110s budget or self-reinvocation logic — last round's fix is sound; just verifying it works under load.
+- Not pulling engagement objects beyond what `mirror_engagements` already covers (table exists but isn't populated by this function — separate job).
+
+## After you click "Run full initial sync"
+
+I'll watch edge function logs in real time and report back: per-phase counts as they land, any 429 backoffs, any window-halving events, and the final tally vs what HubSpot's UI shows.
