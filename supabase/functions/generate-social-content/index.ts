@@ -146,13 +146,13 @@ Add this object to every non-journal post:
 
 WEEKLY SCHEDULE (return as "weeklySchedule"):
 [
-  {"day": "Monday", "format": "case_file", "goal": "Flagship forensic case study"},
-  {"day": "Tuesday", "format": "operators_journal", "goal": "Field note — human signal"},
+  {"day": "Monday", "format": "case_file", "goal": "Autopsy #${autopsyNumber} — flagship serialized case file (set isAutopsy=true and isCarousel=true)"},
+  {"day": "Tuesday", "format": "operators_journal", "goal": "Field note — human signal, NO CTA"},
   {"day": "Wednesday", "format": "leak_of_week", "goal": "Name and define one leak pattern"},
-  {"day": "Thursday", "format": "diagnostic", "goal": "60-second self-test"},
+  {"day": "Thursday", "format": "diagnostic", "goal": "60-second self-test (carousel preferred)"},
   {"day": "Friday", "format": "contrarian", "goal": "Defensible dissent"},
-  {"day": "Saturday", "format": "operators_journal", "goal": "Weekend field note"},
-  {"day": "Sunday", "format": "case_file", "goal": "Second case file of the week"}
+  {"day": "Saturday", "format": "operators_journal", "goal": "Weekend field note, NO CTA"},
+  {"day": "Sunday", "format": "case_file", "goal": "Second case file (long-form text, isAutopsy=false, isCarousel=false)"}
 ]
 
 Return JSON structure:
