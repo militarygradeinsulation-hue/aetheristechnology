@@ -199,6 +199,23 @@ const LinkedInPlaybookPage: React.FC = () => {
             ))}
           </div>
 
+          {/* Six Content Pillars */}
+          <div className="mb-10">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">The Six Content Pillars</h2>
+              <span className="font-mono text-xs text-muted-foreground">EVERY POST MAPS TO ONE</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {PILLARS.map((p) => (
+                <Card key={p.num} className="p-4 border bg-background/50 backdrop-blur">
+                  <div className="font-mono text-xs text-amber tracking-widest mb-1">PILLAR {p.num}</div>
+                  <div className="font-display font-bold text-foreground mb-1">{p.name}</div>
+                  <p className="text-xs text-muted-foreground">{p.focus}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           {/* Main grid: choreography + curve */}
           <div className="grid lg:grid-cols-3 gap-6 mb-10">
             {/* Choreography */}
