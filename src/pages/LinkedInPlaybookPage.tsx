@@ -310,6 +310,78 @@ const LinkedInPlaybookPage: React.FC = () => {
             </div>
           </div>
 
+          {/* The 9 Hidden Moves */}
+          <div className="mt-12">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">The 9 Hidden Moves</h2>
+              <span className="font-mono text-xs text-muted-foreground">UNFILTERED PLAYBOOK</span>
+            </div>
+            <div className="grid md:grid-cols-3 gap-3">
+              {HIDDEN_MOVES.map((m) => (
+                <Card key={m.num} className="p-4 border bg-background/50 backdrop-blur">
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="font-mono text-2xl font-bold text-amber">#{m.num}</span>
+                    <span className="font-display font-bold text-foreground text-sm leading-tight">{m.name}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2"><span className="font-mono text-amber">DO →</span> {m.tactic}</div>
+                  <div className="text-xs text-foreground/80 italic"><span className="font-mono text-[hsl(var(--crimson))] not-italic">SO WHAT →</span> {m.soWhat}</div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* 90-Day Execution Plan */}
+          <div className="mt-12">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-2xl font-display font-bold text-foreground">90-Day Execution Plan</h2>
+              <span className="font-mono text-xs text-muted-foreground">CURRENT: DAY {dayNumber}</span>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              {PHASES.map((phase, i) => {
+                const startDay = i * 30;
+                const endDay = startDay + 30;
+                const isActive = dayNumber >= startDay && dayNumber < endDay;
+                const isPast = dayNumber >= endDay;
+                return (
+                  <Card
+                    key={phase.range}
+                    className={`p-5 border backdrop-blur transition ${
+                      isActive ? 'border-amber bg-amber/5' : isPast ? 'border-emerald-500/30 bg-emerald-500/5 opacity-70' : 'border-border bg-background/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-xs tracking-widest text-amber">{phase.range}</span>
+                      {isActive && <Badge className="bg-amber text-amber-foreground text-[10px]">ACTIVE</Badge>}
+                      {isPast && <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500">DONE</Badge>}
+                    </div>
+                    <div className="font-display text-xl font-bold text-foreground mb-3">{phase.label}</div>
+                    <ul className="space-y-1.5 text-sm text-muted-foreground">
+                      {phase.actions.map((a) => (
+                        <li key={a} className="flex gap-2"><span className="text-amber">·</span><span>{a}</span></li>
+                      ))}
+                    </ul>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Golden Metrics */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-display font-bold text-foreground mb-1">The Golden Metrics</h2>
+            <p className="text-sm text-muted-foreground mb-4">Three numbers. Ignore the rest.</p>
+            <div className="grid md:grid-cols-3 gap-3">
+              {GOLDEN_METRICS.map((m) => (
+                <Card key={m.name} className="p-5 border border-amber/30 bg-amber/5 backdrop-blur">
+                  <div className="font-mono text-xs tracking-wider text-amber mb-1">METRIC</div>
+                  <div className="font-display text-lg font-bold text-foreground mb-2">{m.name}</div>
+                  <div className="text-2xl font-mono font-bold text-foreground mb-2">{m.target}</div>
+                  <p className="text-xs text-muted-foreground">{m.why}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           {/* Doctrine reminders */}
           <Card className="mt-10 p-5 border border-[hsl(var(--crimson))]/30 bg-[hsl(var(--crimson))]/5 backdrop-blur">
             <div className="font-mono text-xs tracking-wider text-[hsl(var(--crimson))] mb-2">FORBIDDEN</div>
