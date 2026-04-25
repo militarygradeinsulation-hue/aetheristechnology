@@ -1068,6 +1068,211 @@ export type Database = {
         }
         Relationships: []
       }
+      hygiene_actions: {
+        Row: {
+          account_id: string
+          affected_count: number
+          affected_record_ids: string[]
+          approval_mode: string
+          approved_at: string | null
+          category: string
+          category_label: string
+          confidence: string
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          progress: Json
+          recommended_action: Json
+          risk_level: string
+          scan_id: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          affected_count?: number
+          affected_record_ids?: string[]
+          approval_mode?: string
+          approved_at?: string | null
+          category: string
+          category_label?: string
+          confidence?: string
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          progress?: Json
+          recommended_action?: Json
+          risk_level?: string
+          scan_id: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          affected_count?: number
+          affected_record_ids?: string[]
+          approval_mode?: string
+          approved_at?: string | null
+          category?: string
+          category_label?: string
+          confidence?: string
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          progress?: Json
+          recommended_action?: Json
+          risk_level?: string
+          scan_id?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hygiene_actions_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "hygiene_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hygiene_log: {
+        Row: {
+          account_id: string
+          action_id: string
+          after_value: Json
+          before_value: Json
+          error_message: string | null
+          executed_at: string
+          field_changes: Json
+          hubspot_object_id: string
+          hubspot_object_type: string
+          id: string
+          rolled_back_at: string | null
+          success: boolean
+        }
+        Insert: {
+          account_id: string
+          action_id: string
+          after_value?: Json
+          before_value?: Json
+          error_message?: string | null
+          executed_at?: string
+          field_changes?: Json
+          hubspot_object_id: string
+          hubspot_object_type: string
+          id?: string
+          rolled_back_at?: string | null
+          success?: boolean
+        }
+        Update: {
+          account_id?: string
+          action_id?: string
+          after_value?: Json
+          before_value?: Json
+          error_message?: string | null
+          executed_at?: string
+          field_changes?: Json
+          hubspot_object_id?: string
+          hubspot_object_type?: string
+          id?: string
+          rolled_back_at?: string | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hygiene_log_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "hygiene_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hygiene_scans: {
+        Row: {
+          account_id: string
+          ai_status: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          results: Json
+          scan_date: string
+          status: string
+          total_issues: number
+          totals_by_category: Json
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          ai_status?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          results?: Json
+          scan_date?: string
+          status?: string
+          total_issues?: number
+          totals_by_category?: Json
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          ai_status?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          results?: Json
+          scan_date?: string
+          status?: string
+          total_issues?: number
+          totals_by_category?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hygiene_settings: {
+        Row: {
+          account_id: string
+          allow_auto_high_conf: boolean
+          created_at: string
+          enable_enrichment: boolean
+          max_batch_size: number
+          pause_threshold_pct: number
+          require_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          allow_auto_high_conf?: boolean
+          created_at?: string
+          enable_enrichment?: boolean
+          max_batch_size?: number
+          pause_threshold_pct?: number
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          allow_auto_high_conf?: boolean
+          created_at?: string
+          enable_enrichment?: boolean
+          max_batch_size?: number
+          pause_threshold_pct?: number
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       identified_visitors: {
         Row: {
           added_to_crm: boolean
