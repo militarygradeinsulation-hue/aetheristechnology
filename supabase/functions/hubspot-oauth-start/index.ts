@@ -14,6 +14,8 @@ const SCOPES = [
   "crm.objects.owners.read",
   "crm.schemas.contacts.read",
   "crm.schemas.deals.read",
+  "crm.schemas.companies.read",
+  "crm.lists.read",
   "oauth",
 ].join(" ");
 
