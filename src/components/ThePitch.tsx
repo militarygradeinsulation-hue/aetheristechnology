@@ -83,7 +83,7 @@ export const ThePitch: React.FC = () => {
                   📞 Call (317) 376-2110
                 </button>
               </a>
-              <a href="mailto:hello@aetheris.technology?subject=Co-CEO%20Inquiry">
+              <a href="mailto:aetheris.technology@outlook.com?subject=Co-CEO%20Inquiry">
                 <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
                   ✉️ Email Us
                 </button>

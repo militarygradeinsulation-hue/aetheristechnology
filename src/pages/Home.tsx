@@ -41,7 +41,7 @@ const Home = () => {
           "logo": "https://aetheris.technology/aetheris-logo.png",
           "description": "Business Forensics Operator. We run forensic audits on operations, marketing, and systems to find where revenue is leaking — then rebuild with AI, automation, and CRM. Indianapolis-based, US-wide.",
           "telephone": "+1-317-376-2110",
-          "email": "hello@aetheris.technology",
+          "email": "aetheris.technology@outlook.com",
           "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
           "geo": { "@type": "GeoCoordinates", "latitude": 39.7684, "longitude": -86.1581 },
           "priceRange": "$0 - $25,000+",
