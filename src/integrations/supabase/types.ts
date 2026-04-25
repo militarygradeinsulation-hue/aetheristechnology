@@ -388,6 +388,105 @@ export type Database = {
         }
         Relationships: []
       }
+      content_engine_posts: {
+        Row: {
+          caption: string
+          created_at: string
+          format: string
+          generated_at: string
+          hashtags: string[]
+          hook: string
+          id: string
+          scheduled_date: string
+          scheduled_time: string
+          script: string
+          status: string
+          target_emotion: string | null
+          topic_angle: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          format: string
+          generated_at?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          scheduled_date: string
+          scheduled_time?: string
+          script?: string
+          status?: string
+          target_emotion?: string | null
+          topic_angle?: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          format?: string
+          generated_at?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          script?: string
+          status?: string
+          target_emotion?: string | null
+          topic_angle?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_engine_strategy: {
+        Row: {
+          business_description: string
+          created_at: string
+          cta_link: string
+          format_mix: Json
+          frequency: string
+          goals: string[]
+          id: string
+          niche: string
+          posting_days: string[]
+          posting_times: string[]
+          target_buyer: string
+          updated_at: string
+          voice_reference: string
+        }
+        Insert: {
+          business_description?: string
+          created_at?: string
+          cta_link?: string
+          format_mix?: Json
+          frequency?: string
+          goals?: string[]
+          id?: string
+          niche?: string
+          posting_days?: string[]
+          posting_times?: string[]
+          target_buyer?: string
+          updated_at?: string
+          voice_reference?: string
+        }
+        Update: {
+          business_description?: string
+          created_at?: string
+          cta_link?: string
+          format_mix?: Json
+          frequency?: string
+          goals?: string[]
+          id?: string
+          niche?: string
+          posting_days?: string[]
+          posting_times?: string[]
+          target_buyer?: string
+          updated_at?: string
+          voice_reference?: string
+        }
+        Relationships: []
+      }
       content_posting_schedule: {
         Row: {
           content_type: string
