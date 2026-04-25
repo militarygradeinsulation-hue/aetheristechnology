@@ -416,29 +416,46 @@ Deno.serve(async (req: Request) => {
 
     let resumeCursor: SyncCursor | undefined;
 
+    // Look at current state — used for both "resume" and watchdog logic
+    const { data: acct } = await admin
+      .from("accounts")
+      .select("sync_progress, last_sync_status")
+      .eq("id", account_id)
+      .single();
+    const sp = (acct?.sync_progress as { cursor?: SyncCursor; heartbeat?: string }) || {};
+    const heartbeatAge = sp.heartbeat ? Date.now() - new Date(sp.heartbeat).getTime() : Infinity;
+    const STALE_MS = 5 * 60 * 1000;
+    const isStale = acct?.last_sync_status === "running" && heartbeatAge > STALE_MS;
+
     if (mode === "resume") {
-      // Load cursor from accounts.sync_progress
-      const { data: acct } = await admin
-        .from("accounts")
-        .select("sync_progress")
-        .eq("id", account_id)
-        .single();
-      const sp = (acct?.sync_progress as { cursor?: SyncCursor }) || {};
       if (sp.cursor) {
         resumeCursor = sp.cursor;
       } else {
-        console.warn("[hubspot-sync] resume requested but no cursor found — starting fresh incremental");
+        console.warn("[hubspot-sync] resume requested but no cursor — restarting fresh initial scan");
       }
     } else {
-      // Mark as running synchronously so the UI immediately reflects state
-      await admin
-        .from("accounts")
-        .update({
-          last_sync_status: "running",
-          last_sync_error: null,
-          sync_progress: { phase: "starting", percent: 0, heartbeat: new Date().toISOString() },
-        })
-        .eq("id", account_id);
+      // Refuse to start a brand-new sync on top of a healthy running one
+      if (acct?.last_sync_status === "running" && !isStale) {
+        return new Response(
+          JSON.stringify({ ok: true, queued: false, reason: "already_running" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      // If stale-running and we have a cursor, prefer resuming over wiping progress
+      if (isStale && sp.cursor && mode !== "initial") {
+        console.log("[hubspot-sync] watchdog: taking over stale running sync via cursor");
+        resumeCursor = sp.cursor;
+      } else {
+        // Mark as running synchronously so the UI immediately reflects state
+        await admin
+          .from("accounts")
+          .update({
+            last_sync_status: "running",
+            last_sync_error: null,
+            sync_progress: { phase: "starting", percent: 0, heartbeat: new Date().toISOString() },
+          })
+          .eq("id", account_id);
+      }
     }
 
     // Run the actual sync in the background — bypasses the 150s response timeout
