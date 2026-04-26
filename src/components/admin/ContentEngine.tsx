@@ -788,6 +788,7 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
         </div>
 
         <div className="p-6 space-y-5">
+          <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
           <Field label="Topic Angle">
             {editing
               ? <Textarea rows={2} value={draft.topic_angle} onChange={(e) => setDraft({ ...draft, topic_angle: e.target.value })} />
