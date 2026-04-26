@@ -229,6 +229,7 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  function exportTSV() {
     const csv = [
       ['Date','Time','Format','Status','Hook','Script','Caption','Hashtags'].join('\t'),
       ...posts.map((p) => [
