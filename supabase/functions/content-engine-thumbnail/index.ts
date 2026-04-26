@@ -39,7 +39,7 @@ function buildPrompt(post: any, accent: string, mood: string, label: string) {
   const hook = sanitizeHook((post.hook || post.topic_angle || "").slice(0, 140));
   return `Editorial magazine cover style portrait poster.
 
-SUBJECT: Keep the same person from the reference photo with their likeness, hair, and clothing intact. Three-quarter angle, confident professional expression, looking at camera. Subject on the left third of the frame.
+SUBJECT: Use the EXACT face, hair, beard, skin tone, and build of the person in the reference image — preserve their facial features identically, do not alter or stylize their face. You may change their clothing to a modern dark business jacket and reposition them three-quarter angle looking at camera with a confident professional expression. Subject on the left third of the frame.
 
 ENVIRONMENT: ${mood}. Deep cinematic dark background (#0a0a0a) with subtle film grain.
 
