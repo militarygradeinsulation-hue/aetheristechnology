@@ -334,6 +334,8 @@ export const ContentEngine: React.FC = () => {
           onDelete={handleDelete}
           onRegenerate={handleRegenerate}
           onDuplicate={handleDuplicate}
+          onGenerateThumbnail={handleGenerateThumbnail}
+          headshots={headshots}
         />
       )}
     </div>
