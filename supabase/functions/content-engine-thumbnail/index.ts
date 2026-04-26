@@ -11,7 +11,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ADMIN_SECRET = SERVICE_KEY;
@@ -39,7 +39,7 @@ function buildPrompt(post: any, accent: string, mood: string, label: string) {
   const hook = sanitizeHook((post.hook || post.topic_angle || "").slice(0, 140));
   return `Editorial magazine cover style portrait poster.
 
-SUBJECT: Keep the same person from the reference photo with their likeness, hair, and clothing intact. Three-quarter angle, confident professional expression, looking at camera. Subject on the left third of the frame.
+SUBJECT: Use the EXACT face, hair, beard, skin tone, and build of the person in the reference image — preserve their facial features identically, do not alter or stylize their face. You may change their clothing to a modern dark business jacket and reposition them three-quarter angle looking at camera with a confident professional expression. Subject on the left third of the frame.
 
 ENVIRONMENT: ${mood}. Deep cinematic dark background (#0a0a0a) with subtle film grain.
 
@@ -97,72 +97,59 @@ async function generateOne(supa: any, postId: string, overrideHeadshotId?: strin
   const preset = FORMAT_PRESETS[post.format] || FORMAT_PRESETS.founderPOV;
   const prompt = buildPrompt(post, preset.accent, preset.mood, preset.label);
 
-  // Fetch reference image as Blob
+  // Fetch reference image and convert to base64 data URL for Lovable AI Gateway
   const refResp = await fetch(headshot.public_url);
   if (!refResp.ok) throw new Error("Could not load reference headshot");
-  const refBlob = await refResp.blob();
+  const refBuf = await refResp.arrayBuffer();
+  const refBytes = new Uint8Array(refBuf);
+  let binStr = "";
+  for (let i = 0; i < refBytes.length; i++) binStr += String.fromCharCode(refBytes[i]);
+  const refB64 = btoa(binStr);
+  const refMime = refResp.headers.get("content-type") || "image/jpeg";
+  const refDataUrl = `data:${refMime};base64,${refB64}`;
 
-  // Build multipart form for OpenAI image edit
-  const form = new FormData();
-  form.append("model", "gpt-image-1");
-  form.append("prompt", prompt);
-  form.append("size", "1024x1024");
-  form.append("quality", settings?.default_quality || "medium");
-  form.append("n", "1");
-  form.append("image", refBlob, "reference.jpg");
-
-  let aiResp = await fetch("https://api.openai.com/v1/images/edits", {
+  // Call Lovable AI Gateway with Nano Banana (gemini-2.5-flash-image) for image-to-image edit
+  const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
-    body: form,
+    headers: {
+      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-image",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: refDataUrl } },
+          ],
+        },
+      ],
+      modalities: ["image", "text"],
+    }),
   });
 
-  // Fallback: if moderation blocks the image-edit (common when a real face + dramatic prompt
-  // trips the safety system), retry with text-to-image generation (no reference photo).
   if (!aiResp.ok) {
     const errText = await aiResp.text();
-    const isModeration = aiResp.status === 400 && /moderation_blocked|safety/i.test(errText);
-    console.error("OpenAI edits error:", aiResp.status, errText);
-
-    if (isModeration) {
-      console.log("Falling back to images/generations (no reference photo)");
-      const fallbackPrompt = `${prompt}\n\nGenerate a generic professional businessman in his 40s wearing modern dark business attire (no specific real person likeness).`;
-      aiResp = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: fallbackPrompt,
-          size: "1024x1024",
-          quality: settings?.default_quality || "medium",
-          n: 1,
-        }),
-      });
-    }
-
-    if (!aiResp.ok) {
-      const errText2 = await aiResp.text();
-      console.error("OpenAI fallback error:", aiResp.status, errText2);
-      await supa.from("thumbnail_generations").insert({
-        post_id: postId, status: "error",
-        error_message: `OpenAI ${aiResp.status}: ${errText2.slice(0, 500)}`,
-      });
-      await supa.from("content_engine_posts").update({ thumbnail_status: "error" }).eq("id", postId);
-      if (aiResp.status === 401) throw new Error("OpenAI API key invalid. Update OPENAI_API_KEY secret.");
-      if (aiResp.status === 429) throw new Error("OpenAI rate limit hit. Wait a minute and retry.");
-      if (aiResp.status === 400 && /moderation_blocked|safety/i.test(errText2)) {
-        throw new Error("Image rejected by content policy even after fallback. Try editing the hook to use less aggressive language.");
-      }
-      throw new Error(`Image generation failed (${aiResp.status})`);
-    }
+    console.error("Lovable AI error:", aiResp.status, errText);
+    await supa.from("thumbnail_generations").insert({
+      post_id: postId, status: "error",
+      error_message: `Lovable AI ${aiResp.status}: ${errText.slice(0, 500)}`,
+    });
+    await supa.from("content_engine_posts").update({ thumbnail_status: "error" }).eq("id", postId);
+    if (aiResp.status === 429) throw new Error("Rate limit hit. Wait a minute and retry.");
+    if (aiResp.status === 402) throw new Error("Lovable AI credits exhausted. Add credits in Workspace > Usage.");
+    throw new Error(`Image generation failed (${aiResp.status})`);
   }
 
   const aiJson = await aiResp.json();
-  const b64 = aiJson?.data?.[0]?.b64_json;
-  if (!b64) throw new Error("No image returned from OpenAI");
+  const dataUrl: string | undefined = aiJson?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  if (!dataUrl?.startsWith("data:image/")) {
+    console.error("No image in response:", JSON.stringify(aiJson).slice(0, 500));
+    throw new Error("No image returned from Lovable AI");
+  }
+  const b64 = dataUrl.split(",")[1];
 
   // Decode and upload to Supabase storage
   const binary = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
