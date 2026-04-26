@@ -179,19 +179,40 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
   }
 }
 
-async function loadAll(supabase: any, table: string, accountId: string): Promise<any[]> {
+async function loadAll(
+  supabase: any,
+  table: string,
+  accountId: string,
+  columns = "*",
+): Promise<any[]> {
   const all: any[] = [];
   let from = 0;
   const pageSize = 1000;
+  // Whitelist of properties keys actually used by detectors — drop the rest
+  // so the contacts payload doesn't carry tens of unused jsonb fields per row.
+  const KEEP_PROPS = ["phone", "company", "jobtitle", "industry", "hubspot_owner_id"];
   for (;;) {
     const { data, error } = await supabase
       .from(table)
-      .select("*")
+      .select(columns)
       .eq("account_id", accountId)
       .range(from, from + pageSize - 1);
     if (error) throw error;
     if (!data || data.length === 0) break;
-    all.push(...data);
+    if (table === "mirror_contacts") {
+      for (const row of data) {
+        if (row.properties && typeof row.properties === "object") {
+          const trimmed: Record<string, unknown> = {};
+          for (const k of KEEP_PROPS) {
+            if (row.properties[k] !== undefined) trimmed[k] = row.properties[k];
+          }
+          row.properties = trimmed;
+        }
+        all.push(row);
+      }
+    } else {
+      all.push(...data);
+    }
     if (data.length < pageSize) break;
     from += pageSize;
   }
