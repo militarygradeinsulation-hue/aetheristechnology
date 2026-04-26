@@ -90,15 +90,33 @@ Deno.serve(async (req) => {
 
 async function runScan(supabase: any, accountId: string, scanId: string) {
   try {
-    const [companies, contacts, deals, engagements, owners, dealContacts] =
-      await Promise.all([
-        loadAll(supabase, "mirror_companies", accountId),
-        loadAll(supabase, "mirror_contacts", accountId),
-        loadAll(supabase, "mirror_deals", accountId),
-        loadAll(supabase, "mirror_engagements", accountId),
-        loadAll(supabase, "mirror_owners", accountId),
-        loadAll(supabase, "mirror_deal_contacts", accountId),
-      ]);
+    // Load sequentially with narrow column projections — these tables can hold
+    // hundreds of thousands of rows and `select("*")` blows the edge function
+    // memory limit (~150MB). Order from smallest to largest so we fail fast.
+    const owners = await loadAll(
+      supabase, "mirror_owners", accountId,
+      "hubspot_id",
+    );
+    const deals = await loadAll(
+      supabase, "mirror_deals", accountId,
+      "hubspot_id, stage, amount, close_date, owner_id",
+    );
+    const dealContacts = await loadAll(
+      supabase, "mirror_deal_contacts", accountId,
+      "contact_id, deal_id",
+    );
+    const engagements = await loadAll(
+      supabase, "mirror_engagements", accountId,
+      "hubspot_id, contact_id, deal_id",
+    );
+    const companies = await loadAll(
+      supabase, "mirror_companies", accountId,
+      "hubspot_id, name",
+    );
+    const contacts = await loadAll(
+      supabase, "mirror_contacts", accountId,
+      "hubspot_id, email, first_name, last_name, lifecycle_stage, last_activity_date, properties",
+    );
 
     const results: CategoryResult[] = [
       detectDuplicateContacts(contacts),
@@ -161,19 +179,40 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
   }
 }
 
-async function loadAll(supabase: any, table: string, accountId: string): Promise<any[]> {
+async function loadAll(
+  supabase: any,
+  table: string,
+  accountId: string,
+  columns = "*",
+): Promise<any[]> {
   const all: any[] = [];
   let from = 0;
   const pageSize = 1000;
+  // Whitelist of properties keys actually used by detectors — drop the rest
+  // so the contacts payload doesn't carry tens of unused jsonb fields per row.
+  const KEEP_PROPS = ["phone", "company", "jobtitle", "industry", "hubspot_owner_id"];
   for (;;) {
     const { data, error } = await supabase
       .from(table)
-      .select("*")
+      .select(columns)
       .eq("account_id", accountId)
       .range(from, from + pageSize - 1);
     if (error) throw error;
     if (!data || data.length === 0) break;
-    all.push(...data);
+    if (table === "mirror_contacts") {
+      for (const row of data) {
+        if (row.properties && typeof row.properties === "object") {
+          const trimmed: Record<string, unknown> = {};
+          for (const k of KEEP_PROPS) {
+            if (row.properties[k] !== undefined) trimmed[k] = row.properties[k];
+          }
+          row.properties = trimmed;
+        }
+        all.push(row);
+      }
+    } else {
+      all.push(...data);
+    }
     if (data.length < pageSize) break;
     from += pageSize;
   }
