@@ -257,7 +257,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
               const before = flattenBefore(rec, objectType);
               const recEdits = edits[rec.hubspot_id] || {};
               const hasChanges = Object.keys(recEdits).length > 0;
-              const sel = !!selected[rec.hubspot_id] && hasChanges;
+              const sel = !!selected[rec.hubspot_id] && (hasChanges || selectAllPending);
               return (
                 <div
                   key={rec.hubspot_id}
@@ -266,7 +266,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
                   <div className="flex items-start gap-3">
                     <Checkbox
                       checked={sel}
-                      disabled={!hasChanges}
+                      disabled={!hasChanges && !selectAllPending}
                       onCheckedChange={(v) => setSelected((s) => ({ ...s, [rec.hubspot_id]: !!v }))}
                       className="mt-1"
                     />
