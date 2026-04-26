@@ -402,6 +402,10 @@ export type Database = {
           script: string
           status: string
           target_emotion: string | null
+          thumbnail_generated_at: string | null
+          thumbnail_reference_id: string | null
+          thumbnail_status: string
+          thumbnail_url: string | null
           topic_angle: string
           updated_at: string
         }
@@ -418,6 +422,10 @@ export type Database = {
           script?: string
           status?: string
           target_emotion?: string | null
+          thumbnail_generated_at?: string | null
+          thumbnail_reference_id?: string | null
+          thumbnail_status?: string
+          thumbnail_url?: string | null
           topic_angle?: string
           updated_at?: string
         }
@@ -434,6 +442,10 @@ export type Database = {
           script?: string
           status?: string
           target_emotion?: string | null
+          thumbnail_generated_at?: string | null
+          thumbnail_reference_id?: string | null
+          thumbnail_status?: string
+          thumbnail_url?: string | null
           topic_angle?: string
           updated_at?: string
         }
@@ -1701,6 +1713,45 @@ export type Database = {
           },
         ]
       }
+      operator_headshots: {
+        Row: {
+          created_at: string
+          disabled: boolean
+          id: string
+          is_default: boolean
+          label: string
+          public_url: string
+          sort_order: number
+          storage_path: string
+          tag: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disabled?: boolean
+          id?: string
+          is_default?: boolean
+          label?: string
+          public_url: string
+          sort_order?: number
+          storage_path: string
+          tag: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disabled?: boolean
+          id?: string
+          is_default?: boolean
+          label?: string
+          public_url?: string
+          sort_order?: number
+          storage_path?: string
+          tag?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pattern_results: {
         Row: {
           account_id: string
@@ -2496,6 +2547,54 @@ export type Database = {
           quote?: string
           rating?: number
           role?: string
+        }
+        Relationships: []
+      }
+      thumbnail_generations: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          post_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          post_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          post_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      thumbnail_settings: {
+        Row: {
+          auto_generate_formats: string[]
+          daily_cap: number
+          default_quality: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          auto_generate_formats?: string[]
+          daily_cap?: number
+          default_quality?: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_generate_formats?: string[]
+          daily_cap?: number
+          default_quality?: string
+          id?: number
+          updated_at?: string
         }
         Relationships: []
       }

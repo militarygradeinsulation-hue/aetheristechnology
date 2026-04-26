@@ -42,6 +42,19 @@ type Post = {
   hashtags: string[];
   status: string;
   generated_at: string;
+  thumbnail_url?: string | null;
+  thumbnail_status?: string | null;
+  thumbnail_reference_id?: string | null;
+  thumbnail_generated_at?: string | null;
+};
+
+type Headshot = {
+  id: string;
+  public_url: string;
+  tag: string;
+  label: string;
+  is_default: boolean;
+  disabled: boolean;
 };
 
 const NICHES = [
@@ -75,6 +88,17 @@ function dayShort(d: Date) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][
 async function call(action: string, payload: Record<string, unknown> = {}) {
   const token = getAdminToken();
   const { data, error } = await supabase.functions.invoke('content-engine-generate', {
+    body: { action, ...payload },
+    headers: token ? { 'x-admin-token': token } : undefined,
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
+async function callThumb(action: string, payload: Record<string, unknown> = {}) {
+  const token = getAdminToken();
+  const { data, error } = await supabase.functions.invoke('content-engine-thumbnail', {
     body: { action, ...payload },
     headers: token ? { 'x-admin-token': token } : undefined,
   });
@@ -177,6 +201,31 @@ export const ContentEngine: React.FC = () => {
       toast({ title: 'Duplicated +7 days' });
     } catch (e) {
       toast({ title: 'Duplicate failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
+  // Headshots library — loaded once
+  const [headshots, setHeadshots] = useState<Headshot[]>([]);
+  useEffect(() => {
+    callThumb('list_headshots').then((d) => setHeadshots(d.headshots || [])).catch(() => {});
+  }, []);
+
+  async function handleGenerateThumbnail(id: string, headshotId?: string) {
+    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, thumbnail_status: 'generating' } : p));
+    setSelectedPost((prev) => prev && prev.id === id ? { ...prev, thumbnail_status: 'generating' } : prev);
+    try {
+      const res = await callThumb('generate', { post_id: id, headshot_id: headshotId });
+      setPosts((prev) => prev.map((p) => p.id === id
+        ? { ...p, thumbnail_url: res.url, thumbnail_status: 'ready', thumbnail_reference_id: res.headshot_id, thumbnail_generated_at: new Date().toISOString() }
+        : p));
+      setSelectedPost((prev) => prev && prev.id === id
+        ? { ...prev, thumbnail_url: res.url, thumbnail_status: 'ready', thumbnail_reference_id: res.headshot_id, thumbnail_generated_at: new Date().toISOString() }
+        : prev);
+      toast({ title: 'Thumbnail ready' });
+    } catch (e) {
+      setPosts((prev) => prev.map((p) => p.id === id ? { ...p, thumbnail_status: 'error' } : p));
+      setSelectedPost((prev) => prev && prev.id === id ? { ...prev, thumbnail_status: 'error' } : prev);
+      toast({ title: 'Thumbnail failed', description: String((e as Error).message), variant: 'destructive' });
     }
   }
 
@@ -285,6 +334,8 @@ export const ContentEngine: React.FC = () => {
           onDelete={handleDelete}
           onRegenerate={handleRegenerate}
           onDuplicate={handleDuplicate}
+          onGenerateThumbnail={handleGenerateThumbnail}
+          headshots={headshots}
         />
       )}
     </div>
@@ -638,13 +689,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 // ----------------- Post Modal -----------------
 
-function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate }: {
+function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate, onGenerateThumbnail, headshots }: {
   post: Post;
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<Post>) => void;
   onDelete: (id: string) => void;
   onRegenerate: (id: string) => Promise<void>;
   onDuplicate: (id: string) => void;
+  onGenerateThumbnail: (id: string, headshotId?: string) => Promise<void>;
+  headshots: Headshot[];
 }) {
   const fmt = FORMAT_INFO[post.format] || FORMAT_INFO.auditRoast;
   const status = STATUS_INFO[post.status];
@@ -735,6 +788,7 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
         </div>
 
         <div className="p-6 space-y-5">
+          <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
           <Field label="Topic Angle">
             {editing
               ? <Textarea rows={2} value={draft.topic_angle} onChange={(e) => setDraft({ ...draft, topic_angle: e.target.value })} />
@@ -837,6 +891,72 @@ function EditableBlock({ label, value, editing, onChange, onCopy, copied, accent
       {editing
         ? <Textarea rows={rows} value={value} onChange={(e) => onChange(e.target.value)} />
         : <div className={`text-sm whitespace-pre-wrap leading-relaxed ${accent ? 'text-foreground font-bold' : 'text-foreground/90'}`}>{value}</div>}
+    </div>
+  );
+}
+
+function ThumbnailBlock({ post, headshots, onGenerate }: {
+  post: Post; headshots: Headshot[]; onGenerate: (id: string, headshotId?: string) => Promise<void>;
+}) {
+  const [selectedHeadshot, setSelectedHeadshot] = useState<string>(post.thumbnail_reference_id || '');
+  const isGenerating = post.thumbnail_status === 'generating';
+  const hasThumb = !!post.thumbnail_url;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Case File Thumbnail</div>
+        {hasThumb && (
+          <a href={post.thumbnail_url!} target="_blank" rel="noreferrer" className="text-[10px] text-cyan-400 hover:underline flex items-center gap-1">
+            <Download className="w-3 h-3" /> Download
+          </a>
+        )}
+      </div>
+      <div className="border border-border rounded-lg overflow-hidden bg-background">
+        <div className="aspect-square bg-card/50 flex items-center justify-center relative">
+          {isGenerating ? (
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-2" />
+              <div className="text-xs text-muted-foreground">Generating with OpenAI gpt-image-1...</div>
+              <div className="text-[10px] text-muted-foreground mt-1">~10–20 seconds</div>
+            </div>
+          ) : hasThumb ? (
+            <img src={post.thumbnail_url!} alt="Post thumbnail" className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-center px-6">
+              <div className="text-xs text-muted-foreground mb-3">No thumbnail yet</div>
+              <div className="text-[10px] text-muted-foreground">Pick a reference photo + Generate</div>
+            </div>
+          )}
+        </div>
+        <div className="p-3 border-t border-border flex flex-wrap gap-2 items-center bg-card/30">
+          <Select value={selectedHeadshot} onValueChange={setSelectedHeadshot}>
+            <SelectTrigger className="h-8 text-xs flex-1 min-w-[180px]">
+              <SelectValue placeholder="Auto-pick by format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto-pick by format</SelectItem>
+              {headshots.filter((h) => !h.disabled).map((h) => (
+                <SelectItem key={h.id} value={h.id}>{h.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm" variant="outline"
+            disabled={isGenerating}
+            onClick={() => onGenerate(post.id, selectedHeadshot && selectedHeadshot !== 'auto' ? selectedHeadshot : undefined)}
+            className="border-amber/40 text-amber hover:bg-amber/10"
+          >
+            {isGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+            {hasThumb ? 'Regenerate' : 'Generate'}
+          </Button>
+        </div>
+        {post.thumbnail_status === 'error' && (
+          <div className="px-3 py-2 text-[11px] text-crimson border-t border-crimson/30 bg-crimson/5">
+            Last attempt failed — check edge function logs.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
