@@ -22,6 +22,8 @@ const AppHygieneQueue = () => {
   const [actions, setActions] = useState<HygieneActionRow[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [confirmAction, setConfirmAction] = useState<HygieneActionRow | null>(null);
+  const [reviewAction, setReviewAction] = useState<HygieneActionRow | null>(null);
+  const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
