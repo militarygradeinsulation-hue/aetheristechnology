@@ -185,9 +185,13 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     });
   };
 
-  const approvedIds = Object.keys(selected).filter(
-    (id) => selected[id] && edits[id] && Object.keys(edits[id]).length > 0,
-  );
+  // When Select-All is active, every affected ID counts (server fills in defaults
+  // for records we haven't loaded). Otherwise only rows with proposed edits.
+  const approvedIds = selectAllPending
+    ? ids.filter((id) => selected[id] !== false)
+    : Object.keys(selected).filter(
+        (id) => selected[id] && edits[id] && Object.keys(edits[id]).length > 0,
+      );
 
   const submit = async () => {
     if (approvedIds.length === 0) {
@@ -196,8 +200,12 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     }
     setSubmitting(true);
     try {
+      // Only send modifications for records the user actually edited; the server
+      // will compute defaults for the rest.
       const modifications: Record<string, Record<string, string>> = {};
-      for (const id of approvedIds) modifications[id] = edits[id];
+      for (const id of approvedIds) {
+        if (edits[id] && Object.keys(edits[id]).length > 0) modifications[id] = edits[id];
+      }
 
       const { error } = await supabase.functions.invoke("hygiene-execute", {
         body: { action_id: action.id, record_ids: approvedIds, modifications },
