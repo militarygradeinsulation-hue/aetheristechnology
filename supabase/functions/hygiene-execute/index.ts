@@ -301,6 +301,93 @@ async function mirrorUpdate(
   await supabase.from(table).update(patch).eq("account_id", accountId).eq("hubspot_id", id);
 }
 
+// ---- Duplicate merges (HubSpot CRM v3 contacts merge endpoint) ----
+async function runMerges(
+  supabase: SupabaseClient,
+  account: any,
+  action: any,
+  merges: Array<{ primary: string; secondary: string }>,
+) {
+  let processed = 0;
+  let failures = 0;
+  try {
+    const accessToken = await getAccessToken(supabase, account);
+
+    for (const m of merges) {
+      try {
+        if (!m?.primary || !m?.secondary || m.primary === m.secondary) {
+          throw new Error("Invalid merge pair");
+        }
+
+        const before = await fetchHubspot(accessToken, "contacts", m.secondary);
+        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/contacts/merge`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ primaryObjectId: m.primary, objectIdToMerge: m.secondary }),
+        });
+        if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
+
+        await supabase.from("hygiene_log").insert({
+          action_id: action.id,
+          account_id: action.account_id,
+          hubspot_object_type: "contact",
+          hubspot_object_id: m.secondary,
+          field_changes: [{ field: "_merged_into", before: null, after: m.primary }],
+          before_value: before?.properties || {},
+          after_value: { merged_into: m.primary },
+          success: true,
+        });
+
+        // Remove the merged-away record from the local mirror so the UI updates immediately
+        await supabase
+          .from("mirror_contacts")
+          .delete()
+          .eq("account_id", action.account_id)
+          .eq("hubspot_id", m.secondary);
+      } catch (err: unknown) {
+        failures++;
+        const message = err instanceof Error ? err.message : String(err);
+        await supabase.from("hygiene_log").insert({
+          action_id: action.id,
+          account_id: action.account_id,
+          hubspot_object_type: "contact",
+          hubspot_object_id: m?.secondary || "unknown",
+          field_changes: [],
+          before_value: { primary: m?.primary, secondary: m?.secondary },
+          after_value: {},
+          success: false,
+          error_message: message,
+        });
+      }
+      processed++;
+      if (processed % 5 === 0) {
+        await supabase
+          .from("hygiene_actions")
+          .update({ progress: { processed, total: merges.length, message: `Merging ${processed} of ${merges.length}` } })
+          .eq("id", action.id);
+      }
+      await sleep(RATE_DELAY_MS);
+    }
+
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: failures === merges.length ? "failed" : "executed",
+        executed_at: new Date().toISOString(),
+        progress: { processed, total: merges.length, message: `Done (${failures} failed)` },
+        error_message: failures ? `${failures} of ${merges.length} merges failed` : null,
+      })
+      .eq("id", action.id);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[hygiene-execute] merge fatal", err);
+    await supabase
+      .from("hygiene_actions")
+      .update({ status: "failed", error_message: message })
+      .eq("id", action.id);
+  }
+}
+
 // ---- HubSpot OAuth helper (mirrors hubspot-sync) ----
 async function getAccessToken(admin: SupabaseClient, account: any): Promise<string> {
   const key = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY")!;
