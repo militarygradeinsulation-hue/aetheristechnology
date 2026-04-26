@@ -204,7 +204,31 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
-  function exportTSV() {
+  // Headshots library — loaded once
+  const [headshots, setHeadshots] = useState<Headshot[]>([]);
+  useEffect(() => {
+    callThumb('list_headshots').then((d) => setHeadshots(d.headshots || [])).catch(() => {});
+  }, []);
+
+  async function handleGenerateThumbnail(id: string, headshotId?: string) {
+    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, thumbnail_status: 'generating' } : p));
+    setSelectedPost((prev) => prev && prev.id === id ? { ...prev, thumbnail_status: 'generating' } : prev);
+    try {
+      const res = await callThumb('generate', { post_id: id, headshot_id: headshotId });
+      setPosts((prev) => prev.map((p) => p.id === id
+        ? { ...p, thumbnail_url: res.url, thumbnail_status: 'ready', thumbnail_reference_id: res.headshot_id, thumbnail_generated_at: new Date().toISOString() }
+        : p));
+      setSelectedPost((prev) => prev && prev.id === id
+        ? { ...prev, thumbnail_url: res.url, thumbnail_status: 'ready', thumbnail_reference_id: res.headshot_id, thumbnail_generated_at: new Date().toISOString() }
+        : prev);
+      toast({ title: 'Thumbnail ready' });
+    } catch (e) {
+      setPosts((prev) => prev.map((p) => p.id === id ? { ...p, thumbnail_status: 'error' } : p));
+      setSelectedPost((prev) => prev && prev.id === id ? { ...prev, thumbnail_status: 'error' } : prev);
+      toast({ title: 'Thumbnail failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
     const csv = [
       ['Date','Time','Format','Status','Hook','Script','Caption','Hashtags'].join('\t'),
       ...posts.map((p) => [
