@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
-    const { action_id, record_ids, modifications, confirm_delete } = await req.json();
+    const { action_id, record_ids, modifications, confirm_delete, merges } = await req.json();
     if (!action_id) return json({ error: "action_id required" }, 400);
 
     const { data: action } = await supabase
@@ -55,23 +55,29 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
 
+    const isMerge = Array.isArray(merges) && merges.length > 0;
     const targetIds: string[] =
       Array.isArray(record_ids) && record_ids.length > 0 ? record_ids : action.affected_record_ids;
+    const totalUnits = isMerge ? merges.length : targetIds.length;
 
     await supabase
       .from("hygiene_actions")
       .update({
         status: "executing",
         approved_at: action.approved_at || new Date().toISOString(),
-        progress: { processed: 0, total: targetIds.length, message: "Starting..." },
+        progress: { processed: 0, total: totalUnits, message: "Starting..." },
       })
       .eq("id", action_id);
 
-    EdgeRuntime.waitUntil(
-      runExecution(supabase, acct, action, targetIds, modifications || {}, !!confirm_delete),
-    );
+    if (isMerge) {
+      EdgeRuntime.waitUntil(runMerges(supabase, acct, action, merges));
+    } else {
+      EdgeRuntime.waitUntil(
+        runExecution(supabase, acct, action, targetIds, modifications || {}, !!confirm_delete),
+      );
+    }
 
-    return json({ ok: true, total: targetIds.length });
+    return json({ ok: true, total: totalUnits });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed";
     console.error("[hygiene-execute] error", err);
@@ -293,6 +299,93 @@ async function mirrorUpdate(
     if (updates.lastname) patch.last_name = updates.lastname;
   }
   await supabase.from(table).update(patch).eq("account_id", accountId).eq("hubspot_id", id);
+}
+
+// ---- Duplicate merges (HubSpot CRM v3 contacts merge endpoint) ----
+async function runMerges(
+  supabase: SupabaseClient,
+  account: any,
+  action: any,
+  merges: Array<{ primary: string; secondary: string }>,
+) {
+  let processed = 0;
+  let failures = 0;
+  try {
+    const accessToken = await getAccessToken(supabase, account);
+
+    for (const m of merges) {
+      try {
+        if (!m?.primary || !m?.secondary || m.primary === m.secondary) {
+          throw new Error("Invalid merge pair");
+        }
+
+        const before = await fetchHubspot(accessToken, "contacts", m.secondary);
+        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/contacts/merge`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ primaryObjectId: m.primary, objectIdToMerge: m.secondary }),
+        });
+        if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
+
+        await supabase.from("hygiene_log").insert({
+          action_id: action.id,
+          account_id: action.account_id,
+          hubspot_object_type: "contact",
+          hubspot_object_id: m.secondary,
+          field_changes: [{ field: "_merged_into", before: null, after: m.primary }],
+          before_value: before?.properties || {},
+          after_value: { merged_into: m.primary },
+          success: true,
+        });
+
+        // Remove the merged-away record from the local mirror so the UI updates immediately
+        await supabase
+          .from("mirror_contacts")
+          .delete()
+          .eq("account_id", action.account_id)
+          .eq("hubspot_id", m.secondary);
+      } catch (err: unknown) {
+        failures++;
+        const message = err instanceof Error ? err.message : String(err);
+        await supabase.from("hygiene_log").insert({
+          action_id: action.id,
+          account_id: action.account_id,
+          hubspot_object_type: "contact",
+          hubspot_object_id: m?.secondary || "unknown",
+          field_changes: [],
+          before_value: { primary: m?.primary, secondary: m?.secondary },
+          after_value: {},
+          success: false,
+          error_message: message,
+        });
+      }
+      processed++;
+      if (processed % 5 === 0) {
+        await supabase
+          .from("hygiene_actions")
+          .update({ progress: { processed, total: merges.length, message: `Merging ${processed} of ${merges.length}` } })
+          .eq("id", action.id);
+      }
+      await sleep(RATE_DELAY_MS);
+    }
+
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: failures === merges.length ? "failed" : "executed",
+        executed_at: new Date().toISOString(),
+        progress: { processed, total: merges.length, message: `Done (${failures} failed)` },
+        error_message: failures ? `${failures} of ${merges.length} merges failed` : null,
+      })
+      .eq("id", action.id);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[hygiene-execute] merge fatal", err);
+    await supabase
+      .from("hygiene_actions")
+      .update({ status: "failed", error_message: message })
+      .eq("id", action.id);
+  }
 }
 
 // ---- HubSpot OAuth helper (mirrors hubspot-sync) ----
