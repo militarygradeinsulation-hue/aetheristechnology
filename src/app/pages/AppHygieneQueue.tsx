@@ -13,6 +13,8 @@ import {
 import {
   HygieneActionRow, severityClass, confidenceLabel, categoryDisplay,
 } from "../lib/hygiene";
+import { HygieneRecordReviewDialog } from "../components/HygieneRecordReviewDialog";
+import { HygieneMergeDialog } from "../components/HygieneMergeDialog";
 
 const AppHygieneQueue = () => {
   const { account, loading } = useAccount();
