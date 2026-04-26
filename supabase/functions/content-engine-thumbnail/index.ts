@@ -111,23 +111,53 @@ async function generateOne(supa: any, postId: string, overrideHeadshotId?: strin
   form.append("n", "1");
   form.append("image", refBlob, "reference.jpg");
 
-  const aiResp = await fetch("https://api.openai.com/v1/images/edits", {
+  let aiResp = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
     headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
     body: form,
   });
+
+  // Fallback: if moderation blocks the image-edit (common when a real face + dramatic prompt
+  // trips the safety system), retry with text-to-image generation (no reference photo).
   if (!aiResp.ok) {
     const errText = await aiResp.text();
-    console.error("OpenAI error:", aiResp.status, errText);
-    await supa.from("thumbnail_generations").insert({
-      post_id: postId, status: "error",
-      error_message: `OpenAI ${aiResp.status}: ${errText.slice(0, 500)}`,
-    });
-    await supa.from("content_engine_posts").update({ thumbnail_status: "error" }).eq("id", postId);
-    if (aiResp.status === 401) throw new Error("OpenAI API key invalid. Update OPENAI_API_KEY secret.");
-    if (aiResp.status === 429) throw new Error("OpenAI rate limit hit. Wait a minute and retry.");
-    if (aiResp.status === 400 && errText.includes("safety")) throw new Error("Image rejected by content policy. Try regenerating or edit the hook.");
-    throw new Error(`Image generation failed (${aiResp.status})`);
+    const isModeration = aiResp.status === 400 && /moderation_blocked|safety/i.test(errText);
+    console.error("OpenAI edits error:", aiResp.status, errText);
+
+    if (isModeration) {
+      console.log("Falling back to images/generations (no reference photo)");
+      const fallbackPrompt = `${prompt}\n\nGenerate a generic professional businessman in his 40s wearing modern dark business attire (no specific real person likeness).`;
+      aiResp = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-image-1",
+          prompt: fallbackPrompt,
+          size: "1024x1024",
+          quality: settings?.default_quality || "medium",
+          n: 1,
+        }),
+      });
+    }
+
+    if (!aiResp.ok) {
+      const errText2 = await aiResp.text();
+      console.error("OpenAI fallback error:", aiResp.status, errText2);
+      await supa.from("thumbnail_generations").insert({
+        post_id: postId, status: "error",
+        error_message: `OpenAI ${aiResp.status}: ${errText2.slice(0, 500)}`,
+      });
+      await supa.from("content_engine_posts").update({ thumbnail_status: "error" }).eq("id", postId);
+      if (aiResp.status === 401) throw new Error("OpenAI API key invalid. Update OPENAI_API_KEY secret.");
+      if (aiResp.status === 429) throw new Error("OpenAI rate limit hit. Wait a minute and retry.");
+      if (aiResp.status === 400 && /moderation_blocked|safety/i.test(errText2)) {
+        throw new Error("Image rejected by content policy even after fallback. Try editing the hook to use less aggressive language.");
+      }
+      throw new Error(`Image generation failed (${aiResp.status})`);
+    }
   }
 
   const aiJson = await aiResp.json();
