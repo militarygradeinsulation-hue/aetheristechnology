@@ -895,4 +895,70 @@ function EditableBlock({ label, value, editing, onChange, onCopy, copied, accent
   );
 }
 
+function ThumbnailBlock({ post, headshots, onGenerate }: {
+  post: Post; headshots: Headshot[]; onGenerate: (id: string, headshotId?: string) => Promise<void>;
+}) {
+  const [selectedHeadshot, setSelectedHeadshot] = useState<string>(post.thumbnail_reference_id || '');
+  const isGenerating = post.thumbnail_status === 'generating';
+  const hasThumb = !!post.thumbnail_url;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Case File Thumbnail</div>
+        {hasThumb && (
+          <a href={post.thumbnail_url!} target="_blank" rel="noreferrer" className="text-[10px] text-cyan-400 hover:underline flex items-center gap-1">
+            <Download className="w-3 h-3" /> Download
+          </a>
+        )}
+      </div>
+      <div className="border border-border rounded-lg overflow-hidden bg-background">
+        <div className="aspect-square bg-card/50 flex items-center justify-center relative">
+          {isGenerating ? (
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-2" />
+              <div className="text-xs text-muted-foreground">Generating with OpenAI gpt-image-1...</div>
+              <div className="text-[10px] text-muted-foreground mt-1">~10–20 seconds</div>
+            </div>
+          ) : hasThumb ? (
+            <img src={post.thumbnail_url!} alt="Post thumbnail" className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-center px-6">
+              <div className="text-xs text-muted-foreground mb-3">No thumbnail yet</div>
+              <div className="text-[10px] text-muted-foreground">Pick a reference photo + Generate</div>
+            </div>
+          )}
+        </div>
+        <div className="p-3 border-t border-border flex flex-wrap gap-2 items-center bg-card/30">
+          <Select value={selectedHeadshot} onValueChange={setSelectedHeadshot}>
+            <SelectTrigger className="h-8 text-xs flex-1 min-w-[180px]">
+              <SelectValue placeholder="Auto-pick by format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto-pick by format</SelectItem>
+              {headshots.filter((h) => !h.disabled).map((h) => (
+                <SelectItem key={h.id} value={h.id}>{h.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm" variant="outline"
+            disabled={isGenerating}
+            onClick={() => onGenerate(post.id, selectedHeadshot && selectedHeadshot !== 'auto' ? selectedHeadshot : undefined)}
+            className="border-amber/40 text-amber hover:bg-amber/10"
+          >
+            {isGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+            {hasThumb ? 'Regenerate' : 'Generate'}
+          </Button>
+        </div>
+        {post.thumbnail_status === 'error' && (
+          <div className="px-3 py-2 text-[11px] text-crimson border-t border-crimson/30 bg-crimson/5">
+            Last attempt failed — check edge function logs.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default ContentEngine;
