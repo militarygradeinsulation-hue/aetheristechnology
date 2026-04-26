@@ -55,23 +55,29 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
 
+    const isMerge = Array.isArray(merges) && merges.length > 0;
     const targetIds: string[] =
       Array.isArray(record_ids) && record_ids.length > 0 ? record_ids : action.affected_record_ids;
+    const totalUnits = isMerge ? merges.length : targetIds.length;
 
     await supabase
       .from("hygiene_actions")
       .update({
         status: "executing",
         approved_at: action.approved_at || new Date().toISOString(),
-        progress: { processed: 0, total: targetIds.length, message: "Starting..." },
+        progress: { processed: 0, total: totalUnits, message: "Starting..." },
       })
       .eq("id", action_id);
 
-    EdgeRuntime.waitUntil(
-      runExecution(supabase, acct, action, targetIds, modifications || {}, !!confirm_delete),
-    );
+    if (isMerge) {
+      EdgeRuntime.waitUntil(runMerges(supabase, acct, action, merges));
+    } else {
+      EdgeRuntime.waitUntil(
+        runExecution(supabase, acct, action, targetIds, modifications || {}, !!confirm_delete),
+      );
+    }
 
-    return json({ ok: true, total: targetIds.length });
+    return json({ ok: true, total: totalUnits });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed";
     console.error("[hygiene-execute] error", err);
