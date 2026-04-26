@@ -14,7 +14,7 @@ const corsHeaders = {
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ADMIN_SECRET = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY") || "fallback-secret";
+const ADMIN_SECRET = SERVICE_KEY;
 
 const FORMAT_PRESETS: Record<string, { tag: string; mood: string; accent: string; label: string }> = {
   auditRoast:    { tag: "executive_dark", mood: "interrogation room, harsh single overhead light, sharp shadows", accent: "crimson red (#DC143C)", label: "AUDIT ROAST" },
