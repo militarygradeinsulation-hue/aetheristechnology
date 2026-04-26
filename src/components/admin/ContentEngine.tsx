@@ -96,6 +96,17 @@ async function call(action: string, payload: Record<string, unknown> = {}) {
   return data;
 }
 
+async function callThumb(action: string, payload: Record<string, unknown> = {}) {
+  const token = getAdminToken();
+  const { data, error } = await supabase.functions.invoke('content-engine-thumbnail', {
+    body: { action, ...payload },
+    headers: token ? { 'x-admin-token': token } : undefined,
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export const ContentEngine: React.FC = () => {
   const { toast } = useToast();
   const [view, setView] = useState<'calendar' | 'generator' | 'strategy'>('calendar');
