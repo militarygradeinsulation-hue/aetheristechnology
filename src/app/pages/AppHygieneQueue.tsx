@@ -260,6 +260,24 @@ const AppHygieneQueue = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {reviewAction && (
+        <HygieneRecordReviewDialog
+          action={reviewAction}
+          open={!!reviewAction}
+          onClose={() => setReviewAction(null)}
+          onComplete={load}
+        />
+      )}
+
+      {mergeAction && (
+        <HygieneMergeDialog
+          action={mergeAction}
+          open={!!mergeAction}
+          onClose={() => setMergeAction(null)}
+          onComplete={load}
+        />
+      )}
     </AppLayout>
   );
 };
