@@ -3,6 +3,7 @@ import { Unplug, RefreshCw } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { useAccount } from "../lib/useAccount";
 import { LoadDemoDataCard } from "../components/LoadDemoDataCard";
+import { HygieneSettingsCard } from "../components/HygieneSettingsCard";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -95,6 +96,7 @@ const AppSettings = () => {
           )}
         </div>
 
+        {account && <HygieneSettingsCard accountId={account.id} />}
         {account && <LoadDemoDataCard accountId={account.id} onSeeded={refetch} />}
       </div>
     </AppLayout>

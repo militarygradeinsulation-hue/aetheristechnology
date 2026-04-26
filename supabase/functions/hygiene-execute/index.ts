@@ -1,0 +1,347 @@
+// Data Hygiene Engine — Write-back to HubSpot.
+// Takes an approved hygiene_action and applies the change one record at a time
+// (rate-limited to ~10 req/s), logging every before/after to hygiene_log.
+
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const HUBSPOT_API = "https://api.hubapi.com";
+const RATE_DELAY_MS = 110; // ~9 req/s
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return json({ error: "Unauthorized" }, 401);
+    const { data: { user }, error: userErr } = await supabase.auth.getUser(
+      authHeader.replace("Bearer ", ""),
+    );
+    if (userErr || !user) return json({ error: "Unauthorized" }, 401);
+
+    const { action_id, record_ids, modifications, confirm_delete } = await req.json();
+    if (!action_id) return json({ error: "action_id required" }, 400);
+
+    const { data: action } = await supabase
+      .from("hygiene_actions")
+      .select("*")
+      .eq("id", action_id)
+      .maybeSingle();
+    if (!action) return json({ error: "Action not found" }, 404);
+
+    const { data: acct } = await supabase
+      .from("accounts")
+      .select("*")
+      .eq("id", action.account_id)
+      .maybeSingle();
+    if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
+
+    const targetIds: string[] =
+      Array.isArray(record_ids) && record_ids.length > 0 ? record_ids : action.affected_record_ids;
+
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: "executing",
+        approved_at: action.approved_at || new Date().toISOString(),
+        progress: { processed: 0, total: targetIds.length, message: "Starting..." },
+      })
+      .eq("id", action_id);
+
+    EdgeRuntime.waitUntil(
+      runExecution(supabase, acct, action, targetIds, modifications || {}, !!confirm_delete),
+    );
+
+    return json({ ok: true, total: targetIds.length });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed";
+    console.error("[hygiene-execute] error", err);
+    return json({ error: message }, 500);
+  }
+});
+
+async function runExecution(
+  supabase: SupabaseClient,
+  account: any,
+  action: any,
+  ids: string[],
+  modifications: Record<string, Record<string, unknown>>,
+  confirmDelete: boolean,
+) {
+  let processed = 0;
+  let failures = 0;
+  try {
+    const accessToken = await getAccessToken(supabase, account);
+    const fixKind: string = action.recommended_action?.fix_kind || "manual_review";
+    const objectType: string = action.recommended_action?.object_type || "contact";
+
+    for (const id of ids) {
+      try {
+        await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
+      } catch (err: unknown) {
+        failures++;
+        const message = err instanceof Error ? err.message : String(err);
+        await supabase.from("hygiene_log").insert({
+          action_id: action.id,
+          account_id: action.account_id,
+          hubspot_object_type: objectType,
+          hubspot_object_id: id,
+          field_changes: [],
+          before_value: {},
+          after_value: {},
+          success: false,
+          error_message: message,
+        });
+      }
+      processed++;
+      if (processed % 10 === 0) {
+        await supabase
+          .from("hygiene_actions")
+          .update({ progress: { processed, total: ids.length, message: `Processing ${processed} of ${ids.length}` } })
+          .eq("id", action.id);
+      }
+      await sleep(RATE_DELAY_MS);
+    }
+
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: failures === ids.length ? "failed" : "executed",
+        executed_at: new Date().toISOString(),
+        progress: { processed, total: ids.length, message: `Done (${failures} failed)` },
+        error_message: failures ? `${failures} of ${ids.length} records failed` : null,
+      })
+      .eq("id", action.id);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[hygiene-execute] fatal", err);
+    await supabase
+      .from("hygiene_actions")
+      .update({ status: "failed", error_message: message })
+      .eq("id", action.id);
+  }
+}
+
+async function applyOne(
+  supabase: SupabaseClient,
+  action: any,
+  token: string,
+  objectType: string,
+  id: string,
+  fixKind: string,
+  modification: Record<string, unknown> | undefined,
+  confirmDelete: boolean,
+) {
+  if (fixKind === "flag_missing") {
+    // No-op write — used as a flag/export category in Phase 1.
+    return;
+  }
+
+  if (fixKind === "delete_orphan_engagement") {
+    if (!confirmDelete) throw new Error("Delete requires confirm_delete=true");
+    const before = await fetchHubspot(token, "engagements", id);
+    const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/engagements/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
+    await supabase.from("hygiene_log").insert({
+      action_id: action.id,
+      account_id: action.account_id,
+      hubspot_object_type: "engagement",
+      hubspot_object_id: id,
+      field_changes: [{ field: "_deleted", before: false, after: true }],
+      before_value: before?.properties || {},
+      after_value: {},
+      success: true,
+    });
+    return;
+  }
+
+  // Fetch current state
+  const objPath = objectTypeToPath(objectType);
+  const before = await fetchHubspot(token, objPath, id);
+  if (!before) return;
+
+  const beforeProps = before.properties || {};
+  const updates = modification || computeUpdates(fixKind, beforeProps);
+  const fieldChanges = Object.entries(updates)
+    .filter(([k, v]) => beforeProps[k] !== v)
+    .map(([k, v]) => ({ field: k, before: beforeProps[k] ?? null, after: v }));
+  if (fieldChanges.length === 0) return;
+
+  const patchRes = await fetch(`${HUBSPOT_API}/crm/v3/objects/${objPath}/${id}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ properties: updates }),
+  });
+  if (!patchRes.ok) throw new Error(`HubSpot ${patchRes.status}: ${await patchRes.text()}`);
+  const after = await patchRes.json();
+
+  await supabase.from("hygiene_log").insert({
+    action_id: action.id,
+    account_id: action.account_id,
+    hubspot_object_type: objectType,
+    hubspot_object_id: id,
+    field_changes: fieldChanges,
+    before_value: beforeProps,
+    after_value: after.properties || updates,
+    success: true,
+  });
+
+  // Mirror the change locally so the UI reflects it immediately
+  await mirrorUpdate(supabase, action.account_id, objectType, id, updates);
+}
+
+function computeUpdates(fixKind: string, before: Record<string, any>): Record<string, unknown> {
+  const u: Record<string, unknown> = {};
+  switch (fixKind) {
+    case "lowercase_email":
+    case "trim_whitespace":
+      if (before.email && before.email !== before.email.trim().toLowerCase()) u.email = before.email.trim().toLowerCase();
+      if (before.firstname && before.firstname !== before.firstname.trim()) u.firstname = before.firstname.trim();
+      if (before.lastname && before.lastname !== before.lastname.trim()) u.lastname = before.lastname.trim();
+      if (before.company && before.company !== before.company.trim()) u.company = before.company.trim();
+      if (before.firstname) {
+        const v = before.firstname.trim();
+        if (v === v.toLowerCase() || v === v.toUpperCase()) u.firstname = titleCase(v);
+      }
+      if (before.lastname) {
+        const v = before.lastname.trim();
+        if (v === v.toLowerCase() || v === v.toUpperCase()) u.lastname = titleCase(v);
+      }
+      break;
+    case "title_case_name":
+      if (before.firstname) u.firstname = titleCase(before.firstname.trim());
+      if (before.lastname) u.lastname = titleCase(before.lastname.trim());
+      break;
+    case "format_phone":
+      if (before.phone) {
+        const digits = String(before.phone).replace(/\D/g, "");
+        if (digits.length === 10) u.phone = `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+        else if (digits.length === 11 && digits.startsWith("1"))
+          u.phone = `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+      }
+      break;
+    case "trim_company":
+      if (before.name && before.name !== before.name.trim()) u.name = before.name.trim();
+      break;
+  }
+  return u;
+}
+
+function titleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+function objectTypeToPath(t: string): string {
+  if (t === "deal") return "deals";
+  if (t === "company") return "companies";
+  if (t === "engagement") return "engagements";
+  return "contacts";
+}
+
+async function fetchHubspot(token: string, path: string, id: string) {
+  const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/${path}/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`HubSpot fetch ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function mirrorUpdate(
+  supabase: SupabaseClient,
+  accountId: string,
+  objectType: string,
+  id: string,
+  updates: Record<string, unknown>,
+) {
+  const table =
+    objectType === "deal" ? "mirror_deals"
+    : objectType === "company" ? "mirror_companies"
+    : objectType === "engagement" ? "mirror_engagements"
+    : "mirror_contacts";
+
+  const patch: Record<string, unknown> = { synced_at: new Date().toISOString() };
+  if (objectType === "contact") {
+    if (updates.email) patch.email = updates.email;
+    if (updates.firstname) patch.first_name = updates.firstname;
+    if (updates.lastname) patch.last_name = updates.lastname;
+  }
+  await supabase.from(table).update(patch).eq("account_id", accountId).eq("hubspot_id", id);
+}
+
+// ---- HubSpot OAuth helper (mirrors hubspot-sync) ----
+async function getAccessToken(admin: SupabaseClient, account: any): Promise<string> {
+  const key = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY")!;
+  const expiresAt = account.hubspot_access_token_expires_at
+    ? new Date(account.hubspot_access_token_expires_at).getTime()
+    : 0;
+  const needsRefresh = expiresAt < Date.now() + 5 * 60 * 1000;
+
+  if (!needsRefresh && account.hubspot_access_token_encrypted) {
+    const { data } = await admin.rpc("decrypt_token", {
+      _ciphertext: account.hubspot_access_token_encrypted,
+      _key: key,
+    });
+    if (data) return data as string;
+  }
+
+  if (!account.hubspot_refresh_token_encrypted) throw new Error("No refresh token on file");
+  const { data: refreshToken } = await admin.rpc("decrypt_token", {
+    _ciphertext: account.hubspot_refresh_token_encrypted,
+    _key: key,
+  });
+  if (!refreshToken) throw new Error("Failed to decrypt refresh token");
+
+  const res = await fetch(`${HUBSPOT_API}/oauth/v1/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: Deno.env.get("HUBSPOT_CLIENT_ID")!,
+      client_secret: Deno.env.get("HUBSPOT_CLIENT_SECRET")!,
+      refresh_token: refreshToken as string,
+    }),
+  });
+  if (!res.ok) throw new Error(`Refresh failed: ${await res.text()}`);
+  const tokens = await res.json();
+
+  const { data: encAccess } = await admin.rpc("encrypt_token", {
+    _plaintext: tokens.access_token,
+    _key: key,
+  });
+  await admin
+    .from("accounts")
+    .update({
+      hubspot_access_token_encrypted: encAccess,
+      hubspot_access_token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+    })
+    .eq("id", account.id);
+
+  return tokens.access_token;
+}

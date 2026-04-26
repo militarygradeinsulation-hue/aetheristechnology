@@ -1,108 +1,220 @@
-## Goal
+## Data Hygiene Engine — CRM cleanup feature for `/app/hygiene`
 
-Integrate the uploaded **Content Engine** (LinkedIn video script planner with calendar + generator + strategy editor) into the existing Admin Dashboard as a first-class tab — fully rebuilt to match the Aetheris forensic dark theme, persisted in the backend (not localStorage), and powered by Lovable AI (no Anthropic key needed).
+A new module inside the Revenue Recovery app that detects, categorizes, and (with approval) writes back data quality fixes to HubSpot. Reuses the existing mirror tables, OAuth, and AI pipeline — no duplicate sync or auth.
 
-## What you'll see
+### Scope notes (please confirm during build)
 
-A new **"Content Engine"** tab in the Admin Dashboard (`/admin`) with three views:
+- **AI model**: The brief asks for `claude-opus-4-7`, which isn't a real model and the project's AI gateway doesn't proxy Anthropic. We'll use the existing pattern from `run-audit` — Lovable AI Gateway with `openai/gpt-5` for categorization (matches the audit pipeline) and `google/gemini-2.5-flash` for cheaper batch confidence scoring. No new API keys needed.
+- **Phase 1 only** — no Apollo/Clay enrichment, no auto-merge, no scheduled scans (UI placeholders only).
+- **Safety-first writes** — one record at a time, ≤10 req/s, every change logged with full before/after, rollback supported.
 
-1. **Calendar** — Month grid showing every scheduled LinkedIn video post, color-coded by format (Audit Roast / Pattern Reveal / Founder POV / Counter-Take). Click any post to open the detail modal.
-2. **Generator** — One-click "Generate 12 Posts" (or custom batch size). Plans dates from your posting schedule, generates hooks + scripts + captions + hashtags in parallel, drops them onto the calendar.
-3. **Strategy** — Editable form: business description, niche, target buyer, posting days/times/frequency, format mix sliders, voice reference. Auto-saves.
+---
 
-The post detail modal supports: edit, regenerate, duplicate +7 days, delete, reschedule, status (draft → approved → posted), and copy hook/script/caption/hashtags to clipboard. Export-all-to-TSV button on the calendar.
+### 1. Routes & Navigation
 
-## Key adaptations from the uploaded file
-
-| Original | Adapted |
-|---|---|
-| Inline JSX colors (`#ff6b35`, `#0a0a0c`) | Aetheris design tokens (`amber`, `crimson`, `bg-background`, `border-border`, `glass`) |
-| Anthropic API direct fetch with hardcoded key | New Supabase edge function `content-engine-generate` using Lovable AI (`google/gemini-2.5-flash` for plans, `openai/gpt-5-mini` for scripts) |
-| `window.storage` / localStorage | Supabase tables `content_engine_strategy` (singleton per admin) + `content_engine_posts` |
-| Pure client-side regenerate | Same edge function, single-script mode |
-| No auth | Gated behind existing PIN admin token (`x-admin-token` header) |
-| Plain inline-style buttons | shadcn `Button`, `Card`, `Badge`, `Dialog`, `Tabs`, `Slider` |
-
-## Technical plan
-
-### 1. Database (migration)
-
-```sql
--- Singleton strategy row keyed by admin (since this is single-tenant admin)
-create table public.content_engine_strategy (
-  id uuid primary key default gen_random_uuid(),
-  business_description text not null,
-  niche text not null,
-  target_buyer text not null,
-  goals text[] not null default '{}',
-  frequency text not null default '4x/week',
-  posting_days text[] not null default '{"Mon","Tue","Wed","Thu"}',
-  posting_times text[] not null default '{"07:30","12:00"}',
-  format_mix jsonb not null default '{"auditRoast":40,"patternReveal":30,"founderPOV":20,"counterTake":10}',
-  voice_reference text not null,
-  cta_link text not null,
-  updated_at timestamptz not null default now()
-);
-
-create table public.content_engine_posts (
-  id uuid primary key default gen_random_uuid(),
-  scheduled_date date not null,
-  scheduled_time text not null,
-  format text not null,           -- auditRoast | patternReveal | founderPOV | counterTake
-  topic_angle text not null,
-  target_emotion text,
-  hook text not null,
-  script text not null,
-  caption text not null,
-  hashtags text[] not null default '{}',
-  status text not null default 'draft',  -- draft | approved | posted
-  generated_at timestamptz not null default now(),
-  created_at timestamptz not null default now()
-);
-
-alter table public.content_engine_strategy enable row level security;
-alter table public.content_engine_posts enable row level security;
-
--- Admin-only access; edge functions use service role to bypass RLS.
--- No public policies — all access flows through admin-token-gated edge function.
+Add to `src/app/AppRouter.tsx`:
+```
+/app/hygiene          → redirects to /app/hygiene/scan
+/app/hygiene/scan     → HygieneScan page
+/app/hygiene/queue    → HygieneQueue page
+/app/hygiene/history  → HygieneHistory page
 ```
 
-### 2. Edge function: `supabase/functions/content-engine-generate/index.ts`
+Add a "Hygiene" nav item (Sparkles icon, cyan accent) to `AppLayout.tsx` between Audits and Settings.
 
-- Verifies `x-admin-token` (HMAC, same pattern as existing admin functions).
-- Three actions:
-  - `plan_and_generate` — takes `numPosts`, computes next N dates from strategy, calls Lovable AI to plan slots (format + topic angle + emotion), then runs all script generations in `Promise.all`, inserts into `content_engine_posts`, returns the new posts.
-  - `regenerate_post` — single post by id, re-runs script generation with same format/angle.
-  - `get_strategy` / `save_strategy` / `get_posts` / `update_post` / `delete_post` — CRUD wrappers.
-- Uses `LOVABLE_API_KEY` env var (already provisioned, no user input needed).
-- Wraps long batch generation in `EdgeRuntime.waitUntil` if >5 posts to avoid worker shutdown mid-loop.
+A shared `HygieneSubNav` component renders Scan / Queue / History tabs at the top of each page.
 
-### 3. New admin component: `src/components/admin/ContentEngine.tsx`
+---
 
-Single component containing the three sub-views (Calendar / Generator / Strategy) and the post detail dialog. Uses:
-- `Card`, `Button`, `Badge`, `Tabs`, `Dialog`, `Slider`, `Input`, `Textarea`, `Select` from shadcn
-- `lucide-react` icons (already used everywhere)
-- `supabase.functions.invoke('content-engine-generate', ...)` with admin token
-- `useToast` for save/generate feedback
+### 2. Database (new migration)
 
-### 4. Wire into `src/pages/AdminDashboard.tsx`
+Three new tables, all with RLS scoped to the user's account (same pattern as `audit_runs`):
 
-- Add `'engine'` to the `activeTab` union type.
-- Add nav button "Content Engine" (icon: `Zap`) alongside existing tabs.
-- Render `<ContentEngine />` when `activeTab === 'engine'`.
+```
+hygiene_scans
+  id uuid pk, account_id uuid, scan_date timestamptz default now(),
+  status text ('running'|'complete'|'failed'),
+  total_issues int default 0,
+  totals_by_category jsonb default '{}',     -- quick rollup for list view
+  results jsonb default '{}',                -- full per-category findings
+  ai_status text default 'pending',          -- 'pending'|'running'|'complete'|'failed'
+  error_message text,
+  completed_at timestamptz
 
-### 5. Files
+hygiene_actions
+  id uuid pk, scan_id uuid fk, account_id uuid,
+  category text,                             -- e.g. 'phone_format', 'duplicate_contacts'
+  confidence text,                           -- 'high'|'medium'|'low'
+  risk_level text,                           -- 'low'|'medium'|'high'
+  approval_mode text,                        -- 'batch'|'individual'
+  recommended_action jsonb,                  -- {label, rationale, change_spec}
+  affected_record_ids text[] default '{}',
+  affected_count int default 0,
+  status text default 'pending',             -- pending|approved|executing|executed|skipped|failed
+  approved_at timestamptz, executed_at timestamptz, created_at timestamptz default now()
 
-**Create**
-- `supabase/migrations/<timestamp>_content_engine.sql`
-- `supabase/functions/content-engine-generate/index.ts`
-- `src/components/admin/ContentEngine.tsx`
+hygiene_log
+  id uuid pk, action_id uuid fk, account_id uuid,
+  hubspot_object_type text,                  -- 'contact'|'deal'|'company'|'engagement'
+  hubspot_object_id text,
+  field_changes jsonb,                       -- [{field, before, after}]
+  before_value jsonb, after_value jsonb,
+  success boolean, error_message text,
+  rolled_back_at timestamptz,
+  executed_at timestamptz default now()
 
-**Edit**
-- `src/pages/AdminDashboard.tsx` (add tab + render)
+hygiene_settings (one row per account)
+  account_id uuid pk,
+  require_approval boolean default true,
+  allow_auto_high_conf boolean default false,
+  enable_enrichment boolean default false,
+  max_batch_size int default 100,
+  pause_threshold_pct int default 5,
+  updated_at timestamptz default now()
+```
 
-## Out of scope (call out if you want them)
+RLS pattern (same as `audit_runs`):
+- `service role manages all`
+- `users select where account_id IN (select id from accounts where user_id = auth.uid())`
+- Settings additionally allows insert/update for the owning user.
 
-- Auto-posting generated scripts to LinkedIn (separate from existing `linkedin-post` queue — could be wired later).
-- Video file upload / storage.
-- Multi-user separation (single admin assumed, matching your current setup).
+---
+
+### 3. Edge functions (3 new)
+
+All follow existing conventions: deno serve, CORS headers, JWT validated via `supabase.auth.getUser`, `EdgeRuntime.waitUntil` for long work, `verify_jwt = false` (in-code validation).
+
+#### `hygiene-scan/index.ts`
+- Input: `{ account_id }`
+- Creates `hygiene_scans` row (status=running), returns `scan_id` immediately
+- Background pipeline:
+  1. Loads `mirror_contacts`, `mirror_deals`, `mirror_engagements`, `mirror_owners` for the account
+  2. Runs the **8 detection routines** (in-memory JS, mirroring the `detectPatterns` style from `run-audit`):
+     - `duplicate_contacts` — group by lowercased email, normalized phone (digits only), and (lowercased name + company_id) fuzzy bucket
+     - `missing_critical_fields` — bucket by missing-set signature: `email|phone|company|title|industry`
+     - `lifecycle_mismatch` — cross-reference contact lifecycle vs `mirror_deal_contacts` + deal stages
+     - `formatting_inconsistencies` — name case (lower/upper/mixed), phone format variance, email whitespace/case, company trailing whitespace
+     - `owner_issues` — null owner, owner_id not in `mirror_owners`, deal owner ≠ primary contact owner
+     - `stale_lifecycle` — MQL/SQL/Opportunity with `last_activity_date` > 90d
+     - `deal_data_issues` — open deals missing amount/close_date/contact/owner, or close_date < now() but stage not closed
+     - `engagement_orphans` — `mirror_engagements` rows with neither `contact_id` nor `deal_id`
+  3. Each routine returns `{ category, count, severity, sample_ids[], affected_record_ids[], details }`
+  4. Persists to `hygiene_scans.results` and `totals_by_category`
+  5. Triggers AI categorization (Stage 2 below) inline; updates `ai_status` to complete
+  6. Inserts one `hygiene_actions` row per category with the AI verdict
+
+- AI Stage A (confidence scoring): one Lovable AI call per category with a sample of 5–10 records → JSON `{confidence, reasoning}`
+- AI Stage B (action recommendation): one call per category → JSON `{label, rationale, change_spec, risk_level, approval_mode}`
+- Tool-calling JSON pattern (from project's AI guidance), gemini-2.5-flash for Stage A, gpt-5 for Stage B
+- Falls back to deterministic defaults if `LOVABLE_API_KEY` missing (matches `run-audit`)
+
+#### `hygiene-execute/index.ts`
+- Input: `{ action_id, record_ids?: string[], modifications?: Record<id, override> }`
+- Marks action `status=executing`
+- Looks up account → resolves HubSpot access token via existing `getAccessToken` helper (reuse pattern from `hubspot-sync`)
+- For each affected record (one at a time, 100ms delay = 10 req/s cap):
+  1. `GET` current value from HubSpot to detect drift
+  2. Computes diff against `change_spec`
+  3. `PATCH` the object with the approved change
+  4. Inserts `hygiene_log` row with field-level before/after
+  5. Updates corresponding `mirror_*` row to keep UI consistent
+- On any single failure: log error, continue with next record
+- Special branch: **duplicates** — performs HubSpot merge API call (`/crm/v3/objects/contacts/merge`) using user-selected master id
+- Refuses to run any DELETE without `confirm_delete: true` flag (Phase 1 has no UI for it)
+- Sends progress to client via `hygiene_actions.status` polling (same pattern as audit's `current_stage`)
+
+#### `hygiene-rollback/index.ts`
+- Input: `{ log_id }` or `{ action_id, all: true }` for batch rollback
+- For each log row: PATCH HubSpot with `before_value`, set `rolled_back_at`, mirror update
+- Same per-record safety + rate limit as execute
+
+---
+
+### 4. Frontend pages
+
+#### `src/app/pages/AppHygieneScan.tsx`
+- Empty state: "Run Hygiene Scan" CTA card
+- During scan: progress bar + live status from `hygiene_scans.status` + `ai_status` (poll every 3s, same as Dashboard sync polling)
+- Results: 8 category cards in a grid. Each card:
+  - Category title + issue count (e.g. "847 duplicate contacts")
+  - Severity chip (green #10b981 / amber #eab308 / red-orange #ef4444)
+  - Confidence label (`Auto-fixable` / `Needs review` / `Requires enrichment`)
+  - Estimated impact line from AI rationale
+  - "Send to Action Queue" → updates `hygiene_actions.status=pending`, navigates to `/app/hygiene/queue`
+- Past scans list at bottom (last 5)
+
+#### `src/app/pages/AppHygieneQueue.tsx`
+- Pulls all `hygiene_actions` where `status='pending'` for the account
+- Collapsible section per category with three buttons: **Approve All / Review Each / Skip Category**
+- **Approve All modal** (high-confidence batch):
+  - Shows 5 sample before/after pairs (computed client-side from change_spec)
+  - "Confirm — Execute All" calls `hygiene-execute`
+  - Live progress bar driven by polling `hygiene_actions.status` + count of `hygiene_log` rows
+- **Review Each** (medium/low confidence): card-based reviewer
+  - Each card: record snapshot (before) + proposed (after) + Approve / Modify / Skip
+  - Modify: inline editor for the proposed value, stored in `modifications` map
+  - "Skip all remaining" at top
+- **Duplicate-specific UI**: side-by-side comparison of all matched records, radio to pick master, checkbox per field to choose source. Preview merged result modal before confirm.
+- **Missing fields**: Phase 1 → "Export to CSV" button (client-side download of affected_record_ids with current field state), enrichment toggle disabled with "Phase 2" tag.
+
+#### `src/app/pages/AppHygieneHistory.tsx`
+- Timeline list of past scans (date, total_issues, executed count from `hygiene_log`)
+- Click a scan → drill into per-action `hygiene_log` rows
+- Each log row: object type/id, field-level diff, success status, "Rollback" button
+- "Rollback entire batch" button on action level
+- Confirmation modal for any rollback
+
+#### Settings additions
+- New "Hygiene Settings" section appended to `src/app/pages/AppSettings.tsx`
+- Fields wired to `hygiene_settings` row (auto-create on first read):
+  - Toggles: require_approval, allow_auto_high_conf, enable_enrichment (disabled, Phase 2 tag)
+  - Numbers: max_batch_size (1–1000), pause_threshold_pct (1–50)
+- Save button uses upsert; toast on success
+
+---
+
+### 5. Design
+
+- Match existing `/app` dark aesthetic (cards, borders, muted text)
+- New accent: cyan `hsl(189 94% 43%)` for hygiene-specific elements (sidebar icon active state, page accents, primary CTAs)
+- Severity color tokens added to local component scope only (not global theme):
+  - high `#10b981`, medium `#eab308`, low `#ef4444`
+- Loading copy: "Scanning 12,847 contacts...", "Updating 234 of 847 records..."
+- All progress uses existing `Progress` component
+
+---
+
+### 6. Build order (matches brief)
+
+1. Routes, sidebar nav, sub-nav skeleton
+2. DB migration (4 tables + RLS + settings auto-row)
+3. `hygiene-scan` edge function — detection routines first, AI layer second
+4. `AppHygieneScan` page + scan trigger + results display
+5. `AppHygieneQueue` — start with formatting/whitespace (highest confidence, lowest risk)
+6. `hygiene-execute` edge function with one-at-a-time + rate limit
+7. Duplicate merge & review-each flows
+8. `AppHygieneHistory` + `hygiene-rollback`
+9. Settings panel
+
+Test gate (per brief): run a 5-record dry-run before exposing 100+ batch approval in any category.
+
+### Files created/edited
+
+**New**
+- `supabase/migrations/<ts>_hygiene_engine.sql`
+- `supabase/functions/hygiene-scan/index.ts`
+- `supabase/functions/hygiene-execute/index.ts`
+- `supabase/functions/hygiene-rollback/index.ts`
+- `src/app/pages/AppHygieneScan.tsx`
+- `src/app/pages/AppHygieneQueue.tsx`
+- `src/app/pages/AppHygieneHistory.tsx`
+- `src/app/components/HygieneSubNav.tsx`
+- `src/app/components/HygieneCategoryCard.tsx`
+- `src/app/components/HygieneReviewCard.tsx`
+- `src/app/components/DuplicateMergeModal.tsx`
+- `src/app/lib/hygiene.ts` (shared types + client helpers)
+
+**Edited**
+- `src/app/AppRouter.tsx` (3 new routes)
+- `src/app/AppLayout.tsx` (Hygiene nav item)
+- `src/app/pages/AppSettings.tsx` (Hygiene Settings section)
