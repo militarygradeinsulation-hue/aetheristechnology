@@ -6,6 +6,9 @@ import AppDashboard from "./pages/AppDashboard";
 import AppSettings from "./pages/AppSettings";
 import AppReports from "./pages/AppReports";
 import AppReportDetail from "./pages/AppReportDetail";
+import AppHygieneScan from "./pages/AppHygieneScan";
+import AppHygieneQueue from "./pages/AppHygieneQueue";
+import AppHygieneHistory from "./pages/AppHygieneHistory";
 
 export const AppRouter = () => (
   <AuthProvider>
@@ -16,6 +19,10 @@ export const AppRouter = () => (
       <Route path="dashboard" element={<AppDashboard />} />
       <Route path="reports" element={<AppReports />} />
       <Route path="reports/:id" element={<AppReportDetail />} />
+      <Route path="hygiene" element={<Navigate to="/app/hygiene/scan" replace />} />
+      <Route path="hygiene/scan" element={<AppHygieneScan />} />
+      <Route path="hygiene/queue" element={<AppHygieneQueue />} />
+      <Route path="hygiene/history" element={<AppHygieneHistory />} />
       <Route path="settings" element={<AppSettings />} />
       <Route path="*" element={<Navigate to="dashboard" replace />} />
     </Routes>

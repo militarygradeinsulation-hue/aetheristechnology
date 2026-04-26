@@ -24,8 +24,8 @@ const AppHygieneHistory = () => {
       supabase.from("hygiene_log").select("*").eq("account_id", account.id)
         .order("executed_at", { ascending: false }).limit(500),
     ]);
-    setActions((a as HygieneActionRow[]) || []);
-    setLogs((l as HygieneLogRow[]) || []);
+    setActions(((a as unknown) as HygieneActionRow[]) || []);
+    setLogs(((l as unknown) as HygieneLogRow[]) || []);
   };
 
   useEffect(() => { load(); }, [account?.id]);

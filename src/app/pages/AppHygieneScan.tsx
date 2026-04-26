@@ -31,13 +31,13 @@ const AppHygieneScan = () => {
       .order("scan_date", { ascending: false })
       .limit(1)
       .maybeSingle();
-    setLatestScan(data as HygieneScanRow | null);
+    setLatestScan((data as unknown as HygieneScanRow) || null);
     if (data) {
       const { data: acts } = await supabase
         .from("hygiene_actions")
         .select("*")
         .eq("scan_id", data.id);
-      setActions((acts as HygieneActionRow[]) || []);
+      setActions(((acts as unknown) as HygieneActionRow[]) || []);
     }
   };
 

@@ -30,7 +30,7 @@ const AppHygieneQueue = () => {
       .eq("account_id", account.id)
       .in("status", ["pending", "approved", "executing"])
       .order("created_at", { ascending: false });
-    setActions((data as HygieneActionRow[]) || []);
+    setActions(((data as unknown) as HygieneActionRow[]) || []);
   };
 
   useEffect(() => { load(); }, [account?.id]);
