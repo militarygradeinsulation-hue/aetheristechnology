@@ -90,15 +90,33 @@ Deno.serve(async (req) => {
 
 async function runScan(supabase: any, accountId: string, scanId: string) {
   try {
-    const [companies, contacts, deals, engagements, owners, dealContacts] =
-      await Promise.all([
-        loadAll(supabase, "mirror_companies", accountId),
-        loadAll(supabase, "mirror_contacts", accountId),
-        loadAll(supabase, "mirror_deals", accountId),
-        loadAll(supabase, "mirror_engagements", accountId),
-        loadAll(supabase, "mirror_owners", accountId),
-        loadAll(supabase, "mirror_deal_contacts", accountId),
-      ]);
+    // Load sequentially with narrow column projections — these tables can hold
+    // hundreds of thousands of rows and `select("*")` blows the edge function
+    // memory limit (~150MB). Order from smallest to largest so we fail fast.
+    const owners = await loadAll(
+      supabase, "mirror_owners", accountId,
+      "hubspot_id",
+    );
+    const deals = await loadAll(
+      supabase, "mirror_deals", accountId,
+      "hubspot_id, stage, amount, close_date, owner_id",
+    );
+    const dealContacts = await loadAll(
+      supabase, "mirror_deal_contacts", accountId,
+      "contact_id, deal_id",
+    );
+    const engagements = await loadAll(
+      supabase, "mirror_engagements", accountId,
+      "hubspot_id, contact_id, deal_id",
+    );
+    const companies = await loadAll(
+      supabase, "mirror_companies", accountId,
+      "hubspot_id, name",
+    );
+    const contacts = await loadAll(
+      supabase, "mirror_contacts", accountId,
+      "hubspot_id, email, first_name, last_name, lifecycle_stage, last_activity_date, properties",
+    );
 
     const results: CategoryResult[] = [
       detectDuplicateContacts(contacts),
