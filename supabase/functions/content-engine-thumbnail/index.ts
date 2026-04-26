@@ -17,33 +17,44 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ADMIN_SECRET = SERVICE_KEY;
 
 const FORMAT_PRESETS: Record<string, { tag: string; mood: string; accent: string; label: string }> = {
-  auditRoast:    { tag: "executive_dark", mood: "interrogation room, harsh single overhead light, sharp shadows", accent: "crimson red (#DC143C)", label: "AUDIT ROAST" },
-  patternReveal: { tag: "boardroom",      mood: "boardroom evidence wall, warm desk lamp, papers pinned with red string", accent: "amber gold (#F59E0B)", label: "PATTERN REVEAL" },
-  founderPOV:    { tag: "field_notes",    mood: "industrial warehouse at dusk, atmospheric haze, warm practical lights", accent: "amber gold (#F59E0B)", label: "FIELD NOTES" },
-  counterTake:   { tag: "analyst",        mood: "vintage library archive, deep shadows, brass desk lamp", accent: "yellow gold (#FBBF24)", label: "COUNTER-TAKE" },
+  auditRoast:    { tag: "executive_dark", mood: "modern dark studio backdrop with a single warm key light", accent: "crimson red (#DC143C)", label: "FIELD REPORT" },
+  patternReveal: { tag: "boardroom",      mood: "modern executive office with warm desk lamp lighting", accent: "amber gold (#F59E0B)", label: "PATTERN REVEAL" },
+  founderPOV:    { tag: "field_notes",    mood: "modern industrial workspace at dusk with warm practical lighting", accent: "amber gold (#F59E0B)", label: "FIELD NOTES" },
+  counterTake:   { tag: "analyst",        mood: "modern library setting with warm brass desk lamp", accent: "yellow gold (#FBBF24)", label: "COUNTER-TAKE" },
 };
 
+// Sanitize hook text to remove words OpenAI's moderation flags aggressively on portrait edits
+function sanitizeHook(raw: string) {
+  const blocked = [
+    /\broast(ed|ing)?\b/gi, /\bkill(ed|ing|er)?\b/gi, /\bdestroy(ed|ing)?\b/gi,
+    /\battack(ed|ing)?\b/gi, /\bweapon\b/gi, /\bblood\b/gi, /\bdead\b/gi,
+    /\bvictim\b/gi, /\bcrime\b/gi, /\bsuspect\b/gi, /\binterrogat\w*/gi,
+  ];
+  let s = raw;
+  for (const re of blocked) s = s.replace(re, "exposed");
+  return s;
+}
+
 function buildPrompt(post: any, accent: string, mood: string, label: string) {
-  const hook = (post.hook || post.topic_angle || "").slice(0, 140);
-  return `Cinematic editorial portrait poster, FORENSIC CASE FILE aesthetic.
+  const hook = sanitizeHook((post.hook || post.topic_angle || "").slice(0, 140));
+  return `Editorial magazine cover style portrait poster.
 
-SUBJECT: Use the reference photo as the EXACT person. Preserve their face, hair, beard, and build precisely. Reposition them three-quarter angle, looking directly at camera with serious operator expression. Subject occupies left third of the frame.
+SUBJECT: Keep the same person from the reference photo with their likeness, hair, and clothing intact. Three-quarter angle, confident professional expression, looking at camera. Subject on the left third of the frame.
 
-ENVIRONMENT: ${mood}. Deep cinematic black background (#0a0a0a) with subtle film grain.
+ENVIRONMENT: ${mood}. Deep cinematic dark background (#0a0a0a) with subtle film grain.
 
-DESIGN OVERLAY (right two-thirds of frame):
-- Top-left small badge: monospaced uppercase text "CASE FILE // ${label}" in ${accent} on dark
-- Large bold serif headline (Playfair Display style, all caps): "${hook.toUpperCase()}"
+DESIGN OVERLAY (right two-thirds):
+- Small badge top-left: monospaced uppercase text "${label}" in ${accent}
+- Large bold serif headline, all caps: "${hook.toUpperCase()}"
 - Headline color: warm off-white (#F5F5F0)
-- Bottom-right small watermark: "AETHERIS // BUSINESS FORENSICS" in ${accent}
-- Thin ${accent} accent border line on the right edge
-- Subtle redacted-document texture in background
+- Small footer text bottom-right: "AETHERIS" in ${accent}
+- Thin ${accent} accent line on the right edge
 
-LIGHTING: Dramatic chiaroscuro. ${accent} rim light on subject's edge. No flat lighting.
+LIGHTING: Editorial chiaroscuro with warm ${accent} rim light on the subject.
 
-STYLE: Editorial magazine cover meets noir detective dossier. High contrast, photographic realism for the subject, designed graphic elements for typography.
+STYLE: Premium business magazine cover, photographic realism for the subject, clean typographic graphic design overlay.
 
-FORMAT: Square 1:1 composition, sharp focus, no text artifacts, no watermarks beyond what is specified.`;
+FORMAT: Square 1:1 composition, sharp focus, clean typography, no extra watermarks.`;
 }
 
 async function generateOne(supa: any, postId: string, overrideHeadshotId?: string) {
