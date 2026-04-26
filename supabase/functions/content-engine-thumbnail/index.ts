@@ -37,24 +37,27 @@ function sanitizeHook(raw: string) {
 
 function buildPrompt(post: any, accent: string, mood: string, label: string) {
   const hook = sanitizeHook((post.hook || post.topic_angle || "").slice(0, 140));
-  return `Editorial magazine cover style portrait poster.
+  return `Editorial magazine cover poster, square 1:1.
 
-SUBJECT: Use the EXACT face, hair, beard, skin tone, and build of the person in the reference image — preserve their facial features identically, do not alter or stylize their face. You may change their clothing to a modern dark business jacket and reposition them three-quarter angle looking at camera with a confident professional expression. Subject on the left third of the frame.
+SUBJECT (CRITICAL — do not modify):
+- The reference image is a full-body cutout of the person on a transparent/white background.
+- Place this exact person into the new scene UNCHANGED: keep their face, hair, beard, skin tone, body proportions, pose, and clothing pixel-accurate. Do not restyle, re-pose, re-light their face, or change their outfit.
+- Position the subject standing on the LEFT THIRD of the composition, full body visible from head to feet, scaled so feet are near the bottom edge and head near the top.
+- Cleanly integrate the subject by adding realistic ground shadow and matching ambient light only — never alter the subject's pixels themselves.
 
-ENVIRONMENT: ${mood}. Deep cinematic dark background (#0a0a0a) with subtle film grain.
+ENVIRONMENT (build this AROUND the subject):
+- ${mood}.
+- Deep cinematic near-black background (#0a0a0a) on the right two-thirds with subtle film grain and soft atmospheric depth.
+- Subtle ${accent} ambient glow behind the subject for separation.
 
-DESIGN OVERLAY (right two-thirds):
-- Small badge top-left: monospaced uppercase text "${label}" in ${accent}
-- Large bold serif headline, all caps: "${hook.toUpperCase()}"
-- Headline color: warm off-white (#F5F5F0)
-- Small footer text bottom-right: "AETHERIS" in ${accent}
-- Thin ${accent} accent line on the right edge
+DESIGN OVERLAY (right two-thirds, do not overlap subject):
+- Small monospaced uppercase label top-right: "${label}" in ${accent}.
+- Large bold serif headline beneath it, all caps, multi-line allowed: "${hook.toUpperCase()}"
+- Headline color: warm off-white (#F5F5F0). Tight letter-spacing.
+- Small footer bottom-right: "AETHERIS" in ${accent}.
+- Thin ${accent} vertical accent rule between subject and text block.
 
-LIGHTING: Editorial chiaroscuro with warm ${accent} rim light on the subject.
-
-STYLE: Premium business magazine cover, photographic realism for the subject, clean typographic graphic design overlay.
-
-FORMAT: Square 1:1 composition, sharp focus, clean typography, no extra watermarks.`;
+STYLE: Premium business magazine cover. Photographic realism for the subject (untouched), clean typographic graphic design for the overlay. No extra watermarks, no text artifacts, no duplicated faces.`;
 }
 
 async function generateOne(supa: any, postId: string, overrideHeadshotId?: string) {
