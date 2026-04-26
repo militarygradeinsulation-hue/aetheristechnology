@@ -112,6 +112,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     setPage(0);
     setEdits({});
     setSelected({});
+    setSelectAllPending(false);
   }, [open, action.id]);
 
   useEffect(() => {
@@ -147,12 +148,25 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     })();
   }, [open, pageIds.join("|"), action.account_id]);
 
+  const [selectAllPending, setSelectAllPending] = useState(false);
+
   const toggleAll = (val: boolean) => {
-    const next = { ...selected };
-    for (const r of records) {
-      if (edits[r.hubspot_id] && Object.keys(edits[r.hubspot_id]).length > 0) next[r.hubspot_id] = val;
+    if (val) {
+      // Select every affected record across all pages. Records not yet loaded
+      // will be marked selected; once they load they'll get edits populated and
+      // already be checked.
+      const next: Record<string, boolean> = { ...selected };
+      for (const id of ids) next[id] = true;
+      setSelected(next);
+      setSelectAllPending(true);
+      toast({
+        title: `Selected all ${ids.length.toLocaleString()} records`,
+        description: "Pages you haven't opened will use the default proposed changes.",
+      });
+    } else {
+      setSelected({});
+      setSelectAllPending(false);
     }
-    setSelected(next);
   };
 
   const updateField = (id: string, field: string, val: string) => {
@@ -171,9 +185,13 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     });
   };
 
-  const approvedIds = Object.keys(selected).filter(
-    (id) => selected[id] && edits[id] && Object.keys(edits[id]).length > 0,
-  );
+  // When Select-All is active, every affected ID counts (server fills in defaults
+  // for records we haven't loaded). Otherwise only rows with proposed edits.
+  const approvedIds = selectAllPending
+    ? ids.filter((id) => selected[id] !== false)
+    : Object.keys(selected).filter(
+        (id) => selected[id] && edits[id] && Object.keys(edits[id]).length > 0,
+      );
 
   const submit = async () => {
     if (approvedIds.length === 0) {
@@ -182,8 +200,12 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     }
     setSubmitting(true);
     try {
+      // Only send modifications for records the user actually edited; the server
+      // will compute defaults for the rest.
       const modifications: Record<string, Record<string, string>> = {};
-      for (const id of approvedIds) modifications[id] = edits[id];
+      for (const id of approvedIds) {
+        if (edits[id] && Object.keys(edits[id]).length > 0) modifications[id] = edits[id];
+      }
 
       const { error } = await supabase.functions.invoke("hygiene-execute", {
         body: { action_id: action.id, record_ids: approvedIds, modifications },
@@ -235,7 +257,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
               const before = flattenBefore(rec, objectType);
               const recEdits = edits[rec.hubspot_id] || {};
               const hasChanges = Object.keys(recEdits).length > 0;
-              const sel = !!selected[rec.hubspot_id] && hasChanges;
+              const sel = !!selected[rec.hubspot_id] && (hasChanges || selectAllPending);
               return (
                 <div
                   key={rec.hubspot_id}
@@ -244,7 +266,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
                   <div className="flex items-start gap-3">
                     <Checkbox
                       checked={sel}
-                      disabled={!hasChanges}
+                      disabled={!hasChanges && !selectAllPending}
                       onCheckedChange={(v) => setSelected((s) => ({ ...s, [rec.hubspot_id]: !!v }))}
                       className="mt-1"
                     />
