@@ -1,0 +1,257 @@
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download } from "lucide-react";
+import { AppLayout } from "../AppLayout";
+import { HygieneSubNav } from "../components/HygieneSubNav";
+import { useAccount } from "../lib/useAccount";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  HygieneActionRow, severityClass, confidenceLabel, categoryDisplay,
+} from "../lib/hygiene";
+
+const AppHygieneQueue = () => {
+  const { account, loading } = useAccount();
+  const { toast } = useToast();
+  const [actions, setActions] = useState<HygieneActionRow[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [confirmAction, setConfirmAction] = useState<HygieneActionRow | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const load = async () => {
+    if (!account?.id) return;
+    const { data } = await supabase
+      .from("hygiene_actions")
+      .select("*")
+      .eq("account_id", account.id)
+      .in("status", ["pending", "approved", "executing"])
+      .order("created_at", { ascending: false });
+    setActions((data as HygieneActionRow[]) || []);
+  };
+
+  useEffect(() => { load(); }, [account?.id]);
+  useEffect(() => {
+    const anyRunning = actions.some((a) => a.status === "executing");
+    if (!anyRunning) return;
+    const i = setInterval(load, 2000);
+    return () => clearInterval(i);
+  }, [actions]);
+
+  const grouped = useMemo(() => actions, [actions]);
+
+  const skipCategory = async (a: HygieneActionRow) => {
+    await supabase.from("hygiene_actions").update({ status: "skipped" }).eq("id", a.id);
+    toast({ title: "Category skipped" });
+    load();
+  };
+
+  const approveAll = async (a: HygieneActionRow) => {
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke("hygiene-execute", {
+        body: { action_id: a.id },
+      });
+      if (error) throw error;
+      toast({
+        title: "Execution started",
+        description: `Updating ${a.affected_count.toLocaleString()} records in HubSpot...`,
+      });
+      setConfirmAction(null);
+      load();
+    } catch (err: any) {
+      toast({ title: "Failed to start", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const exportCsv = (a: HygieneActionRow) => {
+    const rows = ["hubspot_id"].concat(a.affected_record_ids).join("\n");
+    const blob = new Blob([rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${a.category}-records.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) return <AppLayout><div className="h-8 w-48 bg-muted rounded animate-pulse" /></AppLayout>;
+
+  return (
+    <AppLayout>
+      <div className="mb-6">
+        <h1 className="text-3xl font-semibold tracking-tight">Action Queue</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Review and approve detected fixes. High-confidence batches can be approved at once; medium/low confidence requires per-record review.
+        </p>
+      </div>
+
+      <HygieneSubNav />
+
+      {grouped.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <p className="text-sm text-muted-foreground">No pending actions. Run a scan from the Scan tab.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {grouped.map((a) => {
+            const meta = categoryDisplay[a.category];
+            const isExpanded = expanded[a.id];
+            const isExecuting = a.status === "executing";
+            const isMissing = a.recommended_action?.fix_kind === "flag_missing";
+            const isMerge = a.recommended_action?.fix_kind === "merge_duplicates";
+            const progress = isExecuting && a.progress?.total
+              ? Math.round(((a.progress.processed || 0) / a.progress.total) * 100)
+              : 0;
+
+            return (
+              <div key={a.id} className="bg-card border border-border rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setExpanded({ ...expanded, [a.id]: !isExpanded })}
+                  className="w-full flex items-center gap-3 p-4 text-left hover:bg-secondary/30 transition-colors"
+                >
+                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">{meta?.label || a.category_label}</span>
+                      <span className="text-xs text-muted-foreground">— {a.affected_count.toLocaleString()} records</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs px-2 py-0.5 rounded border ${severityClass(a.severity)}`}>{a.severity}</span>
+                      <span className="text-xs px-2 py-0.5 rounded border bg-muted/50 text-muted-foreground border-border">
+                        {confidenceLabel(a.confidence, a.recommended_action?.fix_kind)}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded border bg-cyan-500/10 text-cyan-300 border-cyan-500/20">
+                        {a.approval_mode === "batch" ? "Batch approve" : "Review individually"}
+                      </span>
+                      {isExecuting && (
+                        <span className="text-xs flex items-center gap-1 text-blue-400">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          {a.progress?.processed || 0} / {a.progress?.total || 0}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {isExecuting && (
+                  <div className="px-4 pb-3">
+                    <Progress value={progress} className="h-1.5" />
+                  </div>
+                )}
+
+                {isExpanded && (
+                  <div className="border-t border-border p-4 bg-background/40">
+                    {a.recommended_action?.rationale && (
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <span className="text-foreground font-medium">{a.recommended_action.label}.</span>{" "}
+                        {a.recommended_action.rationale}
+                      </p>
+                    )}
+
+                    {isMissing ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                          Enrichment integrations (Apollo, Clay) arrive in Phase 2. For now, export the affected records and enrich externally.
+                        </p>
+                        <Button onClick={() => exportCsv(a)} variant="outline" size="sm" className="gap-2">
+                          <Download className="h-3.5 w-3.5" />
+                          Export {a.affected_count.toLocaleString()} records to CSV
+                        </Button>
+                      </div>
+                    ) : isMerge ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                          Duplicate merging requires picking a master record per group. Per-record review UI ships next — for now, export the duplicate groups for manual handling.
+                        </p>
+                        <Button onClick={() => exportCsv(a)} variant="outline" size="sm" className="gap-2">
+                          <Download className="h-3.5 w-3.5" />
+                          Export duplicate IDs
+                        </Button>
+                        <Button onClick={() => skipCategory(a)} variant="ghost" size="sm" className="gap-2">
+                          <X className="h-3.5 w-3.5" />
+                          Skip for now
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {a.approval_mode === "batch" ? (
+                          <Button
+                            onClick={() => setConfirmAction(a)}
+                            disabled={isExecuting}
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
+                            size="sm"
+                          >
+                            <CheckCheck className="h-3.5 w-3.5" />
+                            Approve all ({a.affected_count.toLocaleString()})
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => setConfirmAction(a)}
+                            disabled={isExecuting}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            Review &amp; approve
+                          </Button>
+                        )}
+                        <Button onClick={() => exportCsv(a)} variant="ghost" size="sm" className="gap-2">
+                          <Download className="h-3.5 w-3.5" />
+                          Export CSV
+                        </Button>
+                        <Button onClick={() => skipCategory(a)} variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                          <X className="h-3.5 w-3.5" />
+                          Skip category
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={!!confirmAction} onOpenChange={(o) => !o && setConfirmAction(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm execution</DialogTitle>
+            <DialogDescription>
+              {confirmAction && (
+                <>
+                  You are about to update <span className="font-semibold text-foreground">{confirmAction.affected_count.toLocaleString()}</span> records in HubSpot.
+                  Each change is logged and can be rolled back from History. Records are processed one at a time at ~9 per second.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-muted/40 rounded-lg p-3 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground mb-1">{confirmAction?.recommended_action?.label}</div>
+            <div>{confirmAction?.recommended_action?.rationale}</div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmAction(null)}>Cancel</Button>
+            <Button
+              onClick={() => confirmAction && approveAll(confirmAction)}
+              disabled={submitting}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white"
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirm — Execute All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AppLayout>
+  );
+};
+
+export default AppHygieneQueue;
