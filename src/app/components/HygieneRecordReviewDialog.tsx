@@ -112,6 +112,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     setPage(0);
     setEdits({});
     setSelected({});
+    setSelectAllPending(false);
   }, [open, action.id]);
 
   useEffect(() => {
