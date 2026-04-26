@@ -689,13 +689,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 // ----------------- Post Modal -----------------
 
-function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate }: {
+function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate, onGenerateThumbnail, headshots }: {
   post: Post;
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<Post>) => void;
   onDelete: (id: string) => void;
   onRegenerate: (id: string) => Promise<void>;
   onDuplicate: (id: string) => void;
+  onGenerateThumbnail: (id: string, headshotId?: string) => Promise<void>;
+  headshots: Headshot[];
 }) {
   const fmt = FORMAT_INFO[post.format] || FORMAT_INFO.auditRoast;
   const status = STATUS_INFO[post.status];
