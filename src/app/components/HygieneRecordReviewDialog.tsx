@@ -147,12 +147,25 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     })();
   }, [open, pageIds.join("|"), action.account_id]);
 
+  const [selectAllPending, setSelectAllPending] = useState(false);
+
   const toggleAll = (val: boolean) => {
-    const next = { ...selected };
-    for (const r of records) {
-      if (edits[r.hubspot_id] && Object.keys(edits[r.hubspot_id]).length > 0) next[r.hubspot_id] = val;
+    if (val) {
+      // Select every affected record across all pages. Records not yet loaded
+      // will be marked selected; once they load they'll get edits populated and
+      // already be checked.
+      const next: Record<string, boolean> = { ...selected };
+      for (const id of ids) next[id] = true;
+      setSelected(next);
+      setSelectAllPending(true);
+      toast({
+        title: `Selected all ${ids.length.toLocaleString()} records`,
+        description: "Pages you haven't opened will use the default proposed changes.",
+      });
+    } else {
+      setSelected({});
+      setSelectAllPending(false);
     }
-    setSelected(next);
   };
 
   const updateField = (id: string, field: string, val: string) => {
