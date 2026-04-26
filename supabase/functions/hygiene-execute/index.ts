@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
-    const { action_id, record_ids, modifications, confirm_delete } = await req.json();
+    const { action_id, record_ids, modifications, confirm_delete, merges } = await req.json();
     if (!action_id) return json({ error: "action_id required" }, 400);
 
     const { data: action } = await supabase
