@@ -169,15 +169,21 @@ const AppHygieneQueue = () => {
                         </Button>
                       </div>
                     ) : isMerge ? (
-                      <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">
-                          Duplicate merging requires picking a master record per group. Per-record review UI ships next — for now, export the duplicate groups for manual handling.
-                        </p>
-                        <Button onClick={() => exportCsv(a)} variant="outline" size="sm" className="gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => setMergeAction(a)}
+                          disabled={isExecuting}
+                          className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
+                          size="sm"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Review &amp; merge duplicates
+                        </Button>
+                        <Button onClick={() => exportCsv(a)} variant="ghost" size="sm" className="gap-2">
                           <Download className="h-3.5 w-3.5" />
                           Export duplicate IDs
                         </Button>
-                        <Button onClick={() => skipCategory(a)} variant="ghost" size="sm" className="gap-2">
+                        <Button onClick={() => skipCategory(a)} variant="ghost" size="sm" className="gap-2 text-muted-foreground">
                           <X className="h-3.5 w-3.5" />
                           Skip for now
                         </Button>
@@ -196,7 +202,7 @@ const AppHygieneQueue = () => {
                           </Button>
                         ) : (
                           <Button
-                            onClick={() => setConfirmAction(a)}
+                            onClick={() => setReviewAction(a)}
                             disabled={isExecuting}
                             variant="outline"
                             size="sm"
