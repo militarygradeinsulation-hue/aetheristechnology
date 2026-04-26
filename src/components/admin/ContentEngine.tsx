@@ -42,6 +42,19 @@ type Post = {
   hashtags: string[];
   status: string;
   generated_at: string;
+  thumbnail_url?: string | null;
+  thumbnail_status?: string | null;
+  thumbnail_reference_id?: string | null;
+  thumbnail_generated_at?: string | null;
+};
+
+type Headshot = {
+  id: string;
+  public_url: string;
+  tag: string;
+  label: string;
+  is_default: boolean;
+  disabled: boolean;
 };
 
 const NICHES = [
