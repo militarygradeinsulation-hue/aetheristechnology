@@ -1,86 +1,75 @@
-# Content Engine Thumbnails — Plan
+# Self-Improving HubSpot Audit
 
-Add AI-generated thumbnails to every post in the Content Engine, using OpenAI's `gpt-image-1` model and a persistent library of your operator headshots as visual reference.
+Make the audit watch itself, score every run, diagnose what's slow or low-quality, and propose (and optionally auto-apply) improvements without you in the loop.
 
----
+## What you'll get
 
-## What gets built
+1. **Every audit run gets a health score** — duration, AI latency, AI errors, pattern coverage, finding quality, exposure plausibility.
+2. **A self-analysis pass runs after every audit** — an AI "auditor of the auditor" reads the run's metrics + sample output and writes a diagnosis: what was slow, what was weak, what to change.
+3. **Optimization proposals are generated automatically** — concrete changes like "raise stalled-deal threshold from 1.5x → 1.75x", "batch Stage A diagnostics into one AI call", "skip pattern X when count = 0", "switch model from gpt-5 → gemini-flash for Stage A".
+4. **A new `/app/audit-health` admin page** shows: trend charts (duration, exposure, finding count over runs), the latest self-diagnosis, and a queue of proposed improvements with **Approve / Reject** buttons.
+5. **Approved tuning changes apply themselves** — stored as a config row the audit reads at runtime (thresholds, model choices, enabled patterns, parallelism). No redeploy needed for tuning.
+6. **Code-level improvements (new patterns, refactors)** are written by AI into a "proposed patch" record with a diff for you to review in the admin UI; you click Approve and it opens the file change in your next Lovable build (we don't auto-merge code without your click — that's the safety boundary).
 
-### 1. Operator headshot library (one-time setup, persistent)
+## How the loop works
 
-The 5 uploaded photos become a permanent "brand asset library" stored in Supabase Storage. Each photo is tagged with a wardrobe/mood label so the system can pick the right one per post:
+```text
+run-audit  ─►  pattern detection  ─►  AI stages  ─►  report
+     │                                                   │
+     ▼                                                   ▼
+   timing + error metrics  ───────────────────►  audit_run_metrics
+                                                         │
+                                                         ▼
+                                            audit-self-analyze (new fn)
+                                                         │
+                                            ┌────────────┴────────────┐
+                                            ▼                         ▼
+                                  audit_tuning_proposals     audit_code_proposals
+                                  (config knobs)              (code diffs)
+                                            │                         │
+                                            ▼                         ▼
+                                  auto-applied if            shown in admin UI
+                                  confidence > 0.8 AND       for manual approve
+                                  "auto-apply tuning" ON
+```
 
-| Photo | Tag | Used for |
-|---|---|---|
-| Brown suede jacket + denim | `field_notes` | Founder POV, casual operator posts |
-| Black blazer + black henley | `executive_dark` | Audit Roast, hard takedowns |
-| Charcoal double-breasted + glasses | `boardroom` | Pattern Reveal, strategic takes |
-| Tweed blazer + olive sweater | `analyst` | Counter-Take, contrarian posts |
-| Camel overcoat + black turtleneck | `authority` | High-stakes / hero posts |
+## Pieces being built
 
-A new admin sub-section "Brand Assets" inside the Content Engine lets you re-upload, retag, set a default, or disable any photo.
+### Database (1 migration)
+- `audit_run_metrics` — one row per run: total_ms, per-stage ms, ai_call_count, ai_error_count, ai_total_tokens, patterns_with_zero_findings, health_score (0-100), bottleneck_stage.
+- `audit_tuning_config` — single row of live knobs the audit reads: thresholds (stalled multiplier, dead-lead days, slow-followup hours, etc.), per-stage model choice, parallelism, enabled pattern keys, auto_apply_enabled bool.
+- `audit_tuning_proposals` — proposed knob changes: field, current_value, proposed_value, reason, expected_impact, confidence, status (pending/approved/rejected/auto_applied), applied_at.
+- `audit_code_proposals` — proposed code changes: title, diagnosis, target_file, diff, status. Read-only review; never auto-merged.
 
-### 2. Per-post thumbnail generation
+### Edge functions
+- **`run-audit` (modified)** — read `audit_tuning_config` at start; record per-stage timings + AI metrics into `audit_run_metrics`; trigger `audit-self-analyze` at end via `EdgeRuntime.waitUntil`.
+- **`audit-self-analyze` (new)** — pulls the last 1–10 runs + metrics, asks Gemini 2.5 Pro to (a) score the latest run, (b) identify the bottleneck, (c) propose tuning knob changes with confidence, (d) propose code-level improvements (new patterns, refactors). Writes proposals; if `auto_apply_enabled` and confidence ≥ 0.8 and the proposal only touches knobs (not code), applies immediately and stamps `auto_applied`.
+- **`audit-apply-proposal` (new)** — admin-only; flips a tuning proposal to approved and updates `audit_tuning_config` atomically.
 
-A new `thumbnail_url` column on `content_engine_posts`. Each post card gets:
+### Frontend
+- **`/app/audit-health` (new admin page)** — three sections:
+  1. **Trends**: line charts of duration, finding count, total exposure, health score across last 20 runs.
+  2. **Latest self-diagnosis**: the AI's plain-English writeup of what's working/broken, with the bottleneck stage flagged.
+  3. **Proposals queue**: tuning proposals with Approve/Reject; code proposals with diff viewer + "Send to Lovable" copy-button (paste into next chat to actually apply the file edit).
+- **`RunAuditCard`** gets a small "Health: 87/100 · last run 12s" badge linking to `/app/audit-health`.
+- Sidebar gets an "Audit Health" link (admin only).
 
-- **Auto-generated for hero formats**: Audit Roast + Pattern Reveal thumbnails are produced as soon as the post script finishes generating (background job — doesn't block the script appearing).
-- **Manual button for the rest**: Founder POV + Counter-Take posts show a "Generate thumbnail" button on the card. Click → 8–15s spinner → thumbnail appears.
-- **Regenerate**: Every thumbnail has a "↻" button to reroll with the same or a different reference photo.
-- **Edit reference**: Dropdown to swap which headshot is used.
+### Self-analysis prompt (what the AI is told)
+- Role: "You are a senior RevOps engineer auditing the HubSpot audit pipeline itself."
+- Inputs: last run metrics, last 5 runs' metrics, current tuning config, sample findings.
+- Required output (JSON via tool calling): `{ health_score, bottleneck, narrative, tuning_proposals[], code_proposals[] }`.
+- Guardrails: never propose disabling a pattern with non-zero recent findings; never propose lowering exposure thresholds below documented business defaults; tuning confidence must be ≥ 0.8 for auto-apply.
 
-### 3. Thumbnail composition
+## Safety boundaries
 
-`gpt-image-1` is called with:
-- The selected reference photo (uploaded as input image)
-- A prompt built from the post's hook + format + target emotion
-- Forensic case-file aesthetic: dark background, crimson + amber accents, the hook text overlaid as bold serif headline, "CASE FILE #" badge
+- **Tuning knobs auto-apply only when**: `auto_apply_enabled = true` AND `confidence ≥ 0.8` AND the change is within hard min/max bounds defined per knob.
+- **Code changes never auto-apply.** They land as proposals you review in `/app/audit-health`. Clicking "Send to Lovable" gives you a one-line prompt to paste in chat to have me execute the patch.
+- All proposals (auto-applied or not) are logged with full before/after so you can roll back any tuning change with one click.
+- A "Pause self-improvement" master switch sits at the top of `/app/audit-health`.
 
-Output: 1024x1024 PNG, saved to the existing `content-images` storage bucket, URL stored on the post row.
+## Out of scope (can add later)
+- Auto-deploying code patches without your click (intentionally excluded).
+- A/B testing two tuning configs in parallel.
+- Slack/email digest of weekly self-improvement activity.
 
-### 4. Settings & safety
-
-- Estimated cost shown next to the generate button (~$0.04/image at standard quality)
-- Daily generation cap (default 50/day, configurable) to prevent runaway spend
-- Failed generations get a clear error toast (rate limit, content policy, missing API key) instead of silent failures
-
----
-
-## Technical details
-
-**Database migration:**
-- Add `thumbnail_url text`, `thumbnail_reference_id uuid`, `thumbnail_generated_at timestamptz` to `content_engine_posts`
-- New table `operator_headshots` (id, storage_path, public_url, tag, label, is_default, sort_order, disabled, created_at)
-- New table `thumbnail_settings` (singleton row: daily_cap, default_quality, auto_generate_formats text[])
-
-**Storage:**
-- Reuse existing public `content-images` bucket
-- Upload the 5 reference photos to `content-images/operator-headshots/`
-- Store generated thumbnails at `content-images/post-thumbnails/{postId}.png`
-
-**Edge function:** `content-engine-thumbnail`
-- Admin-token gated (same pattern as `content-engine-generate`)
-- Actions: `generate` (single post), `bulk_generate` (array of post IDs), `list_headshots`, `upload_headshot`, `update_headshot`
-- Calls OpenAI `https://api.openai.com/v1/images/edits` with `gpt-image-1`, the reference photo, and the composed prompt
-- Streams the returned base64 → uploads to storage → updates the post row
-
-**Auto-generation hook:**
-- After `content-engine-generate` finishes writing a post, if `format ∈ auto_generate_formats`, fire-and-forget invoke `content-engine-thumbnail` with action `generate`
-- Doesn't block the user-facing response
-
-**Frontend (`src/components/admin/ContentEngine.tsx`):**
-- Post card: new thumbnail slot at the top — shows image, "Generate" button, or loading spinner
-- New "Brand Assets" tab in the engine settings drawer for managing the headshot library
-- Reference-photo dropdown on each post card
-
-**Required secret:**
-- `OPENAI_API_KEY` — you'll need to provide this. I'll request it via the secret tool when implementation starts. Get it from https://platform.openai.com/api-keys (needs billing enabled, ~$5 credit covers ~125 thumbnails).
-
----
-
-## Out of scope (this round)
-
-- Carousel / multi-slide image generation
-- Video thumbnails
-- Per-post manual prompt editing (uses the auto-built prompt only — can add later if needed)
-- Higgsfield / Leonardo fallbacks (OpenAI only per your choice)
+Approve and I'll build it.
