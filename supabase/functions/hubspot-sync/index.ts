@@ -11,6 +11,18 @@ const UPSERT_BATCH_SIZE = 500; // Buffer N rows across HubSpot pages before flus
 const MAX_HUBSPOT_SEARCH_RESULTS = 10000;
 const MIN_SEARCH_WINDOW_MS = 1000;
 
+// HubSpot CRM v3 IDs are positive integer strings (5–19 digits).
+// Association responses occasionally vary shape (toObjectId vs id, number vs string)
+// and we must NEVER persist a non-numeric ID — downstream HubSpot calls would 404.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+function coerceHubspotId(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  // Strip any accidental "contact_"/"deal_"/"company_"/"engagement_" prefix
+  // and any non-digit characters before validating.
+  const digits = String(raw).replace(/^[a-zA-Z]+_/, "").replace(/\D/g, "");
+  return HUBSPOT_ID_RE.test(digits) ? digits : null;
+}
+
 // Time budget per invocation. Edge functions have a hard ~150s wall clock.
 // We stop work at 110s, persist resume cursors, and re-invoke ourselves.
 const INVOCATION_BUDGET_MS = 110_000;
