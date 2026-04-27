@@ -352,7 +352,7 @@ async function syncWindowed(
     } else {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         deal_name: c.properties.dealname,
         amount: c.properties.amount ? Number(c.properties.amount) : null,
         stage: c.properties.dealstage,
