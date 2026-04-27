@@ -26,15 +26,38 @@ const AppHygieneQueue = () => {
   const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // List view never needs the full affected_record_ids array (can be 5,000
+  // hubspot_id strings per row). Polling that every 2s while a job is running
+  // froze the UI. Fetch the IDs on-demand inside the dialogs / export handler.
+  const LIST_COLUMNS =
+    "id, scan_id, account_id, category, category_label, confidence, severity, " +
+    "risk_level, approval_mode, recommended_action, affected_count, status, " +
+    "progress, error_message, created_at, approved_at, executed_at";
+
   const load = async () => {
     if (!account?.id) return;
     const { data } = await supabase
       .from("hygiene_actions")
-      .select("*")
+      .select(LIST_COLUMNS)
       .eq("account_id", account.id)
       .in("status", ["pending", "approved", "executing"])
       .order("created_at", { ascending: false });
-    setActions(((data as unknown) as HygieneActionRow[]) || []);
+    const rows = ((data as unknown) as HygieneActionRow[]) || [];
+    // List rows don't carry affected_record_ids — keep the shape stable so
+    // downstream code that touches `.length` doesn't blow up.
+    for (const r of rows) if (!r.affected_record_ids) r.affected_record_ids = [];
+    setActions(rows);
+  };
+
+  // On-demand loader for the (potentially large) affected_record_ids column.
+  const fetchActionIds = async (id: string): Promise<string[]> => {
+    const { data, error } = await supabase
+      .from("hygiene_actions")
+      .select("affected_record_ids")
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !data) return [];
+    return (data.affected_record_ids as string[]) || [];
   };
 
   useEffect(() => { load(); }, [account?.id]);
