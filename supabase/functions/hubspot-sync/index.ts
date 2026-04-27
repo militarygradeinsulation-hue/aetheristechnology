@@ -11,6 +11,18 @@ const UPSERT_BATCH_SIZE = 500; // Buffer N rows across HubSpot pages before flus
 const MAX_HUBSPOT_SEARCH_RESULTS = 10000;
 const MIN_SEARCH_WINDOW_MS = 1000;
 
+// HubSpot CRM v3 IDs are positive integer strings (5–19 digits).
+// Association responses occasionally vary shape (toObjectId vs id, number vs string)
+// and we must NEVER persist a non-numeric ID — downstream HubSpot calls would 404.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+function coerceHubspotId(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  // Strip any accidental "contact_"/"deal_"/"company_"/"engagement_" prefix
+  // and any non-digit characters before validating.
+  const digits = String(raw).replace(/^[a-zA-Z]+_/, "").replace(/\D/g, "");
+  return HUBSPOT_ID_RE.test(digits) ? digits : null;
+}
+
 // Time budget per invocation. Edge functions have a hard ~150s wall clock.
 // We stop work at 110s, persist resume cursors, and re-invoke ourselves.
 const INVOCATION_BUDGET_MS = 110_000;
@@ -181,18 +193,22 @@ async function syncDealAssociations(
 
   if (contactRes.status === "fulfilled") {
     const linkRows: any[] = [];
+    let dropped = 0;
     for (const result of contactRes.value.results || []) {
-      const dealId = String(result.from?.id ?? result._from?.id ?? "");
-      if (!dealId) continue;
+      const dealId = coerceHubspotId(result.from?.id ?? result._from?.id);
+      if (!dealId) { dropped++; continue; }
       for (const to of result.to || []) {
+        const contactId = coerceHubspotId(to.toObjectId ?? to.id);
+        if (!contactId) { dropped++; continue; }
         linkRows.push({
           account_id: accountId,
           deal_id: dealId,
-          contact_id: String(to.toObjectId ?? to.id),
+          contact_id: contactId,
           synced_at: new Date().toISOString(),
         });
       }
     }
+    if (dropped) console.warn(`[hubspot-sync] dropped ${dropped} deal->contact rows with invalid IDs`);
     if (linkRows.length) {
       await admin.from("mirror_deal_contacts").upsert(linkRows, { onConflict: "account_id,deal_id,contact_id" });
     }
@@ -202,18 +218,22 @@ async function syncDealAssociations(
 
   if (companyRes.status === "fulfilled") {
     const linkRows: any[] = [];
+    let dropped = 0;
     for (const result of companyRes.value.results || []) {
-      const dealId = String(result.from?.id ?? result._from?.id ?? "");
-      if (!dealId) continue;
+      const dealId = coerceHubspotId(result.from?.id ?? result._from?.id);
+      if (!dealId) { dropped++; continue; }
       for (const to of result.to || []) {
+        const companyId = coerceHubspotId(to.toObjectId ?? to.id);
+        if (!companyId) { dropped++; continue; }
         linkRows.push({
           account_id: accountId,
           deal_id: dealId,
-          company_id: String(to.toObjectId ?? to.id),
+          company_id: companyId,
           synced_at: new Date().toISOString(),
         });
       }
     }
+    if (dropped) console.warn(`[hubspot-sync] dropped ${dropped} deal->company rows with invalid IDs`);
     if (linkRows.length) {
       await admin.from("mirror_deal_companies").upsert(linkRows, { onConflict: "account_id,deal_id,company_id" });
     }
@@ -291,13 +311,18 @@ async function syncWindowed(
       continue;
     }
 
-    const results = data.results || [];
+    const allResults = data.results || [];
+    // Drop rows whose `id` is not a valid HubSpot numeric ID before they
+    // poison mirror_* tables and produce 404s in hygiene-execute.
+    const results = allResults.filter((c: any) => coerceHubspotId(c.id));
+    const droppedRows = allResults.length - results.length;
+    if (droppedRows) console.warn(`[hubspot-sync] ${cursor.phase}: dropped ${droppedRows} rows with invalid id`);
     let rows: any[];
 
     if (cursor.phase === "companies") {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         name: c.properties.name,
         domain: c.properties.domain,
         industry: c.properties.industry,
@@ -312,7 +337,7 @@ async function syncWindowed(
     } else if (cursor.phase === "contacts") {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         email: c.properties.email,
         first_name: c.properties.firstname,
         last_name: c.properties.lastname,
@@ -327,7 +352,7 @@ async function syncWindowed(
     } else {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         deal_name: c.properties.dealname,
         amount: c.properties.amount ? Number(c.properties.amount) : null,
         stage: c.properties.dealstage,
