@@ -337,7 +337,7 @@ async function syncWindowed(
     } else if (cursor.phase === "contacts") {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         email: c.properties.email,
         first_name: c.properties.firstname,
         last_name: c.properties.lastname,
