@@ -22,6 +22,23 @@ const json = (body: unknown, status = 200) =>
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// HubSpot CRM v3 IDs are positive integer strings (typically 5–19 digits).
+// Reject anything else BEFORE we hit the API to avoid guaranteed 404s.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+const isValidHubspotId = (id: unknown): id is string =>
+  typeof id === "string" && HUBSPOT_ID_RE.test(id.trim());
+const normalizeHubspotId = (id: unknown): string | null => {
+  if (id === null || id === undefined) return null;
+  const s = String(id).trim();
+  return HUBSPOT_ID_RE.test(s) ? s : null;
+};
+
+// Sentinel thrown by applyOne / merges when the HubSpot record no longer exists.
+// Treated as a "skip" rather than a failure for status-rollup purposes.
+class HubspotNotFoundError extends Error {
+  constructor(msg: string) { super(msg); this.name = "HubspotNotFoundError"; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
