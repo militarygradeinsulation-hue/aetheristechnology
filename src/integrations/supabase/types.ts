@@ -140,6 +140,33 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_ai_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          model: string
+          response: Json
+          stage: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at?: string
+          model: string
+          response: Json
+          stage: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          model?: string
+          response?: Json
+          stage?: string
+        }
+        Relationships: []
+      }
       audit_code_proposals: {
         Row: {
           audit_run_id: string | null
@@ -2897,6 +2924,47 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      detect_closed_lost_reactivation: {
+        Args: {
+          _account_id: string
+          _max_days?: number
+          _min_amount?: number
+          _min_days?: number
+        }
+        Returns: Json
+      }
+      detect_dead_leads: {
+        Args: { _account_id: string; _days?: number }
+        Returns: Json
+      }
+      detect_high_intent_no_workflow: {
+        Args: {
+          _account_id: string
+          _avg_deal_size?: number
+          _min_engagements?: number
+        }
+        Returns: Json
+      }
+      detect_missing_contact_info: {
+        Args: { _account_id: string; _min_amount?: number }
+        Returns: Json
+      }
+      detect_owner_overload: {
+        Args: { _account_id: string; _multiplier?: number }
+        Returns: Json
+      }
+      detect_slow_followup: {
+        Args: { _account_id: string; _avg_deal_size?: number; _hours?: number }
+        Returns: Json
+      }
+      detect_stalled_deals: {
+        Args: { _account_id: string; _multiplier?: number }
+        Returns: Json
+      }
+      detect_stuck_proposal: {
+        Args: { _account_id: string; _days?: number }
+        Returns: Json
+      }
       encrypt_token: {
         Args: { _key: string; _plaintext: string }
         Returns: string
@@ -2905,6 +2973,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_avg_deal_size: { Args: { _account_id: string }; Returns: number }
       increment_rep_sales: {
         Args: { _code: string; _commission: number; _sales: number }
         Returns: undefined
@@ -2920,6 +2989,7 @@ export type Database = {
         Returns: number
       }
       promote_if_first_admin: { Args: { _user_id: string }; Returns: boolean }
+      purge_expired_ai_cache: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
