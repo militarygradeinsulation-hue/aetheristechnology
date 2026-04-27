@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Unplug, RefreshCw } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { useAccount } from "../lib/useAccount";
+import { HubSpotConnectCard } from "../components/HubSpotConnectCard";
 import { LoadDemoDataCard } from "../components/LoadDemoDataCard";
 import { HygieneSettingsCard } from "../components/HygieneSettingsCard";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,8 @@ const AppSettings = () => {
       </div>
 
       <div className="space-y-6">
+        {account && <HubSpotConnectCard />}
+
         <div className="bg-card border border-border rounded-xl p-6">
           <h2 className="font-semibold mb-4">Account</h2>
           <dl className="space-y-2 text-sm">
