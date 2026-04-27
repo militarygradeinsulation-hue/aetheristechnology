@@ -452,7 +452,11 @@ async function runMerges(
         if (res.status === 404) {
           throw new HubspotNotFoundError(`contact ${secondary} or ${primary} not found in HubSpot`);
         }
-        if (res.status === 403) throw new Error(`HubSpot rejected merge (403). Reconnect HubSpot to grant write scopes. ${await res.text()}`);
+        if (res.status === 403) {
+          const body = await res.text();
+          if (isMissingScopes(body)) throw new HubspotMissingScopesError(SCOPE_HINT);
+          throw new Error(`HubSpot rejected merge (403). ${body}`);
+        }
         if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
 
         await supabase.from("hygiene_log").insert({
@@ -474,6 +478,17 @@ async function runMerges(
           .eq("hubspot_id", secondary);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotMissingScopesError) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "failed",
+              error_message: SCOPE_HINT,
+              progress: { processed, total: merges.length, skipped, failures, message: SCOPE_HINT, error_kind: "missing_scopes" },
+            })
+            .eq("id", action.id);
+          return;
+        }
         const isSkip = err instanceof HubspotNotFoundError;
         if (isSkip) skipped++; else failures++;
         await supabase.from("hygiene_log").insert({
@@ -494,6 +509,18 @@ async function runMerges(
           .from("hygiene_actions")
           .update({ progress: { processed, total: merges.length, skipped, failures, message: `Merging ${processed} of ${merges.length}` } })
           .eq("id", action.id);
+        if (await isCancelled(supabase, action.id)) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "cancelled",
+              error_message: "Cancelled by user",
+              executed_at: new Date().toISOString(),
+              progress: { processed, total: merges.length, skipped, failures, message: `Cancelled at ${processed} of ${merges.length}` },
+            })
+            .eq("id", action.id);
+          return;
+        }
       }
       await sleep(RATE_DELAY_MS);
     }
