@@ -140,6 +140,113 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_code_proposals: {
+        Row: {
+          audit_run_id: string | null
+          created_at: string
+          diagnosis: string
+          id: string
+          proposed_change: string
+          reviewed_by: string | null
+          status: string
+          target_file: string
+          title: string
+        }
+        Insert: {
+          audit_run_id?: string | null
+          created_at?: string
+          diagnosis: string
+          id?: string
+          proposed_change: string
+          reviewed_by?: string | null
+          status?: string
+          target_file: string
+          title: string
+        }
+        Update: {
+          audit_run_id?: string | null
+          created_at?: string
+          diagnosis?: string
+          id?: string
+          proposed_change?: string
+          reviewed_by?: string | null
+          status?: string
+          target_file?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_code_proposals_audit_run_id_fkey"
+            columns: ["audit_run_id"]
+            isOneToOne: false
+            referencedRelation: "audit_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_run_metrics: {
+        Row: {
+          account_id: string
+          ai_call_count: number
+          ai_error_count: number
+          ai_total_ms: number
+          audit_run_id: string
+          bottleneck_stage: string | null
+          created_at: string
+          health_score: number
+          id: string
+          patterns_with_zero_findings: number
+          stage_timings: Json
+          total_ms: number
+          total_patterns: number
+        }
+        Insert: {
+          account_id: string
+          ai_call_count?: number
+          ai_error_count?: number
+          ai_total_ms?: number
+          audit_run_id: string
+          bottleneck_stage?: string | null
+          created_at?: string
+          health_score?: number
+          id?: string
+          patterns_with_zero_findings?: number
+          stage_timings?: Json
+          total_ms?: number
+          total_patterns?: number
+        }
+        Update: {
+          account_id?: string
+          ai_call_count?: number
+          ai_error_count?: number
+          ai_total_ms?: number
+          audit_run_id?: string
+          bottleneck_stage?: string | null
+          created_at?: string
+          health_score?: number
+          id?: string
+          patterns_with_zero_findings?: number
+          stage_timings?: Json
+          total_ms?: number
+          total_patterns?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_run_metrics_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_run_metrics_audit_run_id_fkey"
+            columns: ["audit_run_id"]
+            isOneToOne: false
+            referencedRelation: "audit_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_runs: {
         Row: {
           account_id: string
@@ -192,6 +299,128 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_tuning_config: {
+        Row: {
+          auto_apply_enabled: boolean
+          dead_lead_days: number
+          diagnostics_model: string
+          diagnostics_parallelism: number
+          enabled_patterns: Json
+          high_intent_min_engagements: number
+          high_value_deal_min: number
+          id: number
+          owner_overload_multiplier: number
+          reactivation_min_amount: number
+          reactivation_window_max_days: number
+          reactivation_window_min_days: number
+          recommendations_model: string
+          self_analysis_enabled: boolean
+          self_analysis_model: string
+          slow_followup_hours: number
+          stalled_multiplier: number
+          stuck_proposal_days: number
+          summary_model: string
+          updated_at: string
+        }
+        Insert: {
+          auto_apply_enabled?: boolean
+          dead_lead_days?: number
+          diagnostics_model?: string
+          diagnostics_parallelism?: number
+          enabled_patterns?: Json
+          high_intent_min_engagements?: number
+          high_value_deal_min?: number
+          id?: number
+          owner_overload_multiplier?: number
+          reactivation_min_amount?: number
+          reactivation_window_max_days?: number
+          reactivation_window_min_days?: number
+          recommendations_model?: string
+          self_analysis_enabled?: boolean
+          self_analysis_model?: string
+          slow_followup_hours?: number
+          stalled_multiplier?: number
+          stuck_proposal_days?: number
+          summary_model?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_apply_enabled?: boolean
+          dead_lead_days?: number
+          diagnostics_model?: string
+          diagnostics_parallelism?: number
+          enabled_patterns?: Json
+          high_intent_min_engagements?: number
+          high_value_deal_min?: number
+          id?: number
+          owner_overload_multiplier?: number
+          reactivation_min_amount?: number
+          reactivation_window_max_days?: number
+          reactivation_window_min_days?: number
+          recommendations_model?: string
+          self_analysis_enabled?: boolean
+          self_analysis_model?: string
+          slow_followup_hours?: number
+          stalled_multiplier?: number
+          stuck_proposal_days?: number
+          summary_model?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_tuning_proposals: {
+        Row: {
+          applied_at: string | null
+          audit_run_id: string | null
+          confidence: number
+          created_at: string
+          current_value: Json
+          expected_impact: string | null
+          field: string
+          id: string
+          proposed_value: Json
+          reason: string
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          applied_at?: string | null
+          audit_run_id?: string | null
+          confidence?: number
+          created_at?: string
+          current_value: Json
+          expected_impact?: string | null
+          field: string
+          id?: string
+          proposed_value: Json
+          reason: string
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          applied_at?: string | null
+          audit_run_id?: string | null
+          confidence?: number
+          created_at?: string
+          current_value?: Json
+          expected_impact?: string | null
+          field?: string
+          id?: string
+          proposed_value?: Json
+          reason?: string
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_tuning_proposals_audit_run_id_fkey"
+            columns: ["audit_run_id"]
+            isOneToOne: false
+            referencedRelation: "audit_runs"
             referencedColumns: ["id"]
           },
         ]
