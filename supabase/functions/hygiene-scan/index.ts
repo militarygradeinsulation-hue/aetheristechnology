@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
-    const { account_id } = await req.json();
+    const { account_id, action, scan_id } = await req.json();
     if (!account_id) return json({ error: "account_id required" }, 400);
 
     const { data: acct } = await supabase
@@ -70,6 +70,27 @@ Deno.serve(async (req) => {
       .eq("id", account_id)
       .maybeSingle();
     if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
+
+    if (action === "cancel") {
+      if (!scan_id) return json({ error: "scan_id required" }, 400);
+      const { error: cancelErr } = await supabase
+        .from("hygiene_scans")
+        .update({
+          status: "cancelled",
+          ai_status: "cancelled",
+          error_message: "Cancelled by user",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", scan_id)
+        .eq("account_id", account_id);
+      if (cancelErr) throw cancelErr;
+      await supabase
+        .from("hygiene_actions")
+        .update({ status: "cancelled", error_message: "Cancelled by user" })
+        .eq("scan_id", scan_id)
+        .in("status", ["pending", "approved", "executing"]);
+      return json({ ok: true });
+    }
 
     const { data: scan, error: scanErr } = await supabase
       .from("hygiene_scans")
