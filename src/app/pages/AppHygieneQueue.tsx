@@ -236,7 +236,7 @@ const AppHygieneQueue = () => {
                           </Button>
                         ) : (
                           <Button
-                            onClick={() => setReviewAction(a)}
+                            onClick={() => openReview(a)}
                             disabled={isExecuting}
                             variant="outline"
                             size="sm"
