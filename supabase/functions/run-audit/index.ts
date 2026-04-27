@@ -318,11 +318,15 @@ async function detectPatterns(supabase: any, accountId: string, cfg: any): Promi
   // Run all 8 detections in parallel — each one is a single SQL aggregate query.
   const results = await Promise.all(
     specs.map(async (s) => {
+      const tPat = Date.now();
+      console.log(`[run-audit] PATTERN ${s.key} START`);
       const { data, error } = await supabase.rpc(s.rpc, s.args);
+      const dur = Date.now() - tPat;
       if (error) {
-        console.error(`[run-audit] ${s.key} RPC failed:`, error.message);
+        console.error(`[run-audit] PATTERN ${s.key} END dur=${dur}ms FAILED:`, error.message);
         return { spec: s, payload: { count: 0, exposure_cents: 0, sample_ids: [] } };
       }
+      console.log(`[run-audit] PATTERN ${s.key} END dur=${dur}ms count=${data?.count ?? 0} exposure_cents=${data?.exposure_cents ?? 0}`);
       return { spec: s, payload: data ?? { count: 0, exposure_cents: 0, sample_ids: [] } };
     }),
   );
