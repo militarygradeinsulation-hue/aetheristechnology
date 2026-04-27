@@ -15,11 +15,11 @@ export interface HygieneScanRow {
   id: string;
   account_id: string;
   scan_date: string;
-  status: "running" | "complete" | "failed";
+  status: "running" | "complete" | "failed" | "cancelled";
   total_issues: number;
   totals_by_category: Record<string, number>;
   results: Record<string, HygieneCategoryResult>;
-  ai_status: "pending" | "running" | "complete" | "failed";
+  ai_status: "pending" | "running" | "complete" | "failed" | "cancelled";
   error_message: string | null;
   completed_at: string | null;
 }
