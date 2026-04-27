@@ -43,6 +43,29 @@ class HubspotNotFoundError extends Error {
   constructor(msg: string) { super(msg); this.name = "HubspotNotFoundError"; }
 }
 
+// Sentinel for HubSpot 403 MISSING_SCOPES — fatal, abort the whole run
+// instead of grinding through thousands of guaranteed failures.
+class HubspotMissingScopesError extends Error {
+  constructor(msg: string) { super(msg); this.name = "HubspotMissingScopesError"; }
+}
+
+const SCOPE_HINT =
+  "HubSpot is missing write scopes. Reconnect HubSpot from Settings to grant contact write access, then re-approve this action.";
+
+const isMissingScopes = (raw: string) =>
+  /MISSING_SCOPES|missing.*scopes|required.*scope/i.test(raw);
+
+// Re-fetch the action's status from the DB so we can honor user-initiated
+// cancellation between records without keeping connection state.
+async function isCancelled(supabase: SupabaseClient, actionId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("hygiene_actions")
+    .select("status")
+    .eq("id", actionId)
+    .maybeSingle();
+  return data?.status === "cancelled";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
