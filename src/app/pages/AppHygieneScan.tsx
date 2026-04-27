@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, ArrowRight, StopCircle } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
 import { useAccount } from "../lib/useAccount";
