@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -60,6 +60,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <NavLink to="/app/hygiene" className={navItem}>
             <Sparkles className="h-4 w-4" />
             Hygiene
+          </NavLink>
+          <NavLink to="/app/audit-health" className={navItem}>
+            <HeartPulse className="h-4 w-4" />
+            Audit Health
           </NavLink>
           <NavLink to="/app/settings" className={navItem}>
             <Settings className="h-4 w-4" />
