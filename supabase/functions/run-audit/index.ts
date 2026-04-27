@@ -401,20 +401,20 @@ async function callAI(
   }
 }
 
-async function stageA_diagnose(f: PatternFinding, model: string, m: RunMetrics): Promise<any> {
+async function stageA_diagnose(f: PatternFinding, model: string, m: RunMetrics, supabase: any): Promise<any> {
   const ai = await callAI(model,
     "You are a revenue operations analyst. Given a CRM leak pattern, return a 2-3 sentence blunt diagnostic. Plain text only.",
     `Pattern: ${f.label}\nCount: ${f.count}\nExposure: $${(f.exposure_cents / 100).toLocaleString()}\nFormula: ${f.formula}`,
-    m,
+    m, supabase, "diagnose",
   );
   return { ...f, diagnostic: ai || `${f.count} records match this leak pattern, exposing roughly $${(f.exposure_cents / 100).toLocaleString()}.` };
 }
 
-async function stageC_recommend(f: any, model: string, m: RunMetrics): Promise<any> {
+async function stageC_recommend(f: any, model: string, m: RunMetrics, supabase: any): Promise<any> {
   const ai = await callAI(model,
     "You are a revenue operations consultant. Build a focused 30-day recovery plan. Return JSON only with shape: {\"plan\":[{\"day\":\"1-3\",\"action\":\"...\"}], \"primary_action\":{\"label\":\"...\",\"action_type\":\"...\"}}",
     `Pattern: ${f.label}\nDiagnostic: ${f.diagnostic}\nExposure: $${(f.exposure_cents / 100).toLocaleString()}`,
-    m,
+    m, supabase, "recommend",
   );
   let plan: any = null;
   if (ai) {
@@ -433,13 +433,13 @@ async function stageC_recommend(f: any, model: string, m: RunMetrics): Promise<a
   return { ...f, recovery_plan: plan.plan, primary_action: plan.primary_action };
 }
 
-async function stageD_summarize(findings: any[], model: string, m: RunMetrics): Promise<string> {
+async function stageD_summarize(findings: any[], model: string, m: RunMetrics, supabase: any): Promise<string> {
   const total = findings.reduce((s, f) => s + f.exposure_cents, 0);
   const top3 = findings.slice(0, 3);
   const ai = await callAI(model,
     "You are an executive analyst. Write a 3-sentence executive summary for a revenue leak audit. Direct, no fluff.",
     `Total exposure: $${(total / 100).toLocaleString()}\nTop findings: ${top3.map(f => `${f.label} ($${(f.exposure_cents / 100).toLocaleString()}, ${f.count} records)`).join("; ")}`,
-    m,
+    m, supabase, "summary",
   );
   return ai || `This audit identified $${(total / 100).toLocaleString()} in recoverable revenue across ${findings.length} leak patterns. The top three — ${top3.map(f => f.label).join(", ")} — account for the majority of exposure.`;
 }
