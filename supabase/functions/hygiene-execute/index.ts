@@ -24,13 +24,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // HubSpot CRM v3 IDs are positive integer strings (typically 5–19 digits).
 // Reject anything else BEFORE we hit the API to avoid guaranteed 404s.
+// Defensive: strip any accidental "contact_"/"deal_"/"company_"/"engagement_"
+// prefix and non-digit characters before validating, mirroring coerceHubspotId
+// in hubspot-sync. Persisted IDs should already be clean, but upstream callers
+// (UI, retries, replays of old payloads) may still hand us prefixed values.
 const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
 const isValidHubspotId = (id: unknown): id is string =>
   typeof id === "string" && HUBSPOT_ID_RE.test(id.trim());
 const normalizeHubspotId = (id: unknown): string | null => {
   if (id === null || id === undefined) return null;
-  const s = String(id).trim();
-  return HUBSPOT_ID_RE.test(s) ? s : null;
+  const digits = String(id).trim().replace(/^[a-zA-Z]+_/, "").replace(/\D/g, "");
+  return HUBSPOT_ID_RE.test(digits) ? digits : null;
 };
 
 // Sentinel thrown by applyOne / merges when the HubSpot record no longer exists.
