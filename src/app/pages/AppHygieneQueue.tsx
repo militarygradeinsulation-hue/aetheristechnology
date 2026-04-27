@@ -60,10 +60,21 @@ const AppHygieneQueue = () => {
       .in("status", ["pending", "approved", "executing", "failed"])
       .order("created_at", { ascending: false });
     const rows = ((data as unknown) as HygieneActionRow[]) || [];
-    // List rows don't carry affected_record_ids — keep the shape stable so
-    // downstream code that touches `.length` doesn't blow up.
     for (const r of rows) if (!r.affected_record_ids) r.affected_record_ids = [];
-    setActions(rows);
+
+    // Merge-in-place: keep existing array slots for known rows so React doesn't
+    // visually reshuffle when statuses/progress change. Only NEW rows are appended.
+    setActions((prev) => {
+      const incoming = new Map(rows.map((r) => [r.id, r]));
+      const merged: HygieneActionRow[] = [];
+      const seen = new Set<string>();
+      for (const old of prev) {
+        const next = incoming.get(old.id);
+        if (next) { merged.push(next); seen.add(old.id); }
+      }
+      for (const r of rows) if (!seen.has(r.id)) merged.push(r);
+      return merged;
+    });
   };
 
   // On-demand loader for the (potentially large) affected_record_ids column.
@@ -85,7 +96,40 @@ const AppHygieneQueue = () => {
     return () => clearInterval(i);
   }, [actions]);
 
-  const grouped = useMemo(() => actions, [actions]);
+  const changeView = (next: HygieneQueueView) => {
+    setView(next);
+    try { localStorage.setItem(VIEW_KEY, next); } catch {}
+    orderRef.current = new Map();        // force a fresh lock
+    orderViewRef.current = next;
+    setResortNonce((n) => n + 1);
+  };
+
+  const resortNow = () => {
+    orderRef.current = new Map();
+    setResortNonce((n) => n + 1);
+  };
+
+  // Locked sort: compute order once per (view, new-row arrival), then freeze.
+  const grouped = useMemo(() => {
+    if (orderViewRef.current !== view) {
+      orderRef.current = new Map();
+      orderViewRef.current = view;
+    }
+    const order = orderRef.current;
+    // Assign positions to any rows we haven't seen yet, using the current view's sort.
+    const unseen = actions.filter((a) => !order.has(a.id));
+    if (unseen.length) {
+      const sortedUnseen = sortActions(unseen, view);
+      let next = order.size;
+      for (const a of sortedUnseen) order.set(a.id, next++);
+    }
+    return [...actions].sort(
+      (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+    );
+    // resortNonce intentionally a dep so "Re-sort now" re-runs this
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, view, resortNonce]);
+
 
   const skipCategory = async (a: HygieneActionRow) => {
     await supabase.from("hygiene_actions").update({ status: "skipped" }).eq("id", a.id);
