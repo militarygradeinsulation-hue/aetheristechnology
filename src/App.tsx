@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,51 +6,67 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { SalesChat } from "@/components/SalesChat";
-import { ConsentBanner } from "@/components/ConsentBanner";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Home from "./pages/Home";
-import ServicesPage from "./pages/ServicesPage";
-import WhyUsPage from "./pages/WhyUsPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
-import TermsPage from "./pages/TermsPage";
-import ResourcesPage from "./pages/ResourcesPage";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AssessmentPage from "./pages/AssessmentPage";
-import ScanPage from "./pages/ScanPage";
-import NotFound from "./pages/NotFound";
-import DiagnosticQuizPage from "./pages/DiagnosticQuizPage";
-import CareersPage from "./pages/CareersPage";
-import UnsubscribePage from "./pages/UnsubscribePage";
-import CheckoutReturn from "./pages/CheckoutReturn";
-import ContentGeneratorPage from "./pages/ContentGeneratorPage";
-import SalesScriptsPage from "./pages/SalesScriptsPage";
-import ContentCalendarPage from "./pages/ContentCalendarPage";
-import FollowUpPlanPage from "./pages/FollowUpPlanPage";
-import StrategicQuestionsPage from "./pages/StrategicQuestionsPage";
-import BrandContradictionsPage from "./pages/BrandContradictionsPage";
-import FrictionAuditPage from "./pages/FrictionAuditPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import SubscriberOnboardingPage from "./pages/SubscriberOnboardingPage";
-import MySubscriptionPage from "./pages/MySubscriptionPage";
-import IndustriesPage from "./pages/IndustriesPage";
-import VerticalLandingPage from "./pages/VerticalLandingPage";
-import CrmDemoPage from "./pages/CrmDemoPage";
-import CapabilitiesPage from "./pages/CapabilitiesPage";
-import LeakAuditPage from "./pages/LeakAuditPage";
-import RepPortalPage from "./pages/RepPortalPage";
-import LinkedInPlaybookPage from "./pages/LinkedInPlaybookPage";
-import AppRouter from "./app/AppRouter";
 
-const queryClient = new QueryClient();
+// Eager: home + 404 (always needed)
+import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
+
+// Lazy: everything else (~1.5MB → split into per-route chunks)
+const ServicesPage = lazy(() => import("./pages/ServicesPage"));
+const WhyUsPage = lazy(() => import("./pages/WhyUsPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
+const ScanPage = lazy(() => import("./pages/ScanPage"));
+const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
+const CareersPage = lazy(() => import("./pages/CareersPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
+const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
+const SalesScriptsPage = lazy(() => import("./pages/SalesScriptsPage"));
+const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
+const FollowUpPlanPage = lazy(() => import("./pages/FollowUpPlanPage"));
+const StrategicQuestionsPage = lazy(() => import("./pages/StrategicQuestionsPage"));
+const BrandContradictionsPage = lazy(() => import("./pages/BrandContradictionsPage"));
+const FrictionAuditPage = lazy(() => import("./pages/FrictionAuditPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboardingPage"));
+const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
+const IndustriesPage = lazy(() => import("./pages/IndustriesPage"));
+const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
+const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
+const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
+const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
+const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
+const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
+const AppRouter = lazy(() => import("./app/AppRouter"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,        // treat data fresh for 60s
+      gcTime: 5 * 60_000,       // keep cached 5min
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background" aria-hidden="true" />
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -57,69 +74,73 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          {/* Revenue Recovery Engine — isolated SaaS area */}
-          <Route path="/app/*" element={<AppRouter />} />
-          {/* All other routes use the shared AuthProvider */}
-          <Route
-            path="/*"
-            element={
-              <AuthProvider>
-                <PageViewTracker />
-                <RetargetingPixel />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/services" element={<ServicesPage />} />
-                  <Route path="/why-us" element={<WhyUsPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/assessment" element={<AssessmentPage />} />
-                  <Route path="/scan" element={<ScanPage />} />
-                  <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
-                  <Route path="/careers" element={<CareersPage />} />
-                  <Route path="/unsubscribe" element={<UnsubscribePage />} />
-                  <Route path="/checkout/return" element={<CheckoutReturn />} />
-                  <Route path="/content-generator" element={<ContentGeneratorPage />} />
-                  <Route path="/sales-scripts" element={<SalesScriptsPage />} />
-                  <Route path="/content-calendar" element={<ContentCalendarPage />} />
-                  <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
-                  <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
-                  <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
-                  <Route path="/friction-audit" element={<FrictionAuditPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/signup" element={<SignupPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
-                  <Route path="/my-subscription" element={<MySubscriptionPage />} />
-                  <Route path="/industries" element={<IndustriesPage />} />
-                  <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
-                  <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
-                  <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
-                  <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
-                  <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
-                  <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
-                  <Route path="/crm-demo" element={<CrmDemoPage />} />
-                  <Route path="/capabilities" element={<CapabilitiesPage />} />
-                  <Route path="/leak-audit" element={<LeakAuditPage />} />
-                  <Route path="/rep-portal" element={<RepPortalPage />} />
-                  <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
-                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                
-                <SalesChat />
-              </AuthProvider>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            {/* Revenue Recovery Engine — isolated SaaS area */}
+            <Route path="/app/*" element={<AppRouter />} />
+            {/* All other routes use the shared AuthProvider */}
+            <Route
+              path="/*"
+              element={
+                <AuthProvider>
+                  <PageViewTracker />
+                  <RetargetingPixel />
+                  <Suspense fallback={<RouteFallback />}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/services" element={<ServicesPage />} />
+                      <Route path="/why-us" element={<WhyUsPage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<BlogPostPage />} />
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="/resources" element={<ResourcesPage />} />
+                      <Route path="/assessment" element={<AssessmentPage />} />
+                      <Route path="/scan" element={<ScanPage />} />
+                      <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
+                      <Route path="/careers" element={<CareersPage />} />
+                      <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                      <Route path="/checkout/return" element={<CheckoutReturn />} />
+                      <Route path="/content-generator" element={<ContentGeneratorPage />} />
+                      <Route path="/sales-scripts" element={<SalesScriptsPage />} />
+                      <Route path="/content-calendar" element={<ContentCalendarPage />} />
+                      <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
+                      <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
+                      <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
+                      <Route path="/friction-audit" element={<FrictionAuditPage />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/signup" element={<SignupPage />} />
+                      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                      <Route path="/reset-password" element={<ResetPasswordPage />} />
+                      <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
+                      <Route path="/my-subscription" element={<MySubscriptionPage />} />
+                      <Route path="/industries" element={<IndustriesPage />} />
+                      <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
+                      <Route path="/crm-demo" element={<CrmDemoPage />} />
+                      <Route path="/capabilities" element={<CapabilitiesPage />} />
+                      <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/rep-portal" element={<RepPortalPage />} />
+                      <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
+                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+
+                  <SalesChat />
+                </AuthProvider>
+              }
+            />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

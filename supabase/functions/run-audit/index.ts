@@ -87,6 +87,9 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
   const { data: cfgRow } = await supabase.from("audit_tuning_config").select("*").eq("id", 1).maybeSingle();
   const cfg = { ...DEFAULT_CFG, ...(cfgRow || {}) };
 
+  // Lazy purge of expired AI cache (fire-and-forget)
+  supabase.rpc("purge_expired_ai_cache").then(() => {}, () => {});
+
   try {
     // ---- Stage 0: Patterns ----
     const tPatterns = Date.now();
@@ -108,7 +111,7 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     // ---- Stage A: Diagnostics (parallel batches) ----
     const tDiag = Date.now();
     await updateRun(supabase, runId, { current_stage: "diagnostics", progress: { stage: "diagnostics", message: "Analyzing each finding..." } });
-    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics));
+    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase));
     metrics.stage_timings.diagnostics = Date.now() - tDiag;
 
     // ---- Stage B: Prioritize ----
@@ -120,13 +123,13 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     // ---- Stage C: Recommendations ----
     const tRec = Date.now();
     await updateRun(supabase, runId, { current_stage: "recommendations", progress: { stage: "recommendations", message: "Building recovery plans..." } });
-    const recommended = await mapWithLimit(prioritized, cfg.diagnostics_parallelism, (f) => stageC_recommend(f, cfg.recommendations_model, metrics));
+    const recommended = await mapWithLimit(prioritized, cfg.diagnostics_parallelism, (f) => stageC_recommend(f, cfg.recommendations_model, metrics, supabase));
     metrics.stage_timings.recommendations = Date.now() - tRec;
 
     // ---- Stage D + E ----
     const tRpt = Date.now();
     await updateRun(supabase, runId, { current_stage: "report", progress: { stage: "report", message: "Drafting summary..." } });
-    const summary = await stageD_summarize(recommended, cfg.summary_model, metrics);
+    const summary = await stageD_summarize(recommended, cfg.summary_model, metrics, supabase);
     const totalExposure = recommended.reduce((s, f) => s + (f.exposure_cents || 0), 0);
     const report = { summary, total_exposure_cents: totalExposure, findings: recommended, generated_at: new Date().toISOString() };
     metrics.stage_timings.report = Date.now() - tRpt;
@@ -216,155 +219,114 @@ async function updateRun(supabase: any, runId: string, patch: any) {
 }
 
 // ============================================================
-// Pattern Detection — uses tuning config knobs
+// Pattern Detection — runs in SQL via SECURITY DEFINER RPCs.
+// No more loading the entire CRM into edge function memory.
 // ============================================================
 async function detectPatterns(supabase: any, accountId: string, cfg: any): Promise<PatternFinding[]> {
   const findings: PatternFinding[] = [];
-  const now = Date.now();
-  const days = (n: number) => new Date(now - n * 86400000).toISOString();
 
-  const [{ data: deals }, { data: contacts }, { data: engagements }] = await Promise.all([
-    supabase.from("mirror_deals").select("*").eq("account_id", accountId),
-    supabase.from("mirror_contacts").select("*").eq("account_id", accountId),
-    supabase.from("mirror_engagements").select("*").eq("account_id", accountId),
-  ]);
-  const D = deals || []; const C = contacts || []; const E = engagements || [];
+  // Average deal size (one cheap query, used by two patterns)
+  const { data: avgRow } = await supabase.rpc("get_avg_deal_size", { _account_id: accountId });
+  const avgDealSize = Number(avgRow ?? 25000);
 
-  // 1. STALLED DEALS
-  const stalledMult = Number(cfg.stalled_multiplier);
-  const stalled = D.filter((d: any) => {
-    if (!d.stage || d.stage.startsWith("closed_")) return false;
-    const avg = d.properties?.stage_avg_days || 14;
-    if (!d.last_activity_date) return false;
-    const daysSince = (now - new Date(d.last_activity_date).getTime()) / 86400000;
-    return daysSince > avg * stalledMult;
-  });
-  findings.push({
-    key: "stalled_deals", label: "Stalled Deals", count: stalled.length,
-    exposure_cents: Math.round(stalled.reduce((s: number, d: any) => s + Number(d.amount || 0), 0) * 100),
-    sample_ids: stalled.slice(0, 10).map((d: any) => d.hubspot_id),
-    formula: `Open deals where days since last_activity > ${stalledMult}x stage average`,
-    time_period: "All open deals",
-    raw_data: { count: stalled.length },
-  });
+  type Spec = {
+    key: string;
+    label: string;
+    rpc: string;
+    args: Record<string, unknown>;
+    formula: string;
+    time_period: string;
+    extra?: Record<string, unknown>;
+  };
 
-  // 2. DEAD LEADS
-  const deadCutoff = days(Number(cfg.dead_lead_days));
-  const deadLeads = C.filter((c: any) =>
-    ["marketingqualifiedlead", "salesqualifiedlead"].includes(c.lifecycle_stage) &&
-    c.last_activity_date && c.last_activity_date < deadCutoff
+  const specs: Spec[] = [
+    {
+      key: "stalled_deals", label: "Stalled Deals",
+      rpc: "detect_stalled_deals",
+      args: { _account_id: accountId, _multiplier: Number(cfg.stalled_multiplier) },
+      formula: `Open deals where days since last_activity > ${cfg.stalled_multiplier}x stage average`,
+      time_period: "All open deals",
+    },
+    {
+      key: "dead_leads", label: "Dead MQLs / SQLs",
+      rpc: "detect_dead_leads",
+      args: { _account_id: accountId, _days: Number(cfg.dead_lead_days) },
+      formula: `MQL/SQL contacts with no activity in ${cfg.dead_lead_days}+ days`,
+      time_period: `Last ${cfg.dead_lead_days} days`,
+    },
+    {
+      key: "slow_followup", label: "Slow Lead Follow-Up",
+      rpc: "detect_slow_followup",
+      args: { _account_id: accountId, _hours: Number(cfg.slow_followup_hours), _avg_deal_size: avgDealSize },
+      formula: `Form submissions where first response was ${cfg.slow_followup_hours}+ hours later`,
+      time_period: "All form submissions",
+    },
+    {
+      key: "stuck_proposal", label: "Stuck in Proposal",
+      rpc: "detect_stuck_proposal",
+      args: { _account_id: accountId, _days: Number(cfg.stuck_proposal_days) },
+      formula: `Deals in 'proposal_sent' with no activity ${cfg.stuck_proposal_days}+ days`,
+      time_period: `Last ${cfg.stuck_proposal_days}+ days`,
+    },
+    {
+      key: "closed_lost_reactivation", label: "Closed-Lost Reactivation Pool",
+      rpc: "detect_closed_lost_reactivation",
+      args: {
+        _account_id: accountId,
+        _min_days: Number(cfg.reactivation_window_min_days),
+        _max_days: Number(cfg.reactivation_window_max_days),
+        _min_amount: Number(cfg.reactivation_min_amount),
+      },
+      formula: `Closed-lost deals ${cfg.reactivation_window_min_days}-${cfg.reactivation_window_max_days} days old > $${cfg.reactivation_min_amount}`,
+      time_period: `${cfg.reactivation_window_min_days}-${cfg.reactivation_window_max_days} days ago`,
+    },
+    {
+      key: "owner_overload", label: "Overloaded Sales Owners",
+      rpc: "detect_owner_overload",
+      args: { _account_id: accountId, _multiplier: Number(cfg.owner_overload_multiplier) },
+      formula: `Owners with ${cfg.owner_overload_multiplier}x+ the average deal load (20% slip-rate assumed)`,
+      time_period: "All open deals",
+    },
+    {
+      key: "missing_contact_info", label: "High-Value Deals Missing Contact Info",
+      rpc: "detect_missing_contact_info",
+      args: { _account_id: accountId, _min_amount: Number(cfg.high_value_deal_min) },
+      formula: `Open deals > $${cfg.high_value_deal_min} where the primary contact has no email or phone`,
+      time_period: "All open deals",
+    },
+    {
+      key: "high_intent_no_workflow", label: "High-Intent Contacts Not in Workflow",
+      rpc: "detect_high_intent_no_workflow",
+      args: { _account_id: accountId, _min_engagements: Number(cfg.high_intent_min_engagements), _avg_deal_size: avgDealSize },
+      formula: `Non-opportunity contacts with ${cfg.high_intent_min_engagements}+ engagements in last 30 days`,
+      time_period: "Last 30 days",
+    },
+  ];
+
+  // Run all 8 detections in parallel — each one is a single SQL aggregate query.
+  const results = await Promise.all(
+    specs.map(async (s) => {
+      const { data, error } = await supabase.rpc(s.rpc, s.args);
+      if (error) {
+        console.error(`[run-audit] ${s.key} RPC failed:`, error.message);
+        return { spec: s, payload: { count: 0, exposure_cents: 0, sample_ids: [] } };
+      }
+      return { spec: s, payload: data ?? { count: 0, exposure_cents: 0, sample_ids: [] } };
+    }),
   );
-  const avgDealSize = D.length ? D.reduce((s: number, d: any) => s + Number(d.amount || 0), 0) / D.length : 25000;
-  findings.push({
-    key: "dead_leads", label: "Dead MQLs / SQLs", count: deadLeads.length,
-    exposure_cents: Math.round(deadLeads.length * avgDealSize * 0.05 * 100),
-    sample_ids: deadLeads.slice(0, 10).map((c: any) => c.hubspot_id),
-    formula: `MQL/SQL contacts with no activity in ${cfg.dead_lead_days}+ days`,
-    time_period: `Last ${cfg.dead_lead_days} days`, raw_data: { avg_deal_size: avgDealSize },
-  });
 
-  // 3. SLOW FOLLOW-UP
-  const slowHrs = Number(cfg.slow_followup_hours);
-  const formEvents = E.filter((e: any) => e.properties?.source === "form_submission");
-  const slowFollowUps: any[] = [];
-  for (const f of formEvents) {
-    const followUps = E.filter((e: any) => e.contact_id === f.contact_id && new Date(e.timestamp) > new Date(f.timestamp));
-    if (!followUps.length) continue;
-    const earliest = followUps.reduce((min: any, e: any) => new Date(e.timestamp) < new Date(min.timestamp) ? e : min);
-    const hoursLater = (new Date(earliest.timestamp).getTime() - new Date(f.timestamp).getTime()) / 3600000;
-    if (hoursLater >= slowHrs) slowFollowUps.push({ contact_id: f.contact_id, hours: hoursLater });
+  for (const { spec, payload } of results) {
+    findings.push({
+      key: spec.key,
+      label: spec.label,
+      count: Number(payload?.count ?? 0),
+      exposure_cents: Number(payload?.exposure_cents ?? 0),
+      sample_ids: Array.isArray(payload?.sample_ids) ? payload.sample_ids : [],
+      formula: spec.formula,
+      time_period: spec.time_period,
+      raw_data: { ...(payload || {}), avg_deal_size: avgDealSize },
+    });
   }
-  findings.push({
-    key: "slow_followup", label: "Slow Lead Follow-Up", count: slowFollowUps.length,
-    exposure_cents: Math.round(slowFollowUps.length * avgDealSize * 0.08 * 100),
-    sample_ids: slowFollowUps.slice(0, 10).map((s: any) => s.contact_id),
-    formula: `Form submissions where first response was ${slowHrs}+ hours later`,
-    time_period: "All form submissions", raw_data: {},
-  });
-
-  // 4. STUCK IN PROPOSAL
-  const stuckDays = Number(cfg.stuck_proposal_days);
-  const stuckProposal = D.filter((d: any) => {
-    if (d.stage !== "proposal_sent" || !d.last_activity_date) return false;
-    return (now - new Date(d.last_activity_date).getTime()) / 86400000 >= stuckDays;
-  });
-  findings.push({
-    key: "stuck_proposal", label: "Stuck in Proposal", count: stuckProposal.length,
-    exposure_cents: Math.round(stuckProposal.reduce((s: number, d: any) => s + Number(d.amount || 0), 0) * 100),
-    sample_ids: stuckProposal.slice(0, 10).map((d: any) => d.hubspot_id),
-    formula: `Deals in 'proposal_sent' with no activity ${stuckDays}+ days`,
-    time_period: `Last ${stuckDays}+ days`, raw_data: {},
-  });
-
-  // 5. CLOSED-LOST REACTIVATION
-  const minDays = days(Number(cfg.reactivation_window_min_days));
-  const maxDays = days(Number(cfg.reactivation_window_max_days));
-  const minAmount = Number(cfg.reactivation_min_amount);
-  const reactivatable = D.filter((d: any) =>
-    d.stage === "closed_lost" && Number(d.amount || 0) > minAmount &&
-    d.close_date && d.close_date < minDays && d.close_date > maxDays
-  );
-  findings.push({
-    key: "closed_lost_reactivation", label: "Closed-Lost Reactivation Pool", count: reactivatable.length,
-    exposure_cents: Math.round(reactivatable.reduce((s: number, d: any) => s + Number(d.amount || 0), 0) * 0.15 * 100),
-    sample_ids: reactivatable.slice(0, 10).map((d: any) => d.hubspot_id),
-    formula: `Closed-lost deals ${cfg.reactivation_window_min_days}-${cfg.reactivation_window_max_days} days old > $${minAmount}`,
-    time_period: `${cfg.reactivation_window_min_days}-${cfg.reactivation_window_max_days} days ago`, raw_data: {},
-  });
-
-  // 6. OWNER OVERLOAD
-  const overloadMult = Number(cfg.owner_overload_multiplier);
-  const ownerCounts: Record<string, number> = {};
-  D.forEach((d: any) => { if (d.owner_id) ownerCounts[d.owner_id] = (ownerCounts[d.owner_id] || 0) + 1; });
-  const counts = Object.values(ownerCounts);
-  const avgLoad = counts.length ? counts.reduce((a, b) => a + b, 0) / counts.length : 0;
-  const overloaded = Object.entries(ownerCounts).filter(([_, c]) => c >= avgLoad * overloadMult);
-  findings.push({
-    key: "owner_overload", label: "Overloaded Sales Owners", count: overloaded.length,
-    exposure_cents: Math.round(overloaded.reduce((s, [oid]) => {
-      const ownerDeals = D.filter((d: any) => d.owner_id === oid && !d.stage?.startsWith("closed_"));
-      return s + ownerDeals.reduce((ss: number, d: any) => ss + Number(d.amount || 0) * 0.2, 0);
-    }, 0) * 100),
-    sample_ids: overloaded.slice(0, 10).map(([oid]) => oid),
-    formula: `Owners with ${overloadMult}x+ the average deal load (20% slip-rate assumed)`,
-    time_period: "All open deals", raw_data: { avg_load: avgLoad, overloaded_counts: Object.fromEntries(overloaded) },
-  });
-
-  // 7. MISSING CONTACT INFO
-  const hvMin = Number(cfg.high_value_deal_min);
-  const contactById: Record<string, any> = {};
-  C.forEach((c: any) => { contactById[c.hubspot_id] = c; });
-  const missingInfo = D.filter((d: any) => {
-    if (Number(d.amount || 0) < hvMin) return false;
-    const cid = d.properties?.contact_id;
-    if (!cid) return true;
-    const c = contactById[cid];
-    return !c || (!c.email && !c.phone);
-  });
-  findings.push({
-    key: "missing_contact_info", label: "High-Value Deals Missing Contact Info", count: missingInfo.length,
-    exposure_cents: Math.round(missingInfo.reduce((s: number, d: any) => s + Number(d.amount || 0), 0) * 100),
-    sample_ids: missingInfo.slice(0, 10).map((d: any) => d.hubspot_id),
-    formula: `Open deals > $${hvMin} where the primary contact has no email or phone`,
-    time_period: "All open deals", raw_data: {},
-  });
-
-  // 8. HIGH-INTENT NOT IN WORKFLOW
-  const minEng = Number(cfg.high_intent_min_engagements);
-  const thirtyDaysAgo = days(30);
-  const highIntent = C.filter((c: any) => {
-    if (["customer", "opportunity"].includes(c.lifecycle_stage)) return false;
-    if (!c.last_activity_date || c.last_activity_date < thirtyDaysAgo) return false;
-    const recentEng = E.filter((e: any) => e.contact_id === c.hubspot_id && e.timestamp >= thirtyDaysAgo);
-    return recentEng.length >= minEng;
-  }).slice(0, 25);
-  findings.push({
-    key: "high_intent_no_workflow", label: "High-Intent Contacts Not in Workflow", count: highIntent.length,
-    exposure_cents: Math.round(highIntent.length * avgDealSize * 0.1 * 100),
-    sample_ids: highIntent.slice(0, 10).map((c: any) => c.hubspot_id),
-    formula: `Non-opportunity contacts with ${minEng}+ engagements in last 30 days`,
-    time_period: "Last 30 days", raw_data: {},
-  });
 
   return findings;
 }
@@ -372,9 +334,35 @@ async function detectPatterns(supabase: any, accountId: string, cfg: any): Promi
 // ============================================================
 // AI Stages — capture timing and errors into RunMetrics
 // ============================================================
-async function callAI(model: string, systemPrompt: string, userPrompt: string, m: RunMetrics): Promise<string | null> {
+async function sha256Hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function callAI(
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+  m: RunMetrics,
+  supabase?: any,
+  stage?: string,
+): Promise<string | null> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return null;
+
+  // 7-day cache (keyed by model + stage + prompts hash)
+  let cacheKey: string | null = null;
+  if (supabase && stage) {
+    cacheKey = await sha256Hex(`${model}::${stage}::${systemPrompt}::${userPrompt}`);
+    const { data: cached } = await supabase
+      .from("audit_ai_cache")
+      .select("response")
+      .eq("cache_key", cacheKey)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (cached?.response?.text) return String(cached.response.text);
+  }
+
   m.ai_call_count++;
   const t = Date.now();
   try {
@@ -396,7 +384,18 @@ async function callAI(model: string, systemPrompt: string, userPrompt: string, m
       return null;
     }
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || null;
+    const text = data.choices?.[0]?.message?.content || null;
+
+    if (text && supabase && cacheKey && stage) {
+      // Fire-and-forget cache write
+      supabase.from("audit_ai_cache").upsert({
+        cache_key: cacheKey,
+        model,
+        stage,
+        response: { text },
+      }, { onConflict: "cache_key" }).then(() => {}, () => {});
+    }
+    return text;
   } catch (err) {
     m.ai_error_count++;
     m.ai_total_ms += Date.now() - t;
@@ -405,20 +404,20 @@ async function callAI(model: string, systemPrompt: string, userPrompt: string, m
   }
 }
 
-async function stageA_diagnose(f: PatternFinding, model: string, m: RunMetrics): Promise<any> {
+async function stageA_diagnose(f: PatternFinding, model: string, m: RunMetrics, supabase: any): Promise<any> {
   const ai = await callAI(model,
     "You are a revenue operations analyst. Given a CRM leak pattern, return a 2-3 sentence blunt diagnostic. Plain text only.",
     `Pattern: ${f.label}\nCount: ${f.count}\nExposure: $${(f.exposure_cents / 100).toLocaleString()}\nFormula: ${f.formula}`,
-    m,
+    m, supabase, "diagnose",
   );
   return { ...f, diagnostic: ai || `${f.count} records match this leak pattern, exposing roughly $${(f.exposure_cents / 100).toLocaleString()}.` };
 }
 
-async function stageC_recommend(f: any, model: string, m: RunMetrics): Promise<any> {
+async function stageC_recommend(f: any, model: string, m: RunMetrics, supabase: any): Promise<any> {
   const ai = await callAI(model,
     "You are a revenue operations consultant. Build a focused 30-day recovery plan. Return JSON only with shape: {\"plan\":[{\"day\":\"1-3\",\"action\":\"...\"}], \"primary_action\":{\"label\":\"...\",\"action_type\":\"...\"}}",
     `Pattern: ${f.label}\nDiagnostic: ${f.diagnostic}\nExposure: $${(f.exposure_cents / 100).toLocaleString()}`,
-    m,
+    m, supabase, "recommend",
   );
   let plan: any = null;
   if (ai) {
@@ -437,13 +436,13 @@ async function stageC_recommend(f: any, model: string, m: RunMetrics): Promise<a
   return { ...f, recovery_plan: plan.plan, primary_action: plan.primary_action };
 }
 
-async function stageD_summarize(findings: any[], model: string, m: RunMetrics): Promise<string> {
+async function stageD_summarize(findings: any[], model: string, m: RunMetrics, supabase: any): Promise<string> {
   const total = findings.reduce((s, f) => s + f.exposure_cents, 0);
   const top3 = findings.slice(0, 3);
   const ai = await callAI(model,
     "You are an executive analyst. Write a 3-sentence executive summary for a revenue leak audit. Direct, no fluff.",
     `Total exposure: $${(total / 100).toLocaleString()}\nTop findings: ${top3.map(f => `${f.label} ($${(f.exposure_cents / 100).toLocaleString()}, ${f.count} records)`).join("; ")}`,
-    m,
+    m, supabase, "summary",
   );
   return ai || `This audit identified $${(total / 100).toLocaleString()} in recoverable revenue across ${findings.length} leak patterns. The top three — ${top3.map(f => f.label).join(", ")} — account for the majority of exposure.`;
 }
