@@ -205,7 +205,7 @@ const AppHygieneQueue = () => {
                     ) : isMerge ? (
                       <div className="flex flex-wrap gap-2">
                         <Button
-                          onClick={() => setMergeAction(a)}
+                          onClick={() => openMerge(a)}
                           disabled={isExecuting}
                           className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
                           size="sm"
