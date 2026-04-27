@@ -336,16 +336,20 @@ async function syncWindowed(
       }));
     }
 
-    if (rows.length) await admin.from(mirrorTable).upsert(rows, { onConflict: "account_id,hubspot_id" });
-
-    if (cursor.phase === "deals" && rows.length) {
-      const dealIds = rows.map((r) => r.hubspot_id);
-      await syncDealAssociations(admin, accountId, accessToken, dealIds);
+    if (rows.length) {
+      rowBuffer.push(...rows);
+      if (cursor.phase === "deals") {
+        for (const r of rows) dealIdBuffer.push(r.hubspot_id);
+      }
     }
-
     cursor.count += rows.length;
 
     const next = data.paging?.next?.after ?? null;
+
+    // Flush buffered upserts when threshold reached (batched across multiple HubSpot pages = far fewer DB round-trips)
+    if (rowBuffer.length >= UPSERT_BATCH_SIZE) {
+      await flushBuffer();
+    }
 
     await onProgress();
 
@@ -358,12 +362,28 @@ async function syncWindowed(
     }
 
     if (Date.now() - startTime > INVOCATION_BUDGET_MS) {
+      // Flush whatever we have before checkpointing so resume doesn't refetch already-written rows
+      await flushBuffer();
       throw new TimeBudgetExceeded({ ...cursor });
     }
   }
 
+  // Final flush at end of phase
+  await flushBuffer();
   cursor.done = true;
   return cursor;
+
+  // ---- buffered flush helpers (closure-scoped to this phase run) ----
+  async function flushBuffer() {
+    if (rowBuffer.length) {
+      await admin.from(mirrorTable).upsert(rowBuffer, { onConflict: "account_id,hubspot_id" });
+      rowBuffer.length = 0;
+    }
+    if (dealIdBuffer.length) {
+      await syncDealAssociations(admin, accountId, accessToken, dealIdBuffer);
+      dealIdBuffer.length = 0;
+    }
+  }
 }
 
 function makePhaseCursor(phase: SyncPhase, sinceMs: number, endMs: number): PhaseCursor {
