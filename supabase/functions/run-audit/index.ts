@@ -108,10 +108,11 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
       })));
     }
 
-    // ---- Stage A: Diagnostics (parallel batches) ----
+    // ---- Stage A: Diagnostics — fire ALL findings in parallel (Promise.all) ----
+    // Lovable AI tolerates concurrent calls fine for this small fan-out (≤8); cuts wall time vs the prior 4-wide batched limiter.
     const tDiag = Date.now();
     await updateRun(supabase, runId, { current_stage: "diagnostics", progress: { stage: "diagnostics", message: "Analyzing each finding..." } });
-    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase));
+    const diagnosed = await Promise.all(findings.map((f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase)));
     metrics.stage_timings.diagnostics = Date.now() - tDiag;
 
     // ---- Stage B: Prioritize ----
