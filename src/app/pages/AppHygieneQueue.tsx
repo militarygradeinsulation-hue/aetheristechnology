@@ -205,6 +205,40 @@ const AppHygieneQueue = () => {
 
       <HygieneSubNav />
 
+      {grouped.length > 0 && (
+        <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="inline-flex rounded-lg border border-border bg-card p-0.5 text-xs">
+            {([
+              { key: "priority", label: "Priority" },
+              { key: "newest", label: "Newest" },
+              { key: "status", label: "Status" },
+            ] as { key: HygieneQueueView; label: string }[]).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => changeView(opt.key)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  view === opt.key
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>Order locked · {view === "priority" ? "Priority" : view === "newest" ? "Newest" : "Status"}</span>
+            <button
+              onClick={resortNow}
+              className="inline-flex items-center gap-1 text-foreground hover:text-amber-400 transition-colors"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Re-sort now
+            </button>
+          </div>
+        </div>
+      )}
+
       {grouped.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <p className="text-sm text-muted-foreground">No pending actions. Run a scan from the Scan tab.</p>
