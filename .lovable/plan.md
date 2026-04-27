@@ -1,50 +1,80 @@
 ## Goal
 
-Stop Action Queue rows from jumping around while a scan/execution is running, and give the user explicit ways to view the queue without re-shuffling.
+Make the HubSpot OAuth install bulletproof: never fail again because a "Required" scope is missing from the authorize URL. Request the full read/write surface so the app can read and connect to anything in HubSpot.
 
-## The problem
+## Why it's failing now
 
-`AppHygieneQueue.tsx` re-fetches every 2 seconds while anything is `executing`. The query orders by `created_at desc` only, but the UI also depends on `status`, `progress`, etc. As statuses flip and counts change, React re-renders the list in a different visual order than the user expects, so cards "move up and down."
+HubSpot enforces this rule: **every scope marked "Required" in the app config (HubSpot Developer Portal → Auth tab) MUST appear in the `scope` query parameter of the authorize URL**. If even one is missing, the install fails with the giant "Authorization failed because the provided scopes are missing [...]" error you saw.
 
-Two compounding issues:
-1. There's no stable sort tie-breaker — rows with identical `created_at` (same scan batch) can swap.
-2. There's no user-controlled view mode, so there's no single "correct" order — it just looks chaotic.
+The current `hubspot-oauth-start` only requests 12 scopes. Your app config has ~150 marked Required, so HubSpot rejects the install.
 
-## What we'll build
+There's a second rule that matters: scopes for **add-on hubs** (Marketing Hub, CMS Hub, Service Hub Pro, Commerce, custom industry objects) cannot go in `scope` — they must go in `optional_scope`, otherwise the install fails on portals that don't have those hubs. Since you said "everything is turned on," they'll all be granted, but using `optional_scope` keeps the integration safe for any future portal you connect.
 
-### 1. Lock row positions per session
+## What we'll change
 
-Compute the row order **once per scan**, cache it by `action.id`, and reuse that order on every poll. New rows (from a new scan) append at the bottom of their group. Existing rows never move while the page is open — only their inner content (progress bar, status badge) updates in place.
+### 1. `supabase/functions/hubspot-oauth-start/index.ts`
 
-### 2. View options (segmented control above the list)
+Replace the 12-scope list with two lists:
 
-Three locked views; user picks one, order is frozen until they switch:
+**`REQUIRED_SCOPES`** — always-available CRM + core platform (~30 scopes):
+- `oauth`
+- All core CRM objects: contacts, companies, deals, owners (read + write)
+- All core CRM schemas: contacts, companies, deals (read + write)
+- Lists, imports, exports
+- Files, timeline, settings/users/teams, account-info
+- Sales-email-read, communication preferences
 
-- **Priority** (default) — high severity first → medium → low; within each, high confidence first; within each, largest `affected_count` first. Computed once per `(view, scan)`.
-- **Newest first** — `created_at desc`, stable.
-- **Status** — groups in fixed order: `executing` → `failed` → `pending`/`approved` → `cancelled`/`skipped`. Within each group, Priority order applies.
+**`OPTIONAL_SCOPES`** — add-on hubs and premium objects (~110 scopes), sent via `optional_scope=`:
+- Tickets (full)
+- Quotes / line items / products
+- Invoices / subscriptions / orders / carts / commerce / payments / e-commerce / tax_rates
+- Goals
+- Custom objects (read/write + schemas)
+- Marketing Hub: content, social, forms, hubdb, marketing-email, campaigns, transactional-email, automation, business-intelligence
+- Conversations / inbox / visitor identification
+- CMS / Content Hub: knowledge_base, domains, functions, performance, membership
+- Calls / meetings / scheduler
+- Industry objects: appointments, services, courses, listings (HubSpot's vertical bundles)
+- Users object, partner-clients, partner-services
+- Actions, integration-sync, external_integrations.forms.access, GraphQL collector
+- Media bridge, record_images.signed_urls.read
+- Accounting
 
-The selected view persists to `localStorage` so it survives reloads.
+### 2. Build the authorize URL with both params
 
-### 3. Visual stability tricks
+```
+?client_id=...
+&redirect_uri=...
+&scope=<required, space-separated>
+&optional_scope=<optional, space-separated>
+&state=...
+```
 
-- Add a stable React `key={action.id}` (already present) and wrap each card in a memoized component so unchanged rows don't re-render.
-- Use a `useRef`-held `Map<actionId, sortIndex>` that's only rebuilt when the view mode changes or a brand-new action id appears. Existing ids keep their original index forever.
-- The poll updates row *contents* by merging fetched data into existing array slots rather than replacing the array.
+Both lists deduped before encoding (some scopes appear in multiple categories above for readability).
 
-### 4. Small UX additions
+### 3. Logging
 
-- Show a tiny "Locked order: Priority" hint next to the view switcher with a "Re-sort now" link, so users can deliberately re-rank if they want.
-- Keep the auto-refresh badge ("Updating every 2s") so it's clear data is live even though positions are static.
+Update the existing `console.log` to print `required_count` and `optional_count` instead of dumping the full string, so future debugging is fast.
 
-## Files to change
+## What you'll need to do in HubSpot (one time)
 
-- `src/app/pages/AppHygieneQueue.tsx` — add view switcher, stable order ref, memoized row component, merge-in-place loader.
-- `src/app/lib/hygiene.ts` — add a `sortActions(rows, view)` helper + severity/confidence weight maps.
+In the **HubSpot Developer Portal** → your app → **Auth** tab:
 
-No DB changes. No edge function changes.
+1. Make sure every scope you want the app to be able to request is **enabled** (checked at all). If a scope isn't enabled here, no install can grant it regardless of what we send.
+2. For scopes that are not on every portal (anything in Marketing Hub, CMS, Commerce, custom industry objects): move them out of "Required scopes" and into "Optional scopes" / "Conditionally required" — because we're sending them as `optional_scope`. If they stay marked Required, HubSpot will still reject the install on any portal missing that hub.
+3. Keep core CRM scopes in **Required** — that matches our `REQUIRED_SCOPES` list.
+4. Save.
+
+Then click "Reconnect HubSpot" and the install should sail through.
 
 ## Out of scope
 
-- Drag-to-reorder (can add later if you want manual ordering).
-- Persisting order across devices (localStorage only for now).
+- Token-storage schema changes (existing `accounts.hubspot_*` columns already store the access/refresh tokens regardless of how many scopes were granted).
+- Granted-scopes tracking (HubSpot returns the actual granted scopes on the token exchange — we can add that to a follow-up if you want feature gating).
+- Edge functions that USE the new scopes (we're just unlocking the connection here; functions can be added per-feature later).
+
+## Files changing
+
+- `supabase/functions/hubspot-oauth-start/index.ts` — rewritten with the two scope lists and the new URL builder.
+
+No DB changes, no other files affected.
