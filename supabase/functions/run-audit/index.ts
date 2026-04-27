@@ -87,6 +87,9 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
   const { data: cfgRow } = await supabase.from("audit_tuning_config").select("*").eq("id", 1).maybeSingle();
   const cfg = { ...DEFAULT_CFG, ...(cfgRow || {}) };
 
+  // Lazy purge of expired AI cache (fire-and-forget)
+  supabase.rpc("purge_expired_ai_cache").then(() => {}, () => {});
+
   try {
     // ---- Stage 0: Patterns ----
     const tPatterns = Date.now();
