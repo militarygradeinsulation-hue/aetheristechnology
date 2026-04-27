@@ -13,6 +13,17 @@ const corsHeaders = {
 const HUBSPOT_API = "https://api.hubapi.com";
 const RATE_DELAY_MS = 110;
 
+// Defensive sanitization: HubSpot CRM v3 IDs must be positive integer strings.
+// Strip any "contact_"/"deal_"/"company_"/"engagement_" prefix or stray non-digit
+// characters before validating, so a stale/dirty hygiene_log row can't fire a
+// guaranteed 404 PATCH at HubSpot.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+const normalizeHubspotId = (id: unknown): string | null => {
+  if (id === null || id === undefined) return null;
+  const digits = String(id).trim().replace(/^[a-zA-Z]+_/, "").replace(/\D/g, "");
+  return HUBSPOT_ID_RE.test(digits) ? digits : null;
+};
+
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
