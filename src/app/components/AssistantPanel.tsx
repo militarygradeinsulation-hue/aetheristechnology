@@ -37,7 +37,10 @@ const ProposalCard = ({
 );
 
 const FAB_SIZE = 48;
+const PANEL_W = 400;
+const PANEL_H = 560;
 const STORAGE_KEY = "copilot_fab_pos";
+const PANEL_KEY = "copilot_panel_pos";
 
 export const AssistantPanel = () => {
   const [open, setOpen] = useState(false);
@@ -58,8 +61,25 @@ export const AssistantPanel = () => {
     } catch { /* noop */ }
     return { x: window.innerWidth - FAB_SIZE - 24, y: window.innerHeight - FAB_SIZE - 24 };
   });
+
+  // Draggable panel position (persisted)
+  const [panelPos, setPanelPos] = useState<{ x: number; y: number }>(() => {
+    if (typeof window === "undefined") return { x: 24, y: 24 };
+    try {
+      const raw = localStorage.getItem(PANEL_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* noop */ }
+    return {
+      x: Math.max(16, window.innerWidth - PANEL_W - 24),
+      y: Math.max(16, window.innerHeight - PANEL_H - 24),
+    };
+  });
+
   const dragStateRef = useRef<{ dragging: boolean; moved: boolean; offX: number; offY: number }>({
     dragging: false, moved: false, offX: 0, offY: 0,
+  });
+  const panelDragRef = useRef<{ dragging: boolean; offX: number; offY: number }>({
+    dragging: false, offX: 0, offY: 0,
   });
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
@@ -79,22 +99,55 @@ export const AssistantPanel = () => {
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  // Persist FAB position
+  // Persist FAB + panel positions
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fabPos)); } catch { /* noop */ }
   }, [fabPos]);
+  useEffect(() => {
+    try { localStorage.setItem(PANEL_KEY, JSON.stringify(panelPos)); } catch { /* noop */ }
+  }, [panelPos]);
 
-  // Keep FAB on-screen when window resizes
+  // Keep both on-screen when window resizes
   useEffect(() => {
     const onResize = () => {
       setFabPos((p) => ({
         x: Math.min(Math.max(0, p.x), window.innerWidth - FAB_SIZE),
         y: Math.min(Math.max(0, p.y), window.innerHeight - FAB_SIZE),
       }));
+      setPanelPos((p) => ({
+        x: Math.min(Math.max(0, p.x), Math.max(0, window.innerWidth - PANEL_W)),
+        y: Math.min(Math.max(0, p.y), Math.max(0, window.innerHeight - 80)),
+      }));
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Panel header drag handlers
+  const onPanelHeaderDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Ignore drags that start on a button inside the header
+    if ((e.target as HTMLElement).closest("button, a")) return;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    panelDragRef.current = {
+      dragging: true,
+      offX: e.clientX - panelPos.x,
+      offY: e.clientY - panelPos.y,
+    };
+  };
+  const onPanelHeaderMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const s = panelDragRef.current;
+    if (!s.dragging) return;
+    const nx = e.clientX - s.offX;
+    const ny = e.clientY - s.offY;
+    setPanelPos({
+      x: Math.min(Math.max(0, nx), Math.max(0, window.innerWidth - PANEL_W)),
+      y: Math.min(Math.max(0, ny), Math.max(0, window.innerHeight - 80)),
+    });
+  };
+  const onPanelHeaderUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    panelDragRef.current.dragging = false;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+  };
 
   const handleSend = () => {
     if (!input.trim() && !attachedImage) return;
@@ -162,8 +215,25 @@ export const AssistantPanel = () => {
         </button>
       )}
       {open && (
-        <div ref={panelRef} className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div
+          ref={panelRef}
+          style={{
+            left: panelPos.x,
+            top: panelPos.y,
+            width: PANEL_W,
+            height: PANEL_H,
+            maxWidth: "calc(100vw - 16px)",
+            maxHeight: "calc(100vh - 16px)",
+          }}
+          className="fixed z-40 bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden"
+        >
+          <div
+            onPointerDown={onPanelHeaderDown}
+            onPointerMove={onPanelHeaderMove}
+            onPointerUp={onPanelHeaderUp}
+            style={{ touchAction: "none" }}
+            className="flex items-center justify-between px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none"
+          >
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4 text-primary" />
               <span className="font-semibold text-sm">Co-Pilot</span>
