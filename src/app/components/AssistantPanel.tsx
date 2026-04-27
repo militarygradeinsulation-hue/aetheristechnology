@@ -99,22 +99,55 @@ export const AssistantPanel = () => {
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  // Persist FAB position
+  // Persist FAB + panel positions
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fabPos)); } catch { /* noop */ }
   }, [fabPos]);
+  useEffect(() => {
+    try { localStorage.setItem(PANEL_KEY, JSON.stringify(panelPos)); } catch { /* noop */ }
+  }, [panelPos]);
 
-  // Keep FAB on-screen when window resizes
+  // Keep both on-screen when window resizes
   useEffect(() => {
     const onResize = () => {
       setFabPos((p) => ({
         x: Math.min(Math.max(0, p.x), window.innerWidth - FAB_SIZE),
         y: Math.min(Math.max(0, p.y), window.innerHeight - FAB_SIZE),
       }));
+      setPanelPos((p) => ({
+        x: Math.min(Math.max(0, p.x), Math.max(0, window.innerWidth - PANEL_W)),
+        y: Math.min(Math.max(0, p.y), Math.max(0, window.innerHeight - 80)),
+      }));
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Panel header drag handlers
+  const onPanelHeaderDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Ignore drags that start on a button inside the header
+    if ((e.target as HTMLElement).closest("button, a")) return;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    panelDragRef.current = {
+      dragging: true,
+      offX: e.clientX - panelPos.x,
+      offY: e.clientY - panelPos.y,
+    };
+  };
+  const onPanelHeaderMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const s = panelDragRef.current;
+    if (!s.dragging) return;
+    const nx = e.clientX - s.offX;
+    const ny = e.clientY - s.offY;
+    setPanelPos({
+      x: Math.min(Math.max(0, nx), Math.max(0, window.innerWidth - PANEL_W)),
+      y: Math.min(Math.max(0, ny), Math.max(0, window.innerHeight - 80)),
+    });
+  };
+  const onPanelHeaderUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    panelDragRef.current.dragging = false;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+  };
 
   const handleSend = () => {
     if (!input.trim() && !attachedImage) return;
