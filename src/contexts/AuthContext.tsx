@@ -31,10 +31,37 @@ const syncProfile = async (user: User) => {
   }
 };
 
+// Read the persisted Supabase session synchronously from localStorage so we
+// can render the correct UI on first paint instead of flashing a loader while
+// supabase.auth.getSession() does its async network round-trip.
+const readCachedSession = (): Session | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (!k || !k.startsWith('sb-') || !k.endsWith('-auth-token')) continue;
+      const raw = window.localStorage.getItem(k);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const s: Session | null = parsed?.currentSession ?? parsed ?? null;
+      if (s?.access_token) {
+        const expMs = (s.expires_at ?? 0) * 1000;
+        if (!expMs || expMs > Date.now()) return s;
+      }
+    }
+  } catch {
+    /* ignore — fall back to network */
+  }
+  return null;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cached = typeof window !== 'undefined' ? readCachedSession() : null;
+  const [user, setUser] = useState<User | null>(cached?.user ?? null);
+  const [session, setSession] = useState<Session | null>(cached);
+  // If we have a cached session, render immediately and only flip loading
+  // when the live check returns. Otherwise show loader as before.
+  const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
     const applySession = (session: Session | null) => {
