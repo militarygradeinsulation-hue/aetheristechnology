@@ -22,6 +22,7 @@ export type Database = {
           hubspot_connected_at: string | null
           hubspot_portal_id: string | null
           hubspot_refresh_token_encrypted: string | null
+          hubspot_scopes: string | null
           id: string
           last_sync_at: string | null
           last_sync_error: string | null
@@ -37,6 +38,7 @@ export type Database = {
           hubspot_connected_at?: string | null
           hubspot_portal_id?: string | null
           hubspot_refresh_token_encrypted?: string | null
+          hubspot_scopes?: string | null
           id?: string
           last_sync_at?: string | null
           last_sync_error?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           hubspot_connected_at?: string | null
           hubspot_portal_id?: string | null
           hubspot_refresh_token_encrypted?: string | null
+          hubspot_scopes?: string | null
           id?: string
           last_sync_at?: string | null
           last_sync_error?: string | null
