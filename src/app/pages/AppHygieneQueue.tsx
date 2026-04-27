@@ -26,15 +26,38 @@ const AppHygieneQueue = () => {
   const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // List view never needs the full affected_record_ids array (can be 5,000
+  // hubspot_id strings per row). Polling that every 2s while a job is running
+  // froze the UI. Fetch the IDs on-demand inside the dialogs / export handler.
+  const LIST_COLUMNS =
+    "id, scan_id, account_id, category, category_label, confidence, severity, " +
+    "risk_level, approval_mode, recommended_action, affected_count, status, " +
+    "progress, error_message, created_at, approved_at, executed_at";
+
   const load = async () => {
     if (!account?.id) return;
     const { data } = await supabase
       .from("hygiene_actions")
-      .select("*")
+      .select(LIST_COLUMNS)
       .eq("account_id", account.id)
       .in("status", ["pending", "approved", "executing"])
       .order("created_at", { ascending: false });
-    setActions(((data as unknown) as HygieneActionRow[]) || []);
+    const rows = ((data as unknown) as HygieneActionRow[]) || [];
+    // List rows don't carry affected_record_ids — keep the shape stable so
+    // downstream code that touches `.length` doesn't blow up.
+    for (const r of rows) if (!r.affected_record_ids) r.affected_record_ids = [];
+    setActions(rows);
+  };
+
+  // On-demand loader for the (potentially large) affected_record_ids column.
+  const fetchActionIds = async (id: string): Promise<string[]> => {
+    const { data, error } = await supabase
+      .from("hygiene_actions")
+      .select("affected_record_ids")
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !data) return [];
+    return (data.affected_record_ids as string[]) || [];
   };
 
   useEffect(() => { load(); }, [account?.id]);
@@ -73,8 +96,9 @@ const AppHygieneQueue = () => {
     }
   };
 
-  const exportCsv = (a: HygieneActionRow) => {
-    const rows = ["hubspot_id"].concat(a.affected_record_ids).join("\n");
+  const exportCsv = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    const rows = ["hubspot_id"].concat(ids).join("\n");
     const blob = new Blob([rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -82,6 +106,16 @@ const AppHygieneQueue = () => {
     link.download = `${a.category}-records.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Hydrate affected_record_ids before opening dialogs that need them.
+  const openReview = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    setReviewAction({ ...a, affected_record_ids: ids });
+  };
+  const openMerge = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    setMergeAction({ ...a, affected_record_ids: ids });
   };
 
   if (loading) return <AppLayout><div className="h-8 w-48 bg-muted rounded animate-pulse" /></AppLayout>;
@@ -171,7 +205,7 @@ const AppHygieneQueue = () => {
                     ) : isMerge ? (
                       <div className="flex flex-wrap gap-2">
                         <Button
-                          onClick={() => setMergeAction(a)}
+                          onClick={() => openMerge(a)}
                           disabled={isExecuting}
                           className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
                           size="sm"
@@ -202,7 +236,7 @@ const AppHygieneQueue = () => {
                           </Button>
                         ) : (
                           <Button
-                            onClick={() => setReviewAction(a)}
+                            onClick={() => openReview(a)}
                             disabled={isExecuting}
                             variant="outline"
                             size="sm"
