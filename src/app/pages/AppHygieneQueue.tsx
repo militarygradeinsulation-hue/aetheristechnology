@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   HygieneActionRow, severityClass, confidenceLabel, categoryDisplay,
+  sortActions, type HygieneQueueView,
 } from "../lib/hygiene";
 import { HygieneRecordReviewDialog } from "../components/HygieneRecordReviewDialog";
 import { HygieneMergeDialog } from "../components/HygieneMergeDialog";
