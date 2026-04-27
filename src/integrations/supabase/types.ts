@@ -143,6 +143,161 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_actions: {
+        Row: {
+          account_id: string
+          affected_count: number | null
+          after_state: Json | null
+          args: Json
+          before_state: Json | null
+          conversation_id: string | null
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          message_id: string | null
+          status: string
+          tool_name: string
+          undone_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          affected_count?: number | null
+          after_state?: Json | null
+          args?: Json
+          before_state?: Json | null
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          message_id?: string | null
+          status?: string
+          tool_name: string
+          undone_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          affected_count?: number | null
+          after_state?: Json | null
+          args?: Json
+          before_state?: Json | null
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          message_id?: string | null
+          status?: string
+          tool_name?: string
+          undone_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_actions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistant_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistant_actions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_conversations: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_conversations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          name: string | null
+          role: string
+          tool_call_id: string | null
+          tool_calls: Json | null
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          role: string
+          tool_call_id?: string | null
+          tool_calls?: Json | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          role?: string
+          tool_call_id?: string | null
+          tool_calls?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_ai_cache: {
         Row: {
           cache_key: string
