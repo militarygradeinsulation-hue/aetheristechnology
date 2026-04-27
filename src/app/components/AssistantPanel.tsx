@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch } from "lucide-react";
+import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch, Minus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
