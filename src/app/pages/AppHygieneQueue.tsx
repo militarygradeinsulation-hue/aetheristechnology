@@ -36,6 +36,9 @@ const AppHygieneQueue = () => {
 
   const load = async () => {
     if (!account?.id) return;
+    // Watchdog: reset any actions stuck in `executing` for 15+ min
+    // (edge function died/timed out before clearing status).
+    await supabase.rpc("reset_stuck_hygiene_actions", { _stale_minutes: 15 });
     const { data } = await supabase
       .from("hygiene_actions")
       .select(LIST_COLUMNS)
