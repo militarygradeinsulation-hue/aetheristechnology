@@ -219,6 +219,25 @@ const AppHygieneQueue = () => {
                       </p>
                     )}
 
+                    {a.status === "failed" && a.error_message && (
+                      <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3">
+                        <div className="text-sm text-rose-300 font-medium mb-1">Last run failed</div>
+                        <div className="text-xs text-rose-300/80 mb-3 break-words">{a.error_message}</div>
+                        {/MISSING_SCOPES|missing.*scopes|missing write scopes/i.test(a.error_message) && (
+                          <Button
+                            asChild
+                            size="sm"
+                            className="gap-2 bg-amber-500 hover:bg-amber-600 text-black"
+                          >
+                            <a href="/app/settings">
+                              <Plug className="h-3.5 w-3.5" />
+                              Reconnect HubSpot
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
                     {isMissing ? (
                       <div className="space-y-3">
                         <p className="text-sm text-muted-foreground">
