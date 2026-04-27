@@ -240,6 +240,10 @@ async function syncWindowed(
   let label: string;
   let mirrorTable: string;
 
+  // Buffers — accumulate across HubSpot pages, flush in batches of UPSERT_BATCH_SIZE
+  const rowBuffer: any[] = [];
+  const dealIdBuffer: string[] = [];
+
   if (cursor.phase === "companies") {
     endpoint = "/crm/v3/objects/companies/search";
     dateField = "hs_lastmodifieddate";
