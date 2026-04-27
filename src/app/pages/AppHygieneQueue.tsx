@@ -96,8 +96,9 @@ const AppHygieneQueue = () => {
     }
   };
 
-  const exportCsv = (a: HygieneActionRow) => {
-    const rows = ["hubspot_id"].concat(a.affected_record_ids).join("\n");
+  const exportCsv = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    const rows = ["hubspot_id"].concat(ids).join("\n");
     const blob = new Blob([rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -105,6 +106,16 @@ const AppHygieneQueue = () => {
     link.download = `${a.category}-records.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Hydrate affected_record_ids before opening dialogs that need them.
+  const openReview = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    setReviewAction({ ...a, affected_record_ids: ids });
+  };
+  const openMerge = async (a: HygieneActionRow) => {
+    const ids = a.affected_record_ids?.length ? a.affected_record_ids : await fetchActionIds(a.id);
+    setMergeAction({ ...a, affected_record_ids: ids });
   };
 
   if (loading) return <AppLayout><div className="h-8 w-48 bg-muted rounded animate-pulse" /></AppLayout>;
