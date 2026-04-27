@@ -108,10 +108,11 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
       })));
     }
 
-    // ---- Stage A: Diagnostics (parallel batches) ----
+    // ---- Stage A: Diagnostics — fire ALL findings in parallel (Promise.all) ----
+    // Lovable AI tolerates concurrent calls fine for this small fan-out (≤8); cuts wall time vs the prior 4-wide batched limiter.
     const tDiag = Date.now();
     await updateRun(supabase, runId, { current_stage: "diagnostics", progress: { stage: "diagnostics", message: "Analyzing each finding..." } });
-    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase));
+    const diagnosed = await Promise.all(findings.map((f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase)));
     metrics.stage_timings.diagnostics = Date.now() - tDiag;
 
     // ---- Stage B: Prioritize ----
@@ -120,10 +121,10 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     const prioritized = [...diagnosed].sort((a, b) => b.exposure_cents - a.exposure_cents);
     metrics.stage_timings.prioritization = Date.now() - tPrio;
 
-    // ---- Stage C: Recommendations ----
+    // ---- Stage C: Recommendations — fire ALL in parallel ----
     const tRec = Date.now();
     await updateRun(supabase, runId, { current_stage: "recommendations", progress: { stage: "recommendations", message: "Building recovery plans..." } });
-    const recommended = await mapWithLimit(prioritized, cfg.diagnostics_parallelism, (f) => stageC_recommend(f, cfg.recommendations_model, metrics, supabase));
+    const recommended = await Promise.all(prioritized.map((f) => stageC_recommend(f, cfg.recommendations_model, metrics, supabase)));
     metrics.stage_timings.recommendations = Date.now() - tRec;
 
     // ---- Stage D + E ----
