@@ -79,6 +79,22 @@ const AppHygieneQueue = () => {
     load();
   };
 
+  const cancelAction = async (a: HygieneActionRow) => {
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: "cancelled",
+        error_message: "Cancelled by user",
+        executed_at: new Date().toISOString(),
+      })
+      .eq("id", a.id);
+    toast({ title: "Stopping...", description: "The job will halt within a few seconds." });
+    load();
+  };
+    toast({ title: "Category skipped" });
+    load();
+  };
+
   const approveAll = async (a: HygieneActionRow) => {
     setSubmitting(true);
     try {
