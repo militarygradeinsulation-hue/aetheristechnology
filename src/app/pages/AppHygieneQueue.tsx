@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download, StopCircle, Plug } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
@@ -229,10 +230,10 @@ const AppHygieneQueue = () => {
                             size="sm"
                             className="gap-2 bg-amber-500 hover:bg-amber-600 text-black"
                           >
-                            <a href="/app/settings">
+                            <Link to="/app/settings?connect=hubspot">
                               <Plug className="h-3.5 w-3.5" />
                               Reconnect HubSpot
-                            </a>
+                            </Link>
                           </Button>
                         )}
                       </div>
