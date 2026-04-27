@@ -1,8 +1,9 @@
 import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { AssistantPanel } from "./components/AssistantPanel";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -53,6 +54,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
           </NavLink>
+          <NavLink to="/app/assistant" className={navItem}>
+            <Bot className="h-4 w-4" />
+            Co-Pilot
+          </NavLink>
           <NavLink to="/app/reports" className={navItem}>
             <FileSearch className="h-4 w-4" />
             Audits
@@ -94,6 +99,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </header>
         <div className="p-6 md:p-10 max-w-6xl mx-auto">{children}</div>
       </main>
+      <AssistantPanel />
     </div>
   );
 };
