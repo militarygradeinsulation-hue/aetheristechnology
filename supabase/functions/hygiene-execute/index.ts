@@ -43,6 +43,29 @@ class HubspotNotFoundError extends Error {
   constructor(msg: string) { super(msg); this.name = "HubspotNotFoundError"; }
 }
 
+// Sentinel for HubSpot 403 MISSING_SCOPES — fatal, abort the whole run
+// instead of grinding through thousands of guaranteed failures.
+class HubspotMissingScopesError extends Error {
+  constructor(msg: string) { super(msg); this.name = "HubspotMissingScopesError"; }
+}
+
+const SCOPE_HINT =
+  "HubSpot is missing write scopes. Reconnect HubSpot from Settings to grant contact write access, then re-approve this action.";
+
+const isMissingScopes = (raw: string) =>
+  /MISSING_SCOPES|missing.*scopes|required.*scope/i.test(raw);
+
+// Re-fetch the action's status from the DB so we can honor user-initiated
+// cancellation between records without keeping connection state.
+async function isCancelled(supabase: SupabaseClient, actionId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("hygiene_actions")
+    .select("status")
+    .eq("id", actionId)
+    .maybeSingle();
+  return data?.status === "cancelled";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -144,6 +167,18 @@ async function runExecution(
         await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotMissingScopesError) {
+          // Fatal — abort the whole run, don't punish the user with 5,000 logged failures
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "failed",
+              error_message: SCOPE_HINT,
+              progress: { processed, total: ids.length, skipped, failures, message: SCOPE_HINT, error_kind: "missing_scopes" },
+            })
+            .eq("id", action.id);
+          return;
+        }
         if (err instanceof HubspotNotFoundError) {
           skipped++;
           await supabase.from("hygiene_log").insert({
@@ -178,6 +213,19 @@ async function runExecution(
           .from("hygiene_actions")
           .update({ progress: { processed, total: ids.length, skipped, failures, message: `Processing ${processed} of ${ids.length}` } })
           .eq("id", action.id);
+        // Honor user-initiated cancellation
+        if (await isCancelled(supabase, action.id)) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "cancelled",
+              error_message: "Cancelled by user",
+              executed_at: new Date().toISOString(),
+              progress: { processed, total: ids.length, skipped, failures, message: `Cancelled at ${processed} of ${ids.length}` },
+            })
+            .eq("id", action.id);
+          return;
+        }
       }
       await sleep(RATE_DELAY_MS);
     }
@@ -226,7 +274,11 @@ async function applyOne(
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 404) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
-    if (res.status === 403) throw new Error(`HubSpot rejected delete (403). Reconnect HubSpot to grant write scopes. ${await res.text()}`);
+    if (res.status === 403) {
+      const body = await res.text();
+      if (isMissingScopes(body)) throw new HubspotMissingScopesError(SCOPE_HINT);
+      throw new Error(`HubSpot rejected delete (403). ${body}`);
+    }
     if (!res.ok && res.status !== 204) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
     await supabase.from("hygiene_log").insert({
       action_id: action.id,
@@ -260,9 +312,9 @@ async function applyOne(
   });
   if (patchRes.status === 404) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
   if (patchRes.status === 403) {
-    throw new Error(
-      `HubSpot rejected write (403). Reconnect HubSpot to grant write scopes. ${await patchRes.text()}`,
-    );
+    const body = await patchRes.text();
+    if (isMissingScopes(body)) throw new HubspotMissingScopesError(SCOPE_HINT);
+    throw new Error(`HubSpot rejected write (403). ${body}`);
   }
   if (!patchRes.ok) throw new Error(`HubSpot ${patchRes.status}: ${await patchRes.text()}`);
   const after = await patchRes.json();
@@ -400,7 +452,11 @@ async function runMerges(
         if (res.status === 404) {
           throw new HubspotNotFoundError(`contact ${secondary} or ${primary} not found in HubSpot`);
         }
-        if (res.status === 403) throw new Error(`HubSpot rejected merge (403). Reconnect HubSpot to grant write scopes. ${await res.text()}`);
+        if (res.status === 403) {
+          const body = await res.text();
+          if (isMissingScopes(body)) throw new HubspotMissingScopesError(SCOPE_HINT);
+          throw new Error(`HubSpot rejected merge (403). ${body}`);
+        }
         if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
 
         await supabase.from("hygiene_log").insert({
@@ -422,6 +478,17 @@ async function runMerges(
           .eq("hubspot_id", secondary);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotMissingScopesError) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "failed",
+              error_message: SCOPE_HINT,
+              progress: { processed, total: merges.length, skipped, failures, message: SCOPE_HINT, error_kind: "missing_scopes" },
+            })
+            .eq("id", action.id);
+          return;
+        }
         const isSkip = err instanceof HubspotNotFoundError;
         if (isSkip) skipped++; else failures++;
         await supabase.from("hygiene_log").insert({
@@ -442,6 +509,18 @@ async function runMerges(
           .from("hygiene_actions")
           .update({ progress: { processed, total: merges.length, skipped, failures, message: `Merging ${processed} of ${merges.length}` } })
           .eq("id", action.id);
+        if (await isCancelled(supabase, action.id)) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "cancelled",
+              error_message: "Cancelled by user",
+              executed_at: new Date().toISOString(),
+              progress: { processed, total: merges.length, skipped, failures, message: `Cancelled at ${processed} of ${merges.length}` },
+            })
+            .eq("id", action.id);
+          return;
+        }
       }
       await sleep(RATE_DELAY_MS);
     }

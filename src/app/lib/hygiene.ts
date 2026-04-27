@@ -9,6 +9,7 @@ export type HygieneStatus =
   | "executing"
   | "executed"
   | "skipped"
+  | "cancelled"
   | "failed";
 
 export interface HygieneScanRow {

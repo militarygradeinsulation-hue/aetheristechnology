@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download, StopCircle, Plug } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
 import { useAccount } from "../lib/useAccount";
@@ -43,7 +43,7 @@ const AppHygieneQueue = () => {
       .from("hygiene_actions")
       .select(LIST_COLUMNS)
       .eq("account_id", account.id)
-      .in("status", ["pending", "approved", "executing"])
+      .in("status", ["pending", "approved", "executing", "failed"])
       .order("created_at", { ascending: false });
     const rows = ((data as unknown) as HygieneActionRow[]) || [];
     // List rows don't carry affected_record_ids — keep the shape stable so
@@ -76,6 +76,19 @@ const AppHygieneQueue = () => {
   const skipCategory = async (a: HygieneActionRow) => {
     await supabase.from("hygiene_actions").update({ status: "skipped" }).eq("id", a.id);
     toast({ title: "Category skipped" });
+    load();
+  };
+
+  const cancelAction = async (a: HygieneActionRow) => {
+    await supabase
+      .from("hygiene_actions")
+      .update({
+        status: "cancelled",
+        error_message: "Cancelled by user",
+        executed_at: new Date().toISOString(),
+      })
+      .eq("id", a.id);
+    toast({ title: "Stopping...", description: "The job will halt within a few seconds." });
     load();
   };
 
@@ -181,8 +194,19 @@ const AppHygieneQueue = () => {
                 </button>
 
                 {isExecuting && (
-                  <div className="px-4 pb-3">
+                  <div className="px-4 pb-3 space-y-2">
                     <Progress value={progress} className="h-1.5" />
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); cancelAction(a); }}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
+                      >
+                        <StopCircle className="h-3.5 w-3.5" />
+                        Stop
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -193,6 +217,25 @@ const AppHygieneQueue = () => {
                         <span className="text-foreground font-medium">{a.recommended_action.label}.</span>{" "}
                         {a.recommended_action.rationale}
                       </p>
+                    )}
+
+                    {a.status === "failed" && a.error_message && (
+                      <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3">
+                        <div className="text-sm text-rose-300 font-medium mb-1">Last run failed</div>
+                        <div className="text-xs text-rose-300/80 mb-3 break-words">{a.error_message}</div>
+                        {/MISSING_SCOPES|missing.*scopes|missing write scopes/i.test(a.error_message) && (
+                          <Button
+                            asChild
+                            size="sm"
+                            className="gap-2 bg-amber-500 hover:bg-amber-600 text-black"
+                          >
+                            <a href="/app/settings">
+                              <Plug className="h-3.5 w-3.5" />
+                              Reconnect HubSpot
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     )}
 
                     {isMissing ? (
