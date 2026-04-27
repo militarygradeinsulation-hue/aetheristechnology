@@ -13,6 +13,17 @@ const corsHeaders = {
 const HUBSPOT_API = "https://api.hubapi.com";
 const RATE_DELAY_MS = 110;
 
+// Defensive sanitization: HubSpot CRM v3 IDs must be positive integer strings.
+// Strip any "contact_"/"deal_"/"company_"/"engagement_" prefix or stray non-digit
+// characters before validating, so a stale/dirty hygiene_log row can't fire a
+// guaranteed 404 PATCH at HubSpot.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+const normalizeHubspotId = (id: unknown): string | null => {
+  if (id === null || id === undefined) return null;
+  const digits = String(id).trim().replace(/^[a-zA-Z]+_/, "").replace(/\D/g, "");
+  return HUBSPOT_ID_RE.test(digits) ? digits : null;
+};
+
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -70,12 +81,22 @@ async function rollback(supabase: SupabaseClient, account: any, logs: any[]) {
   for (const log of logs) {
     try {
       const objPath = objectTypeToPath(log.hubspot_object_type);
+      const cleanId = normalizeHubspotId(log.hubspot_object_id);
+      if (!cleanId) {
+        console.warn("[hygiene-rollback] skipping log with malformed HubSpot id", {
+          log_id: log.id, raw_id: log.hubspot_object_id,
+        });
+        await supabase.from("hygiene_log")
+          .update({ rolled_back_at: new Date().toISOString() })
+          .eq("id", log.id);
+        continue;
+      }
       const restoreProps: Record<string, unknown> = {};
       for (const change of log.field_changes || []) {
         restoreProps[change.field] = change.before;
       }
       if (Object.keys(restoreProps).length > 0) {
-        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/${objPath}/${log.hubspot_object_id}`, {
+        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/${objPath}/${cleanId}`, {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
           body: JSON.stringify({ properties: restoreProps }),
