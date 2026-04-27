@@ -11,7 +11,7 @@ const MAX_HUBSPOT_SEARCH_RESULTS = 10000;
 const MIN_SEARCH_WINDOW_MS = 1000;
 
 // Time budget per invocation. Edge functions have a hard ~150s wall clock.
-// We stop work at 110s, persist a resume cursor, and re-invoke ourselves.
+// We stop work at 110s, persist resume cursors, and re-invoke ourselves.
 const INVOCATION_BUDGET_MS = 110_000;
 
 interface Account {
@@ -24,23 +24,35 @@ interface Account {
 
 type SyncPhase = "companies" | "contacts" | "deals";
 
-// Cursor stored in accounts.sync_progress.cursor when we yield mid-sync.
-interface SyncCursor {
+// Per-phase cursor. Each phase tracks its own window/pagination state so the
+// three phases can run in parallel during incremental syncs and checkpoint
+// independently.
+interface PhaseCursor {
   phase: SyncPhase;
   sinceMs: number;
   endMs: number;
   windowStartMs: number;
   windowEndMs: number;
   after: string | null;
-  companyCount: number;
-  contactCount: number;
-  dealCount: number;
-  mode: string;
+  count: number;
+  done: boolean;
+}
+
+// Persisted resume state. `mode` controls whether the next invocation
+// fans out (incremental) or runs sequentially (initial).
+interface SyncState {
+  mode: string; // "initial" | "incremental" | "resume"
+  parallel: boolean; // true for incremental, false for initial (deal assoc dependency)
+  cursors: {
+    companies: PhaseCursor;
+    contacts: PhaseCursor;
+    deals: PhaseCursor;
+  };
 }
 
 class TimeBudgetExceeded extends Error {
-  cursor: SyncCursor;
-  constructor(cursor: SyncCursor) {
+  cursor: PhaseCursor;
+  constructor(cursor: PhaseCursor) {
     super("time budget exceeded");
     this.cursor = cursor;
   }
@@ -142,7 +154,7 @@ async function syncOwners(admin: SupabaseClient, accountId: string, accessToken:
     }));
     if (rows.length) await admin.from("mirror_owners").upsert(rows, { onConflict: "account_id,hubspot_id" });
     total += rows.length;
-    console.log("[hubspot-sync] owners page", { pageNum, returned: rows.length, hasNext: !!data.paging?.next?.after, paging: data.paging });
+    console.log("[hubspot-sync] owners page", { pageNum, returned: rows.length, hasNext: !!data.paging?.next?.after });
     after = data.paging?.next?.after;
   } while (after);
   console.log("[hubspot-sync] owners complete", { totalOwners: total, pages: pageNum });
@@ -161,7 +173,6 @@ async function syncDealAssociations(
 
   const inputs = dealIds.map((id) => ({ id }));
 
-  // Fetch deal->contact and deal->company in PARALLEL (was serial — ~half the wall clock).
   const [contactRes, companyRes] = await Promise.allSettled([
     hubspotPost("/crm/v4/associations/deals/contacts/batch/read", accessToken, { inputs }, "DealContacts"),
     hubspotPost("/crm/v4/associations/deals/companies/batch/read", accessToken, { inputs }, "DealCompanies"),
@@ -211,17 +222,17 @@ async function syncDealAssociations(
 }
 
 /**
- * Sync a date-windowed search. Returns updated cursor state.
- * Throws TimeBudgetExceeded with a resumable cursor if it runs out of time.
+ * Sync a date-windowed search for a single phase. Mutates and returns the cursor.
+ * Throws TimeBudgetExceeded with the latest cursor if it runs out of time.
  */
 async function syncWindowed(
   admin: SupabaseClient,
   accountId: string,
   accessToken: string,
-  cursor: SyncCursor,
+  cursor: PhaseCursor,
   startTime: number,
-  setProgress: (extra: Record<string, unknown>) => Promise<void>,
-): Promise<SyncCursor> {
+  onProgress: () => Promise<void>,
+): Promise<PhaseCursor> {
   let endpoint: string;
   let dateField: string;
   let properties: string[];
@@ -248,8 +259,6 @@ async function syncWindowed(
     mirrorTable = "mirror_deals";
   }
 
-  // Process windows of [windowStartMs, windowEndMs). Walk forward window-by-window
-  // until we cover [sinceMs, endMs).
   while (cursor.windowStartMs < cursor.endMs) {
     if (cursor.windowEndMs > cursor.endMs) cursor.windowEndMs = cursor.endMs;
 
@@ -268,7 +277,6 @@ async function syncWindowed(
     const reqBody: Record<string, unknown> = cursor.after ? { ...baseBody, after: cursor.after } : baseBody;
     const data = await hubspotPost(endpoint, accessToken, reqBody, label);
 
-    // If first page of a window blows past the search cap, halve the window.
     if (!cursor.after && typeof data.total === "number" && data.total >= MAX_HUBSPOT_SEARCH_RESULTS) {
       const windowSize = cursor.windowEndMs - cursor.windowStartMs;
       if (windowSize <= MIN_SEARCH_WINDOW_MS) {
@@ -330,28 +338,20 @@ async function syncWindowed(
 
     if (rows.length) await admin.from(mirrorTable).upsert(rows, { onConflict: "account_id,hubspot_id" });
 
-    // For deals, fetch associations for the IDs we just upserted
     if (cursor.phase === "deals" && rows.length) {
       const dealIds = rows.map((r) => r.hubspot_id);
       await syncDealAssociations(admin, accountId, accessToken, dealIds);
     }
 
-    if (cursor.phase === "companies") cursor.companyCount += rows.length;
-    else if (cursor.phase === "contacts") cursor.contactCount += rows.length;
-    else cursor.dealCount += rows.length;
+    cursor.count += rows.length;
 
     const next = data.paging?.next?.after ?? null;
 
-    await setProgress({
-      companies: cursor.companyCount,
-      contacts: cursor.contactCount,
-      deals: cursor.dealCount,
-    });
+    await onProgress();
 
     if (next) {
       cursor.after = next;
     } else {
-      // Window done — advance to next window
       cursor.windowStartMs = cursor.windowEndMs;
       cursor.windowEndMs = cursor.endMs;
       cursor.after = null;
@@ -362,21 +362,41 @@ async function syncWindowed(
     }
   }
 
+  cursor.done = true;
   return cursor;
 }
 
-function phaseLabel(p: SyncPhase): string {
-  return p === "companies" ? "Companies" : p === "contacts" ? "Contacts" : "Deals";
+function makePhaseCursor(phase: SyncPhase, sinceMs: number, endMs: number): PhaseCursor {
+  return {
+    phase,
+    sinceMs,
+    endMs,
+    windowStartMs: sinceMs,
+    windowEndMs: endMs,
+    after: null,
+    count: 0,
+    done: false,
+  };
 }
 
-function phasePercent(p: SyncPhase): number {
-  // owners(5) -> companies(25) -> contacts(55) -> deals(85) -> complete(100)
-  return p === "companies" ? 25 : p === "contacts" ? 55 : 85;
+function overallPercent(state: SyncState): number {
+  const phases = [state.cursors.companies, state.cursors.contacts, state.cursors.deals];
+  const doneCount = phases.filter((p) => p.done).length;
+  return Math.min(95, 5 + Math.round((doneCount / 3) * 90));
 }
 
-async function runSync(admin: SupabaseClient, account_id: string, mode: string, resumeCursor?: SyncCursor) {
+function activePhaseLabel(state: SyncState): string {
+  const active: string[] = [];
+  if (!state.cursors.companies.done) active.push("Companies");
+  if (!state.cursors.contacts.done) active.push("Contacts");
+  if (!state.cursors.deals.done) active.push("Deals");
+  if (!active.length) return "Finalizing";
+  return state.parallel ? active.join(" + ") : active[0];
+}
+
+async function runSync(admin: SupabaseClient, account_id: string, mode: string, resumeState?: SyncState) {
   const startTime = Date.now();
-  let cursor: SyncCursor | null = null;
+  let state: SyncState | null = null;
 
   try {
     const encryptionKey = Deno.env.get("HUBSPOT_TOKEN_ENCRYPTION_KEY");
@@ -388,15 +408,19 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
 
     const accessToken = await getAccessToken(admin, account as Account, encryptionKey);
 
-    if (resumeCursor) {
-      cursor = resumeCursor;
-      console.log("[hubspot-sync] resuming", { phase: cursor.phase, windowStartMs: cursor.windowStartMs, after: cursor.after });
+    if (resumeState) {
+      state = resumeState;
+      console.log("[hubspot-sync] resuming", {
+        parallel: state.parallel,
+        companies: { done: state.cursors.companies.done, count: state.cursors.companies.count },
+        contacts: { done: state.cursors.contacts.done, count: state.cursors.contacts.count },
+        deals: { done: state.cursors.deals.done, count: state.cursors.deals.count },
+      });
     } else {
-      const effectiveMode = mode === "resume" ? "initial" : mode;
-      const sinceMs =
-        effectiveMode === "initial" || !account.last_sync_at
-          ? Date.now() - 18 * 30 * 24 * 60 * 60 * 1000
-          : new Date(account.last_sync_at).getTime() - 5 * 60 * 1000;
+      const isInitial = mode === "initial" || !account.last_sync_at;
+      const sinceMs = isInitial
+        ? Date.now() - 18 * 30 * 24 * 60 * 60 * 1000
+        : new Date(account.last_sync_at).getTime() - 5 * 60 * 1000;
       const endMs = Date.now() + 1;
 
       // Owners run only at start of fresh sync (small + fast)
@@ -406,26 +430,23 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
 
       await syncOwners(admin, account_id, accessToken);
 
-      // Start with companies (must precede contacts/deals so associations resolve)
-      cursor = {
-        phase: "companies",
-        sinceMs,
-        endMs,
-        windowStartMs: sinceMs,
-        windowEndMs: endMs,
-        after: null,
-        companyCount: 0,
-        contactCount: 0,
-        dealCount: 0,
+      state = {
         mode,
+        // Initial sync stays sequential (deal associations resolve against companies/contacts).
+        // Incremental fans out — each phase is independent on the wire.
+        parallel: !isInitial,
+        cursors: {
+          companies: makePhaseCursor("companies", sinceMs, endMs),
+          contacts: makePhaseCursor("contacts", sinceMs, endMs),
+          deals: makePhaseCursor("deals", sinceMs, endMs),
+        },
       };
     }
 
-    // Throttle progress writes to at most one every 2s — page loops were
-    // hitting the DB on every 100-row page (~10/s), saturating writes.
+    // Throttled progress writer — shared across all phases. Snapshots full state.
     let lastProgressAt = 0;
     const PROGRESS_THROTTLE_MS = 2000;
-    const setProgress = async (extra: Record<string, unknown>) => {
+    const persistProgress = async () => {
       const now = Date.now();
       if (now - lastProgressAt < PROGRESS_THROTTLE_MS) return;
       lastProgressAt = now;
@@ -433,37 +454,55 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         .from("accounts")
         .update({
           sync_progress: {
-            phase: phaseLabel(cursor!.phase),
-            percent: phasePercent(cursor!.phase),
+            phase: activePhaseLabel(state!),
+            percent: overallPercent(state!),
             heartbeat: new Date().toISOString(),
-            cursor,
-            ...extra,
+            companies: state!.cursors.companies.count,
+            contacts: state!.cursors.contacts.count,
+            deals: state!.cursors.deals.count,
+            parallel: state!.parallel,
+            state,
           },
         })
         .eq("id", account_id);
     };
 
-    // Phase: companies
-    if (cursor.phase === "companies") {
-      cursor = await syncWindowed(admin, account_id, accessToken, cursor, startTime, setProgress);
-      cursor.phase = "contacts";
-      cursor.windowStartMs = cursor.sinceMs;
-      cursor.windowEndMs = cursor.endMs;
-      cursor.after = null;
-    }
+    // Run a single phase, swallow TimeBudgetExceeded so other parallel phases can also yield.
+    const runPhase = async (key: keyof SyncState["cursors"]) => {
+      const cursor = state!.cursors[key];
+      if (cursor.done) return;
+      try {
+        state!.cursors[key] = await syncWindowed(admin, account_id, accessToken, cursor, startTime, persistProgress);
+      } catch (e) {
+        if (e instanceof TimeBudgetExceeded) {
+          state!.cursors[key] = e.cursor;
+          throw e; // bubble after Promise.allSettled aggregation
+        }
+        throw e;
+      }
+    };
 
-    // Phase: contacts
-    if (cursor.phase === "contacts") {
-      cursor = await syncWindowed(admin, account_id, accessToken, cursor, startTime, setProgress);
-      cursor.phase = "deals";
-      cursor.windowStartMs = cursor.sinceMs;
-      cursor.windowEndMs = cursor.endMs;
-      cursor.after = null;
-    }
+    if (state.parallel) {
+      // PARALLEL: incremental mode — run all 3 phases concurrently.
+      const settled = await Promise.allSettled([
+        runPhase("companies"),
+        runPhase("contacts"),
+        runPhase("deals"),
+      ]);
 
-    // Phase: deals
-    if (cursor.phase === "deals") {
-      cursor = await syncWindowed(admin, account_id, accessToken, cursor, startTime, setProgress);
+      const yielded = settled.find(
+        (r) => r.status === "rejected" && (r as PromiseRejectedResult).reason instanceof TimeBudgetExceeded,
+      );
+      const fatal = settled.find(
+        (r) => r.status === "rejected" && !((r as PromiseRejectedResult).reason instanceof TimeBudgetExceeded),
+      );
+      if (fatal) throw (fatal as PromiseRejectedResult).reason;
+      if (yielded) throw new TimeBudgetExceeded(state.cursors.companies); // sentinel; we re-checkpoint full state below
+    } else {
+      // SEQUENTIAL: initial sync — companies → contacts → deals (deal assoc dependency).
+      await runPhase("companies");
+      await runPhase("contacts");
+      await runPhase("deals");
     }
 
     // Done
@@ -475,30 +514,43 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
         sync_progress: {
           phase: "complete",
           percent: 100,
-          companies: cursor.companyCount,
-          contacts: cursor.contactCount,
-          deals: cursor.dealCount,
+          companies: state.cursors.companies.count,
+          contacts: state.cursors.contacts.count,
+          deals: state.cursors.deals.count,
           heartbeat: new Date().toISOString(),
         },
       })
       .eq("id", account_id);
 
-    console.log("hubspot-sync completed:", { account_id, companies: cursor.companyCount, contacts: cursor.contactCount, deals: cursor.dealCount });
+    console.log("hubspot-sync completed:", {
+      account_id,
+      parallel: state.parallel,
+      elapsed_ms: Date.now() - startTime,
+      companies: state.cursors.companies.count,
+      contacts: state.cursors.contacts.count,
+      deals: state.cursors.deals.count,
+    });
   } catch (e) {
-    if (e instanceof TimeBudgetExceeded) {
-      console.log("[hubspot-sync] yielding for re-invocation", { phase: e.cursor.phase, companies: e.cursor.companyCount, contacts: e.cursor.contactCount, deals: e.cursor.dealCount });
+    if (e instanceof TimeBudgetExceeded && state) {
+      console.log("[hubspot-sync] yielding for re-invocation", {
+        parallel: state.parallel,
+        companies: { done: state.cursors.companies.done, count: state.cursors.companies.count },
+        contacts: { done: state.cursors.contacts.done, count: state.cursors.contacts.count },
+        deals: { done: state.cursors.deals.done, count: state.cursors.deals.count },
+      });
       await admin
         .from("accounts")
         .update({
           last_sync_status: "running",
           sync_progress: {
-            phase: phaseLabel(e.cursor.phase),
-            percent: phasePercent(e.cursor.phase),
+            phase: activePhaseLabel(state),
+            percent: overallPercent(state),
             heartbeat: new Date().toISOString(),
-            companies: e.cursor.companyCount,
-            contacts: e.cursor.contactCount,
-            deals: e.cursor.dealCount,
-            cursor: e.cursor,
+            companies: state.cursors.companies.count,
+            contacts: state.cursors.contacts.count,
+            deals: state.cursors.deals.count,
+            parallel: state.parallel,
+            state,
             resuming: true,
           },
         })
@@ -547,23 +599,23 @@ Deno.serve(async (req: Request) => {
     const { account_id, mode = "incremental" } = await req.json();
     if (!account_id) throw new Error("Missing account_id");
 
-    let resumeCursor: SyncCursor | undefined;
+    let resumeState: SyncState | undefined;
 
     const { data: acct } = await admin
       .from("accounts")
       .select("sync_progress, last_sync_status")
       .eq("id", account_id)
       .single();
-    const sp = (acct?.sync_progress as { cursor?: SyncCursor; heartbeat?: string }) || {};
+    const sp = (acct?.sync_progress as { state?: SyncState; heartbeat?: string }) || {};
     const heartbeatAge = sp.heartbeat ? Date.now() - new Date(sp.heartbeat).getTime() : Infinity;
     const STALE_MS = 5 * 60 * 1000;
     const isStale = acct?.last_sync_status === "running" && heartbeatAge > STALE_MS;
 
     if (mode === "resume") {
-      if (sp.cursor) {
-        resumeCursor = sp.cursor;
+      if (sp.state) {
+        resumeState = sp.state;
       } else {
-        console.warn("[hubspot-sync] resume requested but no cursor — restarting fresh initial scan");
+        console.warn("[hubspot-sync] resume requested but no state — restarting fresh");
       }
     } else {
       if (acct?.last_sync_status === "running" && !isStale) {
@@ -572,9 +624,9 @@ Deno.serve(async (req: Request) => {
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      if (isStale && sp.cursor && mode !== "initial") {
-        console.log("[hubspot-sync] watchdog: taking over stale running sync via cursor");
-        resumeCursor = sp.cursor;
+      if (isStale && sp.state && mode !== "initial") {
+        console.log("[hubspot-sync] watchdog: taking over stale running sync via state");
+        resumeState = sp.state;
       } else {
         await admin
           .from("accounts")
@@ -588,9 +640,9 @@ Deno.serve(async (req: Request) => {
     }
 
     // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
-    EdgeRuntime.waitUntil(runSync(admin, account_id, mode, resumeCursor));
+    EdgeRuntime.waitUntil(runSync(admin, account_id, mode, resumeState));
 
-    return new Response(JSON.stringify({ ok: true, queued: true, resumed: !!resumeCursor }), {
+    return new Response(JSON.stringify({ ok: true, queued: true, resumed: !!resumeState }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
