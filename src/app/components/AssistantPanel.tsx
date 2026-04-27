@@ -215,8 +215,25 @@ export const AssistantPanel = () => {
         </button>
       )}
       {open && (
-        <div ref={panelRef} className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div
+          ref={panelRef}
+          style={{
+            left: panelPos.x,
+            top: panelPos.y,
+            width: PANEL_W,
+            height: PANEL_H,
+            maxWidth: "calc(100vw - 16px)",
+            maxHeight: "calc(100vh - 16px)",
+          }}
+          className="fixed z-40 bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden"
+        >
+          <div
+            onPointerDown={onPanelHeaderDown}
+            onPointerMove={onPanelHeaderMove}
+            onPointerUp={onPanelHeaderUp}
+            style={{ touchAction: "none" }}
+            className="flex items-center justify-between px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none"
+          >
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4 text-primary" />
               <span className="font-semibold text-sm">Co-Pilot</span>
