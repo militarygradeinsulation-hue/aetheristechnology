@@ -112,45 +112,79 @@ async function runExecution(
 ) {
   let processed = 0;
   let failures = 0;
+  let skipped = 0;
   try {
     const accessToken = await getAccessToken(supabase, account);
     const fixKind: string = action.recommended_action?.fix_kind || "manual_review";
     const objectType: string = action.recommended_action?.object_type || "contact";
 
-    for (const id of ids) {
-      try {
-        await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
-      } catch (err: unknown) {
-        failures++;
-        const message = err instanceof Error ? err.message : String(err);
+    for (const rawId of ids) {
+      const id = normalizeHubspotId(rawId);
+      if (!id) {
+        skipped++;
         await supabase.from("hygiene_log").insert({
           action_id: action.id,
           account_id: action.account_id,
           hubspot_object_type: objectType,
-          hubspot_object_id: id,
+          hubspot_object_id: String(rawId ?? ""),
           field_changes: [],
-          before_value: {},
+          before_value: { raw_id: rawId },
           after_value: {},
           success: false,
-          error_message: message,
+          error_message: `Skipped: malformed HubSpot ID "${rawId}"`,
         });
+        processed++;
+        continue;
+      }
+      try {
+        await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotNotFoundError) {
+          skipped++;
+          await supabase.from("hygiene_log").insert({
+            action_id: action.id,
+            account_id: action.account_id,
+            hubspot_object_type: objectType,
+            hubspot_object_id: id,
+            field_changes: [],
+            before_value: {},
+            after_value: {},
+            success: false,
+            error_message: `Skipped: ${message}`,
+          });
+        } else {
+          failures++;
+          await supabase.from("hygiene_log").insert({
+            action_id: action.id,
+            account_id: action.account_id,
+            hubspot_object_type: objectType,
+            hubspot_object_id: id,
+            field_changes: [],
+            before_value: {},
+            after_value: {},
+            success: false,
+            error_message: message,
+          });
+        }
       }
       processed++;
       if (processed % 10 === 0) {
         await supabase
           .from("hygiene_actions")
-          .update({ progress: { processed, total: ids.length, message: `Processing ${processed} of ${ids.length}` } })
+          .update({ progress: { processed, total: ids.length, skipped, failures, message: `Processing ${processed} of ${ids.length}` } })
           .eq("id", action.id);
       }
       await sleep(RATE_DELAY_MS);
     }
 
+    const succeeded = processed - failures - skipped;
     await supabase
       .from("hygiene_actions")
       .update({
-        status: failures === ids.length ? "failed" : "executed",
+        status: succeeded === 0 && failures > 0 ? "failed" : "executed",
         executed_at: new Date().toISOString(),
-        progress: { processed, total: ids.length, message: `Done (${failures} failed)` },
+        progress: { processed, total: ids.length, skipped, failures, message: `Done (${failures} failed, ${skipped} skipped)` },
         error_message: failures ? `${failures} of ${ids.length} records failed` : null,
       })
       .eq("id", action.id);
