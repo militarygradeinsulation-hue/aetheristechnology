@@ -22,6 +22,23 @@ const json = (body: unknown, status = 200) =>
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// HubSpot CRM v3 IDs are positive integer strings (typically 5–19 digits).
+// Reject anything else BEFORE we hit the API to avoid guaranteed 404s.
+const HUBSPOT_ID_RE = /^[1-9]\d{2,18}$/;
+const isValidHubspotId = (id: unknown): id is string =>
+  typeof id === "string" && HUBSPOT_ID_RE.test(id.trim());
+const normalizeHubspotId = (id: unknown): string | null => {
+  if (id === null || id === undefined) return null;
+  const s = String(id).trim();
+  return HUBSPOT_ID_RE.test(s) ? s : null;
+};
+
+// Sentinel thrown by applyOne / merges when the HubSpot record no longer exists.
+// Treated as a "skip" rather than a failure for status-rollup purposes.
+class HubspotNotFoundError extends Error {
+  constructor(msg: string) { super(msg); this.name = "HubspotNotFoundError"; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -95,45 +112,79 @@ async function runExecution(
 ) {
   let processed = 0;
   let failures = 0;
+  let skipped = 0;
   try {
     const accessToken = await getAccessToken(supabase, account);
     const fixKind: string = action.recommended_action?.fix_kind || "manual_review";
     const objectType: string = action.recommended_action?.object_type || "contact";
 
-    for (const id of ids) {
-      try {
-        await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
-      } catch (err: unknown) {
-        failures++;
-        const message = err instanceof Error ? err.message : String(err);
+    for (const rawId of ids) {
+      const id = normalizeHubspotId(rawId);
+      if (!id) {
+        skipped++;
         await supabase.from("hygiene_log").insert({
           action_id: action.id,
           account_id: action.account_id,
           hubspot_object_type: objectType,
-          hubspot_object_id: id,
+          hubspot_object_id: String(rawId ?? ""),
           field_changes: [],
-          before_value: {},
+          before_value: { raw_id: rawId },
           after_value: {},
           success: false,
-          error_message: message,
+          error_message: `Skipped: malformed HubSpot ID "${rawId}"`,
         });
+        processed++;
+        continue;
+      }
+      try {
+        await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotNotFoundError) {
+          skipped++;
+          await supabase.from("hygiene_log").insert({
+            action_id: action.id,
+            account_id: action.account_id,
+            hubspot_object_type: objectType,
+            hubspot_object_id: id,
+            field_changes: [],
+            before_value: {},
+            after_value: {},
+            success: false,
+            error_message: `Skipped: ${message}`,
+          });
+        } else {
+          failures++;
+          await supabase.from("hygiene_log").insert({
+            action_id: action.id,
+            account_id: action.account_id,
+            hubspot_object_type: objectType,
+            hubspot_object_id: id,
+            field_changes: [],
+            before_value: {},
+            after_value: {},
+            success: false,
+            error_message: message,
+          });
+        }
       }
       processed++;
       if (processed % 10 === 0) {
         await supabase
           .from("hygiene_actions")
-          .update({ progress: { processed, total: ids.length, message: `Processing ${processed} of ${ids.length}` } })
+          .update({ progress: { processed, total: ids.length, skipped, failures, message: `Processing ${processed} of ${ids.length}` } })
           .eq("id", action.id);
       }
       await sleep(RATE_DELAY_MS);
     }
 
+    const succeeded = processed - failures - skipped;
     await supabase
       .from("hygiene_actions")
       .update({
-        status: failures === ids.length ? "failed" : "executed",
+        status: succeeded === 0 && failures > 0 ? "failed" : "executed",
         executed_at: new Date().toISOString(),
-        progress: { processed, total: ids.length, message: `Done (${failures} failed)` },
+        progress: { processed, total: ids.length, skipped, failures, message: `Done (${failures} failed, ${skipped} skipped)` },
         error_message: failures ? `${failures} of ${ids.length} records failed` : null,
       })
       .eq("id", action.id);
@@ -165,10 +216,12 @@ async function applyOne(
   if (fixKind === "delete_orphan_engagement") {
     if (!confirmDelete) throw new Error("Delete requires confirm_delete=true");
     const before = await fetchHubspot(token, "engagements", id);
+    if (!before) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
     const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/engagements/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (res.status === 404) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
     if (!res.ok && res.status !== 204) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
     await supabase.from("hygiene_log").insert({
       action_id: action.id,
@@ -186,7 +239,7 @@ async function applyOne(
   // Fetch current state
   const objPath = objectTypeToPath(objectType);
   const before = await fetchHubspot(token, objPath, id);
-  if (!before) return;
+  if (!before) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
 
   const beforeProps = before.properties || {};
   const updates = modification || computeUpdates(fixKind, beforeProps);
@@ -200,6 +253,7 @@ async function applyOne(
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ properties: updates }),
   });
+  if (patchRes.status === 404) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
   if (!patchRes.ok) throw new Error(`HubSpot ${patchRes.status}: ${await patchRes.text()}`);
   const after = await patchRes.json();
 
@@ -310,31 +364,42 @@ async function runMerges(
 ) {
   let processed = 0;
   let failures = 0;
+  let skipped = 0;
   try {
     const accessToken = await getAccessToken(supabase, account);
 
     for (const m of merges) {
+      const primary = normalizeHubspotId(m?.primary);
+      const secondary = normalizeHubspotId(m?.secondary);
       try {
-        if (!m?.primary || !m?.secondary || m.primary === m.secondary) {
-          throw new Error("Invalid merge pair");
+        if (!primary || !secondary || primary === secondary) {
+          throw new HubspotNotFoundError(
+            `Invalid merge pair (primary=${m?.primary}, secondary=${m?.secondary})`,
+          );
         }
 
-        const before = await fetchHubspot(accessToken, "contacts", m.secondary);
+        const before = await fetchHubspot(accessToken, "contacts", secondary);
+        if (!before) {
+          throw new HubspotNotFoundError(`contact ${secondary} not found in HubSpot`);
+        }
         const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/contacts/merge`, {
           method: "POST",
           headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ primaryObjectId: m.primary, objectIdToMerge: m.secondary }),
+          body: JSON.stringify({ primaryObjectId: primary, objectIdToMerge: secondary }),
         });
+        if (res.status === 404) {
+          throw new HubspotNotFoundError(`contact ${secondary} or ${primary} not found in HubSpot`);
+        }
         if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
 
         await supabase.from("hygiene_log").insert({
           action_id: action.id,
           account_id: action.account_id,
           hubspot_object_type: "contact",
-          hubspot_object_id: m.secondary,
-          field_changes: [{ field: "_merged_into", before: null, after: m.primary }],
+          hubspot_object_id: secondary,
+          field_changes: [{ field: "_merged_into", before: null, after: primary }],
           before_value: before?.properties || {},
-          after_value: { merged_into: m.primary },
+          after_value: { merged_into: primary },
           success: true,
         });
 
@@ -343,38 +408,40 @@ async function runMerges(
           .from("mirror_contacts")
           .delete()
           .eq("account_id", action.account_id)
-          .eq("hubspot_id", m.secondary);
+          .eq("hubspot_id", secondary);
       } catch (err: unknown) {
-        failures++;
         const message = err instanceof Error ? err.message : String(err);
+        const isSkip = err instanceof HubspotNotFoundError;
+        if (isSkip) skipped++; else failures++;
         await supabase.from("hygiene_log").insert({
           action_id: action.id,
           account_id: action.account_id,
           hubspot_object_type: "contact",
-          hubspot_object_id: m?.secondary || "unknown",
+          hubspot_object_id: secondary || String(m?.secondary || "unknown"),
           field_changes: [],
           before_value: { primary: m?.primary, secondary: m?.secondary },
           after_value: {},
           success: false,
-          error_message: message,
+          error_message: isSkip ? `Skipped: ${message}` : message,
         });
       }
       processed++;
       if (processed % 5 === 0) {
         await supabase
           .from("hygiene_actions")
-          .update({ progress: { processed, total: merges.length, message: `Merging ${processed} of ${merges.length}` } })
+          .update({ progress: { processed, total: merges.length, skipped, failures, message: `Merging ${processed} of ${merges.length}` } })
           .eq("id", action.id);
       }
       await sleep(RATE_DELAY_MS);
     }
 
+    const succeeded = processed - failures - skipped;
     await supabase
       .from("hygiene_actions")
       .update({
-        status: failures === merges.length ? "failed" : "executed",
+        status: succeeded === 0 && failures > 0 ? "failed" : "executed",
         executed_at: new Date().toISOString(),
-        progress: { processed, total: merges.length, message: `Done (${failures} failed)` },
+        progress: { processed, total: merges.length, skipped, failures, message: `Done (${failures} failed, ${skipped} skipped)` },
         error_message: failures ? `${failures} of ${merges.length} merges failed` : null,
       })
       .eq("id", action.id);
