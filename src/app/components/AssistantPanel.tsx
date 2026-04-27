@@ -37,7 +37,10 @@ const ProposalCard = ({
 );
 
 const FAB_SIZE = 48;
+const PANEL_W = 400;
+const PANEL_H = 560;
 const STORAGE_KEY = "copilot_fab_pos";
+const PANEL_KEY = "copilot_panel_pos";
 
 export const AssistantPanel = () => {
   const [open, setOpen] = useState(false);
@@ -58,8 +61,25 @@ export const AssistantPanel = () => {
     } catch { /* noop */ }
     return { x: window.innerWidth - FAB_SIZE - 24, y: window.innerHeight - FAB_SIZE - 24 };
   });
+
+  // Draggable panel position (persisted)
+  const [panelPos, setPanelPos] = useState<{ x: number; y: number }>(() => {
+    if (typeof window === "undefined") return { x: 24, y: 24 };
+    try {
+      const raw = localStorage.getItem(PANEL_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* noop */ }
+    return {
+      x: Math.max(16, window.innerWidth - PANEL_W - 24),
+      y: Math.max(16, window.innerHeight - PANEL_H - 24),
+    };
+  });
+
   const dragStateRef = useRef<{ dragging: boolean; moved: boolean; offX: number; offY: number }>({
     dragging: false, moved: false, offX: 0, offY: 0,
+  });
+  const panelDragRef = useRef<{ dragging: boolean; offX: number; offY: number }>({
+    dragging: false, offX: 0, offY: 0,
   });
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
