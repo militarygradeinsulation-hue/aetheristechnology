@@ -421,7 +421,14 @@ async function runSync(admin: SupabaseClient, account_id: string, mode: string, 
       };
     }
 
+    // Throttle progress writes to at most one every 2s — page loops were
+    // hitting the DB on every 100-row page (~10/s), saturating writes.
+    let lastProgressAt = 0;
+    const PROGRESS_THROTTLE_MS = 2000;
     const setProgress = async (extra: Record<string, unknown>) => {
+      const now = Date.now();
+      if (now - lastProgressAt < PROGRESS_THROTTLE_MS) return;
+      lastProgressAt = now;
       await admin
         .from("accounts")
         .update({
