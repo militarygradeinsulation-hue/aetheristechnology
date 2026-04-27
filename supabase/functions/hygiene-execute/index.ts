@@ -258,6 +258,11 @@ async function applyOne(
     body: JSON.stringify({ properties: updates }),
   });
   if (patchRes.status === 404) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
+  if (patchRes.status === 403) {
+    throw new Error(
+      `HubSpot rejected write (403). Reconnect HubSpot to grant write scopes. ${await patchRes.text()}`,
+    );
+  }
   if (!patchRes.ok) throw new Error(`HubSpot ${patchRes.status}: ${await patchRes.text()}`);
   const after = await patchRes.json();
 

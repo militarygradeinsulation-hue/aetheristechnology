@@ -9,8 +9,11 @@ const corsHeaders = {
 
 const SCOPES = [
   "crm.objects.contacts.read",
+  "crm.objects.contacts.write",
   "crm.objects.deals.read",
+  "crm.objects.deals.write",
   "crm.objects.companies.read",
+  "crm.objects.companies.write",
   "crm.objects.owners.read",
   "crm.schemas.contacts.read",
   "crm.schemas.deals.read",
