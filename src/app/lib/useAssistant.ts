@@ -46,14 +46,21 @@ export function useAssistant(initialConversationId?: string) {
     return () => { cancelled = true; };
   }, [conversationId]);
 
-  const send = useCallback(async (text: string) => {
-    if (!text.trim() || sending) return;
+  const send = useCallback(async (text: string, imageDataUrl?: string | null) => {
+    if ((!text.trim() && !imageDataUrl) || sending) return;
     setError(null);
     setSending(true);
-    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    const userContent = imageDataUrl
+      ? `${text || "Explain what's in this screenshot."}\n\n![screenshot](${imageDataUrl})`
+      : text;
+    setMessages((prev) => [...prev, { role: "user", content: userContent }]);
     try {
       const { data, error: err } = await supabase.functions.invoke("assistant-chat", {
-        body: { conversation_id: conversationId, message: text },
+        body: {
+          conversation_id: conversationId,
+          message: text || "Explain what's in this screenshot.",
+          image: imageDataUrl || undefined,
+        },
       });
       if (err) throw err;
       if (data?.error) throw new Error(data.error);
