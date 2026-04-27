@@ -108,7 +108,7 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     // ---- Stage A: Diagnostics (parallel batches) ----
     const tDiag = Date.now();
     await updateRun(supabase, runId, { current_stage: "diagnostics", progress: { stage: "diagnostics", message: "Analyzing each finding..." } });
-    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics));
+    const diagnosed = await mapWithLimit(findings, cfg.diagnostics_parallelism, (f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase));
     metrics.stage_timings.diagnostics = Date.now() - tDiag;
 
     // ---- Stage B: Prioritize ----
@@ -120,13 +120,13 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     // ---- Stage C: Recommendations ----
     const tRec = Date.now();
     await updateRun(supabase, runId, { current_stage: "recommendations", progress: { stage: "recommendations", message: "Building recovery plans..." } });
-    const recommended = await mapWithLimit(prioritized, cfg.diagnostics_parallelism, (f) => stageC_recommend(f, cfg.recommendations_model, metrics));
+    const recommended = await mapWithLimit(prioritized, cfg.diagnostics_parallelism, (f) => stageC_recommend(f, cfg.recommendations_model, metrics, supabase));
     metrics.stage_timings.recommendations = Date.now() - tRec;
 
     // ---- Stage D + E ----
     const tRpt = Date.now();
     await updateRun(supabase, runId, { current_stage: "report", progress: { stage: "report", message: "Drafting summary..." } });
-    const summary = await stageD_summarize(recommended, cfg.summary_model, metrics);
+    const summary = await stageD_summarize(recommended, cfg.summary_model, metrics, supabase);
     const totalExposure = recommended.reduce((s, f) => s + (f.exposure_cents || 0), 0);
     const report = { summary, total_exposure_cents: totalExposure, findings: recommended, generated_at: new Date().toISOString() };
     metrics.stage_timings.report = Date.now() - tRpt;
