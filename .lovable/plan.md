@@ -1,81 +1,72 @@
-# Co-Pilot Screen Scan
+# Why your formatting fix is stuck at 870 / 5000
 
-Add a one-click visual capture flow to the Co-Pilot. You hit a button, drag a box around any part of the screen, type a question (or use a default like "what am I looking at?"), and the assistant answers based on the actual pixels — pipeline cards, charts, queue rows, error toasts, anything visible.
+## What's actually happening
 
-Gemini 2.5 Pro is multimodal, so the existing assistant model already supports image input. We just need to capture the region, ship it to the chat function, and add it to the user message.
+I pulled the action row and the execution log:
 
----
+- Action `0cb171ad…` shows `status: executing`, `progress: 870 / 5000`, with **789 failures** so far.
+- The edge function has been **booted/shutdown** repeatedly and auto-recovered twice — meaning the long-running job keeps timing out and a watchdog flips it back to `pending`, but the UI is still showing the last `executing` snapshot.
+- Looking at `hygiene_log` for this action, **every single failure is the same HubSpot error**:
 
-## What you'll see in the UI
-
-1. New camera-style button in the Co-Pilot panel header (and in the input bar of `/app/assistant`), next to Send.
-2. Click it → the panel collapses to the FAB temporarily, the cursor changes to crosshair, and a dim blue overlay covers the page.
-3. Drag a rectangle around the area you want analyzed. ESC to cancel.
-4. On release: the region is captured, the panel re-opens with a thumbnail attached above the input box, and a default prompt ("Explain what's in this screenshot.") is pre-filled — you can edit it or just hit send.
-5. The assistant reply appears inline like any other message. The thumbnail stays in the message history so you can refer back to it.
-
-A tiny `Image attached` chip with an X lets you remove the capture before sending.
-
----
-
-## How the capture works
-
-Two-tier approach for reliability:
-
-- **Primary: `html2canvas-pro`** (drop-in, supports modern CSS like oklch/lab — important because the app uses HSL+oklch tokens). Renders the visible DOM into a canvas, then we crop to the selected rect. Fast, no permission prompt, works on the actual app DOM.
-- **Fallback for cross-origin iframes / canvas-tainting:** if html2canvas throws (e.g., HubSpot embed iframe), call `navigator.mediaDevices.getDisplayMedia()` once, grab a single frame from the video track, crop, and stop the stream. Browser shows the standard "share screen" prompt — only triggered if DOM capture fails.
-
-Output: PNG data URL, downscaled so the longest edge ≤ 1280px (keeps payload under ~400KB and well within Gemini's image limits).
-
----
-
-## Backend changes
-
-`assistant-chat` currently accepts `{ conversation_id, message }`. We extend it to accept an optional `image` (base64 data URL).
-
-When present:
-- The user message sent to Gemini becomes a multimodal `content` array:
   ```
-  [{ type: "text", text: "..." }, { type: "image_url", image_url: { url: "data:image/png;base64,..." }}]
+  403 MISSING_SCOPES
+  Required: crm.objects.contacts.write (and sensitive variants)
   ```
-- We persist a marker in `assistant_messages.content` (e.g. prefix `[screenshot attached] ` + the user text) so the conversation transcript stays readable. The raw image is **not** stored in the DB (privacy + size); it only lives in the single Gemini call.
-- An additional system note is injected for that turn: "The user attached a screenshot of their current view in the Aetheris operator app. Describe what you see in the context of HubSpot CRM data, the Hygiene Queue, or whatever is visible. If you see specific record IDs, deal names, or numbers, you may reference the existing read tools to look them up."
 
-All existing tool-calling behavior (read tools auto-run, writes return `proposed_action`) stays unchanged — the model can still chain a screenshot question into a tool call (e.g., "this deal looks stalled, let me check it").
+So it isn't really "stuck" — it's burning through records but **HubSpot is rejecting every write** because the connected HubSpot app token does not have contact write scopes. The job will never succeed in its current state.
 
----
+Also: the action targets **18,777 records** but `affected_record_ids` was capped at 5,000 — so the rest are silently truncated, which is its own problem.
 
-## Files
+## The fix — three parts
 
-**New**
-- `src/app/lib/useScreenCapture.ts` — hook exposing `startCapture(): Promise<string | null>`. Manages the overlay lifecycle, drag math, html2canvas call, fallback, and downscaling.
-- `src/app/components/ScreenCaptureOverlay.tsx` — the dim overlay + crosshair + drag rectangle UI. Portaled to `document.body`, z-index above everything including the panel.
+### 1. Stop the stuck job right now (one-click, no code)
 
-**Edited**
-- `src/app/components/AssistantPanel.tsx` — add capture button in header, attached-image preview chip above input, hide panel during drag.
-- `src/app/pages/AppAssistant.tsx` — same capture button + preview chip in the full-page chat composer.
-- `src/app/lib/useAssistant.ts` — `send()` accepts an optional `imageDataUrl`, passes it through to the function invoke.
-- `supabase/functions/assistant-chat/index.ts` — accept `image` in body, build multimodal content for that turn, inject the screenshot system note, leave history/tools untouched.
+Run this from the queue page after the changes below ship. In the meantime I'll mark the current action as `failed` so the UI unblocks and you can re-approve once HubSpot is reconnected.
 
-**Dependency**
-- `bun add html2canvas-pro` (~120KB gz, only loaded when capture is invoked via dynamic `import()` so it doesn't bloat the initial bundle).
+### 2. Add a "Stop / Cancel" button to executing rows in the Action Queue
 
----
+Right now `AppHygieneScan.tsx` has a Stop button for the *scan*, but `AppHygieneQueue.tsx` has no equivalent for *executing actions*. I'll add one next to the "Processing X of Y" indicator that:
 
-## Edge cases handled
+- Updates `hygiene_actions.status → 'cancelled'`
+- Sets `error_message: 'Cancelled by user'`
+- Stamps `executed_at`
+- The background loop in `hygiene-execute` will see the cancel on its next progress write and bail (I'll add a status check inside the per-record loop so it actually exits within ~1 second instead of grinding through all 5,000).
 
-- ESC during drag → cancel cleanly, no state stuck.
-- Drag rectangle smaller than 20×20px → ignored (treated as accidental click).
-- html2canvas failure → automatic fallback to `getDisplayMedia` with a one-line toast: "Using screen-share fallback for this capture."
-- User on Safari with no `getDisplayMedia` support → fallback to whole-viewport html2canvas (no crop) and a toast explaining region capture isn't available.
-- Image too large (rare) → rejected client-side with a toast before sending.
-- Assistant-chat token cost: only the current turn carries the image — prior screenshots in history are sent as text markers only, so context stays bounded.
+### 3. Fail-fast on missing scopes (don't burn 800 records to learn the same thing)
 
----
+In `hygiene-execute/index.ts`, the first time a record returns `403 MISSING_SCOPES`, instead of logging and continuing, the function will:
 
-## Out of scope (future ideas, not building now)
+- Mark the action `status: 'failed'`
+- Set `error_message: 'HubSpot is missing write scopes — reconnect HubSpot from Settings to grant contact write access.'`
+- Exit the loop immediately
 
-- Drawing arrows/highlights on the captured image before sending.
-- Multi-region capture in one turn.
-- OCR pre-pass to extract text before calling the model (Gemini Pro handles this natively, no need).
-- Persisting screenshots to storage for later review — keeping them ephemeral by default.
+This way if scopes are missing, you see one clean error in 2 seconds instead of waiting 9 minutes for 5,000 silent rejections.
+
+### 4. Surface the "reconnect HubSpot" CTA
+
+When a hygiene action fails with a scope error, the queue card will show a **"Reconnect HubSpot"** button that deep-links to `/app/settings` (where `HubSpotConnectCard` lives). Re-running OAuth will re-prompt for the missing `crm.objects.contacts.write` scope.
+
+## What you need to do (the human part)
+
+The code fixes above won't grant the scope on their own — HubSpot has to issue a new token. After I ship the changes:
+
+1. Click **Stop** on the stuck row (or I'll auto-fail it on deploy).
+2. Go to **Settings → HubSpot** and click **Reconnect HubSpot**.
+3. On the HubSpot consent screen, make sure **Contacts → Write** is checked. (Your install was done with read-only scopes.)
+4. Re-approve the "Formatting inconsistencies" action from the queue.
+
+## Technical changes
+
+- **`supabase/functions/hygiene-execute/index.ts`**
+  - Inside the `for (const rawId of ids)` loop, after every progress write, re-fetch `hygiene_actions.status`; if `cancelled`, break out and write a final `status: 'cancelled'` row.
+  - On first `403 MISSING_SCOPES` from `applyOne`, abort the loop, set `status: 'failed'`, `error_message` with a human-readable scope hint, and a new `progress.error_kind: 'missing_scopes'` flag.
+  - Same treatment in `runMerges`.
+
+- **`src/app/pages/AppHygieneQueue.tsx`**
+  - Add a `cancelAction(a)` handler that updates the row to `cancelled`.
+  - Render a **Stop** button (Lucide `StopCircle`, rose styling matching the scan page) inside the executing-progress block.
+  - When `error_message` includes `MISSING_SCOPES` or `missing write scopes`, render a **Reconnect HubSpot** button linking to `/app/settings`.
+
+- **One-off DB cleanup** (run on deploy): mark action `0cb171ad-09f2-4009-a514-b1122a5c06e4` as `failed` with the scope-error message so the queue isn't blocked.
+
+No schema changes, no new tables.
