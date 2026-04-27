@@ -28,6 +28,18 @@ const AppHygieneQueue = () => {
   const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // View mode (locked once chosen — list won't reshuffle on poll)
+  const VIEW_KEY = "hygiene_queue_view";
+  const [view, setView] = useState<HygieneQueueView>(() => {
+    if (typeof window === "undefined") return "priority";
+    const v = localStorage.getItem(VIEW_KEY) as HygieneQueueView | null;
+    return v === "newest" || v === "status" || v === "priority" ? v : "priority";
+  });
+  // Locked order: actionId -> position. New rows append; existing rows never move.
+  const orderRef = useRef<Map<string, number>>(new Map());
+  const orderViewRef = useRef<HygieneQueueView>(view);
+  const [resortNonce, setResortNonce] = useState(0);
+
   // List view never needs the full affected_record_ids array (can be 5,000
   // hubspot_id strings per row). Polling that every 2s while a job is running
   // froze the UI. Fetch the IDs on-demand inside the dialogs / export handler.
