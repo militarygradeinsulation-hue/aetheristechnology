@@ -341,7 +341,11 @@ async function executeReadTool(
       return error ? { error: error.message } : data;
     }
     case "list_hygiene_queue": {
-      let q = admin.from("hygiene_actions").select("id,kind,description,status,affected_record_count,exposure_cents,created_at").eq("account_id", accountId).order("created_at", { ascending: false });
+      let q = admin
+        .from("hygiene_actions")
+        .select("id,category,category_label,severity,risk_level,confidence,status,affected_count,recommended_action,created_at")
+        .eq("account_id", accountId)
+        .order("created_at", { ascending: false });
       if (a.status) q = q.eq("status", a.status);
       q = q.limit(Math.min(Number(a.limit) || 25, 100));
       const { data, error } = await q;
