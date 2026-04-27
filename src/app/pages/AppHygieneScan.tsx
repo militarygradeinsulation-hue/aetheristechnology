@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, ArrowRight, StopCircle } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
 import { useAccount } from "../lib/useAccount";
@@ -21,6 +21,7 @@ const AppHygieneScan = () => {
   const [latestScan, setLatestScan] = useState<HygieneScanRow | null>(null);
   const [actions, setActions] = useState<HygieneActionRow[]>([]);
   const [starting, setStarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
 
   const loadLatest = async () => {
     if (!account?.id) return;
@@ -64,6 +65,29 @@ const AppHygieneScan = () => {
       toast({ title: "Scan failed to start", description: err.message, variant: "destructive" });
     } finally {
       setStarting(false);
+    }
+  };
+
+  const stopScan = async () => {
+    if (!latestScan?.id) return;
+    setStopping(true);
+    try {
+      const { error } = await supabase
+        .from("hygiene_scans")
+        .update({
+          status: "cancelled",
+          ai_status: "cancelled",
+          error_message: "Cancelled by user",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", latestScan.id);
+      if (error) throw error;
+      toast({ title: "Scan stopped", description: "The hygiene scan was cancelled." });
+      await loadLatest();
+    } catch (err: any) {
+      toast({ title: "Could not stop scan", description: err.message, variant: "destructive" });
+    } finally {
+      setStopping(false);
     }
   };
 
@@ -119,19 +143,33 @@ const AppHygieneScan = () => {
               </div>
             )}
           </div>
-          <Button
-            onClick={runScan}
-            disabled={starting || isRunning || !account}
-            className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
-          >
-            {starting || isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {isRunning ? "Scanning..." : latestScan ? "Run again" : "Run Hygiene Scan"}
-          </Button>
+          <div className="flex flex-col gap-2 items-end">
+            <Button
+              onClick={runScan}
+              disabled={starting || isRunning || !account}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
+            >
+              {starting || isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {isRunning ? "Scanning..." : latestScan ? "Run again" : "Run Hygiene Scan"}
+            </Button>
+            {isRunning && (
+              <Button
+                onClick={stopScan}
+                disabled={stopping}
+                variant="outline"
+                size="sm"
+                className="gap-2 border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
+              >
+                {stopping ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
+                Stop scan
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Results */}
-      {latestScan?.status === "failed" && (
+      {(latestScan?.status === "failed" || latestScan?.status === "cancelled") && (
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-6 flex items-start gap-3">
           <AlertCircle className="h-4 w-4 text-rose-400 mt-0.5" />
           <div>
