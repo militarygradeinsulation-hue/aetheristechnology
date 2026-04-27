@@ -161,16 +161,15 @@ async function syncDealAssociations(
 
   const inputs = dealIds.map((id) => ({ id }));
 
-  // Deal -> Contacts
-  try {
-    const contactAssoc = await hubspotPost(
-      "/crm/v4/associations/deals/contacts/batch/read",
-      accessToken,
-      { inputs },
-      "DealContacts",
-    );
+  // Fetch deal->contact and deal->company in PARALLEL (was serial — ~half the wall clock).
+  const [contactRes, companyRes] = await Promise.allSettled([
+    hubspotPost("/crm/v4/associations/deals/contacts/batch/read", accessToken, { inputs }, "DealContacts"),
+    hubspotPost("/crm/v4/associations/deals/companies/batch/read", accessToken, { inputs }, "DealCompanies"),
+  ]);
+
+  if (contactRes.status === "fulfilled") {
     const linkRows: any[] = [];
-    for (const result of contactAssoc.results || []) {
+    for (const result of contactRes.value.results || []) {
       const dealId = String(result.from?.id ?? result._from?.id ?? "");
       if (!dealId) continue;
       for (const to of result.to || []) {
@@ -185,20 +184,13 @@ async function syncDealAssociations(
     if (linkRows.length) {
       await admin.from("mirror_deal_contacts").upsert(linkRows, { onConflict: "account_id,deal_id,contact_id" });
     }
-  } catch (e) {
-    console.warn("[hubspot-sync] deal->contact associations failed (continuing):", (e as Error).message);
+  } else {
+    console.warn("[hubspot-sync] deal->contact associations failed (continuing):", contactRes.reason?.message);
   }
 
-  // Deal -> Companies
-  try {
-    const companyAssoc = await hubspotPost(
-      "/crm/v4/associations/deals/companies/batch/read",
-      accessToken,
-      { inputs },
-      "DealCompanies",
-    );
+  if (companyRes.status === "fulfilled") {
     const linkRows: any[] = [];
-    for (const result of companyAssoc.results || []) {
+    for (const result of companyRes.value.results || []) {
       const dealId = String(result.from?.id ?? result._from?.id ?? "");
       if (!dealId) continue;
       for (const to of result.to || []) {
@@ -213,8 +205,8 @@ async function syncDealAssociations(
     if (linkRows.length) {
       await admin.from("mirror_deal_companies").upsert(linkRows, { onConflict: "account_id,deal_id,company_id" });
     }
-  } catch (e) {
-    console.warn("[hubspot-sync] deal->company associations failed (continuing):", (e as Error).message);
+  } else {
+    console.warn("[hubspot-sync] deal->company associations failed (continuing):", companyRes.reason?.message);
   }
 }
 
