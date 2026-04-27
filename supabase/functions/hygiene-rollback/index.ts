@@ -81,12 +81,22 @@ async function rollback(supabase: SupabaseClient, account: any, logs: any[]) {
   for (const log of logs) {
     try {
       const objPath = objectTypeToPath(log.hubspot_object_type);
+      const cleanId = normalizeHubspotId(log.hubspot_object_id);
+      if (!cleanId) {
+        console.warn("[hygiene-rollback] skipping log with malformed HubSpot id", {
+          log_id: log.id, raw_id: log.hubspot_object_id,
+        });
+        await supabase.from("hygiene_log")
+          .update({ rolled_back_at: new Date().toISOString() })
+          .eq("id", log.id);
+        continue;
+      }
       const restoreProps: Record<string, unknown> = {};
       for (const change of log.field_changes || []) {
         restoreProps[change.field] = change.before;
       }
       if (Object.keys(restoreProps).length > 0) {
-        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/${objPath}/${log.hubspot_object_id}`, {
+        const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/${objPath}/${cleanId}`, {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
           body: JSON.stringify({ properties: restoreProps }),
