@@ -52,12 +52,13 @@ export const HubSpotConnectCard = () => {
     try {
       const { data, error } = await supabase.functions.invoke("hubspot-oauth-start");
       if (error) throw error;
-      if (data?.authorizeUrl) {
+      if (typeof data?.authorizeUrl === "string" && data.authorizeUrl.startsWith("https://app.hubspot.com/")) {
         window.location.href = data.authorizeUrl;
       } else {
         throw new Error("No authorize URL returned");
       }
     } catch (err: any) {
+      console.error("HubSpot connect failed", err);
       toast({
         title: "Connection unavailable",
         description: err.message || "HubSpot integration not yet configured.",
