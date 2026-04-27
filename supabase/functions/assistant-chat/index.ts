@@ -268,7 +268,7 @@ async function executeReadTool(
   const a = args || {};
   switch (name) {
     case "query_pipeline": {
-      let q = admin.from("mirror_deals").select("hubspot_id,name,stage,amount,close_date,owner_id,last_activity_date").eq("account_id", accountId);
+      let q = admin.from("mirror_deals").select("hubspot_id,deal_name,stage,amount,close_date,owner_id,last_activity_date").eq("account_id", accountId);
       if (a.stage) q = q.eq("stage", a.stage);
       if (a.owner_id) q = q.eq("owner_id", a.owner_id);
       if (typeof a.min_amount === "number") q = q.gte("amount", a.min_amount);
@@ -381,7 +381,7 @@ async function buildProposalPreview(
   }
   if (toolName === "bulk_update_deals") {
     const f = args.filter || {};
-    let q = admin.from("mirror_deals").select("hubspot_id,name,stage,amount,owner_id", { count: "exact" }).eq("account_id", accountId);
+    let q = admin.from("mirror_deals").select("hubspot_id,deal_name,stage,amount,owner_id", { count: "exact" }).eq("account_id", accountId);
     if (f.stage) q = q.eq("stage", f.stage);
     if (f.owner_id) q = q.eq("owner_id", f.owner_id);
     if (typeof f.min_amount === "number") q = q.gte("amount", f.min_amount);
@@ -401,7 +401,7 @@ async function buildProposalPreview(
   if (toolName === "reassign_deals") {
     const { data, count } = await admin
       .from("mirror_deals")
-      .select("hubspot_id,name,stage,amount", { count: "exact" })
+      .select("hubspot_id,deal_name,stage,amount", { count: "exact" })
       .eq("account_id", accountId)
       .eq("owner_id", String(args.from_owner_id))
       .not("stage", "ilike", "closed_%")
