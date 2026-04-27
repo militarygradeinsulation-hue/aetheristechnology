@@ -21,6 +21,7 @@ const AppHygieneScan = () => {
   const [latestScan, setLatestScan] = useState<HygieneScanRow | null>(null);
   const [actions, setActions] = useState<HygieneActionRow[]>([]);
   const [starting, setStarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
 
   const loadLatest = async () => {
     if (!account?.id) return;
