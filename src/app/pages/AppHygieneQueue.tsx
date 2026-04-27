@@ -91,9 +91,6 @@ const AppHygieneQueue = () => {
     toast({ title: "Stopping...", description: "The job will halt within a few seconds." });
     load();
   };
-    toast({ title: "Category skipped" });
-    load();
-  };
 
   const approveAll = async (a: HygieneActionRow) => {
     setSubmitting(true);
