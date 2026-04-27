@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_mirror_companies_acct_owner ON public.mirror_companies (account_id, owner_id);

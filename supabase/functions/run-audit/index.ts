@@ -83,6 +83,8 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
   const t0 = Date.now();
   const metrics: RunMetrics = { stage_timings: {}, ai_call_count: 0, ai_error_count: 0, ai_total_ms: 0 };
 
+  console.log(`[run-audit][${runId}] PIPELINE START account=${accountId} t=${new Date().toISOString()}`);
+
   // Load live tuning config (fall back to defaults)
   const { data: cfgRow } = await supabase.from("audit_tuning_config").select("*").eq("id", 1).maybeSingle();
   const cfg = { ...DEFAULT_CFG, ...(cfgRow || {}) };
@@ -93,10 +95,12 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
   try {
     // ---- Stage 0: Patterns ----
     const tPatterns = Date.now();
+    console.log(`[run-audit][${runId}] STAGE patterns START`);
     await updateRun(supabase, runId, { current_stage: "patterns", progress: { stage: "patterns", message: "Scanning CRM..." } });
     let findings = await detectPatterns(supabase, accountId, cfg);
     findings = findings.filter(f => (cfg.enabled_patterns as string[]).includes(f.key));
     metrics.stage_timings.patterns = Date.now() - tPatterns;
+    console.log(`[run-audit][${runId}] STAGE patterns END dur=${metrics.stage_timings.patterns}ms findings=${findings.length}`);
 
     if (findings.length) {
       await supabase.from("pattern_results").insert(findings.map(f => ({
@@ -109,31 +113,38 @@ async function runPipeline(supabase: any, accountId: string, runId: string) {
     }
 
     // ---- Stage A: Diagnostics — fire ALL findings in parallel (Promise.all) ----
-    // Lovable AI tolerates concurrent calls fine for this small fan-out (≤8); cuts wall time vs the prior 4-wide batched limiter.
     const tDiag = Date.now();
+    console.log(`[run-audit][${runId}] STAGE diagnostics START fanout=${findings.length}`);
     await updateRun(supabase, runId, { current_stage: "diagnostics", progress: { stage: "diagnostics", message: "Analyzing each finding..." } });
     const diagnosed = await Promise.all(findings.map((f) => stageA_diagnose(f, cfg.diagnostics_model, metrics, supabase)));
     metrics.stage_timings.diagnostics = Date.now() - tDiag;
+    console.log(`[run-audit][${runId}] STAGE diagnostics END dur=${metrics.stage_timings.diagnostics}ms`);
 
     // ---- Stage B: Prioritize ----
     const tPrio = Date.now();
+    console.log(`[run-audit][${runId}] STAGE prioritization START`);
     await updateRun(supabase, runId, { current_stage: "prioritization", progress: { stage: "prioritization", message: "Prioritizing..." } });
     const prioritized = [...diagnosed].sort((a, b) => b.exposure_cents - a.exposure_cents);
     metrics.stage_timings.prioritization = Date.now() - tPrio;
+    console.log(`[run-audit][${runId}] STAGE prioritization END dur=${metrics.stage_timings.prioritization}ms`);
 
     // ---- Stage C: Recommendations — fire ALL in parallel ----
     const tRec = Date.now();
+    console.log(`[run-audit][${runId}] STAGE recommendations START fanout=${prioritized.length}`);
     await updateRun(supabase, runId, { current_stage: "recommendations", progress: { stage: "recommendations", message: "Building recovery plans..." } });
     const recommended = await Promise.all(prioritized.map((f) => stageC_recommend(f, cfg.recommendations_model, metrics, supabase)));
     metrics.stage_timings.recommendations = Date.now() - tRec;
+    console.log(`[run-audit][${runId}] STAGE recommendations END dur=${metrics.stage_timings.recommendations}ms`);
 
     // ---- Stage D + E ----
     const tRpt = Date.now();
+    console.log(`[run-audit][${runId}] STAGE report START`);
     await updateRun(supabase, runId, { current_stage: "report", progress: { stage: "report", message: "Drafting summary..." } });
     const summary = await stageD_summarize(recommended, cfg.summary_model, metrics, supabase);
     const totalExposure = recommended.reduce((s, f) => s + (f.exposure_cents || 0), 0);
     const report = { summary, total_exposure_cents: totalExposure, findings: recommended, generated_at: new Date().toISOString() };
     metrics.stage_timings.report = Date.now() - tRpt;
+    console.log(`[run-audit][${runId}] STAGE report END dur=${metrics.stage_timings.report}ms exposure_cents=${totalExposure}`);
 
     await updateRun(supabase, runId, {
       status: "complete", current_stage: "done",
@@ -307,11 +318,15 @@ async function detectPatterns(supabase: any, accountId: string, cfg: any): Promi
   // Run all 8 detections in parallel — each one is a single SQL aggregate query.
   const results = await Promise.all(
     specs.map(async (s) => {
+      const tPat = Date.now();
+      console.log(`[run-audit] PATTERN ${s.key} START`);
       const { data, error } = await supabase.rpc(s.rpc, s.args);
+      const dur = Date.now() - tPat;
       if (error) {
-        console.error(`[run-audit] ${s.key} RPC failed:`, error.message);
+        console.error(`[run-audit] PATTERN ${s.key} END dur=${dur}ms FAILED:`, error.message);
         return { spec: s, payload: { count: 0, exposure_cents: 0, sample_ids: [] } };
       }
+      console.log(`[run-audit] PATTERN ${s.key} END dur=${dur}ms count=${data?.count ?? 0} exposure_cents=${data?.exposure_cents ?? 0}`);
       return { spec: s, payload: data ?? { count: 0, exposure_cents: 0, sample_ids: [] } };
     }),
   );
