@@ -216,10 +216,12 @@ async function applyOne(
   if (fixKind === "delete_orphan_engagement") {
     if (!confirmDelete) throw new Error("Delete requires confirm_delete=true");
     const before = await fetchHubspot(token, "engagements", id);
+    if (!before) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
     const res = await fetch(`${HUBSPOT_API}/crm/v3/objects/engagements/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (res.status === 404) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
     if (!res.ok && res.status !== 204) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
     await supabase.from("hygiene_log").insert({
       action_id: action.id,
@@ -237,7 +239,7 @@ async function applyOne(
   // Fetch current state
   const objPath = objectTypeToPath(objectType);
   const before = await fetchHubspot(token, objPath, id);
-  if (!before) return;
+  if (!before) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
 
   const beforeProps = before.properties || {};
   const updates = modification || computeUpdates(fixKind, beforeProps);
