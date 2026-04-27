@@ -100,21 +100,48 @@ const AppAssistant = () => {
               </div>
             </div>
           ))}
-          {sending && <div className="text-sm text-muted-foreground italic">Thinking…</div>}
+          {(sending || capture.busy) && (
+            <div className="text-sm text-muted-foreground italic">
+              {capture.busy ? "Capturing…" : "Thinking…"}
+            </div>
+          )}
           {error && <div className="text-sm text-destructive">{error}</div>}
           <div ref={endRef} />
         </div>
 
+        {attachedImage && (
+          <div className="px-4 pt-3 border-t border-border flex items-center gap-3">
+            <img src={attachedImage} alt="attached capture" className="h-16 w-auto rounded border border-border" />
+            <span className="text-xs font-mono uppercase text-muted-foreground flex-1">screenshot attached</span>
+            <button
+              onClick={() => setAttachedImage(null)}
+              className="p-1.5 hover:bg-secondary rounded text-muted-foreground"
+              title="Remove attachment"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         <div className="p-4 border-t border-border flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => capture.start()}
+            disabled={capture.busy || sending}
+            title="Scan an area of the screen"
+          >
+            <ScanSearch className="h-4 w-4" />
+          </Button>
           <input
             className="flex-1 bg-background border border-border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
-            placeholder="Ask the Co-Pilot…"
+            placeholder={attachedImage ? "Ask about this screenshot…" : "Ask the Co-Pilot…"}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             disabled={sending}
           />
-          <Button onClick={handleSend} disabled={sending || !input.trim()} className="gap-2">
+          <Button onClick={handleSend} disabled={sending || (!input.trim() && !attachedImage)} className="gap-2">
             <Send className="h-4 w-4" /> Send
           </Button>
         </div>
