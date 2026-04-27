@@ -36,6 +36,9 @@ const ProposalCard = ({
   </div>
 );
 
+const FAB_SIZE = 48;
+const STORAGE_KEY = "copilot_fab_pos";
+
 export const AssistantPanel = () => {
   const [open, setOpen] = useState(false);
   const { messages, sending, error, send, confirmAction, undoAction } = useAssistant();
@@ -44,8 +47,54 @@ export const AssistantPanel = () => {
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const capture = useScreenCapture();
   const endRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Draggable FAB position (persisted)
+  const [fabPos, setFabPos] = useState<{ x: number; y: number }>(() => {
+    if (typeof window === "undefined") return { x: 24, y: 24 };
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* noop */ }
+    return { x: window.innerWidth - FAB_SIZE - 24, y: window.innerHeight - FAB_SIZE - 24 };
+  });
+  const dragStateRef = useRef<{ dragging: boolean; moved: boolean; offX: number; offY: number }>({
+    dragging: false, moved: false, offX: 0, offY: 0,
+  });
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
+
+  // Click-outside to close (ignore clicks on the FAB and on the capture overlay)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current && !panelRef.current.contains(target)) {
+        // Ignore clicks on capture overlay so capture flow keeps working
+        if ((e.target as HTMLElement).closest?.("[data-copilot-fab]")) return;
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  // Persist FAB position
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fabPos)); } catch { /* noop */ }
+  }, [fabPos]);
+
+  // Keep FAB on-screen when window resizes
+  useEffect(() => {
+    const onResize = () => {
+      setFabPos((p) => ({
+        x: Math.min(Math.max(0, p.x), window.innerWidth - FAB_SIZE),
+        y: Math.min(Math.max(0, p.y), window.innerHeight - FAB_SIZE),
+      }));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const handleSend = () => {
     if (!input.trim() && !attachedImage) return;
@@ -55,7 +104,7 @@ export const AssistantPanel = () => {
   };
 
   const handleScan = () => {
-    setOpen(false); // hide panel so it doesn't end up in the screenshot
+    setOpen(false);
     capture.start();
   };
 
@@ -68,20 +117,52 @@ export const AssistantPanel = () => {
     }
   };
 
+  // FAB drag handlers
+  const onFabPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    dragStateRef.current = {
+      dragging: true,
+      moved: false,
+      offX: e.clientX - fabPos.x,
+      offY: e.clientY - fabPos.y,
+    };
+  };
+  const onFabPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const s = dragStateRef.current;
+    if (!s.dragging) return;
+    const nx = e.clientX - s.offX;
+    const ny = e.clientY - s.offY;
+    if (Math.abs(nx - fabPos.x) + Math.abs(ny - fabPos.y) > 4) s.moved = true;
+    setFabPos({
+      x: Math.min(Math.max(0, nx), window.innerWidth - FAB_SIZE),
+      y: Math.min(Math.max(0, ny), window.innerHeight - FAB_SIZE),
+    });
+  };
+  const onFabPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const s = dragStateRef.current;
+    s.dragging = false;
+    try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+    if (!s.moved) setOpen((v) => !v);
+  };
+
   return (
     <>
       {capture.capturing && <ScreenCaptureOverlay onComplete={handleOverlayDone} />}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          data-copilot-fab
+          onPointerDown={onFabPointerDown}
+          onPointerMove={onFabPointerMove}
+          onPointerUp={onFabPointerUp}
           aria-label="Open Co-Pilot"
-          className="fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition-transform flex items-center justify-center"
+          style={{ left: fabPos.x, top: fabPos.y, width: FAB_SIZE, height: FAB_SIZE, touchAction: "none" }}
+          className="fixed z-40 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition-transform flex items-center justify-center cursor-grab active:cursor-grabbing"
         >
-          <Bot className="h-5 w-5" />
+          <Bot className="h-5 w-5 pointer-events-none" />
         </button>
       )}
       {open && (
-        <div className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col">
+        <div ref={panelRef} className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4 text-primary" />
