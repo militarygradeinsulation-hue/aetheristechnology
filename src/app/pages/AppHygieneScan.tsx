@@ -143,19 +143,33 @@ const AppHygieneScan = () => {
               </div>
             )}
           </div>
-          <Button
-            onClick={runScan}
-            disabled={starting || isRunning || !account}
-            className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
-          >
-            {starting || isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {isRunning ? "Scanning..." : latestScan ? "Run again" : "Run Hygiene Scan"}
-          </Button>
+          <div className="flex flex-col gap-2 items-end">
+            <Button
+              onClick={runScan}
+              disabled={starting || isRunning || !account}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
+            >
+              {starting || isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {isRunning ? "Scanning..." : latestScan ? "Run again" : "Run Hygiene Scan"}
+            </Button>
+            {isRunning && (
+              <Button
+                onClick={stopScan}
+                disabled={stopping}
+                variant="outline"
+                size="sm"
+                className="gap-2 border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
+              >
+                {stopping ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
+                Stop scan
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Results */}
-      {latestScan?.status === "failed" && (
+      {(latestScan?.status === "failed" || latestScan?.status === "cancelled") && (
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-6 flex items-start gap-3">
           <AlertCircle className="h-4 w-4 text-rose-400 mt-0.5" />
           <div>
