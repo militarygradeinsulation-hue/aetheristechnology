@@ -193,18 +193,22 @@ async function syncDealAssociations(
 
   if (contactRes.status === "fulfilled") {
     const linkRows: any[] = [];
+    let dropped = 0;
     for (const result of contactRes.value.results || []) {
-      const dealId = String(result.from?.id ?? result._from?.id ?? "");
-      if (!dealId) continue;
+      const dealId = coerceHubspotId(result.from?.id ?? result._from?.id);
+      if (!dealId) { dropped++; continue; }
       for (const to of result.to || []) {
+        const contactId = coerceHubspotId(to.toObjectId ?? to.id);
+        if (!contactId) { dropped++; continue; }
         linkRows.push({
           account_id: accountId,
           deal_id: dealId,
-          contact_id: String(to.toObjectId ?? to.id),
+          contact_id: contactId,
           synced_at: new Date().toISOString(),
         });
       }
     }
+    if (dropped) console.warn(`[hubspot-sync] dropped ${dropped} deal->contact rows with invalid IDs`);
     if (linkRows.length) {
       await admin.from("mirror_deal_contacts").upsert(linkRows, { onConflict: "account_id,deal_id,contact_id" });
     }
@@ -214,18 +218,22 @@ async function syncDealAssociations(
 
   if (companyRes.status === "fulfilled") {
     const linkRows: any[] = [];
+    let dropped = 0;
     for (const result of companyRes.value.results || []) {
-      const dealId = String(result.from?.id ?? result._from?.id ?? "");
-      if (!dealId) continue;
+      const dealId = coerceHubspotId(result.from?.id ?? result._from?.id);
+      if (!dealId) { dropped++; continue; }
       for (const to of result.to || []) {
+        const companyId = coerceHubspotId(to.toObjectId ?? to.id);
+        if (!companyId) { dropped++; continue; }
         linkRows.push({
           account_id: accountId,
           deal_id: dealId,
-          company_id: String(to.toObjectId ?? to.id),
+          company_id: companyId,
           synced_at: new Date().toISOString(),
         });
       }
     }
+    if (dropped) console.warn(`[hubspot-sync] dropped ${dropped} deal->company rows with invalid IDs`);
     if (linkRows.length) {
       await admin.from("mirror_deal_companies").upsert(linkRows, { onConflict: "account_id,deal_id,company_id" });
     }
