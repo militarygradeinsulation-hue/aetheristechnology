@@ -372,7 +372,7 @@ async function buildProposalPreview(
     const t = toolName.replace("update_", "");
     const table = t === "deal" ? "mirror_deals" : t === "company" ? "mirror_companies" : "mirror_contacts";
     const { data: before } = await admin.from(table).select("*").eq("account_id", accountId).eq("hubspot_id", String(args.hubspot_id)).maybeSingle();
-    const label = t === "deal" ? (before as any)?.name : t === "company" ? (before as any)?.name : `${(before as any)?.first_name || ""} ${(before as any)?.last_name || ""}`.trim() || (before as any)?.email;
+    const label = t === "deal" ? (before as any)?.name : t === "company" ? (before as any)?.deal_name : t === "company" ? (before as any)?.name : `${(before as any)?.first_name || ""} ${(before as any)?.last_name || ""}`.trim() || (before as any)?.email;
     return {
       summary: `Update ${t}${label ? ` "${label}"` : ""} (#${args.hubspot_id})`,
       affected: 1,
