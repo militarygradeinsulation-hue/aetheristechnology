@@ -167,6 +167,18 @@ async function runExecution(
         await applyOne(supabase, action, accessToken, objectType, id, fixKind, modifications[id], confirmDelete);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
+        if (err instanceof HubspotMissingScopesError) {
+          // Fatal — abort the whole run, don't punish the user with 5,000 logged failures
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "failed",
+              error_message: SCOPE_HINT,
+              progress: { processed, total: ids.length, skipped, failures, message: SCOPE_HINT, error_kind: "missing_scopes" },
+            })
+            .eq("id", action.id);
+          return;
+        }
         if (err instanceof HubspotNotFoundError) {
           skipped++;
           await supabase.from("hygiene_log").insert({
@@ -201,6 +213,19 @@ async function runExecution(
           .from("hygiene_actions")
           .update({ progress: { processed, total: ids.length, skipped, failures, message: `Processing ${processed} of ${ids.length}` } })
           .eq("id", action.id);
+        // Honor user-initiated cancellation
+        if (await isCancelled(supabase, action.id)) {
+          await supabase
+            .from("hygiene_actions")
+            .update({
+              status: "cancelled",
+              error_message: "Cancelled by user",
+              executed_at: new Date().toISOString(),
+              progress: { processed, total: ids.length, skipped, failures, message: `Cancelled at ${processed} of ${ids.length}` },
+            })
+            .eq("id", action.id);
+          return;
+        }
       }
       await sleep(RATE_DELAY_MS);
     }
