@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, RotateCcw, Bot } from "lucide-react";
+import { Send, RotateCcw, Bot, ScanSearch, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AppLayout } from "../AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAssistant, type ProposedAction } from "../lib/useAssistant";
+import { useScreenCapture } from "../lib/useScreenCapture";
+import { ScreenCaptureOverlay } from "../components/ScreenCaptureOverlay";
 
 const ProposalCard = ({
   action, onConfirm, onCancel, disabled,
@@ -36,17 +38,29 @@ const AppAssistant = () => {
   const { messages, sending, error, send, confirmAction, undoAction } = useAssistant();
   const [input, setInput] = useState("");
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const capture = useScreenCapture();
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    send(input);
+    if (!input.trim() && !attachedImage) return;
+    send(input, attachedImage);
     setInput("");
+    setAttachedImage(null);
+  };
+
+  const handleOverlayDone = async (rect: { x: number; y: number; w: number; h: number } | null) => {
+    const dataUrl = await capture.handleOverlayComplete(rect);
+    if (dataUrl) {
+      setAttachedImage(dataUrl);
+      if (!input.trim()) setInput("Explain what's in this screenshot.");
+    }
   };
 
   return (
     <AppLayout>
+      {capture.capturing && <ScreenCaptureOverlay onComplete={handleOverlayDone} />}
       <div className="mb-6">
         <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-3">
           <Bot className="h-6 w-6 text-primary" /> Co-Pilot
