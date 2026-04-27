@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch } from "lucide-react";
+import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch, Minus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -100,8 +100,8 @@ export const AssistantPanel = () => {
               <Link to="/app/assistant" onClick={() => setOpen(false)} className="p-1.5 hover:bg-secondary rounded" title="Open full page">
                 <Maximize2 className="h-3.5 w-3.5" />
               </Link>
-              <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-secondary rounded">
-                <X className="h-4 w-4" />
+              <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-secondary rounded" title="Minimize">
+                <Minus className="h-4 w-4" />
               </button>
             </div>
           </div>
