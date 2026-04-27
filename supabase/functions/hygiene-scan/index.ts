@@ -118,16 +118,28 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
       "hubspot_id, email, first_name, last_name, lifecycle_stage, last_activity_date, properties",
     );
 
-    const results: CategoryResult[] = [
-      detectDuplicateContacts(contacts),
-      detectMissingFields(contacts),
-      detectLifecycleMismatch(contacts, deals, dealContacts),
-      detectFormattingIssues(contacts, companies),
-      detectOwnerIssues(contacts, deals, owners),
-      detectStaleLifecycle(contacts),
-      detectDealIssues(deals),
-      detectEngagementOrphans(engagements),
+    const detectors: Array<{ key: string; run: () => CategoryResult }> = [
+      { key: "duplicate_contacts", run: () => detectDuplicateContacts(contacts) },
+      { key: "missing_critical_fields", run: () => detectMissingFields(contacts) },
+      { key: "lifecycle_mismatch", run: () => detectLifecycleMismatch(contacts, deals, dealContacts) },
+      { key: "formatting_inconsistencies", run: () => detectFormattingIssues(contacts, companies) },
+      { key: "owner_issues", run: () => detectOwnerIssues(contacts, deals, owners) },
+      { key: "stale_lifecycle", run: () => detectStaleLifecycle(contacts) },
+      { key: "deal_data_issues", run: () => detectDealIssues(deals) },
+      { key: "engagement_orphans", run: () => detectEngagementOrphans(engagements) },
     ];
+
+    const detectStart = Date.now();
+    console.log(`[hygiene-scan] STAGE detect START categories=${detectors.length}`);
+    const results: CategoryResult[] = await Promise.all(
+      detectors.map(async (d) => {
+        const t0 = Date.now();
+        const r = await Promise.resolve().then(() => d.run());
+        console.log(`[hygiene-scan] CATEGORY ${d.key} END dur=${Date.now() - t0}ms count=${r.count}`);
+        return r;
+      }),
+    );
+    console.log(`[hygiene-scan] STAGE detect END dur=${Date.now() - detectStart}ms total=${results.reduce((a, r) => a + r.count, 0)}`);
 
     const totals_by_category: Record<string, number> = {};
     const resultsMap: Record<string, CategoryResult> = {};
