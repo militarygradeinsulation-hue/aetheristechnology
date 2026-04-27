@@ -331,9 +331,35 @@ async function detectPatterns(supabase: any, accountId: string, cfg: any): Promi
 // ============================================================
 // AI Stages — capture timing and errors into RunMetrics
 // ============================================================
-async function callAI(model: string, systemPrompt: string, userPrompt: string, m: RunMetrics): Promise<string | null> {
+async function sha256Hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function callAI(
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+  m: RunMetrics,
+  supabase?: any,
+  stage?: string,
+): Promise<string | null> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return null;
+
+  // 7-day cache (keyed by model + stage + prompts hash)
+  let cacheKey: string | null = null;
+  if (supabase && stage) {
+    cacheKey = await sha256Hex(`${model}::${stage}::${systemPrompt}::${userPrompt}`);
+    const { data: cached } = await supabase
+      .from("audit_ai_cache")
+      .select("response")
+      .eq("cache_key", cacheKey)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (cached?.response?.text) return String(cached.response.text);
+  }
+
   m.ai_call_count++;
   const t = Date.now();
   try {
@@ -355,7 +381,18 @@ async function callAI(model: string, systemPrompt: string, userPrompt: string, m
       return null;
     }
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || null;
+    const text = data.choices?.[0]?.message?.content || null;
+
+    if (text && supabase && cacheKey && stage) {
+      // Fire-and-forget cache write
+      supabase.from("audit_ai_cache").upsert({
+        cache_key: cacheKey,
+        model,
+        stage,
+        response: { text },
+      }, { onConflict: "cache_key" }).then(() => {}, () => {});
+    }
+    return text;
   } catch (err) {
     m.ai_error_count++;
     m.ai_total_ms += Date.now() - t;
