@@ -311,13 +311,18 @@ async function syncWindowed(
       continue;
     }
 
-    const results = data.results || [];
+    const allResults = data.results || [];
+    // Drop rows whose `id` is not a valid HubSpot numeric ID before they
+    // poison mirror_* tables and produce 404s in hygiene-execute.
+    const results = allResults.filter((c: any) => coerceHubspotId(c.id));
+    const droppedRows = allResults.length - results.length;
+    if (droppedRows) console.warn(`[hubspot-sync] ${cursor.phase}: dropped ${droppedRows} rows with invalid id`);
     let rows: any[];
 
     if (cursor.phase === "companies") {
       rows = results.map((c: any) => ({
         account_id: accountId,
-        hubspot_id: String(c.id),
+        hubspot_id: coerceHubspotId(c.id)!,
         name: c.properties.name,
         domain: c.properties.domain,
         industry: c.properties.industry,
