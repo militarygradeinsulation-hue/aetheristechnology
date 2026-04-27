@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download, StopCircle, Plug } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCheck, Eye, X, Loader2, Download, StopCircle, Plug, RefreshCw } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
 import { useAccount } from "../lib/useAccount";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   HygieneActionRow, severityClass, confidenceLabel, categoryDisplay,
+  sortActions, type HygieneQueueView,
 } from "../lib/hygiene";
 import { HygieneRecordReviewDialog } from "../components/HygieneRecordReviewDialog";
 import { HygieneMergeDialog } from "../components/HygieneMergeDialog";
@@ -26,6 +27,18 @@ const AppHygieneQueue = () => {
   const [reviewAction, setReviewAction] = useState<HygieneActionRow | null>(null);
   const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // View mode (locked once chosen — list won't reshuffle on poll)
+  const VIEW_KEY = "hygiene_queue_view";
+  const [view, setView] = useState<HygieneQueueView>(() => {
+    if (typeof window === "undefined") return "priority";
+    const v = localStorage.getItem(VIEW_KEY) as HygieneQueueView | null;
+    return v === "newest" || v === "status" || v === "priority" ? v : "priority";
+  });
+  // Locked order: actionId -> position. New rows append; existing rows never move.
+  const orderRef = useRef<Map<string, number>>(new Map());
+  const orderViewRef = useRef<HygieneQueueView>(view);
+  const [resortNonce, setResortNonce] = useState(0);
 
   // List view never needs the full affected_record_ids array (can be 5,000
   // hubspot_id strings per row). Polling that every 2s while a job is running
@@ -47,10 +60,21 @@ const AppHygieneQueue = () => {
       .in("status", ["pending", "approved", "executing", "failed"])
       .order("created_at", { ascending: false });
     const rows = ((data as unknown) as HygieneActionRow[]) || [];
-    // List rows don't carry affected_record_ids — keep the shape stable so
-    // downstream code that touches `.length` doesn't blow up.
     for (const r of rows) if (!r.affected_record_ids) r.affected_record_ids = [];
-    setActions(rows);
+
+    // Merge-in-place: keep existing array slots for known rows so React doesn't
+    // visually reshuffle when statuses/progress change. Only NEW rows are appended.
+    setActions((prev) => {
+      const incoming = new Map(rows.map((r) => [r.id, r]));
+      const merged: HygieneActionRow[] = [];
+      const seen = new Set<string>();
+      for (const old of prev) {
+        const next = incoming.get(old.id);
+        if (next) { merged.push(next); seen.add(old.id); }
+      }
+      for (const r of rows) if (!seen.has(r.id)) merged.push(r);
+      return merged;
+    });
   };
 
   // On-demand loader for the (potentially large) affected_record_ids column.
@@ -72,7 +96,40 @@ const AppHygieneQueue = () => {
     return () => clearInterval(i);
   }, [actions]);
 
-  const grouped = useMemo(() => actions, [actions]);
+  const changeView = (next: HygieneQueueView) => {
+    setView(next);
+    try { localStorage.setItem(VIEW_KEY, next); } catch {}
+    orderRef.current = new Map();        // force a fresh lock
+    orderViewRef.current = next;
+    setResortNonce((n) => n + 1);
+  };
+
+  const resortNow = () => {
+    orderRef.current = new Map();
+    setResortNonce((n) => n + 1);
+  };
+
+  // Locked sort: compute order once per (view, new-row arrival), then freeze.
+  const grouped = useMemo(() => {
+    if (orderViewRef.current !== view) {
+      orderRef.current = new Map();
+      orderViewRef.current = view;
+    }
+    const order = orderRef.current;
+    // Assign positions to any rows we haven't seen yet, using the current view's sort.
+    const unseen = actions.filter((a) => !order.has(a.id));
+    if (unseen.length) {
+      const sortedUnseen = sortActions(unseen, view);
+      let next = order.size;
+      for (const a of sortedUnseen) order.set(a.id, next++);
+    }
+    return [...actions].sort(
+      (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+    );
+    // resortNonce intentionally a dep so "Re-sort now" re-runs this
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, view, resortNonce]);
+
 
   const skipCategory = async (a: HygieneActionRow) => {
     await supabase.from("hygiene_actions").update({ status: "skipped" }).eq("id", a.id);
@@ -147,6 +204,40 @@ const AppHygieneQueue = () => {
       </div>
 
       <HygieneSubNav />
+
+      {grouped.length > 0 && (
+        <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="inline-flex rounded-lg border border-border bg-card p-0.5 text-xs">
+            {([
+              { key: "priority", label: "Priority" },
+              { key: "newest", label: "Newest" },
+              { key: "status", label: "Status" },
+            ] as { key: HygieneQueueView; label: string }[]).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => changeView(opt.key)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  view === opt.key
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>Order locked · {view === "priority" ? "Priority" : view === "newest" ? "Newest" : "Status"}</span>
+            <button
+              onClick={resortNow}
+              className="inline-flex items-center gap-1 text-foreground hover:text-amber-400 transition-colors"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Re-sort now
+            </button>
+          </div>
+        </div>
+      )}
 
       {grouped.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center">

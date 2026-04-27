@@ -121,6 +121,53 @@ export const confidenceLabel = (c: HygieneConfidence, kind?: HygieneFixKind): st
   return "Manual review";
 };
 
+// ---- Sorting ----
+
+export type HygieneQueueView = "priority" | "newest" | "status";
+
+const SEVERITY_WEIGHT: Record<HygieneSeverity, number> = { high: 0, medium: 1, low: 2 };
+const CONFIDENCE_WEIGHT: Record<HygieneConfidence, number> = { high: 0, medium: 1, low: 2 };
+const STATUS_WEIGHT: Record<HygieneStatus, number> = {
+  executing: 0,
+  failed: 1,
+  pending: 2,
+  approved: 2,
+  cancelled: 3,
+  skipped: 3,
+  executed: 4,
+};
+
+const priorityCompare = (a: HygieneActionRow, b: HygieneActionRow): number => {
+  const sev = SEVERITY_WEIGHT[a.severity] - SEVERITY_WEIGHT[b.severity];
+  if (sev !== 0) return sev;
+  const conf = CONFIDENCE_WEIGHT[a.confidence] - CONFIDENCE_WEIGHT[b.confidence];
+  if (conf !== 0) return conf;
+  const count = (b.affected_count || 0) - (a.affected_count || 0);
+  if (count !== 0) return count;
+  return a.id.localeCompare(b.id);
+};
+
+export const sortActions = (
+  rows: HygieneActionRow[],
+  view: HygieneQueueView,
+): HygieneActionRow[] => {
+  const copy = [...rows];
+  if (view === "newest") {
+    copy.sort((a, b) => {
+      const t = (b.created_at || "").localeCompare(a.created_at || "");
+      return t !== 0 ? t : a.id.localeCompare(b.id);
+    });
+  } else if (view === "status") {
+    copy.sort((a, b) => {
+      const s = (STATUS_WEIGHT[a.status] ?? 9) - (STATUS_WEIGHT[b.status] ?? 9);
+      return s !== 0 ? s : priorityCompare(a, b);
+    });
+  } else {
+    copy.sort(priorityCompare);
+  }
+  return copy;
+};
+
 export const categoryDisplay: Record<
   string,
   { label: string; description: string }
