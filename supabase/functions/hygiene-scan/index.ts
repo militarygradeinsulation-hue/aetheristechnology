@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
-    const { account_id } = await req.json();
+    const { account_id, action, scan_id } = await req.json();
     if (!account_id) return json({ error: "account_id required" }, 400);
 
     const { data: acct } = await supabase
@@ -70,6 +70,27 @@ Deno.serve(async (req) => {
       .eq("id", account_id)
       .maybeSingle();
     if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
+
+    if (action === "cancel") {
+      if (!scan_id) return json({ error: "scan_id required" }, 400);
+      const { error: cancelErr } = await supabase
+        .from("hygiene_scans")
+        .update({
+          status: "cancelled",
+          ai_status: "cancelled",
+          error_message: "Cancelled by user",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", scan_id)
+        .eq("account_id", account_id);
+      if (cancelErr) throw cancelErr;
+      await supabase
+        .from("hygiene_actions")
+        .update({ status: "cancelled", error_message: "Cancelled by user" })
+        .eq("scan_id", scan_id)
+        .in("status", ["pending", "approved", "executing"]);
+      return json({ ok: true });
+    }
 
     const { data: scan, error: scanErr } = await supabase
       .from("hygiene_scans")
@@ -97,26 +118,32 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
       supabase, "mirror_owners", accountId,
       "hubspot_id",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
     const deals = await loadAll(
       supabase, "mirror_deals", accountId,
       "hubspot_id, stage, amount, close_date, owner_id",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
     const dealContacts = await loadAll(
       supabase, "mirror_deal_contacts", accountId,
       "contact_id, deal_id",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
     const engagements = await loadAll(
       supabase, "mirror_engagements", accountId,
       "hubspot_id, contact_id, deal_id",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
     const companies = await loadAll(
       supabase, "mirror_companies", accountId,
       "hubspot_id, name",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
     const contacts = await loadAll(
       supabase, "mirror_contacts", accountId,
       "hubspot_id, email, first_name, last_name, lifecycle_stage, last_activity_date, properties",
     );
+    if (await isScanCancelled(supabase, scanId)) return;
 
     const detectors: Array<{ key: string; run: () => CategoryResult }> = [
       { key: "duplicate_contacts", run: () => detectDuplicateContacts(contacts) },
@@ -168,6 +195,8 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
       await supabase.from("hygiene_actions").insert(actions);
     }
 
+    if (await isScanCancelled(supabase, scanId)) return;
+
     await supabase
       .from("hygiene_scans")
       .update({
@@ -189,6 +218,15 @@ async function runScan(supabase: any, accountId: string, scanId: string) {
       })
       .eq("id", scanId);
   }
+}
+
+async function isScanCancelled(supabase: any, scanId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("hygiene_scans")
+    .select("status")
+    .eq("id", scanId)
+    .maybeSingle();
+  return data?.status === "cancelled";
 }
 
 async function loadAll(

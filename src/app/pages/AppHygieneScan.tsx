@@ -69,20 +69,15 @@ const AppHygieneScan = () => {
   };
 
   const stopScan = async () => {
-    if (!latestScan?.id) return;
+    if (!latestScan?.id || !account?.id) return;
     setStopping(true);
     try {
-      const { error } = await supabase
-        .from("hygiene_scans")
-        .update({
-          status: "cancelled",
-          ai_status: "cancelled",
-          error_message: "Cancelled by user",
-          completed_at: new Date().toISOString(),
-        })
-        .eq("id", latestScan.id);
+      const { error } = await supabase.functions.invoke("hygiene-scan", {
+        body: { action: "cancel", account_id: account.id, scan_id: latestScan.id },
+      });
       if (error) throw error;
       toast({ title: "Scan stopped", description: "The hygiene scan was cancelled." });
+      setLatestScan({ ...latestScan, status: "cancelled", ai_status: "cancelled", error_message: "Cancelled by user", completed_at: new Date().toISOString() });
       await loadLatest();
     } catch (err: any) {
       toast({ title: "Could not stop scan", description: err.message, variant: "destructive" });

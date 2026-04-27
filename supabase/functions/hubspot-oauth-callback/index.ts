@@ -6,6 +6,7 @@ const APP_ORIGINS = [
   "https://aetheris.technology",
   "https://aetheristechnology.lovable.app",
   "https://id-preview--1b783889-c460-4e52-a4bd-950110dc395b.lovable.app",
+  "https://1b783889-c460-4e52-a4bd-950110dc395b.lovableproject.com",
 ];
 
 const pickOrigin = (req: Request): string => {
