@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const HUBSPOT_API = "https://api.hubapi.com";
 const PAGE_SIZE = 100;
+const UPSERT_BATCH_SIZE = 500; // Buffer N rows across HubSpot pages before flushing to Postgres
 const MAX_HUBSPOT_SEARCH_RESULTS = 10000;
 const MIN_SEARCH_WINDOW_MS = 1000;
 
