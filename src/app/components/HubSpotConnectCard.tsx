@@ -53,7 +53,21 @@ export const HubSpotConnectCard = () => {
       const { data, error } = await supabase.functions.invoke("hubspot-oauth-start");
       if (error) throw error;
       if (typeof data?.authorizeUrl === "string" && data.authorizeUrl.startsWith("https://app.hubspot.com/")) {
-        window.location.href = data.authorizeUrl;
+        // HubSpot blocks loading inside iframes (preview). Always break out to a new top-level tab.
+        const win = window.open(data.authorizeUrl, "_blank", "noopener,noreferrer");
+        if (!win) {
+          // Popup blocked — fall back to top-level navigation (escape iframe if possible)
+          try {
+            if (window.top && window.top !== window.self) {
+              (window.top as Window).location.href = data.authorizeUrl;
+            } else {
+              window.location.href = data.authorizeUrl;
+            }
+          } catch {
+            window.location.href = data.authorizeUrl;
+          }
+        }
+        setLoading(false);
       } else {
         throw new Error("No authorize URL returned");
       }
