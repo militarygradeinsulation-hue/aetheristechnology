@@ -194,8 +194,19 @@ const AppHygieneQueue = () => {
                 </button>
 
                 {isExecuting && (
-                  <div className="px-4 pb-3">
+                  <div className="px-4 pb-3 space-y-2">
                     <Progress value={progress} className="h-1.5" />
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); cancelAction(a); }}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
+                      >
+                        <StopCircle className="h-3.5 w-3.5" />
+                        Stop
+                      </Button>
+                    </div>
                   </div>
                 )}
 
