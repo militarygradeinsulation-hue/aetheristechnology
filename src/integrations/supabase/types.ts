@@ -2998,6 +2998,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reset_stuck_hygiene_actions: {
+        Args: { _stale_minutes?: number }
+        Returns: number
+      }
     }
     Enums: {
       claim_status:
