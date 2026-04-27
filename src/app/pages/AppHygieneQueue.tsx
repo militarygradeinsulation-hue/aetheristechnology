@@ -43,7 +43,7 @@ const AppHygieneQueue = () => {
       .from("hygiene_actions")
       .select(LIST_COLUMNS)
       .eq("account_id", account.id)
-      .in("status", ["pending", "approved", "executing"])
+      .in("status", ["pending", "approved", "executing", "failed"])
       .order("created_at", { ascending: false });
     const rows = ((data as unknown) as HygieneActionRow[]) || [];
     // List rows don't carry affected_record_ids — keep the shape stable so
