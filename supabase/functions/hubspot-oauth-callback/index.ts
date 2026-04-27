@@ -113,9 +113,11 @@ serve(async (req) => {
     const tokens = await tokenRes.json();
     console.log("[hubspot-oauth-callback] token exchange OK", { has_access: !!tokens.access_token, has_refresh: !!tokens.refresh_token, expires_in: tokens.expires_in });
 
-    // Fetch portal info
+    // Fetch portal info (includes granted scopes — source of truth, not what we requested)
     const infoRes = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${tokens.access_token}`);
-    const info = infoRes.ok ? await infoRes.json() : { hub_id: null };
+    const info = infoRes.ok ? await infoRes.json() : { hub_id: null, scopes: [] };
+    const grantedScopes: string = Array.isArray(info.scopes) ? info.scopes.join(" ") : "";
+    console.log("[hubspot-oauth-callback] granted scopes", { count: Array.isArray(info.scopes) ? info.scopes.length : 0, scopes: grantedScopes });
 
     const { data: encAccess } = await admin.rpc("encrypt_token", { _plaintext: tokens.access_token, _key: encryptionKey });
     const { data: encRefresh } = await admin.rpc("encrypt_token", { _plaintext: tokens.refresh_token, _key: encryptionKey });
@@ -128,6 +130,7 @@ serve(async (req) => {
         hubspot_refresh_token_encrypted: encRefresh,
         hubspot_access_token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         hubspot_connected_at: new Date().toISOString(),
+        hubspot_scopes: grantedScopes,
         last_sync_status: "pending",
       })
       .eq("id", accountId);

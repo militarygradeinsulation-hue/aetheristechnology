@@ -226,6 +226,7 @@ async function applyOne(
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 404) throw new HubspotNotFoundError(`engagement ${id} not found in HubSpot`);
+    if (res.status === 403) throw new Error(`HubSpot rejected delete (403). Reconnect HubSpot to grant write scopes. ${await res.text()}`);
     if (!res.ok && res.status !== 204) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
     await supabase.from("hygiene_log").insert({
       action_id: action.id,
@@ -258,6 +259,11 @@ async function applyOne(
     body: JSON.stringify({ properties: updates }),
   });
   if (patchRes.status === 404) throw new HubspotNotFoundError(`${objectType} ${id} not found in HubSpot`);
+  if (patchRes.status === 403) {
+    throw new Error(
+      `HubSpot rejected write (403). Reconnect HubSpot to grant write scopes. ${await patchRes.text()}`,
+    );
+  }
   if (!patchRes.ok) throw new Error(`HubSpot ${patchRes.status}: ${await patchRes.text()}`);
   const after = await patchRes.json();
 
@@ -394,6 +400,7 @@ async function runMerges(
         if (res.status === 404) {
           throw new HubspotNotFoundError(`contact ${secondary} or ${primary} not found in HubSpot`);
         }
+        if (res.status === 403) throw new Error(`HubSpot rejected merge (403). Reconnect HubSpot to grant write scopes. ${await res.text()}`);
         if (!res.ok) throw new Error(`HubSpot ${res.status}: ${await res.text()}`);
 
         await supabase.from("hygiene_log").insert({
