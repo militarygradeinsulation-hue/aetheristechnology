@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, Maximize2, RotateCcw } from "lucide-react";
+import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAssistant, type ProposedAction } from "../lib/useAssistant";
+import { useScreenCapture } from "../lib/useScreenCapture";
+import { ScreenCaptureOverlay } from "./ScreenCaptureOverlay";
 
 const ProposalCard = ({
   action, onConfirm, onCancel, disabled,
@@ -39,14 +41,31 @@ export const AssistantPanel = () => {
   const { messages, sending, error, send, confirmAction, undoAction } = useAssistant();
   const [input, setInput] = useState("");
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const capture = useScreenCapture();
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    send(input);
+    if (!input.trim() && !attachedImage) return;
+    send(input, attachedImage);
     setInput("");
+    setAttachedImage(null);
+  };
+
+  const handleScan = () => {
+    setOpen(false); // hide panel so it doesn't end up in the screenshot
+    capture.start();
+  };
+
+  const handleOverlayDone = async (rect: { x: number; y: number; w: number; h: number } | null) => {
+    const dataUrl = await capture.handleOverlayComplete(rect);
+    setOpen(true);
+    if (dataUrl) {
+      setAttachedImage(dataUrl);
+      if (!input.trim()) setInput("Explain what's in this screenshot.");
+    }
   };
 
   return (
