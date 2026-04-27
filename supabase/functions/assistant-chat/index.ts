@@ -465,8 +465,17 @@ Deno.serve(async (req) => {
     if (uErr || !user) return json({ error: "Unauthorized" }, 401);
 
     const body = await req.json();
-    const { conversation_id, message } = body as { conversation_id?: string; message: string };
+    const { conversation_id, message, image } = body as {
+      conversation_id?: string;
+      message: string;
+      image?: string; // optional base64 data URL of a screen-region capture
+    };
     if (!message || typeof message !== "string") return json({ error: "message required" }, 400);
+
+    // Basic guard on attached image size (~ 8MB cap on the data URL)
+    if (image && (typeof image !== "string" || !image.startsWith("data:image/") || image.length > 8_000_000)) {
+      return json({ error: "Invalid or oversized image attachment" }, 400);
+    }
 
     // Resolve account
     const { data: account } = await admin.from("accounts").select("*").eq("user_id", user.id).maybeSingle();
@@ -488,8 +497,9 @@ Deno.serve(async (req) => {
       if (!convo || convo.account_id !== account.id) return json({ error: "Forbidden" }, 403);
     }
 
-    // Persist user message
-    await admin.from("assistant_messages").insert({ conversation_id: convoId, role: "user", content: message });
+    // Persist user message (text only — raw image is not stored)
+    const persistedUserContent = image ? `[screenshot attached] ${message}` : message;
+    await admin.from("assistant_messages").insert({ conversation_id: convoId, role: "user", content: persistedUserContent });
 
     // Load history
     const { data: history } = await admin
@@ -513,15 +523,42 @@ Deno.serve(async (req) => {
     const tools = [...READ_TOOLS, ...APP_ACTION_TOOLS, ...(writeEnabled ? WRITE_TOOLS : [])];
     const systemPrompt = buildSystemPrompt({ portalId: account.hubspot_portal_id, writeEnabled, counts: ctxCounts });
 
-    // Build OpenAI-format messages
+    // Build OpenAI-format messages. The history user message we just inserted
+    // is replaced for THIS turn with a multimodal payload that carries the
+    // actual image bytes (so Gemini can see it). Future turns will only see
+    // the "[screenshot attached]" marker — which is fine.
     const messages: any[] = [{ role: "system", content: systemPrompt }];
-    for (const m of history || []) {
-      const msg: any = { role: m.role, content: m.content || "" };
-      if (m.tool_calls) msg.tool_calls = m.tool_calls;
-      if (m.tool_call_id) msg.tool_call_id = m.tool_call_id;
-      if (m.name) msg.name = m.name;
-      messages.push(msg);
+    if (image) {
+      messages.push({
+        role: "system",
+        content:
+          "The user attached a screenshot of their current view in the Aetheris operator app. " +
+          "Describe what you see in the context of HubSpot CRM data, the Hygiene Queue, leak audit, " +
+          "or whatever is visible. If you spot specific record IDs, deal names, owner names, or numbers, " +
+          "feel free to use the read tools to look them up and give a richer answer.",
+      });
     }
+    const historyArr = history || [];
+    for (let i = 0; i < historyArr.length; i++) {
+      const m = historyArr[i];
+      const isLastUser = image && i === historyArr.length - 1 && m.role === "user";
+      if (isLastUser) {
+        messages.push({
+          role: "user",
+          content: [
+            { type: "text", text: message || "Explain what's in this screenshot." },
+            { type: "image_url", image_url: { url: image } },
+          ],
+        });
+      } else {
+        const msg: any = { role: m.role, content: m.content || "" };
+        if (m.tool_calls) msg.tool_calls = m.tool_calls;
+        if (m.tool_call_id) msg.tool_call_id = m.tool_call_id;
+        if (m.name) msg.name = m.name;
+        messages.push(msg);
+      }
+    }
+
 
     // Loop: call model, run any read tools, repeat until model returns plain content or proposes a write
     const proposedActions: any[] = [];
