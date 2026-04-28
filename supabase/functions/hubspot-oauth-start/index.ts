@@ -14,24 +14,15 @@ const corsHeaders = {
 // ---------------------------------------------------------------------------
 
 const REQUIRED_SCOPES = [
-  "oauth",
-  "automation",
   "crm.objects.contacts.read",
   "crm.objects.contacts.write",
   "crm.objects.deals.read",
   "crm.objects.deals.write",
   "crm.objects.companies.read",
-  "crm.objects.companies.write",
   "crm.objects.owners.read",
-  "crm.schemas.contacts.read",
-  "crm.schemas.deals.read",
-  "crm.schemas.companies.read",
-  
-  "crm.objects.subscriptions.read",
-  "crm.objects.subscriptions.write",
+  "automation",
+  "oauth",
 ];
-
-const OPTIONAL_SCOPES: string[] = [];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
