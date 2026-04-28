@@ -17,6 +17,11 @@ export type AssistantMessage = {
   content: string;
   proposed_actions?: ProposedAction[];
   action_id?: string;
+  // Populated immediately after a confirmed write so we can render a diff card
+  // inline in the chat (before/after + verified badge).
+  action_after?: any;
+  action_before?: any;
+  action_status?: string;
   created_at?: string;
 };
 
@@ -93,8 +98,11 @@ export function useAssistant(initialConversationId?: string) {
         ...prev,
         {
           role: "assistant",
-          content: `✓ ${data?.message || "Done."}`,
+          content: `${data?.status === "partial" ? "⚠" : "✓"} ${data?.message || "Done."}`,
           action_id: data?.action_id,
+          action_after: data?.after_state,
+          action_before: data?.before_state,
+          action_status: data?.status,
         },
       ]);
     } catch (e: any) {
