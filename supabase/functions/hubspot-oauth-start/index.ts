@@ -26,37 +26,12 @@ const REQUIRED_SCOPES = [
   "crm.schemas.contacts.read",
   "crm.schemas.deals.read",
   "crm.schemas.companies.read",
-  "crm.objects.engagements.read",
-];
-
-const OPTIONAL_SCOPES = [
-  "content",
-  "webhooks",
+  "crm.objects.engagements",
   "crm.objects.subscriptions.read",
   "crm.objects.subscriptions.write",
-  "crm.objects.invoices.read",
-  "crm.objects.invoices.write",
-  "crm.objects.orders.read",
-  "crm.objects.orders.write",
-  "crm.objects.line_items.read",
-  "crm.objects.line_items.write",
-  "crm.objects.notes.read",
-  "crm.objects.notes.write",
-  "crm.objects.calls.read",
-  "crm.objects.calls.write",
-  "crm.objects.emails.read",
-  "crm.objects.emails.write",
-  "crm.objects.meetings.read",
-  "crm.objects.meetings.write",
-  "crm.objects.tasks.read",
-  "crm.objects.tasks.write",
-  "crm.objects.goals.read",
-  "crm.objects.goals.write",
-  "crm.objects.custom_objects.read",
-  "crm.objects.custom_objects.write",
-  "crm.objects.lists.read",
-  "crm.objects.lists.write",
 ];
+
+const OPTIONAL_SCOPES: string[] = [];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
