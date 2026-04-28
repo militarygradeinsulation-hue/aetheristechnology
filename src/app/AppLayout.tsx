@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse, Bot, History } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse, Bot, History, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AssistantPanel } from "./components/AssistantPanel";
@@ -79,8 +79,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             Settings
           </NavLink>
         </nav>
-        <div className="p-4 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-2 truncate">{user.email}</div>
+        <div className="p-4 border-t border-border space-y-3">
+          <Link
+            to="/admin"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Admin
+          </Link>
+          <div className="text-xs text-muted-foreground truncate">{user.email}</div>
           <button
             onClick={handleSignOut}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -97,9 +104,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <Activity className="h-4 w-4 text-primary" />
             <span className="font-semibold text-sm">Revenue Recovery</span>
           </Link>
-          <button onClick={handleSignOut} className="text-xs text-muted-foreground">
-            Sign out
-          </button>
+          <div className="flex items-center gap-3">
+            <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+              <ArrowLeft className="h-3 w-3" />
+              Admin
+            </Link>
+            <button onClick={handleSignOut} className="text-xs text-muted-foreground">
+              Sign out
+            </button>
+          </div>
         </header>
         <div className="p-6 md:p-10 max-w-6xl mx-auto">{children}</div>
       </main>
