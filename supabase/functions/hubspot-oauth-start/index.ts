@@ -21,7 +21,10 @@ const REQUIRED_SCOPES = [
   "crm.objects.companies.read",
   "crm.objects.companies.write",
   "crm.objects.owners.read",
-  "automation",
+  "crm.schemas.contacts.read",
+  "crm.schemas.deals.read",
+  "crm.schemas.companies.read",
+  "crm.lists.read",
   "oauth",
 ];
 
