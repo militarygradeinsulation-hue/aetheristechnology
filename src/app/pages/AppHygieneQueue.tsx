@@ -310,6 +310,23 @@ const AppHygieneQueue = () => {
                           {a.progress?.processed || 0} / {a.progress?.total || 0}
                         </span>
                       )}
+                      {((a as any)._duplicateCount ?? 0) > 0 && (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded border bg-muted/40 text-muted-foreground border-border inline-flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          +{(a as any)._duplicateCount} earlier run{(a as any)._duplicateCount === 1 ? "" : "s"}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dismissDuplicates((a as any)._duplicateIds || []);
+                            }}
+                            className="text-foreground hover:text-amber-400 underline-offset-2 hover:underline"
+                          >
+                            Dismiss
+                          </button>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>
