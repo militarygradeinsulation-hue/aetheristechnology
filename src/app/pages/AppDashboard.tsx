@@ -112,6 +112,30 @@ const AppDashboard = () => {
             <StatCard label="Engagements" value={stats.engagements.toLocaleString()} icon={Activity} />
           </div>
         )}
+
+        {isConnected && changes24h && (
+          <Link
+            to="/app/changes"
+            className="block bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <History className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Changes pushed to HubSpot · last 24h</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {changes24h.total === 0
+                      ? "No changes yet — ask the Co-Pilot to update something."
+                      : `${changes24h.verified} verified${changes24h.partial ? ` · ${changes24h.partial} partial` : ""}${changes24h.undone ? ` · ${changes24h.undone} undone` : ""}`}
+                  </div>
+                </div>
+              </div>
+              <div className="text-2xl font-mono font-semibold text-primary">{changes24h.total}</div>
+            </div>
+          </Link>
+        )}
       </div>
     </AppLayout>
   );
