@@ -21,7 +21,7 @@ const APP_ACTION_TOOLS = [
   "trigger_sync", "trigger_hygiene_scan", "trigger_leak_audit",
   "approve_hygiene_action", "reject_hygiene_action", "execute_hygiene_action",
   "undo_assistant_action", "archive_audit", "restore_audit", "delete_audit_permanently",
-  "disconnect_hubspot",
+  "disconnect_hubspot", "reconnect_hubspot",
 ];
 
 function requireWriteScopes(account: any) {

@@ -304,6 +304,14 @@ const APP_ACTION_TOOLS = [
       parameters: { type: "object", properties: {} },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "reconnect_hubspot",
+      description: "Send the user to Settings to re-authorize HubSpot (e.g. after an expired token or missing scopes). Opens /app/settings with a toast.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
 ];
 
 const WRITE_TOOLS = [
@@ -798,6 +806,7 @@ async function buildProposalPreview(
   if (toolName === "restore_audit") return { summary: `Restore audit ${args.audit_id} from trash`, affected: 0 };
   if (toolName === "delete_audit_permanently") return { summary: `PERMANENTLY delete audit ${args.audit_id}`, affected: 0 };
   if (toolName === "disconnect_hubspot") return { summary: "Disconnect HubSpot from this account", affected: 0 };
+  if (toolName === "reconnect_hubspot") return { summary: "Open Settings to reconnect HubSpot", affected: 0 };
   if (toolName === "create_contact" || toolName === "create_deal" || toolName === "create_company") {
     const t = toolName.replace("create_", "");
     return { summary: `Create new ${t} in HubSpot`, affected: 1, sample: [args.properties] };
