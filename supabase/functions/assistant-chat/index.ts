@@ -385,6 +385,154 @@ const WRITE_TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "create_contact",
+      description: "Create a new HubSpot contact. Requires user confirm.",
+      parameters: {
+        type: "object",
+        required: ["properties"],
+        properties: {
+          properties: { type: "object", description: "HubSpot contact properties (email is recommended)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_deal",
+      description: "Create a new HubSpot deal. Requires user confirm.",
+      parameters: {
+        type: "object",
+        required: ["properties"],
+        properties: {
+          properties: { type: "object", description: "HubSpot deal properties (dealname, amount, dealstage, pipeline, hubspot_owner_id...)." },
+          associate_contact_id: { type: "string", description: "Optional contact hubspot_id to associate." },
+          associate_company_id: { type: "string", description: "Optional company hubspot_id to associate." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_company",
+      description: "Create a new HubSpot company. Requires user confirm.",
+      parameters: {
+        type: "object",
+        required: ["properties"],
+        properties: { properties: { type: "object", description: "HubSpot company properties (name, domain...)." } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_contact",
+      description: "Archive (delete) a HubSpot contact. Requires user confirm.",
+      parameters: { type: "object", required: ["hubspot_id"], properties: { hubspot_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_deal",
+      description: "Archive (delete) a HubSpot deal. Requires user confirm.",
+      parameters: { type: "object", required: ["hubspot_id"], properties: { hubspot_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_company",
+      description: "Archive (delete) a HubSpot company. Requires user confirm.",
+      parameters: { type: "object", required: ["hubspot_id"], properties: { hubspot_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "bulk_update_contacts",
+      description: "Update properties on many contacts matching a filter. Capped at 500.",
+      parameters: {
+        type: "object",
+        required: ["filter", "properties"],
+        properties: {
+          filter: { type: "object", description: "{ lifecycle_stage?, owner_id?, inactive_days?, search? }" },
+          properties: { type: "object" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "bulk_delete_deals",
+      description: "Archive many HubSpot deals matching a filter. Capped at 500. Requires user confirm.",
+      parameters: {
+        type: "object",
+        required: ["filter"],
+        properties: {
+          filter: { type: "object", description: "{ stage?, owner_id?, min_amount?, max_amount?, stalled_days? }" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_note_to_record",
+      description: "Add a note engagement to a HubSpot contact, deal, or company.",
+      parameters: {
+        type: "object",
+        required: ["type", "hubspot_id", "body"],
+        properties: {
+          type: { type: "string", enum: ["contact", "deal", "company"] },
+          hubspot_id: { type: "string" },
+          body: { type: "string", description: "Plain-text or simple-HTML note body." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_task_for_record",
+      description: "Create a HubSpot task associated to a contact, deal, or company.",
+      parameters: {
+        type: "object",
+        required: ["type", "hubspot_id", "subject"],
+        properties: {
+          type: { type: "string", enum: ["contact", "deal", "company"] },
+          hubspot_id: { type: "string" },
+          subject: { type: "string" },
+          body: { type: "string" },
+          due_in_days: { type: "number", description: "Due date offset from today (default 1)." },
+          owner_id: { type: "string", description: "Optional HubSpot owner id." },
+          priority: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"] },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "associate_records",
+      description: "Create an association between two HubSpot records (e.g. attach contact to deal).",
+      parameters: {
+        type: "object",
+        required: ["from_type", "from_id", "to_type", "to_id"],
+        properties: {
+          from_type: { type: "string", enum: ["contact", "deal", "company"] },
+          from_id: { type: "string" },
+          to_type: { type: "string", enum: ["contact", "deal", "company"] },
+          to_id: { type: "string" },
+        },
+      },
+    },
+  },
 ];
 
 const TOOL_NAMES = {
