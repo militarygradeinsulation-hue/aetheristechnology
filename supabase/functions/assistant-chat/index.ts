@@ -465,6 +465,20 @@ const WRITE_TOOLS = [
         },
       },
     },
+  {
+    type: "function",
+    function: {
+      name: "set_lifecycle_stage",
+      description: "Shorthand: set lifecyclestage on all contacts matching a filter. Capped at 500.",
+      parameters: {
+        type: "object",
+        required: ["filter", "stage"],
+        properties: {
+          filter: { type: "object", description: "{ lifecycle_stage?, owner_id?, inactive_days?, search? }" },
+          stage: { type: "string", description: "Target lifecyclestage value (e.g. 'lead','marketingqualifiedlead','customer')." },
+        },
+      },
+    },
   },
   {
     type: "function",
@@ -793,6 +807,20 @@ async function buildProposalPreview(
     const table = t === "deal" ? "mirror_deals" : t === "company" ? "mirror_companies" : "mirror_contacts";
     const { data: before } = await admin.from(table).select("*").eq("account_id", accountId).eq("hubspot_id", String(args.hubspot_id)).maybeSingle();
     return { summary: `Archive (delete) ${t} #${args.hubspot_id}`, affected: 1, before };
+  }
+  if (toolName === "set_lifecycle_stage") {
+    const f = args.filter || {};
+    let q = admin.from("mirror_contacts").select("hubspot_id,first_name,last_name,email,lifecycle_stage", { count: "exact" }).eq("account_id", accountId);
+    if (f.lifecycle_stage) q = q.eq("lifecycle_stage", f.lifecycle_stage);
+    if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+    if (f.search) q = q.or(`first_name.ilike.%${f.search}%,last_name.ilike.%${f.search}%,email.ilike.%${f.search}%`);
+    if (typeof f.inactive_days === "number") {
+      const cutoff = new Date(Date.now() - f.inactive_days * 86400_000).toISOString();
+      q = q.lt("last_activity_date", cutoff);
+    }
+    q = q.limit(10);
+    const { data, count } = await q;
+    return { summary: `Set lifecyclestage="${args.stage}" on ${count ?? 0} contacts`, affected: Math.min(count ?? 0, 500), sample: data || [] };
   }
   if (toolName === "bulk_update_contacts") {
     const f = args.filter || {};
