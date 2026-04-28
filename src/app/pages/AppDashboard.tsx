@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Users, Briefcase, DollarSign, Activity } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Users, Briefcase, DollarSign, Activity, History } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { useAccount } from "../lib/useAccount";
 import { HubSpotConnectCard } from "../components/HubSpotConnectCard";
@@ -9,6 +9,7 @@ import { StatCard } from "../components/StatCard";
 import { RunAuditCard } from "../components/RunAuditCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getChangesCount24h } from "../lib/changes";
 
 interface MirrorStats {
   contacts: number;
@@ -20,6 +21,7 @@ interface MirrorStats {
 const AppDashboard = () => {
   const { account, loading, refetch } = useAccount();
   const [stats, setStats] = useState<MirrorStats>({ contacts: 0, deals: 0, pipelineValue: 0, engagements: 0 });
+  const [changes24h, setChanges24h] = useState<{ total: number; verified: number; partial: number; undone: number } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
@@ -50,6 +52,19 @@ const AppDashboard = () => {
     };
     loadStats();
   }, [account?.id, account?.last_sync_at]);
+
+  // Poll the 24h HubSpot-changes counter for the dashboard widget.
+  useEffect(() => {
+    if (!account?.id) return;
+    let cancelled = false;
+    const tick = async () => {
+      const c = await getChangesCount24h(account.id);
+      if (!cancelled) setChanges24h(c);
+    };
+    tick();
+    const i = setInterval(tick, 15_000);
+    return () => { cancelled = true; clearInterval(i); };
+  }, [account?.id]);
 
   // Poll while sync is running
   useEffect(() => {
