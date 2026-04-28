@@ -357,6 +357,205 @@ Deno.serve(async (req) => {
           resultMessage = `Reassigned ${ok} of ${ids.length} deals from owner ${from} to ${to}${fail ? ` (${fail} failed)` : ""}.`;
         }
 
+      // ---------- Create record ----------
+      } else if (tool_name === "create_contact" || tool_name === "create_deal" || tool_name === "create_company") {
+        requireWriteScopes(account);
+        const t = tool_name.replace("create_", "") as "contact" | "deal" | "company";
+        const props = args.properties || {};
+        if (!Object.keys(props).length) throw new Error("properties required");
+        const token = await getHubSpotAccessToken(admin, account);
+        const created = await fetchHubSpot(
+          "POST",
+          `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(t)}`,
+          token,
+          { properties: props },
+        );
+        const newId = created?.id;
+        // Optional associations on deal create
+        if (t === "deal" && newId) {
+          if (args.associate_contact_id) {
+            try {
+              await fetchHubSpot(
+                "PUT",
+                `${HUBSPOT_API_BASE}/crm/v4/objects/deals/${newId}/associations/default/contacts/${args.associate_contact_id}`,
+                token,
+              );
+            } catch (e) { console.error("[create_deal] assoc contact failed", (e as Error).message); }
+          }
+          if (args.associate_company_id) {
+            try {
+              await fetchHubSpot(
+                "PUT",
+                `${HUBSPOT_API_BASE}/crm/v4/objects/deals/${newId}/associations/default/companies/${args.associate_company_id}`,
+                token,
+              );
+            } catch (e) { console.error("[create_deal] assoc company failed", (e as Error).message); }
+          }
+        }
+        affected = 1;
+        afterState = { hubspot_response: created };
+        const portalId = account.hubspot_portal_id;
+        const link = portalId && newId ? `https://app.hubspot.com/contacts/${portalId}/${objectPath(t)}/${newId}` : null;
+        resultMessage = `Created ${t} ${newId || ""}${link ? ` (${link})` : ""}.`;
+
+      // ---------- Delete record ----------
+      } else if (tool_name === "delete_contact" || tool_name === "delete_deal" || tool_name === "delete_company") {
+        requireWriteScopes(account);
+        const t = tool_name.replace("delete_", "") as "contact" | "deal" | "company";
+        const id = String(args.hubspot_id);
+        if (!id) throw new Error("hubspot_id required");
+        beforeState = await loadMirror(admin, account.id, t, id);
+        const token = await getHubSpotAccessToken(admin, account);
+        await fetchHubSpot("DELETE", `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(t)}/${id}`, token);
+        affected = 1;
+        afterState = { archived: true, id };
+        resultMessage = `Archived ${t} ${id} in HubSpot.`;
+
+      // ---------- Bulk update contacts ----------
+      } else if (tool_name === "bulk_update_contacts") {
+        requireWriteScopes(account);
+        const f = args.filter || {};
+        const props = args.properties || {};
+        if (!Object.keys(props).length) throw new Error("properties required");
+        let q = admin.from("mirror_contacts").select("hubspot_id").eq("account_id", account.id);
+        if (f.lifecycle_stage) q = q.eq("lifecycle_stage", f.lifecycle_stage);
+        if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+        if (f.search) q = q.or(`first_name.ilike.%${f.search}%,last_name.ilike.%${f.search}%,email.ilike.%${f.search}%`);
+        if (typeof f.inactive_days === "number") {
+          const cutoff = new Date(Date.now() - f.inactive_days * 86400_000).toISOString();
+          q = q.lt("last_activity_date", cutoff);
+        }
+        q = q.limit(500);
+        const { data: rows } = await q;
+        const ids = (rows || []).map((r: any) => r.hubspot_id).filter(Boolean);
+        if (!ids.length) {
+          resultMessage = "No contacts matched the filter.";
+        } else {
+          const token = await getHubSpotAccessToken(admin, account);
+          const beforeRows = await admin.from("mirror_contacts").select("hubspot_id,email,lifecycle_stage").eq("account_id", account.id).in("hubspot_id", ids);
+          beforeState = { contacts: beforeRows.data };
+          let ok = 0, fail = 0;
+          for (const id of ids) {
+            try {
+              await fetchHubSpot("PATCH", `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${id}`, token, { properties: props });
+              ok++;
+            } catch (e) { fail++; console.error("[bulk_update_contacts] failed", id, (e as Error).message); }
+            await sleep(RATE_DELAY_MS);
+          }
+          affected = ok;
+          afterState = { updated: ok, failed: fail, ids };
+          resultMessage = `Updated ${ok} of ${ids.length} contacts${fail ? ` (${fail} failed)` : ""}.`;
+        }
+
+      // ---------- Bulk delete deals ----------
+      } else if (tool_name === "bulk_delete_deals") {
+        requireWriteScopes(account);
+        const f = args.filter || {};
+        let q = admin.from("mirror_deals").select("hubspot_id,deal_name,stage,amount,owner_id").eq("account_id", account.id);
+        if (f.stage) q = q.eq("stage", f.stage);
+        if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+        if (typeof f.min_amount === "number") q = q.gte("amount", f.min_amount);
+        if (typeof f.max_amount === "number") q = q.lte("amount", f.max_amount);
+        if (typeof f.stalled_days === "number") {
+          const cutoff = new Date(Date.now() - f.stalled_days * 86400_000).toISOString();
+          q = q.lt("last_activity_date", cutoff);
+        }
+        q = q.limit(500);
+        const { data: rows } = await q;
+        const ids = (rows || []).map((r: any) => r.hubspot_id).filter(Boolean);
+        if (!ids.length) {
+          resultMessage = "No deals matched the filter.";
+        } else {
+          beforeState = { deals: rows };
+          const token = await getHubSpotAccessToken(admin, account);
+          let ok = 0, fail = 0;
+          for (const id of ids) {
+            try {
+              await fetchHubSpot("DELETE", `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${id}`, token);
+              ok++;
+            } catch (e) { fail++; console.error("[bulk_delete_deals] failed", id, (e as Error).message); }
+            await sleep(RATE_DELAY_MS);
+          }
+          affected = ok;
+          afterState = { archived: ok, failed: fail, ids };
+          resultMessage = `Archived ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}.`;
+        }
+
+      // ---------- Add note ----------
+      } else if (tool_name === "add_note_to_record") {
+        requireWriteScopes(account);
+        const t = String(args.type) as "contact" | "deal" | "company";
+        const id = String(args.hubspot_id);
+        const body = String(args.body || "");
+        if (!id || !body) throw new Error("type, hubspot_id, body required");
+        const token = await getHubSpotAccessToken(admin, account);
+        // Create note then associate
+        const created = await fetchHubSpot("POST", `${HUBSPOT_API_BASE}/crm/v3/objects/notes`, token, {
+          properties: { hs_note_body: body, hs_timestamp: Date.now() },
+        });
+        const noteId = created?.id;
+        if (noteId) {
+          try {
+            await fetchHubSpot(
+              "PUT",
+              `${HUBSPOT_API_BASE}/crm/v4/objects/notes/${noteId}/associations/default/${objectPath(t)}/${id}`,
+              token,
+            );
+          } catch (e) { console.error("[add_note] assoc failed", (e as Error).message); }
+        }
+        affected = 1;
+        afterState = { note_id: noteId };
+        resultMessage = `Added note to ${t} ${id}.`;
+
+      // ---------- Create task ----------
+      } else if (tool_name === "create_task_for_record") {
+        requireWriteScopes(account);
+        const t = String(args.type) as "contact" | "deal" | "company";
+        const id = String(args.hubspot_id);
+        if (!id || !args.subject) throw new Error("type, hubspot_id, subject required");
+        const dueMs = Date.now() + ((Number(args.due_in_days) || 1) * 86400_000);
+        const props: Record<string, unknown> = {
+          hs_task_subject: args.subject,
+          hs_task_body: args.body || "",
+          hs_task_status: "NOT_STARTED",
+          hs_task_priority: args.priority || "MEDIUM",
+          hs_timestamp: dueMs,
+        };
+        if (args.owner_id) props.hubspot_owner_id = args.owner_id;
+        const token = await getHubSpotAccessToken(admin, account);
+        const created = await fetchHubSpot("POST", `${HUBSPOT_API_BASE}/crm/v3/objects/tasks`, token, { properties: props });
+        const taskId = created?.id;
+        if (taskId) {
+          try {
+            await fetchHubSpot(
+              "PUT",
+              `${HUBSPOT_API_BASE}/crm/v4/objects/tasks/${taskId}/associations/default/${objectPath(t)}/${id}`,
+              token,
+            );
+          } catch (e) { console.error("[create_task] assoc failed", (e as Error).message); }
+        }
+        affected = 1;
+        afterState = { task_id: taskId };
+        resultMessage = `Created task "${args.subject}" on ${t} ${id}.`;
+
+      // ---------- Associate records ----------
+      } else if (tool_name === "associate_records") {
+        requireWriteScopes(account);
+        const ft = String(args.from_type) as "contact" | "deal" | "company";
+        const tt = String(args.to_type) as "contact" | "deal" | "company";
+        const fid = String(args.from_id);
+        const tid = String(args.to_id);
+        if (!fid || !tid) throw new Error("from_id and to_id required");
+        const token = await getHubSpotAccessToken(admin, account);
+        await fetchHubSpot(
+          "PUT",
+          `${HUBSPOT_API_BASE}/crm/v4/objects/${objectPath(ft)}/${fid}/associations/default/${objectPath(tt)}/${tid}`,
+          token,
+        );
+        affected = 1;
+        afterState = { associated: { from: { type: ft, id: fid }, to: { type: tt, id: tid } } };
+        resultMessage = `Associated ${ft} ${fid} ↔ ${tt} ${tid}.`;
+
       } else {
         throw new Error(`Unsupported tool: ${tool_name}`);
       }
