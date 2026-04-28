@@ -272,7 +272,7 @@ const AppHygieneQueue = () => {
         </div>
       )}
 
-      {grouped.length === 0 ? (
+      {grouped.length === 0 && uncategorized.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <p className="text-sm text-muted-foreground">No pending actions. Run a scan from the Scan tab.</p>
         </div>
