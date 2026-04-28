@@ -315,15 +315,15 @@ const AppHygieneQueue = () => {
                       <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3">
                         <div className="text-sm text-rose-300 font-medium mb-1">Last run failed</div>
                         <div className="text-xs text-rose-300/80 mb-3 break-words">{a.error_message}</div>
-                        {/MISSING_SCOPES|missing.*scopes|missing write scopes/i.test(a.error_message) && (
+                        {/MISSING_SCOPES|missing.*scopes|missing write scopes|not connected|no refresh token|reconnect hubspot/i.test(a.error_message) && (
                           <Button
                             asChild
                             size="sm"
                             className="gap-2 bg-amber-500 hover:bg-amber-600 text-black"
                           >
-                            <Link to="/app/settings?connect=hubspot">
+                            <Link to="/app/dashboard">
                               <Plug className="h-3.5 w-3.5" />
-                              Reconnect HubSpot
+                              Connect HubSpot
                             </Link>
                           </Button>
                         )}
