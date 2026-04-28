@@ -58,25 +58,20 @@ serve(async (req) => {
 
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-oauth-callback`;
 
-    // Dedupe + ensure required and optional don't overlap (Required wins).
-    const requiredSet = new Set(REQUIRED_SCOPES);
-    const optionalSet = new Set(OPTIONAL_SCOPES.filter((s) => !requiredSet.has(s)));
-    const required = Array.from(requiredSet).join(" ");
-    const optional = Array.from(optionalSet).join(" ");
+    // Strict required scopes only — no optional_scope param.
+    const required = Array.from(new Set(REQUIRED_SCOPES)).join(" ");
 
     const authorizeUrl =
       `https://app.hubspot.com/oauth/authorize?client_id=${clientId}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&scope=${encodeURIComponent(required)}` +
-      `&optional_scope=${encodeURIComponent(optional)}` +
       `&state=${encodeURIComponent(state)}`;
 
     console.log("[hubspot-oauth-start] authorize URL built", {
       client_id_preview: clientId.slice(0, 8),
       redirect_uri: redirectUri,
       account_id: account.id,
-      required_count: requiredSet.size,
-      optional_count: optionalSet.size,
+      required_count: required.split(" ").length,
       url_bytes: authorizeUrl.length,
     });
 
