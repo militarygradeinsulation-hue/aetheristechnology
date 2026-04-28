@@ -240,6 +240,70 @@ const APP_ACTION_TOOLS = [
       parameters: { type: "object", properties: {} },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "approve_hygiene_action",
+      description: "Approve a pending hygiene queue action so it can be executed. Pass the action_id from list_hygiene_queue.",
+      parameters: { type: "object", required: ["action_id"], properties: { action_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "reject_hygiene_action",
+      description: "Reject (dismiss) a pending hygiene queue action. Pass the action_id.",
+      parameters: { type: "object", required: ["action_id"], properties: { action_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "execute_hygiene_action",
+      description: "Approve AND immediately run a hygiene queue action against HubSpot. Use this when the user says 'fix it' or 'run the fix'.",
+      parameters: { type: "object", required: ["action_id"], properties: { action_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "undo_assistant_action",
+      description: "Undo a previous Co-Pilot action by id (rolls back the HubSpot write using its before_state).",
+      parameters: { type: "object", required: ["action_id"], properties: { action_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "archive_audit",
+      description: "Move a Leak Audit to the trash bin (soft-delete). Pass the audit id.",
+      parameters: { type: "object", required: ["audit_id"], properties: { audit_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "restore_audit",
+      description: "Restore an archived Leak Audit from the trash bin.",
+      parameters: { type: "object", required: ["audit_id"], properties: { audit_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_audit_permanently",
+      description: "Permanently delete an archived Leak Audit. Cannot be undone.",
+      parameters: { type: "object", required: ["audit_id"], properties: { audit_id: { type: "string" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "disconnect_hubspot",
+      description: "Disconnect HubSpot from this account. The user will need to re-authorize to sync or write again. Requires confirm.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
 ];
 
 const WRITE_TOOLS = [
