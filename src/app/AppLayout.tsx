@@ -104,9 +104,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <Activity className="h-4 w-4 text-primary" />
             <span className="font-semibold text-sm">Revenue Recovery</span>
           </Link>
-          <button onClick={handleSignOut} className="text-xs text-muted-foreground">
-            Sign out
-          </button>
+          <div className="flex items-center gap-3">
+            <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+              <ArrowLeft className="h-3 w-3" />
+              Admin
+            </Link>
+            <button onClick={handleSignOut} className="text-xs text-muted-foreground">
+              Sign out
+            </button>
+          </div>
         </header>
         <div className="p-6 md:p-10 max-w-6xl mx-auto">{children}</div>
       </main>
