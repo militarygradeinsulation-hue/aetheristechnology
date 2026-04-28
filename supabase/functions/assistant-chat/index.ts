@@ -465,6 +465,20 @@ const WRITE_TOOLS = [
         },
       },
     },
+  {
+    type: "function",
+    function: {
+      name: "set_lifecycle_stage",
+      description: "Shorthand: set lifecyclestage on all contacts matching a filter. Capped at 500.",
+      parameters: {
+        type: "object",
+        required: ["filter", "stage"],
+        properties: {
+          filter: { type: "object", description: "{ lifecycle_stage?, owner_id?, inactive_days?, search? }" },
+          stage: { type: "string", description: "Target lifecyclestage value (e.g. 'lead','marketingqualifiedlead','customer')." },
+        },
+      },
+    },
   },
   {
     type: "function",
