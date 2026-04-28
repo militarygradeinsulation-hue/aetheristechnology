@@ -113,20 +113,24 @@ const AppHygieneQueue = () => {
   // the queue accumulates many "Owner Issues / Missing Critical Fields / ..."
   // entries that say the same thing. Keep only the newest action per category
   // and remember how many older duplicates it represents.
-  const dedupedActions = useMemo(() => {
+  // Consolidate duplicate rows strictly by category. Rows missing a category
+  // never get merged — they bucket into `uncategorized` and render in their
+  // own section so unrelated rows aren't collapsed together by an id fallback.
+  const { categorized: dedupedActions, uncategorized } = useMemo(() => {
     const byCat = new Map<string, HygieneActionRow & { _duplicateCount?: number; _duplicateIds?: string[] }>();
-    // actions arrive newest-first from `load()`; first hit per category wins.
+    const uncat: HygieneActionRow[] = [];
     for (const a of actions) {
-      const key = a.category || a.id;
-      const existing = byCat.get(key);
+      const cat = (a.category || "").trim();
+      if (!cat) { uncat.push(a); continue; }
+      const existing = byCat.get(cat);
       if (!existing) {
-        byCat.set(key, { ...a, _duplicateCount: 0, _duplicateIds: [] });
+        byCat.set(cat, { ...a, _duplicateCount: 0, _duplicateIds: [] });
       } else {
         existing._duplicateCount = (existing._duplicateCount || 0) + 1;
         existing._duplicateIds = [...(existing._duplicateIds || []), a.id];
       }
     }
-    return Array.from(byCat.values());
+    return { categorized: Array.from(byCat.values()), uncategorized: uncat };
   }, [actions]);
 
   // Locked sort: compute order once per (view, new-row arrival), then freeze.
@@ -268,7 +272,7 @@ const AppHygieneQueue = () => {
         </div>
       )}
 
-      {grouped.length === 0 ? (
+      {grouped.length === 0 && uncategorized.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <p className="text-sm text-muted-foreground">No pending actions. Run a scan from the Scan tab.</p>
         </div>
@@ -445,6 +449,51 @@ const AppHygieneQueue = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {uncategorized.length > 0 && (
+        <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between gap-3 p-4 border-b border-border">
+            <div>
+              <h2 className="text-sm font-medium text-foreground">Uncategorized actions</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {uncategorized.length} pending — these rows have no category and are not consolidated.
+              </p>
+            </div>
+            <Button
+              onClick={() => dismissDuplicates(uncategorized.map((u) => u.id))}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <X className="h-3.5 w-3.5" />
+              Dismiss all
+            </Button>
+          </div>
+          <div className="divide-y divide-border">
+            {uncategorized.map((u) => (
+              <div key={u.id} className="flex items-center justify-between gap-3 p-3 text-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-foreground">
+                    {u.category_label || "(no category)"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {u.affected_count.toLocaleString()} records · {new Date(u.created_at).toLocaleString()}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => dismissDuplicates([u.id])}
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Dismiss
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
