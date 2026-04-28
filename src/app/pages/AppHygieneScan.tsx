@@ -190,44 +190,103 @@ const AppHygieneScan = () => {
       )}
 
       {latestScan?.status === "complete" && sortedCategories.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {sortedCategories.map((r) => {
-            const meta = categoryDisplay[r.category];
-            const action = actionByCategory[r.category];
-            const conf = action?.confidence || "medium";
-            return (
-              <div key={r.category} className="bg-card border border-border rounded-xl p-5">
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div>
-                    <h3 className="font-semibold">{meta?.label || r.label}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{meta?.description}</p>
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded border whitespace-nowrap ${severityClass(r.severity)}`}>
-                    {r.severity}
-                  </span>
-                </div>
-                <div className="text-3xl font-semibold mb-1">{r.count.toLocaleString()}</div>
-                <div className="text-xs text-muted-foreground mb-4">
-                  {confidenceLabel(conf, action?.recommended_action?.fix_kind)}
-                  {action?.recommended_action?.rationale && (
-                    <span className="block mt-1 italic">{action.recommended_action.rationale}</span>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full gap-2 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
-                  asChild
-                >
-                  <a href="/app/hygiene/queue">
-                    Review in Action Queue
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                </Button>
+        <>
+          {/* Total leak banner */}
+          <div className="mb-6 rounded-xl border border-rose-500/30 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent p-5 flex items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-rose-300 text-xs uppercase tracking-wider font-mono">
+                <DollarSign className="h-3.5 w-3.5" />
+                Estimated annual leak
               </div>
-            );
-          })}
-        </div>
+              <div className="text-3xl font-semibold mt-1">{formatUsd(totalLeak)}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Conservative estimate across {sortedCategories.length} hygiene categories. Expand any field below to see the math.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {sortedCategories.map((r) => {
+              const meta = categoryDisplay[r.category];
+              const action = actionByCategory[r.category];
+              const conf = action?.confidence || "medium";
+              const cost = estimateCategoryCost(r.category, r.count);
+              const model = hygieneCostModels[r.category];
+              return (
+                <div key={r.category} className="bg-card border border-border rounded-xl p-5">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <h3 className="font-semibold">{meta?.label || r.label}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">{meta?.description}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded border whitespace-nowrap ${severityClass(r.severity)}`}>
+                      {r.severity}
+                    </span>
+                  </div>
+
+                  <div className="flex items-end justify-between gap-3 mb-3">
+                    <div>
+                      <div className="text-3xl font-semibold leading-none">{r.count.toLocaleString()}</div>
+                      <div className="text-[11px] text-muted-foreground mt-1 uppercase tracking-wider font-mono">
+                        records affected
+                      </div>
+                    </div>
+                    {model && (
+                      <div className="text-right">
+                        <div className="text-2xl font-semibold leading-none text-rose-300">
+                          {formatUsd(cost)}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-1 uppercase tracking-wider font-mono">
+                          est. leak / yr
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {model && (
+                    <Collapsible>
+                      <CollapsibleTrigger className="group w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground border-t border-border pt-3 mb-3">
+                        <span>Why this costs {formatUsd(cost)}</span>
+                        <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="text-xs text-muted-foreground space-y-2 pb-3">
+                        <p className="leading-relaxed">{model.why}</p>
+                        <div className="rounded border border-border bg-muted/30 px-3 py-2 font-mono text-[11px] text-foreground/80">
+                          {model.formula}
+                        </div>
+                        <div className="text-[11px]">
+                          <span className="text-muted-foreground">Basis:</span>{" "}
+                          <span className="text-foreground/80">{model.basis}</span>
+                          {" · "}
+                          <span className="text-muted-foreground">Per issue:</span>{" "}
+                          <span className="text-foreground/80">${model.perIssue}</span>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
+                  <div className="text-xs text-muted-foreground mb-4">
+                    {confidenceLabel(conf, action?.recommended_action?.fix_kind)}
+                    {action?.recommended_action?.rationale && (
+                      <span className="block mt-1 italic">{action.recommended_action.rationale}</span>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-2 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+                    asChild
+                  >
+                    <a href="/app/hygiene/queue">
+                      Review in Action Queue
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </AppLayout>
   );
