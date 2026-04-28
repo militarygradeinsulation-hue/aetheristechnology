@@ -115,6 +115,7 @@ const PANEL_KEY = "copilot_panel_pos";
 export const AssistantPanel = () => {
   const [open, setOpen] = useState(false);
   const { messages, sending, error, send, confirmAction, undoAction } = useAssistant();
+  const { account } = useAccount();
   const [input, setInput] = useState("");
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
