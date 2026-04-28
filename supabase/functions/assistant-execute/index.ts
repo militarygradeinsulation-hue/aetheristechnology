@@ -21,7 +21,7 @@ const APP_ACTION_TOOLS = [
   "trigger_sync", "trigger_hygiene_scan", "trigger_leak_audit",
   "approve_hygiene_action", "reject_hygiene_action", "execute_hygiene_action",
   "undo_assistant_action", "archive_audit", "restore_audit", "delete_audit_permanently",
-  "disconnect_hubspot",
+  "disconnect_hubspot", "reconnect_hubspot",
 ];
 
 function requireWriteScopes(account: any) {
@@ -227,6 +227,10 @@ Deno.serve(async (req) => {
           if (!inv.ok) throw new Error(`hubspot-disconnect returned ${inv.status}: ${txt.slice(0, 300)}`);
           resultMessage = "HubSpot disconnected.";
           afterState = { invoked: "hubspot-disconnect" };
+
+        } else if (tool_name === "reconnect_hubspot") {
+          resultMessage = "Opening Settings — click 'Reconnect HubSpot' to re-authorize.";
+          afterState = { navigate_to: "/app/settings", toast: "Click Reconnect HubSpot to re-authorize." };
 
         } else {
           // trigger_sync / trigger_hygiene_scan / trigger_leak_audit

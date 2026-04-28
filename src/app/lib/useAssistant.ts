@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ProposedAction = {
@@ -94,6 +95,13 @@ export function useAssistant(initialConversationId?: string) {
       });
       if (err) throw err;
       if (data?.error) throw new Error(data.error);
+      // Frontend hooks for app-actions that need browser-side effects
+      const navTo = data?.after_state?.navigate_to;
+      const toastMsg = data?.after_state?.toast;
+      if (toastMsg) toast(toastMsg);
+      if (typeof navTo === "string" && navTo.startsWith("/")) {
+        setTimeout(() => { window.location.assign(navTo); }, 400);
+      }
       setMessages((prev) => [
         ...prev,
         {
