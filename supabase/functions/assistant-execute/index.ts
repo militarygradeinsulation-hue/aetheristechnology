@@ -44,6 +44,39 @@ async function loadMirror(admin: SupabaseClient, accountId: string, type: "conta
   return data;
 }
 
+// Re-fetch a record from HubSpot and compare against the properties we just wrote.
+// Returns a per-field verification map plus a boolean overall-verified flag.
+async function verifyHubSpot(
+  type: "contact" | "deal" | "company",
+  id: string,
+  token: string,
+  written: Record<string, unknown>,
+): Promise<{ verified: boolean; fields: Record<string, { written: unknown; actual: unknown; match: boolean }>; raw: Record<string, unknown> | null }> {
+  const keys = Object.keys(written);
+  if (!keys.length) return { verified: true, fields: {}, raw: null };
+  try {
+    const url = `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(type)}/${id}?properties=${encodeURIComponent(keys.join(","))}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return { verified: false, fields: {}, raw: null };
+    const body = await res.json();
+    const actual = (body?.properties || {}) as Record<string, unknown>;
+    const fields: Record<string, { written: unknown; actual: unknown; match: boolean }> = {};
+    let allMatch = true;
+    for (const k of keys) {
+      const w = written[k];
+      const a = actual[k];
+      // HubSpot normalizes a lot (strings, casing on enums, currency formatting). Compare loosely.
+      const match = String(w ?? "").trim().toLowerCase() === String(a ?? "").trim().toLowerCase();
+      if (!match) allMatch = false;
+      fields[k] = { written: w, actual: a, match };
+    }
+    return { verified: allMatch, fields, raw: actual };
+  } catch (e) {
+    console.error("[assistant-execute] verify failed", id, (e as Error).message);
+    return { verified: false, fields: {}, raw: null };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
@@ -122,9 +155,15 @@ Deno.serve(async (req) => {
         const token = await getHubSpotAccessToken(admin, account);
         const url = `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(t)}/${id}`;
         const res = await fetchHubSpot("PATCH", url, token, { properties: props });
-        afterState = { hubspot_response: res };
+        // Verify by re-fetching from HubSpot
+        const verify = await verifyHubSpot(t, id, token, props as Record<string, unknown>);
+        afterState = { hubspot_response: res, hubspot_verified: verify };
         affected = 1;
-        resultMessage = `Updated ${t} ${id}.`;
+        const portalId = account.hubspot_portal_id;
+        const link = portalId ? `https://app.hubspot.com/contacts/${portalId}/${objectPath(t)}/${id}` : null;
+        resultMessage = verify.verified
+          ? `Updated ${t} ${id} — verified in HubSpot${link ? ` (${link})` : ""}.`
+          : `Updated ${t} ${id} but HubSpot returned different values for some fields. Check the change log.`;
 
       // ---------- Bulk update deals ----------
       } else if (tool_name === "bulk_update_deals") {
@@ -155,19 +194,29 @@ Deno.serve(async (req) => {
           beforeState = { deals: beforeRows.data };
           let ok = 0;
           let fail = 0;
+          const okIds: string[] = [];
           for (const id of ids) {
             try {
               await fetchHubSpot("PATCH", `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${id}`, token, { properties: props });
               ok++;
+              okIds.push(id);
             } catch (e) {
               fail++;
               console.error("[assistant-execute] bulk PATCH failed", id, (e as Error).message);
             }
             await sleep(RATE_DELAY_MS);
           }
+          // Sample-verify the first 5 successful writes (round-trip GET)
+          const sampleVerify: Array<{ id: string; verified: boolean; fields: Record<string, unknown> }> = [];
+          for (const id of okIds.slice(0, 5)) {
+            const v = await verifyHubSpot("deal", id, token, props as Record<string, unknown>);
+            sampleVerify.push({ id, verified: v.verified, fields: v.fields });
+          }
           affected = ok;
-          afterState = { updated: ok, failed: fail, ids };
-          resultMessage = `Updated ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}.`;
+          afterState = { updated: ok, failed: fail, ids, sample_verified: sampleVerify };
+          const verifiedOk = sampleVerify.filter((v) => v.verified).length;
+          resultMessage = `Updated ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}. Verified ${verifiedOk}/${sampleVerify.length} sampled in HubSpot.`;
+        }
         }
 
       // ---------- Reassign deals ----------
@@ -212,10 +261,17 @@ Deno.serve(async (req) => {
         throw new Error(`Unsupported tool: ${tool_name}`);
       }
 
+      // Determine final status: 'partial' if a verify pass disagreed with what we wrote
+      const verifyBlock = (afterState as any)?.hubspot_verified;
+      const sampleBlock = (afterState as any)?.sample_verified as Array<{ verified: boolean }> | undefined;
+      const singleMismatch = verifyBlock && verifyBlock.verified === false;
+      const sampleMismatch = Array.isArray(sampleBlock) && sampleBlock.length > 0 && sampleBlock.some((v) => !v.verified);
+      const finalStatus = singleMismatch || sampleMismatch ? "partial" : "success";
+
       await admin
         .from("assistant_actions")
         .update({
-          status: "success",
+          status: finalStatus,
           before_state: beforeState,
           after_state: afterState,
           affected_count: affected,
@@ -228,11 +284,11 @@ Deno.serve(async (req) => {
         await admin.from("assistant_messages").insert({
           conversation_id,
           role: "assistant",
-          content: `✓ ${resultMessage}`,
+          content: `${finalStatus === "success" ? "✓" : "⚠"} ${resultMessage}`,
         });
       }
 
-      return json({ ok: true, action_id: actionRow.id, message: resultMessage, affected });
+      return json({ ok: true, status: finalStatus, action_id: actionRow.id, message: resultMessage, affected, after_state: afterState, before_state: beforeState });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed";
       console.error("[assistant-execute] tool error", tool_name, msg);

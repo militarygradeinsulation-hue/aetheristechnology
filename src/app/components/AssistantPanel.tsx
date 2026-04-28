@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch, Minus } from "lucide-react";
+import { Bot, Send, X, Maximize2, RotateCcw, ScanSearch, Minus, ExternalLink, Check, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAssistant, type ProposedAction } from "../lib/useAssistant";
+import { useAssistant, type ProposedAction, type AssistantMessage } from "../lib/useAssistant";
+import { useAccount } from "../lib/useAccount";
 import { useScreenCapture } from "../lib/useScreenCapture";
 import { ScreenCaptureOverlay } from "./ScreenCaptureOverlay";
 
@@ -36,6 +37,75 @@ const ProposalCard = ({
   </div>
 );
 
+// Inline diff for a confirmed write — built from action_before / action_after
+// returned by assistant-execute. Shows verified state + deep link to HubSpot.
+const InlineWriteResult = ({ m, portalId }: { m: AssistantMessage; portalId: string | null }) => {
+  if (!m.action_id || !m.action_after) return null;
+  const after = m.action_after as any;
+  const before = m.action_before as any;
+  const verified = after?.hubspot_verified;
+  const sample = after?.sample_verified as Array<{ id: string; verified: boolean; fields: Record<string, { actual: unknown }> }> | undefined;
+  const status = m.action_status || "success";
+  const isPartial = status === "partial";
+
+  // Single-record write: show field-level diff
+  const fields = verified?.fields as Record<string, { written: unknown; actual: unknown; match: boolean }> | undefined;
+  const fieldEntries = fields ? Object.entries(fields) : [];
+
+  // Build deep link if we can derive object type + id
+  const writtenKeys = fields ? Object.keys(fields) : [];
+  const link = (() => {
+    if (!portalId || !writtenKeys.length) return null;
+    // tool_name not on the message, but we can derive object type from before-state if available
+    if (before?.hubspot_id && before?.email !== undefined) return `https://app.hubspot.com/contacts/${portalId}/contact/${before.hubspot_id}`;
+    if (before?.hubspot_id && before?.amount !== undefined) return `https://app.hubspot.com/contacts/${portalId}/deal/${before.hubspot_id}`;
+    if (before?.hubspot_id) return `https://app.hubspot.com/contacts/${portalId}/contact/${before.hubspot_id}`;
+    return null;
+  })();
+
+  return (
+    <div className={`mt-2 border rounded p-2 text-[11px] ${isPartial ? "border-amber-500/40 bg-amber-500/5" : "border-emerald-500/30 bg-emerald-500/5"}`}>
+      <div className="flex items-center gap-2 mb-1.5 font-mono text-[10px] uppercase">
+        {isPartial ? (
+          <span className="text-amber-500 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> partial — re-check in hubspot</span>
+        ) : (
+          <span className="text-emerald-500 inline-flex items-center gap-1"><Check className="h-3 w-3" /> verified in hubspot</span>
+        )}
+        {link && (
+          <a href={link} target="_blank" rel="noreferrer" className="ml-auto inline-flex items-center gap-1 text-muted-foreground hover:text-primary">
+            <ExternalLink className="h-3 w-3" /> open
+          </a>
+        )}
+      </div>
+      {fieldEntries.length > 0 && (
+        <div className="space-y-0.5 font-mono">
+          {fieldEntries.map(([k, v]) => (
+            <div key={k} className="flex items-baseline gap-2">
+              <span className="text-muted-foreground shrink-0">{k}:</span>
+              <span className={v.match ? "text-foreground" : "text-amber-500"}>
+                {String(v.actual ?? "—")}
+              </span>
+              {!v.match && (
+                <span className="text-[10px] text-muted-foreground">(wrote: {String(v.written ?? "—")})</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {sample && sample.length > 0 && (
+        <div className="text-muted-foreground">
+          Sample-verified {sample.filter((s) => s.verified).length}/{sample.length} records.
+        </div>
+      )}
+      <div className="mt-1.5">
+        <Link to="/app/changes" className="text-[10px] font-mono uppercase text-muted-foreground hover:text-primary">
+          view all changes →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const FAB_SIZE = 48;
 const PANEL_W = 400;
 const PANEL_H = 560;
@@ -45,6 +115,7 @@ const PANEL_KEY = "copilot_panel_pos";
 export const AssistantPanel = () => {
   const [open, setOpen] = useState(false);
   const { messages, sending, error, send, confirmAction, undoAction } = useAssistant();
+  const { account } = useAccount();
   const [input, setInput] = useState("");
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -271,6 +342,9 @@ export const AssistantPanel = () => {
                   <div className="prose prose-sm prose-invert max-w-none text-sm [&_p]:my-1 [&_ul]:my-1 [&_img]:rounded [&_img]:border [&_img]:border-border [&_img]:my-2 [&_img]:max-h-48">
                     <ReactMarkdown>{m.content || ""}</ReactMarkdown>
                   </div>
+                  {m.action_id && m.action_after && (
+                    <InlineWriteResult m={m} portalId={account?.hubspot_portal_id || null} />
+                  )}
                   {m.action_id && (
                     <button onClick={() => undoAction(m.action_id!)} className="mt-1 text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground flex items-center gap-1">
                       <RotateCcw className="h-3 w-3" /> Undo
