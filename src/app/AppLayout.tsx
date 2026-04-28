@@ -79,8 +79,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             Settings
           </NavLink>
         </nav>
-        <div className="p-4 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-2 truncate">{user.email}</div>
+        <div className="p-4 border-t border-border space-y-3">
+          <Link
+            to="/admin"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Admin
+          </Link>
+          <div className="text-xs text-muted-foreground truncate">{user.email}</div>
           <button
             onClick={handleSignOut}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
