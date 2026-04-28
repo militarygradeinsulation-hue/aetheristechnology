@@ -217,7 +217,6 @@ Deno.serve(async (req) => {
           const verifiedOk = sampleVerify.filter((v) => v.verified).length;
           resultMessage = `Updated ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}. Verified ${verifiedOk}/${sampleVerify.length} sampled in HubSpot.`;
         }
-        }
 
       // ---------- Reassign deals ----------
       } else if (tool_name === "reassign_deals") {
