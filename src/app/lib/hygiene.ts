@@ -168,6 +168,82 @@ export const sortActions = (
   return copy;
 };
 
+// ---- Cost estimation ----
+// Per-issue dollar impact estimates. Conservative ranges based on common CRM
+// hygiene research (DataLadder, Validity, HubSpot State of Marketing reports).
+// Each entry returns dollars-per-issue and a plain-English explanation.
+export interface HygieneCostModel {
+  perIssue: number; // USD lost per issue, conservative
+  basis: string; // short label, e.g. "lost deal value"
+  why: string; // explanation shown in dropdown
+  formula: string; // human-readable math
+}
+
+export const hygieneCostModels: Record<string, HygieneCostModel> = {
+  duplicate_contacts: {
+    perIssue: 18,
+    basis: "wasted send + sales time",
+    why: "Duplicate contacts inflate marketing sends, double-count engagement, and cause reps to call the same person twice. Industry benchmarks (Validity, 2023) put the blended cost of a duplicate at ~$15–25 once you factor in storage, sends, and rep time.",
+    formula: "$18 × duplicates (sends + 5 min rep time per dup)",
+  },
+  missing_critical_fields: {
+    perIssue: 35,
+    basis: "lost pipeline opportunity",
+    why: "Records without email, phone, company, or title can't be routed, scored, or worked. Most are silently dropped from sequences. Conservative estimate: 1 in 200 unworked records would have closed at avg deal size.",
+    formula: "$35 × missing-field records (~0.5% × $7K avg deal)",
+  },
+  lifecycle_mismatch: {
+    perIssue: 22,
+    basis: "misrouted records",
+    why: "Wrong lifecycle stage means the contact gets the wrong nurture, wrong owner, or wrong handoff. Marketing spends on customers, sales ignores MQLs. ~$22 of misallocated spend per mis-staged record.",
+    formula: "$22 × mismatched records (touch + spend leakage)",
+  },
+  formatting_inconsistencies: {
+    perIssue: 4,
+    basis: "deliverability + reporting",
+    why: "Mixed-case emails, raw phone numbers, and whitespace break dedupe, lower deliverability, and corrupt reports. Cost is small per record but compounds across the database.",
+    formula: "$4 × records (hard bounces + bad reporting)",
+  },
+  owner_issues: {
+    perIssue: 95,
+    basis: "unowned pipeline",
+    why: "An unowned or mis-owned record is, on average, 60% less likely to be worked. Multiplied by avg deal value × close rate, each unowned high-value record costs ~$95 in expected value.",
+    formula: "$95 × unowned records ($7K × 1.5% × 0.9 neglect)",
+  },
+  stale_lifecycle: {
+    perIssue: 12,
+    basis: "decaying lead value",
+    why: "Leads in active stages with no activity for 60+ days decay fast. Re-engagement rates fall below 5%. Each stale record represents lost expected pipeline value of ~$12.",
+    formula: "$12 × stale records (decayed expected value)",
+  },
+  deal_data_issues: {
+    perIssue: 240,
+    basis: "forecast risk",
+    why: "Open deals past close date or missing key fields distort the forecast and slip silently. Sales ops studies show ~3% of these slip permanently. At avg deal size $7K, that's ~$240 of forecast risk per bad deal.",
+    formula: "$240 × bad deals ($7K × 3.5% slip rate)",
+  },
+  engagement_orphans: {
+    perIssue: 2,
+    basis: "attribution loss",
+    why: "Orphan engagements (calls, emails, meetings not linked to a contact or deal) break attribution and clutter activity timelines. Cost is mostly reporting noise — small per record.",
+    formula: "$2 × orphans (lost attribution credit)",
+  },
+};
+
+export const estimateCategoryCost = (category: string, count: number): number => {
+  const m = hygieneCostModels[category];
+  if (!m) return 0;
+  return Math.round(m.perIssue * count);
+};
+
+export const formatUsd = (cents: number, opts?: { compact?: boolean }): string => {
+  const v = cents;
+  if (opts?.compact && v >= 10000) {
+    return `$${(v / 1000).toFixed(v >= 100000 ? 0 : 1)}K`;
+  }
+  return v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+};
+
 export const categoryDisplay: Record<
   string,
   { label: string; description: string }
