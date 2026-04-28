@@ -571,7 +571,9 @@ async function getAccessToken(admin: SupabaseClient, account: any): Promise<stri
     if (data) return data as string;
   }
 
-  if (!account.hubspot_refresh_token_encrypted) throw new Error("No refresh token on file");
+  if (!account.hubspot_refresh_token_encrypted) {
+    throw new Error("HubSpot is not connected (no refresh token). Reconnect HubSpot from the Dashboard, then retry.");
+  }
   const { data: refreshToken } = await admin.rpc("decrypt_token", {
     _ciphertext: account.hubspot_refresh_token_encrypted,
     _key: key,
