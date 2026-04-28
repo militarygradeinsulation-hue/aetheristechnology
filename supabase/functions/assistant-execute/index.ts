@@ -155,9 +155,15 @@ Deno.serve(async (req) => {
         const token = await getHubSpotAccessToken(admin, account);
         const url = `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(t)}/${id}`;
         const res = await fetchHubSpot("PATCH", url, token, { properties: props });
-        afterState = { hubspot_response: res };
+        // Verify by re-fetching from HubSpot
+        const verify = await verifyHubSpot(t, id, token, props as Record<string, unknown>);
+        afterState = { hubspot_response: res, hubspot_verified: verify };
         affected = 1;
-        resultMessage = `Updated ${t} ${id}.`;
+        const portalId = account.hubspot_portal_id;
+        const link = portalId ? `https://app.hubspot.com/contacts/${portalId}/${objectPath(t)}/${id}` : null;
+        resultMessage = verify.verified
+          ? `Updated ${t} ${id} — verified in HubSpot${link ? ` (${link})` : ""}.`
+          : `Updated ${t} ${id} but HubSpot returned different values for some fields. Check the change log.`;
 
       // ---------- Bulk update deals ----------
       } else if (tool_name === "bulk_update_deals") {
