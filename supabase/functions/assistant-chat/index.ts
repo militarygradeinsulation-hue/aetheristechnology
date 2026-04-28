@@ -755,6 +755,68 @@ async function buildProposalPreview(
   if (toolName === "trigger_sync") return { summary: `Run HubSpot sync (${args.mode})`, affected: 0 };
   if (toolName === "trigger_hygiene_scan") return { summary: "Run a fresh data hygiene scan", affected: 0 };
   if (toolName === "trigger_leak_audit") return { summary: "Run a fresh Leak Audit", affected: 0 };
+  if (toolName === "approve_hygiene_action") return { summary: `Approve hygiene action ${args.action_id}`, affected: 0 };
+  if (toolName === "reject_hygiene_action") return { summary: `Reject hygiene action ${args.action_id}`, affected: 0 };
+  if (toolName === "execute_hygiene_action") {
+    const { data: act } = await admin.from("hygiene_actions").select("category_label,affected_count").eq("id", String(args.action_id)).maybeSingle();
+    return {
+      summary: `Approve & run hygiene fix${act?.category_label ? `: ${act.category_label}` : ""}`,
+      affected: (act as any)?.affected_count || 0,
+    };
+  }
+  if (toolName === "undo_assistant_action") return { summary: `Undo previous Co-Pilot action ${args.action_id}`, affected: 0 };
+  if (toolName === "archive_audit") return { summary: `Move audit ${args.audit_id} to trash`, affected: 0 };
+  if (toolName === "restore_audit") return { summary: `Restore audit ${args.audit_id} from trash`, affected: 0 };
+  if (toolName === "delete_audit_permanently") return { summary: `PERMANENTLY delete audit ${args.audit_id}`, affected: 0 };
+  if (toolName === "disconnect_hubspot") return { summary: "Disconnect HubSpot from this account", affected: 0 };
+  if (toolName === "create_contact" || toolName === "create_deal" || toolName === "create_company") {
+    const t = toolName.replace("create_", "");
+    return { summary: `Create new ${t} in HubSpot`, affected: 1, sample: [args.properties] };
+  }
+  if (toolName === "delete_contact" || toolName === "delete_deal" || toolName === "delete_company") {
+    const t = toolName.replace("delete_", "");
+    const table = t === "deal" ? "mirror_deals" : t === "company" ? "mirror_companies" : "mirror_contacts";
+    const { data: before } = await admin.from(table).select("*").eq("account_id", accountId).eq("hubspot_id", String(args.hubspot_id)).maybeSingle();
+    return { summary: `Archive (delete) ${t} #${args.hubspot_id}`, affected: 1, before };
+  }
+  if (toolName === "bulk_update_contacts") {
+    const f = args.filter || {};
+    let q = admin.from("mirror_contacts").select("hubspot_id,first_name,last_name,email,lifecycle_stage", { count: "exact" }).eq("account_id", accountId);
+    if (f.lifecycle_stage) q = q.eq("lifecycle_stage", f.lifecycle_stage);
+    if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+    if (f.search) q = q.or(`first_name.ilike.%${f.search}%,last_name.ilike.%${f.search}%,email.ilike.%${f.search}%`);
+    if (typeof f.inactive_days === "number") {
+      const cutoff = new Date(Date.now() - f.inactive_days * 86400_000).toISOString();
+      q = q.lt("last_activity_date", cutoff);
+    }
+    q = q.limit(10);
+    const { data, count } = await q;
+    return { summary: `Update ${count ?? 0} contacts matching filter`, affected: Math.min(count ?? 0, 500), sample: data || [] };
+  }
+  if (toolName === "bulk_delete_deals") {
+    const f = args.filter || {};
+    let q = admin.from("mirror_deals").select("hubspot_id,deal_name,stage,amount", { count: "exact" }).eq("account_id", accountId);
+    if (f.stage) q = q.eq("stage", f.stage);
+    if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+    if (typeof f.min_amount === "number") q = q.gte("amount", f.min_amount);
+    if (typeof f.max_amount === "number") q = q.lte("amount", f.max_amount);
+    if (typeof f.stalled_days === "number") {
+      const cutoff = new Date(Date.now() - f.stalled_days * 86400_000).toISOString();
+      q = q.lt("last_activity_date", cutoff);
+    }
+    q = q.limit(10);
+    const { data, count } = await q;
+    return { summary: `ARCHIVE ${count ?? 0} deals matching filter`, affected: Math.min(count ?? 0, 500), sample: data || [] };
+  }
+  if (toolName === "add_note_to_record") {
+    return { summary: `Add note to ${args.type} #${args.hubspot_id}`, affected: 1, sample: [{ body: String(args.body || "").slice(0, 200) }] };
+  }
+  if (toolName === "create_task_for_record") {
+    return { summary: `Create task "${args.subject}" on ${args.type} #${args.hubspot_id}`, affected: 1 };
+  }
+  if (toolName === "associate_records") {
+    return { summary: `Associate ${args.from_type} #${args.from_id} ↔ ${args.to_type} #${args.to_id}`, affected: 1 };
+  }
   return { summary: `${toolName}`, affected: 0 };
 }
 
@@ -771,22 +833,33 @@ CONTEXT
 - Write-back permission: ${ctx.writeEnabled ? "ENABLED" : "DISABLED (read-only — tell user to reconnect HubSpot for writes)"}
 - Mirrored counts: ${JSON.stringify(ctx.counts)}
 
-CAPABILITIES
-You have tools that fall into three categories:
+CAPABILITIES — every UI action in this app is also doable here:
 
-1. READ tools (run automatically, no confirmation): query_pipeline, query_contacts, query_companies, get_record_detail, run_leak_detector, list_hygiene_queue, summarize_audit. Use these freely to answer questions.
+READ (auto-run, no confirm): query_pipeline, query_contacts, query_companies, query_owners, query_engagements, get_record_detail, count_records, run_leak_detector, list_hygiene_queue, summarize_audit, list_audits, list_assistant_actions.
 
-2. APP-ACTION tools (require user confirm): trigger_sync, trigger_hygiene_scan, trigger_leak_audit. When the user asks for one of these, call the tool — the system will surface a confirmation card automatically.
+APP-ACTION (require confirm):
+  - trigger_sync, trigger_hygiene_scan, trigger_leak_audit
+  - approve_hygiene_action, reject_hygiene_action, execute_hygiene_action (approve+run a queued fix)
+  - undo_assistant_action (rollback a prior Co-Pilot write)
+  - archive_audit / restore_audit / delete_audit_permanently
+  - disconnect_hubspot
 
-3. WRITE tools (require user confirm + show before/after): update_contact, update_deal, update_company, bulk_update_deals, reassign_deals. Same — call the tool and the system handles the confirm.
+WRITE (require confirm, log before/after for undo):
+  - update_contact, update_deal, update_company
+  - create_contact, create_deal, create_company
+  - delete_contact, delete_deal, delete_company
+  - bulk_update_deals, bulk_update_contacts, bulk_delete_deals
+  - reassign_deals
+  - add_note_to_record, create_task_for_record, associate_records
 
 RULES
-- For data questions, ALWAYS call a read tool first, then summarize. Don't make up numbers.
-- For writes, confirm the user's intent in plain English, then call the tool. The user gets one final preview before execution.
-- For bulk operations, prefer narrow filters and warn about row counts.
-- When write tools are disabled, do NOT call them — explain that HubSpot needs to be reconnected with write scopes.
+- For data questions, ALWAYS call a read tool first; never make up numbers.
+- Translate user names to ids first: if the user says "reassign Sarah's deals to Mike", call query_owners to resolve both ids before reassign_deals.
+- For bulk operations, narrow the filter, then PREVIEW the count before confirming.
+- When write tools are disabled (no scopes), do NOT call them — tell the user to reconnect HubSpot.
+- For destructive actions (delete_*, bulk_delete_*, delete_audit_permanently, disconnect_hubspot), be loud about it in the confirm summary.
 - Keep responses scannable: short paragraphs, bullet points, dollar figures. Use markdown.
-- When a tool returns numbers, frame them as "leaks" or "exposure" when appropriate to brand voice.`;
+- Frame leak numbers as "exposure" / "bleeding" in brand voice.`;
 }
 
 // ------------------------------------------------------------------
