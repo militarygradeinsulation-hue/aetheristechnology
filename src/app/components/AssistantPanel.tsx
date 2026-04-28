@@ -342,6 +342,9 @@ export const AssistantPanel = () => {
                   <div className="prose prose-sm prose-invert max-w-none text-sm [&_p]:my-1 [&_ul]:my-1 [&_img]:rounded [&_img]:border [&_img]:border-border [&_img]:my-2 [&_img]:max-h-48">
                     <ReactMarkdown>{m.content || ""}</ReactMarkdown>
                   </div>
+                  {m.action_id && m.action_after && (
+                    <InlineWriteResult m={m} portalId={account?.hubspot_portal_id || null} />
+                  )}
                   {m.action_id && (
                     <button onClick={() => undoAction(m.action_id!)} className="mt-1 text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground flex items-center gap-1">
                       <RotateCcw className="h-3 w-3" /> Undo
