@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const { data: account } = await admin.from("accounts").select("*").eq("id", action.account_id).maybeSingle();
     if (!account || account.user_id !== user.id) return json({ error: "Forbidden" }, 403);
 
-    if (action.status !== "success") return json({ error: `Cannot undo action in status ${action.status}` }, 400);
+    if (action.status !== "success" && action.status !== "partial") return json({ error: `Cannot undo action in status ${action.status}` }, 400);
     if (action.undone_at) return json({ error: "Already undone" }, 400);
     if (Date.now() - new Date(action.executed_at).getTime() > UNDO_WINDOW_MS) {
       return json({ error: "Undo window expired (24h)" }, 400);
