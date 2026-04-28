@@ -473,6 +473,7 @@ const WRITE_TOOLS = [
         },
       },
     },
+  },
   {
     type: "function",
     function: {
