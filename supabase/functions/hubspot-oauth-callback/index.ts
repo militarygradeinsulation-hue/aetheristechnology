@@ -18,8 +18,10 @@ const pickOrigin = (req: Request): string => {
   return APP_ORIGINS[0];
 };
 
-const html = (origin: string, params: string) =>
-  `<!doctype html><meta http-equiv="refresh" content="0;url=${origin}/app/dashboard${params}"><body style="font-family:system-ui;background:#0f1117;color:#e8e6e0;padding:40px;text-align:center">Redirecting…</body>`;
+const html = (origin: string, params: string) => {
+  const target = `${origin}/app/dashboard${params}`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${target}"><title>Redirecting…</title></head><body style="font-family:system-ui;background:#0f1117;color:#e8e6e0;padding:40px;text-align:center"><p>Connected. Redirecting to your dashboard…</p><p><a href="${target}" style="color:#f5b041;text-decoration:underline">Click here if you are not redirected automatically</a></p><script>window.location.replace(${JSON.stringify(target)});</script></body></html>`;
+};
 
 serve(async (req) => {
   const url = new URL(req.url);
