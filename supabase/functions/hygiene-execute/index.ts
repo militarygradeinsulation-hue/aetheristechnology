@@ -99,6 +99,16 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!acct || acct.user_id !== user.id) return json({ error: "Forbidden" }, 403);
 
+    // Pre-flight: HubSpot must be connected with write tokens before we queue any work.
+    if (!acct.hubspot_portal_id || !acct.hubspot_refresh_token_encrypted) {
+      const msg = "HubSpot is not connected. Open Dashboard → Connect HubSpot, authorize, then retry this fix.";
+      await supabase
+        .from("hygiene_actions")
+        .update({ status: "failed", error_message: msg })
+        .eq("id", action_id);
+      return json({ error: msg, code: "hubspot_not_connected" }, 400);
+    }
+
     const isMerge = Array.isArray(merges) && merges.length > 0;
     const targetIds: string[] =
       Array.isArray(record_ids) && record_ids.length > 0 ? record_ids : action.affected_record_ids;
