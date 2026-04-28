@@ -1,80 +1,41 @@
-## Goal
+# Sync HubSpot OAuth Request to Match Portal Config
 
-Make the HubSpot OAuth install bulletproof: never fail again because a "Required" scope is missing from the authorize URL. Request the full read/write surface so the app can read and connect to anything in HubSpot.
+## Problem
 
-## Why it's failing now
+Your HubSpot Developer Portal now lists **every scope as Required** (~140 scopes). HubSpot's rule: every scope marked Required in the portal MUST appear in the `scope=` parameter of the authorize URL — `optional_scope` is not enough. The current edge function sends only ~30 in `scope` and ~110 in `optional_scope`, so the install will fail with the same "missing scopes" error.
 
-HubSpot enforces this rule: **every scope marked "Required" in the app config (HubSpot Developer Portal → Auth tab) MUST appear in the `scope` query parameter of the authorize URL**. If even one is missing, the install fails with the giant "Authorization failed because the provided scopes are missing [...]" error you saw.
+Additionally, your portal includes ~25 scopes that aren't in our code at all (e.g. `analytics.behavioral_events.send`, `behavioral_events.event_definitions.read_write`, `business_units_view.read`, `crm.dealsplits.read_write`, `crm.extensions_calling_transcripts.*`, `crm.objects.forecasts.read`, `crm.objects.leads.*`, `crm.objects.marketing_events.*`, `crm.objects.projects.*`, `crm.pipelines.orders.*`, `crm.schemas.commercepayments.*`, `crm.schemas.feedback_submissions.*`, `crm.schemas.forecasts.read`, `crm.schemas.line_items.read`, `crm.schemas.projects.*`, `ctas.read`, `data_integration.data_source.file.*`, `conversations.custom_channels.*`, `communication_preferences.statuses.batch.*`, `integrations.zoom-app.playbooks.read`, `mcp.users.read`, `settings.billing.write`, `settings.currencies.*`, `settings.security.security_health.read`, `crm.objects.commercepayments.write`, `crm.objects.partner-services.write`).
 
-The current `hubspot-oauth-start` only requests 12 scopes. Your app config has ~150 marked Required, so HubSpot rejects the install.
-
-There's a second rule that matters: scopes for **add-on hubs** (Marketing Hub, CMS Hub, Service Hub Pro, Commerce, custom industry objects) cannot go in `scope` — they must go in `optional_scope`, otherwise the install fails on portals that don't have those hubs. Since you said "everything is turned on," they'll all be granted, but using `optional_scope` keeps the integration safe for any future portal you connect.
-
-## What we'll change
+## What Will Change
 
 ### 1. `supabase/functions/hubspot-oauth-start/index.ts`
 
-Replace the 12-scope list with two lists:
+- Collapse `REQUIRED_SCOPES` and `OPTIONAL_SCOPES` into one **single source of truth** array containing all ~140 scopes from your Portal.
+- Add the ~25 missing scopes listed above.
+- Build the authorize URL with all scopes in `scope=` (drop `optional_scope=` entirely, since nothing is optional now).
+- Keep dedupe + alphabetical sort for stability and easier diffing against the Portal.
+- Log scope count + final URL byte length so we can verify we're under HubSpot's URL length cap (~8KB; ~140 scopes ≈ 5KB encoded — safe).
 
-**`REQUIRED_SCOPES`** — always-available CRM + core platform (~30 scopes):
-- `oauth`
-- All core CRM objects: contacts, companies, deals, owners (read + write)
-- All core CRM schemas: contacts, companies, deals (read + write)
-- Lists, imports, exports
-- Files, timeline, settings/users/teams, account-info
-- Sales-email-read, communication preferences
+### 2. `src/app/components/HubSpotConnectCard.tsx`
 
-**`OPTIONAL_SCOPES`** — add-on hubs and premium objects (~110 scopes), sent via `optional_scope=`:
-- Tickets (full)
-- Quotes / line items / products
-- Invoices / subscriptions / orders / carts / commerce / payments / e-commerce / tax_rates
-- Goals
-- Custom objects (read/write + schemas)
-- Marketing Hub: content, social, forms, hubdb, marketing-email, campaigns, transactional-email, automation, business-intelligence
-- Conversations / inbox / visitor identification
-- CMS / Content Hub: knowledge_base, domains, functions, performance, membership
-- Calls / meetings / scheduler
-- Industry objects: appointments, services, courses, listings (HubSpot's vertical bundles)
-- Users object, partner-clients, partner-services
-- Actions, integration-sync, external_integrations.forms.access, GraphQL collector
-- Media bridge, record_images.signed_urls.read
-- Accounting
+- The `WRITE_SCOPES` check (used to show "Write-back enabled") stays as-is — it only checks the 3 core CRM write scopes against `accounts.hubspot_scopes` returned by HubSpot, which is independent of what we request.
 
-### 2. Build the authorize URL with both params
+### 3. No DB or callback changes
 
-```
-?client_id=...
-&redirect_uri=...
-&scope=<required, space-separated>
-&optional_scope=<optional, space-separated>
-&state=...
-```
+- `hubspot-oauth-callback` already stores the **granted** scope list returned by HubSpot's `/oauth/v1/access-tokens/{token}` endpoint, so it auto-adapts.
+- No migration needed.
 
-Both lists deduped before encoding (some scopes appear in multiple categories above for readability).
+## Maintenance Note
 
-### 3. Logging
+Going forward, the scope list in the edge function = the scope list in the HubSpot Developer Portal. If you add a scope in the Portal, add it here too (and reconnect). I'll add a code comment with that rule + a link to the Portal at the top of the file.
 
-Update the existing `console.log` to print `required_count` and `optional_count` instead of dumping the full string, so future debugging is fast.
+## Post-Deploy Steps
 
-## What you'll need to do in HubSpot (one time)
+1. After the function deploys, click **Reconnect HubSpot** on the Connect card.
+2. HubSpot's consent screen should now display all ~140 scopes for approval (long scroll — expected).
+3. On success, the dashboard will show `?connected=1` and trigger an initial sync.
 
-In the **HubSpot Developer Portal** → your app → **Auth** tab:
+## Risk
 
-1. Make sure every scope you want the app to be able to request is **enabled** (checked at all). If a scope isn't enabled here, no install can grant it regardless of what we send.
-2. For scopes that are not on every portal (anything in Marketing Hub, CMS, Commerce, custom industry objects): move them out of "Required scopes" and into "Optional scopes" / "Conditionally required" — because we're sending them as `optional_scope`. If they stay marked Required, HubSpot will still reject the install on any portal missing that hub.
-3. Keep core CRM scopes in **Required** — that matches our `REQUIRED_SCOPES` list.
-4. Save.
-
-Then click "Reconnect HubSpot" and the install should sail through.
-
-## Out of scope
-
-- Token-storage schema changes (existing `accounts.hubspot_*` columns already store the access/refresh tokens regardless of how many scopes were granted).
-- Granted-scopes tracking (HubSpot returns the actual granted scopes on the token exchange — we can add that to a follow-up if you want feature gating).
-- Edge functions that USE the new scopes (we're just unlocking the connection here; functions can be added per-feature later).
-
-## Files changing
-
-- `supabase/functions/hubspot-oauth-start/index.ts` — rewritten with the two scope lists and the new URL builder.
-
-No DB changes, no other files affected.
+- **URL length**: ~5KB encoded — well under HubSpot's limit. Logged on each call so we'll see if it ever creeps up.
+- **User consent screen length**: Long, but unavoidable when all scopes are Required in the Portal. If you want to shorten it, the fix is in HubSpot (move scopes back to Optional/Conditionally Required), not in code.
