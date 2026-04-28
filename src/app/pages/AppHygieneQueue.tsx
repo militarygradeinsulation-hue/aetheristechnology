@@ -452,6 +452,51 @@ const AppHygieneQueue = () => {
         </div>
       )}
 
+      {uncategorized.length > 0 && (
+        <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between gap-3 p-4 border-b border-border">
+            <div>
+              <h2 className="text-sm font-medium text-foreground">Uncategorized actions</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {uncategorized.length} pending — these rows have no category and are not consolidated.
+              </p>
+            </div>
+            <Button
+              onClick={() => dismissDuplicates(uncategorized.map((u) => u.id))}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <X className="h-3.5 w-3.5" />
+              Dismiss all
+            </Button>
+          </div>
+          <div className="divide-y divide-border">
+            {uncategorized.map((u) => (
+              <div key={u.id} className="flex items-center justify-between gap-3 p-3 text-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-foreground">
+                    {u.category_label || "(no category)"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {u.affected_count.toLocaleString()} records · {new Date(u.created_at).toLocaleString()}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => dismissDuplicates([u.id])}
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Dismiss
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Dialog open={!!confirmAction} onOpenChange={(o) => !o && setConfirmAction(null)}>
         <DialogContent>
           <DialogHeader>
