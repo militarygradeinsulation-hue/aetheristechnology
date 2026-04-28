@@ -228,6 +228,10 @@ Deno.serve(async (req) => {
           resultMessage = "HubSpot disconnected.";
           afterState = { invoked: "hubspot-disconnect" };
 
+        } else if (tool_name === "reconnect_hubspot") {
+          resultMessage = "Opening Settings — click 'Reconnect HubSpot' to re-authorize.";
+          afterState = { navigate_to: "/app/settings", toast: "Click Reconnect HubSpot to re-authorize." };
+
         } else {
           // trigger_sync / trigger_hygiene_scan / trigger_leak_audit
           const fnName = tool_name === "trigger_sync" ? "hubspot-sync"
