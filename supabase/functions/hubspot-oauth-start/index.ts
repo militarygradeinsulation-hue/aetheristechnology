@@ -26,7 +26,7 @@ const REQUIRED_SCOPES = [
   "crm.schemas.contacts.read",
   "crm.schemas.deals.read",
   "crm.schemas.companies.read",
-  "crm.objects.engagements",
+  
   "crm.objects.subscriptions.read",
   "crm.objects.subscriptions.write",
 ];
