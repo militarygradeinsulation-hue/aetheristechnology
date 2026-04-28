@@ -447,6 +447,44 @@ Deno.serve(async (req) => {
           resultMessage = `Updated ${ok} of ${ids.length} contacts${fail ? ` (${fail} failed)` : ""}.`;
         }
 
+      // ---------- Bulk update companies ----------
+      } else if (tool_name === "bulk_update_companies") {
+        requireWriteScopes(account);
+        const f = args.filter || {};
+        const props = args.properties || {};
+        if (!Object.keys(props).length) throw new Error("properties required");
+        let q = admin.from("mirror_companies").select("hubspot_id").eq("account_id", account.id);
+        if (f.industry) q = q.eq("industry", f.industry);
+        if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+        if (f.search) q = q.or(`name.ilike.%${f.search}%,domain.ilike.%${f.search}%`);
+        if (typeof f.min_employees === "number") q = q.gte("num_employees", f.min_employees);
+        if (typeof f.max_employees === "number") q = q.lte("num_employees", f.max_employees);
+        if (typeof f.inactive_days === "number") {
+          const cutoff = new Date(Date.now() - f.inactive_days * 86400_000).toISOString();
+          q = q.lt("last_activity_date", cutoff);
+        }
+        q = q.limit(500);
+        const { data: rows } = await q;
+        const ids = (rows || []).map((r: any) => r.hubspot_id).filter(Boolean);
+        if (!ids.length) {
+          resultMessage = "No companies matched the filter.";
+        } else {
+          const token = await getHubSpotAccessToken(admin, account);
+          const beforeRows = await admin.from("mirror_companies").select("hubspot_id,name,domain,industry").eq("account_id", account.id).in("hubspot_id", ids);
+          beforeState = { companies: beforeRows.data };
+          let ok = 0, fail = 0;
+          for (const id of ids) {
+            try {
+              await fetchHubSpot("PATCH", `${HUBSPOT_API_BASE}/crm/v3/objects/companies/${id}`, token, { properties: props });
+              ok++;
+            } catch (e) { fail++; console.error("[bulk_update_companies] failed", id, (e as Error).message); }
+            await sleep(RATE_DELAY_MS);
+          }
+          affected = ok;
+          afterState = { updated: ok, failed: fail, ids };
+          resultMessage = `Updated ${ok} of ${ids.length} companies${fail ? ` (${fail} failed)` : ""}.`;
+        }
+
       // ---------- Bulk delete deals ----------
       } else if (tool_name === "bulk_delete_deals") {
         requireWriteScopes(account);
