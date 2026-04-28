@@ -469,6 +469,21 @@ const WRITE_TOOLS = [
   {
     type: "function",
     function: {
+      name: "bulk_update_companies",
+      description: "Update properties on many companies matching a filter. Capped at 500.",
+      parameters: {
+        type: "object",
+        required: ["filter", "properties"],
+        properties: {
+          filter: { type: "object", description: "{ industry?, owner_id?, inactive_days?, search?, min_employees?, max_employees? }" },
+          properties: { type: "object" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "bulk_delete_deals",
       description: "Archive many HubSpot deals matching a filter. Capped at 500. Requires user confirm.",
       parameters: {
@@ -792,6 +807,22 @@ async function buildProposalPreview(
     q = q.limit(10);
     const { data, count } = await q;
     return { summary: `Update ${count ?? 0} contacts matching filter`, affected: Math.min(count ?? 0, 500), sample: data || [] };
+  }
+  if (toolName === "bulk_update_companies") {
+    const f = args.filter || {};
+    let q = admin.from("mirror_companies").select("hubspot_id,name,domain,industry", { count: "exact" }).eq("account_id", accountId);
+    if (f.industry) q = q.eq("industry", f.industry);
+    if (f.owner_id) q = q.eq("owner_id", f.owner_id);
+    if (f.search) q = q.or(`name.ilike.%${f.search}%,domain.ilike.%${f.search}%`);
+    if (typeof f.min_employees === "number") q = q.gte("num_employees", f.min_employees);
+    if (typeof f.max_employees === "number") q = q.lte("num_employees", f.max_employees);
+    if (typeof f.inactive_days === "number") {
+      const cutoff = new Date(Date.now() - f.inactive_days * 86400_000).toISOString();
+      q = q.lt("last_activity_date", cutoff);
+    }
+    q = q.limit(10);
+    const { data, count } = await q;
+    return { summary: `Update ${count ?? 0} companies matching filter`, affected: Math.min(count ?? 0, 500), sample: data || [] };
   }
   if (toolName === "bulk_delete_deals") {
     const f = args.filter || {};
