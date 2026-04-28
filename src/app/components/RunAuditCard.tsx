@@ -81,12 +81,14 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
 
   const handleRun = async () => {
     setRunning(true);
+    setAutoNavigate(true);
     try {
       const { data, error } = await supabase.functions.invoke("run-audit", { body: { account_id: accountId } });
       if (error) throw error;
       setRunId(data.audit_run_id);
     } catch (err: any) {
       setRunning(false);
+      setAutoNavigate(false);
       toast({ title: "Couldn't start audit", description: err.message, variant: "destructive" });
     }
   };
