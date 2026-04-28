@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Loader2, AlertCircle, ArrowRight, StopCircle } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, ArrowRight, StopCircle, ChevronDown, DollarSign } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { HygieneSubNav } from "../components/HygieneSubNav";
 import { useAccount } from "../lib/useAccount";
@@ -7,12 +7,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   HygieneScanRow,
   categoryDisplay,
   severityClass,
   confidenceLabel,
   HygieneActionRow,
+  hygieneCostModels,
+  estimateCategoryCost,
+  formatUsd,
 } from "../lib/hygiene";
 
 const AppHygieneScan = () => {
