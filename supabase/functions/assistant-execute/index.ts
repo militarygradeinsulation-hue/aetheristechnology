@@ -107,8 +107,15 @@ Deno.serve(async (req) => {
     const { data: { user }, error: uErr } = await admin.auth.getUser(authHeader.replace("Bearer ", ""));
     if (uErr || !user) return json({ error: "Unauthorized" }, 401);
 
-    const { conversation_id, tool_name, args } = await req.json();
+    let { conversation_id, tool_name, args } = await req.json();
     if (!tool_name || typeof tool_name !== "string") return json({ error: "tool_name required" }, 400);
+
+    // ---- Shorthand expansions (must run before dispatch + before insert) ----
+    if (tool_name === "set_lifecycle_stage") {
+      if (!args?.stage) return json({ error: "stage required" }, 400);
+      args = { filter: args.filter || {}, properties: { lifecyclestage: String(args.stage) } };
+      tool_name = "bulk_update_contacts";
+    }
 
     const { data: account } = await admin.from("accounts").select("*").eq("user_id", user.id).maybeSingle();
     if (!account) return json({ error: "No account on file" }, 404);
@@ -412,14 +419,7 @@ Deno.serve(async (req) => {
         resultMessage = `Archived ${t} ${id} in HubSpot.`;
 
       // ---------- Bulk update contacts ----------
-      } else if (tool_name === "set_lifecycle_stage") {
-        // Shorthand → delegate to bulk_update_contacts logic
-        if (!args.stage) throw new Error("stage required");
-        args = { filter: args.filter || {}, properties: { lifecyclestage: args.stage } };
-        tool_name = "bulk_update_contacts";
-        // fall through by re-running below
-      }
-      if (tool_name === "bulk_update_contacts") {
+      } else if (tool_name === "bulk_update_contacts") {
         requireWriteScopes(account);
         const f = args.filter || {};
         const props = args.properties || {};
