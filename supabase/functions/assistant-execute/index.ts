@@ -141,22 +141,105 @@ Deno.serve(async (req) => {
     try {
       // ---------- App-action tools ----------
       if (APP_ACTION_TOOLS.includes(tool_name)) {
-        const fnName = tool_name === "trigger_sync" ? "hubspot-sync"
-                     : tool_name === "trigger_hygiene_scan" ? "hygiene-scan"
-                     : "run-audit";
-        const body = tool_name === "trigger_sync"
-          ? { account_id: account.id, mode: args?.mode || "incremental" }
-          : { account_id: account.id };
-        const invokeUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/${fnName}`;
-        const inv = await fetch(invokeUrl, {
-          method: "POST",
-          headers: { Authorization: authHeader, "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const txt = await inv.text();
-        if (!inv.ok) throw new Error(`${fnName} returned ${inv.status}: ${txt.slice(0, 300)}`);
-        resultMessage = `Started ${fnName}.`;
-        afterState = { invoked: fnName, response: txt.slice(0, 500) };
+        // Sub-dispatch: hygiene queue management
+        if (tool_name === "approve_hygiene_action" || tool_name === "reject_hygiene_action") {
+          const newStatus = tool_name === "approve_hygiene_action" ? "approved" : "rejected";
+          const { data: act, error } = await admin
+            .from("hygiene_actions")
+            .update({ status: newStatus, approved_at: newStatus === "approved" ? new Date().toISOString() : null })
+            .eq("id", String(args.action_id))
+            .eq("account_id", account.id)
+            .select()
+            .single();
+          if (error) throw new Error(error.message);
+          resultMessage = `Hygiene action ${args.action_id} marked ${newStatus}.`;
+          afterState = { hygiene_action: act };
+
+        } else if (tool_name === "execute_hygiene_action") {
+          // Approve then invoke hygiene-execute
+          await admin
+            .from("hygiene_actions")
+            .update({ status: "approved", approved_at: new Date().toISOString() })
+            .eq("id", String(args.action_id))
+            .eq("account_id", account.id);
+          const invokeUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hygiene-execute`;
+          const inv = await fetch(invokeUrl, {
+            method: "POST",
+            headers: { Authorization: authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify({ action_id: String(args.action_id) }),
+          });
+          const txt = await inv.text();
+          if (!inv.ok) throw new Error(`hygiene-execute returned ${inv.status}: ${txt.slice(0, 300)}`);
+          resultMessage = `Approved & started hygiene fix ${args.action_id}.`;
+          afterState = { invoked: "hygiene-execute", response: txt.slice(0, 500) };
+
+        } else if (tool_name === "undo_assistant_action") {
+          const invokeUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/assistant-undo`;
+          const inv = await fetch(invokeUrl, {
+            method: "POST",
+            headers: { Authorization: authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify({ action_id: String(args.action_id) }),
+          });
+          const txt = await inv.text();
+          if (!inv.ok) throw new Error(`assistant-undo returned ${inv.status}: ${txt.slice(0, 300)}`);
+          resultMessage = `Undid prior action ${args.action_id}.`;
+          afterState = { invoked: "assistant-undo", response: txt.slice(0, 500) };
+
+        } else if (tool_name === "archive_audit") {
+          const { error } = await admin.from("audit_runs")
+            .update({ deleted_at: new Date().toISOString() })
+            .eq("id", String(args.audit_id))
+            .eq("account_id", account.id);
+          if (error) throw new Error(error.message);
+          resultMessage = `Audit ${args.audit_id} moved to trash.`;
+
+        } else if (tool_name === "restore_audit") {
+          const { error } = await admin.from("audit_runs")
+            .update({ deleted_at: null })
+            .eq("id", String(args.audit_id))
+            .eq("account_id", account.id);
+          if (error) throw new Error(error.message);
+          resultMessage = `Audit ${args.audit_id} restored.`;
+
+        } else if (tool_name === "delete_audit_permanently") {
+          const { error } = await admin.from("audit_runs")
+            .delete()
+            .eq("id", String(args.audit_id))
+            .eq("account_id", account.id);
+          if (error) throw new Error(error.message);
+          resultMessage = `Audit ${args.audit_id} permanently deleted.`;
+
+        } else if (tool_name === "disconnect_hubspot") {
+          const invokeUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-disconnect`;
+          const inv = await fetch(invokeUrl, {
+            method: "POST",
+            headers: { Authorization: authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          });
+          const txt = await inv.text();
+          if (!inv.ok) throw new Error(`hubspot-disconnect returned ${inv.status}: ${txt.slice(0, 300)}`);
+          resultMessage = "HubSpot disconnected.";
+          afterState = { invoked: "hubspot-disconnect" };
+
+        } else {
+          // trigger_sync / trigger_hygiene_scan / trigger_leak_audit
+          const fnName = tool_name === "trigger_sync" ? "hubspot-sync"
+                       : tool_name === "trigger_hygiene_scan" ? "hygiene-scan"
+                       : "run-audit";
+          const body = tool_name === "trigger_sync"
+            ? { account_id: account.id, mode: args?.mode || "incremental" }
+            : { account_id: account.id };
+          const invokeUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/${fnName}`;
+          const inv = await fetch(invokeUrl, {
+            method: "POST",
+            headers: { Authorization: authHeader, "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const txt = await inv.text();
+          if (!inv.ok) throw new Error(`${fnName} returned ${inv.status}: ${txt.slice(0, 300)}`);
+          resultMessage = `Started ${fnName}.`;
+          afterState = { invoked: fnName, response: txt.slice(0, 500) };
+        }
 
       // ---------- Single-record writes ----------
       } else if (tool_name === "update_contact" || tool_name === "update_deal" || tool_name === "update_company") {
