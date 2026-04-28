@@ -412,7 +412,14 @@ Deno.serve(async (req) => {
         resultMessage = `Archived ${t} ${id} in HubSpot.`;
 
       // ---------- Bulk update contacts ----------
-      } else if (tool_name === "bulk_update_contacts") {
+      } else if (tool_name === "set_lifecycle_stage") {
+        // Shorthand → delegate to bulk_update_contacts logic
+        if (!args.stage) throw new Error("stage required");
+        args = { filter: args.filter || {}, properties: { lifecyclestage: args.stage } };
+        tool_name = "bulk_update_contacts";
+        // fall through by re-running below
+      }
+      if (tool_name === "bulk_update_contacts") {
         requireWriteScopes(account);
         const f = args.filter || {};
         const props = args.properties || {};
