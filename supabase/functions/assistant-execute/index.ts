@@ -261,10 +261,17 @@ Deno.serve(async (req) => {
         throw new Error(`Unsupported tool: ${tool_name}`);
       }
 
+      // Determine final status: 'partial' if a verify pass disagreed with what we wrote
+      const verifyBlock = (afterState as any)?.hubspot_verified;
+      const sampleBlock = (afterState as any)?.sample_verified as Array<{ verified: boolean }> | undefined;
+      const singleMismatch = verifyBlock && verifyBlock.verified === false;
+      const sampleMismatch = Array.isArray(sampleBlock) && sampleBlock.length > 0 && sampleBlock.some((v) => !v.verified);
+      const finalStatus = singleMismatch || sampleMismatch ? "partial" : "success";
+
       await admin
         .from("assistant_actions")
         .update({
-          status: "success",
+          status: finalStatus,
           before_state: beforeState,
           after_state: afterState,
           affected_count: affected,
@@ -277,11 +284,11 @@ Deno.serve(async (req) => {
         await admin.from("assistant_messages").insert({
           conversation_id,
           role: "assistant",
-          content: `✓ ${resultMessage}`,
+          content: `${finalStatus === "success" ? "✓" : "⚠"} ${resultMessage}`,
         });
       }
 
-      return json({ ok: true, action_id: actionRow.id, message: resultMessage, affected });
+      return json({ ok: true, status: finalStatus, action_id: actionRow.id, message: resultMessage, affected, after_state: afterState, before_state: beforeState });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed";
       console.error("[assistant-execute] tool error", tool_name, msg);
