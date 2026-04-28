@@ -10,25 +10,95 @@ const corsHeaders = {
 // ---------------------------------------------------------------------------
 // HubSpot OAuth scope strategy
 // ---------------------------------------------------------------------------
-// HubSpot enforces that EVERY scope marked "Required" in the app config (HubSpot
-// Developer Portal -> Auth tab) MUST appear in the authorize URL's `scope`
-// parameter. If even one is missing, the install fails with:
-//   "Authorization failed because the provided scopes are missing [...]"
+// Two failure modes to balance:
+//   1. "provided scopes are missing [...]" -> a scope marked Required in the
+//      HubSpot Developer Portal is missing from `scope=`. Fix: include it in
+//      REQUIRED_SCOPES below.
+//   2. "your account lacks access to the required scopes [...]" -> a scope is
+//      in `scope=` but the connecting HubSpot portal doesn't have the product
+//      tier (Marketing Hub Ent, Content Hub Ent, Ops Hub, etc.). Fix: move it
+//      to OPTIONAL_SCOPES so HubSpot grants it only if available.
 //
-// `optional_scope` is NOT a substitute -- it's only granted if the portal has
-// the relevant hub, and HubSpot still validates the Required list against
-// `scope` strictly.
-//
-// MAINTENANCE RULE:
-//   This list MUST stay in sync with the Required column in the HubSpot
-//   Developer Portal. If you add a scope in the Portal -> add it here ->
-//   reconnect HubSpot in the app. If you remove a scope in the Portal ->
-//   remove it here too (otherwise HubSpot returns INVALID_SCOPE).
+// Rule of thumb:
+//   REQUIRED_SCOPES  = available on every HubSpot portal (Free, Starter, Pro,
+//                      Ent) -- core CRM, settings, files, timeline, oauth.
+//   OPTIONAL_SCOPES  = tier-gated (Marketing Hub, Content Hub, Ops Hub,
+//                      Commerce Hub, Service Hub add-ons, custom objects,
+//                      industry objects, sequences, custom channels, etc.).
 //
 // Portal: https://app.hubspot.com/developer/  (App settings -> Auth -> Scopes)
+// In the Portal: keep REQUIRED scopes in the Required column, move tier-gated
+// scopes to "Optional" or "Conditionally required". HubSpot enforces Required
+// strictly and won't auto-skip them.
 // ---------------------------------------------------------------------------
 
-const ALL_REQUIRED_SCOPES = [
+// Scopes available on EVERY HubSpot portal regardless of tier.
+const REQUIRED_SCOPES = [
+  "oauth",
+  "account-info.security.read",
+  "settings.users.read",
+  "settings.users.write",
+  "settings.users.teams.read",
+  "settings.users.teams.write",
+  "settings.currencies.read",
+  "settings.currencies.write",
+  "settings.security.security_health.read",
+
+  // Core CRM objects (always available)
+  "crm.objects.contacts.read",
+  "crm.objects.contacts.write",
+  "crm.objects.companies.read",
+  "crm.objects.companies.write",
+  "crm.objects.deals.read",
+  "crm.objects.deals.write",
+  "crm.objects.owners.read",
+  "crm.objects.leads.read",
+  "crm.objects.leads.write",
+  "crm.objects.line_items.read",
+  "crm.objects.line_items.write",
+  "crm.objects.products.read",
+  "crm.objects.products.write",
+
+  // Core CRM schemas
+  "crm.schemas.contacts.read",
+  "crm.schemas.contacts.write",
+  "crm.schemas.companies.read",
+  "crm.schemas.companies.write",
+  "crm.schemas.deals.read",
+  "crm.schemas.deals.write",
+  "crm.schemas.line_items.read",
+
+  // Lists / import / export (Free+)
+  "crm.lists.read",
+  "crm.lists.write",
+  "crm.import",
+  "crm.export",
+
+  // Files / timeline / engagements / forms / sales email (Free+)
+  "files",
+  "files.ui_hidden.read",
+  "timeline",
+  "forms",
+  "forms-uploaded-files",
+  "sales-email-read",
+
+  // Communication preferences (Free+)
+  "communication_preferences.read",
+  "communication_preferences.write",
+  "communication_preferences.read_write",
+
+  // Conversations basic (Free+)
+  "conversations.read",
+  "conversations.write",
+  "conversations.visitor_identification.tokens.create",
+
+  // Tickets (Service Hub Free+)
+  "tickets",
+  "crm.objects.feedback_submissions.read",
+];
+
+// Tier-gated scopes -- HubSpot grants these only if the portal has the product.
+const OPTIONAL_SCOPES = [
   // OAuth + identity
   "oauth",
 
@@ -272,22 +342,25 @@ serve(async (req) => {
 
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/hubspot-oauth-callback`;
 
-    // Dedupe + sort for stable URL + easier diff against the HubSpot Portal.
-    const scopes = Array.from(new Set(ALL_REQUIRED_SCOPES)).sort();
-    const scopeParam = scopes.join(" ");
+    // Dedupe + ensure required and optional don't overlap (Required wins).
+    const requiredSet = new Set(REQUIRED_SCOPES);
+    const optionalSet = new Set(OPTIONAL_SCOPES.filter((s) => !requiredSet.has(s)));
+    const required = Array.from(requiredSet).sort().join(" ");
+    const optional = Array.from(optionalSet).sort().join(" ");
 
     const authorizeUrl =
       `https://app.hubspot.com/oauth/authorize?client_id=${clientId}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&scope=${encodeURIComponent(scopeParam)}` +
+      `&scope=${encodeURIComponent(required)}` +
+      `&optional_scope=${encodeURIComponent(optional)}` +
       `&state=${encodeURIComponent(state)}`;
 
     console.log("[hubspot-oauth-start] authorize URL built", {
       client_id_preview: clientId.slice(0, 8),
       redirect_uri: redirectUri,
       account_id: account.id,
-      scope_count: scopes.length,
-      scope_bytes: scopeParam.length,
+      required_count: requiredSet.size,
+      optional_count: optionalSet.size,
       url_bytes: authorizeUrl.length,
     });
 
