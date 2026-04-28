@@ -94,8 +94,13 @@ const AppHygieneScan = () => {
     if (!latestScan?.results) return [];
     return Object.values(latestScan.results)
       .filter((r) => r.count > 0)
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => estimateCategoryCost(b.category, b.count) - estimateCategoryCost(a.category, a.count));
   }, [latestScan]);
+
+  const totalLeak = useMemo(
+    () => sortedCategories.reduce((s, r) => s + estimateCategoryCost(r.category, r.count), 0),
+    [sortedCategories],
+  );
 
   const actionByCategory = useMemo(() => {
     const m: Record<string, HygieneActionRow> = {};
