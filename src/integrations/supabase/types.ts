@@ -438,6 +438,7 @@ export type Database = {
           completed_at: string | null
           created_at: string
           current_stage: string | null
+          deleted_at: string | null
           error_message: string | null
           findings_count: number | null
           id: string
@@ -453,6 +454,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           current_stage?: string | null
+          deleted_at?: string | null
           error_message?: string | null
           findings_count?: number | null
           id?: string
@@ -468,6 +470,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           current_stage?: string | null
+          deleted_at?: string | null
           error_message?: string | null
           findings_count?: number | null
           id?: string
