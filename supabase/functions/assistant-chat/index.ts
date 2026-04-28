@@ -637,11 +637,62 @@ async function executeReadTool(
       return error ? { error: error.message } : { count: data?.length || 0, items: data };
     }
     case "summarize_audit": {
-      let q = admin.from("audits").select("*").eq("account_id", accountId).order("created_at", { ascending: false }).limit(1);
-      if (a.audit_id) q = admin.from("audits").select("*").eq("account_id", accountId).eq("id", a.audit_id);
+      let q = admin.from("audit_runs").select("*").eq("account_id", accountId).order("created_at", { ascending: false }).limit(1);
+      if (a.audit_id) q = admin.from("audit_runs").select("*").eq("account_id", accountId).eq("id", a.audit_id);
       const { data, error } = await q;
       if (error) return { error: error.message };
       return data?.[0] || { error: "No audits found" };
+    }
+    case "list_audits": {
+      let q = admin.from("audit_runs").select("id,created_at,total_leak_cents,status,archived_at").eq("account_id", accountId).order("created_at", { ascending: false });
+      if (!a.include_archived) q = q.is("archived_at", null);
+      q = q.limit(Math.min(Number(a.limit) || 25, 100));
+      const { data, error } = await q;
+      return error ? { error: error.message } : { count: data?.length || 0, audits: data };
+    }
+    case "query_owners": {
+      let q = admin.from("mirror_owners").select("hubspot_id,first_name,last_name,email").eq("account_id", accountId);
+      if (a.search) q = q.or(`first_name.ilike.%${a.search}%,last_name.ilike.%${a.search}%,email.ilike.%${a.search}%`);
+      q = q.limit(Math.min(Number(a.limit) || 50, 200));
+      const { data, error } = await q;
+      return error ? { error: error.message } : { count: data?.length || 0, owners: data };
+    }
+    case "query_engagements": {
+      let q = admin.from("mirror_engagements").select("hubspot_id,type,timestamp,contact_id,deal_id,properties").eq("account_id", accountId).order("timestamp", { ascending: false });
+      if (a.contact_id) q = q.eq("contact_id", String(a.contact_id));
+      if (a.deal_id) q = q.eq("deal_id", String(a.deal_id));
+      if (a.type) q = q.eq("type", String(a.type).toUpperCase());
+      if (typeof a.since_days === "number") {
+        const cutoff = new Date(Date.now() - a.since_days * 86400_000).toISOString();
+        q = q.gte("timestamp", cutoff);
+      }
+      q = q.limit(Math.min(Number(a.limit) || 25, 200));
+      const { data, error } = await q;
+      return error ? { error: error.message } : { count: data?.length || 0, engagements: data };
+    }
+    case "count_records": {
+      const tableMap: Record<string, string> = {
+        contacts: "mirror_contacts",
+        deals: "mirror_deals",
+        companies: "mirror_companies",
+        engagements: "mirror_engagements",
+        owners: "mirror_owners",
+      };
+      const table = tableMap[a.entity];
+      if (!table) return { error: `Unknown entity: ${a.entity}` };
+      let q = admin.from(table).select("*", { count: "exact", head: true }).eq("account_id", accountId);
+      if (a.stage && table === "mirror_deals") q = q.eq("stage", a.stage);
+      if (a.owner_id && table === "mirror_deals") q = q.eq("owner_id", a.owner_id);
+      if (a.lifecycle_stage && table === "mirror_contacts") q = q.eq("lifecycle_stage", a.lifecycle_stage);
+      const { count, error } = await q;
+      return error ? { error: error.message } : { entity: a.entity, count: count ?? 0 };
+    }
+    case "list_assistant_actions": {
+      let q = admin.from("assistant_actions").select("id,tool_name,status,affected_count,created_at,executed_at,undone_at,error_message").eq("account_id", accountId).order("created_at", { ascending: false });
+      if (a.status) q = q.eq("status", a.status);
+      q = q.limit(Math.min(Number(a.limit) || 25, 100));
+      const { data, error } = await q;
+      return error ? { error: error.message } : { count: data?.length || 0, actions: data };
     }
     default:
       return { error: `Unknown read tool: ${name}` };
