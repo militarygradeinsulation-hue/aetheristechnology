@@ -17,7 +17,25 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const RATE_DELAY_MS = 110;
 
 const WRITE_SCOPES = ["crm.objects.contacts.write", "crm.objects.deals.write", "crm.objects.companies.write"];
-const APP_ACTION_TOOLS = ["trigger_sync", "trigger_hygiene_scan", "trigger_leak_audit"];
+const APP_ACTION_TOOLS = [
+  "trigger_sync", "trigger_hygiene_scan", "trigger_leak_audit",
+  "approve_hygiene_action", "reject_hygiene_action", "execute_hygiene_action",
+  "undo_assistant_action", "archive_audit", "restore_audit", "delete_audit_permanently",
+  "disconnect_hubspot",
+];
+
+function requireWriteScopes(account: any) {
+  if (!WRITE_SCOPES.every((s) => (account.hubspot_scopes || "").includes(s))) {
+    throw new Error("HubSpot write scopes not granted. Reconnect HubSpot from Settings.");
+  }
+}
+
+// HubSpot association type ids (default labels) for v4 default-types endpoint
+const ASSOC_DEFAULT_PATH: Record<string, Record<string, string>> = {
+  contact: { deal: "contact_to_deal", company: "contact_to_company" },
+  deal:    { contact: "deal_to_contact", company: "deal_to_company" },
+  company: { contact: "company_to_contact", deal: "company_to_deal" },
+};
 
 function objectPath(t: "contact" | "deal" | "company"): string {
   return t === "contact" ? "contacts" : t === "deal" ? "deals" : "companies";
