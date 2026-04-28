@@ -136,6 +136,79 @@ const READ_TOOLS = [
       parameters: { type: "object", properties: { audit_id: { type: "string" } } },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_audits",
+      description: "List recent Leak Audit runs (id, created_at, totals, archived flag).",
+      parameters: {
+        type: "object",
+        properties: {
+          include_archived: { type: "boolean" },
+          limit: { type: "number" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "query_owners",
+      description: "List or search HubSpot owners (sales reps) mirrored locally. Useful for translating an owner name to an owner_id before reassigning deals.",
+      parameters: {
+        type: "object",
+        properties: { search: { type: "string" }, limit: { type: "number" } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "query_engagements",
+      description: "Search recent engagements (calls, emails, meetings, notes, tasks) for a contact, deal, or by type.",
+      parameters: {
+        type: "object",
+        properties: {
+          contact_id: { type: "string" },
+          deal_id: { type: "string" },
+          type: { type: "string", description: "e.g. EMAIL, CALL, MEETING, NOTE, TASK" },
+          since_days: { type: "number" },
+          limit: { type: "number" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "count_records",
+      description: "Quickly count rows in a mirrored table (contacts, deals, companies, engagements) with optional filters.",
+      parameters: {
+        type: "object",
+        required: ["entity"],
+        properties: {
+          entity: { type: "string", enum: ["contacts", "deals", "companies", "engagements", "owners"] },
+          stage: { type: "string" },
+          owner_id: { type: "string" },
+          lifecycle_stage: { type: "string" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_assistant_actions",
+      description: "List recent Co-Pilot actions executed in this account (for review or undo).",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["pending", "executing", "success", "partial", "error", "undone"] },
+          limit: { type: "number" },
+        },
+      },
+    },
+  },
 ];
 
 const APP_ACTION_TOOLS = [
