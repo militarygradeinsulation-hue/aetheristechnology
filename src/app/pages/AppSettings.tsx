@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Unplug, RefreshCw } from "lucide-react";
+import { Unplug, RefreshCw, Beaker } from "lucide-react";
 import { AppLayout } from "../AppLayout";
 import { useAccount } from "../lib/useAccount";
 import { HubSpotConnectCard } from "../components/HubSpotConnectCard";
@@ -48,6 +48,23 @@ const AppSettings = () => {
     }
   };
 
+  const handleSelfTest = async () => {
+    setWorking("selftest");
+    try {
+      const { data, error } = await supabase.functions.invoke("hubspot-self-test", { body: {} });
+      if (error) throw error;
+      if (data?.ok) {
+        toast({ title: "HubSpot write access confirmed", description: data.message });
+      } else {
+        toast({ title: "Self-test failed", description: data?.error || "Unknown error", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Self-test failed", description: err.message, variant: "destructive" });
+    } finally {
+      setWorking(null);
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout>
@@ -83,7 +100,11 @@ const AppSettings = () => {
                 <div className="flex justify-between"><dt className="text-muted-foreground">Connected</dt><dd>{account.hubspot_connected_at ? new Date(account.hubspot_connected_at).toLocaleDateString() : "—"}</dd></div>
                 <div className="flex justify-between"><dt className="text-muted-foreground">Last sync</dt><dd>{account.last_sync_at ? new Date(account.last_sync_at).toLocaleString() : "Never"}</dd></div>
               </dl>
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={handleSelfTest} disabled={working !== null} className="gap-2">
+                  <Beaker className={`h-3.5 w-3.5 ${working === "selftest" ? "animate-pulse" : ""}`} />
+                  Test HubSpot write
+                </Button>
                 <Button variant="outline" size="sm" onClick={handleResync} disabled={working !== null} className="gap-2">
                   <RefreshCw className={`h-3.5 w-3.5 ${working === "sync" ? "animate-spin" : ""}`} />
                   Full re-sync
