@@ -44,6 +44,39 @@ async function loadMirror(admin: SupabaseClient, accountId: string, type: "conta
   return data;
 }
 
+// Re-fetch a record from HubSpot and compare against the properties we just wrote.
+// Returns a per-field verification map plus a boolean overall-verified flag.
+async function verifyHubSpot(
+  type: "contact" | "deal" | "company",
+  id: string,
+  token: string,
+  written: Record<string, unknown>,
+): Promise<{ verified: boolean; fields: Record<string, { written: unknown; actual: unknown; match: boolean }>; raw: Record<string, unknown> | null }> {
+  const keys = Object.keys(written);
+  if (!keys.length) return { verified: true, fields: {}, raw: null };
+  try {
+    const url = `${HUBSPOT_API_BASE}/crm/v3/objects/${objectPath(type)}/${id}?properties=${encodeURIComponent(keys.join(","))}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return { verified: false, fields: {}, raw: null };
+    const body = await res.json();
+    const actual = (body?.properties || {}) as Record<string, unknown>;
+    const fields: Record<string, { written: unknown; actual: unknown; match: boolean }> = {};
+    let allMatch = true;
+    for (const k of keys) {
+      const w = written[k];
+      const a = actual[k];
+      // HubSpot normalizes a lot (strings, casing on enums, currency formatting). Compare loosely.
+      const match = String(w ?? "").trim().toLowerCase() === String(a ?? "").trim().toLowerCase();
+      if (!match) allMatch = false;
+      fields[k] = { written: w, actual: a, match };
+    }
+    return { verified: allMatch, fields, raw: actual };
+  } catch (e) {
+    console.error("[assistant-execute] verify failed", id, (e as Error).message);
+    return { verified: false, fields: {}, raw: null };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
