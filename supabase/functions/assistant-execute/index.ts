@@ -194,19 +194,29 @@ Deno.serve(async (req) => {
           beforeState = { deals: beforeRows.data };
           let ok = 0;
           let fail = 0;
+          const okIds: string[] = [];
           for (const id of ids) {
             try {
               await fetchHubSpot("PATCH", `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${id}`, token, { properties: props });
               ok++;
+              okIds.push(id);
             } catch (e) {
               fail++;
               console.error("[assistant-execute] bulk PATCH failed", id, (e as Error).message);
             }
             await sleep(RATE_DELAY_MS);
           }
+          // Sample-verify the first 5 successful writes (round-trip GET)
+          const sampleVerify: Array<{ id: string; verified: boolean; fields: Record<string, unknown> }> = [];
+          for (const id of okIds.slice(0, 5)) {
+            const v = await verifyHubSpot("deal", id, token, props as Record<string, unknown>);
+            sampleVerify.push({ id, verified: v.verified, fields: v.fields });
+          }
           affected = ok;
-          afterState = { updated: ok, failed: fail, ids };
-          resultMessage = `Updated ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}.`;
+          afterState = { updated: ok, failed: fail, ids, sample_verified: sampleVerify };
+          const verifiedOk = sampleVerify.filter((v) => v.verified).length;
+          resultMessage = `Updated ${ok} of ${ids.length} deals${fail ? ` (${fail} failed)` : ""}. Verified ${verifiedOk}/${sampleVerify.length} sampled in HubSpot.`;
+        }
         }
 
       // ---------- Reassign deals ----------
