@@ -644,8 +644,8 @@ async function executeReadTool(
       return data?.[0] || { error: "No audits found" };
     }
     case "list_audits": {
-      let q = admin.from("audit_runs").select("id,created_at,total_leak_cents,status,archived_at").eq("account_id", accountId).order("created_at", { ascending: false });
-      if (!a.include_archived) q = q.is("archived_at", null);
+      let q = admin.from("audit_runs").select("id,created_at,total_exposure_cents,findings_count,status,deleted_at").eq("account_id", accountId).order("created_at", { ascending: false });
+      if (!a.include_archived) q = q.is("deleted_at", null);
       q = q.limit(Math.min(Number(a.limit) || 25, 100));
       const { data, error } = await q;
       return error ? { error: error.message } : { count: data?.length || 0, audits: data };
