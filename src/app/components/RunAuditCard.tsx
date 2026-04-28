@@ -23,10 +23,37 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
   const [runId, setRunId] = useState<string | null>(null);
   const [currentStage, setCurrentStage] = useState<string>("patterns");
   const [stageMessage, setStageMessage] = useState<string>("");
+  const [autoNavigate, setAutoNavigate] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Poll for status while running
+  // Detect any in-flight audit for this account on mount / account change.
+  // This makes the running state visible across devices, not just on the
+  // browser tab that kicked it off.
+  useEffect(() => {
+    let cancelled = false;
+    const detect = async () => {
+      const { data } = await supabase
+        .from("audit_runs")
+        .select("id,status,current_stage,progress")
+        .eq("account_id", accountId)
+        .in("status", ["pending", "running"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setRunId(data.id);
+      setRunning(true);
+      setCurrentStage(data.current_stage || "patterns");
+      setStageMessage((data.progress as any)?.message || "");
+    };
+    detect();
+    return () => {
+      cancelled = true;
+    };
+  }, [accountId]);
+
+  // Poll for status while running (works whether this device started the run or another did)
   useEffect(() => {
     if (!runId || !running) return;
     const interval = setInterval(async () => {
@@ -42,7 +69,7 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
         clearInterval(interval);
         setRunning(false);
         toast({ title: "Audit complete", description: "Opening your revenue leak report..." });
-        navigate(`/app/reports/${runId}`);
+        if (autoNavigate) navigate(`/app/reports/${runId}`);
       } else if (data.status === "failed") {
         clearInterval(interval);
         setRunning(false);
@@ -50,16 +77,18 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
       }
     }, 1500);
     return () => clearInterval(interval);
-  }, [runId, running, navigate, toast]);
+  }, [runId, running, navigate, toast, autoNavigate]);
 
   const handleRun = async () => {
     setRunning(true);
+    setAutoNavigate(true);
     try {
       const { data, error } = await supabase.functions.invoke("run-audit", { body: { account_id: accountId } });
       if (error) throw error;
       setRunId(data.audit_run_id);
     } catch (err: any) {
       setRunning(false);
+      setAutoNavigate(false);
       toast({ title: "Couldn't start audit", description: err.message, variant: "destructive" });
     }
   };

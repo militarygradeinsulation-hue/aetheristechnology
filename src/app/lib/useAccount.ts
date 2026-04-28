@@ -49,5 +49,21 @@ export const useAccount = () => {
     fetchAccount();
   }, [fetchAccount]);
 
+  // Cross-device awareness: poll the account every 5s and refetch when the
+  // tab becomes visible. This way, work started on another device (sync,
+  // audit, etc.) shows up here without a manual reload.
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(fetchAccount, 5000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchAccount();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [user, fetchAccount]);
+
   return { account, loading, refetch: fetchAccount };
 };
