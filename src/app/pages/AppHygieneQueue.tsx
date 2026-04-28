@@ -109,6 +109,26 @@ const AppHygieneQueue = () => {
     setResortNonce((n) => n + 1);
   };
 
+  // Consolidate duplicate rows: each scan re-creates a row per category, so
+  // the queue accumulates many "Owner Issues / Missing Critical Fields / ..."
+  // entries that say the same thing. Keep only the newest action per category
+  // and remember how many older duplicates it represents.
+  const dedupedActions = useMemo(() => {
+    const byCat = new Map<string, HygieneActionRow & { _duplicateCount?: number; _duplicateIds?: string[] }>();
+    // actions arrive newest-first from `load()`; first hit per category wins.
+    for (const a of actions) {
+      const key = a.category || a.id;
+      const existing = byCat.get(key);
+      if (!existing) {
+        byCat.set(key, { ...a, _duplicateCount: 0, _duplicateIds: [] });
+      } else {
+        existing._duplicateCount = (existing._duplicateCount || 0) + 1;
+        existing._duplicateIds = [...(existing._duplicateIds || []), a.id];
+      }
+    }
+    return Array.from(byCat.values());
+  }, [actions]);
+
   // Locked sort: compute order once per (view, new-row arrival), then freeze.
   const grouped = useMemo(() => {
     if (orderViewRef.current !== view) {
@@ -117,18 +137,27 @@ const AppHygieneQueue = () => {
     }
     const order = orderRef.current;
     // Assign positions to any rows we haven't seen yet, using the current view's sort.
-    const unseen = actions.filter((a) => !order.has(a.id));
+    const unseen = dedupedActions.filter((a) => !order.has(a.id));
     if (unseen.length) {
       const sortedUnseen = sortActions(unseen, view);
       let next = order.size;
       for (const a of sortedUnseen) order.set(a.id, next++);
     }
-    return [...actions].sort(
+    return [...dedupedActions].sort(
       (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
     );
     // resortNonce intentionally a dep so "Re-sort now" re-runs this
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actions, view, resortNonce]);
+  }, [dedupedActions, view, resortNonce]);
+
+  // Dismiss older duplicate runs for a category (marks them as skipped in DB
+  // so they don't reappear on next load).
+  const dismissDuplicates = async (ids: string[]) => {
+    if (!ids.length) return;
+    await supabase.from("hygiene_actions").update({ status: "skipped" }).in("id", ids);
+    toast({ title: `Dismissed ${ids.length} older run${ids.length === 1 ? "" : "s"}` });
+    load();
+  };
 
 
   const skipCategory = async (a: HygieneActionRow) => {
@@ -279,6 +308,23 @@ const AppHygieneQueue = () => {
                         <span className="text-xs flex items-center gap-1 text-blue-400">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           {a.progress?.processed || 0} / {a.progress?.total || 0}
+                        </span>
+                      )}
+                      {((a as any)._duplicateCount ?? 0) > 0 && (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded border bg-muted/40 text-muted-foreground border-border inline-flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          +{(a as any)._duplicateCount} earlier run{(a as any)._duplicateCount === 1 ? "" : "s"}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dismissDuplicates((a as any)._duplicateIds || []);
+                            }}
+                            className="text-foreground hover:text-amber-400 underline-offset-2 hover:underline"
+                          >
+                            Dismiss
+                          </button>
                         </span>
                       )}
                     </div>
