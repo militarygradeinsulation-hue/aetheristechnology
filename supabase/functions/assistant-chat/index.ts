@@ -879,7 +879,7 @@ WRITE (require confirm, log before/after for undo):
   - update_contact, update_deal, update_company
   - create_contact, create_deal, create_company
   - delete_contact, delete_deal, delete_company
-  - bulk_update_deals, bulk_update_contacts, bulk_delete_deals
+  - bulk_update_deals, bulk_update_contacts, bulk_update_companies, bulk_delete_deals
   - reassign_deals
   - add_note_to_record, create_task_for_record, associate_records
 
