@@ -113,20 +113,24 @@ const AppHygieneQueue = () => {
   // the queue accumulates many "Owner Issues / Missing Critical Fields / ..."
   // entries that say the same thing. Keep only the newest action per category
   // and remember how many older duplicates it represents.
-  const dedupedActions = useMemo(() => {
+  // Consolidate duplicate rows strictly by category. Rows missing a category
+  // never get merged — they bucket into `uncategorized` and render in their
+  // own section so unrelated rows aren't collapsed together by an id fallback.
+  const { categorized: dedupedActions, uncategorized } = useMemo(() => {
     const byCat = new Map<string, HygieneActionRow & { _duplicateCount?: number; _duplicateIds?: string[] }>();
-    // actions arrive newest-first from `load()`; first hit per category wins.
+    const uncat: HygieneActionRow[] = [];
     for (const a of actions) {
-      const key = a.category || a.id;
-      const existing = byCat.get(key);
+      const cat = (a.category || "").trim();
+      if (!cat) { uncat.push(a); continue; }
+      const existing = byCat.get(cat);
       if (!existing) {
-        byCat.set(key, { ...a, _duplicateCount: 0, _duplicateIds: [] });
+        byCat.set(cat, { ...a, _duplicateCount: 0, _duplicateIds: [] });
       } else {
         existing._duplicateCount = (existing._duplicateCount || 0) + 1;
         existing._duplicateIds = [...(existing._duplicateIds || []), a.id];
       }
     }
-    return Array.from(byCat.values());
+    return { categorized: Array.from(byCat.values()), uncategorized: uncat };
   }, [actions]);
 
   // Locked sort: compute order once per (view, new-row arrival), then freeze.
