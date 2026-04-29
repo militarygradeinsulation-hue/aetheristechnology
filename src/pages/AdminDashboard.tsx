@@ -335,7 +335,7 @@ const AdminDashboard: React.FC = () => {
     if (!token) return;
     setLinkedinLoading(true);
     try {
-      const redirectUri = `${window.location.origin}/admin`;
+      const redirectUri = LINKEDIN_REDIRECT_URI;
       const { data, error } = await supabase.functions.invoke('linkedin-auth', {
         body: { action: 'callback', code, redirect_uri: redirectUri },
         headers: { 'x-admin-token': token },
