@@ -76,7 +76,18 @@ RULES:
 - If they push back on price, compare it to what they're losing
 - Keep responses concise but impactful — max 3-4 paragraphs
 - End every response with either a question or a clear next step
-- If they're ready to buy, give them the checkout link immediately`;
+- If they're ready to buy, give them the checkout link immediately
+
+QUICK-REPLY SUGGESTIONS (HARD RULE):
+After your normal reply, you MUST append a machine-readable block on its own lines, exactly in this format:
+<suggestions>["Reply 1","Reply 2","Reply 3"]</suggestions>
+
+Rules for the suggestions:
+- Always exactly 3 suggestions
+- Each suggestion MUST be 6 words or fewer
+- Each one must be written in the FIRST PERSON as the prospect would say it next (e.g. "Show me what to fix first", "What does that cost me?", "I want the $500 audit")
+- They must move the conversation forward — no "thanks" / "goodbye" filler
+- Do NOT mention the suggestions block in your visible reply, do not wrap it in code fences, do not add anything after the closing </suggestions> tag`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
