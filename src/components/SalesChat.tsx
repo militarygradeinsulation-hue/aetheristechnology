@@ -5,13 +5,41 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
-type Msg = { role: 'user' | 'assistant'; content: string };
+type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
 const INITIAL_MESSAGE: Msg = {
   role: 'assistant',
   content: "Hey — I'm the Aetheris Sales Advisor. I help business owners figure out exactly what's broken in their digital presence and what to do about it.\n\nWhat's going on in your business? What's the biggest headache right now?",
+};
+
+const STARTER_PROBLEMS = [
+  "My website isn't generating leads",
+  "I'm losing bids and don't know why",
+  "My CRM is a graveyard",
+  "Marketing spend, no ROI",
+  "My follow-up is broken",
+  "I don't know what's actually broken",
+];
+
+const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
+const STREAMING_STRIP_RE = /\s*<suggestions>[\s\S]*$/i;
+
+const stripSuggestionsForDisplay = (text: string) => text.replace(STREAMING_STRIP_RE, '').trim();
+
+const parseSuggestions = (text: string): { clean: string; suggestions?: string[] } => {
+  const m = text.match(SUGGESTIONS_RE);
+  if (!m) return { clean: text };
+  try {
+    const arr = JSON.parse(m[1]);
+    if (Array.isArray(arr) && arr.every((s) => typeof s === 'string')) {
+      return { clean: text.replace(SUGGESTIONS_RE, '').trim(), suggestions: arr.slice(0, 3) };
+    }
+  } catch {
+    // ignore
+  }
+  return { clean: text.replace(SUGGESTIONS_RE, '').trim() };
 };
 
 const CONTACT_LINKS = [
@@ -40,8 +68,7 @@ export const SalesChat: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
+  const runChat = useCallback(async (text: string) => {
     if (!text || isLoading) return;
 
     const userMsg: Msg = { role: 'user', content: text };
@@ -70,12 +97,13 @@ export const SalesChat: React.FC = () => {
 
       const upsertAssistant = (chunk: string) => {
         assistantSoFar += chunk;
+        const display = stripSuggestionsForDisplay(assistantSoFar);
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === 'assistant' && prev.length > 1 && prev[prev.length - 2]?.role === 'user') {
-            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: display } : m));
           }
-          return [...prev, { role: 'assistant', content: assistantSoFar }];
+          return [...prev, { role: 'assistant', content: display }];
         });
       };
 
@@ -104,13 +132,30 @@ export const SalesChat: React.FC = () => {
           }
         }
       }
+
+      // Final pass: extract suggestions and clean content on the last assistant message
+      const { clean, suggestions } = parseSuggestions(assistantSoFar);
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role !== 'assistant') return prev;
+        return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, suggestions } : m));
+      });
     } catch (e) {
       console.error(e);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Try again or call us at (317) 376-2110.' }]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages]);
+  }, [isLoading, messages]);
+
+  const sendMessage = useCallback(() => {
+    runChat(input.trim());
+  }, [input, runChat]);
+
+  const sendPreset = useCallback((text: string, position: 'starter' | 'followup') => {
+    trackEvent('chat_quickpick', { label: text, position });
+    runChat(text);
+  }, [runChat, trackEvent]);
 
   const handleCheckoutClick = (priceId: string) => {
     setCheckoutPriceId(priceId);
@@ -169,6 +214,13 @@ export const SalesChat: React.FC = () => {
     }
     return <>{elements}</>;
   };
+
+  const lastAssistantIdx = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') return i;
+    }
+    return -1;
+  })();
 
   return (
     <>
@@ -229,19 +281,57 @@ export const SalesChat: React.FC = () => {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-sm'
-                      : 'bg-muted text-foreground rounded-bl-sm'
-                  }`}
-                >
-                  {msg.role === 'assistant' ? renderContent(msg.content) : msg.content}
+            {messages.map((msg, i) => {
+              const isLastAssistant = i === lastAssistantIdx;
+              const showStarters = i === 0 && messages.length === 1 && !isLoading;
+              const showFollowups =
+                isLastAssistant &&
+                i > 0 &&
+                !isLoading &&
+                msg.suggestions &&
+                msg.suggestions.length > 0;
+              return (
+                <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div
+                    className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-sm'
+                        : 'bg-muted text-foreground rounded-bl-sm'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? renderContent(msg.content) : msg.content}
+                  </div>
+
+                  {showStarters && (
+                    <div className="mt-2 flex flex-wrap gap-1.5 max-w-[95%]">
+                      {STARTER_PROBLEMS.map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => sendPreset(p, 'starter')}
+                          className="text-[11px] px-3 py-1.5 rounded-full bg-muted hover:bg-amber/20 hover:border-amber border border-border text-foreground transition-colors"
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {showFollowups && (
+                    <div className="mt-2 flex flex-wrap gap-1.5 max-w-[95%]">
+                      {msg.suggestions!.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => sendPreset(s, 'followup')}
+                          className="text-[11px] px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/30 text-foreground transition-colors"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex justify-start">
                 <div className="bg-muted px-3 py-2 rounded-xl rounded-bl-sm">
