@@ -274,6 +274,9 @@ const AdminDashboard: React.FC = () => {
   };
 
   // --- LinkedIn helpers ---
+  // MUST exactly match an entry in your LinkedIn app's "Authorized redirect URLs"
+  const LINKEDIN_REDIRECT_URI = 'https://aetheris.technology/admin';
+
   const fetchLinkedinStatus = async () => {
     const token = getAdminToken();
     if (!token) return;
@@ -299,12 +302,32 @@ const AdminDashboard: React.FC = () => {
   const handleLinkedinConnect = async () => {
     const token = getAdminToken();
     if (!token) return;
-    const redirectUri = `${window.location.origin}/admin`;
-    const { data } = await supabase.functions.invoke('linkedin-auth', {
-      body: { action: 'authorize', redirect_uri: redirectUri },
-      headers: { 'x-admin-token': token },
-    });
-    if (data?.url) window.location.href = data.url;
+    try {
+      const { data, error } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'authorize', redirect_uri: LINKEDIN_REDIRECT_URI },
+        headers: { 'x-admin-token': token },
+      });
+      console.log('linkedin-auth authorize response', { data, error });
+      if (error) throw error;
+      if (!data?.url) throw new Error('No authorize URL returned');
+
+      // Break out of the Lovable preview iframe — LinkedIn refuses to load in a frame.
+      const win = window.open(data.url, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        try {
+          if (window.top && window.top !== window.self) {
+            (window.top as Window).location.href = data.url;
+          } else {
+            window.location.href = data.url;
+          }
+        } catch {
+          window.location.href = data.url;
+        }
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'LinkedIn Connect Failed', description: msg, variant: 'destructive' });
+    }
   };
 
   const handleLinkedinCallback = async (code: string) => {
@@ -312,7 +335,7 @@ const AdminDashboard: React.FC = () => {
     if (!token) return;
     setLinkedinLoading(true);
     try {
-      const redirectUri = `${window.location.origin}/admin`;
+      const redirectUri = LINKEDIN_REDIRECT_URI;
       const { data, error } = await supabase.functions.invoke('linkedin-auth', {
         body: { action: 'callback', code, redirect_uri: redirectUri },
         headers: { 'x-admin-token': token },
@@ -388,8 +411,30 @@ const AdminDashboard: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
+    const oauthError = params.get('error');
+    const oauthErrorDesc = params.get('error_description');
+
+    if (oauthError && state === 'admin_oauth') {
+      setActiveTab('linkedin');
+      toast({
+        title: 'LinkedIn rejected the connection',
+        description: oauthErrorDesc || oauthError,
+        variant: 'destructive',
+      });
+      window.history.replaceState({}, '', '/admin');
+      return;
+    }
+
     if (code && state === 'admin_oauth') {
       setActiveTab('linkedin');
+      if (!getAdminToken()) {
+        toast({
+          title: 'Sign in to admin first',
+          description: 'Open /admin from your bookmarked URL, sign in, then re-run Connect LinkedIn.',
+          variant: 'destructive',
+        });
+        return;
+      }
       handleLinkedinCallback(code);
     }
   }, []);
