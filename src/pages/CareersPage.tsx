@@ -86,7 +86,7 @@ const CareersPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Sales Rep — Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell digital transformation to playground & recreation companies. Earn 8–25% per deal."
+        description="Independent commission sales role. Sell digital transformation to playground & recreation companies. Earn 10% on every deal — including recurring revenue."
         path="/careers"
       />
       <Background />
@@ -121,7 +121,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 
     <div className="grid md:grid-cols-2 gap-6 mb-12">
       {[
-        { icon: DollarSign, title: "8–25% Commission", desc: "On every closed deal. No ceiling." },
+        { icon: DollarSign, title: "Flat 10% Commission", desc: "On every closed deal — including recurring monthly revenue, for as long as the client stays." },
         { icon: Target, title: "Warm Market", desc: "These companies know they need help. They just don't know who to call." },
         { icon: TrendingUp, title: "$14B Industry", desc: "Global playground market growing at 7% CAGR. Money is moving." },
         { icon: Zap, title: "No Inventory", desc: "You sell services. We deliver. You get paid." },
@@ -235,31 +235,46 @@ const PlaybookSection = () => (
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><TrendingUp className="text-primary" /> Your Commission</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <p className="text-foreground font-medium">
+            Flat <span className="text-primary font-bold">10%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time — that's what keeps it fair to you, the business, and the owner.
+          </p>
+        </div>
+
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Service</TableHead>
-              <TableHead>Base Commission</TableHead>
-              <TableHead>Step-Up Bonus</TableHead>
+              <TableHead>Product</TableHead>
+              <TableHead className="text-right">Client Price</TableHead>
+              <TableHead className="text-right">Your Cut (10%)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[
-              ["Digital Snapshot ($125)", "25% — $31.25/sale", "3+ in a week → 30%"],
-              ["Website Evaluation ($500)", "25% — $125/sale", "2+ in a month → 28%"],
-              ["14-Day Diagnostic ($2,500)", "12% — $300/sale", "Upsell to implementation → +3%"],
-              ["Implementation ($5K–$25K+)", "8–10%", "Repeat client → 12%"],
-            ].map(([service, base, bonus]) => (
-              <TableRow key={service}>
-                <TableCell className="font-medium text-foreground">{service}</TableCell>
-                <TableCell className="text-primary font-semibold">{base}</TableCell>
-                <TableCell className="text-muted-foreground">{bonus}</TableCell>
+            {REP_PRODUCTS.map((p) => (
+              <TableRow key={p.name} className={p.highlight ? 'bg-primary/5' : undefined}>
+                <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
+                  {p.name}{p.recurring ? ' (recurring)' : ''}
+                </TableCell>
+                <TableCell className="text-right text-muted-foreground">
+                  {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
+                </TableCell>
+                <TableCell className={`text-right font-semibold ${p.highlight ? 'text-primary' : 'text-foreground'}`}>
+                  {fmtUsd(commissionCents(p.priceCents, 0.10))}{p.recurring ? '/mo' : ''}
+                </TableCell>
               </TableRow>
             ))}
+            <TableRow>
+              <TableCell className="text-foreground">Monthly Subscriptions ($25–$1,990/mo)</TableCell>
+              <TableCell className="text-right text-muted-foreground">varies</TableCell>
+              <TableCell className="text-right font-semibold text-primary">10% of every invoice</TableCell>
+            </TableRow>
           </TableBody>
         </Table>
-        <p className="text-sm text-muted-foreground mt-4">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
+        <p className="text-sm text-muted-foreground">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
       </CardContent>
     </Card>
 
@@ -276,9 +291,9 @@ const PlaybookSection = () => (
             {[
               "Visit their website. Find 2-3 obvious problems (slow load, no mobile, outdated photos, no CTA).",
               "Send a short email or LinkedIn message: 'I looked at your site — you're leaving money on the table. Want me to show you where?'",
-              "Offer the $125 Digital Snapshot as the entry point. It's cheap, it's fast, and it proves value.",
-              "Once they see the report, they'll ask 'what now?' That's when you introduce the evaluation or diagnostic.",
-              "Implementation sells itself after the diagnostic reveals the full damage.",
+              "Offer the $149 Digital Snapshot as the entry point. It's cheap, it's fast, and it proves value.",
+              "Once they see the report, they'll ask 'what now?' That's when you introduce the Strategy Blueprint or 14-Day Diagnostic.",
+              "Implementation and Fractional CTO/CMO retainers sell themselves after the diagnostic reveals the full damage.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
@@ -312,7 +327,7 @@ const PlaybookSection = () => (
             <ul className="space-y-2 text-muted-foreground">
               {[
                 "Don't lead with price. Lead with the problem.",
-                "Don't oversell. The $125 snapshot does the selling for you.",
+                "Don't oversell. The Snapshot does the selling for you.",
                 "Don't trash-talk their current vendor. Just show the gaps.",
                 "Don't promise timelines you can't control.",
                 "Don't disappear after the first 'no.' It's rarely final.",
@@ -328,39 +343,25 @@ const PlaybookSection = () => (
     {/* SAMPLE EARNINGS */}
     <Card className="bg-card/60 backdrop-blur border-border/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Sample Monthly Earnings</CardTitle>
+        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">A realistic month for someone working this 10–15 hours per week:</p>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Closed Deal</TableHead>
-              <TableHead>Revenue</TableHead>
-              <TableHead>Your Commission</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ["4× Digital Snapshots", "$500", "$125"],
-              ["2× Website Evaluations", "$1,000", "$250"],
-              ["1× 14-Day Diagnostic", "$2,500", "$300"],
-              ["1× Implementation (small)", "$8,000", "$800"],
-            ].map(([deal, rev, comm]) => (
-              <TableRow key={deal}>
-                <TableCell className="text-foreground">{deal}</TableCell>
-                <TableCell className="text-muted-foreground">{rev}</TableCell>
-                <TableCell className="text-primary font-semibold">{comm}</TableCell>
-              </TableRow>
-            ))}
-            <TableRow className="border-t-2 border-primary/30">
-              <TableCell className="font-bold text-foreground">Monthly Total</TableCell>
-              <TableCell className="font-bold text-foreground">$12,000</TableCell>
-              <TableCell className="font-bold text-primary text-lg">$1,475</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-        <p className="text-sm text-muted-foreground mt-4">This is conservative. Top reps closing 2+ implementations per month clear $3K–$5K+ in commission.</p>
+        <p className="text-muted-foreground mb-4">Honest math at 10% across the real product ladder:</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$40' },
+            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$164' },
+            { label: 'Strong month', detail: '1 × 14-Day Diagnostic + 2 Snapshots + 1 Fractional retainer signed', total: '$910 first month + $590/mo recurring' },
+            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,170 first month + $590/mo recurring' },
+          ].map((row) => (
+            <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
+              <p className="text-sm text-muted-foreground">{row.label}</p>
+              <p className="text-foreground mt-1">{row.detail}</p>
+              <p className="text-primary font-semibold mt-1">{row.total}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = $14,160 in residual commission alone.</p>
       </CardContent>
     </Card>
 
