@@ -51,6 +51,7 @@ const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
+const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 
 const queryClient = new QueryClient({
@@ -130,6 +131,7 @@ const App = () => (
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
+                      <Route path="/leak-report/:prospectId" element={<LeakReportPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

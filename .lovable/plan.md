@@ -1,58 +1,50 @@
-# Why LinkedIn isn't connecting
+## Goal
 
-The flow is broken in two places, both rooted in the same problem: **the admin dashboard runs inside the Lovable preview iframe, but LinkedIn refuses to load inside an iframe and the OAuth redirect can't make it back to the iframe.**
+For every prospect in the drip campaign, scrape their company website, run a Friction Scan on it, store the result on the prospect, and weave the actual findings into the outreach emails they receive.
 
-## Root causes
+## How it works today
 
-1. **Redirect URI is dynamic and almost certainly not whitelisted in your LinkedIn app.**
-   `handleLinkedinConnect` builds `redirect_uri = ${window.location.origin}/admin`. Inside the Lovable preview that becomes `https://id-preview--<uuid>.lovable.app/admin` (or `lovableproject.com`). LinkedIn rejects any redirect URI that isn't *exactly* listed under "Authorized redirect URLs" in your LinkedIn Developer app, so the consent screen returns an error before the code is ever issued.
+- `generate-drip-batch` pulls `imported` prospects, AI-writes follow-ups (emails 2..N), and inserts them into `drip_emails`. Email 1 is a fixed "Saw this and thought of you" template.
+- `generate-friction-audit` already exists: scrapes a URL with Firecrawl + runs a Lovable AI analysis returning `frictionScore`, `flaggedPhrases`, `topPriorityFixes`, `strongerCTAs`, etc. Currently used only by the public `/friction-audit` page.
+- `drip_prospects` already has `website_url` and a `scraped_data` jsonb field for storing extra data.
 
-2. **Navigation happens inside the iframe.** `window.location.href = data.url` tries to load `linkedin.com/oauth/...` inside the preview iframe. LinkedIn sets `X-Frame-Options: DENY`, so the page is blocked and the user sees a blank/refused frame. Even if it loaded, LinkedIn would redirect back to the preview iframe URL — not to your real `/admin` page where the user is logged in.
+## Changes
 
-3. **The callback runs on `/admin` of whichever origin LinkedIn redirected to**, but the admin token (in `localStorage`) lives per-origin. If LinkedIn redirects to the published domain and the user authenticated on the preview (or vice versa), `getAdminToken()` returns null and `handleLinkedinCallback` silently no-ops.
+### 1. New shared scan step in `generate-drip-batch`
 
-## Fix plan
+For each prospect being processed:
+1. If `website_url` is missing, derive it from the email domain (skip free providers like gmail/yahoo/outlook → mark `audit_status: 'skipped'`).
+2. Call the existing friction-audit logic (extracted into a small helper) against `website_url`.
+3. Store the full result on `drip_prospects.scraped_data.friction_audit` plus a top-level `audit_status` (`done` / `failed` / `skipped`) and `audit_score`.
+4. Run scans with the same `chunkSize` concurrency cap already used (5 in flight) to respect Firecrawl/AI limits, with try/catch so a single failed scan doesn't kill the prospect — they just get a generic email path.
 
-### 1. Pin the redirect URI to one canonical, registered URL
-- Add a `LINKEDIN_REDIRECT_URI` constant, default `https://aetheris.technology/admin`.
-- Use that exact value in both `authorize` and `callback` calls (must match byte-for-byte).
-- Tell the user to add that URL to their LinkedIn app's "Authorized redirect URLs".
+### 2. Pass audit findings into the email writer
 
-### 2. Break out of the iframe when starting OAuth
-In `handleLinkedinConnect`, after getting the authorize URL:
-- Try `window.top.location.href = data.url` (matches the pattern already used in `HubSpotConnectCard.tsx`).
-- Fall back to `window.open(url, '_blank')` if cross-origin frame access is blocked.
+Extend `generateFollowUpEmails` so the AI prompt receives a compact **Forensic Findings** block when an audit succeeded:
 
-### 3. Make the callback resilient
-- On mount, if `?code=...&state=admin_oauth` is present but `getAdminToken()` is null, show a toast "Open admin from your bookmarked URL and try again" instead of silently failing.
-- Pass the canonical `redirect_uri` constant to the `callback` invocation (currently rebuilt from `window.location.origin` — must match what was sent in step 1 or LinkedIn rejects the code exchange).
+- Friction score + 1-line overall assessment
+- Top 3 flagged phrases (exact text + issue + replacement)
+- Top 2 priority fixes
+- 1 stronger CTA suggestion
 
-### 4. Surface real errors
-- LinkedIn returns errors as `?error=...&error_description=...` on the redirect. The current effect only checks for `code`. Add handling that toasts the error description so future failures are visible instead of silent.
-- Add `console.log` of `data` / `error` in `handleLinkedinConnect` so the next attempt produces something in the browser console.
+New hard rule added to the prompt: **at least one follow-up email must reference a specific finding from their site verbatim** (so it reads like an autopsy, not a template). Keeps the existing tone, length, and "no dashes / no calls" rules.
 
-### 5. Verify required secrets/scopes
-- `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET` are present in secrets ✅.
-- The function requests scopes `openid profile w_member_social`. Confirm those three products are enabled on the LinkedIn app ("Sign In with LinkedIn using OpenID Connect" + "Share on LinkedIn"). If "Share on LinkedIn" isn't approved, `w_member_social` causes the consent screen to error immediately.
+### 3. Email 1 stays untouched
 
-## Files to change
+The "Saw this and thought of you" opener remains verbatim — it's the soft pattern interrupt. Findings only appear from email 2 onward, where personalization is expected.
 
-- `src/pages/AdminDashboard.tsx` — add `LINKEDIN_REDIRECT_URI` constant, top-frame navigation, error handling, token-missing guard.
-- (No edge function changes required — `linkedin-auth/index.ts` already echoes back whatever `redirect_uri` the client sends.)
+### 4. Optional: full mini-report link
 
-## What you'll need to do once
+Add a new `/leak-report/:prospectId` public page that renders the stored audit (score, flagged phrases, fixes) using the existing `FrictionVocabularyAudit` styling. Email 3 (the resource-offer step) links to it as "I ran a quick forensic pass on [business] — here's what I found: <link>". This gives them a real artifact without requiring them to fill out a form.
 
-In your LinkedIn Developer Portal → your app → **Auth** tab → **Authorized redirect URLs**, add:
-```
-https://aetheris.technology/admin
-```
-(Or whichever single canonical URL you want to use. Tell me which one and I'll wire it in.)
+## Technical notes
+
+- `generate-friction-audit/index.ts` logic is duplicated as an internal helper inside `generate-drip-batch` (functions can't import from each other). Truncates site content to 12k chars, uses `google/gemini-2.5-flash`.
+- Add columns? No schema change needed — everything fits in `scraped_data` jsonb. We only add a public RLS read policy if we build the `/leak-report/:id` page (select by id, only when `audit_status='done'`).
+- Concurrency: Firecrawl scrape + Gemini call adds ~5–10s per prospect. With 5-wide concurrency a 10-prospect wave runs in ~20s, well under edge function limits.
+- Failure mode: if scan fails, prospect still gets emails but without findings (writer falls back to current generic prompt).
 
 ## Open question
 
-Which domain should be the canonical OAuth redirect?
-- `https://aetheris.technology/admin` (your custom domain — recommended)
-- `https://aetheristechnology.lovable.app/admin` (Lovable published)
-- Something else
+Do you want option **#4 (the public `/leak-report/:id` page linked in email 3)**, or just bake the findings into the email body and skip the standalone report page?
 
-Once you confirm, I'll implement the fixes above.
