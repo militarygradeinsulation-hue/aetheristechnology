@@ -274,6 +274,9 @@ const AdminDashboard: React.FC = () => {
   };
 
   // --- LinkedIn helpers ---
+  // MUST exactly match an entry in your LinkedIn app's "Authorized redirect URLs"
+  const LINKEDIN_REDIRECT_URI = 'https://aetheris.technology/admin';
+
   const fetchLinkedinStatus = async () => {
     const token = getAdminToken();
     if (!token) return;
