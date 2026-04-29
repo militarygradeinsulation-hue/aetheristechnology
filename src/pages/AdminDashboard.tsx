@@ -411,8 +411,30 @@ const AdminDashboard: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
+    const oauthError = params.get('error');
+    const oauthErrorDesc = params.get('error_description');
+
+    if (oauthError && state === 'admin_oauth') {
+      setActiveTab('linkedin');
+      toast({
+        title: 'LinkedIn rejected the connection',
+        description: oauthErrorDesc || oauthError,
+        variant: 'destructive',
+      });
+      window.history.replaceState({}, '', '/admin');
+      return;
+    }
+
     if (code && state === 'admin_oauth') {
       setActiveTab('linkedin');
+      if (!getAdminToken()) {
+        toast({
+          title: 'Sign in to admin first',
+          description: 'Open /admin from your bookmarked URL, sign in, then re-run Connect LinkedIn.',
+          variant: 'destructive',
+        });
+        return;
+      }
       handleLinkedinCallback(code);
     }
   }, []);
