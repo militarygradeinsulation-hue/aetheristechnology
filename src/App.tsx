@@ -131,6 +131,7 @@ const App = () => (
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
+                      <Route path="/leak-report/:prospectId" element={<LeakReportPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
