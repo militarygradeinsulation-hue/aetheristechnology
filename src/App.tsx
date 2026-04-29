@@ -51,6 +51,7 @@ const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
+const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 
 const queryClient = new QueryClient({
