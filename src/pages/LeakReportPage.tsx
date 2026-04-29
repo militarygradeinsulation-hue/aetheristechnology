@@ -99,7 +99,7 @@ export default function LeakReportPage() {
       <SEOHead
         title={`Leak Report: ${businessName} | Aetheris`}
         description="A forensic copy audit of your public site. Where the words leak revenue."
-        canonical={`https://aetheris.technology/leak-report/${prospect.id}`}
+        path={`/leak-report/${prospect.id}`}
       />
       <div className="min-h-screen py-16 px-6">
         <div className="max-w-4xl mx-auto">
