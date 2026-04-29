@@ -1,51 +1,89 @@
 ## Goal
-Speed up the SalesChat conversation by giving visitors clickable "what's broken" chips instead of forcing them to type the first message — and have the AI suggest 3 follow-up quick-replies after each response so the conversation keeps moving with one tap.
+
+Write the commission structure clearly inside the Rep Portal commission area so reps know exactly what they earn on every product. Make it fair, sustainable, and aligned to the actual prices and the 10% rate already stored in the database. Fix the outdated Careers page table so it stops contradicting reality.
+
+## Current state (audited)
+
+- `rep_codes` table: all 10 active reps are at **10% flat** (`commission_rate = 0.10`).
+- Memory / Stripe products: full price ladder from **$29 Playbook Unlock → $5,900/mo Fractional CTO/CMO**, with the **$2,900 14-Day Diagnostic** as the core entry point.
+- Rep Portal (`src/pages/RepPortalPage.tsx`) currently shows just a "Commission Rate: 10%" tile — no breakdown, no examples, no payout terms.
+- Careers page (`src/pages/CareersPage.tsx`) still shows an old tiered table (25% on Snapshots, 12% on Diagnostic, 8–10% on Implementation, $125 / $500 / $2,500 prices). This is stale and inflates expectations the business cannot sustainably honor.
+
+## The structure to display (fair to reps + business + owner)
+
+**Flat 10% on every closed sale tied to your rep code.** No tiers, no clawbacks on completed work, no caps. Paid within 7 days of the client's payment clearing.
+
+Why it works for everyone:
+- **Reps**: predictable, easy math on every product — no guessing which tier applies.
+- **Business**: margin protected so we can keep delivering quality and stay profitable as we scale.
+- **Owner**: one rule, no exceptions to manage, no disputes about which tier a deal fell into.
 
 ## Changes
 
-### 1. `src/components/SalesChat.tsx` — add quick-pick chips
-- Define a `STARTER_PROBLEMS` array of 6 high-intent, blunt one-liners that match the forensic/Leak Audit voice. Suggested set:
-  - "My website isn't generating leads"
-  - "I'm losing bids and don't know why"
-  - "My CRM is a graveyard"
-  - "I'm spending on marketing with no ROI"
-  - "My follow-up is broken"
-  - "I don't know what's actually broken"
-- Render the chips as a horizontal-wrap row directly under the initial assistant message, only while `messages.length === 1` (i.e., before the user has said anything). After the first user message they disappear.
-- Clicking a chip calls a new `sendPresetMessage(text)` helper that mirrors `sendMessage` but takes the text directly (bypasses the input box) so we don't have to round-trip through state.
-- Style: `bg-muted hover:bg-primary/20 border border-border text-xs px-3 py-1.5 rounded-full` to match the existing contact-link chip language. Amber outline on hover for the forensic feel.
+### 1. `src/pages/RepPortalPage.tsx` — expand the commission area
 
-### 2. Dynamic follow-up quick-replies after every assistant turn
-Goal: after the AI finishes streaming, show 2–3 contextual one-tap follow-up buttons (e.g., "Tell me what that costs me", "Show me what to fix first", "I want the $500 audit").
+Below the existing 4 stat cards, add a **"Your Commission Structure"** card containing:
 
-Two viable approaches — recommend **(a)**:
+**(a) The rule, in plain language**
+> You earn **10%** of every sale tied to your rep code. Paid within 7 days of the client's payment clearing. No clawbacks on completed work.
 
-**(a) Backend-generated suggestions (chosen):**
-- Update `supabase/functions/sales-chat/index.ts` system prompt to instruct the model to end every response with a hidden machine-readable block:
-  ```
-  <suggestions>
-  ["Short reply 1","Short reply 2","Short reply 3"]
-  </suggestions>
-  ```
-  with a hard rule: 3 suggestions, max 6 words each, each one a plausible next thing the buyer would say.
-- In `SalesChat.tsx`, after streaming completes, parse the trailing `<suggestions>...</suggestions>` block out of the assistant message, strip it from the displayed content, and store the parsed array on that message (`Msg` type gains optional `suggestions?: string[]`).
-- Render those suggestions as chips under the latest assistant bubble. Clicking one calls `sendPresetMessage(text)`. Chips clear once the user sends anything else.
-- Hide the block during streaming by applying the strip both incrementally (regex on each upsert) and once more on completion.
+**(b) Per-product table** (Service · Price · Your Cut), built from a single source-of-truth array so it stays in sync with pricing:
 
-**(b) Hardcoded suggestions:** simpler but static and won't adapt to context. Skip unless (a) feels risky.
+| Product | Price | Your Cut |
+|---|---|---|
+| Playbook Unlock | $29 | $2.90 |
+| Social Content Pack | $39 | $3.90 |
+| Content Calendar | $39 | $3.90 |
+| Sales Script Pack | $59 | $5.90 |
+| Follow-Up Plan | $59 | $5.90 |
+| Full Website Report | $59 | $5.90 |
+| Friction Vocabulary Audit | $79 | $7.90 |
+| Strategic Question Engine | $99 | $9.90 |
+| Brand Contradiction Finder | $119 | $11.90 |
+| Digital Snapshot | $149 | $14.90 |
+| Strategy Blueprint | $349 | $34.90 |
+| Website Evaluation | $599 | $59.90 |
+| Strategic Discovery Audit | $599 | $59.90 |
+| **14-Day Diagnostic** | **$2,900** | **$290** |
+| Fractional CTO/CMO (recurring) | $5,900/mo | **$590/mo** while client stays |
 
-### 3. Tracking
-- Fire `trackEvent('chat_quickpick', { label: text, position: 'starter' | 'followup' })` whenever a chip is clicked, so we can see which prompts convert.
+Subscription tiers (e.g. $25/mo, $39/mo, $49/mo, $69/mo, $99/mo, $249/mo, $419/mo, $1,990/mo) row right below: **10% of every monthly invoice for as long as the subscription stays active**.
 
-## Technical Notes
-- `Msg` type becomes `{ role; content; suggestions?: string[] }`.
-- `sendPresetMessage` takes `(text: string)`, builds `userMsg`, appends to `messages`, and runs the same fetch/stream loop currently inside `sendMessage`. Refactor `sendMessage` to call `sendPresetMessage(input.trim())` to avoid duplication.
-- Suggestion-block parsing regex: `/<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/`. Wrap `JSON.parse` in try/catch — if parsing fails, just don't render chips (graceful degrade).
-- During streaming, run a lightweight strip on each render so the user never sees the raw `<suggestions>` tag flash on screen.
-- No DB or RLS changes. No new edge function — just edit the existing `sales-chat` function's system prompt.
+**(c) Realistic month examples** (replace the inflated old earnings table):
+- **Light month** (5 small unlocks + 1 Snapshot): ≈ $40
+- **Solid month** (3 Snapshots + 2 Strategy Blueprints + 1 Website Eval): ≈ $164
+- **Strong month** (1 × 14-Day Diagnostic + 2 Snapshots + 1 Fractional retainer signed): **$290 + $30 + $590 recurring = $910 first month, $590/mo recurring after**
+- **Heavy month** (2 Diagnostics + 1 Fractional retainer): **$580 + $590 recurring = $1,170 first month**
 
-## Out of Scope
-- Persisting chat history across sessions
-- Changing the launcher button, header, or checkout flow
-- Adding new packages to the catalog
+**(d) Payout terms** (small print under the table):
+- Paid via the same channel they invoice us through (PayPal, ACH, Stripe Connect — pick one at signup).
+- Tracked automatically when the client uses your 6-digit code at checkout. Visible live in this dashboard.
+- Recurring products keep paying for as long as the client stays subscribed.
 
+### 2. `src/pages/CareersPage.tsx` — replace the outdated commission + earnings sections
+
+- Replace the "Your Commission" table with the same flat-10% rule and the per-product table.
+- Replace the "Sample Monthly Earnings" table with the realistic monthly examples above.
+- Update the hero subtext from `"Earn 8–25% per deal"` and `"8–25% Commission"` chip → `"Earn 10% on every deal — including recurring revenue."`
+- Keep the "Commission paid within 7 days of client payment clearing. No clawbacks on completed work." line.
+
+### 3. Single source-of-truth helper (clean code)
+
+Add a small `REP_PRODUCTS` constant at the top of `RepPortalPage.tsx` (and reuse on CareersPage via shared file `src/lib/repProducts.ts`) that lists `{ name, priceCents, recurring }` so the commission table renders from one place. The rep's actual `commission_rate` from the DB is used to compute the cut, so if a specific rep is later given a custom rate, their personal table updates automatically.
+
+### 4. Memory update
+
+Update `mem://business/pricing` to remove the stale "8–25%" Careers narrative and lock in: "Reps earn flat 10% on every closed sale, including recurring monthly invoices for the lifetime of the subscription. Stored as `commission_rate` in `rep_codes`; default 0.10."
+
+## Files touched
+
+- `src/pages/RepPortalPage.tsx` — expand commission area (new card + table + examples + payout terms)
+- `src/pages/CareersPage.tsx` — replace outdated commission + earnings tables, fix hero copy
+- `src/lib/repProducts.ts` — new shared product/price list (single source of truth)
+- `mem://business/pricing` — record the locked-in 10% flat rule
+
+## Out of scope
+
+- No changes to Stripe products, prices, or webhook commission math (already correct at 10%).
+- No changes to the rep_codes table or the increment_rep_sales function.
+- No new payment flows.

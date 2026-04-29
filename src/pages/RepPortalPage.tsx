@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield } from 'lucide-react';
+import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
 
 interface RepData {
   rep_name: string;
@@ -61,10 +63,10 @@ const RepPortalPage: React.FC = () => {
   if (repData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
-        <Button variant="ghost" size="sm" className="absolute top-4 left-4" onClick={() => setRepData(null)}>
+      <Button variant="ghost" size="sm" className="absolute top-4 left-4" onClick={() => setRepData(null)}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Log out
         </Button>
-        <div className="max-w-lg w-full space-y-6">
+        <div className="max-w-3xl w-full space-y-6 py-16">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground font-display">
               {repData.rep_name || 'Rep'} Dashboard
@@ -114,6 +116,88 @@ const RepPortalPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* COMMISSION STRUCTURE */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-display">
+                <DollarSign className="w-5 h-5 text-primary" /> Your Commission Structure
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="text-foreground font-medium">
+                  You earn <span className="text-primary font-bold">{(repData.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Paid within 7 days of the client's payment clearing. No tiers. No caps. No clawbacks on completed work.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead className="text-right">Client Price</TableHead>
+                      <TableHead className="text-right">Your Cut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {REP_PRODUCTS.map((p) => (
+                      <TableRow key={p.name} className={p.highlight ? 'bg-primary/5' : undefined}>
+                        <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
+                          {p.name}
+                          {p.recurring && (
+                            <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                              <Repeat className="w-3 h-3" /> recurring
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
+                        </TableCell>
+                        <TableCell className={`text-right font-semibold ${p.highlight ? 'text-primary' : 'text-foreground'}`}>
+                          {fmtUsd(commissionCents(p.priceCents, repData.commission_rate))}{p.recurring ? '/mo' : ''}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell className="text-foreground">Monthly Subscriptions ($25–$1,990/mo)</TableCell>
+                      <TableCell className="text-right text-muted-foreground">varies</TableCell>
+                      <TableCell className="text-right font-semibold text-primary">
+                        {(repData.commission_rate * 100).toFixed(0)}% of every invoice
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div>
+                <h3 className="font-display text-lg font-semibold text-foreground mb-3">Realistic Monthly Earnings</h3>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {[
+                    { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$40' },
+                    { label: 'Solid month', detail: '3 Snapshots + 2 Blueprints + 1 Website Eval', total: '~$164' },
+                    { label: 'Strong month', detail: '1 Diagnostic + 2 Snapshots + 1 Fractional retainer', total: '$910 + $590/mo recurring' },
+                    { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,170 + $590/mo recurring' },
+                  ].map((row) => (
+                    <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-3">
+                      <p className="text-sm text-muted-foreground">{row.label}</p>
+                      <p className="text-foreground text-sm mt-1">{row.detail}</p>
+                      <p className="text-primary font-semibold mt-1">{row.total}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/50">
+                <p>• Tracked automatically when the client uses your 6-digit code at checkout. Visible live in this dashboard.</p>
+                <p>• Paid via your chosen payout channel (PayPal, ACH, or Stripe Connect).</p>
+                <p>• Recurring products keep paying for as long as the client stays subscribed.</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
