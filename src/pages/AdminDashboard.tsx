@@ -302,12 +302,32 @@ const AdminDashboard: React.FC = () => {
   const handleLinkedinConnect = async () => {
     const token = getAdminToken();
     if (!token) return;
-    const redirectUri = `${window.location.origin}/admin`;
-    const { data } = await supabase.functions.invoke('linkedin-auth', {
-      body: { action: 'authorize', redirect_uri: redirectUri },
-      headers: { 'x-admin-token': token },
-    });
-    if (data?.url) window.location.href = data.url;
+    try {
+      const { data, error } = await supabase.functions.invoke('linkedin-auth', {
+        body: { action: 'authorize', redirect_uri: LINKEDIN_REDIRECT_URI },
+        headers: { 'x-admin-token': token },
+      });
+      console.log('linkedin-auth authorize response', { data, error });
+      if (error) throw error;
+      if (!data?.url) throw new Error('No authorize URL returned');
+
+      // Break out of the Lovable preview iframe — LinkedIn refuses to load in a frame.
+      const win = window.open(data.url, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        try {
+          if (window.top && window.top !== window.self) {
+            (window.top as Window).location.href = data.url;
+          } else {
+            window.location.href = data.url;
+          }
+        } catch {
+          window.location.href = data.url;
+        }
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'LinkedIn Connect Failed', description: msg, variant: 'destructive' });
+    }
   };
 
   const handleLinkedinCallback = async (code: string) => {
