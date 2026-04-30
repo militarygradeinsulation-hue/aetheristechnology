@@ -9,12 +9,19 @@ export interface ForecastCompany {
   name: string; website?: string; industry?: string; location?: string;
   signal: string; why: string; source_url?: string;
 }
+export interface ForecastEducation { kind: "blog" | "playbook" | "topic"; title: string; url: string; why_today: string }
+export interface ForecastPulse { title: string; url: string; source?: string; ts?: string }
+export interface ForecastSectionVisibility {
+  tip: boolean; education: boolean; tech: boolean; industry: boolean; live_pulse: boolean; companies: boolean;
+}
 export interface ForecastBriefing {
   briefing_date: string;
   tip: ForecastTip;
   tech: ForecastTrend[];
   industry: ForecastIndustry[];
   companies: ForecastCompany[];
+  education?: ForecastEducation[];
+  live_pulse?: ForecastPulse[];
   generated_at: string;
 }
 
@@ -42,7 +49,17 @@ async function call(action: string, body: Record<string, unknown> = {}, mode: Fo
 
 export const portalForecast = {
   getToday: (mode: ForecastAuthMode = "portal") =>
-    call("get_today", {}, mode) as Promise<{ briefing: ForecastBriefing | null; age_hours: number | null }>,
+    call("get_today", {}, mode) as Promise<{
+      briefing: ForecastBriefing | null;
+      age_hours: number | null;
+      settings: { sections?: ForecastSectionVisibility; live_pulse_minutes?: number } | null;
+    }>,
+  getLivePulse: (mode: ForecastAuthMode = "portal") =>
+    call("live_pulse", {}, mode) as Promise<{
+      live_pulse: ForecastPulse[];
+      generated_at: string | null;
+      live_pulse_minutes: number;
+    }>,
   regenerate: (mode: ForecastAuthMode = "portal") =>
     call("regenerate", {}, mode) as Promise<{ ok: boolean; briefing: ForecastBriefing | null }>,
   pushLead: (company: ForecastCompany, mode: ForecastAuthMode = "portal") =>
