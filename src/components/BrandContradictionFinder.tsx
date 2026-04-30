@@ -49,7 +49,7 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       if (error || !data) throw new Error(error?.message || 'Failed to analyze');
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
+      if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'brand_contradictions',
           title: `${form.url} — Brand audit — ${new Date().toLocaleDateString()}`,

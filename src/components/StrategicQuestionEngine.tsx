@@ -59,7 +59,7 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
       if (error || !data) throw new Error(error?.message || 'Failed to generate');
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
+      if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'strategic_questions',
           title: `${form.industry} — ${form.companySize} — ${new Date().toLocaleDateString()}`,

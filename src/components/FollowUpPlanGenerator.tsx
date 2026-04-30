@@ -63,7 +63,7 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
+      if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'follow_up_plan',
           title: `${form.businessType} — Follow-up — ${new Date().toLocaleDateString()}`,

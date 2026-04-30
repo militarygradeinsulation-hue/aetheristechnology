@@ -52,7 +52,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
+      if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'sales_scripts',
           title: `${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`,

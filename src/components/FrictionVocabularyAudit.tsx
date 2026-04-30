@@ -46,7 +46,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       if (error || !data) throw new Error(error?.message || 'Failed to audit');
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
+      if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'friction_audit',
           title: `${form.url} — Friction audit — ${new Date().toLocaleDateString()}`,
