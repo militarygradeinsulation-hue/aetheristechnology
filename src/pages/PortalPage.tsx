@@ -32,6 +32,7 @@ import {
   getPortalProfile, setPortalSession, clearPortalSession,
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
+import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 
 type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
