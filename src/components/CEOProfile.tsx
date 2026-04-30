@@ -75,7 +75,7 @@ export const CEOProfile: React.FC = () => {
                       data-size="medium"
                       data-theme="dark"
                       data-type="VERTICAL"
-                      data-vanity="aisystemsarchitect"
+                      data-vanity="thejosephtoney"
                       data-version="v1"
                     >
                       <a
