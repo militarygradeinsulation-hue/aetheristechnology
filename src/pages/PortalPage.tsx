@@ -193,6 +193,7 @@ const PortalPage: React.FC = () => {
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" /> },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
