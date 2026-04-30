@@ -23,18 +23,33 @@ Bright Dental,,info@brightdental.com,,https://brightdental.com,Dental,Carmel IN,
 
 export const LeadsBoard: React.FC = () => {
   const { toast } = useToast();
-  const [sub, setSub] = useState<SubTab>('pool');
+  const [sub, setSub] = useState<SubTab>('drip');
+  const [drip, setDrip] = useState<RepLead[]>([]);
   const [pool, setPool] = useState<RepLead[]>([]);
   const [mine, setMine] = useState<RepLead[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [maxActive, setMaxActive] = useState(25);
+  const [dripCount, setDripCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
+
+  const refreshDrip = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { leads, activeClaimed, maxActive, dripCount } = await portalLeads.list('drip');
+      setDrip(leads);
+      setActiveCount(activeClaimed);
+      setMaxActive(maxActive);
+      setDripCount(dripCount);
+    } catch (e) {
+      toast({ title: "Couldn't load today's drop", description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setLoading(false); }
+  }, [toast]);
 
   const refreshPool = useCallback(async () => {
     setLoading(true);
     try {
-      const { leads, activeClaimed, maxActive } = await portalLeads.list('pool', {
+      const { leads, activeClaimed, maxActive, dripCount } = await portalLeads.list('pool', {
         industry: filters.industry || undefined,
         location: filters.location || undefined,
         minScore: filters.minScore ? Number(filters.minScore) : undefined,
@@ -42,6 +57,7 @@ export const LeadsBoard: React.FC = () => {
       setPool(leads);
       setActiveCount(activeClaimed);
       setMaxActive(maxActive);
+      setDripCount(dripCount);
     } catch (e) {
       toast({ title: 'Failed to load pool', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setLoading(false); }
@@ -50,27 +66,39 @@ export const LeadsBoard: React.FC = () => {
   const refreshMine = useCallback(async () => {
     setLoading(true);
     try {
-      const { leads, activeClaimed, maxActive } = await portalLeads.list('mine');
+      const { leads, activeClaimed, maxActive, dripCount } = await portalLeads.list('mine');
       setMine(leads);
       setActiveCount(activeClaimed);
       setMaxActive(maxActive);
+      setDripCount(dripCount);
     } catch (e) {
       toast({ title: 'Failed to load your leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setLoading(false); }
   }, [toast]);
 
   useEffect(() => {
-    if (sub === 'pool') refreshPool();
+    if (sub === 'drip') refreshDrip();
+    else if (sub === 'pool') refreshPool();
     else if (sub === 'mine') refreshMine();
-  }, [sub, refreshPool, refreshMine]);
+  }, [sub, refreshDrip, refreshPool, refreshMine]);
 
-  const handleClaim = async (lead: RepLead) => {
+  const handleClaim = async (lead: RepLead, source: 'drip' | 'pool') => {
     try {
       await portalLeads.claim(lead.id);
       toast({ title: `Claimed: ${lead.business_name || lead.email}` });
-      refreshPool();
+      if (source === 'drip') refreshDrip(); else refreshPool();
     } catch (e) {
       toast({ title: 'Claim failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    }
+  };
+
+  const handleSkipDrip = async (lead: RepLead) => {
+    try {
+      await portalLeads.skipDrip(lead.id);
+      toast({ title: 'Skipped — back to pool' });
+      refreshDrip();
+    } catch (e) {
+      toast({ title: 'Skip failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
   };
 
@@ -85,6 +113,7 @@ export const LeadsBoard: React.FC = () => {
       {/* Sub tabs */}
       <div className="flex flex-wrap gap-1 border-b border-border/50">
         {([
+          { id: 'drip', label: `Today's Drop${dripCount ? ` (${dripCount})` : ''}`, icon: Zap },
           { id: 'pool', label: 'Lead Pool', icon: Inbox },
           { id: 'mine', label: `My Leads (${activeCount}/${maxActive})`, icon: ListChecks },
           { id: 'upload', label: 'Upload / Download', icon: UploadIcon },
@@ -100,6 +129,62 @@ export const LeadsBoard: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* DRIP — Today's Drop */}
+      {sub === 'drip' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber" /> Today's Drop
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Fresh leads assigned to you. Accept what you'll work, skip the rest. They expire in 24h if you don't decide.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {loading && drip.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+            ) : drip.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground text-sm">
+                No new leads in your drop right now. Check back tomorrow morning, or browse the Lead Pool.
+              </p>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {drip.map(l => (
+                  <div key={l.id} className="rounded-lg border border-amber/30 bg-amber/5 p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
+                        </p>
+                      </div>
+                      {typeof l.score === 'number' && (
+                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40 flex-shrink-0">
+                          {l.score}
+                        </span>
+                      )}
+                    </div>
+                    {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2 italic">{l.why_fit}</p>}
+                    <div className="text-xs text-muted-foreground mt-2 space-y-0.5">
+                      {l.email && <p className="truncate"><Mail className="w-3 h-3 inline mr-1" />{l.email}</p>}
+                      {l.phone && <p className="truncate"><Phone className="w-3 h-3 inline mr-1" />{l.phone}</p>}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => handleSkipDrip(l)} className="text-muted-foreground">
+                        <X className="w-3 h-3 mr-1" /> Skip
+                      </Button>
+                      <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => handleClaim(l, 'drip')}>
+                        Accept
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* POOL */}
       {sub === 'pool' && (
