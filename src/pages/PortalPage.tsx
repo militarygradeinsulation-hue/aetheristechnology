@@ -15,23 +15,48 @@ import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png'
 import { FileText, Search } from 'lucide-react';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
+import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
+import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
+import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
+import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
+import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
+import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 
 type Tab = 'overview' | 'commissions' | 'tools' | 'coach' | 'company';
+type ToolKey =
+  | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
+  | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
-const REP_TOOLS = [
-  { name: 'Free Leak Audit (give to prospects)', href: '/leak-audit', desc: 'Send this URL. Their result is your wedge.' },
-  { name: 'Website Scanner', href: '/scan', desc: 'Run a quick scan on a prospect site to break the ice.' },
-  { name: 'Business Diagnostic Quiz', href: '/business-diagnostic', desc: '20 questions, score, full PDF — perfect demo asset.' },
-  { name: 'Sales Script Generator', href: '/sales-scripts', desc: 'Custom cold-call & email scripts in seconds.' },
-  { name: 'Follow-Up Plan', href: '/follow-up-plan', desc: '7-touch sequences tuned to a specific prospect.' },
-  { name: 'Strategic Question Engine', href: '/strategic-questions', desc: 'Discovery-call questions to uncover real pain.' },
-  { name: 'Brand Contradiction Finder', href: '/brand-contradictions', desc: 'Show prospects what their brand is actually saying.' },
-  { name: 'Friction Vocabulary Audit', href: '/friction-audit', desc: 'Find the words on their site costing them deals.' },
+const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string }[] = [
+  { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
+  { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
+  { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF — perfect demo asset.' },
+  { key: 'sales-scripts',       name: 'Sales Script Generator',              href: '/sales-scripts',        desc: 'Custom cold-call & email scripts in seconds.' },
+  { key: 'follow-up-plan',      name: 'Follow-Up Plan',                      href: '/follow-up-plan',       desc: '7-touch sequences tuned to a specific prospect.' },
+  { key: 'strategic-questions', name: 'Strategic Question Engine',           href: '/strategic-questions',  desc: 'Discovery-call questions to uncover real pain.' },
+  { key: 'brand-contradictions',name: 'Brand Contradiction Finder',          href: '/brand-contradictions', desc: 'Show prospects what their brand is actually saying.' },
+  { key: 'friction-audit',      name: 'Friction Vocabulary Audit',           href: '/friction-audit',       desc: 'Find the words on their site costing them deals.' },
 ];
+
+const renderEmbeddedTool = (key: ToolKey, noop: () => void): React.ReactNode => {
+  switch (key) {
+    case 'leak-audit':           return <WhatsWrongDiagnostic />;
+    case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
+    case 'business-diagnostic':  return <BusinessDiagnostic />;
+    case 'sales-scripts':        return <SalesScriptGenerator adminMode />;
+    case 'follow-up-plan':       return <FollowUpPlanGenerator adminMode />;
+    case 'strategic-questions':  return <StrategicQuestionEngine adminMode />;
+    case 'brand-contradictions': return <BrandContradictionFinder adminMode />;
+    case 'friction-audit':       return <FrictionVocabularyAudit adminMode />;
+  }
+};
 
 const PortalPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,6 +65,7 @@ const PortalPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
 
   useEffect(() => {
     if (hasValidPortalSession() && !profile) setProfile(getPortalProfile());
@@ -159,7 +185,7 @@ const PortalPage: React.FC = () => {
           {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); setActiveTool(null); }}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.id
                   ? 'border-amber text-amber'
@@ -246,37 +272,77 @@ const PortalPage: React.FC = () => {
         {tab === 'commissions' && <CommissionStructurePanel />}
 
         {/* MY TOOLS */}
-        {tab === 'tools' && (
+        {tab === 'tools' && !activeTool && (
           <Card>
             <CardHeader>
               <CardTitle className="font-display">Sales Tools</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Use these on prospect calls or send the public links as lead magnets. Anything they buy with your code at checkout is your commission.
+                Click any tool to use it free, right here inside the portal — no paywalls. The public link is also shown if you want to send it as a lead magnet (your code stays attached at checkout).
               </p>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3">
                 {REP_TOOLS.map((t) => (
-                  <Link
-                    key={t.href}
-                    to={t.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
+                    key={t.key}
                     className="rounded-lg border border-border/50 bg-card/50 p-4 hover:border-amber/50 hover:bg-amber/5 transition-colors group"
                   >
-                    <div className="flex items-start gap-2">
-                      <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
-                        <p className="text-xs font-mono text-amber/70 mt-2 truncate">{t.href}</p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTool(t.key)}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-start gap-2">
+                        <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
+                        </div>
                       </div>
+                    </button>
+                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
+                      <a
+                        href={t.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Public page <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {tab === 'tools' && activeTool && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTool(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools
+              </Button>
+              <a
+                href={REP_TOOLS.find(t => t.key === activeTool)?.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1"
+              >
+                Open public page <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">
+              {renderEmbeddedTool(activeTool, () => {})}
+            </div>
+          </div>
         )}
 
         {/* AI COACH (embedded) */}
