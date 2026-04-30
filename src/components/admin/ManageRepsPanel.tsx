@@ -1,0 +1,194 @@
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Eye, EyeOff, Plus, Trash2, Save, Users, ShieldAlert } from "lucide-react";
+import {
+  listRepCodes,
+  createRepCode,
+  updateRepCode,
+  deleteRepCode,
+  type RepCodeRow,
+} from "@/lib/repCodes";
+
+const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) => {
+  const { toast } = useToast();
+  const [rows, setRows] = useState<RepCodeRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCodes, setShowCodes] = useState(false);
+  const [draft, setDraft] = useState({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" as "rep" | "partner" });
+  const [editing, setEditing] = useState<Record<string, Partial<RepCodeRow>>>({});
+
+  const load = async () => {
+    setLoading(true);
+    try { setRows(await listRepCodes()); }
+    catch (e) { toast({ title: "Failed to load reps", description: (e as Error).message, variant: "destructive" }); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void load(); }, []);
+
+  const fmt = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+  const maskCode = (c: string) => showCodes ? c : `••••${c.slice(-2)}`;
+
+  const onCreate = async () => {
+    try {
+      await createRepCode({
+        code: draft.code.trim(),
+        rep_name: draft.rep_name.trim(),
+        rep_email: draft.rep_email.trim() || null,
+        commission_rate: Number(draft.commission_rate) || 0.10,
+        role: draft.role,
+      });
+      setDraft({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" });
+      toast({ title: "Rep added" });
+      await load();
+    } catch (e) { toast({ title: "Could not add", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const onSave = async (id: string) => {
+    const patch = editing[id];
+    if (!patch) return;
+    try {
+      await updateRepCode(id, patch);
+      setEditing(s => { const n = { ...s }; delete n[id]; return n; });
+      toast({ title: "Saved" });
+      await load();
+    } catch (e) { toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  const onDelete = async (id: string, name: string) => {
+    if (!confirm(`Remove ${name}? This deletes their code, notes, library, and settings.`)) return;
+    try { await deleteRepCode(id); toast({ title: "Removed" }); await load(); }
+    catch (e) { toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" }); }
+  };
+
+  return (
+    <Card className="bg-card/60 border-border/60">
+      <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="w-4 h-4 text-amber" /> Manage Sales Reps
+          <Badge variant="outline" className="ml-2 text-[10px] uppercase">{scope === "partner" ? "Partner View" : "Admin"}</Badge>
+        </CardTitle>
+        <Button size="sm" variant="outline" onClick={() => setShowCodes(s => !s)}>
+          {showCodes ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Hide codes</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Reveal codes</>}
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground flex items-start gap-2">
+          <ShieldAlert className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+          <div>
+            Codes are <strong>only visible to you and your partner</strong>. Reps never see other reps' codes.
+            Names you set here appear in team chat, leaderboards, and the CRM.
+          </div>
+        </div>
+
+        {/* Add new */}
+        <div className="rounded-md border border-border/60 p-3 bg-muted/20">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Add a rep</div>
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
+            <Input placeholder="6-digit code" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
+            <Input placeholder="Full name" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
+            <Input placeholder="Email (optional)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
+            <Input placeholder="Rate (0.10)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} />
+            <div className="flex gap-2">
+              <select className="flex h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={draft.role} onChange={e => setDraft(s => ({ ...s, role: e.target.value as "rep" | "partner" }))}>
+                <option value="rep">rep</option>
+                <option value="partner">partner</option>
+              </select>
+              <Button size="sm" onClick={onCreate} disabled={!draft.code || !draft.rep_name}><Plus className="w-3.5 h-3.5" /></Button>
+            </div>
+          </div>
+        </div>
+
+        {/* List */}
+        {loading ? (
+          <div className="text-sm text-muted-foreground text-center py-6">Loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="text-sm text-muted-foreground text-center py-6">No reps yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground text-xs uppercase">
+                  <th className="pb-2 pr-3">Code</th>
+                  <th className="pb-2 pr-3">Name</th>
+                  <th className="pb-2 pr-3">Email</th>
+                  <th className="pb-2 pr-3">Rate</th>
+                  <th className="pb-2 pr-3">Role</th>
+                  <th className="pb-2 pr-3">Sales</th>
+                  <th className="pb-2 pr-3">Active</th>
+                  <th className="pb-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map(r => {
+                  const e = editing[r.id] || {};
+                  const dirty = Object.keys(e).length > 0;
+                  return (
+                    <tr key={r.id} className="border-b border-border/40 align-middle">
+                      <td className="py-2 pr-3 font-mono text-amber">{maskCode(r.code)}</td>
+                      <td className="py-2 pr-3">
+                        <Input
+                          value={e.rep_name ?? r.rep_name}
+                          onChange={ev => setEditing(s => ({ ...s, [r.id]: { ...s[r.id], rep_name: ev.target.value } }))}
+                          className="h-8"
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Input
+                          value={(e.rep_email ?? r.rep_email) || ""}
+                          onChange={ev => setEditing(s => ({ ...s, [r.id]: { ...s[r.id], rep_email: ev.target.value } }))}
+                          className="h-8"
+                        />
+                      </td>
+                      <td className="py-2 pr-3 w-24">
+                        <Input
+                          type="number" step="0.01" min="0" max="1"
+                          value={String(e.commission_rate ?? r.commission_rate)}
+                          onChange={ev => setEditing(s => ({ ...s, [r.id]: { ...s[r.id], commission_rate: Number(ev.target.value) } }))}
+                          className="h-8"
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <select
+                          className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                          value={(e.role ?? r.role)}
+                          onChange={ev => setEditing(s => ({ ...s, [r.id]: { ...s[r.id], role: ev.target.value as "rep" | "partner" } }))}
+                        >
+                          <option value="rep">rep</option>
+                          <option value="partner">partner</option>
+                        </select>
+                      </td>
+                      <td className="py-2 pr-3 text-muted-foreground whitespace-nowrap">{fmt(r.total_sales_cents)}</td>
+                      <td className="py-2 pr-3">
+                        <Switch
+                          checked={(e.is_active ?? r.is_active) as boolean}
+                          onCheckedChange={v => setEditing(s => ({ ...s, [r.id]: { ...s[r.id], is_active: v } }))}
+                        />
+                      </td>
+                      <td className="py-2 text-right whitespace-nowrap">
+                        {dirty && (
+                          <Button size="sm" variant="default" className="mr-1" onClick={() => onSave(r.id)}>
+                            <Save className="w-3.5 h-3.5 mr-1" /> Save
+                          </Button>
+                        )}
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => onDelete(r.id, r.rep_name || r.code)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ManageRepsPanel;

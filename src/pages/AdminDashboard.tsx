@@ -28,6 +28,7 @@ import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
+import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
@@ -590,7 +591,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Rep Performance */}
+            {/* Manage Reps (codes hidden by default) */}
+            <ManageRepsPanel scope="admin" />
+
+            {/* Rep Performance (read-only sales totals) */}
             <RepPerformancePanel />
 
             {/* Lead Scraper → Rep Pool */}

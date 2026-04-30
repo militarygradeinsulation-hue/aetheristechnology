@@ -36,6 +36,7 @@ import {
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
+import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 
 type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
@@ -413,6 +414,7 @@ const PortalPage: React.FC = () => {
         {/* COMPANY (partner only) */}
         {tab === 'company' && isPartner && (
           <div className="space-y-6">
+            <ManageRepsPanel scope="partner" />
             <ForecastCenter isPartner={isPartner} />
             <Card>
               <CardHeader>
