@@ -30,6 +30,8 @@ import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel'
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 
+import TeamMessageBoard from '@/components/team/TeamMessageBoard';
+
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
 
