@@ -10,6 +10,11 @@ import customImplementationThumb from '@/assets/packages/custom-implementation.p
 import brandContradictionFinderThumb from '@/assets/packages/brand-contradiction-finder.png';
 import strategicQuestionEngineThumb from '@/assets/packages/strategic-question-engine.png';
 import fourteenDayDiagnosticThumb from '@/assets/packages/fourteen-day-diagnostic.png';
+import fractionalCtoCmoThumb from '@/assets/packages/fractional-cto-cmo.png';
+import websiteEvaluationThumb from '@/assets/packages/website-evaluation.png';
+import strategicDiscoveryAuditThumb from '@/assets/packages/strategic-discovery-audit.png';
+import visualRenderingThumb from '@/assets/packages/visual-rendering.png';
+import followUpPlanThumb from '@/assets/packages/follow-up-plan.png';
 
 interface ServiceTile {
   icon: React.ElementType;
@@ -90,7 +95,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Content consistency is the #1 growth lever on social media. This eliminates the "what do I post today" problem for an entire month — for less than a coffee per day.',
   },
   {
-    icon: Mail, title: 'Follow-Up Plan', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
+    icon: Mail, title: 'Follow-Up Plan', thumbnail: followUpPlanThumb, pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'follow_up_plan_once', bundleable: true,
     monthlyPriceId: 'follow_up_plan_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: '14-day multi-channel sales cadence with templates.',
     successStat: '76% of users recover at least 1 lost deal within 14 days',
@@ -99,7 +104,7 @@ const services: ServiceTile[] = [
     whyValuable: '80% of sales require 5+ follow-ups, but most reps stop at 2. This system closes the gap and recovers deals you\'re currently losing — $500–$5,000+ per recovered deal.',
   },
   {
-    icon: Image, title: 'Visual Rendering', pricing: '$50–$400', priceRaw: 0, pricingDetail: 'per image',
+    icon: Image, title: 'Visual Rendering', thumbnail: visualRenderingThumb, pricing: '$50–$400', priceRaw: 0, pricingDetail: 'per image',
     description: 'AI renders with realistic human interaction for your products.',
     successStat: '38% higher engagement on listings with professional AI visuals',
     longDescription: 'From basic image enhancement to full-scene AI renders with realistic human interaction. These visuals show your product in real-world use — not empty, lifeless shots. Perfect for proposals, catalogs, and social media.',
@@ -107,7 +112,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Visuals with people increase engagement by 38%. High-quality imagery boosts conversion by up to 30%. One improved image helps win one deal on a $25K–$150K+ project.',
   },
   {
-    icon: Globe, title: 'Website Evaluation', pricing: '$599', priceRaw: 59900, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
+    icon: Globe, title: 'Website Evaluation', thumbnail: websiteEvaluationThumb, pricing: '$599', priceRaw: 59900, pricingDetail: 'one-time', priceId: 'website_evaluation_once', bundleable: true,
     monthlyPriceId: 'website_evaluation_monthly', monthlyPricing: '$419/mo', monthlyPriceRaw: 41900, monthlySavePercent: 30,
     description: 'Detailed tear-down + strategy call. Delivered in 3–5 days.',
     successStat: '93% implement at least 3 changes within 7 days of the call',
@@ -117,7 +122,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Full Website Report', value: '$49' }, { name: 'Strategy Call', value: 'included' }],
   },
   {
-    icon: BarChart3, title: 'Strategic Discovery Audit', pricing: '$599', priceRaw: 59900, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
+    icon: BarChart3, title: 'Strategic Discovery Audit', thumbnail: strategicDiscoveryAuditThumb, pricing: '$599', priceRaw: 59900, pricingDetail: 'foundational engagement', priceId: 'full_analytics_package_once', badge: 'FOUNDATIONAL', bundleable: true,
     monthlyPriceId: 'full_analytics_package_monthly', monthlyPricing: '$419/mo', monthlyPriceRaw: 41900, monthlySavePercent: 30,
     description: 'Website + social + CRM — the complete picture before custom work begins.',
     successStat: '89% uncover $3K–$10K/mo in wasted marketing spend',
@@ -137,7 +142,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Strategy Blueprint', value: '$299' }, { name: 'Operational Workflow Mapping', value: 'included' }, { name: 'Automation Roadmap', value: 'included' }],
   },
   {
-    icon: TrendingUp, title: 'Fractional CTO/CMO', pricing: '$5,900/mo', priceRaw: 590000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
+    icon: TrendingUp, title: 'Fractional CTO/CMO', thumbnail: fractionalCtoCmoThumb, pricing: '$5,900/mo', priceRaw: 590000, pricingDetail: 'monthly', priceId: 'fractional_cto_cmo_monthly',
     description: 'Ongoing strategic leadership + execution.',
     successStat: '4.1x avg ROI within first 6 months of engagement',
     longDescription: 'Full-time strategic leadership without the full-time salary. We become your embedded technology and marketing executive — setting strategy, managing execution, and continuously optimizing your operation month over month.',
