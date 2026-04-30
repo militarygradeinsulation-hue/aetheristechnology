@@ -69,22 +69,7 @@ export const ServiceCapabilities: React.FC = () => {
   return (
     <section className="relative py-20 px-4" aria-labelledby="capabilities-heading">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20 mb-4">
-            Full-Spectrum AI Consulting Capabilities
-          </span>
-          <h2
-            id="capabilities-heading"
-            className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4 text-float"
-          >
-            From <span className="text-gradient-amber">AI Strategy</span> to Deployed Systems
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Indianapolis-based B2B AI consulting for US businesses. We help leadership teams
-            build an AI adoption roadmap, prioritize use cases, and ship production AI agents,
-            LLM workflows, and automation that move ROI — not slideware.
-          </p>
-        </div>
+        <h2 id="capabilities-heading" className="sr-only">AI Consulting Capabilities</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {CLUSTERS.map((cluster, idx) => {
