@@ -281,6 +281,10 @@ const PortalPage: React.FC = () => {
         {tab === 'commissions' && <CommissionStructurePanel />}
 
         {/* MY TOOLS */}
+        {/* LEADS */}
+        {tab === 'leads' && <LeadsBoard />}
+
+        {/* MY TOOLS */}
         {tab === 'tools' && !activeTool && (
           <Card>
             <CardHeader>
