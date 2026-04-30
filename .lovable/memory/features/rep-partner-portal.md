@@ -31,10 +31,18 @@ type: feature
 - Suggestion chips: same `<suggestions>[...]</suggestions>` parser pattern as AdminAssistant/SalesChat.
 
 ## Components
-- Page: `src/pages/PortalPage.tsx` (login + 4-or-5-tab dashboard).
+- Page: `src/pages/PortalPage.tsx` (login + 5-or-6-tab dashboard).
 - Coach panel: `src/components/portal/SalesCoachChat.tsx` (works embedded or floating).
+- Leads board: `src/components/portal/LeadsBoard.tsx` (Pool / My Leads / Upload-Download sub-tabs).
 - Reuses: `src/components/admin/CommissionStructurePanel.tsx` (no admin dependency, pure UI).
+
+## Leads system (added 2026-04)
+- Tables: `rep_leads` (shared pool, claim-based) and `rep_activity` (every login + action). Service-role only.
+- Edge functions: `portal-leads` (list/claim/release/update_status/upload/download — gated by portal HMAC token) and `portal-activity` (logs login/tab_view/lead_*).
+- Admin-side: `admin-scrape-leads` edge function uses Firecrawl + Lovable AI Gateway (`google/gemini-2.5-flash`) to score ICP-fit prospects and push them to the pool. Verified by HMAC admin token (`9822.<exp>`).
+- Admin UI: `LeadScraperPanel` + `RepActivityPanel` mounted under the Reps tab in `AdminDashboard.tsx`.
+- Hard caps: 25 active claimed leads per rep (won/lost/dead don't count). 500 rows max per upload.
 
 ## Hard rules
 - Portal NEVER grants admin access. `/admin` remains PIN 9822 only.
-- No CRM, no edit/delete, no admin tools, no Supabase Auth user — fully isolated session.
+- No CRM, no edit/delete on other tables, no admin tools, no Supabase Auth user — fully isolated session.
