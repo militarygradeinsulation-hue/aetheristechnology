@@ -15,6 +15,11 @@ import websiteEvaluationThumb from '@/assets/packages/website-evaluation.png';
 import strategicDiscoveryAuditThumb from '@/assets/packages/strategic-discovery-audit.png';
 import visualRenderingThumb from '@/assets/packages/visual-rendering.png';
 import followUpPlanThumb from '@/assets/packages/follow-up-plan.png';
+import salesScriptPackThumb from '@/assets/packages/sales-script-pack.png';
+import contentCalendarThumb from '@/assets/packages/content-calendar.png';
+import strategyBlueprintThumb from '@/assets/packages/strategy-blueprint.png';
+import socialContentPackThumb from '@/assets/packages/social-content-pack.png';
+import digitalSnapshotThumb from '@/assets/packages/digital-snapshot.png';
 
 interface ServiceTile {
   icon: React.ElementType;
@@ -49,7 +54,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses lose $1,000–$5,000/month from invisible website issues. This report makes them visible in minutes — not weeks of consulting.',
   },
   {
-    icon: Search, title: 'Digital Snapshot', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
+    icon: Search, title: 'Digital Snapshot', thumbnail: digitalSnapshotThumb, pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'digital_snapshot_once', bundleable: true,
     monthlyPriceId: 'digital_snapshot_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Automated report showing where you\'re bleeding revenue online.',
     successStat: '87% recover the cost within 30 days of acting on findings',
@@ -58,7 +63,7 @@ const services: ServiceTile[] = [
     whyValuable: 'You can\'t fix what you can\'t see. This snapshot reveals blind spots that are costing you money every single day — for less than the cost of one hour of consulting.',
   },
   {
-    icon: BarChart3, title: 'Strategy Blueprint', pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
+    icon: BarChart3, title: 'Strategy Blueprint', thumbnail: strategyBlueprintThumb, pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'scan_strategy_blueprint_once', badge: 'POPULAR', bundleable: true,
     monthlyPriceId: 'scan_strategy_blueprint_monthly', monthlyPricing: '$249/mo', monthlyPriceRaw: 24900, monthlySavePercent: 29,
     description: 'Full report + CRM plan + implementation specs + content calendar.',
     successStat: '3.2x avg revenue improvement within 90 days of implementation',
@@ -68,7 +73,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Full Website Report', value: '$49' }, { name: 'Content Calendar', value: '$29' }, { name: 'CRM Plan', value: 'included' }],
   },
   {
-    icon: Share2, title: 'Social Content Pack', pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
+    icon: Share2, title: 'Social Content Pack', thumbnail: socialContentPackThumb, pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'social_content_pack_once', bundleable: true,
     monthlyPriceId: 'social_content_pack_monthly', monthlyPricing: '$25/mo', monthlyPriceRaw: 2500, monthlySavePercent: 36,
     description: '10 LinkedIn + 10 Facebook posts + 5 ad hooks from your site.',
     successStat: '74% see measurable engagement increase within 2 weeks',
@@ -77,7 +82,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Hiring a copywriter for 25 posts costs $500+. A social media manager charges $2,000+/month. Get a month of content in minutes for $29.',
   },
   {
-    icon: Phone, title: 'Sales Script Pack', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
+    icon: Phone, title: 'Sales Script Pack', thumbnail: salesScriptPackThumb, pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'sales_script_pack_once', bundleable: true,
     monthlyPriceId: 'sales_script_pack_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: 'Call scripts, objection handlers & follow-up templates.',
     successStat: '68% of sales teams report higher close rates within 1 month',
@@ -86,7 +91,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Sales teams with scripts close 30% more deals. One extra closed deal per month at $500+ = 10x ROI on a $49 investment.',
   },
   {
-    icon: Calendar, title: 'Content Calendar', pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
+    icon: Calendar, title: 'Content Calendar', thumbnail: contentCalendarThumb, pricing: '$39', priceRaw: 3900, pricingDetail: 'one-time', priceId: 'content_calendar_once', bundleable: true,
     monthlyPriceId: 'content_calendar_monthly', monthlyPricing: '$25/mo', monthlyPriceRaw: 2500, monthlySavePercent: 36,
     description: '30 days of topics, hooks, captions & posting times.',
     successStat: '82% post consistently for 30+ days (vs. 23% without a plan)',
