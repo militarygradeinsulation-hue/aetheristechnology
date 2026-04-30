@@ -8,9 +8,9 @@ import {
   Activity, RefreshCw, Lightbulb, Cpu, Building2, Crosshair, ExternalLink,
   TrendingUp, AlertTriangle, Globe,
 } from "lucide-react";
-import { portalForecast, type ForecastBriefing, type ForecastCompany } from "@/lib/portalForecast";
+import { portalForecast, type ForecastBriefing, type ForecastCompany, type ForecastAuthMode } from "@/lib/portalForecast";
 
-interface Props { isPartner: boolean }
+interface Props { isPartner: boolean; authMode?: ForecastAuthMode }
 
 const formatAge = (h: number | null): string => {
   if (h == null) return "—";
@@ -36,7 +36,7 @@ const SourceLink: React.FC<{ url?: string }> = ({ url }) => {
   );
 };
 
-export const ForecastCenter: React.FC<Props> = ({ isPartner }) => {
+export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal" }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,7 +47,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner }) => {
   const load = async () => {
     setLoading(true);
     try {
-      const r = await portalForecast.getToday();
+      const r = await portalForecast.getToday(authMode);
       setBriefing(r.briefing);
       setAgeHours(r.age_hours);
     } catch (e) {
@@ -62,7 +62,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner }) => {
   const handleRegenerate = async () => {
     setRefreshing(true);
     try {
-      const r = await portalForecast.regenerate();
+      const r = await portalForecast.regenerate(authMode);
       setBriefing(r.briefing);
       setAgeHours(0);
       toast({ title: "Briefing regenerated" });
@@ -76,7 +76,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner }) => {
   const handlePush = async (c: ForecastCompany) => {
     setPushing(c.name);
     try {
-      const r = await portalForecast.pushLead(c);
+      const r = await portalForecast.pushLead(c, authMode);
       toast({
         title: r.duplicate ? "Already in pool" : "Pushed to Lead Pool",
         description: c.name,
