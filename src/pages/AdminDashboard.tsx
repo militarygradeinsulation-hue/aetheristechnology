@@ -520,7 +520,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'forecast' ? '🔮 Forecast Center' : tab === 'crm' ? '🗂 CRM' : tab === 'commissions' ? '💰 Commissions' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'engine' ? '⚡ Content Engine' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'forecast' ? '🔮 Forecast Center' : tab === 'crm' ? '🗂 CRM' : tab === 'commissions' ? '💰 Commissions' : tab === 'portal' ? '🏢 Company Portal' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'engine' ? '⚡ Content Engine' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
             </button>
           ))}
         </div>
