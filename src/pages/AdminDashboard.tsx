@@ -219,6 +219,22 @@ const AdminDashboard: React.FC = () => {
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
   };
 
+  const deleteSubmission = async (id: string) => {
+    if (!confirm('Delete this submission? This cannot be undone.')) return;
+    const token = getAdminToken();
+    if (!token) return;
+    const { data, error } = await supabase.functions.invoke('admin-data', {
+      body: { action: 'delete_submission', id },
+      headers: { 'x-admin-token': token },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: 'Delete failed', description: error?.message || (data as any)?.error || 'Unknown error', variant: 'destructive' });
+      return;
+    }
+    setSubmissions(prev => prev.filter(s => s.id !== id));
+    toast({ title: 'Submission deleted' });
+  };
+
   const handleLogout = async () => {
     clearAdminToken();
     try { await supabase.auth.signOut(); } catch { /* ignore */ }
