@@ -2474,6 +2474,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_activity: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip: string | null
+          meta: Json
+          rep_code: string
+          rep_name: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          rep_code: string
+          rep_name?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          rep_code?: string
+          rep_name?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       rep_codes: {
         Row: {
           code: string
@@ -2510,6 +2543,75 @@ export type Database = {
           role?: string
           total_commission_cents?: number
           total_sales_cents?: number
+        }
+        Relationships: []
+      }
+      rep_leads: {
+        Row: {
+          business_name: string | null
+          claimed_at: string | null
+          claimed_by_code: string | null
+          contact_name: string | null
+          created_at: string
+          created_by_code: string | null
+          email: string | null
+          id: string
+          industry: string | null
+          last_touched_at: string | null
+          location: string | null
+          notes: string | null
+          phone: string | null
+          score: number | null
+          source: string
+          status: string
+          touch_count: number
+          updated_at: string
+          website: string | null
+          why_fit: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          claimed_at?: string | null
+          claimed_by_code?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by_code?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          last_touched_at?: string | null
+          location?: string | null
+          notes?: string | null
+          phone?: string | null
+          score?: number | null
+          source?: string
+          status?: string
+          touch_count?: number
+          updated_at?: string
+          website?: string | null
+          why_fit?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          claimed_at?: string | null
+          claimed_by_code?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by_code?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          last_touched_at?: string | null
+          location?: string | null
+          notes?: string | null
+          phone?: string | null
+          score?: number | null
+          source?: string
+          status?: string
+          touch_count?: number
+          updated_at?: string
+          website?: string | null
+          why_fit?: string | null
         }
         Relationships: []
       }
