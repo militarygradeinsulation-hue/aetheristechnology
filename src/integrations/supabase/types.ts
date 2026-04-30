@@ -2615,6 +2615,127 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_library: {
+        Row: {
+          code: string
+          created_at: string
+          file_url: string | null
+          id: string
+          input_data: Json
+          lead_id: string | null
+          output_data: Json
+          title: string
+          tool_type: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          lead_id?: string | null
+          output_data?: Json
+          title: string
+          tool_type: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          input_data?: Json
+          lead_id?: string | null
+          output_data?: Json
+          title?: string
+          tool_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_library_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "rep_library_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rep_notes: {
+        Row: {
+          body: string
+          code: string
+          created_at: string
+          id: string
+          pinned: boolean
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          code: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          code?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_notes_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      rep_settings: {
+        Row: {
+          code: string
+          defaults: Json
+          preferences: Json
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          defaults?: Json
+          preferences?: Json
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          defaults?: Json
+          preferences?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_settings_code_fkey"
+            columns: ["code"]
+            isOneToOne: true
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       rep_signups: {
         Row: {
           created_at: string
