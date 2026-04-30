@@ -16,6 +16,8 @@ import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png'
 import { FileText, Search } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
+import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
+import { BookOpen } from 'lucide-react';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
@@ -34,7 +36,7 @@ import {
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 
-type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
@@ -189,6 +191,7 @@ const PortalPage: React.FC = () => {
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
+    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
@@ -389,6 +392,9 @@ const PortalPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* PLAYBOOK */}
+        {tab === 'playbook' && <PortalPlaybook />}
 
         {/* WORKSPACE */}
         {tab === 'workspace' && <WorkspaceTab />}
