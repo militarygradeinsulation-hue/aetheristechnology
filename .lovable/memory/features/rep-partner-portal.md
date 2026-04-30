@@ -13,36 +13,39 @@ type: feature
 - Token format: `<expEpochMs>.<role>.<code>.<hmacHex>` (role = "rep" | "partner").
 - Client stores token in `localStorage` (`aetheris_portal_token`) + cached profile (`aetheris_portal_profile`).
 - Helpers: `src/lib/portalAuth.ts`. Shared verifier: `supabase/functions/_shared/portal-token.ts`.
-- The legacy `/rep-portal` page (code+email login, stats only) still exists for backwards compatibility — new portal is `/portal`.
 
 ## Roles (rep_codes.role column)
-- `rep` (default) — sees Overview, Commission Calculator, My Tools, AI Sales Coach.
-- `partner` — sees everything reps see PLUS a "Company Portal" tab. Their AI coach has 4 read-only tools: `get_company_summary`, `list_all_reps`, `list_recent_leads`, `list_recent_contact_submissions`. Never gets admin tools.
+- `rep` (default) — sees Overview, Commission Calculator, Leads, My Tools, Workspace, AI Sales Coach.
+- `partner` — sees everything reps see PLUS a "Company Portal" tab. AI coach gets 4 read-only tools.
+- Partner credential: code 963169.
 
-## Partner credential (seeded)
-- Code: **963169**, name: "Business Partner", email: partner@aetheris.technology, role: partner.
-- Created in migration; renameable via admin Reps panel anytime.
+## Tabs (in order)
+Overview · Commissions · Leads · My Tools · **Workspace** · AI Coach · (Company)
 
 ## AI Sales Coach
-- Edge function: **`rep-assistant`** (model: `google/gemini-2.5-flash`).
-- Gated by portal token. NOT the public sales chat, NOT the admin assistant.
-- System prompt = full pricing ladder + 10% commission rules + objection-handling playbook.
-- Partners get an addendum + the 4 read-only company tools.
-- Suggestion chips: same `<suggestions>[...]</suggestions>` parser pattern as AdminAssistant/SalesChat.
+- Edge function: `rep-assistant` (model: `google/gemini-2.5-flash`). Gated by portal token.
 
 ## Components
-- Page: `src/pages/PortalPage.tsx` (login + 5-or-6-tab dashboard).
-- Coach panel: `src/components/portal/SalesCoachChat.tsx` (works embedded or floating).
-- Leads board: `src/components/portal/LeadsBoard.tsx` (Pool / My Leads / Upload-Download sub-tabs).
-- Reuses: `src/components/admin/CommissionStructurePanel.tsx` (no admin dependency, pure UI).
+- Page: `src/pages/PortalPage.tsx`.
+- Coach panel: `src/components/portal/SalesCoachChat.tsx`.
+- Leads board: `src/components/portal/LeadsBoard.tsx`.
+- Workspace: `src/components/portal/WorkspaceTab.tsx` (+ History/Notes/Settings sub-components).
 
-## Leads system (added 2026-04)
+## Leads system
 - Tables: `rep_leads` (shared pool, claim-based) and `rep_activity` (every login + action). Service-role only.
-- Edge functions: `portal-leads` (list/claim/release/update_status/upload/download — gated by portal HMAC token) and `portal-activity` (logs login/tab_view/lead_*).
-- Admin-side: `admin-scrape-leads` edge function uses Firecrawl + Lovable AI Gateway (`google/gemini-2.5-flash`) to score ICP-fit prospects and push them to the pool. Verified by HMAC admin token (`9822.<exp>`).
-- Admin UI: `LeadScraperPanel` + `RepActivityPanel` mounted under the Reps tab in `AdminDashboard.tsx`.
-- Hard caps: 25 active claimed leads per rep (won/lost/dead don't count). 500 rows max per upload.
+- Edge functions: `portal-leads`, `portal-activity`, admin-side `admin-scrape-leads` (Firecrawl + Gemini).
+- Hard caps: 25 active claimed leads per rep. 500 rows max per upload.
+
+## Personal Workspace (added 2026-04)
+- Tables (service-role only): `rep_settings` (per-code defaults + preferences), `rep_notes` (free-form notes), `rep_library` (auto-saved tool runs, optionally linked to a rep_lead).
+- Edge function: `portal-workspace` — actions: `settings_get/save`, `notes_list/upsert/delete`, `library_list/save/delete`, unified `search`. Gated by portal HMAC token.
+- Client wrapper: `src/lib/portalWorkspace.ts`.
+- **Auto-save**: SalesScriptGenerator, FollowUpPlanGenerator, StrategicQuestionEngine, BrandContradictionFinder, FrictionVocabularyAudit save outputs via `src/lib/toolSaveHelper.ts` which routes to `rep_library` if a portal session exists, else `admin_library`.
+- Settings drive form auto-fill across the 5 tools (business name, industry, tone, sender, signature, default CTA).
+- Workspace tab has a global search bar + 3 sub-tabs (History / Notes / Settings).
+- Reuses `LibraryItemRenderer` and `generateLibraryPdf` for view + PDF download (same UX as admin library).
 
 ## Hard rules
 - Portal NEVER grants admin access. `/admin` remains PIN 9822 only.
-- No CRM, no edit/delete on other tables, no admin tools, no Supabase Auth user — fully isolated session.
+- Workspace data is fully isolated per `code`. No rep can see another rep's notes or history.
+- No Supabase Auth user — fully isolated session via portal HMAC token.

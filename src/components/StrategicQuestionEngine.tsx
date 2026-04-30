@@ -7,7 +7,8 @@ import { Lock, Copy, Check, Brain, AlertTriangle, Users, TrendingUp, Briefcase, 
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { isPortalSession } from '@/lib/portalWorkspace';
 
 const PHASES = [
   { label: 'Analyzing your business profile...', target: 20 },
@@ -58,8 +59,8 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
       if (error || !data) throw new Error(error?.message || 'Failed to generate');
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
-      if (adminMode) {
-        saveToAdminLibrary({
+      if (adminMode || isPortalSession()) {
+        saveToolRun({
           tool_type: 'strategic_questions',
           title: `${form.industry} — ${form.companySize} — ${new Date().toLocaleDateString()}`,
           input_data: form,
