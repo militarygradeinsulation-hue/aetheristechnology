@@ -3,10 +3,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
 };
 
 const STALE_HOURS = 20;
@@ -18,12 +19,15 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const claims = await verifyPortalToken(getPortalTokenFromRequest(req), SERVICE);
-    if (!claims) {
+    const adminOk = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+    const portalClaims = adminOk ? null : await verifyPortalToken(getPortalTokenFromRequest(req), SERVICE);
+    if (!adminOk && !portalClaims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Admin acts as a partner-equivalent for permission checks.
+    const claims = portalClaims ?? { code: "ADMIN", role: "partner" as const };
 
     const admin = createClient(SUPABASE_URL, SERVICE);
     const body = await req.json().catch(() => ({}));
