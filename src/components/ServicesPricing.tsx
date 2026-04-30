@@ -451,6 +451,16 @@ export const ServicesPricing: React.FC = () => {
                   <X className="w-5 h-5" />
                 </button>
 
+                {expandedService.thumbnail && (
+                  <div className="w-full bg-white border-b border-border">
+                    <img
+                      src={expandedService.thumbnail}
+                      alt={expandedService.title}
+                      className="w-full h-auto object-contain block"
+                    />
+                  </div>
+                )}
+
                 <div className="p-6 md:p-8">
                   {expandedService.badge && (
                     <span
