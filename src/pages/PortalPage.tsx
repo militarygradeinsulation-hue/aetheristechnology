@@ -8,11 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
-  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat,
+  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users,
 } from 'lucide-react';
 import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
+import { LeadsBoard } from '@/components/portal/LeadsBoard';
+import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
@@ -29,7 +31,7 @@ import {
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 
-type Tab = 'overview' | 'commissions' | 'tools' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'coach' | 'company';
 type ToolKey =
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
@@ -83,6 +85,8 @@ const PortalPage: React.FC = () => {
       }
       setPortalSession(data.token, data.profile);
       setProfile(data.profile);
+      // Fire-and-forget activity log; runs after token is in localStorage
+      setTimeout(() => logPortalActivity('login'), 0);
       toast({ title: `Welcome${data.profile.rep_name ? `, ${data.profile.rep_name}` : ''}` });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed.';
@@ -153,6 +157,7 @@ const PortalPage: React.FC = () => {
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean }[] = [
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
+    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
@@ -185,7 +190,11 @@ const PortalPage: React.FC = () => {
           {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
             <button
               key={t.id}
-              onClick={() => { setTab(t.id); setActiveTool(null); }}
+              onClick={() => {
+                setTab(t.id);
+                setActiveTool(null);
+                logPortalActivity('tab_view', { tab: t.id });
+              }}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.id
                   ? 'border-amber text-amber'
@@ -270,6 +279,10 @@ const PortalPage: React.FC = () => {
 
         {/* COMMISSIONS CALCULATOR — reuses admin panel */}
         {tab === 'commissions' && <CommissionStructurePanel />}
+
+        {/* MY TOOLS */}
+        {/* LEADS */}
+        {tab === 'leads' && <LeadsBoard />}
 
         {/* MY TOOLS */}
         {tab === 'tools' && !activeTool && (

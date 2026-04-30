@@ -1,53 +1,102 @@
-# Embed Sales Tools Inside the Portal
+## Goal
 
-## Problem
-Today the portal's **My Tools** tab is just a grid of links. Clicking a tool opens the public marketing page in a new tab (`/scan`, `/sales-scripts`, etc.). Reps get bounced out of the portal and the pages still show paywall language even though the tools unlock for them. You wanted it to feel like the admin area — pick a tool, it loads inline, fully unlocked, no navigation away.
+Give reps a real lead workflow inside the portal (claim, touch, status, upload/download CSVs), track every login/activity, and let the admin scrape ideal-customer leads that get pushed into the shared rep pool.
 
-## Solution
-Convert the **My Tools** tab into an in-portal tool launcher. Clicking a tool swaps the panel to render that tool's component directly inside the portal, with a "Back to all tools" button. Every tool runs in `adminMode` so paywalls/locked sections never appear.
+## 1. Database (new migration)
 
-### New behavior in the `tools` tab
+**`rep_activity`** — every login + meaningful action
+- `id uuid pk`, `rep_code text`, `rep_name text`
+- `event text` ('login' | 'lead_claim' | 'lead_touch' | 'lead_status' | 'lead_upload' | 'lead_download' | 'tool_open')
+- `meta jsonb`, `ip text`, `user_agent text`, `created_at timestamptz`
+- Index on `(rep_code, created_at desc)`.
+
+**`rep_leads`** — the shared lead pool reps work
+- `id uuid pk`
+- `business_name text`, `contact_name text`, `email text`, `phone text`, `website text`, `industry text`, `location text`, `notes text`
+- `source text` ('admin_scrape' | 'rep_upload' | 'admin_manual')
+- `score int` (admin/AI fit score 0–100, nullable)
+- `claimed_by_code text` nullable, `claimed_at timestamptz`
+- `status text` default `'new'` — one of: new, outreach, touched, replied, meeting, won, lost, dead
+- `last_touched_at timestamptz`, `touch_count int default 0`
+- `created_by_code text` nullable (set when a rep uploaded), `created_at`, `updated_at`
+- Index on `(claimed_by_code, status)` and `(status, created_at desc)`.
+
+**RLS:** both tables service-role only. All reads/writes go through edge functions that verify the portal HMAC token (so reps can only see/modify what's permitted by the function logic).
+
+## 2. Edge functions (all gated by `_shared/portal-token.ts`)
+
+- **`portal-activity`** — POST `{ event, meta? }` → inserts into `rep_activity`. Called by the client on login, tab switches, lead actions.
+- **`portal-leads`** — single function, action-routed:
+  - `list` — pool view (unclaimed) + "my leads" (claimed by current code), filterable by status.
+  - `claim` — assigns lead to current rep_code if unclaimed.
+  - `release` — unclaim.
+  - `update_status` — change status, increments `touch_count`, sets `last_touched_at`.
+  - `upload` — accepts parsed CSV rows, inserts as `source='rep_upload'`, `created_by_code=<me>`, auto-claimed to uploader.
+  - `download` — returns CSV of caller's claimed leads (or admin-pushed pool, scoped to their view).
+  - Every mutating action also logs to `rep_activity`.
+- **`admin-scrape-leads`** — admin-PIN-gated wrapper around the existing `scrape-leads` flow that:
+  1. Takes `{ industry, location, count }` (e.g. "HubSpot users in Indianapolis, 25").
+  2. Uses Firecrawl search + Lovable AI Gateway (`google/gemini-2.5-flash-lite`) to build a list of ideal-customer prospects with a fit-score and "why this is a fit" note based on the Aetheris ICP (HubSpot users, mid-market, leak-audit fit).
+  3. Inserts into `rep_leads` with `source='admin_scrape'`, `score`, leaving `claimed_by_code` null so reps can pull from the pool.
+
+`scrape-leads` already exists for the drip campaign — we'll keep it untouched and add the new admin function so the rep pool is independent from the email drip system.
+
+## 3. Portal UI changes (`src/pages/PortalPage.tsx`)
+
+Add a new tab **"Leads"** (icon: Users) between "My Tools" and "AI Sales Coach". Three sub-views inside it:
+
+```text
+┌─ Leads ──────────────────────────────────────────────┐
+│ [ Pool (admin pushed) ]  [ My Leads ]  [ Upload/CSV ]│
+└──────────────────────────────────────────────────────┘
 ```
-┌──────────────────────────────────────────┐
-│  Sales Tools                             │
-│  [grid of 8 tool cards]                  │
-└──────────────────────────────────────────┘
-        ↓ click "Website Scanner"
-┌──────────────────────────────────────────┐
-│  ← Back to all tools                     │
-│  Website Scanner                         │
-│  ────────────────────────────            │
-│  <WebsiteScanner staffUnlock />          │
-└──────────────────────────────────────────┘
-```
 
-### Tools wired in (all 8)
-| Card | Component rendered inline |
-|---|---|
-| Free Leak Audit | `WhatsWrongDiagnostic` (the leak-audit quiz) |
-| Website Scanner | `WebsiteScanner` with `staffUnlock` |
-| Business Diagnostic Quiz | `BusinessDiagnostic` |
-| Sales Script Generator | `SalesScriptGenerator` with `adminMode` |
-| Follow-Up Plan | `FollowUpPlanGenerator` with `adminMode` |
-| Strategic Question Engine | `StrategicQuestionEngine` with `adminMode` |
-| Brand Contradiction Finder | `BrandContradictionFinder` with `adminMode` |
-| Friction Vocabulary Audit | `FrictionVocabularyAudit` with `adminMode` |
+**Pool view** — table of unclaimed leads with score badge, "Claim" button. Filters: industry, location, score≥.
 
-Each card keeps the existing public URL displayed underneath so reps can still copy/share it as a lead magnet — but the card click launches the embedded version, not a new tab. A small "Open public page ↗" secondary link will preserve the share use-case.
+**My Leads view** — kanban-lite or table of claimed leads grouped by status (New → Outreach → Touched → Replied → Meeting → Won/Lost/Dead). Click a row to expand: status dropdown, notes textarea (autosaves), "Log a touch" button, "Release back to pool" link.
 
-## Files to change
+**Upload/Download view**
+- Drop CSV (parsed client-side with PapaParse — already a common Lovable dep, will add if missing). Required columns: `business_name,email`. Optional: `contact_name,phone,website,industry,location,notes`. Preview first 5 rows, then "Upload N leads" → calls `portal-leads` action `upload`. Auto-claimed to uploader.
+- "Download my leads (CSV)" button → calls `portal-leads` action `download`.
+- Sample CSV template download (static).
 
-**`src/pages/PortalPage.tsx`**
-- Replace the `REP_TOOLS` link grid with a launcher pattern.
-- Add `const [activeTool, setActiveTool] = useState<string | null>(null)`.
-- Import the 8 tool components.
-- Add a small `<ToolEmbed>` switch that returns the right component for `activeTool`, all passed `adminMode={true}` (or `staffUnlock` for the scanner). Since the user is logged into the portal, the unlock is implicit — pass `true` directly.
-- Replace tool grid rendering: each card becomes a `<button>` that sets `activeTool`. Keep a tiny `Open public page ↗` link in the corner for the shareable URL.
-- When `activeTool` is set, hide the grid and render header `← Back to all tools` + the embedded tool.
+### Activity tracking hooks
 
-**No changes needed elsewhere** — every tool component already supports `adminMode` / `staffUnlock` props and works standalone.
+- On successful login (in `handleLogin`): call `portal-activity` with `event='login'`.
+- On tab change: `event='tool_open'` with `meta={tab}`.
+- On every lead action: handled server-side by `portal-leads`.
+- Light client throttling: skip duplicate `tool_open` within 30s for the same tab.
 
-## Notes
-- The public pages stay exactly as they are (still used as lead magnets reps share).
-- The Company Portal tab and AI Coach tab are unchanged.
-- No backend, schema, or auth changes.
+## 4. Admin UI changes (`src/pages/AdminDashboard.tsx`)
+
+Add a new "Lead Scraper" panel in the existing admin tool grid (or under the Reps section). Form:
+- Industry (text), Location (default "Indianapolis, Indiana"), Count (5–50), "Push to rep pool" toggle (default on).
+- "Run scrape" → calls `admin-scrape-leads`.
+- Below: table of last 50 scraped leads with score, claimed-by, status. Column to manually push or delete.
+
+Also add a small **"Rep Activity"** widget to the Reps panel (`RepPerformancePanel`):
+- Per-rep: last login, leads claimed (7d / 30d), touches logged (7d / 30d), upload count, download count.
+- Backed by a SQL view or aggregated query over `rep_activity` + `rep_leads`.
+
+## 5. Files
+
+**New**
+- `supabase/migrations/<ts>_rep_activity_and_leads.sql`
+- `supabase/functions/portal-activity/index.ts`
+- `supabase/functions/portal-leads/index.ts`
+- `supabase/functions/admin-scrape-leads/index.ts`
+- `src/components/portal/LeadsBoard.tsx` (Pool + My Leads + Upload tabs)
+- `src/components/portal/LeadCard.tsx`
+- `src/components/admin/LeadScraperPanel.tsx`
+- `src/components/admin/RepActivityPanel.tsx`
+- `src/lib/portalLeads.ts` (typed client wrapper around `portal-leads` + `portal-activity`)
+
+**Edited**
+- `src/pages/PortalPage.tsx` — add Leads tab, activity hooks
+- `src/pages/AdminDashboard.tsx` — add Lead Scraper + Rep Activity panels
+- `.lovable/memory/features/rep-partner-portal.md` — document new tab + tracking
+- `package.json` — add `papaparse` if not present
+
+## 6. Open question
+
+Right now anyone with a valid rep code can upload arbitrary leads and claim from the pool. **Should there be a max-claim cap (e.g. 25 active claimed leads per rep) so one rep can't sweep the entire pool?** I'd default to **25 active claimed** with auto-release after 30 days of no touch — but flag if you want different numbers.
