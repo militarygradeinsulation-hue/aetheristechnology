@@ -1753,6 +1753,48 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_drip_settings: {
+        Row: {
+          daily_per_rep: number
+          enabled: boolean
+          excluded_lifecycle_stages: string[]
+          hold_hours: number
+          id: string
+          indianapolis_only: boolean
+          require_email: boolean
+          scraper_enabled: boolean
+          scraper_frequency: string
+          scraper_target_per_run: number
+          updated_at: string
+        }
+        Insert: {
+          daily_per_rep?: number
+          enabled?: boolean
+          excluded_lifecycle_stages?: string[]
+          hold_hours?: number
+          id?: string
+          indianapolis_only?: boolean
+          require_email?: boolean
+          scraper_enabled?: boolean
+          scraper_frequency?: string
+          scraper_target_per_run?: number
+          updated_at?: string
+        }
+        Update: {
+          daily_per_rep?: number
+          enabled?: boolean
+          excluded_lifecycle_stages?: string[]
+          hold_hours?: number
+          id?: string
+          indianapolis_only?: boolean
+          require_email?: boolean
+          scraper_enabled?: boolean
+          scraper_frequency?: string
+          scraper_target_per_run?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_post_queue: {
         Row: {
           content: string
@@ -2548,6 +2590,9 @@ export type Database = {
       }
       rep_leads: {
         Row: {
+          assigned_at: string | null
+          assigned_to_code: string | null
+          assignment_expires_at: string | null
           business_name: string | null
           claimed_at: string | null
           claimed_by_code: string | null
@@ -2555,9 +2600,12 @@ export type Database = {
           created_at: string
           created_by_code: string | null
           email: string | null
+          external_id: string | null
           id: string
           industry: string | null
           last_touched_at: string | null
+          lead_status: string | null
+          lifecycle_stage: string | null
           location: string | null
           notes: string | null
           phone: string | null
@@ -2570,6 +2618,9 @@ export type Database = {
           why_fit: string | null
         }
         Insert: {
+          assigned_at?: string | null
+          assigned_to_code?: string | null
+          assignment_expires_at?: string | null
           business_name?: string | null
           claimed_at?: string | null
           claimed_by_code?: string | null
@@ -2577,9 +2628,12 @@ export type Database = {
           created_at?: string
           created_by_code?: string | null
           email?: string | null
+          external_id?: string | null
           id?: string
           industry?: string | null
           last_touched_at?: string | null
+          lead_status?: string | null
+          lifecycle_stage?: string | null
           location?: string | null
           notes?: string | null
           phone?: string | null
@@ -2592,6 +2646,9 @@ export type Database = {
           why_fit?: string | null
         }
         Update: {
+          assigned_at?: string | null
+          assigned_to_code?: string | null
+          assignment_expires_at?: string | null
           business_name?: string | null
           claimed_at?: string | null
           claimed_by_code?: string | null
@@ -2599,9 +2656,12 @@ export type Database = {
           created_at?: string
           created_by_code?: string | null
           email?: string | null
+          external_id?: string | null
           id?: string
           industry?: string | null
           last_touched_at?: string | null
+          lead_status?: string | null
+          lifecycle_stage?: string | null
           location?: string | null
           notes?: string | null
           phone?: string | null
