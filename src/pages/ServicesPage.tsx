@@ -3,7 +3,7 @@ import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Services } from '@/components/Services';
 import { ServicesPricing } from '@/components/ServicesPricing';
-import { ServiceCapabilities } from '@/components/ServiceCapabilities';
+
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -63,7 +63,6 @@ const ServicesPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <ServicesPricing />
-          <ServiceCapabilities />
           <Services />
         </div>
         <Footer />
