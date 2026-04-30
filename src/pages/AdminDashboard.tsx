@@ -801,6 +801,9 @@ const AdminDashboard: React.FC = () => {
         {/* Forecast Center */}
         {activeTab === 'forecast' && <ForecastSettingsPanel />}
 
+        {/* Company Portal Preview */}
+        {activeTab === 'portal' && <CompanyPortalPreview />}
+
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}
 
