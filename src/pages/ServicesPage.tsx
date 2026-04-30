@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
-import { Services } from '@/components/Services';
 import { ServicesPricing } from '@/components/ServicesPricing';
 
 import { Footer } from '@/components/Footer';
@@ -63,7 +62,6 @@ const ServicesPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <ServicesPricing />
-          <Services />
         </div>
         <Footer />
       </div>
