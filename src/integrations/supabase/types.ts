@@ -1024,7 +1024,10 @@ export type Database = {
           id: string
           notes: string | null
           owner: string | null
+          owner_code: string | null
           phone: string | null
+          qualified_at: string | null
+          qualified_by_code: string | null
           source: string | null
           tags: string[] | null
           title: string | null
@@ -1038,7 +1041,10 @@ export type Database = {
           id?: string
           notes?: string | null
           owner?: string | null
+          owner_code?: string | null
           phone?: string | null
+          qualified_at?: string | null
+          qualified_by_code?: string | null
           source?: string | null
           tags?: string[] | null
           title?: string | null
@@ -1052,7 +1058,10 @@ export type Database = {
           id?: string
           notes?: string | null
           owner?: string | null
+          owner_code?: string | null
           phone?: string | null
+          qualified_at?: string | null
+          qualified_by_code?: string | null
           source?: string | null
           tags?: string[] | null
           title?: string | null
@@ -1076,12 +1085,17 @@ export type Database = {
           currency: string
           expected_close_date: string | null
           id: string
+          lost_at: string | null
+          lost_reason: string | null
           notes: string | null
+          owner_code: string | null
           position: number
+          proposal_sent_at: string | null
           stage: Database["public"]["Enums"]["crm_deal_stage"]
           title: string
           updated_at: string
           value_cents: number
+          won_at: string | null
         }
         Insert: {
           company_id?: string | null
@@ -1090,12 +1104,17 @@ export type Database = {
           currency?: string
           expected_close_date?: string | null
           id?: string
+          lost_at?: string | null
+          lost_reason?: string | null
           notes?: string | null
+          owner_code?: string | null
           position?: number
+          proposal_sent_at?: string | null
           stage?: Database["public"]["Enums"]["crm_deal_stage"]
           title: string
           updated_at?: string
           value_cents?: number
+          won_at?: string | null
         }
         Update: {
           company_id?: string | null
@@ -1104,12 +1123,17 @@ export type Database = {
           currency?: string
           expected_close_date?: string | null
           id?: string
+          lost_at?: string | null
+          lost_reason?: string | null
           notes?: string | null
+          owner_code?: string | null
           position?: number
+          proposal_sent_at?: string | null
           stage?: Database["public"]["Enums"]["crm_deal_stage"]
           title?: string
           updated_at?: string
           value_cents?: number
+          won_at?: string | null
         }
         Relationships: [
           {
@@ -1155,6 +1179,7 @@ export type Database = {
           id: string
           metadata: Json
           occurred_at: string
+          owner_code: string | null
           subject: string | null
           type: Database["public"]["Enums"]["crm_interaction_type"]
         }
@@ -1166,6 +1191,7 @@ export type Database = {
           id?: string
           metadata?: Json
           occurred_at?: string
+          owner_code?: string | null
           subject?: string | null
           type?: Database["public"]["Enums"]["crm_interaction_type"]
         }
@@ -1177,6 +1203,7 @@ export type Database = {
           id?: string
           metadata?: Json
           occurred_at?: string
+          owner_code?: string | null
           subject?: string | null
           type?: Database["public"]["Enums"]["crm_interaction_type"]
         }
@@ -2675,6 +2702,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_idea_of_day: {
+        Row: {
+          body: string
+          category: string | null
+          created_at: string
+          for_date: string
+          id: string
+          is_active: boolean
+          source: string
+          title: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          created_at?: string
+          for_date: string
+          id?: string
+          is_active?: boolean
+          source?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          created_at?: string
+          for_date?: string
+          id?: string
+          is_active?: boolean
+          source?: string
+          title?: string
+        }
+        Relationships: []
+      }
       rep_leads: {
         Row: {
           assigned_at: string | null
@@ -2853,6 +2913,126 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      rep_playbook_schedule: {
+        Row: {
+          block_order: number
+          category: string
+          created_at: string
+          day_of_week: number
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          block_order?: number
+          category?: string
+          created_at?: string
+          day_of_week: number
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          block_order?: number
+          category?: string
+          created_at?: string
+          day_of_week?: number
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rep_plays: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          industry: string | null
+          is_published: boolean
+          source: string
+          stage: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          is_published?: boolean
+          source?: string
+          stage?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          is_published?: boolean
+          source?: string
+          stage?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rep_quotas: {
+        Row: {
+          calls_target: number
+          created_at: string
+          id: string
+          meetings_target: number
+          notes: string | null
+          period: string
+          proposals_target: number
+          rep_code: string
+          revenue_target_cents: number
+          updated_at: string
+        }
+        Insert: {
+          calls_target?: number
+          created_at?: string
+          id?: string
+          meetings_target?: number
+          notes?: string | null
+          period?: string
+          proposals_target?: number
+          rep_code: string
+          revenue_target_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          calls_target?: number
+          created_at?: string
+          id?: string
+          meetings_target?: number
+          notes?: string | null
+          period?: string
+          proposals_target?: number
+          rep_code?: string
+          revenue_target_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       rep_settings: {
         Row: {
