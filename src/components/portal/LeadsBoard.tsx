@@ -6,14 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
 
-type SubTab = 'pool' | 'mine' | 'upload';
+type SubTab = 'drip' | 'pool' | 'mine' | 'upload';
 
 const STATUSES: LeadStatus[] = ['new','outreach','touched','replied','meeting','won','lost','dead'];
 
