@@ -37,6 +37,8 @@ import {
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
+import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
+import { toast as sonnerToast } from 'sonner';
 
 type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
@@ -189,12 +191,25 @@ const PortalPage: React.FC = () => {
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean }[] = [
+  const { unread: unreadChat } = useUnreadTeamMessages(profile.code, tab === 'team');
+
+  // Toast pop when a new chat arrives while not viewing chat
+  useEffect(() => {
+    if (unreadChat > 0 && tab !== 'team') {
+      sonnerToast(`${unreadChat} new team message${unreadChat === 1 ? '' : 's'}`, {
+        description: 'Open the Team Chat tab to read.',
+        action: { label: 'View', onClick: () => setTab('team') },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unreadChat]);
+
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" /> },
+    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
@@ -233,13 +248,18 @@ const PortalPage: React.FC = () => {
                 setActiveTool(null);
                 logPortalActivity('tab_view', { tab: t.id });
               }}
-              className={`flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
+              className={`relative flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.id
                   ? 'border-amber text-amber'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               {t.icon}{t.label}
+              {t.badge && t.badge > 0 ? (
+                <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
+                  {t.badge > 99 ? '99+' : t.badge}
+                </span>
+              ) : null}
             </button>
           ))}
         </nav>
