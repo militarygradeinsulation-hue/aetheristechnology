@@ -47,7 +47,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const load = async () => {
     setLoading(true);
     try {
-      const r = await portalForecast.getToday();
+      const r = await portalForecast.getToday(authMode);
       setBriefing(r.briefing);
       setAgeHours(r.age_hours);
     } catch (e) {
@@ -62,7 +62,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const handleRegenerate = async () => {
     setRefreshing(true);
     try {
-      const r = await portalForecast.regenerate();
+      const r = await portalForecast.regenerate(authMode);
       setBriefing(r.briefing);
       setAgeHours(0);
       toast({ title: "Briefing regenerated" });
@@ -76,7 +76,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const handlePush = async (c: ForecastCompany) => {
     setPushing(c.name);
     try {
-      const r = await portalForecast.pushLead(c);
+      const r = await portalForecast.pushLead(c, authMode);
       toast({
         title: r.duplicate ? "Already in pool" : "Pushed to Lead Pool",
         description: c.name,
