@@ -5,10 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import frictionVocabularyAuditThumb from '@/assets/packages/friction-vocabulary-audit.png';
+import customImplementationThumb from '@/assets/packages/custom-implementation.png';
+import brandContradictionFinderThumb from '@/assets/packages/brand-contradiction-finder.png';
+import strategicQuestionEngineThumb from '@/assets/packages/strategic-question-engine.png';
+import fourteenDayDiagnosticThumb from '@/assets/packages/fourteen-day-diagnostic.png';
 
 interface ServiceTile {
   icon: React.ElementType;
   title: string;
+  thumbnail?: string;
   pricing: string;
   priceRaw: number;
   pricingDetail: string;
