@@ -15,6 +15,7 @@ import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
+import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
@@ -373,6 +374,7 @@ const PortalPage: React.FC = () => {
         {/* COMPANY (partner only) */}
         {tab === 'company' && isPartner && (
           <div className="space-y-6">
+            <ForecastCenter isPartner={isPartner} />
             <Card>
               <CardHeader>
                 <CardTitle className="font-display flex items-center gap-2">
