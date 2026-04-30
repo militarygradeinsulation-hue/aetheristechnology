@@ -36,7 +36,7 @@ const SourceLink: React.FC<{ url?: string }> = ({ url }) => {
   );
 };
 
-export const ForecastCenter: React.FC<Props> = ({ isPartner }) => {
+export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal" }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
