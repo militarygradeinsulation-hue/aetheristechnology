@@ -5,9 +5,11 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
+import { useStaffUnlock } from '@/hooks/useStaffUnlock';
 
 const FollowUpPlanPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const staffUnlock = useStaffUnlock();
 
   return (
     <div className="relative min-h-screen">
@@ -27,7 +29,7 @@ const FollowUpPlanPage = () => {
             </h1>
             <p className="text-muted-foreground text-xl max-w-2xl mx-auto">A 14-day multi-channel follow-up plan with ready-to-use templates for every touchpoint.</p>
           </div>
-          <FollowUpPlanGenerator />
+          <FollowUpPlanGenerator adminMode={staffUnlock} />
         </div>
         <Footer />
       </div>

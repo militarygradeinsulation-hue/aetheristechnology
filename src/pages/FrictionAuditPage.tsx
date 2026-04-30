@@ -6,9 +6,11 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { combineSchemas, howToSchema, softwareAppSchema } from '@/lib/schemas';
+import { useStaffUnlock } from '@/hooks/useStaffUnlock';
 
 const FrictionAuditPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const staffUnlock = useStaffUnlock();
 
   const jsonLd = combineSchemas(
     softwareAppSchema(
@@ -76,7 +78,7 @@ const FrictionAuditPage = () => {
             </p>
           </div>
 
-          <FrictionVocabularyAudit />
+          <FrictionVocabularyAudit adminMode={staffUnlock} />
         </div>
         <Footer />
       </div>

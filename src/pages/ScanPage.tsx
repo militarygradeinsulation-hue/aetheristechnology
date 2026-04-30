@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
+import { useStaffUnlock } from '@/hooks/useStaffUnlock';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -9,6 +10,7 @@ import { combineSchemas, howToSchema, softwareAppSchema } from '@/lib/schemas';
 
 const ScanPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const staffUnlock = useStaffUnlock();
 
   const jsonLd = combineSchemas(
     softwareAppSchema(
@@ -56,7 +58,7 @@ const ScanPage = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-20">
-          <WebsiteScanner onContactClick={() => setIsContactModalOpen(true)} />
+          <WebsiteScanner onContactClick={() => setIsContactModalOpen(true)} staffUnlock={staffUnlock} />
         </div>
         <Footer />
       </div>

@@ -5,9 +5,11 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
+import { useStaffUnlock } from '@/hooks/useStaffUnlock';
 
 const SalesScriptsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const staffUnlock = useStaffUnlock();
 
   return (
     <div className="relative min-h-screen">
@@ -27,7 +29,7 @@ const SalesScriptsPage = () => {
             </h1>
             <p className="text-muted-foreground text-xl max-w-2xl mx-auto">AI-generated call scripts, objection handlers, and follow-up templates for your business.</p>
           </div>
-          <SalesScriptGenerator />
+          <SalesScriptGenerator adminMode={staffUnlock} />
         </div>
         <Footer />
       </div>

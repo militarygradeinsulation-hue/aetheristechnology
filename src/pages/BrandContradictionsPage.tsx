@@ -5,9 +5,11 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
+import { useStaffUnlock } from '@/hooks/useStaffUnlock';
 
 const BrandContradictionsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const staffUnlock = useStaffUnlock();
   return (
     <div className="relative min-h-screen">
       <SEOHead title="Brand Contradiction Finder | Aetheris AI" description="Buyers feel contradiction before they can explain it. Find where trust in your brand is quietly weakening — free preview." path="/brand-contradictions" />
@@ -20,7 +22,7 @@ const BrandContradictionsPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">Brand Contradiction <span className="text-gradient-amber">Finder</span></h1>
             <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Your buyers can feel contradiction before they can explain it. This tool shows you where trust is being weakened in silence.</p>
           </div>
-          <BrandContradictionFinder />
+          <BrandContradictionFinder adminMode={staffUnlock} />
         </div>
         <Footer />
       </div>
