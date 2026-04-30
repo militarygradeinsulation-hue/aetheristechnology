@@ -2483,6 +2483,7 @@ export type Database = {
           is_active: boolean
           rep_email: string | null
           rep_name: string
+          role: string
           total_commission_cents: number
           total_sales_cents: number
         }
@@ -2494,6 +2495,7 @@ export type Database = {
           is_active?: boolean
           rep_email?: string | null
           rep_name?: string
+          role?: string
           total_commission_cents?: number
           total_sales_cents?: number
         }
@@ -2505,6 +2507,7 @@ export type Database = {
           is_active?: boolean
           rep_email?: string | null
           rep_name?: string
+          role?: string
           total_commission_cents?: number
           total_sales_cents?: number
         }
