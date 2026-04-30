@@ -8,9 +8,9 @@ import {
   Activity, RefreshCw, Lightbulb, Cpu, Building2, Crosshair, ExternalLink,
   TrendingUp, AlertTriangle, Globe,
 } from "lucide-react";
-import { portalForecast, type ForecastBriefing, type ForecastCompany } from "@/lib/portalForecast";
+import { portalForecast, type ForecastBriefing, type ForecastCompany, type ForecastAuthMode } from "@/lib/portalForecast";
 
-interface Props { isPartner: boolean }
+interface Props { isPartner: boolean; authMode?: ForecastAuthMode }
 
 const formatAge = (h: number | null): string => {
   if (h == null) return "—";
