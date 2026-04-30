@@ -26,7 +26,7 @@ import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
-import { ForecastCenter } from '@/components/portal/ForecastCenter';
+import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -798,7 +798,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'commissions' && <CommissionStructurePanel />}
 
         {/* Forecast Center */}
-        {activeTab === 'forecast' && <ForecastCenter isPartner={true} authMode="admin" />}
+        {activeTab === 'forecast' && <ForecastSettingsPanel />}
 
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}
