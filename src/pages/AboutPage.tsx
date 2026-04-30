@@ -26,7 +26,7 @@ const AboutPage = () => {
       'Joseph Toney',
       'Business Forensics Operator',
       'Founder of Aetheris. Marine Corps veteran with a psychology background. Runs forensic audits on B2B operations to expose revenue leaks, then rebuilds with AI agents, automation, and CRM.',
-      ['https://www.linkedin.com/in/aisystemsarchitect', 'https://ctoguy.ai']
+      ['https://www.linkedin.com/in/thejosephtoney', 'https://ctoguy.ai']
     )
   );
 

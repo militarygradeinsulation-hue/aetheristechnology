@@ -60,7 +60,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
           <RevealOnScroll delay={0.3}>
             <a
-              href="https://www.linkedin.com/in/aisystemsarchitect"
+              href="https://www.linkedin.com/in/thejosephtoney"
               target="_blank"
               rel="noopener noreferrer"
               className="glass glass-hover p-8 rounded-2xl flex flex-col items-center text-center group hover:border-amber/30 border border-transparent transition-all hover:scale-[1.02] active:scale-[0.98]"

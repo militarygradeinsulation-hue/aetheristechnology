@@ -47,7 +47,7 @@ const Home = () => {
           "priceRange": "$0 - $25,000+",
           "areaServed": { "@type": "Country", "name": "United States" },
           "serviceType": ["Business Forensics", "Revenue Leak Audit", "Operational Diagnostic", "AI Strategy Consulting", "AI Agents", "Workflow Automation", "CRM Implementation", "Co-CEO Embed"],
-          "sameAs": ["https://www.linkedin.com/in/aisystemsarchitect", "https://ctoguy.ai"],
+          "sameAs": ["https://www.linkedin.com/in/thejosephtoney", "https://ctoguy.ai"],
         }}
       />
       <Background />

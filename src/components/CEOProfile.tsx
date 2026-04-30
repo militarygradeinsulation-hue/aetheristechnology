@@ -75,12 +75,12 @@ export const CEOProfile: React.FC = () => {
                       data-size="medium"
                       data-theme="dark"
                       data-type="VERTICAL"
-                      data-vanity="aisystemsarchitect"
+                      data-vanity="thejosephtoney"
                       data-version="v1"
                     >
                       <a
                         className="badge-base__link LI-simple-link"
-                        href="https://www.linkedin.com/in/aisystemsarchitect?trk=profile-badge"
+                        href="https://www.linkedin.com/in/thejosephtoney?trk=profile-badge"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

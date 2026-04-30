@@ -6,7 +6,7 @@ const ORG_NAME = 'Aetheris AI';
 const ORG_LOGO = `${SITE_URL}/aetheris-logo.png`;
 
 export const ORG_SAME_AS = [
-  'https://www.linkedin.com/in/aisystemsarchitect',
+  'https://www.linkedin.com/in/thejosephtoney',
   'https://ctoguy.ai',
   'https://aetheristechnology.lovable.app',
 ];
@@ -137,7 +137,7 @@ export const articleSchema = (article: ArticleData) => ({
   author: {
     '@type': 'Person',
     name: article.author,
-    url: 'https://www.linkedin.com/in/aisystemsarchitect',
+    url: 'https://www.linkedin.com/in/thejosephtoney',
   },
   publisher: PUBLISHER,
   datePublished: article.datePublished || undefined,
