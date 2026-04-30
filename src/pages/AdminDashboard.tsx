@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Linkedin, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2 } from 'lucide-react';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -217,6 +217,22 @@ const AdminDashboard: React.FC = () => {
       headers: { 'x-admin-token': token },
     });
     setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_read: !current } : s));
+  };
+
+  const deleteSubmission = async (id: string) => {
+    if (!confirm('Delete this submission? This cannot be undone.')) return;
+    const token = getAdminToken();
+    if (!token) return;
+    const { data, error } = await supabase.functions.invoke('admin-data', {
+      body: { action: 'delete_submission', id },
+      headers: { 'x-admin-token': token },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: 'Delete failed', description: error?.message || (data as any)?.error || 'Unknown error', variant: 'destructive' });
+      return;
+    }
+    setSubmissions(prev => prev.filter(s => s.id !== id));
+    toast({ title: 'Submission deleted' });
   };
 
   const handleLogout = async () => {
@@ -603,9 +619,14 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-foreground text-sm whitespace-pre-wrap">{sub.message}</p>
                       <p className="text-xs text-muted-foreground mt-2">{new Date(sub.created_at).toLocaleString()}</p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => toggleRead(sub.id, sub.is_read)} title={sub.is_read ? 'Mark unread' : 'Mark read'}>
-                      {sub.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => toggleRead(sub.id, sub.is_read)} title={sub.is_read ? 'Mark unread' : 'Mark read'}>
+                        {sub.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteSubmission(sub.id)} title="Delete submission">
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))
