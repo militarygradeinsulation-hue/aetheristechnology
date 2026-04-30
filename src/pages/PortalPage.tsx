@@ -185,7 +185,7 @@ const PortalPage: React.FC = () => {
           {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); setActiveTool(null); }}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.id
                   ? 'border-amber text-amber'
