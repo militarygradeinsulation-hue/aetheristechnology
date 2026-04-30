@@ -11,7 +11,7 @@ export interface RepLead {
   industry: string | null;
   location: string | null;
   notes: string | null;
-  source: 'admin_scrape' | 'rep_upload' | 'admin_manual';
+  source: string;
   score: number | null;
   why_fit: string | null;
   claimed_by_code: string | null;
@@ -20,6 +20,8 @@ export interface RepLead {
   last_touched_at: string | null;
   touch_count: number;
   created_at: string;
+  assigned_to_code?: string | null;
+  assignment_expires_at?: string | null;
 }
 
 export type LeadStatus = 'new' | 'outreach' | 'touched' | 'replied' | 'meeting' | 'won' | 'lost' | 'dead';
