@@ -27,4 +27,5 @@ Updated: now
 - [Website Scanner](mem://features/website-scanner-tool) — Scanner logic, gated results, AI assessment details
 - [Business Diagnostic](mem://features/business-diagnostic-tool) — 20-question flow, client-side PDF generation
 - [Admin & Infrastructure](mem://features/admin-analytics-hub) — Hardcoded passcode 9822, HubSpot ID, notify domain
+- [Rep & Partner Portal](mem://features/rep-partner-portal) — `/portal` code-only login, partner code 963169, AI sales coach, separate from admin
 - [Smart Subscriptions](mem://features/smart-subscriptions) — Monthly AI-powered personalized deliveries via invoice.paid webhook

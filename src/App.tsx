@@ -50,6 +50,7 @@ const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
+const PortalPage = lazy(() => import("./pages/PortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
 const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
@@ -130,6 +131,8 @@ const App = () => (
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
+                      <Route path="/portal" element={<PortalPage />} />
+                      <Route path="/partner-portal" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
                       <Route path="/leak-report/:prospectId" element={<LeakReportPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
