@@ -33,6 +33,12 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || "get_today");
 
+    // Public-facing settings (sections + cadence/pulse minutes only)
+    const { data: settings } = await admin
+      .from("forecast_settings")
+      .select("sections,live_pulse_minutes,refresh_cadence_minutes,is_active")
+      .eq("id", "default").maybeSingle();
+
     if (action === "get_today") {
       const { data: latest } = await admin
         .from("forecast_briefings")
@@ -45,8 +51,8 @@ serve(async (req) => {
         ? (Date.now() - new Date(latest.generated_at).getTime()) / 3600000
         : Infinity;
 
-      // Auto-trigger generation if stale or missing (fire & forget so client doesn't block forever).
-      if (!latest || ageHours > STALE_HOURS) {
+      const cadenceHours = settings?.refresh_cadence_minutes ? settings.refresh_cadence_minutes / 60 : STALE_HOURS;
+      if (settings?.is_active !== false && (!latest || ageHours > cadenceHours)) {
         fetch(`${SUPABASE_URL}/functions/v1/forecast-generate-daily`, {
           method: "POST",
           headers: { "x-forecast-secret": SERVICE, "Content-Type": "application/json" },
@@ -54,7 +60,27 @@ serve(async (req) => {
         }).catch((e) => console.warn("trigger generate failed", e));
       }
 
-      return new Response(JSON.stringify({ briefing: latest, age_hours: ageHours === Infinity ? null : ageHours }), {
+      return new Response(JSON.stringify({
+        briefing: latest,
+        age_hours: ageHours === Infinity ? null : ageHours,
+        settings: settings || null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "live_pulse") {
+      const { data: latest } = await admin
+        .from("forecast_briefings")
+        .select("live_pulse,generated_at,briefing_date")
+        .order("briefing_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return new Response(JSON.stringify({
+        live_pulse: latest?.live_pulse || [],
+        generated_at: latest?.generated_at || null,
+        live_pulse_minutes: settings?.live_pulse_minutes || 15,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
