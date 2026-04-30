@@ -55,9 +55,10 @@ async function callPortalLeads(action: string, payload: Record<string, unknown> 
 }
 
 export const portalLeads = {
-  list: (view: 'pool' | 'mine', filters: { industry?: string; location?: string; minScore?: number } = {}) =>
-    callPortalLeads('list', { view, ...filters }) as Promise<{ ok: true; leads: RepLead[]; activeClaimed: number; maxActive: number }>,
+  list: (view: 'pool' | 'mine' | 'drip', filters: { industry?: string; location?: string; minScore?: number } = {}) =>
+    callPortalLeads('list', { view, ...filters }) as Promise<{ ok: true; leads: RepLead[]; activeClaimed: number; maxActive: number; dripCount: number }>,
   claim: (id: string) => callPortalLeads('claim', { id }),
+  skipDrip: (id: string) => callPortalLeads('skip_drip', { id }),
   release: (id: string) => callPortalLeads('release', { id }),
   updateStatus: (id: string, opts: { status?: LeadStatus; notes?: string; touch?: boolean }) =>
     callPortalLeads('update_status', { id, ...opts }),
