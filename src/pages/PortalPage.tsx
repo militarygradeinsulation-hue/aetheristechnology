@@ -65,6 +65,7 @@ const PortalPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
 
   useEffect(() => {
     if (hasValidPortalSession() && !profile) setProfile(getPortalProfile());
