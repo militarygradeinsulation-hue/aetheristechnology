@@ -116,11 +116,20 @@ serve(async (req) => {
         return jsonResp({ error: `You already have ${MAX_ACTIVE_CLAIMED} active leads. Close some first.` }, 400);
       }
 
+      // Allow claim if: lead is unclaimed AND (unassigned OR assigned to this rep)
       const { data, error } = await supabase
         .from("rep_leads")
-        .update({ claimed_by_code: claims.code, claimed_at: new Date().toISOString(), status: "new" })
+        .update({
+          claimed_by_code: claims.code,
+          claimed_at: new Date().toISOString(),
+          status: "new",
+          assigned_to_code: null,
+          assigned_at: null,
+          assignment_expires_at: null,
+        })
         .eq("id", id)
         .is("claimed_by_code", null)
+        .or(`assigned_to_code.is.null,assigned_to_code.eq.${claims.code}`)
         .select("id,business_name")
         .maybeSingle();
       if (error) throw error;
