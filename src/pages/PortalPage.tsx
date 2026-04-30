@@ -8,11 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
-  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat,
+  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users,
 } from 'lucide-react';
 import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
+import { LeadsBoard } from '@/components/portal/LeadsBoard';
+import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
@@ -29,7 +31,7 @@ import {
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 
-type Tab = 'overview' | 'commissions' | 'tools' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'coach' | 'company';
 type ToolKey =
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
