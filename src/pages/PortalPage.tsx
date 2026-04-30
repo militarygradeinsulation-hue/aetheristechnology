@@ -8,8 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
-  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users,
+  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase,
 } from 'lucide-react';
+import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
@@ -31,7 +32,7 @@ import {
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 
-type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
@@ -159,6 +160,7 @@ const PortalPage: React.FC = () => {
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
+    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
   ];
@@ -357,6 +359,9 @@ const PortalPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* WORKSPACE */}
+        {tab === 'workspace' && <WorkspaceTab />}
 
         {/* AI COACH (embedded) */}
         {tab === 'coach' && (
