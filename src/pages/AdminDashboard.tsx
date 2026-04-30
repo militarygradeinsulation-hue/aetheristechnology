@@ -27,6 +27,7 @@ import { CommissionStructurePanel } from '@/components/admin/CommissionStructure
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
+import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
