@@ -15,23 +15,48 @@ import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png'
 import { FileText, Search } from 'lucide-react';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
+import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
+import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
+import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
+import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
+import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
+import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
 
 type Tab = 'overview' | 'commissions' | 'tools' | 'coach' | 'company';
+type ToolKey =
+  | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
+  | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
-const REP_TOOLS = [
-  { name: 'Free Leak Audit (give to prospects)', href: '/leak-audit', desc: 'Send this URL. Their result is your wedge.' },
-  { name: 'Website Scanner', href: '/scan', desc: 'Run a quick scan on a prospect site to break the ice.' },
-  { name: 'Business Diagnostic Quiz', href: '/business-diagnostic', desc: '20 questions, score, full PDF — perfect demo asset.' },
-  { name: 'Sales Script Generator', href: '/sales-scripts', desc: 'Custom cold-call & email scripts in seconds.' },
-  { name: 'Follow-Up Plan', href: '/follow-up-plan', desc: '7-touch sequences tuned to a specific prospect.' },
-  { name: 'Strategic Question Engine', href: '/strategic-questions', desc: 'Discovery-call questions to uncover real pain.' },
-  { name: 'Brand Contradiction Finder', href: '/brand-contradictions', desc: 'Show prospects what their brand is actually saying.' },
-  { name: 'Friction Vocabulary Audit', href: '/friction-audit', desc: 'Find the words on their site costing them deals.' },
+const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string }[] = [
+  { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
+  { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
+  { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF — perfect demo asset.' },
+  { key: 'sales-scripts',       name: 'Sales Script Generator',              href: '/sales-scripts',        desc: 'Custom cold-call & email scripts in seconds.' },
+  { key: 'follow-up-plan',      name: 'Follow-Up Plan',                      href: '/follow-up-plan',       desc: '7-touch sequences tuned to a specific prospect.' },
+  { key: 'strategic-questions', name: 'Strategic Question Engine',           href: '/strategic-questions',  desc: 'Discovery-call questions to uncover real pain.' },
+  { key: 'brand-contradictions',name: 'Brand Contradiction Finder',          href: '/brand-contradictions', desc: 'Show prospects what their brand is actually saying.' },
+  { key: 'friction-audit',      name: 'Friction Vocabulary Audit',           href: '/friction-audit',       desc: 'Find the words on their site costing them deals.' },
 ];
+
+const renderEmbeddedTool = (key: ToolKey, noop: () => void): React.ReactNode => {
+  switch (key) {
+    case 'leak-audit':           return <WhatsWrongDiagnostic />;
+    case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
+    case 'business-diagnostic':  return <BusinessDiagnostic />;
+    case 'sales-scripts':        return <SalesScriptGenerator adminMode />;
+    case 'follow-up-plan':       return <FollowUpPlanGenerator adminMode />;
+    case 'strategic-questions':  return <StrategicQuestionEngine adminMode />;
+    case 'brand-contradictions': return <BrandContradictionFinder adminMode />;
+    case 'friction-audit':       return <FrictionVocabularyAudit adminMode />;
+  }
+};
 
 const PortalPage: React.FC = () => {
   const navigate = useNavigate();
