@@ -195,7 +195,7 @@ const tierCards = [
   },
 ];
 
-export const WebsiteScanner = ({ onContactClick, hideHeader = false }: { onContactClick: () => void; hideHeader?: boolean }) => {
+export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock = false }: { onContactClick: () => void; hideHeader?: boolean; staffUnlock?: boolean }) => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [scanPhase, setScanPhase] = useState(0);
@@ -286,7 +286,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false }: { onConta
     setCheckoutPriceId(priceId);
   };
 
-  const isUnlocked = !!purchasedTier;
+  const isUnlocked = staffUnlock || !!purchasedTier;
 
   return (
     <section className={hideHeader ? "py-6 px-4" : "py-20 px-4"}>
