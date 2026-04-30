@@ -1465,10 +1465,13 @@ export type Database = {
         Row: {
           briefing_date: string
           companies: Json
+          education: Json
           generated_at: string
           id: string
           industry: Json
+          live_pulse: Json
           model: string | null
+          settings_snapshot: Json | null
           sources: Json
           tech: Json
           tip: Json
@@ -1476,10 +1479,13 @@ export type Database = {
         Insert: {
           briefing_date: string
           companies?: Json
+          education?: Json
           generated_at?: string
           id?: string
           industry?: Json
+          live_pulse?: Json
           model?: string | null
+          settings_snapshot?: Json | null
           sources?: Json
           tech?: Json
           tip?: Json
@@ -1487,13 +1493,58 @@ export type Database = {
         Update: {
           briefing_date?: string
           companies?: Json
+          education?: Json
           generated_at?: string
           id?: string
           industry?: Json
+          live_pulse?: Json
           model?: string | null
+          settings_snapshot?: Json | null
           sources?: Json
           tech?: Json
           tip?: Json
+        }
+        Relationships: []
+      }
+      forecast_settings: {
+        Row: {
+          education_pool: Json
+          id: string
+          industry_presets: Json
+          is_active: boolean
+          live_pulse_minutes: number
+          refresh_cadence_minutes: number
+          sections: Json
+          sources: Json
+          topic_queries: Json
+          updated_at: string
+          web_window: string
+        }
+        Insert: {
+          education_pool?: Json
+          id?: string
+          industry_presets?: Json
+          is_active?: boolean
+          live_pulse_minutes?: number
+          refresh_cadence_minutes?: number
+          sections?: Json
+          sources?: Json
+          topic_queries?: Json
+          updated_at?: string
+          web_window?: string
+        }
+        Update: {
+          education_pool?: Json
+          id?: string
+          industry_presets?: Json
+          is_active?: boolean
+          live_pulse_minutes?: number
+          refresh_cadence_minutes?: number
+          sections?: Json
+          sources?: Json
+          topic_queries?: Json
+          updated_at?: string
+          web_window?: string
         }
         Relationships: []
       }

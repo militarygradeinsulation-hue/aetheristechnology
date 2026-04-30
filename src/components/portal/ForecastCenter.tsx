@@ -1,16 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import {
   Activity, RefreshCw, Lightbulb, Cpu, Building2, Crosshair, ExternalLink,
-  TrendingUp, AlertTriangle, Globe,
+  TrendingUp, AlertTriangle, Globe, GraduationCap, Radio, Settings2, BookOpen, FileText,
 } from "lucide-react";
-import { portalForecast, type ForecastBriefing, type ForecastCompany, type ForecastAuthMode } from "@/lib/portalForecast";
+import {
+  portalForecast,
+  type ForecastBriefing, type ForecastCompany, type ForecastAuthMode,
+  type ForecastSectionVisibility, type ForecastPulse,
+} from "@/lib/portalForecast";
 
 interface Props { isPartner: boolean; authMode?: ForecastAuthMode }
+
+type SectionKey = keyof ForecastSectionVisibility;
+const ALL_SECTIONS: { key: SectionKey; label: string }[] = [
+  { key: "tip", label: "Tip of the Day" },
+  { key: "live_pulse", label: "Live Pulse" },
+  { key: "education", label: "Operator Education" },
+  { key: "tech", label: "Tech Trends" },
+  { key: "industry", label: "Industry Shifts" },
+  { key: "companies", label: "Target Companies" },
+];
+
+const STORAGE_KEY = "aetheris_forecast_user_sections_v1";
 
 const formatAge = (h: number | null): string => {
   if (h == null) return "—";
@@ -24,17 +45,19 @@ const SourceLink: React.FC<{ url?: string }> = ({ url }) => {
   let host = url;
   try { host = new URL(url).hostname.replace(/^www\./, ""); } catch { /* noop */ }
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-amber transition-colors"
-    >
-      <Globe className="w-3 h-3" /> {host}
-      <ExternalLink className="w-3 h-3" />
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-amber transition-colors">
+      <Globe className="w-3 h-3" /> {host} <ExternalLink className="w-3 h-3" />
     </a>
   );
 };
+
+function loadUserSections(): Partial<Record<SectionKey, boolean>> {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+}
+function saveUserSections(v: Partial<Record<SectionKey, boolean>>) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch { /* noop */ }
+}
 
 export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal" }) => {
   const { toast } = useToast();
@@ -43,6 +66,19 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const [briefing, setBriefing] = useState<ForecastBriefing | null>(null);
   const [ageHours, setAgeHours] = useState<number | null>(null);
   const [pushing, setPushing] = useState<string | null>(null);
+  const [adminSections, setAdminSections] = useState<ForecastSectionVisibility | null>(null);
+  const [pulseMinutes, setPulseMinutes] = useState<number>(15);
+  const [livePulse, setLivePulse] = useState<ForecastPulse[]>([]);
+  const [userSections, setUserSections] = useState<Partial<Record<SectionKey, boolean>>>(() => loadUserSections());
+
+  const visible = useMemo<ForecastSectionVisibility>(() => {
+    const base = adminSections || { tip: true, education: true, tech: true, industry: true, live_pulse: true, companies: true };
+    const merged: ForecastSectionVisibility = { ...base };
+    for (const k of Object.keys(userSections) as SectionKey[]) {
+      if (typeof userSections[k] === "boolean") merged[k] = (base[k] ?? true) && (userSections[k] as boolean);
+    }
+    return merged;
+  }, [adminSections, userSections]);
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +86,9 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
       const r = await portalForecast.getToday(authMode);
       setBriefing(r.briefing);
       setAgeHours(r.age_hours);
+      if (r.settings?.sections) setAdminSections(r.settings.sections);
+      if (r.settings?.live_pulse_minutes) setPulseMinutes(r.settings.live_pulse_minutes);
+      setLivePulse(r.briefing?.live_pulse || []);
     } catch (e) {
       toast({ title: "Could not load briefing", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
     } finally {
@@ -59,12 +98,33 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
 
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
+  // Live Pulse polling (only if section is visible)
+  useEffect(() => {
+    if (!visible.live_pulse) return;
+    const ms = Math.max(5, pulseMinutes) * 60 * 1000;
+    const tick = async () => {
+      try {
+        const p = await portalForecast.getLivePulse(authMode);
+        setLivePulse(p.live_pulse || []);
+      } catch { /* silent */ }
+    };
+    const id = window.setInterval(tick, ms);
+    return () => window.clearInterval(id);
+  }, [visible.live_pulse, pulseMinutes, authMode]);
+
+  const toggleUserSection = (k: SectionKey) => {
+    const next = { ...userSections, [k]: !(userSections[k] ?? true) };
+    setUserSections(next);
+    saveUserSections(next);
+  };
+
   const handleRegenerate = async () => {
     setRefreshing(true);
     try {
       const r = await portalForecast.regenerate(authMode);
       setBriefing(r.briefing);
       setAgeHours(0);
+      setLivePulse(r.briefing?.live_pulse || []);
       toast({ title: "Briefing regenerated" });
     } catch (e) {
       toast({ title: "Regenerate failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
@@ -77,10 +137,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
     setPushing(c.name);
     try {
       const r = await portalForecast.pushLead(c, authMode);
-      toast({
-        title: r.duplicate ? "Already in pool" : "Pushed to Lead Pool",
-        description: c.name,
-      });
+      toast({ title: r.duplicate ? "Already in pool" : "Pushed to Lead Pool", description: c.name });
     } catch (e) {
       toast({ title: "Push failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
     } finally {
@@ -91,14 +148,9 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-64" />
-          <Skeleton className="h-4 w-40 mt-2" />
-        </CardHeader>
+        <CardHeader><Skeleton className="h-6 w-64" /><Skeleton className="h-4 w-40 mt-2" /></CardHeader>
         <CardContent className="space-y-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-24 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" />
         </CardContent>
       </Card>
     );
@@ -145,27 +197,74 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
               <Activity className="w-5 h-5 text-amber" /> Forecast Center
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              {briefing.briefing_date} · refreshed {formatAge(ageHours)}
+              {briefing.briefing_date} · refreshed {formatAge(ageHours)} · pulse every {pulseMinutes}m
             </p>
           </div>
-          {isPartner && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRegenerate}
-              disabled={refreshing}
-              className="border-amber/40 text-amber hover:bg-amber/10"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-              {refreshing ? "Refreshing…" : "Regenerate"}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10">
+                  <Settings2 className="w-4 h-4 mr-2" /> Customize
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-[0.2em]">My Sections</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {ALL_SECTIONS.map((s) => {
+                  const adminAllowed = adminSections ? adminSections[s.key] : true;
+                  if (!adminAllowed) return null;
+                  const on = userSections[s.key] ?? true;
+                  return (
+                    <DropdownMenuItem
+                      key={s.key}
+                      onSelect={(e) => { e.preventDefault(); toggleUserSection(s.key); }}
+                      className="flex items-center justify-between gap-3 cursor-pointer"
+                    >
+                      <span className="text-xs">{s.label}</span>
+                      <Switch checked={on} className="pointer-events-none" />
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {isPartner && (
+              <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={refreshing}
+                className="border-amber/40 text-amber hover:bg-amber/10">
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+                {refreshing ? "Refreshing…" : "Regenerate"}
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* LIVE PULSE STRIP */}
+        {visible.live_pulse && livePulse.length > 0 && (
+          <section className="rounded-lg border border-amber/30 bg-card/40 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Radio className="w-4 h-4 text-amber animate-pulse" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">Live Pulse</p>
+              <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{livePulse.length}</Badge>
+              <span className="text-[10px] text-muted-foreground ml-auto">auto-refresh {pulseMinutes}m</span>
+            </div>
+            <ul className="space-y-1.5">
+              {livePulse.slice(0, 5).map((p, i) => (
+                <li key={i} className="text-xs flex items-start gap-2">
+                  <span className="font-mono text-amber/60 text-[10px] mt-0.5">{String(i + 1).padStart(2, "0")}</span>
+                  <a href={p.url} target="_blank" rel="noopener noreferrer"
+                    className="text-foreground hover:text-amber line-clamp-2 flex-1">
+                    {p.title}
+                  </a>
+                  {p.source && <span className="text-[10px] font-mono text-muted-foreground">{p.source}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* TIP OF THE DAY */}
-        {briefing.tip?.headline && (
+        {visible.tip && briefing.tip?.headline && (
           <section className="rounded-lg border border-amber/30 bg-amber/5 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb className="w-4 h-4 text-amber" />
@@ -178,8 +277,32 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
           </section>
         )}
 
+        {/* OPERATOR EDUCATION */}
+        {visible.education && (briefing.education?.length ?? 0) > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <GraduationCap className="w-4 h-4 text-amber" />
+              <h3 className="font-display font-semibold">Operator Education — Read Today</h3>
+              <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{briefing.education!.length}</Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {briefing.education!.map((e, i) => (
+                <a key={i} href={e.url} target="_blank" rel="noopener noreferrer"
+                  className="rounded-lg border border-border/50 bg-card/50 p-3 hover:border-amber/40 transition-colors group">
+                  <div className="flex items-center gap-2 mb-1">
+                    {e.kind === "playbook" ? <BookOpen className="w-3.5 h-3.5 text-amber" /> : <FileText className="w-3.5 h-3.5 text-amber" />}
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">{e.kind}</span>
+                  </div>
+                  <p className="font-semibold text-sm text-foreground group-hover:text-amber line-clamp-2">{e.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5"><span className="font-mono text-amber/70">WHY TODAY:</span> {e.why_today}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* TECH TRENDS */}
-        {briefing.tech?.length > 0 && (
+        {visible.tech && briefing.tech?.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Cpu className="w-4 h-4 text-amber" />
@@ -199,7 +322,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         )}
 
         {/* INDUSTRY SHIFTS */}
-        {briefing.industry?.length > 0 && (
+        {visible.industry && briefing.industry?.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-4 h-4 text-amber" />
@@ -222,7 +345,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         )}
 
         {/* TARGET COMPANIES */}
-        {briefing.companies?.length > 0 && (
+        {visible.companies && briefing.companies?.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4 text-amber" />
@@ -240,13 +363,9 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
                       </p>
                     </div>
                     {c.website && (
-                      <a
-                        href={c.website.startsWith("http") ? c.website : `https://${c.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-amber flex-shrink-0"
-                        title="Visit site"
-                      >
+                      <a href={c.website.startsWith("http") ? c.website : `https://${c.website}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-amber flex-shrink-0" title="Visit site">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
@@ -257,13 +376,8 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
                   </div>
                   <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/30 mt-auto">
                     <SourceLink url={c.source_url} />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePush(c)}
-                      disabled={pushing === c.name}
-                      className="border-amber/40 text-amber hover:bg-amber/10 h-7 text-xs"
-                    >
+                    <Button size="sm" variant="outline" onClick={() => handlePush(c)} disabled={pushing === c.name}
+                      className="border-amber/40 text-amber hover:bg-amber/10 h-7 text-xs">
                       <Crosshair className="w-3 h-3 mr-1" />
                       {pushing === c.name ? "Pushing…" : "Push to Pool"}
                     </Button>
