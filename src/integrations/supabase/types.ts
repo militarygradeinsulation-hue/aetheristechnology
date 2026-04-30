@@ -3478,6 +3478,56 @@ export type Database = {
         }
         Relationships: []
       }
+      team_messages: {
+        Row: {
+          attachments: Json
+          author_code: string
+          author_name: string
+          author_role: string
+          body: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          parent_id: string | null
+          pinned: boolean
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          author_code: string
+          author_name: string
+          author_role: string
+          body: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          parent_id?: string | null
+          pinned?: boolean
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          author_code?: string
+          author_name?: string
+          author_role?: string
+          body?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          parent_id?: string | null
+          pinned?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_messages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "team_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           avatar_url: string | null
