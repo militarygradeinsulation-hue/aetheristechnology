@@ -37,7 +37,7 @@ import {
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 
-type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
