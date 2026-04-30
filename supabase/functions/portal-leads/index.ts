@@ -53,14 +53,23 @@ serve(async (req) => {
 
     // ---------- LIST ----------
     if (action === "list") {
-      const view = body.view === "mine" ? "mine" : "pool";
+      const view = body.view === "mine" ? "mine" : body.view === "drip" ? "drip" : "pool";
       let query = supabase.from("rep_leads").select(
-        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at"
+        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at,assigned_to_code,assignment_expires_at"
       );
       if (view === "mine") {
         query = query.eq("claimed_by_code", claims.code).order("updated_at", { ascending: false }).limit(200);
+      } else if (view === "drip") {
+        query = query
+          .eq("assigned_to_code", claims.code)
+          .is("claimed_by_code", null)
+          .gt("assignment_expires_at", new Date().toISOString())
+          .order("score", { ascending: false, nullsFirst: false })
+          .limit(100);
       } else {
-        query = query.is("claimed_by_code", null).order("score", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(200);
+        query = query.is("claimed_by_code", null).is("assigned_to_code", null)
+          .order("score", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false }).limit(200);
         if (body.industry) query = query.ilike("industry", `%${body.industry}%`);
         if (body.location) query = query.ilike("location", `%${body.location}%`);
         if (body.minScore) query = query.gte("score", Number(body.minScore));
@@ -73,7 +82,25 @@ serve(async (req) => {
         .eq("claimed_by_code", claims.code)
         .not("status", "in", "(won,lost,dead)");
 
-      return jsonResp({ ok: true, leads: data || [], activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED });
+      const { count: dripCount } = await supabase.from("rep_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("assigned_to_code", claims.code)
+        .is("claimed_by_code", null)
+        .gt("assignment_expires_at", new Date().toISOString());
+
+      return jsonResp({ ok: true, leads: data || [], activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED, dripCount: dripCount ?? 0 });
+    }
+
+    // ---------- SKIP DRIP ----------
+    if (action === "skip_drip") {
+      const id = sanitizeStr(body.id);
+      if (!id) return jsonResp({ error: "Missing id" }, 400);
+      const { error } = await supabase.from("rep_leads")
+        .update({ assigned_to_code: null, assigned_at: null, assignment_expires_at: null })
+        .eq("id", id).eq("assigned_to_code", claims.code).is("claimed_by_code", null);
+      if (error) throw error;
+      await logActivity(supabase, claims, "lead_skip_drip", { lead_id: id });
+      return jsonResp({ ok: true });
     }
 
     // ---------- CLAIM ----------
@@ -89,11 +116,20 @@ serve(async (req) => {
         return jsonResp({ error: `You already have ${MAX_ACTIVE_CLAIMED} active leads. Close some first.` }, 400);
       }
 
+      // Allow claim if: lead is unclaimed AND (unassigned OR assigned to this rep)
       const { data, error } = await supabase
         .from("rep_leads")
-        .update({ claimed_by_code: claims.code, claimed_at: new Date().toISOString(), status: "new" })
+        .update({
+          claimed_by_code: claims.code,
+          claimed_at: new Date().toISOString(),
+          status: "new",
+          assigned_to_code: null,
+          assigned_at: null,
+          assignment_expires_at: null,
+        })
         .eq("id", id)
         .is("claimed_by_code", null)
+        .or(`assigned_to_code.is.null,assigned_to_code.eq.${claims.code}`)
         .select("id,business_name")
         .maybeSingle();
       if (error) throw error;

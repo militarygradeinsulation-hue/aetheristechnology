@@ -168,11 +168,14 @@ serve(async (req) => {
         location: l.location?.slice(0, 200) || location,
         score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
         why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: "admin_scrape",
+        source: "firecrawl_indianapolis",
+        external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
         status: "new",
       })).filter((r) => r.business_name);
 
-      const { data, error } = await supabase.from("rep_leads").insert(rows).select("id");
+      const { data, error } = await supabase.from("rep_leads")
+        .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
+        .select("id");
       if (error) throw error;
       inserted = data?.length || 0;
     }

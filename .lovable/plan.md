@@ -1,136 +1,140 @@
-# Personal Rep Workspace (Per-Code Persistence)
+## What this does
 
-Turn the Rep & Partner Portal into a personal CRM for each rep. Everything keyed to their 6-digit `code` so it follows them across logins/devices.
+You said "17,000 leads I uploaded" — there's no file in this chat, but the backend already mirrors **194,398 HubSpot contacts** (174,494 with email). That's the source. We'll:
 
-## What you get
+1. Import them into `rep_leads` (the shared pool the reps already see)
+2. Drip-release them to the 11 active reps on a daily cap (you set the number)
+3. Run the Indianapolis scraper on a schedule to keep adding fresh net-new leads
 
-1. **Saved settings** per rep code (defaults that auto-fill every tool).
-2. **Notes area** — free-form scratchpad with multiple notes, search, pin/star, last-edited timestamps.
-3. **History area** — every tool run (Sales Script, Follow-Up Plan, Strategic Questions, Brand Contradictions, Friction Audit, Website Scanner, Business Diagnostic) is auto-saved with title, input, output, and timestamp.
-4. **Search bar** across all history + notes (title, body, tool type, prospect/business name).
-5. Reuses the same View / Copy / Download PDF / Download .txt / Delete actions the admin library has.
+No rep ever sees the full pool dump — they only see what's been released to them that day.
 
 ---
 
-## How it fits the existing portal
-
-New tab in `/portal` between **My Tools** and **AI Coach**:
+## How it works for the rep
 
 ```text
-Overview | Commissions | Leads | My Tools | Workspace | AI Coach | (Company)
-                                            ^^^^^^^^^ NEW
+Rep logs in → Portal → "Leads" tab → "My Queue"
+  ┌─────────────────────────────────────────┐
+  │  TODAY'S DROP (8 new)                   │
+  │  ─────────────────────                  │
+  │  Acme Plumbing — Indianapolis           │
+  │  Score 87 · why fit: 12 employees, ...  │
+  │  [Claim] [Skip]                         │
+  │  ...                                    │
+  └─────────────────────────────────────────┘
+  Active claimed: 14 / 25
 ```
 
-Workspace tab has 3 sub-tabs: **History**, **Notes**, **Settings** — with one global search bar at the top that filters History + Notes simultaneously.
+Each rep gets **N leads/day** (you pick — default 10) auto-assigned to them as a soft hold for 24h. They claim or skip. Skipped ones go back to the pool. Won/lost/dead don't count against their 25-active cap.
 
 ---
 
-## Technical Plan
+## How it works for you (admin)
 
-### 1. Database (one migration, three tables — all service-role only)
+New "**Lead Pipeline**" panel in admin:
 
-```sql
--- Per-rep saved defaults that auto-fill tool forms
-create table public.rep_settings (
-  code text primary key references public.rep_codes(code) on delete cascade,
-  defaults jsonb not null default '{}'::jsonb,  -- { business_type, target_audience, tone, signature, ... }
-  preferences jsonb not null default '{}'::jsonb, -- { theme_density, default_tab, ... }
-  updated_at timestamptz not null default now()
-);
-
--- Free-form notes
-create table public.rep_notes (
-  id uuid primary key default gen_random_uuid(),
-  code text not null references public.rep_codes(code) on delete cascade,
-  title text not null default 'Untitled',
-  body text not null default '',
-  pinned boolean not null default false,
-  tags text[] not null default '{}',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index rep_notes_code_idx on public.rep_notes(code, updated_at desc);
-
--- Auto-saved tool runs (mirror of admin_library, scoped to rep code)
-create table public.rep_library (
-  id uuid primary key default gen_random_uuid(),
-  code text not null references public.rep_codes(code) on delete cascade,
-  tool_type text not null,           -- 'sales_scripts' | 'follow_up_plan' | ...
-  title text not null,
-  input_data jsonb not null default '{}'::jsonb,
-  output_data jsonb not null default '{}'::jsonb,
-  file_url text,
-  lead_id uuid references public.rep_leads(id) on delete set null, -- optional link to a claimed lead
-  created_at timestamptz not null default now()
-);
-create index rep_library_code_idx on public.rep_library(code, created_at desc);
-create index rep_library_search_idx on public.rep_library using gin (to_tsvector('english', title));
-```
-
-All three tables: RLS on, **service-role only**. Reps reach them via the existing portal HMAC token.
-
-### 2. Edge function: `portal-workspace`
-
-Single function (mirrors `portal-leads` pattern), gated by `x-portal-token`:
-
-| action | does |
-|---|---|
-| `settings_get` / `settings_save` | read/write `rep_settings` for the code |
-| `notes_list` / `notes_upsert` / `notes_delete` | full CRUD on rep_notes |
-| `library_list` (with `q`, `tool_type`, `lead_id` filters) | search + filter |
-| `library_save` | called by tools when generating |
-| `library_delete` | remove an item |
-| `search` | unified search across notes + library, ranked by recency |
-
-### 3. Frontend
-
-- **`src/lib/portalWorkspace.ts`** — wrapper functions identical in shape to `adminLibrary.ts` (`saveToRepLibrary`, `listRepLibrary`, `deleteFromRepLibrary`, `getRepSettings`, `saveRepSettings`, `listRepNotes`, `upsertRepNote`, `deleteRepNote`, `searchWorkspace`).
-- **`src/components/portal/WorkspaceTab.tsx`** — new component with global search input + tabs:
-  - `WorkspaceHistory.tsx` — reuses `LibraryItemRenderer` + the same view/copy/download/PDF/delete row UI from `AdminLibrary.tsx`. Filter chips per tool type. Optional "Linked to lead: X" badge when item has `lead_id`.
-  - `WorkspaceNotes.tsx` — list on the left, editor on the right (title, markdown body, pin toggle, tags). Auto-save on blur. "New note" button.
-  - `WorkspaceSettings.tsx` — form for default business name, industry, tone, signature, default CTA URL, etc. Saved values auto-fill tool inputs.
-- **`src/pages/PortalPage.tsx`** — add `'workspace'` to `Tab` union, render new tab, log `tab_view` activity.
-
-### 4. Auto-save tool outputs to rep library
-
-The 5 generators already call `saveToAdminLibrary` when `adminMode` is true. Add a parallel `staffMode` (or extend the existing prop) so when launched from the portal they call `saveToRepLibrary` instead. One small change per tool component (~3 lines each).
-
-Tools that get history saving:
-- Sales Script Generator
-- Follow-Up Plan Generator
-- Strategic Question Engine
-- Brand Contradiction Finder
-- Friction Vocabulary Audit
-- Website Scanner (saves scan URL + score + summary)
-- Business Diagnostic (saves answers + score)
-
-### 5. Settings auto-fill
-
-When opening any tool from the portal, read `rep_settings.defaults` once and pre-populate matching form fields (business name, industry, tone, sender name, signature). Rep can override per-run; saving from Settings updates the defaults.
-
-### 6. Activity logging
-
-Existing `portal-activity` already tracks tab views. Add events: `note_create`, `note_update`, `library_save`, `settings_save`, `workspace_search` so admin's RepActivityPanel shows engagement depth.
+- **Pool stats**: Total, unassigned, dripped-but-unclaimed, claimed, worked, dead
+- **Drip controls**: Daily-per-rep cap, ICP filter (Indianapolis-only toggle, industries, has-email required, exclude HubSpot lifecycle = customer/opportunity)
+- **One-click "Import HubSpot Contacts"**: Pulls eligible mirror_contacts → rep_leads (idempotent on hubspot_id)
+- **Scraper schedule**: ON/OFF + frequency (daily 6am ET default), Indianapolis SMB ICP
 
 ---
 
-## Files Touched
+## Technical implementation
 
-**New**
-- `supabase/migrations/<ts>_rep_workspace.sql`
-- `supabase/functions/portal-workspace/index.ts`
-- `src/lib/portalWorkspace.ts`
-- `src/components/portal/WorkspaceTab.tsx`
-- `src/components/portal/WorkspaceHistory.tsx`
-- `src/components/portal/WorkspaceNotes.tsx`
-- `src/components/portal/WorkspaceSettings.tsx`
+### 1. Schema additions (migration)
 
-**Edited**
-- `src/pages/PortalPage.tsx` (new tab + wiring + pass `staffMode` to embedded tools)
-- `src/components/SalesScriptGenerator.tsx`, `FollowUpPlanGenerator.tsx`, `StrategicQuestionEngine.tsx`, `BrandContradictionFinder.tsx`, `FrictionVocabularyAudit.tsx`, `WebsiteScanner.tsx`, `BusinessDiagnostic.tsx` (~3 lines each — branch save target)
-- `.lovable/memory/features/rep-partner-portal.md` (document the workspace)
+Add to `rep_leads`:
+- `external_id text` (e.g. `hubspot:12345`) + unique index — prevents dupes on re-import
+- `assigned_to_code text` + `assigned_at timestamptz` + `assignment_expires_at timestamptz` — soft drip hold (24h)
+- `lifecycle_stage text`, `lead_status text` — copied from HubSpot for filtering
 
-## Hard rules carried forward
-- Workspace data is fully isolated per `code`. No rep can see another rep's notes or history.
-- No Supabase Auth required — uses portal HMAC token only.
-- Admin (`/admin`, PIN 9822) is unaffected and keeps its own `admin_library`.
+New table `lead_drip_settings` (singleton):
+- `daily_per_rep int default 10`
+- `enabled boolean default true`
+- `require_email boolean default true`
+- `indianapolis_only boolean default true`
+- `excluded_lifecycle_stages text[] default '{customer,opportunity}'`
+- `scraper_enabled boolean default true`
+- `scraper_frequency text default 'daily'`
+
+### 2. Backfill: HubSpot mirror_contacts → rep_leads
+
+Edge function `admin-import-hubspot-leads` (admin-passcode protected):
+- Reads `mirror_contacts` in batches of 1,000
+- Filters: `email IS NOT NULL`, lifecycle NOT IN excluded list, `last_activity_date < now() - 30d` OR null (avoid stealing active deals)
+- Maps to `rep_leads`:
+  - `business_name` ← properties->>'company'
+  - `contact_name` ← first_name + last_name
+  - `email`, `phone` ← properties->>'phone'
+  - `location` ← properties->>'city/state'
+  - `industry` ← properties->>'industry'
+  - `external_id` ← `'hubspot:' + hubspot_id`
+  - `source` ← `'hubspot_import'`
+  - `score` ← computed (Indianapolis +30, has phone +10, recent activity +20, has company +20)
+- Returns `{ inserted, skipped, total_eligible }`. Run multiple times safely.
+
+### 3. Daily drip job
+
+Edge function `cron-drip-leads`, scheduled via pg_cron at 6am ET daily:
+
+```text
+For each active rep:
+  current_active = rep_leads where claimed_by_code=rep AND status NOT IN (won,lost,dead)
+  if current_active >= 25: skip
+  needed = daily_per_rep - count(assigned to rep with non-expired hold)
+  if needed <= 0: skip
+  pull `needed` unassigned, unclaimed leads, ORDER BY score DESC
+  set assigned_to_code, assignment_expires_at = now()+24h
+```
+
+Plus a sweep step: any `assignment_expires_at < now()` and not claimed → release back to pool.
+
+### 4. Portal updates
+
+`portal-leads` edge function — add view `view: "drip"` returning leads assigned to that rep where hold not expired. Claim action becomes "accept" (clears expiry, sets claimed_by_code).
+
+`LeadsBoard.tsx` — add **"Today's Drop"** sub-tab as default view, badge with count, accept/skip buttons. Existing Pool/Mine tabs stay.
+
+### 5. Scheduled Indianapolis scraping
+
+Wrap existing `admin-scrape-leads` in a daily pg_cron job. ICP locked to:
+- Geography: Indianapolis metro (Marion, Hamilton, Hendricks, Johnson counties)
+- Revenue band: $1M–$50M
+- Industries: services, healthcare, manufacturing, professional services, contractors
+- Target: 50 net-new leads/day
+
+Scraped leads get `source='firecrawl_indianapolis'` and feed the same drip queue.
+
+### 6. Admin UI: `LeadPipelinePanel.tsx`
+
+Replaces the bare-bones scraper panel. Sections:
+- Stats grid (6 cards)
+- Drip settings form (sliders + toggles, saves to `lead_drip_settings`)
+- "Import from HubSpot" button → calls import function, shows progress
+- "Run scraper now" button (manual trigger)
+- Recent activity feed: imports, drips, claims
+
+---
+
+## Files
+
+**New:**
+- `supabase/migrations/<ts>_lead_drip_pipeline.sql`
+- `supabase/functions/admin-import-hubspot-leads/index.ts`
+- `supabase/functions/cron-drip-leads/index.ts`
+- `src/components/admin/LeadPipelinePanel.tsx`
+
+**Edited:**
+- `supabase/functions/portal-leads/index.ts` — add drip view + accept action
+- `supabase/functions/admin-scrape-leads/index.ts` — lock Indianapolis ICP defaults
+- `src/components/portal/LeadsBoard.tsx` — Today's Drop tab
+- `src/pages/AdminDashboard.tsx` — swap LeadScraperPanel for LeadPipelinePanel
+- `src/lib/portalLeads.ts` — drip + accept helpers
+
+---
+
+## Open question (will assume defaults if you don't answer)
+
+- **Daily drop per rep**: defaulting to **10/day**. With 11 reps that's 110/day → the 174K pool lasts ~4 years. If you want faster burn (e.g. 25/day), say so.
+- **Initial seed**: I'll skip the auto-pre-fill on day one. Reps wake up tomorrow morning to their first drop. If you want to seed everyone with 10 immediately on deploy, say so.
