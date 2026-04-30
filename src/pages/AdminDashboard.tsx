@@ -24,6 +24,8 @@ import { VisitorCompaniesPanel } from '@/components/admin/VisitorCompaniesPanel'
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
+import { LeadScraperPanel } from '@/components/admin/LeadScraperPanel';
+import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -569,6 +571,12 @@ const AdminDashboard: React.FC = () => {
 
             {/* Rep Performance */}
             <RepPerformancePanel />
+
+            {/* Lead Scraper → Rep Pool */}
+            <LeadScraperPanel />
+
+            {/* Rep Activity (logins / claims / touches) */}
+            <RepActivityPanel />
           </div>
         )}
 
