@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { hasValidAdminToken, setAdminToken } from '@/lib/adminAuth';
+import { setAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { clearPortalSession } from '@/lib/portalAuth';
 
 const AdminLogin: React.FC = () => {
   const [pin, setPin] = useState('');
@@ -13,10 +14,15 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Synchronous redirect if a valid PIN token already exists.
+  // SECURITY: Always require a fresh PIN on this page. Never auto-redirect
+  // based on a stored token — that would let anyone who can reach this URL
+  // bypass authentication. Also wipe any stale rep/partner session so the
+  // login boundary is clean.
   useEffect(() => {
-    if (hasValidAdminToken()) navigate('/admin', { replace: true });
-  }, [navigate]);
+    clearAdminToken();
+    clearPortalSession();
+    try { supabase.auth.signOut(); } catch { /* noop */ }
+  }, []);
 
   const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

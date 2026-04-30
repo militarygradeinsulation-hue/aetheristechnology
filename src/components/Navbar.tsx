@@ -24,7 +24,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     if (tapCountRef.current >= 3) {
       e.preventDefault();
       tapCountRef.current = 0;
-      navigate('/admin/login');
+      // Land on the staff entry chooser. It clears any stored token and
+      // forces an explicit code entry — no silent re-auth.
+      navigate('/staff');
       return;
     }
     tapTimerRef.current = setTimeout(() => {

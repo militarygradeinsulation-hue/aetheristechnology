@@ -24,6 +24,7 @@ const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
 const ScanPage = lazy(() => import("./pages/ScanPage"));
@@ -79,6 +80,7 @@ const App = () => (
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
+            <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* Revenue Recovery Engine — isolated SaaS area */}
