@@ -1,21 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
 
-type SubTab = 'drip' | 'pool' | 'mine' | 'upload';
+type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
 const STATUSES: LeadStatus[] = ['new','outreach','touched','replied','meeting','won','lost','dead'];
+
+const INDUSTRY_PRESETS = [
+  'Roofing', 'HVAC', 'Dental', 'Med Spa', 'Law Firms', 'Accounting',
+  'Real Estate Brokerages', 'Auto Dealers', 'Home Services', 'Manufacturing',
+  'SaaS', 'Marketing Agencies',
+];
 
 const SAMPLE_CSV = `business_name,contact_name,email,phone,website,industry,location,notes
 Acme Roofing,Jane Smith,jane@acme.com,317-555-0100,https://acme.com,Roofing,Indianapolis IN,Met at chamber event
