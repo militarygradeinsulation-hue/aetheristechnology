@@ -7,7 +7,7 @@ import { Lock, Copy, Check, Globe, AlertTriangle, Shield, X, ArrowRight } from '
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
@@ -49,7 +49,7 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
       if (adminMode) {
-        saveToAdminLibrary({
+        saveToolRun({
           tool_type: 'brand_contradictions',
           title: `${form.url} — Brand audit — ${new Date().toLocaleDateString()}`,
           input_data: form,

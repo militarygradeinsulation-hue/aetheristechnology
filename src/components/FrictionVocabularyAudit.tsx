@@ -6,7 +6,7 @@ import { Lock, Copy, Check, Globe, FileText, ArrowRight, X } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 const PHASES = [
   { label: 'Scraping your website copy...', target: 15 },
@@ -46,7 +46,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       setProgress(100); setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
       if (adminMode) {
-        saveToAdminLibrary({
+        saveToolRun({
           tool_type: 'friction_audit',
           title: `${form.url} — Friction audit — ${new Date().toLocaleDateString()}`,
           input_data: form,

@@ -7,7 +7,7 @@ import { Lock, Copy, Check, Mail, Phone, MessageSquare, Linkedin, X } from 'luci
 import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 const PHASES = [
   { label: 'Analyzing your sales cycle...', target: 25 },
@@ -63,7 +63,7 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
       if (adminMode) {
-        saveToAdminLibrary({
+        saveToolRun({
           tool_type: 'follow_up_plan',
           title: `${form.businessType} — Follow-up — ${new Date().toLocaleDateString()}`,
           input_data: form,
