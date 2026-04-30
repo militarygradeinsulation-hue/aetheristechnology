@@ -810,6 +810,9 @@ const AdminDashboard: React.FC = () => {
         {/* Rep Playbook (schedule, plays library, quotas, idea of day) */}
         {activeTab === 'playbook' && <RepPlaybookPanel />}
 
+        {/* Team Messages (admin can edit/delete/pin) */}
+        {activeTab === 'team' && <TeamMessageBoard isAdmin authorName="Admin" />}
+
         {/* SEO Auto-Optimizer */}
         {activeTab === 'seo' && <SEOOptimizer />}
 
