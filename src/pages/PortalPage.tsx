@@ -11,6 +11,8 @@ import {
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat,
 } from 'lucide-react';
 import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
+import { FileText, Search } from 'lucide-react';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import {
@@ -286,27 +288,83 @@ const PortalPage: React.FC = () => {
 
         {/* COMPANY (partner only) */}
         {tab === 'company' && isPartner && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-display flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-amber" /> Company Portal
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Ask the AI coach for live company stats — total reps, recent leads, contact submissions, sales totals. Switch to the <button className="text-amber underline" onClick={() => setTab('coach')}>Sales Coach tab</button> and try:
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Give me a company summary"</li>
-                <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "List all reps and their numbers"</li>
-                <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Show recent leads from the last 30 days"</li>
-                <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "What contact submissions came in this week?"</li>
-              </ul>
-              <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border/30">
-                Read-only. No admin actions, no settings, no sensitive systems. For full admin access, use the separate /admin login.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-display flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-amber" /> Company Portal
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Ask the AI coach for live company stats — total reps, recent leads, contact submissions, sales totals. Switch to the <button className="text-amber underline" onClick={() => setTab('coach')}>Sales Coach tab</button> and try:
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Give me a company summary"</li>
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "List all reps and their numbers"</li>
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Show recent leads from the last 30 days"</li>
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "What contact submissions came in this week?"</li>
+                </ul>
+                <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border/30">
+                  Read-only. No admin actions, no settings, no sensitive systems. For full admin access, use the separate /admin login.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Revenue Forensics — Sales Breakdown */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Search className="w-5 h-5 text-amber" />
+                  <CardTitle className="font-display">Revenue Forensics — How Reps Sell The Leak Audit</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This is the visual breakdown reps should walk prospects through. Frame their CRM as a "crime scene," show the 7 leak detectors, present the dollar-figure diagnosis, then close on the Hygiene Queue + Recovery Protocol.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="rounded-lg overflow-hidden border border-border/50 bg-card/50">
+                  <img
+                    src={revenueForensicsBreakdown}
+                    alt="Revenue Forensics: Investigating the HubSpot Crime Scene — full sales breakdown"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-5 gap-3 text-xs">
+                  {[
+                    { step: '1', label: 'The Problem', detail: 'Revenue under attack — invisible leaks' },
+                    { step: '2', label: 'Detection', detail: '7 forensic leak detectors' },
+                    { step: '3', label: 'Diagnosis', detail: 'Dollar figure of risk + record counts' },
+                    { step: '4', label: 'Correction', detail: 'Hygiene Queue with audit trail' },
+                    { step: '5', label: 'Outcome', detail: 'Stop bleeding, recover revenue' },
+                  ].map((s) => (
+                    <div key={s.step} className="rounded-lg border border-border/50 bg-card/30 p-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">Step {s.step}</p>
+                      <p className="font-semibold text-foreground mt-1">{s.label}</p>
+                      <p className="text-muted-foreground mt-1">{s.detail}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <FileText className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground">HubSpot Revenue Recovery Protocol</p>
+                      <p className="text-sm text-muted-foreground">Full PDF breakdown of what the Leak Audit does and how to position it. Send to qualified prospects after the discovery call.</p>
+                    </div>
+                  </div>
+                  <Button asChild className="bg-amber text-background hover:bg-amber/90 flex-shrink-0">
+                    <a href="/docs/HubSpot_Revenue_Recovery_Protocol.pdf" target="_blank" rel="noopener noreferrer">
+                      Open Protocol PDF
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </main>
     </div>
