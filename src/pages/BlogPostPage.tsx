@@ -341,7 +341,7 @@ const BlogPostPage = () => {
                       📧 aetheris.technology@outlook.com
                     </a>
                     <a 
-                      href="https://www.linkedin.com/in/aisystemsarchitect" 
+                      href="https://www.linkedin.com/in/thejosephtoney" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="hover:text-amber transition-colors"

@@ -36,7 +36,7 @@ export const FloatingContact: React.FC = () => {
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">Email Us</span>
             </a>
             <a
-              href="https://www.linkedin.com/in/aisystemsarchitect"
+              href="https://www.linkedin.com/in/thejosephtoney"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 glass px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
@@ -114,7 +114,7 @@ const StickyContactBar: React.FC = () => {
           <Mail className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">Email</span>
         </a>
-        <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
+        <a href="https://www.linkedin.com/in/thejosephtoney" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
           <Linkedin className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">LinkedIn</span>
         </a>

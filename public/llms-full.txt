@@ -156,7 +156,7 @@ Vertical landing pages live at `https://aetheris.technology/industries/<vertical
 
 Joseph Toney is the Business Forensics Operator behind Aetheris. He runs the audits personally — not a junior, not an account manager. He has built and rebuilt operational systems across SaaS, services, and B2B for over a decade. The forensic posture comes from the fact that almost every business he's audited had revenue leaks the owner hadn't seen.
 
-LinkedIn: https://www.linkedin.com/in/aisystemsarchitect
+LinkedIn: https://www.linkedin.com/in/thejosephtoney
 About page: https://aetheris.technology/about
 
 ---

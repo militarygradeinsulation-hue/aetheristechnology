@@ -170,7 +170,7 @@ export const BlogList: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </a>
             <a
-              href="https://www.linkedin.com/in/aisystemsarchitect"
+              href="https://www.linkedin.com/in/thejosephtoney"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 text-amber hover:text-amber/80"

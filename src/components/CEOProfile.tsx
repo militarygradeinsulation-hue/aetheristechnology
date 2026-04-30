@@ -80,7 +80,7 @@ export const CEOProfile: React.FC = () => {
                     >
                       <a
                         className="badge-base__link LI-simple-link"
-                        href="https://www.linkedin.com/in/aisystemsarchitect?trk=profile-badge"
+                        href="https://www.linkedin.com/in/thejosephtoney?trk=profile-badge"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

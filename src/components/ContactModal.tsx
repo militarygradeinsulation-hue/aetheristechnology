@@ -56,7 +56,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             </div>
           </a>
 
-          <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('linkedin_click', { location: 'contact_modal' })}>
+          <a href="https://www.linkedin.com/in/thejosephtoney" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('linkedin_click', { location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Linkedin className="w-6 h-6 text-amber" />
             </div>

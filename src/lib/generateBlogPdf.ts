@@ -265,7 +265,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
   const contactItems = [
     { icon: '📧', text: 'aetheris.technology@outlook.com' },
     { icon: '📞', text: '(317) 376-2110' },
-    { icon: '🔗', text: 'linkedin.com/in/aisystemsarchitect' },
+    { icon: '🔗', text: 'linkedin.com/in/thejosephtoney' },
   ];
   
   pdf.setFontSize(12);

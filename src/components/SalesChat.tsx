@@ -45,7 +45,7 @@ const parseSuggestions = (text: string): { clean: string; suggestions?: string[]
 const CONTACT_LINKS = [
   { href: 'tel:+13173762110', icon: Phone, label: 'Call', eventLabel: 'phone' },
   { href: 'mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business', icon: Mail, label: 'Email', eventLabel: 'email' },
-  { href: 'https://www.linkedin.com/in/aisystemsarchitect', icon: Linkedin, label: 'LinkedIn', eventLabel: 'linkedin', external: true },
+  { href: 'https://www.linkedin.com/in/thejosephtoney', icon: Linkedin, label: 'LinkedIn', eventLabel: 'linkedin', external: true },
   { href: BOOK_MEETING_URL, icon: Calendar, label: 'Book', eventLabel: 'book_meeting', external: true, highlight: true },
 ];
 
@@ -395,7 +395,7 @@ const StickyContactBar: React.FC = () => {
           <Mail className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">Email</span>
         </a>
-        <a href="https://www.linkedin.com/in/aisystemsarchitect" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
+        <a href="https://www.linkedin.com/in/thejosephtoney" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
           <Linkedin className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">LinkedIn</span>
         </a>
