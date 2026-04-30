@@ -20,6 +20,7 @@ import contentCalendarThumb from '@/assets/packages/content-calendar.png';
 import strategyBlueprintThumb from '@/assets/packages/strategy-blueprint.png';
 import socialContentPackThumb from '@/assets/packages/social-content-pack.png';
 import digitalSnapshotThumb from '@/assets/packages/digital-snapshot.png';
+import fullWebsiteReportThumb from '@/assets/packages/full-website-report.png';
 
 interface ServiceTile {
   icon: React.ElementType;
@@ -45,7 +46,7 @@ interface ServiceTile {
 
 const services: ServiceTile[] = [
   {
-    icon: Search, title: 'Full Website Report', pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
+    icon: Search, title: 'Full Website Report', thumbnail: fullWebsiteReportThumb, pricing: '$59', priceRaw: 5900, pricingDetail: 'one-time', priceId: 'scan_full_report_once', bundleable: true,
     monthlyPriceId: 'scan_full_report_monthly', monthlyPricing: '$39/mo', monthlyPriceRaw: 3900, monthlySavePercent: 34,
     description: 'Complete AI diagnostic — all gaps, revenue leaks, ROI projections.',
     successStat: '91% of businesses found at least 3 fixable revenue leaks',
