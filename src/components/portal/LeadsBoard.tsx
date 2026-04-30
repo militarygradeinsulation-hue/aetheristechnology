@@ -1,21 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
 
-type SubTab = 'drip' | 'pool' | 'mine' | 'upload';
+type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
 const STATUSES: LeadStatus[] = ['new','outreach','touched','replied','meeting','won','lost','dead'];
+
+const INDUSTRY_PRESETS = [
+  'Roofing', 'HVAC', 'Dental', 'Med Spa', 'Law Firms', 'Accounting',
+  'Real Estate Brokerages', 'Auto Dealers', 'Home Services', 'Manufacturing',
+  'SaaS', 'Marketing Agencies',
+];
 
 const SAMPLE_CSV = `business_name,contact_name,email,phone,website,industry,location,notes
 Acme Roofing,Jane Smith,jane@acme.com,317-555-0100,https://acme.com,Roofing,Indianapolis IN,Met at chamber event
@@ -115,6 +124,7 @@ export const LeadsBoard: React.FC = () => {
         {([
           { id: 'drip', label: `Today's Drop${dripCount ? ` (${dripCount})` : ''}`, icon: Zap },
           { id: 'pool', label: 'Lead Pool', icon: Inbox },
+          { id: 'hunt', label: 'Hunt', icon: Crosshair },
           { id: 'mine', label: `My Leads (${activeCount}/${maxActive})`, icon: ListChecks },
           { id: 'upload', label: 'Upload / Download', icon: UploadIcon },
         ] as const).map(t => (
@@ -291,9 +301,133 @@ export const LeadsBoard: React.FC = () => {
         </Card>
       )}
 
+      {/* HUNT — AI scraper */}
+      {sub === 'hunt' && (
+        <HuntPanel onScraped={(toMine) => {
+          if (toMine) { setSub('drip'); refreshDrip(); }
+          else { setSub('pool'); refreshPool(); }
+        }} />
+      )}
+
       {/* UPLOAD/DOWNLOAD */}
       {sub === 'upload' && <UploadDownloadPanel onUploaded={() => { setSub('mine'); refreshMine(); }} />}
     </div>
+  );
+};
+
+// ============================================================
+const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScraped }) => {
+  const { toast } = useToast();
+  const [industry, setIndustry] = useState('');
+  const [location, setLocation] = useState('Indianapolis, Indiana');
+  const [count, setCount] = useState(10);
+  const [assignToMe, setAssignToMe] = useState(true);
+  const [running, setRunning] = useState(false);
+
+  const run = async () => {
+    setRunning(true);
+    try {
+      const token = getPortalToken();
+      if (!token) throw new Error('Portal session expired — sign in again.');
+      const { data, error } = await supabase.functions.invoke('portal-scrape-leads', {
+        body: { industry, location, count, assign_to_me: assignToMe },
+        headers: { 'x-portal-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const inserted = (data as any)?.inserted || 0;
+      toast({
+        title: inserted > 0 ? `Scraped ${inserted} new leads` : 'No new leads found',
+        description: inserted > 0
+          ? (assignToMe ? "Dropped into your Today's Drop." : 'Pushed to the shared pool.')
+          : 'Try a different industry, broader location, or run again.',
+      });
+      if (inserted > 0) onScraped(assignToMe);
+    } catch (e) {
+      toast({ title: 'Scrape failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display flex items-center gap-2">
+          <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode — AI Web Scraper
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Label className="text-xs text-muted-foreground">Quick industries</Label>
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {INDUSTRY_PRESETS.map(p => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setIndustry(p)}
+                className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                  industry === p
+                    ? 'bg-amber text-background border-amber'
+                    : 'border-border/50 text-muted-foreground hover:border-amber/40 hover:text-amber'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div>
+            <Label className="text-xs">Industry (optional)</Label>
+            <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+          </div>
+          <div>
+            <Label className="text-xs">Location</Label>
+            <Input value={location} onChange={e => setLocation(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">Count (3–25)</Label>
+            <Input type="number" min={3} max={25} value={count}
+              onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAssignToMe(true)}
+            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+              assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Drop into my queue
+          </button>
+          <button
+            type="button"
+            onClick={() => setAssignToMe(false)}
+            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+              !assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Push to shared pool
+          </button>
+        </div>
+
+        <Button onClick={run} disabled={running} className="bg-amber text-background hover:bg-amber/90">
+          {running
+            ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping & scoring...</>
+            : <><Crosshair className="w-4 h-4 mr-1" /> Run scrape</>
+          }
+        </Button>
+
+        <p className="text-xs text-muted-foreground italic">
+          Tip: leave industry blank for a broad sweep of HubSpot/Salesforce-using SMBs in your location.
+        </p>
+      </CardContent>
+    </Card>
   );
 };
 

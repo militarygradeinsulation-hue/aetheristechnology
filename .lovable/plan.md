@@ -1,32 +1,43 @@
-## Add Delete for Contact Form Submissions
+## Add Web Scraper to Rep Portal (with Industry Preset Buttons)
 
-Currently the admin Submissions tab only allows toggling read/unread. Add a delete action so leads can be removed from the list.
+Mirror the admin lead scraper into the rep portal so reps can hunt their own ICP-fit prospects on demand. Scraped leads land directly in the rep's "Today's Drop" workflow (24h soft hold, just like the admin drip), with the option to push to the shared pool instead.
 
-### Changes
+### 1. New edge function: `supabase/functions/portal-scrape-leads/index.ts`
 
-**1. `supabase/functions/admin-data/index.ts`**
-Add a new `delete_submission` action alongside the existing `toggle_read`:
-```ts
-if (action === "delete_submission") {
-  const { id } = body;
-  if (!id) return 400;
-  const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
-  if (error) throw error;
-  return { success: true };
-}
+Same Firecrawl + Lovable AI pipeline as `admin-scrape-leads`, but:
+- Auth via `verifyPortalToken` + `x-portal-token` (not admin token).
+- Smaller cap: `count` clamped to 3–25 (admins can do 5–50).
+- Default behavior: assigns the inserted leads to the rep's own `code` with `assignment_expires_at = now + 24h` (so they appear in **Today's Drop**).
+- Optional `assign_to_me: false` body flag pushes to the shared pool instead.
+- `source` field stamped as `rep_scrape:<rep_code>` for audit clarity.
+- Logs a `scrape_leads` event to `rep_activity` with `{industry, location, count, inserted}`.
+- Reuses existing `external_id` upsert dedup so reps can't double-claim the same business.
+
+### 2. Update `src/components/portal/LeadsBoard.tsx`
+
+Add a new sub-tab **"Hunt"** (Search icon) between "Lead Pool" and "My Leads":
+
 ```
-PIN-token auth is already enforced by the function, so no extra auth work needed.
+[ Today's Drop ] [ Lead Pool ] [ Hunt ] [ My Leads ] [ Upload / Download ]
+```
 
-**2. `src/pages/AdminDashboard.tsx`**
-- Import `Trash2` from lucide-react.
-- Add a `deleteSubmission(id)` handler next to `toggleRead` (line 212) that:
-  - Shows a `confirm("Delete this submission? This cannot be undone.")`.
-  - Calls `supabase.functions.invoke('admin-data', { body: { action: 'delete_submission', id }, headers: { 'x-admin-token': token } })`.
-  - On success, removes it from local `submissions` state and shows a toast.
-  - On failure, shows an error toast.
-- In the submissions card (line 606), add a second ghost icon button with a red `Trash2` next to the existing eye toggle.
+The Hunt panel contains:
+- **Premade industry buttons** (chip row, click to set the input):
+  - Roofing, HVAC, Dental, Med Spa, Law Firms, Accounting, Real Estate Brokerages, Auto Dealers, Home Services, Manufacturing, SaaS, Marketing Agencies
+- **Industry input** (free-text, prefilled when a chip is clicked)
+- **Location input** (defaults to `Indianapolis, Indiana`)
+- **Count input** (3–25, default 10)
+- **Toggle**: "Drop into my queue" (default ON) vs "Push to shared pool"
+- **"Run scrape" button** → calls `portal-scrape-leads` via `supabase.functions.invoke` with `x-portal-token` header
+- After success: toast `"Scraped N leads → Today's Drop"`, auto-switch to `drip` sub-tab and refresh
+
+Reuses existing `getPortalToken()` from `@/lib/portalAuth` (already imported pattern is in `portalLeads.ts`).
+
+### 3. Wire into existing types
+
+No DB migration needed — `rep_leads` already has `assigned_to_code`, `assignment_expires_at`, `source`, and `external_id` from prior work. The `rep_activity` table already exists.
 
 ### Out of scope
-- No schema migration (just a delete on existing `contact_submissions` rows).
-- No bulk-delete or undo (can be added later if needed).
-- CRM/contact mirroring is not touched — only the raw form submission row is removed.
+- No new tables / RLS changes.
+- No quota system on rep scrapes for now (we can add a daily cap later if reps abuse it).
+- Admin scraper unchanged.
