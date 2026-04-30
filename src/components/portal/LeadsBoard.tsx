@@ -245,7 +245,7 @@ export const LeadsBoard: React.FC = () => {
                     )}
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{l.source.replace('_',' ')}</span>
-                      <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => handleClaim(l)}>
+                      <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => handleClaim(l, 'pool')}>
                         Claim
                       </Button>
                     </div>
