@@ -22,6 +22,7 @@ import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 import { RetargetingPanel } from '@/components/admin/RetargetingPanel';
 import { VisitorCompaniesPanel } from '@/components/admin/VisitorCompaniesPanel';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { AdminAssistant } from '@/components/admin/AdminAssistant';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -956,6 +957,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
+      <AdminAssistant />
     </div>
   );
 };
