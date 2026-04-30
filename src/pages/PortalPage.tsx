@@ -272,37 +272,77 @@ const PortalPage: React.FC = () => {
         {tab === 'commissions' && <CommissionStructurePanel />}
 
         {/* MY TOOLS */}
-        {tab === 'tools' && (
+        {tab === 'tools' && !activeTool && (
           <Card>
             <CardHeader>
               <CardTitle className="font-display">Sales Tools</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Use these on prospect calls or send the public links as lead magnets. Anything they buy with your code at checkout is your commission.
+                Click any tool to use it free, right here inside the portal — no paywalls. The public link is also shown if you want to send it as a lead magnet (your code stays attached at checkout).
               </p>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3">
                 {REP_TOOLS.map((t) => (
-                  <Link
-                    key={t.href}
-                    to={t.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
+                    key={t.key}
                     className="rounded-lg border border-border/50 bg-card/50 p-4 hover:border-amber/50 hover:bg-amber/5 transition-colors group"
                   >
-                    <div className="flex items-start gap-2">
-                      <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
-                        <p className="text-xs font-mono text-amber/70 mt-2 truncate">{t.href}</p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTool(t.key)}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-start gap-2">
+                        <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
+                        </div>
                       </div>
+                    </button>
+                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
+                      <a
+                        href={t.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Public page <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {tab === 'tools' && activeTool && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTool(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools
+              </Button>
+              <a
+                href={REP_TOOLS.find(t => t.key === activeTool)?.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1"
+              >
+                Open public page <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">
+              {renderEmbeddedTool(activeTool, () => {})}
+            </div>
+          </div>
         )}
 
         {/* AI COACH (embedded) */}
