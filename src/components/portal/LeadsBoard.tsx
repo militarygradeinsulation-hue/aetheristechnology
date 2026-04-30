@@ -124,6 +124,7 @@ export const LeadsBoard: React.FC = () => {
         {([
           { id: 'drip', label: `Today's Drop${dripCount ? ` (${dripCount})` : ''}`, icon: Zap },
           { id: 'pool', label: 'Lead Pool', icon: Inbox },
+          { id: 'hunt', label: 'Hunt', icon: Crosshair },
           { id: 'mine', label: `My Leads (${activeCount}/${maxActive})`, icon: ListChecks },
           { id: 'upload', label: 'Upload / Download', icon: UploadIcon },
         ] as const).map(t => (
