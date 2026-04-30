@@ -1461,6 +1461,42 @@ export type Database = {
         }
         Relationships: []
       }
+      forecast_briefings: {
+        Row: {
+          briefing_date: string
+          companies: Json
+          generated_at: string
+          id: string
+          industry: Json
+          model: string | null
+          sources: Json
+          tech: Json
+          tip: Json
+        }
+        Insert: {
+          briefing_date: string
+          companies?: Json
+          generated_at?: string
+          id?: string
+          industry?: Json
+          model?: string | null
+          sources?: Json
+          tech?: Json
+          tip?: Json
+        }
+        Update: {
+          briefing_date?: string
+          companies?: Json
+          generated_at?: string
+          id?: string
+          industry?: Json
+          model?: string | null
+          sources?: Json
+          tech?: Json
+          tip?: Json
+        }
+        Relationships: []
+      }
       generated_playbooks: {
         Row: {
           created_at: string
