@@ -311,76 +311,112 @@ export const ServicesPricing: React.FC = () => {
         >
           {services.map((service, index) => {
             const isSelected = selectedIds.has(index);
+            const hasThumb = !!service.thumbnail;
             return (
               <RevealOnScroll key={service.title} delay={0.03 + index * 0.04}>
                 <div
                   onClick={() => setExpandedIdx(index)}
-                  className={`glass glass-shine shimmer-border hover-lift rounded-xl p-6 flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 ${
+                  className={`glass glass-shine shimmer-border hover-lift rounded-xl flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 overflow-hidden ${
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
-                  }`}
+                  } ${hasThumb ? 'p-0' : 'p-6'}`}
                 >
                   {service.badge && (
                     <span
-                      className={`absolute -top-2 right-4 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
+                      className={`absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
                         service.badge === 'FOUNDATIONAL'
-                          ? 'bg-amber/[0.08] text-amber border-amber/40'
-                          : 'bg-primary/20 text-primary border-primary/30'
+                          ? 'bg-amber/[0.08] text-amber border-amber/40 backdrop-blur-md bg-background/70'
+                          : 'bg-primary/20 text-primary border-primary/30 backdrop-blur-md'
                       }`}
                     >
                       {service.badge === 'FOUNDATIONAL' ? 'Foundational Engagement' : service.badge}
                     </span>
                   )}
 
-                  {/* Icon + Title */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-                      <service.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
-                  </div>
+                  {hasThumb ? (
+                    <>
+                      {/* Hero infographic — already contains title, price, icon, stats */}
+                      <div className="relative w-full bg-white">
+                        <img
+                          src={service.thumbnail}
+                          alt={service.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-auto object-contain block"
+                        />
+                      </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
+                      {/* Footer hint + bundle checkbox */}
+                      <div className="flex items-center justify-between px-5 py-3.5 border-t border-border/40 mt-auto">
+                        <span className="text-xs text-primary font-semibold">Click for details →</span>
+                        {service.bundleable && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
+                            className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-border hover:border-primary/60'
+                            }`}
+                            title="Add to bundle"
+                          >
+                            {isSelected && <Check className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Icon + Title */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                          <service.icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
+                      </div>
 
-                  {/* Success Stat */}
-                  <div className="flex items-start gap-2 mb-4 bg-amber/[0.06] border border-amber/25 rounded-md px-3 py-2.5">
-                    <Percent className="w-3.5 h-3.5 text-amber flex-shrink-0 mt-0.5" />
-                    <span className="text-xs text-foreground/85 font-medium leading-snug tracking-[0.01em]">{service.successStat}</span>
-                  </div>
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2 mb-4">
-                    {billingMode === 'monthly' && service.monthlyPriceId ? (
-                      <>
-                        <span className="text-2xl font-bold text-gradient-amber font-display">{service.monthlyPricing}</span>
-                        <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
-                        <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-2xl font-bold text-primary font-display">{service.pricing}</span>
-                        <span className="text-xs text-muted-foreground">{service.pricingDetail}</span>
-                      </>
-                    )}
-                  </div>
+                      {/* Success Stat */}
+                      <div className="flex items-start gap-2 mb-4 bg-amber/[0.06] border border-amber/25 rounded-md px-3 py-2.5">
+                        <Percent className="w-3.5 h-3.5 text-amber flex-shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground/85 font-medium leading-snug tracking-[0.01em]">{service.successStat}</span>
+                      </div>
 
-                  {/* Footer hint + bundle checkbox */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                    <span className="text-xs text-primary font-semibold">Click for details →</span>
-                    {service.bundleable && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
-                        className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
-                          isSelected
-                            ? 'bg-primary border-primary text-primary-foreground'
-                            : 'border-border hover:border-primary/60'
-                        }`}
-                        title="Add to bundle"
-                      >
-                        {isSelected && <Check className="w-4 h-4" />}
-                      </button>
-                    )}
-                  </div>
+                      {/* Price */}
+                      <div className="flex items-baseline gap-2 mb-4">
+                        {billingMode === 'monthly' && service.monthlyPriceId ? (
+                          <>
+                            <span className="text-2xl font-bold text-gradient-amber font-display">{service.monthlyPricing}</span>
+                            <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
+                            <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-2xl font-bold text-primary font-display">{service.pricing}</span>
+                            <span className="text-xs text-muted-foreground">{service.pricingDetail}</span>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Footer hint + bundle checkbox */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                        <span className="text-xs text-primary font-semibold">Click for details →</span>
+                        {service.bundleable && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
+                            className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-border hover:border-primary/60'
+                            }`}
+                            title="Add to bundle"
+                          >
+                            {isSelected && <Check className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </RevealOnScroll>
             );
