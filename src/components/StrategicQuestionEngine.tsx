@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { isPortalSession } from '@/lib/portalWorkspace';
 
 const PHASES = [
   { label: 'Analyzing your business profile...', target: 20 },
