@@ -38,7 +38,7 @@ import {
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
-import { toast } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
 
 type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
@@ -196,7 +196,7 @@ const PortalPage: React.FC = () => {
   // Toast pop when a new chat arrives while not viewing chat
   useEffect(() => {
     if (unreadChat > 0 && tab !== 'team') {
-      toast(`${unreadChat} new team message${unreadChat === 1 ? '' : 's'}`, {
+      sonnerToast(`${unreadChat} new team message${unreadChat === 1 ? '' : 's'}`, {
         description: 'Open the Team Chat tab to read.',
         action: { label: 'View', onClick: () => setTab('team') },
       });
