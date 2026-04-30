@@ -2,8 +2,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CrmShell } from "./CrmShell";
+import { AdminCrmRepView } from "./AdminCrmRepView";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { loadAdminDataset, EMPTY_DATASET, type CrmDataset } from "@/lib/crm";
-import { Database } from "lucide-react";
+import { Database, Users } from "lucide-react";
 
 export const AdminCrm: React.FC = () => {
   const { toast } = useToast();
@@ -51,7 +53,18 @@ export const AdminCrm: React.FC = () => {
         </div>
       )}
 
-      <CrmShell dataset={dataset} loading={loading} onMutate={fetchAll} />
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList>
+          <TabsTrigger value="all"><Database className="w-4 h-4 mr-1" />All Records</TabsTrigger>
+          <TabsTrigger value="reps"><Users className="w-4 h-4 mr-1" />By Rep</TabsTrigger>
+        </TabsList>
+        <TabsContent value="all" className="mt-4">
+          <CrmShell dataset={dataset} loading={loading} onMutate={fetchAll} />
+        </TabsContent>
+        <TabsContent value="reps" className="mt-4">
+          <AdminCrmRepView />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
