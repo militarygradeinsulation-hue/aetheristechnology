@@ -413,6 +413,7 @@ const PortalPage: React.FC = () => {
         {/* COMPANY (partner only) */}
         {tab === 'company' && isPartner && (
           <div className="space-y-6">
+            <ManageRepsPanel scope="partner" />
             <ForecastCenter isPartner={isPartner} />
             <Card>
               <CardHeader>
