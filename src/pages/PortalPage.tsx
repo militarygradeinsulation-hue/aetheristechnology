@@ -32,6 +32,7 @@ import {
   getPortalProfile, setPortalSession, clearPortalSession,
   hasValidPortalSession, type PortalProfile,
 } from '@/lib/portalAuth';
+import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 
 type Tab = 'overview' | 'commissions' | 'leads' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
@@ -70,6 +71,34 @@ const PortalPage: React.FC = () => {
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+
+  // Admin preview mode: if launched from the admin dashboard with ?adminPreview=1
+  // and a valid admin token, mint a synthetic profile so admins can browse the
+  // exact portal UX without a rep code.
+  useEffect(() => {
+    if (profile) return;
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('adminPreview') !== '1') return;
+    if (!hasValidAdminToken()) return;
+    const role: 'partner' | 'rep' = params.get('role') === 'rep' ? 'rep' : 'partner';
+    const adminToken = getAdminToken() || '';
+    // Reuse the admin token as a portal token surrogate so localStorage reads
+    // still return something; backend endpoints that require a real portal
+    // token will fall back to admin-token auth where supported.
+    const syntheticToken = `${Date.now() + 1000 * 60 * 60}.${adminToken}`;
+    const syntheticProfile: PortalProfile = {
+      code: 'ADMIN',
+      rep_name: 'Admin Preview',
+      rep_email: null,
+      commission_rate: 0.25,
+      total_sales_cents: 0,
+      total_commission_cents: 0,
+      role,
+    };
+    setPortalSession(syntheticToken, syntheticProfile);
+    setProfile(syntheticProfile);
+  }, [profile]);
 
   useEffect(() => {
     if (hasValidPortalSession() && !profile) setProfile(getPortalProfile());
