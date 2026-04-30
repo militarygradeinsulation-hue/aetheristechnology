@@ -127,7 +127,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
-    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,900', priceRaw: 290000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
+    icon: Eye, title: '14-Day Diagnostic', thumbnail: fourteenDayDiagnosticThumb, pricing: '$2,900', priceRaw: 290000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
     monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,990/mo', monthlyPriceRaw: 199000, monthlySavePercent: 31,
     description: 'The deep operational breakdown that precedes any custom build.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
@@ -146,7 +146,7 @@ const services: ServiceTile[] = [
     includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
   },
   {
-    icon: Brain, title: 'Strategic Question Engine', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: Brain, title: 'Strategic Question Engine', thumbnail: strategicQuestionEngineThumb, pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
     description: 'Custom question map exposing blind spots across 8 departments.',
     successStat: '84% discover critical blind spots they hadn\'t considered',
@@ -155,7 +155,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Business owners are drowning in advice. Very few people help them think clearly. This tool comes in like a surgeon and says "here are the questions your business has earned."',
   },
   {
-    icon: Search, title: 'Brand Contradiction Finder', pricing: '$119', priceRaw: 11900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: Search, title: 'Brand Contradiction Finder', thumbnail: brandContradictionFinderThumb, pricing: '$119', priceRaw: 11900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$69/mo', monthlyPriceRaw: 6900, monthlySavePercent: 42,
     description: 'See where your brand says one thing but signals another.',
     successStat: '79% see conversion lift after fixing top contradiction',
@@ -164,7 +164,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses think they need more traffic. Sometimes they just need to stop sending mixed signals. One contradiction fix can increase conversion 10-30%.',
   },
   {
-    icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: FileText, title: 'Friction Vocabulary Audit', thumbnail: frictionVocabularyAuditThumb, pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: 'Find the exact words weakening your trust and authority.',
     successStat: '71% report stronger brand perception within 2 weeks of edits',
@@ -173,7 +173,7 @@ const services: ServiceTile[] = [
     whyValuable: 'This is one of those things people never notice until shown to them. Then they can\'t unsee it. "These 11 phrases are quietly weakening your authority" — that lands.',
   },
   {
-    icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
+    icon: Wrench, title: 'Custom Implementation', thumbnail: customImplementationThumb, pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
     description: 'Build the systems that scale you.',
     successStat: '94% reduce operational costs by 20%+ within first quarter',
     longDescription: 'Once gaps are identified, implementation is the multiplier. We build custom systems, deploy automation, restructure CRMs, and integrate workflows — everything needed to scale without adding headcount.',
