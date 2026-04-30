@@ -5,10 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import frictionVocabularyAuditThumb from '@/assets/packages/friction-vocabulary-audit.png';
+import customImplementationThumb from '@/assets/packages/custom-implementation.png';
+import brandContradictionFinderThumb from '@/assets/packages/brand-contradiction-finder.png';
+import strategicQuestionEngineThumb from '@/assets/packages/strategic-question-engine.png';
+import fourteenDayDiagnosticThumb from '@/assets/packages/fourteen-day-diagnostic.png';
 
 interface ServiceTile {
   icon: React.ElementType;
   title: string;
+  thumbnail?: string;
   pricing: string;
   priceRaw: number;
   pricingDetail: string;
@@ -121,7 +127,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'Digital Snapshot', value: '$125' }, { name: 'Website Evaluation', value: '$500' }, { name: 'Social Media Audit', value: '$300+' }, { name: 'CRM Analysis', value: '$275+' }],
   },
   {
-    icon: Eye, title: '14-Day Diagnostic', pricing: '$2,900', priceRaw: 290000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
+    icon: Eye, title: '14-Day Diagnostic', thumbnail: fourteenDayDiagnosticThumb, pricing: '$2,900', priceRaw: 290000, pricingDetail: 'flat · foundational engagement', priceId: 'fourteen_day_diagnostic_once', badge: 'FOUNDATIONAL',
     monthlyPriceId: 'fourteen_day_diagnostic_monthly', monthlyPricing: '$1,990/mo', monthlyPriceRaw: 199000, monthlySavePercent: 31,
     description: 'The deep operational breakdown that precedes any custom build.',
     successStat: '96% identify operational waste exceeding the diagnostic cost',
@@ -140,7 +146,7 @@ const services: ServiceTile[] = [
     includes: [{ name: '14-Day Diagnostic', value: '$2,500' }, { name: 'Strategic Discovery Audit', value: '$500' }, { name: 'Content Calendar', value: '$29/mo' }, { name: 'Ongoing Execution', value: 'included' }],
   },
   {
-    icon: Brain, title: 'Strategic Question Engine', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: Brain, title: 'Strategic Question Engine', thumbnail: strategicQuestionEngineThumb, pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'strategic_question_engine_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'strategic_question_engine_monthly', monthlyPricing: '$59/mo', monthlyPriceRaw: 5900, monthlySavePercent: 40,
     description: 'Custom question map exposing blind spots across 8 departments.',
     successStat: '84% discover critical blind spots they hadn\'t considered',
@@ -149,7 +155,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Business owners are drowning in advice. Very few people help them think clearly. This tool comes in like a surgeon and says "here are the questions your business has earned."',
   },
   {
-    icon: Search, title: 'Brand Contradiction Finder', pricing: '$119', priceRaw: 11900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: Search, title: 'Brand Contradiction Finder', thumbnail: brandContradictionFinderThumb, pricing: '$119', priceRaw: 11900, pricingDetail: 'one-time', priceId: 'brand_contradiction_finder_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'brand_contradiction_finder_monthly', monthlyPricing: '$69/mo', monthlyPriceRaw: 6900, monthlySavePercent: 42,
     description: 'See where your brand says one thing but signals another.',
     successStat: '79% see conversion lift after fixing top contradiction',
@@ -158,7 +164,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses think they need more traffic. Sometimes they just need to stop sending mixed signals. One contradiction fix can increase conversion 10-30%.',
   },
   {
-    icon: FileText, title: 'Friction Vocabulary Audit', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
+    icon: FileText, title: 'Friction Vocabulary Audit', thumbnail: frictionVocabularyAuditThumb, pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'friction_vocabulary_audit_once', bundleable: true, badge: 'CLARITY SUITE',
     monthlyPriceId: 'friction_vocabulary_audit_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: 'Find the exact words weakening your trust and authority.',
     successStat: '71% report stronger brand perception within 2 weeks of edits',
@@ -167,7 +173,7 @@ const services: ServiceTile[] = [
     whyValuable: 'This is one of those things people never notice until shown to them. Then they can\'t unsee it. "These 11 phrases are quietly weakening your authority" — that lands.',
   },
   {
-    icon: Wrench, title: 'Custom Implementation', pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
+    icon: Wrench, title: 'Custom Implementation', thumbnail: customImplementationThumb, pricing: '$25,000+', priceRaw: 0, pricingDetail: 'scoped',
     description: 'Build the systems that scale you.',
     successStat: '94% reduce operational costs by 20%+ within first quarter',
     longDescription: 'Once gaps are identified, implementation is the multiplier. We build custom systems, deploy automation, restructure CRMs, and integrate workflows — everything needed to scale without adding headcount.',
@@ -305,76 +311,112 @@ export const ServicesPricing: React.FC = () => {
         >
           {services.map((service, index) => {
             const isSelected = selectedIds.has(index);
+            const hasThumb = !!service.thumbnail;
             return (
               <RevealOnScroll key={service.title} delay={0.03 + index * 0.04}>
                 <div
                   onClick={() => setExpandedIdx(index)}
-                  className={`glass glass-shine shimmer-border hover-lift rounded-xl p-6 flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 ${
+                  className={`glass glass-shine shimmer-border hover-lift rounded-xl flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 overflow-hidden ${
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
-                  }`}
+                  } ${hasThumb ? 'p-0' : 'p-6'}`}
                 >
                   {service.badge && (
                     <span
-                      className={`absolute -top-2 right-4 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
+                      className={`absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
                         service.badge === 'FOUNDATIONAL'
-                          ? 'bg-amber/[0.08] text-amber border-amber/40'
-                          : 'bg-primary/20 text-primary border-primary/30'
+                          ? 'bg-amber/[0.08] text-amber border-amber/40 backdrop-blur-md bg-background/70'
+                          : 'bg-primary/20 text-primary border-primary/30 backdrop-blur-md'
                       }`}
                     >
                       {service.badge === 'FOUNDATIONAL' ? 'Foundational Engagement' : service.badge}
                     </span>
                   )}
 
-                  {/* Icon + Title */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-                      <service.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
-                  </div>
+                  {hasThumb ? (
+                    <>
+                      {/* Hero infographic — already contains title, price, icon, stats */}
+                      <div className="relative w-full bg-white">
+                        <img
+                          src={service.thumbnail}
+                          alt={service.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-auto object-contain block"
+                        />
+                      </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
+                      {/* Footer hint + bundle checkbox */}
+                      <div className="flex items-center justify-between px-5 py-3.5 border-t border-border/40 mt-auto">
+                        <span className="text-xs text-primary font-semibold">Click for details →</span>
+                        {service.bundleable && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
+                            className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-border hover:border-primary/60'
+                            }`}
+                            title="Add to bundle"
+                          >
+                            {isSelected && <Check className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Icon + Title */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                          <service.icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-bold text-foreground font-display leading-tight">{service.title}</h3>
+                      </div>
 
-                  {/* Success Stat */}
-                  <div className="flex items-start gap-2 mb-4 bg-amber/[0.06] border border-amber/25 rounded-md px-3 py-2.5">
-                    <Percent className="w-3.5 h-3.5 text-amber flex-shrink-0 mt-0.5" />
-                    <span className="text-xs text-foreground/85 font-medium leading-snug tracking-[0.01em]">{service.successStat}</span>
-                  </div>
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground mb-3 flex-1 leading-relaxed">{service.description}</p>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2 mb-4">
-                    {billingMode === 'monthly' && service.monthlyPriceId ? (
-                      <>
-                        <span className="text-2xl font-bold text-gradient-amber font-display">{service.monthlyPricing}</span>
-                        <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
-                        <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-2xl font-bold text-primary font-display">{service.pricing}</span>
-                        <span className="text-xs text-muted-foreground">{service.pricingDetail}</span>
-                      </>
-                    )}
-                  </div>
+                      {/* Success Stat */}
+                      <div className="flex items-start gap-2 mb-4 bg-amber/[0.06] border border-amber/25 rounded-md px-3 py-2.5">
+                        <Percent className="w-3.5 h-3.5 text-amber flex-shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground/85 font-medium leading-snug tracking-[0.01em]">{service.successStat}</span>
+                      </div>
 
-                  {/* Footer hint + bundle checkbox */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                    <span className="text-xs text-primary font-semibold">Click for details →</span>
-                    {service.bundleable && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
-                        className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
-                          isSelected
-                            ? 'bg-primary border-primary text-primary-foreground'
-                            : 'border-border hover:border-primary/60'
-                        }`}
-                        title="Add to bundle"
-                      >
-                        {isSelected && <Check className="w-4 h-4" />}
-                      </button>
-                    )}
-                  </div>
+                      {/* Price */}
+                      <div className="flex items-baseline gap-2 mb-4">
+                        {billingMode === 'monthly' && service.monthlyPriceId ? (
+                          <>
+                            <span className="text-2xl font-bold text-gradient-amber font-display">{service.monthlyPricing}</span>
+                            <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
+                            <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-2xl font-bold text-primary font-display">{service.pricing}</span>
+                            <span className="text-xs text-muted-foreground">{service.pricingDetail}</span>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Footer hint + bundle checkbox */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                        <span className="text-xs text-primary font-semibold">Click for details →</span>
+                        {service.bundleable && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
+                            className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-border hover:border-primary/60'
+                            }`}
+                            title="Add to bundle"
+                          >
+                            {isSelected && <Check className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </RevealOnScroll>
             );
@@ -408,6 +450,16 @@ export const ServicesPricing: React.FC = () => {
                 >
                   <X className="w-5 h-5" />
                 </button>
+
+                {expandedService.thumbnail && (
+                  <div className="w-full bg-white border-b border-border">
+                    <img
+                      src={expandedService.thumbnail}
+                      alt={expandedService.title}
+                      className="w-full h-auto object-contain block"
+                    />
+                  </div>
+                )}
 
                 <div className="p-6 md:p-8">
                   {expandedService.badge && (
