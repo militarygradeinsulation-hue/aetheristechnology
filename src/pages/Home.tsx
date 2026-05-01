@@ -113,8 +113,6 @@ const Home = () => {
           </div>
         </section>
 
-        <LeakAuditMethod />
-        
         <FreeTools />
         <VerifiableOutcomes />
         <WhatsWrongDiagnostic />
