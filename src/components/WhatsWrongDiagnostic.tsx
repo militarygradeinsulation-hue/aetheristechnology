@@ -12,7 +12,8 @@ const ISSUE_CATEGORIES = [
   {
     id: 'brand-digital',
     label: 'Brand & Digital Presence',
-    emoji: '\u{1F3AF}',
+    sublabel: 'Website, messaging, conversion',
+    icon: Target,
     issues: [
       'Website looks outdated or unprofessional',
       'Customers do not understand what we do',
@@ -24,7 +25,8 @@ const ISSUE_CATEGORIES = [
   {
     id: 'marketing-sales',
     label: 'Marketing & Sales Pipeline',
-    emoji: '\u{1F4B8}',
+    sublabel: 'Leads, follow-up, close rate',
+    icon: TrendingDown,
     issues: [
       'Spending on ads with no measurable ROI',
       'No idea where leads actually come from',
@@ -36,7 +38,8 @@ const ISSUE_CATEGORIES = [
   {
     id: 'operations-crm',
     label: 'Operations & CRM Systems',
-    emoji: '\u{2699}',
+    sublabel: 'Workflow, automation, data',
+    icon: Settings,
     issues: [
       'CRM is a mess or does not exist',
       'Team is doing busywork instead of revenue work',
@@ -48,7 +51,8 @@ const ISSUE_CATEGORIES = [
   {
     id: 'growth-strategy',
     label: 'Growth & Strategic Direction',
-    emoji: '\u{1F680}',
+    sublabel: 'Scale, leadership, focus',
+    icon: Rocket,
     issues: [
       'Revenue is stuck and we cannot break through',
       'Leadership is the bottleneck',
