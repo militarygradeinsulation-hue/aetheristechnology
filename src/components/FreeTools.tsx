@@ -60,16 +60,17 @@ export const FreeTools: React.FC = () => {
               <ParallaxTilt intensity={0.3} className="h-full">
                 <Link
                   to={tool.path}
-                  className="group glass hover:glass-shine hover-lift rounded-xl border border-border/60 hover:border-amber/40 flex flex-col h-full overflow-hidden transition-all"
+                  className="premium-tile amber-corner group rounded-xl flex flex-col h-full"
                 >
-                  <div className="w-full aspect-[16/10] overflow-hidden">
+                  <div className="thumb-frame w-full aspect-[16/10] rounded-t-xl">
+                    <span className="thumb-hairline" />
                     <img
                       src={tool.thumbnail}
                       alt={tool.title}
                       loading="lazy"
                       width={512}
                       height={320}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="p-6 flex flex-col flex-1">
@@ -79,7 +80,7 @@ export const FreeTools: React.FC = () => {
                     <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
                       {tool.description}
                     </p>
-                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide">
+                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:bg-amber after:w-0 group-hover:after:w-full after:transition-all after:duration-500">
                       Explore Tool <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>

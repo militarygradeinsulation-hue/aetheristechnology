@@ -28,8 +28,9 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
 
   return (
     <div
-      className={`relative glass rounded-lg border border-border/60 p-6 md:p-7 overflow-hidden ${className}`}
+      className={`group relative glass glass-shine hover-lift shimmer-border rounded-lg border border-border/60 p-6 md:p-7 overflow-hidden transition-colors hover:border-amber/40 ${className}`}
     >
+      <span className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       {/* Top bar — case number + status */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/40">
         <div className="font-case text-xs tracking-widest text-muted-foreground uppercase">
@@ -81,8 +82,8 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
       </div>
 
       {/* Corner cross-hair detail */}
-      <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-amber/40 pointer-events-none" />
-      <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-amber/40 pointer-events-none" />
+      <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-amber/40 group-hover:border-amber group-hover:w-4 group-hover:h-4 transition-all duration-500 pointer-events-none" />
+      <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-amber/40 group-hover:border-amber group-hover:w-4 group-hover:h-4 transition-all duration-500 pointer-events-none" />
     </div>
   );
 };

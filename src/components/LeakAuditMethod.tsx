@@ -68,17 +68,20 @@ export const LeakAuditMethod: React.FC = () => {
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="block w-full group rounded-xl overflow-hidden border border-amber/30 hover:border-amber/60 transition-colors"
+              className="group block w-full rounded-xl overflow-hidden border border-amber/30 hover:border-amber/60 transition-colors shimmer-border relative"
               aria-expanded={expanded}
               aria-controls="leak-audit-steps"
             >
-              <img
-                src={leakAuditThumbnail}
-                alt="The Strategic Intelligence Platform — 7-step Leak Audit overview"
-                className="w-full h-auto block"
-                loading="lazy"
-              />
-              <div className="flex items-center justify-center gap-2 py-3 bg-background/60 font-case text-xs uppercase tracking-widest text-amber">
+              <div className="thumb-frame">
+                <span className="thumb-hairline" />
+                <img
+                  src={leakAuditThumbnail}
+                  alt="The Strategic Intelligence Platform — 7-step Leak Audit overview"
+                  className="w-full h-auto block"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex items-center justify-center gap-2 py-3 bg-background/60 font-case text-xs uppercase tracking-widest text-amber relative z-10">
                 {expanded ? 'Hide the 7 Steps' : 'View the 7 Steps'}
                 <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
               </div>
@@ -92,7 +95,7 @@ export const LeakAuditMethod: React.FC = () => {
               const Icon = step.icon;
               return (
                 <RevealOnScroll key={step.title} delay={i * 0.05}>
-                  <div className="glass rounded-lg border border-border/60 p-6 h-full hover:border-amber/40 transition-colors group">
+                  <div className="premium-tile rounded-lg p-6 h-full group">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 flex items-center gap-2">
                         <div className="font-case text-xs text-muted-foreground">

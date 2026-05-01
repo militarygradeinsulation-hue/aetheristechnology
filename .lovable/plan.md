@@ -1,42 +1,54 @@
 ## Goal
+Make every tile, thumbnail, and image card on the site feel like luxury hardware — premium glass shine, breathing amber halo, animated gradient borders, and a subtle Ken-Burns-style image drift on hover. No new emojis, no clutter — just motion and material quality.
 
-Make `ServicesPricing` (the main pricing grid on `/services` and Home) feel premium by using your 5 uploaded infographic visuals as the hero thumbnail for the matching package — instead of just a small icon and text.
+## What changes
 
-## Mapping (uploaded image → service)
+### 1. New CSS primitives in `src/index.css`
 
-| Upload | Service title in `ServicesPricing.tsx` |
-|---|---|
-| `file_0000000054f071fda30f63b1879f801e.png` | Friction Vocabulary Audit ($79) |
-| `file_0000000083b471fd97abdc9caaf08fd0.png` | Custom Implementation ($25,000+) |
-| `file_000000009fe871fda6da0369c81f9884.png` | Brand Contradiction Finder ($119) |
-| `file_00000000dca071fdb001ffdb18fb4b2f.png` | Strategic Question Engine ($99) |
-| `file_00000000ddc871fdadce399623009150.png` | 14-Day Diagnostic ($2,900) |
+Add three reusable utilities that complement the existing `glass-shine`, `hover-lift`, and `shimmer-border`:
 
-The other 6 services (Fractional CTO/CMO, Strategic Discovery Audit, Website Evaluation, etc.) keep the current icon-only treatment until you provide visuals for them.
+- **`.premium-tile`** — convenience class that bundles `glass + glass-shine + hover-lift + shimmer-border` plus a soft amber inner halo on hover.
+- **`.thumb-frame`** — wraps `<img>` thumbnails. Adds:
+  - Soft amber vignette overlay
+  - Diagonal light sweep on hover (separate from card-level glass-shine, so both fire)
+  - Slow Ken-Burns drift on hover (`scale + translate` over 1.2s)
+  - Top-edge gradient hairline that lights amber on hover
+- **`.amber-corner`** — pseudo-element corner brackets (top-left + bottom-right) that fade in on hover. Reinforces the forensic case-file aesthetic on premium cards.
 
-## Steps
+All animations respect `prefers-reduced-motion`.
 
-1. **Save assets** — copy the 5 uploads into `src/assets/packages/` with clean names:
-   - `friction-vocabulary-audit.png`
-   - `custom-implementation.png`
-   - `brand-contradiction-finder.png`
-   - `strategic-question-engine.png`
-   - `fourteen-day-diagnostic.png`
+### 2. `src/components/FreeTools.tsx` — Capability Demonstration tiles
+- Swap card class to `premium-tile` (replaces current `glass hover:glass-shine hover-lift` chain).
+- Wrap thumbnail `<img>` in a `thumb-frame` div for the sweep + Ken-Burns + vignette.
+- Add `amber-corner` brackets to each card.
+- Tighten arrow-CTA: amber underline reveal on hover instead of just gap-shift.
 
-2. **Add a `thumbnail` field** to the matching 5 entries in the `services` array in `src/components/ServicesPricing.tsx` (imported via `@/assets/packages/...`).
+### 3. `src/components/CaseFileCard.tsx` — Field Report case files
+- Add `glass-shine hover-lift shimmer-border` to the existing card.
+- The two existing cross-hair corner brackets stay (already on-brand). Add subtle hover state that brightens them to full amber.
+- Add a faint horizontal scanline gradient at the top edge that pulses on hover (forensic monitor feel).
 
-3. **Render the thumbnail on the tile** — when a service has a `thumbnail`, replace the current icon+title row with a top hero image:
-   - Full-width image with `aspect-[4/3]` at the top of the card (rounded top corners, no padding).
-   - Image uses `object-cover` with a subtle dark gradient overlay at the bottom for text legibility.
-   - Title overlays the bottom-left of the image in white.
-   - Price, success stat, and footer hint stay where they are below the image.
-   - Tiles without a thumbnail keep the existing icon layout — grid stays uniform via `h-full` and consistent card padding.
+### 4. `src/components/LeakAuditMethod.tsx` — Leak Audit thumbnail
+- The big thumbnail button gets `thumb-frame` treatment (sweep + Ken-Burns + vignette).
+- Add `shimmer-border` so the amber border traces around it on hover — signals "this is interactive, click me."
+- The 7-step cards inside the expanded grid get `premium-tile` treatment.
 
-4. **Render the thumbnail in the expanded modal** — show the same image as a hero banner across the top of the modal (above the existing icon/title block, or replacing it for these 5 services). Keeps the premium "product packshot" feel when users click in.
+### 5. `src/components/VerifiableOutcomes.tsx` — Outcome cards
+- Already uses `glass hover:glass-shine`. Upgrade to `premium-tile` for parity with FreeTools.
+- Make the metric number (`{outcome.metric}`) glow softly on hover via amber text-shadow transition.
 
-5. **Performance** — use `loading="lazy"` and `decoding="async"` on the thumbnail `<img>` tags. Files are PNG ~1.3MB each at full resolution; that's acceptable since only 5 exist and they're lazy-loaded, but I'll keep them as-is unless you want me to also export WebP versions.
+### 6. `src/components/WhatsWrongDiagnostic.tsx` — Category cards
+- The 4 collapsible category cards get `glass-shine` added (currently plain `glass`).
+- Selected/open state already glows; add `shimmer-border` so the amber traces around the active one continuously.
 
-## Out of scope (ask if you want)
-- Generating matching infographics for the remaining 6 services
-- Replacing the Home-page service grid (`Services.tsx`) with the same thumbnails
-- Converting PNGs to WebP for smaller payload
+## Technical notes
+- All new utilities live in `src/index.css` under `@layer utilities` inside the existing `prefers-reduced-motion: no-preference` block.
+- No new dependencies, no token changes — uses existing `--amber-glow` and `--shadow-lift`.
+- Ken-Burns drift uses `transform: scale(1.06) translate(-1%, -1%)` over 1.2s ease-out, returning over 0.5s on mouse-leave.
+- All hover effects are GPU-only (`transform`, `opacity`, `box-shadow`) — no layout thrash.
+- Crimson is preserved strictly for leak signals (CaseFileCard `$ amount bled`, `ACTIVE` stamps) — none of the new shine introduces crimson.
+
+## Out of scope
+- No copy changes.
+- No layout/structure changes — purely material/motion polish.
+- No changes to the Hero (already has its own treatment).
