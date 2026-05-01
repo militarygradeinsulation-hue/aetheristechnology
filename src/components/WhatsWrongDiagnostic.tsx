@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, ChevronRight, Download, Mail, Loader2, CheckCircle, RotateCcw, Sparkles } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Download, Mail, Loader2, CheckCircle, RotateCcw, Sparkles, Target, TrendingDown, Settings, Rocket } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
