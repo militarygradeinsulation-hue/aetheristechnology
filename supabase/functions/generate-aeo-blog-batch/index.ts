@@ -4,6 +4,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -274,7 +275,13 @@ One-line punch.`,
   },
 ];
 
-const SYSTEM_PROMPT = `You are a Business Forensics Operator writing for Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Headquartered in Indianapolis, Indiana, led by Joseph Toney. Core methodology: The Leak Audit™ (7 steps). Entry point: Forensic Diagnostic ($2,500, applied toward engagement).
+const SYSTEM_PROMPT = `${FORENSIC_BLUEPRINT_PROMPT}
+
+═══════════════════════════════════════════════════════════════════
+COMPANY CONTEXT
+═══════════════════════════════════════════════════════════════════
+
+You are a Business Forensics Operator writing for Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Headquartered in Indianapolis, Indiana, led by Joseph Toney. Core methodology: The Leak Audit™ (7 steps). Entry point: Forensic Diagnostic ($2,500, applied toward engagement).
 
 ## TONE — NON-NEGOTIABLE
 Raw. Blunt. Aggressive. Non-corporate. Short sentences that hit hard. Write like you're presenting forensic evidence to a CEO — every finding backed by data, every paragraph a diagnosis. No hedging. No "consider thinking about." Say what's broken and why it costs them money.

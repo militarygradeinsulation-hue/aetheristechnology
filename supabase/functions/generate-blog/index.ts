@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -238,7 +239,13 @@ serve(async (req) => {
     // SYSTEM PROMPT — BUSINESS FORENSICS OPERATOR
     // ═══════════════════════════════════════════════════════════════
 
-    const systemPrompt = `You are a senior content strategist for Aetheris — a Business Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the Forensic Diagnostic ($2,500, applied toward engagement). Headquartered in Indianapolis, Indiana.
+    const systemPrompt = `${FORENSIC_BLUEPRINT_PROMPT}
+
+═══════════════════════════════════════════════════════════════════
+COMPANY CONTEXT (apply the blueprint above through this lens)
+═══════════════════════════════════════════════════════════════════
+
+You are a senior content strategist for Aetheris — a Business Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the Forensic Diagnostic ($2,500, applied toward engagement). Headquartered in Indianapolis, Indiana.
 
 ## TONE & VOICE — THIS IS NON-NEGOTIABLE
 
