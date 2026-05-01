@@ -62,14 +62,14 @@ export const VerifiableOutcomes: React.FC = () => {
             const Icon = outcome.icon;
             return (
               <RevealOnScroll key={outcome.industry} delay={idx * 0.08}>
-                <article className="glass hover:glass-shine rounded-2xl p-7 border border-border/60 hover:border-amber/40 h-full flex flex-col transition-all">
+                <article className="premium-tile amber-corner group rounded-2xl p-7 h-full flex flex-col">
                   <div className="w-11 h-11 rounded-xl bg-amber/[0.08] border border-amber/15 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5 text-amber" aria-hidden="true" />
                   </div>
                   <span className="text-[10px] font-semibold text-amber/80 tracking-[0.18em] uppercase mb-2">
                     {outcome.industry}
                   </span>
-                  <div className="text-4xl md:text-5xl font-bold text-gradient-amber font-display mb-3 leading-none">
+                  <div className="metric-glow text-4xl md:text-5xl font-bold text-gradient-amber font-display mb-3 leading-none">
                     {outcome.metric}
                   </div>
                   <p className="text-sm text-foreground/85 leading-relaxed mb-5 flex-1">
