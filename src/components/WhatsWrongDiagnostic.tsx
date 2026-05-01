@@ -266,18 +266,19 @@ export const WhatsWrongDiagnostic: React.FC = () => {
               </div>
 
               {selectedIssues.length > 0 && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {selectedIssues.length} issue{selectedIssues.length > 1 ? 's' : ''} selected
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-8 text-center">
+                  <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
+                    {selectedIssues.length} symptom{selectedIssues.length > 1 ? 's' : ''} flagged · ready for diagnosis
                   </p>
                   <Button
                     onClick={() => setStep('notes')}
                     size="lg"
-                    className="bg-amber hover:bg-amber/90 text-foreground font-semibold"
+                    className="bg-amber hover:bg-amber/90 text-primary-foreground font-semibold px-8 shadow-[0_8px_30px_-8px_hsl(var(--amber)/0.5)]"
                   >
-                    Next &mdash; Add Context
+                    Run Diagnosis
                     <ChevronRight className="ml-2 w-5 h-5" />
                   </Button>
+                  <p className="text-xs text-muted-foreground mt-3">Free · No email required to start</p>
                 </motion.div>
               )}
             </motion.div>
