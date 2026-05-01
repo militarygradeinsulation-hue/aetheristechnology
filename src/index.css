@@ -270,6 +270,221 @@
       opacity: 1;
     }
 
+    /* ===== Premium tile + thumbnail system ===== */
+
+    /* Premium tile — bundles glass material, shine sweep, lift, traced amber border, and inner halo */
+    .premium-tile {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background: hsl(var(--surface-elevated) / 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid hsl(var(--border) / 0.6);
+      border-radius: inherit;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.4s ease,
+                  background 0.4s ease;
+      will-change: transform;
+    }
+    .premium-tile::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.04) 40%,
+        hsl(var(--amber-glow) / 0.22) 50%,
+        hsl(var(--amber-glow) / 0.04) 60%,
+        transparent 100%
+      );
+      transform: translateX(-150%) skewX(-20deg);
+      pointer-events: none;
+      z-index: 2;
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .premium-tile::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.55) 25%,
+        hsl(var(--amber-glow) / 0.15) 50%,
+        hsl(var(--amber-glow) / 0.55) 75%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: border-rotate 6s linear infinite;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 3;
+    }
+    .premium-tile:hover {
+      transform: translateY(-6px);
+      border-color: hsl(var(--amber-glow) / 0.4);
+      background: hsl(var(--surface-elevated) / 0.78);
+      box-shadow:
+        0 24px 70px -18px hsl(var(--amber-glow) / 0.28),
+        0 12px 36px -12px hsl(0 0% 0% / 0.7),
+        inset 0 1px 0 0 hsl(var(--amber-glow) / 0.08);
+    }
+    .premium-tile:hover::before {
+      transform: translateX(250%) skewX(-20deg);
+    }
+    .premium-tile:hover::after {
+      opacity: 1;
+    }
+    .premium-tile > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Thumb frame — for image thumbnails inside cards */
+    .thumb-frame {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .thumb-frame img {
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.6s ease;
+      will-change: transform;
+    }
+    .thumb-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at 50% 100%,
+        transparent 40%,
+        hsl(220 15% 4% / 0.55) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.7;
+      transition: opacity 0.5s ease;
+    }
+    .thumb-frame::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.05) 40%,
+        hsl(var(--amber-glow) / 0.25) 50%,
+        hsl(var(--amber-glow) / 0.05) 60%,
+        transparent 100%
+      );
+      transform: translateX(-180%) skewX(-22deg);
+      pointer-events: none;
+      z-index: 2;
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .group:hover .thumb-frame img,
+    .thumb-frame:hover img,
+    button:hover .thumb-frame img,
+    a:hover .thumb-frame img {
+      transform: scale(1.06) translate(-1%, -1%);
+      filter: brightness(1.05) saturate(1.08);
+    }
+    .group:hover .thumb-frame::after,
+    .thumb-frame:hover::after,
+    button:hover .thumb-frame::after,
+    a:hover .thumb-frame::after {
+      transform: translateX(260%) skewX(-22deg);
+    }
+    .group:hover .thumb-frame::before,
+    .thumb-frame:hover::before,
+    button:hover .thumb-frame::before,
+    a:hover .thumb-frame::before {
+      opacity: 0.45;
+    }
+
+    /* Top hairline that lights amber on parent hover */
+    .thumb-hairline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        hsl(var(--amber-glow) / 0.7),
+        transparent
+      );
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .group:hover .thumb-hairline,
+    .thumb-frame:hover .thumb-hairline,
+    button:hover .thumb-hairline,
+    a:hover .thumb-hairline {
+      opacity: 1;
+    }
+
+    /* Forensic corner brackets — fade in on hover */
+    .amber-corner::before,
+    .amber-corner::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.45s ease, width 0.45s ease, height 0.45s ease;
+      z-index: 4;
+    }
+    .amber-corner::before {
+      top: 8px;
+      left: 8px;
+      border-top: 1px solid hsl(var(--amber-glow) / 0.7);
+      border-left: 1px solid hsl(var(--amber-glow) / 0.7);
+    }
+    .amber-corner::after {
+      bottom: 8px;
+      right: 8px;
+      border-bottom: 1px solid hsl(var(--amber-glow) / 0.7);
+      border-right: 1px solid hsl(var(--amber-glow) / 0.7);
+    }
+    .amber-corner:hover::before,
+    .amber-corner:hover::after {
+      opacity: 1;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Metric glow on hover (for outcome cards) */
+    .metric-glow {
+      transition: text-shadow 0.5s ease, transform 0.5s ease;
+    }
+    .group:hover .metric-glow,
+    .premium-tile:hover .metric-glow {
+      text-shadow:
+        0 0 24px hsl(var(--amber-glow) / 0.55),
+        0 0 60px hsl(var(--amber-glow) / 0.25);
+    }
+
     /* Cursor-reactive amber glow on CTAs */
     .cursor-glow {
       position: relative;
