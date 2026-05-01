@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Search, Map, GitBranch, Crosshair, DollarSign, Wrench, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Search, Map, GitBranch, Crosshair, DollarSign, Wrench, ShieldCheck, ChevronDown } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import leakAuditThumbnail from '@/assets/leak-audit-thumbnail.png';
 
 const STEPS = [
   {
@@ -42,11 +43,13 @@ const STEPS = [
 ];
 
 export const LeakAuditMethod: React.FC = () => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <section className="relative py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <RevealOnScroll>
-          <div className="text-center mb-14 max-w-3xl mx-auto">
+          <div className="text-center mb-10 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
               The Methodology
             </div>
@@ -60,31 +63,56 @@ export const LeakAuditMethod: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {STEPS.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <RevealOnScroll key={step.title} delay={i * 0.05}>
-                <div className="glass rounded-lg border border-border/60 p-6 h-full hover:border-amber/40 transition-colors group">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 flex items-center gap-2">
-                      <div className="font-case text-xs text-muted-foreground">
-                        STEP {String(i + 1).padStart(2, '0')}
-                      </div>
-                      <div className="w-10 h-10 rounded-md bg-amber/10 border border-amber/30 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
-                        <Icon className="w-5 h-5 text-amber" />
+        <RevealOnScroll>
+          <div className="max-w-4xl mx-auto mb-8">
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="block w-full group rounded-xl overflow-hidden border border-amber/30 hover:border-amber/60 transition-colors"
+              aria-expanded={expanded}
+              aria-controls="leak-audit-steps"
+            >
+              <img
+                src={leakAuditThumbnail}
+                alt="The Strategic Intelligence Platform — 7-step Leak Audit overview"
+                className="w-full h-auto block"
+                loading="lazy"
+              />
+              <div className="flex items-center justify-center gap-2 py-3 bg-background/60 font-case text-xs uppercase tracking-widest text-amber">
+                {expanded ? 'Hide the 7 Steps' : 'View the 7 Steps'}
+                <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+          </div>
+        </RevealOnScroll>
+
+        {expanded && (
+          <div id="leak-audit-steps" className="grid gap-4 md:grid-cols-2">
+            {STEPS.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <RevealOnScroll key={step.title} delay={i * 0.05}>
+                  <div className="glass rounded-lg border border-border/60 p-6 h-full hover:border-amber/40 transition-colors group">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 flex items-center gap-2">
+                        <div className="font-case text-xs text-muted-foreground">
+                          STEP {String(i + 1).padStart(2, '0')}
+                        </div>
+                        <div className="w-10 h-10 rounded-md bg-amber/10 border border-amber/30 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+                          <Icon className="w-5 h-5 text-amber" />
+                        </div>
                       </div>
                     </div>
+                    <h3 className="font-forensic text-2xl font-semibold text-foreground mt-4 mb-2">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                   </div>
-                  <h3 className="font-forensic text-2xl font-semibold text-foreground mt-4 mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </RevealOnScroll>
-            );
-          })}
-        </div>
+                </RevealOnScroll>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <Link
