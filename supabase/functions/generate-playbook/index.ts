@@ -36,6 +36,12 @@ const TOPIC_POOL = [
   { title: "The AI Cost Reduction Framework", subtitle: "6 Categories Where AI Cuts Operational Costs 25-50%", pillar: "AI Transformation", tags: ["AI ROI", "Cost Reduction", "Operational AI"], icon: "TrendingUp" },
   { title: "The AI Ethics and Governance Playbook", subtitle: "Building Trust While Deploying Autonomous Systems", pillar: "AI Transformation", tags: ["AI Ethics", "Governance", "Trust Architecture"], icon: "Shield" },
   { title: "The Build vs Buy AI Decision Framework", subtitle: "TCO Analysis for Every AI Investment Decision", pillar: "AI Transformation", tags: ["Build vs Buy", "AI Strategy", "TCO Analysis"], icon: "FileText" },
+
+  // ─── Forensic Communication (NEW — built on The Content Architect's Blueprint) ───
+  { title: "The Hook Architect's Field Manual", subtitle: "How to Engineer the Subconscious Lock-On in Sales Calls, Cold Emails, and First Lines", pillar: "Forensic Communication", tags: ["Hook Engineering", "Desire-Based Selling", "Sales Communication"], icon: "Target" },
+  { title: "The Attention Hourglass: 6 Story Locks for Operators", subtitle: "Why You Lose the Room at Minute Three — and the Six Re-Hooks That Keep It", pillar: "Forensic Communication", tags: ["Retention Mechanics", "Storytelling", "Executive Presence"], icon: "Hourglass" },
+  { title: "The Diagnostic Sequence Playbook", subtitle: "The 5-Step Hook → Mechanism → Translation → Consequence → Close, Scripted for the Sales Floor", pillar: "Forensic Communication", tags: ["Sales Scripts", "Discovery Calls", "Objection Handling"], icon: "Stethoscope" },
+  { title: "The Operator's Voice", subtitle: "How to Sound Like Someone Worth Listening To — 30 Forensic Phrases to Replace Consulting Clichés", pillar: "Forensic Communication", tags: ["Tone & Voice", "Operator Persona", "Sales Communication"], icon: "Mic" },
 ];
 
 // ─── PDF Rendering Helpers ───
