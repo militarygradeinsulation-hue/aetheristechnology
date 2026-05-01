@@ -161,18 +161,21 @@ export const WhatsWrongDiagnostic: React.FC = () => {
   };
 
   return (
-    <section className="py-16 px-4" id="whats-wrong">
+    <section className="py-20 px-4 relative" id="whats-wrong">
+      {/* Subtle top divider */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent" />
+
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
-            <AlertTriangle className="w-4 h-4 text-amber" />
-            <span className="text-sm text-muted-foreground">Smart Diagnostic</span>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-[0.2em] text-amber mb-4 px-3 py-1 border border-amber/30 rounded-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
+            Forensic Triage
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-4">
-            Tell Us What&apos;s <span className="text-gradient-amber">Broken</span>
+          <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+            Where is your business <span className="text-amber italic">leaking</span>?
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Pick the area that&apos;s slowing you down. We&apos;ll pinpoint the root cause and prescribe exactly what to fix first.
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+            Pick the symptom. We&apos;ll name the leak, quantify the bleed, and prescribe the exact fix — in under 60 seconds.
           </p>
         </div>
 
@@ -180,55 +183,86 @@ export const WhatsWrongDiagnostic: React.FC = () => {
           {step === 'pick' && (
             <motion.div key="pick" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <div className="space-y-3">
-                {ISSUE_CATEGORIES.map(cat => (
-                  <div key={cat.id} className="glass rounded-xl overflow-hidden border border-border/50">
-                    <button
-                      onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
-                      className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/20 transition-colors"
+                {ISSUE_CATEGORIES.map((cat, idx) => {
+                  const Icon = cat.icon;
+                  const isOpen = expandedCategory === cat.id;
+                  const selectedCount = selectedIssues.filter(i => cat.issues.includes(i)).length;
+                  return (
+                    <div
+                      key={cat.id}
+                      className={`glass rounded-lg overflow-hidden border transition-all duration-300 ${
+                        isOpen
+                          ? 'border-amber/50 shadow-[0_0_30px_-10px_hsl(var(--amber)/0.3)]'
+                          : selectedCount > 0
+                          ? 'border-amber/30'
+                          : 'border-border/60 hover:border-amber/30'
+                      }`}
                     >
-                      <span className="font-semibold text-foreground">{cat.emoji} {cat.label}</span>
-                      <div className="flex items-center gap-2">
-                        {selectedIssues.filter(i => cat.issues.includes(i)).length > 0 && (
-                          <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">
-                            {selectedIssues.filter(i => cat.issues.includes(i)).length} selected
-                          </span>
-                        )}
-                        <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${expandedCategory === cat.id ? 'rotate-90' : ''}`} />
-                      </div>
-                    </button>
-                    <AnimatePresence>
-                      {expandedCategory === cat.id && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-5 pb-4 space-y-2">
-                            {cat.issues.map(issue => (
-                              <label
-                                key={issue}
-                                className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all border ${
-                                  selectedIssues.includes(issue)
-                                    ? 'border-amber/50 bg-amber/10'
-                                    : 'border-transparent hover:bg-muted/20'
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedIssues.includes(issue)}
-                                  onChange={() => toggleIssue(issue)}
-                                  className="mt-0.5 accent-[hsl(var(--amber))]"
-                                />
-                                <span className="text-sm text-foreground/90">{issue}</span>
-                              </label>
-                            ))}
+                      <button
+                        onClick={() => setExpandedCategory(isOpen ? null : cat.id)}
+                        className="w-full flex items-center justify-between px-5 py-5 text-left group"
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`flex-shrink-0 w-11 h-11 rounded-md border flex items-center justify-center transition-colors ${
+                            isOpen || selectedCount > 0
+                              ? 'bg-amber/15 border-amber/40 text-amber'
+                              : 'bg-muted/20 border-border/60 text-muted-foreground group-hover:text-amber group-hover:border-amber/30'
+                          }`}>
+                            <Icon className="w-5 h-5" strokeWidth={1.75} />
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+                          <div className="min-w-0">
+                            <div className="flex items-baseline gap-2">
+                              <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                                CAT {String(idx + 1).padStart(2, '0')}
+                              </span>
+                            </div>
+                            <div className="font-semibold text-foreground text-base md:text-lg leading-tight">{cat.label}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{cat.sublabel}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          {selectedCount > 0 && (
+                            <span className="font-case text-[10px] uppercase tracking-wider bg-amber/15 text-amber px-2 py-1 rounded-sm border border-amber/30">
+                              {selectedCount} flagged
+                            </span>
+                          )}
+                          <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-90 text-amber' : ''}`} />
+                        </div>
+                      </button>
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border/40">
+                              {cat.issues.map(issue => (
+                                <label
+                                  key={issue}
+                                  className={`flex items-start gap-3 p-3 rounded-md cursor-pointer transition-all border ${
+                                    selectedIssues.includes(issue)
+                                      ? 'border-amber/50 bg-amber/10'
+                                      : 'border-transparent hover:bg-muted/20 hover:border-border/40'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedIssues.includes(issue)}
+                                    onChange={() => toggleIssue(issue)}
+                                    className="mt-0.5 accent-[hsl(var(--amber))]"
+                                  />
+                                  <span className="text-sm text-foreground/90">{issue}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
               </div>
 
               {selectedIssues.length > 0 && (
