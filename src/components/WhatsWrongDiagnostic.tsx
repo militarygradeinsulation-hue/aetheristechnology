@@ -190,9 +190,9 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                   return (
                     <div
                       key={cat.id}
-                      className={`glass rounded-lg overflow-hidden border transition-all duration-300 ${
+                      className={`glass glass-shine rounded-lg overflow-hidden border transition-all duration-300 ${
                         isOpen
-                          ? 'border-amber/50 shadow-[0_0_30px_-10px_hsl(var(--amber)/0.3)]'
+                          ? 'border-amber/50 shadow-[0_0_30px_-10px_hsl(var(--amber)/0.3)] shimmer-border'
                           : selectedCount > 0
                           ? 'border-amber/30'
                           : 'border-border/60 hover:border-amber/30'
