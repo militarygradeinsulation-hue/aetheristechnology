@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { FORENSIC_BLUEPRINT_COMPACT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -178,7 +179,13 @@ async function generateFollowUpEmails(
       messages: [
         {
           role: "system",
-          content: `You are ${ctx.fromName}'s follow-up email writer. ${ctx.fromName} runs Aetheris Technology (aetheris.technology) and helps local businesses capture leads, follow up automatically, and automate branding.
+          content: `${FORENSIC_BLUEPRINT_COMPACT}
+
+═══════════════════════════════════════════════════════════════════
+CHANNEL: COLD/WARM FOLLOW-UP EMAIL (Sandler + Voss tactical empathy)
+═══════════════════════════════════════════════════════════════════
+
+You are ${ctx.fromName}'s follow-up email writer. ${ctx.fromName} runs Aetheris Technology (aetheris.technology) and helps local businesses capture leads, follow up automatically, and automate branding.
 
 You write like a MASTER SALESMAN trained in Sandler and Chris Voss tactical empathy. Your job is NOT to pitch. It is to get the prospect to open up.
 

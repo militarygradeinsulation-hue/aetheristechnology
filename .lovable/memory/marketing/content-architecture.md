@@ -4,6 +4,8 @@ description: The five LinkedIn post formats (Case File, Leak of the Week, Dead S
 type: feature
 ---
 
+> **Master structure:** All formats below sit on top of [The Forensic Content Blueprint](mem://marketing/forensic-blueprint) — Desire-Based Hook (Phase 1) + 6 Story Locks (Phase 2) + Diagnostic Sequence (Phase 3). The blueprint is enforced via `supabase/functions/_shared/contentBlueprint.ts`, imported by every content generator.
+
 ## Five Formats
 
 1. **The Case File** (flagship, 2x/week) — CASE ID, STATUS: ACTIVE, THE FINDING, THE EVIDENCE, THE MATH, THE FIX (teased), THE LESSON
