@@ -674,20 +674,51 @@ export const ServicesPricing: React.FC = () => {
 
         {/* CTA */}
         <RevealOnScroll delay={0.3}>
-          <div className="mt-12 glass p-8 rounded-xl border border-primary/20 text-center">
-            <p className="text-xl font-bold text-foreground mb-2 font-display">The Real Question</p>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              It's not "Do I spend $2,500?" — it's "How much is inefficiency already costing me every month?"
+          <div className="premium-tile amber-corner mt-12 p-10 md:p-12 rounded-xl text-center overflow-hidden">
+            {/* Top hairline */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent pointer-events-none" />
+
+            {/* Case-file label */}
+            <div className="font-case text-[10px] uppercase tracking-[0.28em] text-amber/80 mb-3">
+              Case File · Closing Argument
+            </div>
+
+            <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+              The Real <span className="text-gradient-amber">Question</span>
+            </h3>
+
+            <p className="text-base md:text-lg text-muted-foreground/90 mb-8 max-w-2xl mx-auto leading-relaxed">
+              It's not <span className="text-foreground/70">"Do I spend $2,500?"</span> — it's{' '}
+              <span className="text-foreground font-semibold">
+                "How much is inefficiency already costing me every month?"
+              </span>
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="tel:+13173762110">
-                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors active:scale-[0.97]">
-                  📞 Call (317) 376-2110
+
+            {/* Divider */}
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <span className="h-px w-12 bg-amber/30" />
+              <span className="font-case text-[9px] uppercase tracking-[0.3em] text-amber/60">
+                Take Action
+              </span>
+              <span className="h-px w-12 bg-amber/30" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href="tel:+13173762110" className="w-full sm:w-auto">
+                <button className="group relative w-full sm:w-auto overflow-hidden bg-gradient-to-r from-amber to-amber/80 hover:from-amber hover:to-amber text-background px-7 py-3.5 rounded-lg font-semibold tracking-wide transition-all active:scale-[0.97] shadow-[0_8px_30px_-8px_hsl(var(--amber-glow)/0.6)] hover:shadow-[0_12px_40px_-8px_hsl(var(--amber-glow)/0.9)]">
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+                  <span className="relative inline-flex items-center gap-2.5">
+                    <Phone className="w-4 h-4" />
+                    Call (317) 376-2110
+                  </span>
                 </button>
               </a>
-              <a href="mailto:aetheris.technology@outlook.com?subject=Service%20Inquiry">
-                <button className="glass-hover border border-border px-6 py-3 rounded-lg font-semibold text-foreground transition-colors active:scale-[0.97]">
-                  ✉️ Email Us
+              <a href="mailto:aetheris.technology@outlook.com?subject=Service%20Inquiry" className="w-full sm:w-auto">
+                <button className="group w-full sm:w-auto border border-amber/30 hover:border-amber/70 bg-background/40 hover:bg-amber/5 backdrop-blur-sm px-7 py-3.5 rounded-lg font-semibold tracking-wide text-foreground transition-all active:scale-[0.97]">
+                  <span className="inline-flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-amber" />
+                    Email the Operator
+                  </span>
                 </button>
               </a>
             </div>
