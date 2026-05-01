@@ -95,7 +95,7 @@ export const LeakAuditMethod: React.FC = () => {
               const Icon = step.icon;
               return (
                 <RevealOnScroll key={step.title} delay={i * 0.05}>
-                  <div className="glass rounded-lg border border-border/60 p-6 h-full hover:border-amber/40 transition-colors group">
+                  <div className="premium-tile rounded-lg p-6 h-full group">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 flex items-center gap-2">
                         <div className="font-case text-xs text-muted-foreground">
