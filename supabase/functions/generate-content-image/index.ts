@@ -26,7 +26,7 @@ serve(async (req) => {
       });
     }
 
-    const { prompt, library_item_id, post_index } = await req.json();
+    const { prompt, library_item_id, post_index, style } = await req.json();
     if (!prompt) {
       return new Response(JSON.stringify({ error: "prompt required" }), {
         status: 400,
@@ -34,9 +34,43 @@ serve(async (req) => {
       });
     }
 
-    const imagePrompt = `Editorial cartoon style illustration. Bold ink lines, crosshatching, slightly exaggerated proportions. Muted earth tones with selective amber and crimson highlights. No text or speech bubbles. Professional editorial illustration for a business forensics firm. Subject: ${prompt}`;
+    // Aetheris brand palette — locked across every style.
+    // Charcoal background, amber primary, crimson reserved for leak signal only.
+    const BRAND_PALETTE = `STRICT BRAND PALETTE — do not deviate:
+  • Background: deep charcoal #0E0E10 to #1A1A1D (never pure black, never white)
+  • Primary accent: amber/gold #D4A24C with subtle warm glow
+  • Secondary: bone #E8E2D5 and graphite #2A2A2E
+  • Crimson #B23A3A used ONLY for "leak" signals — a single dripping line, a redacted bar, a stamp. Never as the dominant color.
+  • Mono micro-labels (if any visual text): JetBrains Mono feel, uppercase, tiny, amber on charcoal
+  • Serif headlines (if any visual text): Fraunces feel, condensed, bone-colored
+  • NO bright blues, no neon, no rainbow gradients, no pastel, no corporate stock-photo look`;
 
-    console.log("Generating image with prompt:", imagePrompt.slice(0, 200));
+    const STYLES: Record<string, string> = {
+      case_file: `Forensic CASE FILE document mockup. Manila folder texture aged to charcoal, "CASE #" stamp in amber JetBrains Mono, redaction bars, paperclip shadow, a single crimson signature line bleeding at the bottom edge. Flat-lay overhead view. Cinematic shadow.`,
+      autopsy_diagram: `Anatomical/forensic autopsy diagram of a business process. Bone-white linework on charcoal, amber annotation arrows pointing to "leak points" with mono labels. One specific leak point dripping crimson. Style of a vintage medical chart crossed with a sales-ops flowchart.`,
+      blueprint: `Architectural blueprint of a CRM pipeline. Dark charcoal paper, amber gridlines and measurement marks, isometric pipeline stages drawn in thin bone lines. One stage outlined in crimson with a dashed "BREACH" callout in mono.`,
+      editorial_cartoon: `Editorial newspaper-cartoon illustration. Bold ink crosshatching, exaggerated character proportions, charcoal/bone palette with amber spot color. A single small crimson element acts as the focal "leak". Op-ed feel — never cute, never whimsical.`,
+      data_macro: `Extreme macro photography aesthetic of data on a screen. Dark CRT glow, amber monospaced terminal text on charcoal, one row highlighted with a thin crimson underline. Shallow depth of field, film grain, subtle scan lines.`,
+      noir_object: `Moody noir still-life. Single business object (filing cabinet, ledger, magnifying glass, broken pipeline gauge) on charcoal surface under a hard amber side-light. Long shadow. A trickle of crimson liquid pooling near the base. Cinematic, restrained.`,
+      isometric: `Clean isometric vector illustration. Charcoal background, amber and bone geometric shapes representing the business system. One node rendered in crimson with a subtle "leak" emission. Flat shading, sharp edges, generous negative space.`,
+    };
+
+    const styleKey = (typeof style === "string" && STYLES[style]) ? style : "editorial_cartoon";
+    const styleDirective = STYLES[styleKey];
+
+    const imagePrompt = `${styleDirective}
+
+${BRAND_PALETTE}
+
+COMPOSITION RULES:
+  • Subject of the piece: ${prompt}
+  • No human faces with recognizable features. No real people. No celebrities.
+  • No on-image headlines, captions, or paragraphs. Tiny mono labels are OK.
+  • No logos, no brand marks, no watermarks (we add the Aetheris watermark separately).
+  • Premium editorial feel — looks like it was commissioned for The Economist or Bloomberg Businessweek.
+  • Aspect ratio square. High contrast. Cinematic.`;
+
+    console.log("Generating image. Style:", styleKey, "Prompt:", imagePrompt.slice(0, 200));
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
