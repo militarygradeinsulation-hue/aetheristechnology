@@ -75,6 +75,8 @@ const Home = () => {
           </div>
         </section>
 
+        <LeakAuditMethod />
+
         {/* Sample case files — credibility before methodology */}
         <section className="px-4 py-10">
           <div className="max-w-5xl mx-auto">
