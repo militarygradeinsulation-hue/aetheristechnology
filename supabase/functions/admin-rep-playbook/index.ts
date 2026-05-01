@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { FORENSIC_BLUEPRINT_COMPACT, HUMANIZED_PLAYBOOK_VOICE } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,7 @@ async function generateIdeaWithAI(): Promise<{ title: string; body: string; cate
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a sales-floor coach for a B2B 'Business Forensics' consulting firm (Aetheris). You write blunt, operator-grade daily coaching tips for commissioned reps. Avoid corporate fluff. 1 punchy idea per day, ~120 words, ends with a 'Try this today:' action line." },
+          { role: "system", content: `${FORENSIC_BLUEPRINT_COMPACT}\n\n${HUMANIZED_PLAYBOOK_VOICE}\n\nYou are a sales-floor coach for a B2B 'Business Forensics' consulting firm (Aetheris). You write blunt, operator-grade daily coaching tips for commissioned reps. One punchy idea per day, ~120 words, written like an operator talking to another operator over coffee — not a corporate training memo. Open with the diagnosis, not "Today's tip is..." End with a 'Try this today:' action line.` },
           { role: "user", content: `Write today's (${today}) Idea of the Day for the sales team. Pick ONE high-leverage tactic — could be cold-outreach angle, qualification question, objection-handler, follow-up cadence trick, or proposal-pacing move. Return JSON: {"title": "...", "body": "...", "category": "outreach|qualification|objection|followup|proposal|mindset"}` },
         ],
         response_format: { type: "json_object" },
@@ -142,7 +143,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: `You are a senior sales operator. Tone: blunt, no fluff. ${sys} Return JSON: {"title": "...", "body": "..."}` },
+            { role: "system", content: `${FORENSIC_BLUEPRINT_COMPACT}\n\nYou are a senior sales operator. Tone: blunt, no fluff. Lead with diagnosis, never agreement. ${sys} Return JSON: {"title": "...", "body": "..."}` },
             { role: "user", content: ctx || "Default scenario." },
           ],
           response_format: { type: "json_object" },

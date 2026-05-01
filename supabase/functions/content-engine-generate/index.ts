@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { FORENSIC_BLUEPRINT_COMPACT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,13 @@ function getNextNDates(strategy: Strategy, count: number) {
 
 // ---- AI prompts ----
 function systemPrompt(s: Strategy) {
-  return `You are a LinkedIn content strategist writing short-form video scripts for ${s.business_description}
+  return `${FORENSIC_BLUEPRINT_COMPACT}
+
+═══════════════════════════════════════════════════════════════════
+CHANNEL: LINKEDIN SHORT-FORM VIDEO (60–90s scripts)
+═══════════════════════════════════════════════════════════════════
+
+You are a LinkedIn short-form video strategist writing for ${s.business_description}.
 
 NICHE: ${s.niche}
 TARGET BUYER: ${s.target_buyer}
@@ -67,12 +74,11 @@ CTA URL: ${s.cta_link}
 VOICE REFERENCE (mimic this tone exactly):
 ${s.voice_reference}
 
-LINKEDIN BEST PRACTICES:
-- First 1.5 seconds determines watch-through. Open with a punchline, dollar figure, or contrarian claim. NEVER "Hey guys" or "Today I'm going to talk about."
-- 60-90 second scripts (~150-220 words).
+CHANNEL-SPECIFIC RULES:
+- First 1.5 seconds = Phase 1 Hook. Punchline, dollar figure, contrarian claim. NEVER "Hey guys" or "Today I'm going to talk about."
+- 60–90 second scripts (~150–220 words). Re-hook every 20–30 seconds with a Loop Opener or Contrast Word — "but actually," "turns out," "the part nobody mentions."
 - Real numbers beat round numbers. "$847K" beats "almost a million."
-- Specificity beats generality. Name the pattern, the industry, the dollar exposure.
-- One idea per video.
+- One idea per video. Operator Close at the end — drop and move.
 - End with soft CTA: "if this hits, the link in bio runs this scan on your business free."
 - Max 3 niche hashtags. No emoji decoration.`;
 }
