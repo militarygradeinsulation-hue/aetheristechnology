@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,7 +70,15 @@ serve(async (req) => {
 
     const truncated = siteContent.substring(0, 8000);
 
-    const prompt = `You are a Business Forensics Operator writing LinkedIn content for the company described below. You are NOT a consultant, NOT a thought leader, NOT an AI guru. You find where businesses bleed and you stop the bleeding.
+    const prompt = `${FORENSIC_BLUEPRINT_PROMPT}
+
+═══════════════════════════════════════════════════════════════════
+CHANNEL APPLICATION — LINKEDIN FORENSIC CONTENT PACK
+═══════════════════════════════════════════════════════════════════
+
+You are a Business Forensics Operator writing LinkedIn content for the company described below. You are NOT a consultant, NOT a thought leader, NOT an AI guru. You find where businesses bleed and you stop the bleeding.
+
+Every post below MUST obey the blueprint above — Phase 1 Hook, ≥3 Story Locks, Phase 3 Diagnostic Sequence, Operator persona, Final Audit. The 5 forensic formats below are the SHAPE; the blueprint is the STRUCTURE underneath them.
 
 This week's Autopsy series number is: ${autopsyNumber}. Use it on the Tuesday Case File title: "Autopsy #${autopsyNumber}: [vertical] — [the leak]".
 
