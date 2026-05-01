@@ -50,14 +50,14 @@ export const PostImageGenerator: React.FC<Props> = ({
     return (
       <div className="space-y-2">
         {imageUrl && (
-          <img src={imageUrl} alt="Generated editorial cartoon" className="w-full rounded-md border border-border" />
+          <img src={imageUrl} alt="Generated editorial cartoon" className="w-full h-20 object-cover rounded-md border border-border" />
         )}
         <Button
           variant="outline"
           size="sm"
           onClick={generate}
           disabled={generating}
-          className="w-full"
+          className="w-full h-7 text-[11px]"
         >
           {generating ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Generating...</>

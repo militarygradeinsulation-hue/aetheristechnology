@@ -294,7 +294,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
                   return (
                     <div key={item.id} className="glass rounded-xl border border-border overflow-hidden flex flex-col">
                       {imgUrl && (
-                        <img src={imgUrl} alt="" className="w-full h-32 object-cover" />
+                        <img src={imgUrl} alt="" className="w-full h-20 object-cover" />
                       )}
                       <div className="p-3 flex-1 flex flex-col">
                         <div className="flex items-center gap-1.5 mb-1">
