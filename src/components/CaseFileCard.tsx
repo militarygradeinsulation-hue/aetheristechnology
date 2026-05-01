@@ -82,8 +82,8 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
       </div>
 
       {/* Corner cross-hair detail */}
-      <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-amber/40 pointer-events-none" />
-      <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-amber/40 pointer-events-none" />
+      <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-amber/40 group-hover:border-amber group-hover:w-4 group-hover:h-4 transition-all duration-500 pointer-events-none" />
+      <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-amber/40 group-hover:border-amber group-hover:w-4 group-hover:h-4 transition-all duration-500 pointer-events-none" />
     </div>
   );
 };
