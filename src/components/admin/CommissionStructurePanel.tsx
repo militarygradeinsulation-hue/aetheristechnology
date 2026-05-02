@@ -3,15 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DollarSign, TrendingUp, RotateCcw, Repeat } from 'lucide-react';
-import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import { DollarSign, TrendingUp, RotateCcw, Repeat, Building2, Handshake, User } from 'lucide-react';
+import {
+  REP_PRODUCTS,
+  fmtUsd,
+  commissionCents,
+  partnerCents,
+  REP_RATE,
+  PARTNER_RATE,
+  COMPANY_RATE,
+} from '@/lib/repProducts';
 
-const DEFAULT_RATE = 0.10;
+const DEFAULT_RATE = REP_RATE;
 
 export const CommissionStructurePanel: React.FC = () => {
   const [rate, setRate] = useState(DEFAULT_RATE);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  // Number of months we project recurring revenue for in the Mix & Match.
   const [retentionMonths, setRetentionMonths] = useState(6);
 
   const setQty = (name: string, qty: number) =>
@@ -28,43 +35,58 @@ export const CommissionStructurePanel: React.FC = () => {
 
   const totals = useMemo(() => {
     let oneTimeRevenueCents = 0;
-    let oneTimeCommissionCents = 0;
+    let oneTimeRepCents = 0;
+    let oneTimePartnerCents = 0;
     let monthlyRevenueCents = 0;
-    let monthlyCommissionCents = 0;
+    let monthlyRepCents = 0;
+    let monthlyPartnerCents = 0;
 
     for (const p of REP_PRODUCTS) {
       const qty = quantities[p.name] || 0;
       if (qty <= 0) continue;
       const revenue = p.priceCents * qty;
-      const commission = commissionCents(p.priceCents, rate) * qty;
+      const repCut = commissionCents(p.priceCents, rate) * qty;
+      const partnerCut = partnerCents(p.priceCents) * qty;
       if (p.recurring) {
         monthlyRevenueCents += revenue;
-        monthlyCommissionCents += commission;
+        monthlyRepCents += repCut;
+        monthlyPartnerCents += partnerCut;
       } else {
         oneTimeRevenueCents += revenue;
-        oneTimeCommissionCents += commission;
+        oneTimeRepCents += repCut;
+        oneTimePartnerCents += partnerCut;
       }
     }
 
     const firstMonthRevenue = oneTimeRevenueCents + monthlyRevenueCents;
-    const firstMonthCommission = oneTimeCommissionCents + monthlyCommissionCents;
+    const firstMonthRep = oneTimeRepCents + monthlyRepCents;
+    const firstMonthPartner = oneTimePartnerCents + monthlyPartnerCents;
+
     const projectedRevenue = oneTimeRevenueCents + monthlyRevenueCents * retentionMonths;
-    const projectedCommission =
-      oneTimeCommissionCents + monthlyCommissionCents * retentionMonths;
+    const projectedRep = oneTimeRepCents + monthlyRepCents * retentionMonths;
+    const projectedPartner = oneTimePartnerCents + monthlyPartnerCents * retentionMonths;
+    const projectedCompany = projectedRevenue - projectedRep - projectedPartner;
 
     return {
       oneTimeRevenueCents,
-      oneTimeCommissionCents,
+      oneTimeRepCents,
+      oneTimePartnerCents,
       monthlyRevenueCents,
-      monthlyCommissionCents,
+      monthlyRepCents,
+      monthlyPartnerCents,
       firstMonthRevenue,
-      firstMonthCommission,
+      firstMonthRep,
+      firstMonthPartner,
       projectedRevenue,
-      projectedCommission,
+      projectedRep,
+      projectedPartner,
+      projectedCompany,
     };
   }, [quantities, rate, retentionMonths]);
 
-  const ratePct = (rate * 100).toFixed(0);
+  const repPct = (rate * 100).toFixed(0);
+  const partnerPct = (PARTNER_RATE * 100).toFixed(0);
+  const companyPct = (((1 - rate - PARTNER_RATE)) * 100).toFixed(0);
 
   return (
     <div className="space-y-6">
@@ -72,26 +94,48 @@ export const CommissionStructurePanel: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-display">
-            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure
+            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure — 3-Way Split
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-amber/30 bg-amber/5 p-4">
             <p className="text-foreground font-medium">
-              Flat <span className="text-amber font-bold">{ratePct}%</span> of every closed
-              sale tied to the rep's 6-digit code — including recurring monthly invoices for as
-              long as the client stays subscribed.
+              Every closed sale tied to the rep's 6-digit code splits three ways:
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              No tiers. No caps. No clawbacks on completed work. Paid within 7 days of the
-              client's payment clearing. Stored as <code className="text-amber">commission_rate</code> in <code className="text-amber">rep_codes</code> (default 0.10).
+            <div className="grid sm:grid-cols-3 gap-3 mt-3">
+              <div className="rounded-md border border-border/50 bg-card/40 p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                  <Building2 className="w-3.5 h-3.5" /> Company
+                </div>
+                <p className="text-2xl font-bold text-foreground mt-1">{companyPct}%</p>
+                <p className="text-xs text-muted-foreground">Delivery, ops, overhead</p>
+              </div>
+              <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                  <User className="w-3.5 h-3.5" /> Rep
+                </div>
+                <p className="text-2xl font-bold text-amber mt-1">{repPct}%</p>
+                <p className="text-xs text-muted-foreground">Closer / source of deal</p>
+              </div>
+              <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                  <Handshake className="w-3.5 h-3.5" /> Business Partner
+                </div>
+                <p className="text-2xl font-bold text-amber mt-1">{partnerPct}%</p>
+                <p className="text-xs text-muted-foreground">Override on every sale</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-3">
+              Applies to one-time AND recurring monthly invoices for as long as the client stays subscribed.
+              No tiers. No caps. No clawbacks on completed work. Paid within 7 days of the client's payment clearing.
+              Rep cut stored as <code className="text-amber">commission_rate</code> in <code className="text-amber">rep_codes</code> (default {DEFAULT_RATE.toFixed(2)}). Partner override is fixed at {partnerPct}%.
             </p>
           </div>
 
           <div className="flex items-end gap-3 flex-wrap">
             <div>
               <label className="text-xs text-muted-foreground block mb-1 font-mono uppercase tracking-wider">
-                Test rate (%)
+                Test rep rate (%)
               </label>
               <Input
                 type="number"
@@ -104,7 +148,7 @@ export const CommissionStructurePanel: React.FC = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground pb-2">
-              Default is 10%. Change this to model what a custom rep rate would look like across the table below.
+              Default rep cut is {(DEFAULT_RATE * 100).toFixed(0)}%. Partner stays at {partnerPct}%. Adjust to model a custom rep rate.
             </p>
           </div>
         </CardContent>
@@ -114,7 +158,7 @@ export const CommissionStructurePanel: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-display">
-            <TrendingUp className="w-5 h-5 text-amber" /> Per-Product Cuts at {ratePct}%
+            <TrendingUp className="w-5 h-5 text-amber" /> Per-Product Split
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -124,28 +168,41 @@ export const CommissionStructurePanel: React.FC = () => {
                 <TableRow>
                   <TableHead>Product</TableHead>
                   <TableHead className="text-right">Client Price</TableHead>
-                  <TableHead className="text-right">Rep Cut</TableHead>
+                  <TableHead className="text-right">Company ({companyPct}%)</TableHead>
+                  <TableHead className="text-right">Rep ({repPct}%)</TableHead>
+                  <TableHead className="text-right">Partner ({partnerPct}%)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {REP_PRODUCTS.map((p) => (
-                  <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
-                    <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
-                      {p.name}
-                      {p.recurring && (
-                        <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <Repeat className="w-3 h-3" /> recurring
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
-                    </TableCell>
-                    <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>
-                      {fmtUsd(commissionCents(p.priceCents, rate))}{p.recurring ? '/mo' : ''}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {REP_PRODUCTS.map((p) => {
+                  const repCut = commissionCents(p.priceCents, rate);
+                  const partnerCut = partnerCents(p.priceCents);
+                  const companyCut = p.priceCents - repCut - partnerCut;
+                  return (
+                    <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
+                      <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
+                        {p.name}
+                        {p.recurring && (
+                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                            <Repeat className="w-3 h-3" /> recurring
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
+                      </TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {fmtUsd(companyCut)}{p.recurring ? '/mo' : ''}
+                      </TableCell>
+                      <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>
+                        {fmtUsd(repCut)}{p.recurring ? '/mo' : ''}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-amber">
+                        {fmtUsd(partnerCut)}{p.recurring ? '/mo' : ''}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -164,13 +221,14 @@ export const CommissionStructurePanel: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Set how many of each product the rep closes this month. Recurring retainers are projected over your retention window.
+            Set how many of each product the rep closes this month. Recurring retainers are projected over your retention window. Splits company / rep / partner automatically.
           </p>
 
           <div className="grid sm:grid-cols-2 gap-3">
             {REP_PRODUCTS.map((p) => {
               const qty = quantities[p.name] || 0;
-              const lineCommission = commissionCents(p.priceCents, rate) * qty;
+              const repLine = commissionCents(p.priceCents, rate) * qty;
+              const partnerLine = partnerCents(p.priceCents) * qty;
               return (
                 <div
                   key={p.name}
@@ -187,7 +245,7 @@ export const CommissionStructurePanel: React.FC = () => {
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {fmtUsd(p.priceCents)} → {fmtUsd(commissionCents(p.priceCents, rate))} per sale
+                        {fmtUsd(p.priceCents)} → rep {fmtUsd(commissionCents(p.priceCents, rate))} · partner {fmtUsd(partnerCents(p.priceCents))}
                       </p>
                     </div>
                   </div>
@@ -218,8 +276,13 @@ export const CommissionStructurePanel: React.FC = () => {
                     >
                       +
                     </Button>
-                    <span className="ml-auto text-sm font-semibold text-amber">
-                      {qty > 0 ? fmtUsd(lineCommission) + (p.recurring ? '/mo' : '') : '—'}
+                    <span className="ml-auto text-xs font-semibold text-amber text-right leading-tight">
+                      {qty > 0 ? (
+                        <>
+                          R: {fmtUsd(repLine)}{p.recurring ? '/mo' : ''}<br />
+                          P: {fmtUsd(partnerLine)}{p.recurring ? '/mo' : ''}
+                        </>
+                      ) : '—'}
                     </span>
                   </div>
                 </div>
@@ -249,44 +312,49 @@ export const CommissionStructurePanel: React.FC = () => {
             </div>
           </div>
 
-          {/* Totals */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-amber/40 bg-amber/10 p-4">
-              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">First-month commission</p>
-              <p className="text-3xl font-bold text-amber mt-1">
-                {fmtUsd(totals.firstMonthCommission)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                One-time {fmtUsd(totals.oneTimeCommissionCents)} + recurring {fmtUsd(totals.monthlyCommissionCents)}/mo
-              </p>
-            </div>
-            <div className="rounded-lg border border-amber/40 bg-amber/10 p-4">
-              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                Projected over {retentionMonths} mo
-              </p>
-              <p className="text-3xl font-bold text-amber mt-1">
-                {fmtUsd(totals.projectedCommission)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Total client revenue: {fmtUsd(totals.projectedRevenue)}
-              </p>
-            </div>
+          {/* Totals — 3-way */}
+          <div className="grid sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-border/50 bg-card/40 p-4">
-              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Recurring MRR commission</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                <Building2 className="w-3.5 h-3.5" /> Company ({companyPct}%)
+              </div>
               <p className="text-2xl font-semibold text-foreground mt-1">
-                {fmtUsd(totals.monthlyCommissionCents)}<span className="text-sm text-muted-foreground">/mo</span>
+                {fmtUsd(totals.projectedCompany)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Keeps paying as long as the client stays subscribed.
+                Over {retentionMonths} mo. Funds delivery + overhead.
               </p>
             </div>
-            <div className="rounded-lg border border-border/50 bg-card/40 p-4">
-              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Business take (after rep cut)</p>
-              <p className="text-2xl font-semibold text-foreground mt-1">
-                {fmtUsd(totals.projectedRevenue - totals.projectedCommission)}
+            <div className="rounded-lg border border-amber/40 bg-amber/10 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                <User className="w-3.5 h-3.5" /> Rep ({repPct}%)
+              </div>
+              <p className="text-2xl font-bold text-amber mt-1">
+                {fmtUsd(totals.projectedRep)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Over the {retentionMonths}-month projection.
+                First-month {fmtUsd(totals.firstMonthRep)} · MRR {fmtUsd(totals.monthlyRepCents)}/mo
+              </p>
+            </div>
+            <div className="rounded-lg border border-amber/40 bg-amber/10 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                <Handshake className="w-3.5 h-3.5" /> Partner ({partnerPct}%)
+              </div>
+              <p className="text-2xl font-bold text-amber mt-1">
+                {fmtUsd(totals.projectedPartner)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                First-month {fmtUsd(totals.firstMonthPartner)} · MRR {fmtUsd(totals.monthlyPartnerCents)}/mo
+              </p>
+            </div>
+            <div className="sm:col-span-3 rounded-lg border border-border/50 bg-card/40 p-4">
+              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Total client revenue</p>
+              <p className="text-xl font-semibold text-foreground mt-1">
+                {fmtUsd(totals.projectedRevenue)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                One-time {fmtUsd(totals.oneTimeRevenueCents)} + recurring {fmtUsd(totals.monthlyRevenueCents)}/mo × {retentionMonths} mo.
+                Math sanity: company {companyPct} + rep {repPct} + partner {partnerPct} = 100%.
               </p>
             </div>
           </div>

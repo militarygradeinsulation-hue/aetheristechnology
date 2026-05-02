@@ -26,6 +26,12 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: 'Fractional CTO/CMO', priceCents: 590000, recurring: true, highlight: true },
 ];
 
+// 3-way revenue split applied to every closed sale (one-time AND recurring).
+// Company 70% · Rep 15% · Partner 15%
+export const REP_RATE = 0.15;
+export const PARTNER_RATE = 0.15;
+export const COMPANY_RATE = 0.70;
+
 export const fmtUsd = (cents: number) =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -35,3 +41,9 @@ export const fmtUsd = (cents: number) =>
 
 export const commissionCents = (priceCents: number, rate: number) =>
   Math.round(priceCents * rate);
+
+export const partnerCents = (priceCents: number) =>
+  Math.round(priceCents * PARTNER_RATE);
+
+export const companyCents = (priceCents: number, repRate: number) =>
+  priceCents - commissionCents(priceCents, repRate) - partnerCents(priceCents);
