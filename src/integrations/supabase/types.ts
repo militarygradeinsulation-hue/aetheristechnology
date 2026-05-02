@@ -65,6 +65,53 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_log: {
+        Row: {
+          actor: string | null
+          created_at: string
+          customer_id: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          rep_code: string | null
+          summary: string | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          customer_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          rep_code?: string | null
+          summary?: string | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          customer_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          rep_code?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_library: {
         Row: {
           created_at: string
@@ -769,6 +816,56 @@ export type Database = {
         }
         Relationships: []
       }
+      commissions: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          environment: string
+          id: string
+          paid_at: string | null
+          payout_reference: string | null
+          rate: number
+          recipient_code: string | null
+          recipient_role: string
+          sale_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          environment?: string
+          id?: string
+          paid_at?: string | null
+          payout_reference?: string | null
+          rate: number
+          recipient_code?: string | null
+          recipient_role: string
+          sale_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          environment?: string
+          id?: string
+          paid_at?: string | null
+          payout_reference?: string | null
+          rate?: number
+          recipient_code?: string | null
+          recipient_role?: string
+          sale_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           company: string | null
@@ -1223,6 +1320,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          email: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          lifetime_value_cents: number
+          metadata: Json
+          name: string | null
+          partner_code: string | null
+          phone: string | null
+          rep_code: string | null
+          source: string | null
+          stripe_customer_id: string | null
+          total_purchases: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          lifetime_value_cents?: number
+          metadata?: Json
+          name?: string | null
+          partner_code?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          source?: string | null
+          stripe_customer_id?: string | null
+          total_purchases?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          lifetime_value_cents?: number
+          metadata?: Json
+          name?: string | null
+          partner_code?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          source?: string | null
+          stripe_customer_id?: string | null
+          total_purchases?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       diagnostic_leads: {
         Row: {
@@ -2502,6 +2653,27 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_webhook_events: {
+        Row: {
+          environment: string
+          event_type: string
+          processed_at: string
+          stripe_event_id: string
+        }
+        Insert: {
+          environment?: string
+          event_type: string
+          processed_at?: string
+          stripe_event_id: string
+        }
+        Update: {
+          environment?: string
+          event_type?: string
+          processed_at?: string
+          stripe_event_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -3256,6 +3428,83 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sales: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          customer_id: string | null
+          email: string | null
+          environment: string
+          id: string
+          kind: string
+          metadata: Json
+          occurred_at: string
+          partner_code: string | null
+          price_id: string | null
+          product_id: string | null
+          product_name: string | null
+          rep_code: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_invoice_id: string | null
+          stripe_session_id: string | null
+          stripe_subscription_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          email?: string | null
+          environment?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          occurred_at?: string
+          partner_code?: string | null
+          price_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          rep_code?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          email?: string | null
+          environment?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          occurred_at?: string
+          partner_code?: string | null
+          price_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          rep_code?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scan_purchases: {
         Row: {
@@ -4082,6 +4331,19 @@ export type Database = {
       reset_stuck_hygiene_actions: {
         Args: { _stale_minutes?: number }
         Returns: number
+      }
+      upsert_customer_with_sale: {
+        Args: {
+          _amount_cents: number
+          _email: string
+          _name: string
+          _partner_code: string
+          _phone: string
+          _rep_code: string
+          _source: string
+          _stripe_customer_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
