@@ -3,10 +3,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
+import { verifyAdminToken } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
 };
 
 const MAX_LIBRARY = 500;
@@ -46,7 +47,13 @@ serve(async (req) => {
 
   try {
     const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
+    let claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
+    if (!claims) {
+      const adminToken = req.headers.get("x-admin-token");
+      if (adminToken && (await verifyAdminToken(adminToken, secret))) {
+        claims = { code: "ADMIN_PREVIEW", role: "partner", exp: Date.now() + 60_000 } as PortalClaims;
+      }
+    }
     if (!claims) return jsonResp({ error: "Unauthorized" }, 401);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, secret);

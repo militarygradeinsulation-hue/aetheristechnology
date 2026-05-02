@@ -1,6 +1,7 @@
 // Client wrapper for the per-rep workspace (settings, notes, history) edge function.
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 
 export interface RepLibraryItem {
   id: string;
@@ -31,10 +32,14 @@ export interface RepSettings {
 
 async function call(action: string, payload: Record<string, unknown> = {}) {
   const token = getPortalToken();
-  if (!token) throw new Error('Not signed in to portal');
+  const adminToken = getAdminToken();
+  if (!token && !adminToken) throw new Error('Not signed in to portal');
+  const headers: Record<string, string> = {};
+  if (token) headers['x-portal-token'] = token;
+  if (adminToken) headers['x-admin-token'] = adminToken;
   const { data, error } = await supabase.functions.invoke('portal-workspace', {
     body: { action, ...payload },
-    headers: { 'x-portal-token': token },
+    headers,
   });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
