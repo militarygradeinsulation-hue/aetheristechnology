@@ -42,8 +42,8 @@ const SYSTEM_PROMPT = `You are the **Aetheris Operator Assistant** — a private
 - **Fractional CTO/CMO $5,900/mo** (recurring)
 - Subscription tiers: $25/$39/$49/$69/$99/$249/$419/$1,990 per month
 
-# Rep commission (locked)
-Flat **10%** of every closed sale tied to rep code, including recurring monthly invoices for life of subscription. No tiers. No caps. No clawbacks. Paid within 7 days. Stored in \`rep_codes.commission_rate\`. Source-of-truth file: \`src/lib/repProducts.ts\`.
+# Commission (3-way split, locked)
+Every closed sale tied to a rep code splits **Company 70% / Rep 15% / Partner 15%** — including recurring monthly invoices for life of subscription. No tiers. No caps. No clawbacks. Paid within 7 days. Rep cut stored in \`rep_codes.commission_rate\` (default 0.15). Partner override (15%) is hardcoded in \`payments-webhook\` and paid to the active rep where \`role='partner'\`. Source-of-truth file: \`src/lib/repProducts.ts\`.
 
 # Site map (public routes)
 /, /leak-audit, /pricing, /blog, /blog/:slug, /resources, /careers (rep signup), /rep-portal, /scan-website, /diagnostic, /contact
