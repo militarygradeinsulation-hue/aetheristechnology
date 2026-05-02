@@ -157,9 +157,18 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
           <Users className="w-4 h-4 text-amber" /> Manage Sales Reps
           <Badge variant="outline" className="ml-2 text-[10px] uppercase">{scope === "partner" ? "Partner View" : "Admin"}</Badge>
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setShowCodes(s => !s)}>
-          {showCodes ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Hide codes</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Reveal codes</>}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => onBulkGenerateEmails(false)} disabled={bulkBusy}>
+            {bulkBusy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Mail className="w-3.5 h-3.5 mr-1" />}
+            Generate emails for all reps
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onBulkGenerateEmails(true)} disabled={bulkBusy}>
+            Regenerate all
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setShowCodes(s => !s)}>
+            {showCodes ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Hide codes</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Reveal codes</>}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground flex items-start gap-2">
