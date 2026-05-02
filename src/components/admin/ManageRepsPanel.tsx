@@ -127,18 +127,21 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
 
         {/* Add new */}
         <div className="rounded-md border border-border/60 p-3 bg-muted/20">
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Add a rep</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Add a rep</div>
+          <div className="text-[11px] text-muted-foreground mb-2">
+            Just enter a name — we'll auto-generate a 6-digit rep ID and an <span className="font-mono">@aetheris.technology</span> email. You can override either field if you want.
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
-            <Input placeholder="6-digit code" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
-            <Input placeholder="Full name" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
-            <Input placeholder="Email (optional)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
+            <Input placeholder="Code (auto)" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
+            <Input placeholder="Full name (required)" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
+            <Input placeholder="Email (auto)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
             <Input placeholder="Rate (0.10)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} />
             <div className="flex gap-2">
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={draft.role} onChange={e => setDraft(s => ({ ...s, role: e.target.value as "rep" | "partner" }))}>
                 <option value="rep">rep</option>
                 <option value="partner">partner</option>
               </select>
-              <Button size="sm" onClick={onCreate} disabled={!draft.code || !draft.rep_name}><Plus className="w-3.5 h-3.5" /></Button>
+              <Button size="sm" onClick={onCreate} disabled={!draft.rep_name.trim()}><Plus className="w-3.5 h-3.5" /></Button>
             </div>
           </div>
         </div>
