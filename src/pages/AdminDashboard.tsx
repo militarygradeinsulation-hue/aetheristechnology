@@ -30,6 +30,7 @@ import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel'
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
+import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
 
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 
