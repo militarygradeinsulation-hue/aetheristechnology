@@ -52,7 +52,7 @@ serve(async (req) => {
     const adminToken = req.headers.get("x-admin-token");
     const portalToken = req.headers.get("x-portal-token");
     const isAdmin = adminToken ? await verifyAdminToken(adminToken, SERVICE_ROLE) : false;
-    const claims = portalToken ? await verifyPortalToken(portalToken, SERVICE_ROLE) : null;
+    let claims = portalToken ? await verifyPortalToken(portalToken, SERVICE_ROLE) : null;
 
     // ─────────── ADMIN ACTIONS ───────────
     if (action.startsWith("admin_")) {
@@ -171,6 +171,11 @@ serve(async (req) => {
     }
 
     // ─────────── REP / PARTNER ACTIONS ───────────
+    // Allow admin token to act as a preview rep so the admin dashboard
+    // iframe preview of the portal works without a real rep code.
+    if (!claims && isAdmin) {
+      claims = { code: "ADMIN_PREVIEW", role: "partner", exp: Date.now() + 60_000 } as any;
+    }
     if (!claims) return json(401, { error: "Invalid portal session" });
 
     if (action === "list_trainings") {

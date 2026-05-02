@@ -73,8 +73,12 @@ async function callWith(headers: Record<string, string>, action: string, payload
 
 function repHeaders() {
   const token = getPortalToken();
-  if (!token) throw new Error("No portal session");
-  return { "x-portal-token": token };
+  const adminToken = getAdminToken();
+  if (!token && !adminToken) throw new Error("No portal session");
+  const h: Record<string, string> = {};
+  if (token) h["x-portal-token"] = token;
+  if (adminToken) h["x-admin-token"] = adminToken;
+  return h;
 }
 
 function adminHeaders() {
