@@ -100,6 +100,8 @@ export const repTraining = {
 // ─── Admin API ───
 export const adminTraining = {
   list: () => callWith(adminHeaders(), "admin_list_trainings") as Promise<{ trainings: Training[] }>,
+  get: (id: string) =>
+    callWith(adminHeaders(), "admin_get_training", { id }) as Promise<{ training: Training; questions: TrainingQuestion[] }>,
   save: (training: Partial<Training> & { id?: string }, questions: Array<Partial<TrainingQuestion>>) =>
     callWith(adminHeaders(), "admin_save_training", { training, questions }) as Promise<{ id: string }>,
   remove: (id: string) => callWith(adminHeaders(), "admin_delete_training", { id }) as Promise<{ ok: true }>,
