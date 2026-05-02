@@ -1,6 +1,7 @@
 // Client wrapper for the per-rep workspace (settings, notes, history) edge function.
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 
 export interface RepLibraryItem {
   id: string;
