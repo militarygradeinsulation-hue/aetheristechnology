@@ -25,6 +25,8 @@ import { CommissionStructurePanel } from '@/components/admin/CommissionStructure
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
+import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { CalendarDays } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
@@ -44,7 +46,7 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 
-type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
@@ -213,6 +215,7 @@ const PortalPage: React.FC = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
+    { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
@@ -441,6 +444,8 @@ const PortalPage: React.FC = () => {
         )}
 
         {/* PLAYBOOK */}
+        {tab === 'calendar' && <RepCalendarView isAdmin={false} />}
+
         {tab === 'playbook' && <PortalPlaybook />}
 
         {tab === 'training' && <TrainingPanel repName={profile?.rep_name} />}
