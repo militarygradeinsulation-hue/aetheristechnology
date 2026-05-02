@@ -74,7 +74,7 @@ serve(async (req) => {
       const code = String(body.code || "").trim();
       const rep_name = String(body.rep_name || "").trim();
       const rep_email = body.rep_email ? String(body.rep_email).trim() : null;
-      const commission_rate = Number.isFinite(Number(body.commission_rate)) ? Number(body.commission_rate) : 0.10;
+      const commission_rate = Number.isFinite(Number(body.commission_rate)) ? Number(body.commission_rate) : 0.15;
       const role = body.role === "partner" ? "partner" : "rep";
       if (!/^\d{4,12}$/.test(code)) return json(400, { error: "Code must be 4-12 digits" });
       if (!rep_name) return json(400, { error: "Name required" });
