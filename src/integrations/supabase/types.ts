@@ -2663,6 +2663,71 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_calendar_events: {
+        Row: {
+          admin_notes: string | null
+          all_day: boolean
+          body: string | null
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          end_at: string | null
+          id: string
+          kind: string
+          lead_id: string | null
+          rep_code: string
+          rep_notes: string | null
+          start_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          all_day?: boolean
+          body?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          end_at?: string | null
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          rep_code: string
+          rep_notes?: string | null
+          start_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          all_day?: boolean
+          body?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          end_at?: string | null
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          rep_code?: string
+          rep_notes?: string | null
+          start_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_calendar_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_codes: {
         Row: {
           code: string
