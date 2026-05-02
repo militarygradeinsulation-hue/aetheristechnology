@@ -99,19 +99,33 @@ export const AdminTrainingPanel: React.FC = () => {
   };
 
   const editExisting = async (t: Training) => {
-    setDraft({
-      id: t.id,
-      title: t.title,
-      description: t.description ?? "",
-      kind: t.kind,
-      passing_score: t.passing_score,
-      attachments: t.attachments ?? [],
-      reference_text: (t as any).reference_text ?? "",
-      is_published: t.is_published,
-      order_index: t.order_index,
-    });
-    setDraftQuestions([]);
-    setTab("edit");
+    try {
+      const { training, questions } = await adminTraining.get(t.id);
+      setDraft({
+        id: training.id,
+        title: training.title,
+        description: training.description ?? "",
+        kind: training.kind,
+        passing_score: training.passing_score,
+        attachments: training.attachments ?? [],
+        reference_text: (training as any).reference_text ?? "",
+        is_published: training.is_published,
+        order_index: training.order_index,
+      });
+      setDraftQuestions(
+        (questions ?? []).map((q) => ({
+          id: q.id,
+          question_text: q.question_text,
+          options: q.options ?? undefined,
+          correct_index: q.correct_index ?? undefined,
+          rubric: q.rubric ?? undefined,
+          weight: q.weight,
+        })),
+      );
+      setTab("edit");
+    } catch (e) {
+      toast({ title: "Could not load", description: (e as Error).message, variant: "destructive" });
+    }
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
