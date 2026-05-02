@@ -3093,6 +3093,42 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_time_entries: {
+        Row: {
+          clock_in_at: string
+          clock_out_at: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          note: string | null
+          rep_code: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          clock_in_at?: string
+          clock_out_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          note?: string | null
+          rep_code: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          clock_in_at?: string
+          clock_out_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          note?: string | null
+          rep_code?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       retargeting_settings: {
         Row: {
           enabled: boolean
