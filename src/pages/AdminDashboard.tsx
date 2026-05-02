@@ -31,6 +31,7 @@ import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
+import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
 
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 
@@ -139,7 +140,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook' | 'linkedin' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'seo' | 'retargeting' | 'visitors' | 'outlook' | 'linkedin' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars'>('overview');
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
@@ -511,7 +512,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['insights', 'events', 'commissions', 'portal', 'engine', 'crm', 'forecast', 'submissions', 'linkedin', 'library', 'tools', 'outlook', 'overview', 'playbook', 'training', 'retargeting', 'seo', 'team', 'visitors'] as const).map(tab => (
+          {(['insights', 'events', 'commissions', 'portal', 'engine', 'crm', 'forecast', 'submissions', 'linkedin', 'library', 'tools', 'outlook', 'overview', 'playbook', 'training', 'calendars', 'retargeting', 'seo', 'team', 'visitors'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -525,7 +526,7 @@ const AdminDashboard: React.FC = () => {
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'forecast' ? '🔮 Forecast Center' : tab === 'crm' ? '🗂 CRM' : tab === 'commissions' ? '💰 Commissions' : tab === 'portal' ? '🏢 Company Portal' : tab === 'playbook' ? '📘 Rep Playbook' : tab === 'training' ? '🎓 Team Training' : tab === 'team' ? '💬 Team Messages' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'engine' ? '⚡ Content Engine' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
+              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'forecast' ? '🔮 Forecast Center' : tab === 'crm' ? '🗂 CRM' : tab === 'commissions' ? '💰 Commissions' : tab === 'portal' ? '🏢 Company Portal' : tab === 'playbook' ? '📘 Rep Playbook' : tab === 'training' ? '🎓 Team Training' : tab === 'calendars' ? '📅 Rep Calendars' : tab === 'team' ? '💬 Team Messages' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'library' ? '📚 My Library' : tab === 'engine' ? '⚡ Content Engine' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : tab === 'retargeting' ? '🎯 Retargeting' : tab === 'visitors' ? '🏢 Visitor Companies' : tab === 'linkedin' ? '🔗 LinkedIn' : '📤 Outlook Sync'}
             </button>
           ))}
         </div>
@@ -816,6 +817,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'playbook' && <RepPlaybookPanel />}
 
         {activeTab === 'training' && <AdminTrainingPanel />}
+        {activeTab === 'calendars' && <AdminRepCalendarPanel />}
 
         {/* Team Messages (admin can edit/delete/pin) */}
         {activeTab === 'team' && <TeamMessageBoard isAdmin authorName="Admin" />}
