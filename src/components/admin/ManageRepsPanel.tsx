@@ -33,17 +33,57 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   const fmt = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
   const maskCode = (c: string) => showCodes ? c : `••••${c.slice(-2)}`;
 
+  const EMAIL_DOMAIN = "aetheris.technology";
+
+  const slugifyName = (name: string) => {
+    const base = name
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s.-]/g, "")
+      .trim()
+      .replace(/\s+/g, ".");
+    return base || "rep";
+  };
+
+  const generateUniqueCode = (): string => {
+    const used = new Set(rows.map(r => r.code));
+    for (let i = 0; i < 50; i++) {
+      const c = String(Math.floor(100000 + Math.random() * 900000));
+      if (!used.has(c)) return c;
+    }
+    return String(Date.now()).slice(-6);
+  };
+
+  const generateUniqueEmail = (name: string): string => {
+    const slug = slugifyName(name);
+    const usedEmails = new Set(rows.map(r => (r.rep_email || "").toLowerCase()));
+    let candidate = `${slug}@${EMAIL_DOMAIN}`;
+    let n = 2;
+    while (usedEmails.has(candidate.toLowerCase())) {
+      candidate = `${slug}${n}@${EMAIL_DOMAIN}`;
+      n++;
+    }
+    return candidate;
+  };
+
   const onCreate = async () => {
+    const name = draft.rep_name.trim();
+    if (!name) {
+      toast({ title: "Name required", description: "Enter the rep's full name.", variant: "destructive" });
+      return;
+    }
     try {
+      const code = draft.code.trim() || generateUniqueCode();
+      const email = draft.rep_email.trim() || generateUniqueEmail(name);
       await createRepCode({
-        code: draft.code.trim(),
-        rep_name: draft.rep_name.trim(),
-        rep_email: draft.rep_email.trim() || null,
+        code,
+        rep_name: name,
+        rep_email: email,
         commission_rate: Number(draft.commission_rate) || 0.10,
         role: draft.role,
       });
       setDraft({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" });
-      toast({ title: "Rep added" });
+      toast({ title: "Rep added", description: `Code ${code} • ${email}` });
       await load();
     } catch (e) { toast({ title: "Could not add", description: (e as Error).message, variant: "destructive" }); }
   };
