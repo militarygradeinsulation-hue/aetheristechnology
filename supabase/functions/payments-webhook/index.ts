@@ -88,13 +88,15 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     });
     if (error) console.error("Insert purchase error:", error);
 
-    // Track rep commission
+    // Track rep + partner commission (3-way split: company 70 / rep 15 / partner 15)
     if (repCode && session.amount_total) {
       const amount = session.amount_total;
-      // Fetch commission rate
+      const PARTNER_RATE = 0.15;
+
+      // Fetch rep commission rate
       const { data: rep } = await supabase
         .from("rep_codes")
-        .select("commission_rate")
+        .select("commission_rate, role")
         .eq("code", repCode)
         .eq("is_active", true)
         .maybeSingle();
@@ -106,13 +108,34 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
           _sales: amount,
           _commission: commission,
         }).then(({ error: rpcErr }) => {
-          if (rpcErr) {
-            // Fallback: direct update won't work via rpc, log it
-            console.error("Rep commission rpc error:", rpcErr);
-          } else {
-            console.log("Rep commission tracked:", repCode, "amount:", amount, "commission:", commission);
-          }
+          if (rpcErr) console.error("Rep commission rpc error:", rpcErr);
+          else console.log("Rep commission tracked:", repCode, "amount:", amount, "commission:", commission);
         });
+
+        // Pay partner override — 15% of every sale, including recurring.
+        // Skip if the rep WAS the partner (no double-dip).
+        if (rep.role !== "partner") {
+          const { data: partner } = await supabase
+            .from("rep_codes")
+            .select("code")
+            .eq("role", "partner")
+            .eq("is_active", true)
+            .maybeSingle();
+
+          if (partner?.code) {
+            const partnerCommission = Math.floor(amount * PARTNER_RATE);
+            await supabase.rpc("increment_rep_sales" as any, {
+              _code: partner.code,
+              _sales: 0, // don't double-count gross sales
+              _commission: partnerCommission,
+            }).then(({ error: rpcErr }) => {
+              if (rpcErr) console.error("Partner commission rpc error:", rpcErr);
+              else console.log("Partner commission tracked:", partner.code, "amount:", amount, "commission:", partnerCommission);
+            });
+          } else {
+            console.warn("No active partner found — partner override unpaid for sale by", repCode);
+          }
+        }
       }
     }
 
