@@ -441,6 +441,8 @@ const PortalPage: React.FC = () => {
         {/* PLAYBOOK */}
         {tab === 'playbook' && <PortalPlaybook />}
 
+        {tab === 'training' && <TrainingPanel repName={profile?.rep_name} />}
+
         {tab === 'team' && <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />}
 
         {/* WORKSPACE */}
