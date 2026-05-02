@@ -18,7 +18,8 @@ import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import { BookOpen, MessageSquare } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap } from 'lucide-react';
+import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
@@ -42,7 +43,7 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 
-type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
@@ -214,6 +215,7 @@ const PortalPage: React.FC = () => {
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
@@ -438,6 +440,8 @@ const PortalPage: React.FC = () => {
 
         {/* PLAYBOOK */}
         {tab === 'playbook' && <PortalPlaybook />}
+
+        {tab === 'training' && <TrainingPanel repName={profile?.rep_name} />}
 
         {tab === 'team' && <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />}
 
