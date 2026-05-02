@@ -68,6 +68,19 @@ serve(async (req) => {
         return json(200, { trainings: data ?? [] });
       }
 
+      if (action === "admin_get_training") {
+        const id = String(body.id ?? "");
+        if (!id) return json(400, { error: "id required" });
+        const { data: training, error } = await supabase.from("trainings").select("*").eq("id", id).maybeSingle();
+        if (error) return json(500, { error: error.message });
+        const { data: questions } = await supabase
+          .from("training_questions")
+          .select("*")
+          .eq("training_id", id)
+          .order("order_index", { ascending: true });
+        return json(200, { training, questions: questions ?? [] });
+      }
+
       if (action === "admin_save_training") {
         const t = body.training ?? {};
         const payload = {
