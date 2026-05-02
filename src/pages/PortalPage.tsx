@@ -22,6 +22,8 @@ import { BookOpen, MessageSquare } from 'lucide-react';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
+import { RepClockWidget } from '@/components/portal/RepClockWidget';
+import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
