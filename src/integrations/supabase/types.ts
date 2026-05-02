@@ -2702,6 +2702,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_daily_checklist: {
+        Row: {
+          blog_posted: boolean
+          connections_added: number
+          created_at: string
+          for_date: string
+          id: string
+          notifications_reposted: boolean
+          rep_code: string
+          updated_at: string
+        }
+        Insert: {
+          blog_posted?: boolean
+          connections_added?: number
+          created_at?: string
+          for_date?: string
+          id?: string
+          notifications_reposted?: boolean
+          rep_code: string
+          updated_at?: string
+        }
+        Update: {
+          blog_posted?: boolean
+          connections_added?: number
+          created_at?: string
+          for_date?: string
+          id?: string
+          notifications_reposted?: boolean
+          rep_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rep_idea_of_day: {
         Row: {
           body: string
