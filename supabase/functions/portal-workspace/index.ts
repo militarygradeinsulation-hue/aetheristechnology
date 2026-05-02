@@ -47,7 +47,13 @@ serve(async (req) => {
 
   try {
     const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
+    let claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
+    if (!claims) {
+      const adminToken = req.headers.get("x-admin-token");
+      if (adminToken && (await verifyAdminToken(adminToken, secret))) {
+        claims = { code: "ADMIN_PREVIEW", role: "partner", exp: Date.now() + 60_000 } as PortalClaims;
+      }
+    }
     if (!claims) return jsonResp({ error: "Unauthorized" }, 401);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, secret);
