@@ -33,17 +33,57 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   const fmt = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
   const maskCode = (c: string) => showCodes ? c : `••••${c.slice(-2)}`;
 
+  const EMAIL_DOMAIN = "aetheris.technology";
+
+  const slugifyName = (name: string) => {
+    const base = name
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s.-]/g, "")
+      .trim()
+      .replace(/\s+/g, ".");
+    return base || "rep";
+  };
+
+  const generateUniqueCode = (): string => {
+    const used = new Set(rows.map(r => r.code));
+    for (let i = 0; i < 50; i++) {
+      const c = String(Math.floor(100000 + Math.random() * 900000));
+      if (!used.has(c)) return c;
+    }
+    return String(Date.now()).slice(-6);
+  };
+
+  const generateUniqueEmail = (name: string): string => {
+    const slug = slugifyName(name);
+    const usedEmails = new Set(rows.map(r => (r.rep_email || "").toLowerCase()));
+    let candidate = `${slug}@${EMAIL_DOMAIN}`;
+    let n = 2;
+    while (usedEmails.has(candidate.toLowerCase())) {
+      candidate = `${slug}${n}@${EMAIL_DOMAIN}`;
+      n++;
+    }
+    return candidate;
+  };
+
   const onCreate = async () => {
+    const name = draft.rep_name.trim();
+    if (!name) {
+      toast({ title: "Name required", description: "Enter the rep's full name.", variant: "destructive" });
+      return;
+    }
     try {
+      const code = draft.code.trim() || generateUniqueCode();
+      const email = draft.rep_email.trim() || generateUniqueEmail(name);
       await createRepCode({
-        code: draft.code.trim(),
-        rep_name: draft.rep_name.trim(),
-        rep_email: draft.rep_email.trim() || null,
+        code,
+        rep_name: name,
+        rep_email: email,
         commission_rate: Number(draft.commission_rate) || 0.10,
         role: draft.role,
       });
       setDraft({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" });
-      toast({ title: "Rep added" });
+      toast({ title: "Rep added", description: `Code ${code} • ${email}` });
       await load();
     } catch (e) { toast({ title: "Could not add", description: (e as Error).message, variant: "destructive" }); }
   };
@@ -87,18 +127,21 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
 
         {/* Add new */}
         <div className="rounded-md border border-border/60 p-3 bg-muted/20">
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Add a rep</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Add a rep</div>
+          <div className="text-[11px] text-muted-foreground mb-2">
+            Just enter a name — we'll auto-generate a 6-digit rep ID and an <span className="font-mono">@aetheris.technology</span> email. You can override either field if you want.
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
-            <Input placeholder="6-digit code" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
-            <Input placeholder="Full name" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
-            <Input placeholder="Email (optional)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
+            <Input placeholder="Code (auto)" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
+            <Input placeholder="Full name (required)" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
+            <Input placeholder="Email (auto)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
             <Input placeholder="Rate (0.10)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} />
             <div className="flex gap-2">
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={draft.role} onChange={e => setDraft(s => ({ ...s, role: e.target.value as "rep" | "partner" }))}>
                 <option value="rep">rep</option>
                 <option value="partner">partner</option>
               </select>
-              <Button size="sm" onClick={onCreate} disabled={!draft.code || !draft.rep_name}><Plus className="w-3.5 h-3.5" /></Button>
+              <Button size="sm" onClick={onCreate} disabled={!draft.rep_name.trim()}><Plus className="w-3.5 h-3.5" /></Button>
             </div>
           </div>
         </div>
