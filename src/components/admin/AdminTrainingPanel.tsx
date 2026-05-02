@@ -260,11 +260,6 @@ export const AdminTrainingPanel: React.FC = () => {
 
         {tab === "edit" && (
           <div className="space-y-4">
-            {draft.id && (
-              <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground">
-                Editing existing training. <strong>Note:</strong> question list isn't pre-loaded — re-add them or leave empty to keep current questions only if you re-save with an empty array (which wipes them). For safety, only re-save questions when you intentionally want to replace them.
-              </div>
-            )}
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>Title</Label>
