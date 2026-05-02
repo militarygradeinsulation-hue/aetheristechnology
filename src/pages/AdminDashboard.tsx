@@ -32,6 +32,7 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
 import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
+import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
 
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 
