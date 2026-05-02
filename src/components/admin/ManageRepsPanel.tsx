@@ -23,6 +23,49 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   const [showCodes, setShowCodes] = useState(false);
   const [draft, setDraft] = useState({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" as "rep" | "partner" });
   const [editing, setEditing] = useState<Record<string, Partial<RepCodeRow>>>({});
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [testingId, setTestingId] = useState<string | null>(null);
+
+  const onBulkGenerateEmails = async (overwrite = false) => {
+    if (overwrite && !confirm("Overwrite ALL existing rep emails with auto-generated ones? This cannot be undone.")) return;
+    setBulkBusy(true);
+    try {
+      const r = await backfillRepEmails(overwrite);
+      toast({
+        title: overwrite ? "All emails regenerated" : "Missing emails generated",
+        description: `${r.updated} of ${r.total_candidates} updated.`,
+      });
+      await load();
+    } catch (e) {
+      toast({ title: "Bulk generate failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const onSendTest = async (id: string, name: string, email: string | null) => {
+    if (!email) {
+      toast({ title: "No email on file", description: `Generate one for ${name} first.`, variant: "destructive" });
+      return;
+    }
+    const override = prompt(
+      `Send a test rep-welcome email.\n\nLeave as-is to send to:\n${email}\n\nOr enter a different inbox you can actually check (e.g. your personal email):`,
+      email,
+    );
+    if (override === null) return;
+    setTestingId(id);
+    try {
+      const res = await sendRepTestEmail(id, override.trim() && override.trim() !== email ? override.trim() : undefined);
+      toast({
+        title: "Test email queued",
+        description: `Sent to ${res.recipient}. Check inbox in ~30s.`,
+      });
+    } catch (e) {
+      toast({ title: "Test failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setTestingId(null);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
