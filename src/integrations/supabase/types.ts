@@ -3687,6 +3687,189 @@ export type Database = {
         }
         Relationships: []
       }
+      training_attempts: {
+        Row: {
+          ai_feedback: string | null
+          answers: Json
+          completed_at: string | null
+          id: string
+          passed: boolean | null
+          per_question_feedback: Json | null
+          rep_code: string
+          score: number | null
+          started_at: string
+          training_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          passed?: boolean | null
+          per_question_feedback?: Json | null
+          rep_code: string
+          score?: number | null
+          started_at?: string
+          training_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          passed?: boolean | null
+          per_question_feedback?: Json | null
+          rep_code?: string
+          score?: number | null
+          started_at?: string
+          training_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_attempts_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_qa: {
+        Row: {
+          admin_answer: string | null
+          ai_answer: string | null
+          created_at: string
+          id: string
+          question: string
+          rep_code: string
+          rep_name: string | null
+          status: string
+          training_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_answer?: string | null
+          ai_answer?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          rep_code: string
+          rep_name?: string | null
+          status?: string
+          training_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_answer?: string | null
+          ai_answer?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          rep_code?: string
+          rep_name?: string | null
+          status?: string
+          training_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_qa_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_questions: {
+        Row: {
+          correct_index: number | null
+          created_at: string
+          id: string
+          options: Json | null
+          order_index: number
+          question_text: string
+          rubric: string | null
+          training_id: string
+          weight: number
+        }
+        Insert: {
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question_text: string
+          rubric?: string | null
+          training_id: string
+          weight?: number
+        }
+        Update: {
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question_text?: string
+          rubric?: string | null
+          training_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_questions_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainings: {
+        Row: {
+          attachments: Json
+          created_at: string
+          created_by_admin: boolean
+          description: string | null
+          id: string
+          is_published: boolean
+          kind: string
+          order_index: number
+          passing_score: number
+          reference_text: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          created_at?: string
+          created_by_admin?: boolean
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          kind?: string
+          order_index?: number
+          passing_score?: number
+          reference_text?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          created_at?: string
+          created_by_admin?: boolean
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          kind?: string
+          order_index?: number
+          passing_score?: number
+          reference_text?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       website_scans: {
         Row: {
           created_at: string
