@@ -815,6 +815,8 @@ const AdminDashboard: React.FC = () => {
         {/* Rep Playbook (schedule, plays library, quotas, idea of day) */}
         {activeTab === 'playbook' && <RepPlaybookPanel />}
 
+        {activeTab === 'training' && <AdminTrainingPanel />}
+
         {/* Team Messages (admin can edit/delete/pin) */}
         {activeTab === 'team' && <TeamMessageBoard isAdmin authorName="Admin" />}
 
