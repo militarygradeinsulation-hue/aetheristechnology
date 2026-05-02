@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Bell, Users, FileText, ExternalLink, Copy, Check, Loader2, Flame, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPortalToken } from "@/lib/portalAuth";
 import {
   fetchDailyChecklist,
   updateDailyChecklist,
@@ -19,11 +20,7 @@ export const DailyHustleCard: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const portalToken = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    const raw = localStorage.getItem("portal_token");
-    return raw || null;
-  }, []);
+  const portalToken = useMemo(() => getPortalToken(), []);
 
   useEffect(() => {
     let alive = true;

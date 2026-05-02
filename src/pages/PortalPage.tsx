@@ -24,6 +24,7 @@ import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
+import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
@@ -276,6 +277,7 @@ const PortalPage: React.FC = () => {
         {/* OVERVIEW */}
         {tab === 'overview' && (
           <div className="space-y-6">
+            <DailyHustleCard />
             <RepClockWidget />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
