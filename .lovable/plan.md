@@ -1,86 +1,54 @@
-## Goal
+# Full-Site Audit & CRM Hardening Plan
 
-The PPTX you uploaded — *The Content Architect's Blueprint* — becomes the **single source of truth** for every word the system writes. Blogs, playbooks, LinkedIn posts, drip emails, rep coaching, and content-engine video scripts all get re-anchored to its 3-phase structure:
+Goal: every button/flow works, every sale and purchase is captured to the backend like a real CRM, and admin has complete visibility.
 
-1. **Phase 1 — Entry Point:** Desire-Based Hook (Dream Outcome + Relatable Character − Constraints)
-2. **Phase 2 — Retention Protocol:** 6 Story Locks (Term Branding, Embedded Truths, Thought Narration, Negative Frames, Loop Openers, Contrast Words)
-3. **Phase 3 — Conversion Sequence:** 5-step Diagnostic (Hook → Mechanism → Translation → Consequence → Operator Close)
+## 1. Audit Pass (read-only sweep)
 
-Plus the operator persona rules (lead with diagnosis not agreement, numbers = authority, name the unseen pattern, zero fluff) and the template bank phrases.
+Walk every surface and log defects to fix in step 2:
 
-Playbooks specifically get a **humanization pass** — less "field manual," more "operator talking to another operator over coffee." Still numbered, still specific, but with breathing room, occasional first-person, and the 6 Story Locks woven in (Thought Narration, Term Branding, Loop Openers).
+- **Public site**: `/`, `/leak-audit`, blog, playbooks, contact, scanner, diagnostic — verify routes, CTAs, forms submit, edge functions return 2xx.
+- **Stripe / Checkout**: products + prices in sandbox, `create-checkout` returns `clientSecret`, embedded checkout mounts, return URL works, `payments-webhook` (sandbox + live) verifies signature, writes to DB, fires commission split (70/15/15 with Brandon at 15%).
+- **Admin Dashboard** tabs: Analytics, Leads, Reps, Partners, Trainings, Calendars, Daily Hustle, Workspace preview, Subscriptions, Sales — confirm each loads with `x-admin-token`.
+- **Rep/Partner Portal** tabs: Dashboard, Leads, Calendar, Daily Hustle, Trainings, Workspace, AI Coach, Time Clock — confirm `x-portal-token` flows.
+- **Edge functions**: list every function, hit each via curl, scan logs for errors over last 24h.
+- **DB schema**: confirm tables exist for `sales`, `purchases`, `commissions`, `leads`, `customers`, `subscriptions`, `rep_codes`, `payouts`, `activity_log`.
 
-## What changes
+## 2. CRM Data Capture (the core ask)
 
-### 1. New shared module: `supabase/functions/_shared/contentBlueprint.ts`
+Make the backend behave like a real CRM. Add/verify:
 
-A single TypeScript export that all generator functions import. Contains:
+- **`customers` table** — created on every checkout (email, name, phone, stripe_customer_id, source, rep_code, partner_code, first_seen, last_seen).
+- **`sales` table** — one row per `checkout.session.completed` and per `invoice.paid` (amount, currency, product, price_id, customer_id, rep_code, partner_code, environment, stripe_session_id, stripe_invoice_id, status, created_at).
+- **`commissions` table** — one row per sale per recipient (company 70 / rep 15 / partner 15), status pending → paid, payout_id.
+- **`activity_log` table** — every meaningful event (lead captured, scan run, diagnostic completed, checkout started, checkout completed, subscription renewed, refund, training assigned, calendar event, etc.) with actor, entity, metadata.
+- **Webhook expansion** in `payments-webhook`: handle `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `charge.refunded`, `customer.subscription.created/updated/deleted`. Each writes to `sales` + `commissions` + `activity_log` and updates `rep_codes.total_sales_cents`.
+- **Lead → Customer linking**: when a lead converts (checkout email matches lead email), stamp `customer_id` on the lead and log conversion event.
 
-- `FORENSIC_BLUEPRINT_PROMPT` — the canonical ~1,200-word prompt fragment encoding all 3 phases, the 6 Story Locks with examples, the Diagnostic Sequence, the Operator Persona checklist, the template bank, and the execution rules from slides 9 & 15.
-- `HUMANIZED_PLAYBOOK_VOICE` — a smaller fragment layered on top for playbook-style content (less mechanical mono labels, more lived-experience phrasing, occasional "Here's what I see when I walk into a $4M shop…" openings).
-- `HOOK_FORMULAS` — the 5 tactical templates from slide 4 (About Me / If I / To You / Can You / He-She) as reusable variables.
-- `STORY_LOCK_REMINDERS` — short bulletpoint reminders the model can be told to apply at minimum 3 of per piece.
+## 3. Admin CRM Views
 
-This file is imported by every content-generating edge function so the blueprint stays in one place. Edits propagate everywhere.
+- **Sales tab**: live feed of every sale with rep/partner, amount, product, environment toggle (sandbox/live), CSV export.
+- **Customers tab**: searchable customer list with lifetime value, sales history, linked leads, linked rep.
+- **Commissions tab**: per-rep + per-partner ledger, pending vs paid, mark-as-paid action, monthly statement export.
+- **Activity feed**: global timeline filtered by rep, customer, or event type.
 
-### 2. Re-anchor existing generator prompts
+## 4. Fix Pass
 
-For each function below, replace the existing system prompt's "voice/tone" section with the blueprint import + a small function-specific layer (length, format, schema) on top:
+For every defect found in step 1, apply fixes in priority order: payment capture → admin visibility → portal UX → public site polish. Re-test each after fix.
 
-- `supabase/functions/generate-blog/index.ts` — long-form blogs
-- `supabase/functions/generate-aeo-blog-batch/index.ts` — AEO blog batch
-- `supabase/functions/generate-playbook/index.ts` — operator playbooks (also gets the humanization layer)
-- `supabase/functions/generate-custom-playbook/index.ts` — client-custom playbooks (humanization layer)
-- `supabase/functions/generate-social-content/index.ts` — LinkedIn posts (5 forensic formats already in place — just add the blueprint reminders so hooks and re-hooks stop drifting)
-- `supabase/functions/content-engine-generate/index.ts` — LinkedIn short-form video scripts (Phase 1 hook + Loop Openers every 20-30 sec are critical here)
-- `supabase/functions/generate-drip-batch/index.ts` — follow-up emails (apply Phase 1 hook to subject lines + Diagnostic Sequence to body)
-- `supabase/functions/admin-rep-playbook/index.ts` — daily rep coaching tips (humanized voice + Operator Persona checklist)
+## 5. Verification
 
-No behavior, schemas, or output shapes change — only the system prompt content.
+- Run a sandbox checkout end-to-end with a rep code → verify row appears in `sales`, 3 rows in `commissions`, `rep_codes.total_sales_cents` increments, activity logged, admin Sales tab shows it.
+- Run a subscription renewal simulation → verify recurring commission row created.
+- Run a refund → verify reversal row + status update.
+- Run linter + security scan, fix criticals.
 
-### 3. Four new playbooks added to the catalog
+## Technical notes
 
-The existing `generate-playbook` function pulls topics from a static list inside `src/lib/adminPlaybook.ts` and/or `src/lib/portalPlaybook.ts`. I'll add 4 new playbook topics modeled directly on the slides, each written in the humanized voice:
+- All new tables get RLS: admins via `is_admin()`, reps via `rep_code` match through portal token claims, service role for webhook writes.
+- Webhook is idempotent via `onConflict: stripe_event_id` on a new `processed_webhook_events` table — Stripe retries won't double-book commissions.
+- `price_id` (human-readable, via `lovable_external_id`) is the join key for tier mapping, never the internal `prod_xxx`.
+- Sandbox vs live stays separated by `environment` column on every payment table.
 
-1. **The Hook Architect's Field Manual** — Phase 1 deep-dive. How to engineer the Subconscious Lock-On for sales calls, intro emails, LinkedIn openers, proposal first lines.
-2. **The Attention Hourglass: 6 Story Locks for Operators** — Phase 2 applied to internal comms, client meetings, written proposals, sales decks. Rehook every 60-90 seconds or lose the room.
-3. **The Diagnostic Sequence Playbook** — Phase 3 as a sales-floor weapon. The 5-step Hook → Mechanism → Translation → Consequence → Operator Close, scripted for cold calls, discovery calls, objection handling.
-4. **The Operator's Voice: How to Sound Like Someone Worth Listening To** — the persona rules from slides 9 & 11. The Old Way / New Way teardowns, lead-with-diagnosis script library, 30 forensic phrases to replace consulting clichés.
+## Deliverable
 
-Each playbook gets:
-- A row in the playbook topic list (`src/lib/adminPlaybook.ts` or wherever topics are seeded)
-- Title, slug, description, target audience, prompt brief (~6-line creative brief that the AI consumes)
-
-### 4. Memory updates
-
-Update `mem://marketing/content-architecture.md` to reference the Forensic Blueprint as the master structure (3 phases) that the 5 LinkedIn formats now sit underneath. Add a new memory `mem://marketing/forensic-blueprint.md` that summarizes the blueprint so future loops don't re-derive it from the PPTX.
-
-## What does NOT change
-
-- No DB schema changes.
-- No UI changes.
-- No new edge functions.
-- Existing post formats (Case File, Leak of the Week, Diagnostic, Operator's Journal, Contrarian) stay — the blueprint sits underneath them as the structural rules each format must obey.
-- No emojis added (slide 10 had them; we don't carry those over — they violate brand).
-
-## Files touched (summary)
-
-```
-NEW   supabase/functions/_shared/contentBlueprint.ts
-EDIT  supabase/functions/generate-blog/index.ts
-EDIT  supabase/functions/generate-aeo-blog-batch/index.ts
-EDIT  supabase/functions/generate-playbook/index.ts
-EDIT  supabase/functions/generate-custom-playbook/index.ts
-EDIT  supabase/functions/generate-social-content/index.ts
-EDIT  supabase/functions/content-engine-generate/index.ts
-EDIT  supabase/functions/generate-drip-batch/index.ts
-EDIT  supabase/functions/admin-rep-playbook/index.ts
-EDIT  src/lib/adminPlaybook.ts        (add 4 new playbook topics)
-NEW   mem://marketing/forensic-blueprint.md
-EDIT  mem://marketing/content-architecture.md
-EDIT  mem://index.md                   (link the new memory)
-```
-
-## Open question
-
-Do you want the 4 new playbooks **generated and saved into the library now** (auto-published as drafts you can review), or just **added to the topic catalog** so they generate on demand the next time you click "Create"? I'll default to topic-catalog-only unless you say otherwise — safer, no surprise content lands in production until you trigger it.
+A defect log of what was broken, the fixes applied, and a confirmation that a test sale flows cleanly from checkout → webhook → sales/commissions/activity → admin dashboard.

@@ -41,6 +41,34 @@ serve(async (req) => {
       );
     }
 
+    if (action === "crm") {
+      const env = body.env || null;
+      let salesQ = supabase.from("sales").select("*").order("occurred_at", { ascending: false }).limit(500);
+      let commQ = supabase.from("commissions").select("*").order("created_at", { ascending: false }).limit(500);
+      if (env) { salesQ = salesQ.eq("environment", env); commQ = commQ.eq("environment", env); }
+      const [salesR, custR, commR, actR] = await Promise.all([
+        salesQ,
+        supabase.from("customers").select("*").order("last_seen_at", { ascending: false }).limit(500),
+        commQ,
+        supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(500),
+      ]);
+      return new Response(JSON.stringify({
+        sales: salesR.data || [], customers: custR.data || [],
+        commissions: commR.data || [], activity: actR.data || [],
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "mark_commission_paid") {
+      const { id, payout_reference } = body;
+      const { error } = await supabase.from("commissions").update({
+        status: "paid", paid_at: new Date().toISOString(), payout_reference: payout_reference || null,
+      }).eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "toggle_read") {
       const { id, is_read } = body;
       if (!id) {
