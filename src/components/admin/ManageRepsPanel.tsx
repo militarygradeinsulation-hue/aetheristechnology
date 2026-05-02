@@ -272,6 +272,18 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
                             <Save className="w-3.5 h-3.5 mr-1" /> Save
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mr-1"
+                          onClick={() => onSendTest(r.id, r.rep_name || r.code, r.rep_email)}
+                          disabled={testingId === r.id}
+                          title="Send a test welcome email"
+                        >
+                          {testingId === r.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <><Send className="w-3.5 h-3.5 mr-1" /> Test</>}
+                        </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => onDelete(r.id, r.rep_name || r.code)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
