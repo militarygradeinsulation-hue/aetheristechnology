@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Plus, Trash2, Save, Users, ShieldAlert } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, Save, Users, ShieldAlert, Mail, Send, Loader2 } from "lucide-react";
 import {
   listRepCodes,
   createRepCode,
   updateRepCode,
   deleteRepCode,
+  backfillRepEmails,
+  sendRepTestEmail,
   type RepCodeRow,
 } from "@/lib/repCodes";
 
