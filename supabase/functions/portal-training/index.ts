@@ -52,7 +52,7 @@ serve(async (req) => {
     const adminToken = req.headers.get("x-admin-token");
     const portalToken = req.headers.get("x-portal-token");
     const isAdmin = adminToken ? await verifyAdminToken(adminToken, SERVICE_ROLE) : false;
-    const claims = portalToken ? await verifyPortalToken(portalToken, SERVICE_ROLE) : null;
+    let claims = portalToken ? await verifyPortalToken(portalToken, SERVICE_ROLE) : null;
 
     // ─────────── ADMIN ACTIONS ───────────
     if (action.startsWith("admin_")) {
