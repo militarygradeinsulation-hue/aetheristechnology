@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Plus, Trash2, Save, Users, ShieldAlert } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, Save, Users, ShieldAlert, Mail, Send, Loader2 } from "lucide-react";
 import {
   listRepCodes,
   createRepCode,
   updateRepCode,
   deleteRepCode,
+  backfillRepEmails,
+  sendRepTestEmail,
   type RepCodeRow,
 } from "@/lib/repCodes";
 
@@ -21,6 +23,49 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   const [showCodes, setShowCodes] = useState(false);
   const [draft, setDraft] = useState({ code: "", rep_name: "", rep_email: "", commission_rate: "0.10", role: "rep" as "rep" | "partner" });
   const [editing, setEditing] = useState<Record<string, Partial<RepCodeRow>>>({});
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [testingId, setTestingId] = useState<string | null>(null);
+
+  const onBulkGenerateEmails = async (overwrite = false) => {
+    if (overwrite && !confirm("Overwrite ALL existing rep emails with auto-generated ones? This cannot be undone.")) return;
+    setBulkBusy(true);
+    try {
+      const r = await backfillRepEmails(overwrite);
+      toast({
+        title: overwrite ? "All emails regenerated" : "Missing emails generated",
+        description: `${r.updated} of ${r.total_candidates} updated.`,
+      });
+      await load();
+    } catch (e) {
+      toast({ title: "Bulk generate failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const onSendTest = async (id: string, name: string, email: string | null) => {
+    if (!email) {
+      toast({ title: "No email on file", description: `Generate one for ${name} first.`, variant: "destructive" });
+      return;
+    }
+    const override = prompt(
+      `Send a test rep-welcome email.\n\nLeave as-is to send to:\n${email}\n\nOr enter a different inbox you can actually check (e.g. your personal email):`,
+      email,
+    );
+    if (override === null) return;
+    setTestingId(id);
+    try {
+      const res = await sendRepTestEmail(id, override.trim() && override.trim() !== email ? override.trim() : undefined);
+      toast({
+        title: "Test email queued",
+        description: `Sent to ${res.recipient}. Check inbox in ~30s.`,
+      });
+    } catch (e) {
+      toast({ title: "Test failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setTestingId(null);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -112,9 +157,18 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
           <Users className="w-4 h-4 text-amber" /> Manage Sales Reps
           <Badge variant="outline" className="ml-2 text-[10px] uppercase">{scope === "partner" ? "Partner View" : "Admin"}</Badge>
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setShowCodes(s => !s)}>
-          {showCodes ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Hide codes</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Reveal codes</>}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => onBulkGenerateEmails(false)} disabled={bulkBusy}>
+            {bulkBusy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Mail className="w-3.5 h-3.5 mr-1" />}
+            Generate emails for all reps
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onBulkGenerateEmails(true)} disabled={bulkBusy}>
+            Regenerate all
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setShowCodes(s => !s)}>
+            {showCodes ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Hide codes</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Reveal codes</>}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground flex items-start gap-2">
@@ -218,6 +272,18 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
                             <Save className="w-3.5 h-3.5 mr-1" /> Save
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mr-1"
+                          onClick={() => onSendTest(r.id, r.rep_name || r.code, r.rep_email)}
+                          disabled={testingId === r.id}
+                          title="Send a test welcome email"
+                        >
+                          {testingId === r.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <><Send className="w-3.5 h-3.5 mr-1" /> Test</>}
+                        </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => onDelete(r.id, r.rep_name || r.code)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>

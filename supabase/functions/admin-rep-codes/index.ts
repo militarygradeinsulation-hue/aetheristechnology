@@ -14,6 +14,30 @@ const corsHeaders = {
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const EMAIL_DOMAIN = "aetheris.technology";
+
+function slugifyName(name: string): string {
+  const base = (name || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s.-]/g, "")
+    .trim()
+    .replace(/\s+/g, ".");
+  return base || "rep";
+}
+
+function buildEmail(name: string, takenLower: Set<string>): string {
+  const slug = slugifyName(name);
+  let candidate = `${slug}@${EMAIL_DOMAIN}`;
+  let n = 2;
+  while (takenLower.has(candidate.toLowerCase())) {
+    candidate = `${slug}${n}@${EMAIL_DOMAIN}`;
+    n++;
+  }
+  takenLower.add(candidate.toLowerCase());
+  return candidate;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -89,6 +113,78 @@ serve(async (req) => {
       const { error } = await sb.from("rep_codes").delete().eq("id", id);
       if (error) return json(400, { error: error.message });
       return json(200, { success: true });
+    }
+
+    if (action === "backfill_emails") {
+      const overwrite = body.overwrite === true;
+      const { data: reps, error } = await sb
+        .from("rep_codes")
+        .select("id, rep_name, rep_email");
+      if (error) return json(400, { error: error.message });
+
+      const taken = new Set<string>(
+        (reps || [])
+          .map(r => (r.rep_email || "").toLowerCase())
+          .filter(Boolean)
+      );
+
+      const updates: { id: string; rep_name: string; rep_email: string }[] = [];
+      for (const r of reps || []) {
+        const has = !!(r.rep_email && r.rep_email.trim());
+        if (has && !overwrite) continue;
+        if (has && overwrite) taken.delete((r.rep_email || "").toLowerCase());
+        const email = buildEmail(r.rep_name || "rep", taken);
+        updates.push({ id: r.id, rep_name: r.rep_name || "", rep_email: email });
+      }
+
+      const results: { id: string; rep_name: string; rep_email: string; ok: boolean; error?: string }[] = [];
+      for (const u of updates) {
+        const { error: uErr } = await sb.from("rep_codes").update({ rep_email: u.rep_email }).eq("id", u.id);
+        results.push({ ...u, ok: !uErr, error: uErr?.message });
+      }
+      return json(200, { updated: results.filter(r => r.ok).length, total_candidates: updates.length, results });
+    }
+
+    if (action === "send_test_email") {
+      const id = body.id ? String(body.id) : null;
+      const inboxOverride = body.inbox ? String(body.inbox).trim() : null;
+      if (!id) return json(400, { error: "Rep id required" });
+      const { data: rep, error } = await sb
+        .from("rep_codes")
+        .select("id, rep_name, rep_email")
+        .eq("id", id)
+        .maybeSingle();
+      if (error || !rep) return json(404, { error: "Rep not found" });
+
+      const recipient = inboxOverride || rep.rep_email;
+      if (!recipient || !/^\S+@\S+\.\S+$/.test(recipient)) {
+        return json(400, { error: "No valid recipient email on file. Generate one first or provide an inbox override." });
+      }
+
+      // Invoke send-transactional-email
+      const url = `${SUPABASE_URL}/functions/v1/send-transactional-email`;
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SVC}`,
+          "apikey": SVC,
+        },
+        body: JSON.stringify({
+          templateName: "rep-welcome",
+          to: recipient,
+          data: { name: rep.rep_name || "Rep" },
+          idempotencyKey: `rep-test-${rep.id}-${Date.now()}`,
+          purpose: "transactional",
+        }),
+      });
+      const bodyText = await resp.text();
+      let parsed: unknown = bodyText;
+      try { parsed = JSON.parse(bodyText); } catch { /* keep text */ }
+      if (!resp.ok) {
+        return json(502, { error: "Email send failed", status: resp.status, response: parsed });
+      }
+      return json(200, { ok: true, recipient, response: parsed });
     }
 
     return json(400, { error: "Unknown action" });
