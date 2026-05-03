@@ -6,7 +6,8 @@ import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { listNews, type NewsPost } from "@/lib/newsFeed";
 import { Badge } from "@/components/ui/badge";
-import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
+import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
 
 interface IndustryItem {
@@ -44,6 +45,7 @@ const NewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>("all");
+  const [activeItem, setActiveItem] = useState<IndustryItem | null>(null);
 
   const fetchIndustry = async (cat: string) => {
     const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
