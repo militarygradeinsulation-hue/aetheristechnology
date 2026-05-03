@@ -169,8 +169,8 @@ async function refresh(supabase: ReturnType<typeof createClient>) {
   if (trimRows && trimRows.length > 0) {
     await supabase.from("industry_news_cache").delete().in("id", trimRows.map((r: { id: string }) => r.id));
   }
-  await supabase.from("industry_news_meta").upsert({ key: "last_refresh", value: { at: new Date().toISOString(), count: all.length }, updated_at: new Date().toISOString() });
-  return all.length;
+  await supabase.from("industry_news_meta").upsert({ key: "last_refresh", value: { at: new Date().toISOString(), fetched: all.length, deduped: rows.length, saved }, updated_at: new Date().toISOString() });
+  return saved;
 }
 
 serve(async (req) => {
