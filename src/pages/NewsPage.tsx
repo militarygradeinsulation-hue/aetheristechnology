@@ -219,11 +219,9 @@ const NewsPage = () => {
               <div className="lg:col-span-2 space-y-6">
                 {top && (
                   <button onClick={() => openItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
-                    {top.image_url && (
-                      <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                        <img src={top.image_url} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
-                      </div>
-                    )}
+                    <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                      <img src={thumbFor(top)} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...top, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+                    </div>
                     <div className="p-6">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{top.source_label}</Badge>
