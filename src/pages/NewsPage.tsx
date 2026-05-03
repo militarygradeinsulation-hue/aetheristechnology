@@ -318,10 +318,36 @@ const NewsPage = () => {
                   <p className="text-xs text-muted-foreground leading-relaxed">TechCrunch · The Verge · WIRED · MIT Technology Review · OpenAI · Google AI · Anthropic · VentureBeat · HBR · Entrepreneur · HubSpot · Moz · Krebs on Security · BleepingComputer · The Hacker News · Healthcare IT News · Construction Dive · Manufacturing Dive · Supply Chain Dive · American Banker.</p>
                 </div>
 
-                <Link to="/leak-audit" className="block border border-amber/40 rounded-xl bg-amber/5 p-5 hover:border-amber transition">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">While you're here</div>
-                  <div className="font-display text-lg font-semibold text-foreground">Run the free Leak Audit™ <ArrowRight className="w-4 h-4 inline ml-1" /></div>
-                  <p className="text-sm text-muted-foreground mt-1">Find where your business is bleeding money in 2 minutes.</p>
+                <Link to="/leak-audit" className="block border border-amber/40 rounded-xl bg-gradient-to-br from-amber/10 via-card/40 to-background p-5 hover:border-amber transition group relative overflow-hidden">
+                  <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber/10 blur-2xl group-hover:bg-amber/20 transition" />
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2 relative">While you're here</div>
+                  <div className="font-display text-lg font-semibold text-foreground relative leading-tight">Run the free Leak Audit™ <ArrowRight className="w-4 h-4 inline ml-1" /></div>
+                  <p className="text-sm text-muted-foreground mt-1 relative">Find where your business is bleeding money in 2 minutes.</p>
+                  <ul className="mt-3 space-y-1.5 relative">
+                    {[
+                      "7-step forensic scan",
+                      "Personalized leak report",
+                      "No call required",
+                    ].map((b) => (
+                      <li key={b} className="flex items-start gap-2 text-xs text-foreground/80">
+                        <span className="text-amber font-mono mt-0.5">▸</span>{b}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-amber/20 relative">
+                    <div>
+                      <div className="font-display text-base font-bold text-amber leading-none">2m</div>
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mt-1">Avg time</div>
+                    </div>
+                    <div>
+                      <div className="font-display text-base font-bold text-amber leading-none">$0</div>
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mt-1">Cost</div>
+                    </div>
+                    <div>
+                      <div className="font-display text-base font-bold text-amber leading-none">100%</div>
+                      <div className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mt-1">Private</div>
+                    </div>
+                  </div>
                 </Link>
 
                 {/* Operator-led upgrade */}
