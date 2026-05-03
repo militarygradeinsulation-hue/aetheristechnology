@@ -121,6 +121,53 @@ async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
   }
 }
 
+async function fetchOgImage(url: string): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0)", "Accept": "text/html" },
+      signal: ctrl.signal, redirect: "follow",
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    // Only read first 80kb — og:image lives in <head>
+    const reader = res.body?.getReader();
+    if (!reader) return null;
+    let html = ""; let bytes = 0;
+    while (bytes < 80000) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      html += new TextDecoder().decode(value);
+      bytes += value.length;
+      if (html.includes("</head>")) break;
+    }
+    try { await reader.cancel(); } catch { /* ignore */ }
+    const patterns = [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+      /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i,
+    ];
+    for (const p of patterns) { const m = html.match(p); if (m && m[1]) return m[1]; }
+    return null;
+  } catch { return null; }
+}
+
+async function enrichImages(items: { link: string; image_url: string | null }[]): Promise<void> {
+  const concurrency = 8;
+  let idx = 0;
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (idx < items.length) {
+      const i = idx++;
+      const it = items[i];
+      const img = await fetchOgImage(it.link);
+      if (img) it.image_url = img;
+    }
+  });
+  await Promise.all(workers);
+}
+
 async function refresh(supabase: ReturnType<typeof createClient>) {
   const all: Item[] = [];
   // Fetch in parallel, capped concurrency
