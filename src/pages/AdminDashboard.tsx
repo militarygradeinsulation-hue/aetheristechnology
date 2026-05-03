@@ -35,6 +35,7 @@ import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel'
 import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
 
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
+import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
