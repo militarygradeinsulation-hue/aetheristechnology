@@ -452,6 +452,150 @@ const NewsPage = () => {
               </aside>
             </div>
           )}
+
+          {/* ============== FULL-WIDTH CONTENT BELOW THE WIRE ============== */}
+          {!loading && (
+            <div className="mt-20 space-y-16">
+              {/* Section divider */}
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-border" />
+                <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Below the wire · Operator intel</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
+              {/* Common leaks by category */}
+              <section>
+                <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground">Common leaks by category</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">Where money quietly bleeds out, mapped to the news above.</p>
+                  </div>
+                  <Link to="/leak-audit" className="font-mono text-[10px] uppercase tracking-widest text-amber hover:gap-3 inline-flex items-center gap-2 transition-all">
+                    Run the free Leak Audit™ <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {[
+                    { tag: "Funnel", title: "Lead-form abandon ≥ 60%", body: "Most sites lose 6 of 10 visitors at the form. Field count, friction copy, mobile keyboard.", est: "$3K–$18K/mo" },
+                    { tag: "Sales", title: "First-touch > 1 hour", body: "Conversion drops ~7x past the first hour. No SLA, no router, no triage.", est: "$5K–$40K/mo" },
+                    { tag: "Ops", title: "Manual handoffs between tools", body: "Sales → ops → fulfillment via spreadsheets and DMs. Drops, double-work, missed SLAs.", est: "$2K–$25K/mo" },
+                    { tag: "Tech stack", title: "Overlapping SaaS", body: "Two CRMs, three calendars, four chat tools. Paying twice, syncing nothing.", est: "$400–$6K/mo" },
+                    { tag: "Retention", title: "No churn signal", body: "You find out customers left when the invoice doesn't clear. No usage telemetry, no save play.", est: "$8K–$60K/mo" },
+                    { tag: "Cash", title: "AR aging buried", body: "30/60/90 not reviewed weekly. No reminder cadence. Working capital trapped.", est: "$5K–$50K AR" },
+                    { tag: "Marketing", title: "Spend without attribution", body: "Ads run, leads land, nothing tied back to revenue. Optimizing on vibes.", est: "$2K–$30K/mo" },
+                    { tag: "Team", title: "Bottleneck = founder", body: "Every approval, every reply routes through one person. Throughput capped at one human.", est: "Capped growth" },
+                  ].map((leak) => (
+                    <div key={leak.title} className="border border-border rounded-xl bg-card/30 p-5 hover:border-amber/40 transition group">
+                      <div className="flex items-center justify-between mb-3">
+                        <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest">{leak.tag}</Badge>
+                        <span className="font-mono text-[9px] uppercase tracking-widest text-crimson">Active</span>
+                      </div>
+                      <h3 className="font-display text-base font-semibold text-foreground leading-snug group-hover:text-amber transition">{leak.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{leak.body}</p>
+                      <div className="mt-4 pt-3 border-t border-border/60">
+                        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Typical bleed</div>
+                        <div className="font-display text-lg font-bold text-amber leading-none mt-1">{leak.est}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* How to read the wire + Forensic Diagnostic */}
+              <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 border border-border rounded-xl bg-card/30 p-7">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">How to read the wire</div>
+                  <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">Most operators read the news wrong.</h2>
+                  <p className="text-muted-foreground mt-3 leading-relaxed">News is a leak detector, not a horoscope. Every headline is a signal that something in the market just shifted — pricing power, attention, regulation, tooling. The question isn't "is this cool?" — it's <span className="text-foreground">"does this widen or narrow my leaks this week?"</span></p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    {[
+                      { n: "01", t: "Filter to your stack", d: "Ignore anything that doesn't touch your funnel, ops, retention, or cash." },
+                      { n: "02", t: "Map to a leak", d: "If it tightens a leak: act. If it widens one: prepare. Otherwise: skip." },
+                      { n: "03", t: "Pick one move", d: "One change per week beats a backlog of brilliant ideas. Ship it, measure it." },
+                    ].map((s) => (
+                      <div key={s.n} className="border border-border rounded-lg bg-background/40 p-4">
+                        <div className="font-mono text-[10px] text-amber tracking-widest">{s.n}</div>
+                        <div className="font-display text-base font-semibold text-foreground mt-1">{s.t}</div>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{s.d}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="border border-amber/30 rounded-xl bg-gradient-to-br from-amber/10 via-card/40 to-background p-7 relative overflow-hidden">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber/10 blur-3xl" />
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber relative">Operator-led</div>
+                  <div className="font-display text-2xl font-semibold text-foreground mt-2 relative leading-tight">Forensic Diagnostic</div>
+                  <div className="font-display text-4xl font-bold text-amber mt-2 relative">$2,500 <span className="text-sm font-mono text-muted-foreground tracking-widest uppercase">flat</span></div>
+                  <p className="text-sm text-muted-foreground mt-3 relative">A live, operator-led teardown of your funnel, ops, and stack. Full $2,500 applies toward any engagement.</p>
+                  <ul className="mt-4 space-y-1.5 relative">
+                    {["7-step Leak Audit™ on your real data", "Ranked leak report with $/month estimates", "Remediation plan you can run yourself"].map(b => (
+                      <li key={b} className="flex items-start gap-2 text-xs text-foreground/80"><span className="text-amber font-mono mt-0.5">▸</span>{b}</li>
+                    ))}
+                  </ul>
+                  <button onClick={() => setIsContactModalOpen(true)} className="mt-5 w-full px-4 py-3 rounded-lg bg-amber text-background font-mono text-xs uppercase tracking-widest hover:bg-amber/90 transition relative">
+                    Book the diagnostic →
+                  </button>
+                </div>
+              </section>
+
+              {/* FAQ + final CTA */}
+              <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Wire FAQ</div>
+                  <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground mb-6">Questions operators actually ask</h2>
+                  <div className="space-y-3">
+                    {[
+                      { q: "How often does the wire refresh?", a: "Every 30 minutes. Dedupe is automatic across 21 sources, so you don't read the same headline three times." },
+                      { q: "Why are some thumbnails generic?", a: "A few sources block scrapers (OpenAI, BleepingComputer, etc.). We fall back to category-relevant imagery so the grid stays clean." },
+                      { q: "What's the Aetheris Take?", a: "An operator POV on each story — what it means for funnel, ops, retention, and where the leverage points are. Not a summary, an angle." },
+                      { q: "Can I get this as a weekly digest?", a: "Yes. Run the Leak Audit and you're auto-subscribed to the operator dispatch — one email, no fluff, unsubscribe anytime." },
+                      { q: "Do you cover my industry?", a: "If it's healthcare, manufacturing, construction, logistics, finance, SaaS, or services — yes. Use the category filter at the top of the wire." },
+                    ].map((f) => (
+                      <details key={f.q} className="group border border-border rounded-lg bg-card/30 p-4 hover:border-amber/40 transition">
+                        <summary className="cursor-pointer flex items-center justify-between gap-4 list-none">
+                          <span className="font-display text-base font-semibold text-foreground">{f.q}</span>
+                          <span className="font-mono text-amber text-xs group-open:rotate-45 transition-transform">+</span>
+                        </summary>
+                        <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{f.a}</p>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border border-border rounded-xl bg-card/30 p-7 flex flex-col">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Field notes</div>
+                  <div className="font-display text-xl font-semibold text-foreground leading-tight">Get one operator dispatch a week</div>
+                  <p className="text-sm text-muted-foreground mt-2">Real teardowns, real leak math, no engagement bait. Sent only when there's something worth sending.</p>
+                  <ul className="mt-4 space-y-1.5">
+                    {["Anatomy of one real leak per issue", "Tool reviews, not press releases", "Pulled from operator-led engagements"].map(b => (
+                      <li key={b} className="flex items-start gap-2 text-xs text-foreground/80"><span className="text-amber font-mono mt-0.5">▸</span>{b}</li>
+                    ))}
+                  </ul>
+                  <Link to="/leak-audit" className="mt-auto pt-5 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
+                    Subscribe via the audit <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </section>
+
+              {/* Closing operator banner */}
+              <section className="border border-amber/30 rounded-2xl bg-gradient-to-br from-card via-background to-card p-10 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--amber)/0.12),transparent_60%)]" />
+                <div className="relative">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber">Operator doctrine</div>
+                  <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mt-3 leading-[1.05]">Your business is <span className="text-crimson italic">leaking</span>.<br/>You just can't see it from the inside.</h2>
+                  <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">Stop scrolling the wire. Run the 7-step Leak Audit™ in 2 minutes and find out exactly where the money is going.</p>
+                  <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                    <Link to="/leak-audit" className="px-6 py-3 rounded-lg bg-amber text-background font-mono text-xs uppercase tracking-widest hover:bg-amber/90 transition">
+                      Run the free Leak Audit™
+                    </Link>
+                    <button onClick={() => setIsContactModalOpen(true)} className="px-6 py-3 rounded-lg border border-border text-foreground font-mono text-xs uppercase tracking-widest hover:border-amber transition">
+                      Talk to an operator
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
         </div>
       </main>
 
