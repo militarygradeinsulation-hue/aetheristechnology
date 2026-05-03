@@ -2018,6 +2018,66 @@ export type Database = {
         }
         Relationships: []
       }
+      industry_news_cache: {
+        Row: {
+          author: string | null
+          category: string
+          fetched_at: string
+          id: string
+          image_url: string | null
+          link: string
+          published_at: string | null
+          source: string
+          source_label: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          link: string
+          published_at?: string | null
+          source: string
+          source_label: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          author?: string | null
+          category?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          link?: string
+          published_at?: string | null
+          source?: string
+          source_label?: string
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      industry_news_meta: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       lead_drip_settings: {
         Row: {
           daily_per_rep: number
