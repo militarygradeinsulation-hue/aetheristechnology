@@ -105,12 +105,16 @@ const NewsPage = () => {
   const [articleHero, setArticleHero] = useState<string | null>(null);
   const [articleLoading, setArticleLoading] = useState(false);
   const [articleError, setArticleError] = useState<string | null>(null);
+  const [take, setTake] = useState<string | null>(null);
+  const [takeLoading, setTakeLoading] = useState(false);
+  const [takeError, setTakeError] = useState<string | null>(null);
 
   const openItem = async (it: IndustryItem) => {
     setActiveItem(it);
     setArticleBlocks(null);
     setArticleHero(it.image_url || null);
     setArticleError(null);
+    setTake(null); setTakeError(null); setTakeLoading(false);
     setArticleLoading(true);
     try {
       const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
