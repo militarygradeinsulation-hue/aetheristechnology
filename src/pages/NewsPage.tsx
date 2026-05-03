@@ -260,6 +260,63 @@ const NewsPage = () => {
                     Subscribe via audit <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
+
+                {/* The Leak Audit™ 7 steps */}
+                <div className="border border-border rounded-xl bg-card/30 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">The Leak Audit™ · 7 steps</div>
+                  <ol className="space-y-2 text-sm">
+                    {[
+                      "Funnel autopsy",
+                      "Pipeline pressure test",
+                      "Ops & handoff map",
+                      "Tech stack reconciliation",
+                      "Cash & margin trace",
+                      "Team load + bottleneck scan",
+                      "Leak report + remediation plan",
+                    ].map((s, i) => (
+                      <li key={s} className="flex gap-3">
+                        <span className="font-mono text-[10px] text-amber w-5 shrink-0 pt-0.5">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="text-foreground/90">{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Trending categories */}
+                <div className="border border-border rounded-xl bg-card/30 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Jump to a category</div>
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORIES.filter(c => c.id !== "all").map(c => (
+                      <button
+                        key={c.id}
+                        onClick={() => setCategory(c.id)}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest border transition ${
+                          category === c.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:border-amber/40 hover:text-foreground'
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Operator doctrine */}
+                <div className="border border-border rounded-xl bg-card/40 p-5 relative overflow-hidden">
+                  <div className="absolute top-2 right-3 font-display text-6xl text-amber/10 leading-none select-none">"</div>
+                  <p className="font-display text-base text-foreground leading-snug italic relative">
+                    Your business is leaking. You just can't see it from the inside.
+                  </p>
+                  <div className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Aetheris · Operator Doctrine</div>
+                </div>
+
+                {/* Direct line */}
+                <div className="border border-border rounded-xl bg-card/30 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Direct line</div>
+                  <p className="text-sm text-muted-foreground">No forms-and-funnels routine. If it's urgent, talk to an operator.</p>
+                  <button onClick={() => setIsContactModalOpen(true)} className="mt-3 w-full px-4 py-2.5 rounded-lg bg-amber text-background font-mono text-xs uppercase tracking-widest hover:bg-amber/90 transition">
+                    Contact an operator
+                  </button>
+                </div>
               </aside>
             </div>
           )}
