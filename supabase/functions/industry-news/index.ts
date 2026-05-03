@@ -205,6 +205,69 @@ serve(async (req) => {
       return json(200, { items: data || [], last_refresh: meta?.value?.at || null });
     }
 
+    if (action === "fetch_article") {
+      const url = String(body.url || "");
+      if (!url || !/^https?:\/\//i.test(url)) return json(400, { error: "Invalid url" });
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0; +https://aetheris.technology)",
+            "Accept": "text/html,application/xhtml+xml",
+          },
+          signal: ctrl.signal,
+          redirect: "follow",
+        });
+        clearTimeout(t);
+        if (!res.ok) return json(200, { ok: false, status: res.status, content: null });
+        const html = await res.text();
+
+        // Try to find <article> or main content; fall back to <body>
+        let region = "";
+        const articleMatch = html.match(/<article[\s\S]*?<\/article>/i);
+        if (articleMatch) region = articleMatch[0];
+        else {
+          const mainMatch = html.match(/<main[\s\S]*?<\/main>/i);
+          region = mainMatch ? mainMatch[0] : html;
+        }
+
+        // Pull paragraphs and headings
+        const blocks: string[] = [];
+        const regex = /<(p|h[1-3]|li|blockquote)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+        let m: RegExpExecArray | null;
+        while ((m = regex.exec(region)) !== null) {
+          const tag = m[1].toLowerCase();
+          const inner = m[2]
+            .replace(/<style[\s\S]*?<\/style>/gi, "")
+            .replace(/<script[\s\S]*?<\/script>/gi, "")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/&nbsp;/g, " ")
+            .replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&apos;/g, "'")
+            .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+            .replace(/\s+/g, " ")
+            .trim();
+          if (inner.length < 20 && tag === "p") continue;
+          if (inner.length === 0) continue;
+          blocks.push(JSON.stringify({ tag, text: inner }));
+        }
+        // Cap and parse
+        const parsed = blocks.slice(0, 80).map(b => JSON.parse(b));
+        // Hero image
+        const ogImg = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+        const hero = ogImg ? ogImg[1] : null;
+        const siteName = (html.match(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)["']/i) || [])[1] || null;
+        return json(200, { ok: true, blocks: parsed, hero_image: hero, site_name: siteName });
+      } catch (e) {
+        return json(200, { ok: false, error: (e as Error).message });
+      }
+    }
+
     return json(400, { error: "Unknown action" });
   } catch (e) {
     console.error("industry-news error", e);
