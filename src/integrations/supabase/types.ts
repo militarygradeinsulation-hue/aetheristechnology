@@ -2437,6 +2437,57 @@ export type Database = {
           },
         ]
       }
+      news_posts: {
+        Row: {
+          author_name: string
+          body: string
+          category: string | null
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          published: boolean
+          published_at: string | null
+          slug: string
+          summary: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          author_name?: string
+          body?: string
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          slug: string
+          summary?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string
+          summary?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       operator_headshots: {
         Row: {
           created_at: string
