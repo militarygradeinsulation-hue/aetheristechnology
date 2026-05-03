@@ -136,7 +136,7 @@ const NewsPage = () => {
               {/* Main wire */}
               <div className="lg:col-span-2 space-y-6">
                 {top && (
-                  <a href={top.link} target="_blank" rel="noopener noreferrer" className="group block border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
+                  <button onClick={() => setActiveItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
                     {top.image_url && (
                       <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
                         <img src={top.image_url} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
@@ -150,14 +150,14 @@ const NewsPage = () => {
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground group-hover:text-amber transition-colors leading-tight">{top.title}</h2>
                       {top.summary && <p className="text-muted-foreground mt-3 leading-relaxed line-clamp-3">{top.summary}</p>}
-                      <div className="flex items-center gap-2 mt-4 text-amber font-mono text-xs uppercase tracking-widest">Read at source <ExternalLink className="w-3.5 h-3.5" /></div>
+                      <div className="flex items-center gap-2 mt-4 text-amber font-mono text-xs uppercase tracking-widest">Read article <ArrowRight className="w-3.5 h-3.5" /></div>
                     </div>
-                  </a>
+                  </button>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {rest.map(it => (
-                    <a key={it.id} href={it.link} target="_blank" rel="noopener noreferrer" className="group block border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
+                    <button key={it.id} onClick={() => setActiveItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
                       {it.image_url ? (
                         <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
                           <img src={it.image_url} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
@@ -175,7 +175,7 @@ const NewsPage = () => {
                         <h3 className="font-display text-base font-semibold text-foreground group-hover:text-amber transition-colors leading-snug line-clamp-3">{it.title}</h3>
                         {it.published_at && <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">{formatDistanceToNow(new Date(it.published_at), { addSuffix: true })}</p>}
                       </div>
-                    </a>
+                    </button>
                   ))}
                 </div>
 
