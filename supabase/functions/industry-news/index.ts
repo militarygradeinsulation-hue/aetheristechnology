@@ -56,7 +56,7 @@ function stripHtml(s: string): string {
 }
 function pick(xml: string, tag: string): string | null {
   // CDATA-aware
-  const re = new RegExp(`<${tag}[^>]*>([\s\S]*?)<\/${tag}>`, "i");
+  const re = new RegExp(String.raw`<${tag}(?:\s[^>]*)?>([\s\S]*?)<\/${tag}>`, "i");
   const m = xml.match(re);
   if (!m) return null;
   let v = m[1].trim();
@@ -65,7 +65,7 @@ function pick(xml: string, tag: string): string | null {
   return v.trim();
 }
 function pickAttr(xml: string, tag: string, attr: string): string | null {
-  const re = new RegExp(`<${tag}[^>]*\s${attr}="([^"]+)"[^>]*>`, "i");
+  const re = new RegExp(String.raw`<${tag}\b[^>]*\s${attr}="([^"]+)"[^>]*\/?>`, "i");
   const m = xml.match(re); return m ? m[1] : null;
 }
 function extractImage(xml: string): string | null {
