@@ -121,6 +121,53 @@ async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
   }
 }
 
+async function fetchOgImage(url: string): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0)", "Accept": "text/html" },
+      signal: ctrl.signal, redirect: "follow",
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    // Only read first 80kb — og:image lives in <head>
+    const reader = res.body?.getReader();
+    if (!reader) return null;
+    let html = ""; let bytes = 0;
+    while (bytes < 80000) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      html += new TextDecoder().decode(value);
+      bytes += value.length;
+      if (html.includes("</head>")) break;
+    }
+    try { await reader.cancel(); } catch { /* ignore */ }
+    const patterns = [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+      /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i,
+    ];
+    for (const p of patterns) { const m = html.match(p); if (m && m[1]) return m[1]; }
+    return null;
+  } catch { return null; }
+}
+
+async function enrichImages(items: { link: string; image_url: string | null }[]): Promise<void> {
+  const concurrency = 8;
+  let idx = 0;
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (idx < items.length) {
+      const i = idx++;
+      const it = items[i];
+      const img = await fetchOgImage(it.link);
+      if (img) it.image_url = img;
+    }
+  });
+  await Promise.all(workers);
+}
+
 async function refresh(supabase: ReturnType<typeof createClient>) {
   const all: Item[] = [];
   // Fetch in parallel, capped concurrency
@@ -150,6 +197,9 @@ async function refresh(supabase: ReturnType<typeof createClient>) {
     const score = (x: typeof i) => (x.image_url ? 2 : 0) + (x.published_at ? 1 : 0) + Math.min((x.summary?.length || 0) / 100, 2);
     if (score(i) > score(existing)) seen.set(key, { ...i, link: key });
   }
+  // Enrich missing images by fetching og:image from article pages (capped + parallel)
+  const needImg = Array.from(seen.values()).filter(i => !i.image_url).slice(0, 60);
+  await enrichImages(needImg);
   const rows = Array.from(seen.values()).map(i => ({
     source: i.source, source_label: i.source_label, category: i.category,
     title: i.title.slice(0, 500), link: i.link, summary: i.summary,
