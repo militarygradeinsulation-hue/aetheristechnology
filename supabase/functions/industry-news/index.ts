@@ -84,10 +84,13 @@ interface Item {
 
 async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
   try {
-    const res = await fetch(feed.url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0)" }, signal: AbortSignal.timeout(8000) });
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 7000);
+    const res = await fetch(feed.url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0)", "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*" }, signal: ctrl.signal });
+    clearTimeout(t);
     if (!res.ok) { console.warn("feed err", feed.source, res.status); return []; }
     const xml = await res.text();
-    const isAtom = xml.includes("<feed");
+    const isAtom = /<feed[\s>]/i.test(xml) && !/<rss[\s>]/i.test(xml);
     const itemBlocks = isAtom
       ? Array.from(xml.matchAll(/<entry[\s\S]*?<\/entry>/gi)).map(m => m[0])
       : Array.from(xml.matchAll(/<item[\s\S]*?<\/item>/gi)).map(m => m[0]);
@@ -96,9 +99,9 @@ async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
       const title = stripHtml(pick(b, "title") || "");
       let link = "";
       if (isAtom) {
-        link = pickAttr(b, "link", "href") || "";
+        link = pickAttr(b, "link", "href") || stripHtml(pick(b, "link") || "");
       } else {
-        link = stripHtml(pick(b, "link") || "");
+        link = stripHtml(pick(b, "link") || "") || pickAttr(b, "link", "href") || "";
       }
       if (!title || !link) continue;
       const desc = pick(b, isAtom ? "summary" : "description") || pick(b, "content:encoded") || "";
@@ -109,6 +112,7 @@ async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
       const author = stripHtml(pick(b, isAtom ? "author" : "dc:creator") || pick(b, "author") || "") || null;
       items.push({ title, link, summary, image_url: extractImage(b), author, published_at, source: feed.source, source_label: feed.label, category: feed.category });
     }
+    console.log("feed ok", feed.source, "items", items.length);
     return items;
   } catch (e) {
     console.warn("fetch fail", feed.source, (e as Error).message);
