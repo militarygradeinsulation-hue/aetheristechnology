@@ -359,9 +359,9 @@ const NewsPage = () => {
         <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
-              {activeItem.image_url && (
+              {(articleHero || activeItem.image_url) && (
                 <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                  <img src={activeItem.image_url} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
+                  <img src={articleHero || activeItem.image_url || ""} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
                 </div>
               )}
               <div className="p-6 md:p-8">
@@ -373,9 +373,31 @@ const NewsPage = () => {
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">{activeItem.title}</h2>
                 {activeItem.summary && (
-                  <p className="text-muted-foreground mt-4 leading-relaxed text-base">{activeItem.summary}</p>
+                  <p className="text-muted-foreground mt-4 leading-relaxed text-base italic border-l-2 border-amber/40 pl-4">{activeItem.summary}</p>
                 )}
-                <div className="mt-6 p-4 rounded-lg border border-border bg-background/40">
+
+                {/* Article body */}
+                <div className="mt-6">
+                  {articleLoading && (
+                    <div className="flex items-center gap-2 text-muted-foreground py-8"><Loader2 className="w-4 h-4 animate-spin" /> Loading article…</div>
+                  )}
+                  {!articleLoading && articleBlocks && articleBlocks.length > 0 && (
+                    <div className="space-y-4 text-foreground/90 leading-relaxed">
+                      {articleBlocks.map((b, i) => {
+                        if (b.tag === "h1" || b.tag === "h2") return <h3 key={i} className="font-display text-xl font-semibold text-foreground mt-6">{b.text}</h3>;
+                        if (b.tag === "h3") return <h4 key={i} className="font-display text-lg font-semibold text-foreground mt-5">{b.text}</h4>;
+                        if (b.tag === "blockquote") return <blockquote key={i} className="border-l-2 border-amber/50 pl-4 italic text-foreground/80">{b.text}</blockquote>;
+                        if (b.tag === "li") return <li key={i} className="ml-5 list-disc">{b.text}</li>;
+                        return <p key={i} className="text-base">{b.text}</p>;
+                      })}
+                    </div>
+                  )}
+                  {!articleLoading && articleError && (
+                    <p className="text-sm text-muted-foreground py-4">{articleError}</p>
+                  )}
+                </div>
+
+                <div className="mt-8 p-4 rounded-lg border border-border bg-background/40">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Source</div>
                   <p className="text-sm text-muted-foreground break-all">{activeItem.link}</p>
                 </div>
