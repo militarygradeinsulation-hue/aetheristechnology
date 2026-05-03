@@ -18,11 +18,11 @@ const FEEDS: { url: string; source: string; label: string; category: string }[] 
   { url: "https://www.technologyreview.com/feed/", source: "mit_tech_review", label: "MIT Technology Review", category: "ai" },
   { url: "https://openai.com/blog/rss.xml", source: "openai", label: "OpenAI Blog", category: "ai" },
   { url: "https://blog.google/technology/ai/rss/", source: "google_ai", label: "Google AI Blog", category: "ai" },
-  { url: "https://www.anthropic.com/news/rss.xml", source: "anthropic", label: "Anthropic News", category: "ai" },
+  { url: "https://www.anthropic.com/rss.xml", source: "anthropic", label: "Anthropic News", category: "ai" },
   // Business / Startups
   { url: "https://techcrunch.com/feed/", source: "techcrunch_main", label: "TechCrunch", category: "business" },
   { url: "https://www.wired.com/feed/category/business/latest/rss", source: "wired_business", label: "WIRED Business", category: "business" },
-  { url: "https://hbr.org/feed", source: "hbr", label: "Harvard Business Review", category: "business" },
+  { url: "https://feeds.hbr.org/harvardbusiness", source: "hbr", label: "Harvard Business Review", category: "business" },
   { url: "https://feeds.feedburner.com/entrepreneur/latest", source: "entrepreneur", label: "Entrepreneur", category: "business" },
   // Marketing / Sales
   { url: "https://blog.hubspot.com/marketing/rss.xml", source: "hubspot_marketing", label: "HubSpot Marketing", category: "marketing" },
