@@ -327,6 +327,44 @@ const NewsPage = () => {
 
       <Footer />
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+
+      <Dialog open={!!activeItem} onOpenChange={(o) => !o && setActiveItem(null)}>
+        <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
+          {activeItem && (
+            <article className="relative">
+              {activeItem.image_url && (
+                <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                  <img src={activeItem.image_url} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
+                </div>
+              )}
+              <div className="p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{activeItem.source_label}</Badge>
+                  <Badge className="bg-amber/10 text-amber border border-amber/30 font-mono text-[10px] uppercase">{activeItem.category}</Badge>
+                  {activeItem.published_at && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{formatDistanceToNow(new Date(activeItem.published_at), { addSuffix: true })}</span>}
+                  {activeItem.author && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· {activeItem.author}</span>}
+                </div>
+                <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">{activeItem.title}</h2>
+                {activeItem.summary && (
+                  <p className="text-muted-foreground mt-4 leading-relaxed text-base">{activeItem.summary}</p>
+                )}
+                <div className="mt-6 p-4 rounded-lg border border-border bg-background/40">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Source</div>
+                  <p className="text-sm text-muted-foreground break-all">{activeItem.link}</p>
+                </div>
+                <div className="mt-6 flex items-center gap-3 flex-wrap">
+                  <a href={activeItem.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber text-background font-mono text-xs uppercase tracking-widest hover:bg-amber/90 transition">
+                    Read full article <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  <button onClick={() => setActiveItem(null)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-muted-foreground font-mono text-xs uppercase tracking-widest hover:border-amber/40 hover:text-foreground transition">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </article>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
