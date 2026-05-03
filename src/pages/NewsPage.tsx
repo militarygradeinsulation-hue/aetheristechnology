@@ -451,6 +451,33 @@ const NewsPage = () => {
                   <p className="text-muted-foreground mt-4 leading-relaxed text-base italic border-l-2 border-amber/40 pl-4">{activeItem.summary}</p>
                 )}
 
+                {/* Aetheris Take */}
+                <div className="mt-5">
+                  {!take && !takeLoading && (
+                    <button
+                      onClick={loadTake}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-amber/40 bg-amber/10 text-amber font-mono text-xs uppercase tracking-widest hover:bg-amber/20 transition"
+                    >
+                      ▶ Aetheris Take
+                    </button>
+                  )}
+                  {takeLoading && (
+                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Pulling the operator's read…</div>
+                  )}
+                  {takeError && (
+                    <p className="text-sm text-destructive">{takeError}</p>
+                  )}
+                  {take && (
+                    <div className="border border-amber/40 rounded-xl bg-gradient-to-br from-amber/10 to-card/40 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Aetheris Take</span>
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· Operator POV</span>
+                      </div>
+                      <div className="font-display text-base leading-relaxed text-foreground/90 whitespace-pre-wrap">{take}</div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Article body */}
                 <div className="mt-6">
                   {articleLoading && (
