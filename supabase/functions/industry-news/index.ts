@@ -150,6 +150,9 @@ async function refresh(supabase: ReturnType<typeof createClient>) {
     const score = (x: typeof i) => (x.image_url ? 2 : 0) + (x.published_at ? 1 : 0) + Math.min((x.summary?.length || 0) / 100, 2);
     if (score(i) > score(existing)) seen.set(key, { ...i, link: key });
   }
+  // Enrich missing images by fetching og:image from article pages (capped + parallel)
+  const needImg = Array.from(seen.values()).filter(i => !i.image_url).slice(0, 60);
+  await enrichImages(needImg);
   const rows = Array.from(seen.values()).map(i => ({
     source: i.source, source_label: i.source_label, category: i.category,
     title: i.title.slice(0, 500), link: i.link, summary: i.summary,
