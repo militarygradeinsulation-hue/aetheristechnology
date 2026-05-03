@@ -43,10 +43,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
+  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
     { label: 'Home', href: '/', special: true },
-    { label: 'Free Leak Audit™', href: '/leak-audit', tone: 'red' as const },
-    { label: 'Forensic Diagnostic', href: '/services', tone: 'yellow' as const },
+    { label: 'Free Leak Audit™', href: '/leak-audit', tone: 'red' },
+    { label: 'Forensic Diagnostic', href: '/services', tone: 'yellow' },
     { label: 'Industries', href: '/industries' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'News', href: '/news' },
