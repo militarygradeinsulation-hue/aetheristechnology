@@ -436,11 +436,9 @@ const NewsPage = () => {
         <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
-              {(articleHero || activeItem.image_url) && (
-                <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                  <img src={articleHero || activeItem.image_url || ""} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
-                </div>
-              )}
+              <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                <img src={articleHero || thumbFor(activeItem)} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...activeItem, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+              </div>
               <div className="p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
                   <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{activeItem.source_label}</Badge>
