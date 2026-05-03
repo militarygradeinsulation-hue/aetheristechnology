@@ -240,6 +240,7 @@ const NewsPage = () => {
                     <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
                       <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
                         <img src={thumbFor(it)} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...it, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+                      </div>
                       <div className="p-4">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest">{it.source_label}</Badge>
