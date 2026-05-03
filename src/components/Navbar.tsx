@@ -49,6 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Forensic Diagnostic', href: '/services' },
     { label: 'Industries', href: '/industries' },
     { label: 'Field Notes', href: '/blog' },
+    { label: 'News', href: '/news' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'The Operator', href: '/about' },
   ];
