@@ -318,6 +318,40 @@ serve(async (req) => {
       }
     }
 
+    if (action === "aetheris_take") {
+      const title = String(body.title || "").slice(0, 400);
+      const summary = String(body.summary || "").slice(0, 2000);
+      const source = String(body.source_label || "");
+      const category = String(body.category || "");
+      if (!title) return json(400, { error: "Missing title" });
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) return json(500, { error: "AI not configured" });
+      const system = `You are the operator behind Aetheris — a Business Forensics Operator. Tone: blunt, forensic, non-corporate. You speak in first person ("I"). Connect news to operational reality: where business leaks happen — funnel, follow-up, ops handoff, pricing, retention. Avoid hype words ("game-changer", "revolutionary", "leverage synergies"). No bullet lists longer than 4 items. Around 140-200 words. End with one short directive line for the operator-reader.`;
+      const user = `Article (${source} · ${category}):\nTitle: ${title}\nSummary: ${summary}\n\nGive me the Aetheris Take: what this actually means for an operator running a real business right now. What's the leak this exposes or the leverage point most people will miss? Speak from my POV.`;
+      try {
+        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "system", content: system }, { role: "user", content: user }],
+          }),
+        });
+        if (!r.ok) {
+          const t = await r.text();
+          console.error("aetheris_take ai err", r.status, t);
+          if (r.status === 429) return json(429, { error: "Rate limited. Try again in a moment." });
+          if (r.status === 402) return json(402, { error: "AI credits exhausted." });
+          return json(500, { error: "AI request failed" });
+        }
+        const j = await r.json();
+        const text = j?.choices?.[0]?.message?.content || "";
+        return json(200, { ok: true, take: text });
+      } catch (e) {
+        return json(500, { error: (e as Error).message });
+      }
+    }
+
     return json(400, { error: "Unknown action" });
   } catch (e) {
     console.error("industry-news error", e);

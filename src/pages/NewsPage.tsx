@@ -37,6 +37,61 @@ const CATEGORIES: { id: string; label: string }[] = [
   { id: "logistics", label: "Logistics" },
 ];
 
+// Deterministic fallback thumbnails per category (Unsplash). Guarantees every card has an image.
+const FALLBACK_THUMBS: Record<string, string[]> = {
+  ai: [
+    "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=1200&q=70&auto=format&fit=crop",
+  ],
+  business: [
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=70&auto=format&fit=crop",
+  ],
+  marketing: [
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=70&auto=format&fit=crop",
+  ],
+  sales: [
+    "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=1200&q=70&auto=format&fit=crop",
+  ],
+  security: [
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&q=70&auto=format&fit=crop",
+  ],
+  finance: [
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=70&auto=format&fit=crop",
+  ],
+  healthcare: [
+    "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&q=70&auto=format&fit=crop",
+  ],
+  manufacturing: [
+    "https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=70&auto=format&fit=crop",
+  ],
+  construction: [
+    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1200&q=70&auto=format&fit=crop",
+  ],
+  logistics: [
+    "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=70&auto=format&fit=crop",
+  ],
+};
+const DEFAULT_THUMBS = [
+  "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&q=70&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=1200&q=70&auto=format&fit=crop",
+];
+function thumbFor(item: { id: string; category: string; image_url: string | null }): string {
+  if (item.image_url) return item.image_url;
+  const pool = FALLBACK_THUMBS[item.category] || DEFAULT_THUMBS;
+  let h = 0;
+  for (let i = 0; i < item.id.length; i++) h = (h * 31 + item.id.charCodeAt(i)) | 0;
+  return pool[Math.abs(h) % pool.length];
+}
+
 const NewsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [posts, setPosts] = useState<NewsPost[]>([]);
@@ -50,12 +105,16 @@ const NewsPage = () => {
   const [articleHero, setArticleHero] = useState<string | null>(null);
   const [articleLoading, setArticleLoading] = useState(false);
   const [articleError, setArticleError] = useState<string | null>(null);
+  const [take, setTake] = useState<string | null>(null);
+  const [takeLoading, setTakeLoading] = useState(false);
+  const [takeError, setTakeError] = useState<string | null>(null);
 
   const openItem = async (it: IndustryItem) => {
     setActiveItem(it);
     setArticleBlocks(null);
     setArticleHero(it.image_url || null);
     setArticleError(null);
+    setTake(null); setTakeError(null); setTakeLoading(false);
     setArticleLoading(true);
     try {
       const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
@@ -71,6 +130,32 @@ const NewsPage = () => {
       setArticleError("Couldn't load the article right now.");
     } finally {
       setArticleLoading(false);
+    }
+  };
+
+  const loadTake = async () => {
+    if (!activeItem || takeLoading || take) return;
+    setTakeLoading(true); setTakeError(null);
+    try {
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "aetheris_take",
+          title: activeItem.title,
+          summary: activeItem.summary || "",
+          source_label: activeItem.source_label,
+          category: activeItem.category,
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.ok) throw new Error(j.error || "Failed");
+      setTake(j.take || "");
+    } catch (e) {
+      setTakeError((e as Error).message || "Couldn't generate the Aetheris Take.");
+    } finally {
+      setTakeLoading(false);
     }
   };
 
@@ -164,11 +249,9 @@ const NewsPage = () => {
               <div className="lg:col-span-2 space-y-6">
                 {top && (
                   <button onClick={() => openItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
-                    {top.image_url && (
-                      <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                        <img src={top.image_url} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
-                      </div>
-                    )}
+                    <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                      <img src={thumbFor(top)} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...top, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+                    </div>
                     <div className="p-6">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{top.source_label}</Badge>
@@ -185,15 +268,9 @@ const NewsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {rest.map(it => (
                     <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
-                      {it.image_url ? (
-                        <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
-                          <img src={it.image_url} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
-                        </div>
-                      ) : (
-                        <div className="aspect-[16/10] flex items-center justify-center bg-gradient-to-br from-secondary/30 to-card/40">
-                          <Newspaper className="w-8 h-8 text-muted-foreground/50" />
-                        </div>
-                      )}
+                      <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
+                        <img src={thumbFor(it)} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...it, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+                      </div>
                       <div className="p-4">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest">{it.source_label}</Badge>
@@ -359,11 +436,9 @@ const NewsPage = () => {
         <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
-              {(articleHero || activeItem.image_url) && (
-                <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                  <img src={articleHero || activeItem.image_url || ""} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
-                </div>
-              )}
+              <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                <img src={articleHero || thumbFor(activeItem)} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...activeItem, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+              </div>
               <div className="p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
                   <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{activeItem.source_label}</Badge>
@@ -375,6 +450,33 @@ const NewsPage = () => {
                 {activeItem.summary && (
                   <p className="text-muted-foreground mt-4 leading-relaxed text-base italic border-l-2 border-amber/40 pl-4">{activeItem.summary}</p>
                 )}
+
+                {/* Aetheris Take */}
+                <div className="mt-5">
+                  {!take && !takeLoading && (
+                    <button
+                      onClick={loadTake}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-amber/40 bg-amber/10 text-amber font-mono text-xs uppercase tracking-widest hover:bg-amber/20 transition"
+                    >
+                      ▶ Aetheris Take
+                    </button>
+                  )}
+                  {takeLoading && (
+                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Pulling the operator's read…</div>
+                  )}
+                  {takeError && (
+                    <p className="text-sm text-destructive">{takeError}</p>
+                  )}
+                  {take && (
+                    <div className="border border-amber/40 rounded-xl bg-gradient-to-br from-amber/10 to-card/40 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Aetheris Take</span>
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· Operator POV</span>
+                      </div>
+                      <div className="font-display text-base leading-relaxed text-foreground/90 whitespace-pre-wrap">{take}</div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Article body */}
                 <div className="mt-6">
