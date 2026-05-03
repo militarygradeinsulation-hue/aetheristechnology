@@ -6,7 +6,8 @@ import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { listNews, type NewsPost } from "@/lib/newsFeed";
 import { Badge } from "@/components/ui/badge";
-import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
+import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
 
 interface IndustryItem {
@@ -44,6 +45,7 @@ const NewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>("all");
+  const [activeItem, setActiveItem] = useState<IndustryItem | null>(null);
 
   const fetchIndustry = async (cat: string) => {
     const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
@@ -134,7 +136,7 @@ const NewsPage = () => {
               {/* Main wire */}
               <div className="lg:col-span-2 space-y-6">
                 {top && (
-                  <a href={top.link} target="_blank" rel="noopener noreferrer" className="group block border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
+                  <button onClick={() => setActiveItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
                     {top.image_url && (
                       <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
                         <img src={top.image_url} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
@@ -148,14 +150,14 @@ const NewsPage = () => {
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground group-hover:text-amber transition-colors leading-tight">{top.title}</h2>
                       {top.summary && <p className="text-muted-foreground mt-3 leading-relaxed line-clamp-3">{top.summary}</p>}
-                      <div className="flex items-center gap-2 mt-4 text-amber font-mono text-xs uppercase tracking-widest">Read at source <ExternalLink className="w-3.5 h-3.5" /></div>
+                      <div className="flex items-center gap-2 mt-4 text-amber font-mono text-xs uppercase tracking-widest">Read article <ArrowRight className="w-3.5 h-3.5" /></div>
                     </div>
-                  </a>
+                  </button>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {rest.map(it => (
-                    <a key={it.id} href={it.link} target="_blank" rel="noopener noreferrer" className="group block border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
+                    <button key={it.id} onClick={() => setActiveItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
                       {it.image_url ? (
                         <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
                           <img src={it.image_url} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
@@ -173,7 +175,7 @@ const NewsPage = () => {
                         <h3 className="font-display text-base font-semibold text-foreground group-hover:text-amber transition-colors leading-snug line-clamp-3">{it.title}</h3>
                         {it.published_at && <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">{formatDistanceToNow(new Date(it.published_at), { addSuffix: true })}</p>}
                       </div>
-                    </a>
+                    </button>
                   ))}
                 </div>
 
@@ -325,6 +327,44 @@ const NewsPage = () => {
 
       <Footer />
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+
+      <Dialog open={!!activeItem} onOpenChange={(o) => !o && setActiveItem(null)}>
+        <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
+          {activeItem && (
+            <article className="relative">
+              {activeItem.image_url && (
+                <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                  <img src={activeItem.image_url} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
+                </div>
+              )}
+              <div className="p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{activeItem.source_label}</Badge>
+                  <Badge className="bg-amber/10 text-amber border border-amber/30 font-mono text-[10px] uppercase">{activeItem.category}</Badge>
+                  {activeItem.published_at && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{formatDistanceToNow(new Date(activeItem.published_at), { addSuffix: true })}</span>}
+                  {activeItem.author && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· {activeItem.author}</span>}
+                </div>
+                <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">{activeItem.title}</h2>
+                {activeItem.summary && (
+                  <p className="text-muted-foreground mt-4 leading-relaxed text-base">{activeItem.summary}</p>
+                )}
+                <div className="mt-6 p-4 rounded-lg border border-border bg-background/40">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Source</div>
+                  <p className="text-sm text-muted-foreground break-all">{activeItem.link}</p>
+                </div>
+                <div className="mt-6 flex items-center gap-3 flex-wrap">
+                  <a href={activeItem.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber text-background font-mono text-xs uppercase tracking-widest hover:bg-amber/90 transition">
+                    Read full article <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  <button onClick={() => setActiveItem(null)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-muted-foreground font-mono text-xs uppercase tracking-widest hover:border-amber/40 hover:text-foreground transition">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </article>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
