@@ -131,21 +131,46 @@ async function refresh(supabase: ReturnType<typeof createClient>) {
     r.forEach(arr => all.push(...arr));
   }
   if (all.length === 0) return 0;
-  // Upsert by link (unique)
-  const rows = all.map(i => ({
+  // Normalize + dedupe by link (unique constraint). Strip tracking params and fragments.
+  const normalize = (u: string): string => {
+    try {
+      const url = new URL(u);
+      url.hash = "";
+      const drop = ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","fbclid","gclid","mc_cid","mc_eid","ref","ref_src"];
+      drop.forEach(k => url.searchParams.delete(k));
+      return url.toString();
+    } catch { return u; }
+  };
+  const seen = new Map<string, typeof all[number]>();
+  for (const i of all) {
+    const key = normalize(i.link);
+    const existing = seen.get(key);
+    if (!existing) { seen.set(key, { ...i, link: key }); continue; }
+    // Prefer one with image, then with published_at, then longer summary
+    const score = (x: typeof i) => (x.image_url ? 2 : 0) + (x.published_at ? 1 : 0) + Math.min((x.summary?.length || 0) / 100, 2);
+    if (score(i) > score(existing)) seen.set(key, { ...i, link: key });
+  }
+  const rows = Array.from(seen.values()).map(i => ({
     source: i.source, source_label: i.source_label, category: i.category,
     title: i.title.slice(0, 500), link: i.link, summary: i.summary,
     image_url: i.image_url, author: i.author, published_at: i.published_at, fetched_at: new Date().toISOString(),
   }));
-  const { error } = await supabase.from("industry_news_cache").upsert(rows, { onConflict: "link", ignoreDuplicates: false });
-  if (error) console.error("upsert err", error.message);
+  // Chunked upsert so a single bad row doesn't kill everything
+  let saved = 0;
+  for (let i = 0; i < rows.length; i += 200) {
+    const chunk = rows.slice(i, i + 200);
+    const { error } = await supabase.from("industry_news_cache").upsert(chunk, { onConflict: "link", ignoreDuplicates: false });
+    if (error) { console.error("upsert err", error.message); }
+    else saved += chunk.length;
+  }
+  console.log("refresh saved", saved, "of", rows.length);
   // Trim to most recent 1000
   const { data: trimRows } = await supabase.from("industry_news_cache").select("id").order("published_at", { ascending: false, nullsFirst: false }).range(1000, 9999);
   if (trimRows && trimRows.length > 0) {
     await supabase.from("industry_news_cache").delete().in("id", trimRows.map((r: { id: string }) => r.id));
   }
-  await supabase.from("industry_news_meta").upsert({ key: "last_refresh", value: { at: new Date().toISOString(), count: all.length }, updated_at: new Date().toISOString() });
-  return all.length;
+  await supabase.from("industry_news_meta").upsert({ key: "last_refresh", value: { at: new Date().toISOString(), fetched: all.length, deduped: rows.length, saved }, updated_at: new Date().toISOString() });
+  return saved;
 }
 
 serve(async (req) => {
