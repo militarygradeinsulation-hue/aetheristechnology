@@ -37,6 +37,61 @@ const CATEGORIES: { id: string; label: string }[] = [
   { id: "logistics", label: "Logistics" },
 ];
 
+// Deterministic fallback thumbnails per category (Unsplash). Guarantees every card has an image.
+const FALLBACK_THUMBS: Record<string, string[]> = {
+  ai: [
+    "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=1200&q=70&auto=format&fit=crop",
+  ],
+  business: [
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=70&auto=format&fit=crop",
+  ],
+  marketing: [
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=70&auto=format&fit=crop",
+  ],
+  sales: [
+    "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=1200&q=70&auto=format&fit=crop",
+  ],
+  security: [
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&q=70&auto=format&fit=crop",
+  ],
+  finance: [
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=70&auto=format&fit=crop",
+  ],
+  healthcare: [
+    "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&q=70&auto=format&fit=crop",
+  ],
+  manufacturing: [
+    "https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=70&auto=format&fit=crop",
+  ],
+  construction: [
+    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1200&q=70&auto=format&fit=crop",
+  ],
+  logistics: [
+    "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1200&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=70&auto=format&fit=crop",
+  ],
+};
+const DEFAULT_THUMBS = [
+  "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&q=70&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=1200&q=70&auto=format&fit=crop",
+];
+function thumbFor(item: { id: string; category: string; image_url: string | null }): string {
+  if (item.image_url) return item.image_url;
+  const pool = FALLBACK_THUMBS[item.category] || DEFAULT_THUMBS;
+  let h = 0;
+  for (let i = 0; i < item.id.length; i++) h = (h * 31 + item.id.charCodeAt(i)) | 0;
+  return pool[Math.abs(h) % pool.length];
+}
+
 const NewsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [posts, setPosts] = useState<NewsPost[]>([]);
