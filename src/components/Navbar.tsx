@@ -112,7 +112,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                 key={item.href}
                 to={item.href}
                 className={`block transition-colors ${
-                  item.special
+                  item.tone === 'red'
+                    ? 'text-crimson hover:text-crimson/80 font-semibold'
+                    : item.tone === 'yellow'
+                    ? 'text-yellow-400 hover:text-yellow-300 font-semibold'
+                    : item.special
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
