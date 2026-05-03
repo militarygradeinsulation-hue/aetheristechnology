@@ -217,6 +217,49 @@ const NewsPage = () => {
                   <div className="font-display text-lg font-semibold text-foreground">Run the free Leak Audit™ <ArrowRight className="w-4 h-4 inline ml-1" /></div>
                   <p className="text-sm text-muted-foreground mt-1">Find where your business is bleeding money in 2 minutes.</p>
                 </Link>
+
+                {/* Operator-led upgrade */}
+                <div className="border border-border rounded-xl bg-card/30 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Operator-led</div>
+                  <div className="font-display text-lg font-semibold text-foreground leading-tight">Forensic Diagnostic — $2,500 flat</div>
+                  <p className="text-sm text-muted-foreground mt-2">A live, operator-led teardown of your funnel, ops, and tech stack. The full $2,500 applies toward any engagement.</p>
+                  <button onClick={() => setIsContactModalOpen(true)} className="mt-3 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
+                    Book the diagnostic <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Live wire stats */}
+                <div className="border border-border rounded-xl bg-card/30 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Live wire · status</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="font-display text-2xl font-bold text-foreground">{items.length}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">In feed</div>
+                    </div>
+                    <div>
+                      <div className="font-display text-2xl font-bold text-foreground">21</div>
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Sources</div>
+                    </div>
+                    <div>
+                      <div className="font-display text-2xl font-bold text-foreground">{CATEGORIES.length - 1}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Categories</div>
+                    </div>
+                    <div>
+                      <div className="font-display text-2xl font-bold text-amber">30m</div>
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Refresh cycle</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Newsletter / Field Notes */}
+                <div className="border border-amber/30 rounded-xl bg-gradient-to-br from-card/40 to-amber/5 p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">Field Notes</div>
+                  <div className="font-display text-lg font-semibold text-foreground leading-tight">Get the weekly leak report</div>
+                  <p className="text-sm text-muted-foreground mt-2">One operator dispatch a week. Real teardowns, no fluff. Unsubscribe anytime.</p>
+                  <Link to="/leak-audit" className="mt-3 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
+                    Subscribe via audit <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </aside>
             </div>
           )}
