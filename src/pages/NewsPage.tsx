@@ -46,6 +46,33 @@ const NewsPage = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>("all");
   const [activeItem, setActiveItem] = useState<IndustryItem | null>(null);
+  const [articleBlocks, setArticleBlocks] = useState<{ tag: string; text: string }[] | null>(null);
+  const [articleHero, setArticleHero] = useState<string | null>(null);
+  const [articleLoading, setArticleLoading] = useState(false);
+  const [articleError, setArticleError] = useState<string | null>(null);
+
+  const openItem = async (it: IndustryItem) => {
+    setActiveItem(it);
+    setArticleBlocks(null);
+    setArticleHero(it.image_url || null);
+    setArticleError(null);
+    setArticleLoading(true);
+    try {
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "fetch_article", url: it.link }) });
+      const j = await r.json();
+      if (j.ok && Array.isArray(j.blocks) && j.blocks.length > 0) {
+        setArticleBlocks(j.blocks);
+        if (j.hero_image && !it.image_url) setArticleHero(j.hero_image);
+      } else {
+        setArticleError("Couldn't extract the full article. Use the link below to read it at the source.");
+      }
+    } catch (e) {
+      setArticleError("Couldn't load the article right now.");
+    } finally {
+      setArticleLoading(false);
+    }
+  };
 
   const fetchIndustry = async (cat: string) => {
     const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
