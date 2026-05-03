@@ -204,7 +204,7 @@ const NewsPage = () => {
       <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
       <main className="relative z-10 pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1600px] mx-auto">
           <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber/30 bg-amber/5 mb-4">
@@ -265,7 +265,7 @@ const NewsPage = () => {
                   </button>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {rest.map(it => (
                     <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
                       <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
@@ -433,7 +433,7 @@ const NewsPage = () => {
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
 
       <Dialog open={!!activeItem} onOpenChange={(o) => !o && setActiveItem(null)}>
-        <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 bg-card border border-amber/30">
+        <DialogContent className="max-w-[96vw] xl:max-w-[1400px] max-h-[92vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
               <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
