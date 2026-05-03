@@ -133,6 +133,32 @@ const NewsPage = () => {
     }
   };
 
+  const loadTake = async () => {
+    if (!activeItem || takeLoading || take) return;
+    setTakeLoading(true); setTakeError(null);
+    try {
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "aetheris_take",
+          title: activeItem.title,
+          summary: activeItem.summary || "",
+          source_label: activeItem.source_label,
+          category: activeItem.category,
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.ok) throw new Error(j.error || "Failed");
+      setTake(j.take || "");
+    } catch (e) {
+      setTakeError((e as Error).message || "Couldn't generate the Aetheris Take.");
+    } finally {
+      setTakeLoading(false);
+    }
+  };
+
   const fetchIndustry = async (cat: string) => {
     const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/industry-news`;
     const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "list", category: cat, limit: 80 }) });
