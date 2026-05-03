@@ -54,6 +54,8 @@ const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
 const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
+const NewsPage = lazy(() => import("./pages/NewsPage"));
+const NewsPostPage = lazy(() => import("./pages/NewsPostPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 
 const queryClient = new QueryClient({
@@ -137,6 +139,8 @@ const App = () => (
                       <Route path="/partner-portal" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
                       <Route path="/leak-report/:prospectId" element={<LeakReportPage />} />
+                      <Route path="/news" element={<NewsPage />} />
+                      <Route path="/news/:slug" element={<NewsPostPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
