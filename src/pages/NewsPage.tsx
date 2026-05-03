@@ -163,7 +163,7 @@ const NewsPage = () => {
               {/* Main wire */}
               <div className="lg:col-span-2 space-y-6">
                 {top && (
-                  <button onClick={() => setActiveItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
+                  <button onClick={() => openItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
                     {top.image_url && (
                       <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
                         <img src={top.image_url} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
@@ -184,7 +184,7 @@ const NewsPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {rest.map(it => (
-                    <button key={it.id} onClick={() => setActiveItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
+                    <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
                       {it.image_url ? (
                         <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
                           <img src={it.image_url} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")} />
