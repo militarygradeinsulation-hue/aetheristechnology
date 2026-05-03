@@ -91,6 +91,7 @@ async function fetchFeed(feed: typeof FEEDS[number]): Promise<Item[]> {
     if (!res.ok) { console.warn("feed err", feed.source, res.status); return []; }
     const xml = await res.text();
     const isAtom = /<feed[\s>]/i.test(xml) && !/<rss[\s>]/i.test(xml);
+    console.log("feed fetch", feed.source, "bytes", xml.length, "atom", isAtom);
     const itemBlocks = isAtom
       ? Array.from(xml.matchAll(/<entry[\s\S]*?<\/entry>/gi)).map(m => m[0])
       : Array.from(xml.matchAll(/<item[\s\S]*?<\/item>/gi)).map(m => m[0]);
