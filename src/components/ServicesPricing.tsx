@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Brain, FileText, RefreshCw, Database, GitBranch, Swords, Send, Settings, Users, LayoutTemplate, ListChecks, Rocket, Workflow, Handshake, GraduationCap, Bot, Mic, DollarSign, Activity, FlaskConical, Copy, UserPlus, HeartPulse, Map, Maximize2, Gauge, Bug, Radar, Network } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -556,6 +556,12 @@ export const ServicesPricing: React.FC = () => {
 
   const isServiceComingSoon = (s: { priceId?: string; monthlyPriceId?: string }) =>
     isComingSoonPriceId(s.priceId) || isComingSoonPriceId(s.monthlyPriceId);
+
+  useEffect(() => {
+    if (expandedIdx !== null && isServiceComingSoon(services[expandedIdx])) {
+      setExpandedIdx(null);
+    }
+  }, [expandedIdx]);
 
   const bundleableServices = useMemo(
     () => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable && !isServiceComingSoon(s)),
