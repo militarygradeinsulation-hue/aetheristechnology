@@ -23,6 +23,7 @@ const BlogPage = lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const DeliverablePage = lazy(() => import("./pages/DeliverablePage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
