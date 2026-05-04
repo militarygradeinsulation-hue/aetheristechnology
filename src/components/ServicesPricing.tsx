@@ -716,7 +716,7 @@ export const ServicesPricing: React.FC = () => {
 
                       {/* Footer hint + bundle checkbox */}
                       <div className="flex items-center justify-between px-5 py-3.5 border-t border-border/40 mt-auto">
-                        <span className="text-xs text-primary font-semibold">Click for details →</span>
+                        <span className="text-xs font-semibold ${locked ? 'text-red-400 font-mono uppercase tracking-widest' : 'text-primary'}">{locked ? 'Details locked' : 'Click for details →'}</span>
                         {service.bundleable && !isServiceComingSoon(service) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
