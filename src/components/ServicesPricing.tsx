@@ -289,6 +289,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Handshake, title: 'Marketing-to-Sales Alignment', pricing: '$1,299', priceRaw: 129900, pricingDetail: '2-day workshop + 60-day coaching', priceId: 'marketing_sales_alignment_once', bundleable: true, badge: 'PREMIUM',
+    monthlyPriceId: 'marketing_sales_alignment_monthly', monthlyPricing: '$899/mo', monthlyPriceRaw: 89900, monthlySavePercent: 31,
     description: '2-day workshop fixing the disconnect that costs you 6 figures/year.',
     successStat: 'Misalignment costs the average company 6+ figures/year in wasted leads',
     longDescription: 'A 2-day workshop (off-site or virtual) that fixes the disconnect between marketing and sales. We build the SLA, lead-scoring framework, handoff process, messaging alignment, content collaboration framework, reporting dashboard, and provide 60 days of follow-up coaching.',
