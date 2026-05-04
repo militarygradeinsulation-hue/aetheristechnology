@@ -55,6 +55,16 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
+    const WHITE_LABEL = `\n\nOUTPUT REQUIREMENTS (MANDATORY):
+- WHITE-LABEL deliverable prepared FOR ${intake.businessName || "the client"}. Address it to them by name.
+- Begin with H1: "${intake.businessName || "Client"} — ${spec.title}". Subtitle line with today's date (${new Date().toISOString().slice(0,10)}).
+- Section 2: 4–6 sentence Executive Summary for a CEO.
+- Use H2/H3 structure, short paragraphs, bullet lists, markdown tables.
+- Every recommendation must be CONCRETE and ACTIONABLE. Quantify impact in $/%/hours where possible.
+- End with: (a) "Next 7 Days" checklist (≤7 verb-led items), (b) "30/60/90-Day Roadmap" markdown table.
+- Tone: blunt, operator-grade, forensic. No fluff, no emojis, no "I", no AI/vendor mentions.
+- Output VALID GitHub-flavored markdown only. No HTML.`;
+
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -64,7 +74,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: spec.systemPrompt },
+          { role: "system", content: spec.systemPrompt + WHITE_LABEL },
           { role: "user", content: spec.userPrompt(intake) },
         ],
       }),
