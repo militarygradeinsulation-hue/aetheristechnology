@@ -21,6 +21,14 @@ const AUTOMATABLE_PRICES: Record<string, string> = {
   friction_vocabulary_audit_once: "friction_audit",
 };
 
+// 13 Forensics systems — intake-driven AI deliverables
+import { SYSTEM_SPECS } from "../_shared/system-prompts.ts";
+const SYSTEM_PRICE_IDS = new Set(Object.keys(SYSTEM_SPECS));
+const SYSTEM_TITLES: Record<string, string> = Object.fromEntries(
+  Object.entries(SYSTEM_SPECS).map(([k, v]) => [k, v.title]),
+);
+const PUBLIC_SITE_URL = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
+
 // Tiered commission split (replaces flat 70/15/15).
 // Tier resolved from sale amount (cents):
 //   T1 ≤ $59  → company 50 / rep 30 / partner 20
