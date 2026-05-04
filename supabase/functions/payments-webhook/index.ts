@@ -21,8 +21,16 @@ const AUTOMATABLE_PRICES: Record<string, string> = {
   friction_vocabulary_audit_once: "friction_audit",
 };
 
-const COMPANY_RATE = 0.70;
-const PARTNER_RATE = 0.15;
+// Tiered commission split (replaces flat 70/15/15).
+// Tier resolved from sale amount (cents):
+//   T1 ≤ $59  → company 50 / rep 30 / partner 20
+//   T2 ≤ $349 → company 60 / rep 25 / partner 15
+//   T3  >$349 → company 70 / rep 20 / partner 10
+function ratesForAmount(amountCents: number): { company: number; rep: number; partner: number; tier: 1 | 2 | 3 } {
+  if (amountCents <= 5900) return { company: 0.50, rep: 0.30, partner: 0.20, tier: 1 };
+  if (amountCents <= 34900) return { company: 0.60, rep: 0.25, partner: 0.15, tier: 2 };
+  return { company: 0.70, rep: 0.20, partner: 0.10, tier: 3 };
+}
 
 serve(async (req) => {
   if (req.method !== "POST") {
