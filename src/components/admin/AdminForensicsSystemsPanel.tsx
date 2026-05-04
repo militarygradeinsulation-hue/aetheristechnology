@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, Loader2, Download, Sparkles } from 'lucide-react';
+import { ChevronLeft, Loader2, Download, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
