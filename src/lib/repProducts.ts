@@ -35,6 +35,8 @@ export interface RepProduct {
 }
 
 export const REP_PRODUCTS: RepProduct[] = [
+  // Lead magnet — free self-scan (no commission, listed for visibility)
+  { name: 'Free Leak Audit (Self-Scan)', priceCents: 0, tier: 1 },
   // Tier 1 — Entry ($29–$59)
   { name: 'Playbook Unlock', priceCents: 2900, tier: 1 },
   { name: 'Social Content Pack', priceCents: 3900, tier: 1 },
