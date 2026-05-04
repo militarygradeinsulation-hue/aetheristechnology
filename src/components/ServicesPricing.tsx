@@ -204,7 +204,7 @@ const services: ServiceTile[] = [
   },
   // ============ NEW PRODUCTS — Phase 1: Quick Wins ============
   {
-    icon: Database, title: 'CRM Health Check', thumbnail: crmSetupOptimizationThumb, pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'crm_health_check_once', bundleable: true,
+    icon: Database, title: 'CRM Health Check', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'crm_health_check_once', bundleable: true,
     monthlyPriceId: 'crm_health_check_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: '30-min audit of your CRM — find deals falling through the cracks.',
     successStat: '80% of CRMs have hidden revenue leaks within 30 minutes of audit',
