@@ -158,15 +158,16 @@ const RepPortalPage: React.FC = () => {
                           {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
                         </TableCell>
                         <TableCell className={`text-right font-semibold ${p.highlight ? 'text-primary' : 'text-foreground'}`}>
-                          {fmtUsd(commissionCents(p.priceCents, repData.commission_rate))}{p.recurring ? '/mo' : ''}
+                          {fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}
+                          <span className="ml-1 text-xs text-muted-foreground">(T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%)</span>
                         </TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell className="text-foreground">Monthly Subscriptions ($25–$1,990/mo)</TableCell>
+                      <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
                       <TableCell className="text-right text-muted-foreground">varies</TableCell>
                       <TableCell className="text-right font-semibold text-primary">
-                        {(repData.commission_rate * 100).toFixed(0)}% of every invoice
+                        20–30% of every invoice (by tier)
                       </TableCell>
                     </TableRow>
                   </TableBody>
