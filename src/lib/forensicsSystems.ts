@@ -111,6 +111,17 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   // Monthly variants surfaced in ServicesPricing but not in this catalog
   "crm_health_check_monthly",
   "lead_flow_mapper_monthly",
+  // 1M IQ Innovations — net-new categories, public checkout disabled
+  "obsession_engine_once", "obsession_engine_monthly",
+  "revenue_leak_detector_once", "revenue_leak_detector_monthly",
+  "messaging_psychologist_once", "messaging_psychologist_monthly",
+  "opportunity_radar_once", "opportunity_radar_monthly",
+  "death_wish_detector_once",
+  "sales_psychography_once", "sales_psychography_monthly",
+  "market_timing_oracle_once", "market_timing_oracle_monthly",
+  "unfair_advantage_detector_once",
+  "ltv_maximizer_once",
+  "pmf_predictor_once",
 ]);
 
 export const isComingSoonPriceId = (priceId?: string | null): boolean =>
