@@ -195,6 +195,7 @@ const services: ServiceTile[] = [
   // ============ NEW PRODUCTS — Phase 1: Quick Wins ============
   {
     icon: Database, title: 'CRM Health Check', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'crm_health_check_once', bundleable: true,
+    monthlyPriceId: 'crm_health_check_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: '30-min audit of your CRM — find deals falling through the cracks.',
     successStat: '80% of CRMs have hidden revenue leaks within 30 minutes of audit',
     longDescription: 'A focused 30-minute audit of your current CRM (HubSpot, Salesforce, Pipedrive, etc.) covering contact quality, pipeline visibility, automation gaps, and data cleanliness. You get a quick-wins list of fixes you can deploy immediately.',
@@ -203,6 +204,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: GitBranch, title: 'Lead Flow Mapper', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'lead_flow_mapper_once', bundleable: true,
+    monthlyPriceId: 'lead_flow_mapper_monthly', monthlyPricing: '$65/mo', monthlyPriceRaw: 6500, monthlySavePercent: 34,
     description: 'Visual map of how leads move from prospect to close — and where they die.',
     successStat: '92% of businesses don\'t know their actual stage-by-stage conversion rates',
     longDescription: 'A visual diagram of your lead funnel showing every stage from source to close, conversion rates at each step, bottlenecks, lead-loss points, and revenue per lead. Comes with a 1-page roadmap of fixes prioritized by impact.',
@@ -211,6 +213,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Swords, title: 'Competitor Landing Page Analysis', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'competitor_landing_analysis_once', bundleable: true,
+    monthlyPriceId: 'competitor_landing_analysis_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Deep teardown of 3–5 competitors vs. you — what they win on, what you can copy.',
     successStat: '85% find at least 3 high-impact conversion elements competitors are using',
     longDescription: 'A side-by-side teardown of 3–5 competitor websites and landing pages compared to yours. We surface what they do better, where you out-perform, conversion-element gaps, and messaging differences — with quick copy and design wins you can ship this week.',
@@ -219,6 +222,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Send, title: 'Email Series Bundle', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time · 4 sequences', priceId: 'email_series_bundle_once', bundleable: true,
+    monthlyPriceId: 'email_series_bundle_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Done-for-you email sequences: cold, welcome, re-engagement, upsell.',
     successStat: '20–30% of recipients convert on properly sequenced email flows',
     longDescription: 'A done-for-you bundle of 4 proven email sequences — cold outreach (5 emails), customer welcome, win-back/re-engagement, and upsell — plus 2 bonus sequences. Drop them into your email tool and send the same day.',
@@ -228,6 +232,7 @@ const services: ServiceTile[] = [
   // ============ Phase 2: Mid-Level Implementation ============
   {
     icon: Settings, title: 'CRM Setup & Optimization', pricing: '$399', priceRaw: 39900, pricingDetail: 'one-time + training', priceId: 'crm_setup_optimization_once', bundleable: true,
+    monthlyPriceId: 'crm_setup_optimization_monthly', monthlyPricing: '$279/mo', monthlyPriceRaw: 27900, monthlySavePercent: 30,
     description: 'Full CRM rebuild + automation + 2-hour live team training.',
     successStat: '20–40% improvement in forecast accuracy after structural cleanup',
     longDescription: 'Full CRM audit + setup improvements + team training. We restructure your pipeline, standardize contact fields, build basic automation workflows, train your sales team live (2 hours), and check in 30 days later to optimize what\'s actually working.',
@@ -237,6 +242,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: LayoutTemplate, title: 'Landing Page Blueprint', pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'landing_page_blueprint_once', bundleable: true,
+    monthlyPriceId: 'landing_page_blueprint_monthly', monthlyPricing: '$239/mo', monthlyPriceRaw: 23900, monthlySavePercent: 32,
     description: 'Custom landing page template + copy framework + CTA optimization.',
     successStat: 'Average 30–50% conversion lift after copy + CTA rebuild',
     longDescription: 'A conversion-focused landing page blueprint built specifically for your business. Includes analysis of your current page, a custom template, 3 headline variations, value prop reframing, CTA optimization, form field recommendations, and an A/B testing roadmap.',
@@ -245,6 +251,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Users, title: 'Prospecting List Builder', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time · 200–500 leads', priceId: 'prospecting_list_builder_once', bundleable: true,
+    monthlyPriceId: 'prospecting_list_builder_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: '200–500 AI-scraped, qualified leads with research + decision-maker data.',
     successStat: 'Saves reps 40+ hours of manual prospecting research',
     longDescription: 'We build you a custom prospect list using AI + data scraping. Define your target profile, get 200–500 qualified leads (email + phone) with company research, decision-maker info, and personalization data — delivered in a clean, CRM-ready spreadsheet.',
@@ -254,6 +261,7 @@ const services: ServiceTile[] = [
   // ============ Phase 3: Premium Strategic ============
   {
     icon: GraduationCap, title: 'Sales Team Onboarding', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time + 30-day support', priceId: 'sales_team_onboarding_once', bundleable: true,
+    monthlyPriceId: 'sales_team_onboarding_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: 'Customized training + playbook + role-play + 30-day accountability.',
     successStat: 'Trained reps close 30%+ more deals in their first 60 days',
     longDescription: 'A customized onboarding program for your sales team — process documentation, custom pitch deck, objection handling guide, CRM training (2 sessions), live role-play, 30-day accountability check-ins, and a delivered playbook (printable + digital).',
@@ -262,6 +270,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Rocket, title: '30-Day Lead Gen Sprint', pricing: '$999', priceRaw: 99900, pricingDetail: '30 days · done-for-you', priceId: 'lead_gen_sprint_once', bundleable: true, badge: 'DONE-FOR-YOU',
+    monthlyPriceId: 'lead_gen_sprint_monthly', monthlyPricing: '$699/mo', monthlyPriceRaw: 69900, monthlySavePercent: 30,
     description: 'Done-for-you lead generation sprint — LinkedIn + email + ads + landing page.',
     successStat: '$999 typically pays for itself in the first 1–2 qualified deals closed',
     longDescription: 'A 30-day done-for-you lead generation campaign. We run a strategy workshop, execute LinkedIn outreach (100+ connections), email sequences, paid ads ($500 budget included), build the landing page + lead magnet, integrate with your CRM, and report results daily.',
@@ -271,6 +280,7 @@ const services: ServiceTile[] = [
   // ============ Phase 4: Premium / Recurring ============
   {
     icon: Workflow, title: 'Sales Process Redesign', pricing: '$1,499', priceRaw: 149900, pricingDetail: 'one-time + 90-day support', priceId: 'sales_process_redesign_once', bundleable: true, badge: 'PREMIUM',
+    monthlyPriceId: 'sales_process_redesign_monthly', monthlyPricing: '$1,049/mo', monthlyPriceRaw: 104900, monthlySavePercent: 30,
     description: 'Complete sales methodology overhaul + 5 training sessions + 90-day support.',
     successStat: 'Average 20–40% revenue increase within 90 days of new process',
     longDescription: 'A complete overhaul of how your team sells. Methodology selection (Consultative, Value-based, MEDDIC, etc.), full process documentation lead-to-close, 5 sales team training sessions, CRM configuration for the new process, playbook creation, new-rep onboarding materials, and 90-day implementation support.',
@@ -279,6 +289,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Handshake, title: 'Marketing-to-Sales Alignment', pricing: '$1,299', priceRaw: 129900, pricingDetail: '2-day workshop + 60-day coaching', priceId: 'marketing_sales_alignment_once', bundleable: true, badge: 'PREMIUM',
+    monthlyPriceId: 'marketing_sales_alignment_monthly', monthlyPricing: '$899/mo', monthlyPriceRaw: 89900, monthlySavePercent: 31,
     description: '2-day workshop fixing the disconnect that costs you 6 figures/year.',
     successStat: 'Misalignment costs the average company 6+ figures/year in wasted leads',
     longDescription: 'A 2-day workshop (off-site or virtual) that fixes the disconnect between marketing and sales. We build the SLA, lead-scoring framework, handoff process, messaging alignment, content collaboration framework, reporting dashboard, and provide 60 days of follow-up coaching.',
