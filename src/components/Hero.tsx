@@ -54,10 +54,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link to="/leak-audit" onClick={() => trackEvent('click', { label: 'leak_audit_hero', location: 'hero' })}>
+            <Link to="/assessment" onClick={() => trackEvent('click', { label: 'ai_readiness_hero', location: 'hero' })}>
               <Button
                 size="lg"
-                className="bg-amber hover:bg-amber/90 text-primary-foreground group hover-lift cursor-glow"
+                className="bg-amber hover:bg-amber/90 text-primary-foreground group hover-lift cursor-glow font-bold"
                 onMouseMove={(e) => {
                   const r = e.currentTarget.getBoundingClientRect();
                   e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
@@ -65,8 +65,17 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 }}
               >
                 <Search className="mr-2 w-5 h-5" />
-                Run the Free Leak Audit
+                Get Your Free AI Readiness Score
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/leak-audit" onClick={() => trackEvent('click', { label: 'leak_audit_hero', location: 'hero' })}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="glass-hover border-amber/40 text-amber hover:text-amber group hover-lift"
+              >
+                Run the Free Leak Audit
               </Button>
             </Link>
             <a
