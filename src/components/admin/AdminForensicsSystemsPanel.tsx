@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, Loader2, Download, Sparkles } from 'lucide-react';
+import { ChevronLeft, Loader2, Download, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,12 +12,47 @@ export function AdminForensicsSystemsPanel() {
   const [active, setActive] = useState<ForensicsSystem | null>(null);
   const [intake, setIntake] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [autofilling, setAutofilling] = useState(false);
+  const [autofillUrl, setAutofillUrl] = useState('');
   const [result, setResult] = useState<{ markdown: string; title: string } | null>(null);
 
   const open = (sys: ForensicsSystem) => {
     setActive(sys);
     setIntake({});
+    setAutofillUrl('');
     setResult(null);
+  };
+
+  const autofillFromUrl = async () => {
+    if (!active) return;
+    const url = autofillUrl.trim();
+    if (!url) {
+      toast({ title: 'Enter a URL first', variant: 'destructive' });
+      return;
+    }
+    setAutofilling(true);
+    try {
+      const fieldsSpec = active.intake.map(f => ({ name: f.name, label: f.label, type: f.type }));
+      const { data, error } = await supabase.functions.invoke('autofill-intake-from-url', {
+        body: { url, fields: fieldsSpec, toolTitle: active.title },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const filled = data?.values || {};
+      setIntake(prev => {
+        const next = { ...prev };
+        for (const k of Object.keys(filled)) {
+          const v = filled[k];
+          if (v != null && String(v).trim() && !next[k]?.trim()) next[k] = String(v);
+        }
+        return next;
+      });
+      toast({ title: 'Autofilled', description: `Pulled ${Object.keys(filled).length} fields from ${url}` });
+    } catch (e: unknown) {
+      toast({ title: 'Autofill failed', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+    } finally {
+      setAutofilling(false);
+    }
   };
 
   const submit = async () => {
@@ -97,6 +132,21 @@ export function AdminForensicsSystemsPanel() {
 
       {!result && (
         <div className="glass p-6 rounded-xl space-y-4 max-w-2xl">
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+            <Label className="text-xs uppercase tracking-wide text-amber">Autofill from URL</Label>
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                value={autofillUrl}
+                onChange={e => setAutofillUrl(e.target.value)}
+                placeholder="https://company.com — AI scrapes & fills the rest"
+              />
+              <Button onClick={autofillFromUrl} disabled={autofilling} variant="outline" size="sm" className="shrink-0">
+                {autofilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Wand2 className="w-4 h-4 mr-1" />Autofill</>}
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Only fills empty fields. Edit anything after.</p>
+          </div>
           {active.intake.map(field => (
             <div key={field.name} className="space-y-1">
               <Label>{field.label}{field.required && <span className="text-destructive ml-1">*</span>}</Label>
