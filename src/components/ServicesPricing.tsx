@@ -674,12 +674,15 @@ export const ServicesPricing: React.FC = () => {
           {services.map((service, index) => {
             const isSelected = selectedIds.has(index);
             const hasThumb = !!service.thumbnail;
+            const locked = isServiceComingSoon(service);
             return (
               <RevealOnScroll key={service.title} delay={0.03 + index * 0.04}>
                 <div
-                  onClick={() => setExpandedIdx(index)}
-                  className={`glass glass-shine shimmer-border hover-lift rounded-xl flex flex-col h-full transition-all duration-300 group relative cursor-pointer hover:shadow-2xl hover:shadow-primary/10 overflow-hidden ${
-                    isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
+                  onClick={() => { if (!locked) setExpandedIdx(index); }}
+                  className={`glass glass-shine shimmer-border hover-lift rounded-xl flex flex-col h-full transition-all duration-300 group relative overflow-hidden ${
+                    locked ? 'cursor-not-allowed opacity-95' : 'cursor-pointer hover:shadow-2xl hover:shadow-primary/10'
+                  } ${
+                    isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : `border border-border ${locked ? '' : 'hover:border-primary/40'}`
                   } ${hasThumb ? 'p-0' : 'p-6'}`}
                 >
                   {isServiceComingSoon(service) ? (
