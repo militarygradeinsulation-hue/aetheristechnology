@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 
 interface RepData {
   rep_name: string;
