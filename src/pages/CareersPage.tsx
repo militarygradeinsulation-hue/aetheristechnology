@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2 } from 'lucide-react';
-import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -251,7 +251,8 @@ const PlaybookSection = () => (
             <TableRow>
               <TableHead>Product</TableHead>
               <TableHead className="text-right">Client Price</TableHead>
-              <TableHead className="text-right">Your Cut (10%)</TableHead>
+              <TableHead className="text-right">Tier</TableHead>
+              <TableHead className="text-right">Your Cut</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -263,15 +264,19 @@ const PlaybookSection = () => (
                 <TableCell className="text-right text-muted-foreground">
                   {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
                 </TableCell>
+                <TableCell className="text-right text-muted-foreground">
+                  T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%
+                </TableCell>
                 <TableCell className={`text-right font-semibold ${p.highlight ? 'text-primary' : 'text-foreground'}`}>
-                  {fmtUsd(commissionCents(p.priceCents, 0.10))}{p.recurring ? '/mo' : ''}
+                  {fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}
                 </TableCell>
               </TableRow>
             ))}
             <TableRow>
-              <TableCell className="text-foreground">Monthly Subscriptions ($25–$1,990/mo)</TableCell>
+              <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
               <TableCell className="text-right text-muted-foreground">varies</TableCell>
-              <TableCell className="text-right font-semibold text-primary">10% of every invoice</TableCell>
+              <TableCell className="text-right text-muted-foreground">tier-based</TableCell>
+              <TableCell className="text-right font-semibold text-primary">20–30% of every invoice</TableCell>
             </TableRow>
           </TableBody>
         </Table>
