@@ -336,7 +336,8 @@ const PortalPage: React.FC = () => {
                           </TableCell>
                           <TableCell className="text-right text-muted-foreground">{fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}</TableCell>
                           <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>
-                            {fmtUsd(commissionCents(p.priceCents, profile.commission_rate))}{p.recurring ? '/mo' : ''}
+                            {fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}
+                            <span className="ml-1 text-xs text-muted-foreground">(T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%)</span>
                           </TableCell>
                         </TableRow>
                       ))}
