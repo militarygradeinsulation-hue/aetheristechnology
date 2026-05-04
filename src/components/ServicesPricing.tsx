@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { isComingSoonPriceId } from '@/lib/forensicsSystems';
+import { Clock } from 'lucide-react';
 import frictionVocabularyAuditThumb from '@/assets/packages/friction-vocabulary-audit.png';
 import customImplementationThumb from '@/assets/packages/custom-implementation.png';
 import brandContradictionFinderThumb from '@/assets/packages/brand-contradiction-finder.png';
