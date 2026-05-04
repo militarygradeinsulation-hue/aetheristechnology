@@ -21,6 +21,16 @@ import strategyBlueprintThumb from '@/assets/packages/strategy-blueprint.png';
 import socialContentPackThumb from '@/assets/packages/social-content-pack.png';
 import digitalSnapshotThumb from '@/assets/packages/digital-snapshot.png';
 import fullWebsiteReportThumb from '@/assets/packages/full-website-report.png';
+import leadNurtureAutomationThumb from '@/assets/packages/lead-nurture-automation.png';
+import salesCoachingRetainerThumb from '@/assets/packages/sales-coaching-retainer.png';
+import marketingSalesAlignmentThumb from '@/assets/packages/marketing-sales-alignment.png';
+import leadGenSprintThumb from '@/assets/packages/lead-gen-sprint.png';
+import salesProcessRedesignThumb from '@/assets/packages/sales-process-redesign.png';
+import salesTeamOnboardingThumb from '@/assets/packages/sales-team-onboarding.png';
+import prospectingListBuilderThumb from '@/assets/packages/prospecting-list-builder.png';
+import landingPageBlueprintThumb from '@/assets/packages/landing-page-blueprint.png';
+import crmSetupOptimizationThumb from '@/assets/packages/crm-setup-optimization.png';
+import emailSeriesBundleThumb from '@/assets/packages/email-series-bundle.png';
 
 interface ServiceTile {
   icon: React.ElementType;
@@ -221,7 +231,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Owners are obsessed with what competitors are doing. This shows the exact moves they\'re using to win — and gives you a step-by-step plan to take that ground back.',
   },
   {
-    icon: Send, title: 'Email Series Bundle', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time · 4 sequences', priceId: 'email_series_bundle_once', bundleable: true,
+    icon: Send, title: 'Email Series Bundle', thumbnail: emailSeriesBundleThumb, pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time · 4 sequences', priceId: 'email_series_bundle_once', bundleable: true,
     monthlyPriceId: 'email_series_bundle_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Done-for-you email sequences: cold, welcome, re-engagement, upsell.',
     successStat: '20–30% of recipients convert on properly sequenced email flows',
@@ -231,7 +241,7 @@ const services: ServiceTile[] = [
   },
   // ============ Phase 2: Mid-Level Implementation ============
   {
-    icon: Settings, title: 'CRM Setup & Optimization', pricing: '$399', priceRaw: 39900, pricingDetail: 'one-time + training', priceId: 'crm_setup_optimization_once', bundleable: true,
+    icon: Settings, title: 'CRM Setup & Optimization', thumbnail: crmSetupOptimizationThumb, pricing: '$399', priceRaw: 39900, pricingDetail: 'one-time + training', priceId: 'crm_setup_optimization_once', bundleable: true,
     monthlyPriceId: 'crm_setup_optimization_monthly', monthlyPricing: '$279/mo', monthlyPriceRaw: 27900, monthlySavePercent: 30,
     description: 'Full CRM rebuild + automation + 2-hour live team training.',
     successStat: '20–40% improvement in forecast accuracy after structural cleanup',
@@ -241,7 +251,7 @@ const services: ServiceTile[] = [
     includes: [{ name: 'CRM Health Check', value: '$79' }, { name: 'Live Team Training', value: 'included' }, { name: '30-Day Optimization', value: 'included' }],
   },
   {
-    icon: LayoutTemplate, title: 'Landing Page Blueprint', pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'landing_page_blueprint_once', bundleable: true,
+    icon: LayoutTemplate, title: 'Landing Page Blueprint', thumbnail: landingPageBlueprintThumb, pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'landing_page_blueprint_once', bundleable: true,
     monthlyPriceId: 'landing_page_blueprint_monthly', monthlyPricing: '$239/mo', monthlyPriceRaw: 23900, monthlySavePercent: 32,
     description: 'Custom landing page template + copy framework + CTA optimization.',
     successStat: 'Average 30–50% conversion lift after copy + CTA rebuild',
@@ -250,7 +260,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most landing pages are terrible. A real conversion rebuild typically lifts conversions 30–50% — which usually pays back $349 in the first week.',
   },
   {
-    icon: Users, title: 'Prospecting List Builder', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time · 200–500 leads', priceId: 'prospecting_list_builder_once', bundleable: true,
+    icon: Users, title: 'Prospecting List Builder', thumbnail: prospectingListBuilderThumb, pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time · 200–500 leads', priceId: 'prospecting_list_builder_once', bundleable: true,
     monthlyPriceId: 'prospecting_list_builder_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: '200–500 AI-scraped, qualified leads with research + decision-maker data.',
     successStat: 'Saves reps 40+ hours of manual prospecting research',
@@ -260,7 +270,7 @@ const services: ServiceTile[] = [
   },
   // ============ Phase 3: Premium Strategic ============
   {
-    icon: GraduationCap, title: 'Sales Team Onboarding', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time + 30-day support', priceId: 'sales_team_onboarding_once', bundleable: true,
+    icon: GraduationCap, title: 'Sales Team Onboarding', thumbnail: salesTeamOnboardingThumb, pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time + 30-day support', priceId: 'sales_team_onboarding_once', bundleable: true,
     monthlyPriceId: 'sales_team_onboarding_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: 'Customized training + playbook + role-play + 30-day accountability.',
     successStat: 'Trained reps close 30%+ more deals in their first 60 days',
@@ -269,7 +279,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Every sales team needs training but few get it. $299 is cheap for training that generates $50K+ in client revenue and builds a recurring relationship.',
   },
   {
-    icon: Rocket, title: '30-Day Lead Gen Sprint', pricing: '$999', priceRaw: 99900, pricingDetail: '30 days · done-for-you', priceId: 'lead_gen_sprint_once', bundleable: true, badge: 'DONE-FOR-YOU',
+    icon: Rocket, title: '30-Day Lead Gen Sprint', thumbnail: leadGenSprintThumb, pricing: '$999', priceRaw: 99900, pricingDetail: '30 days · done-for-you', priceId: 'lead_gen_sprint_once', bundleable: true, badge: 'DONE-FOR-YOU',
     monthlyPriceId: 'lead_gen_sprint_monthly', monthlyPricing: '$699/mo', monthlyPriceRaw: 69900, monthlySavePercent: 30,
     description: 'Done-for-you lead generation sprint — LinkedIn + email + ads + landing page.',
     successStat: '$999 typically pays for itself in the first 1–2 qualified deals closed',
@@ -279,7 +289,7 @@ const services: ServiceTile[] = [
   },
   // ============ Phase 4: Premium / Recurring ============
   {
-    icon: Workflow, title: 'Sales Process Redesign', pricing: '$1,499', priceRaw: 149900, pricingDetail: 'one-time + 90-day support', priceId: 'sales_process_redesign_once', bundleable: true, badge: 'PREMIUM',
+    icon: Workflow, title: 'Sales Process Redesign', thumbnail: salesProcessRedesignThumb, pricing: '$1,499', priceRaw: 149900, pricingDetail: 'one-time + 90-day support', priceId: 'sales_process_redesign_once', bundleable: true, badge: 'PREMIUM',
     monthlyPriceId: 'sales_process_redesign_monthly', monthlyPricing: '$1,049/mo', monthlyPriceRaw: 104900, monthlySavePercent: 30,
     description: 'Complete sales methodology overhaul + 5 training sessions + 90-day support.',
     successStat: 'Average 20–40% revenue increase within 90 days of new process',
@@ -288,7 +298,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most businesses sell wrong because they have no clear process. Fixing it generates 20–40% more revenue immediately and shortens the sales cycle. Bridge into $1K–$3K/mo coaching retainers.',
   },
   {
-    icon: Handshake, title: 'Marketing-to-Sales Alignment', pricing: '$1,299', priceRaw: 129900, pricingDetail: '2-day workshop + 60-day coaching', priceId: 'marketing_sales_alignment_once', bundleable: true, badge: 'PREMIUM',
+    icon: Handshake, title: 'Marketing-to-Sales Alignment', thumbnail: marketingSalesAlignmentThumb, pricing: '$1,299', priceRaw: 129900, pricingDetail: '2-day workshop + 60-day coaching', priceId: 'marketing_sales_alignment_once', bundleable: true, badge: 'PREMIUM',
     monthlyPriceId: 'marketing_sales_alignment_monthly', monthlyPricing: '$899/mo', monthlyPriceRaw: 89900, monthlySavePercent: 31,
     description: '2-day workshop fixing the disconnect that costs you 6 figures/year.',
     successStat: 'Misalignment costs the average company 6+ figures/year in wasted leads',
@@ -297,7 +307,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Marketing and sales hate each other in 90% of companies and that misalignment costs 6+ figures/year. Premium high-touch workshop that usually leads into bigger combined retainers.',
   },
   {
-    icon: TrendingUp, title: 'Sales Coaching Retainer', pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_retainer_monthly', badge: 'RECURRING',
+    icon: TrendingUp, title: 'Sales Coaching Retainer', thumbnail: salesCoachingRetainerThumb, pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_retainer_monthly', badge: 'RECURRING',
     description: 'Ongoing sales team coaching, pipeline reviews, and CRM optimization.',
     successStat: 'Average client stays 12–18 months — recurring revenue engine',
     longDescription: 'Ongoing sales team coaching and optimization. Weekly team call, 1:1 coaching for each rep (30–60 min), deal reviews on stuck pipeline, CRM optimization, playbook/script updates, quarterly strategy refresh, and a monthly performance dashboard. Tier B ($699) and Tier C ($999) add daily Slack support and a dedicated account manager.',
@@ -305,7 +315,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Companies eventually realize "we can\'t do this alone." Recurring revenue, 12–18 month average tenure, and it feeds every other product in the lineup.',
   },
   {
-    icon: Bot, title: 'Lead Nurture Automation', pricing: '$299/mo', priceRaw: 29900, pricingDetail: 'monthly · managed', priceId: 'lead_nurture_automation_monthly', badge: 'RECURRING',
+    icon: Bot, title: 'Lead Nurture Automation', thumbnail: leadNurtureAutomationThumb, pricing: '$299/mo', priceRaw: 29900, pricingDetail: 'monthly · managed', priceId: 'lead_nurture_automation_monthly', badge: 'RECURRING',
     description: 'Managed email + SMS nurture sequences that convert cold leads automatically.',
     successStat: 'Properly nurtured leads convert at 20–30% over 6–12 months',
     longDescription: 'Ongoing managed nurture automation. We build and run 8–12 email sequences plus SMS campaigns (holiday, seasonal, re-engagement), set up lead scoring, manage drip campaigns, A/B test copy and timing, deliver monthly performance reporting, and integrate everything with your CRM.',
