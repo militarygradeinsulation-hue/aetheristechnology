@@ -31,6 +31,9 @@ import prospectingListBuilderThumb from '@/assets/packages/prospecting-list-buil
 import landingPageBlueprintThumb from '@/assets/packages/landing-page-blueprint.png';
 import crmSetupOptimizationThumb from '@/assets/packages/crm-setup-optimization.png';
 import emailSeriesBundleThumb from '@/assets/packages/email-series-bundle.png';
+import crmHealthCheckThumb from '@/assets/packages/crm-health-check.png';
+import leadFlowMapperThumb from '@/assets/packages/lead-flow-mapper.png';
+import competitorLandingAnalysisThumb from '@/assets/packages/competitor-landing-analysis.png';
 
 interface ServiceTile {
   icon: React.ElementType;
@@ -204,7 +207,7 @@ const services: ServiceTile[] = [
   },
   // ============ NEW PRODUCTS — Phase 1: Quick Wins ============
   {
-    icon: Database, title: 'CRM Health Check', pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'crm_health_check_once', bundleable: true,
+    icon: Database, title: 'CRM Health Check', thumbnail: crmHealthCheckThumb, pricing: '$79', priceRaw: 7900, pricingDetail: 'one-time', priceId: 'crm_health_check_once', bundleable: true,
     monthlyPriceId: 'crm_health_check_monthly', monthlyPricing: '$49/mo', monthlyPriceRaw: 4900, monthlySavePercent: 38,
     description: '30-min audit of your CRM — find deals falling through the cracks.',
     successStat: '80% of CRMs have hidden revenue leaks within 30 minutes of audit',
@@ -213,7 +216,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Every CRM has problems the owner doesn\'t know about. Identifying hidden revenue leaks and bad data alone usually pays back the $79 in the first deal recovered.',
   },
   {
-    icon: GitBranch, title: 'Lead Flow Mapper', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'lead_flow_mapper_once', bundleable: true,
+    icon: GitBranch, title: 'Lead Flow Mapper', thumbnail: leadFlowMapperThumb, pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'lead_flow_mapper_once', bundleable: true,
     monthlyPriceId: 'lead_flow_mapper_monthly', monthlyPricing: '$65/mo', monthlyPriceRaw: 6500, monthlySavePercent: 34,
     description: 'Visual map of how leads move from prospect to close — and where they die.',
     successStat: '92% of businesses don\'t know their actual stage-by-stage conversion rates',
@@ -222,7 +225,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Most companies don\'t know their real conversion math. Seeing exactly where leads die — in brutal detail — usually exposes $1K–$10K/month in recoverable revenue.',
   },
   {
-    icon: Swords, title: 'Competitor Landing Page Analysis', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'competitor_landing_analysis_once', bundleable: true,
+    icon: Swords, title: 'Competitor Landing Page Analysis', thumbnail: competitorLandingAnalysisThumb, pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'competitor_landing_analysis_once', bundleable: true,
     monthlyPriceId: 'competitor_landing_analysis_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Deep teardown of 3–5 competitors vs. you — what they win on, what you can copy.',
     successStat: '85% find at least 3 high-impact conversion elements competitors are using',
