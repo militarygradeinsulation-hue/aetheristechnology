@@ -850,7 +850,9 @@ export const ServicesPricing: React.FC = () => {
                     <div className="flex-1 min-w-0 pr-8">
                       <h3 className="text-2xl md:text-3xl font-bold text-foreground font-display mb-1">{expandedService.title}</h3>
                       <div className="flex items-baseline gap-2 flex-wrap">
-                        {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
+                        {isServiceComingSoon(expandedService) ? (
+                          <span className="text-xs font-mono uppercase tracking-widest text-red-400">Pricing TBA</span>
+                        ) : billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                           <>
                             <span className="text-2xl font-bold text-gradient-amber font-display">{expandedService.monthlyPricing}</span>
                             <span className="text-sm text-muted-foreground/70 line-through">{expandedService.pricing}</span>
