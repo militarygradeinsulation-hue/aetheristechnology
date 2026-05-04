@@ -280,6 +280,7 @@ const services: ServiceTile[] = [
   // ============ Phase 4: Premium / Recurring ============
   {
     icon: Workflow, title: 'Sales Process Redesign', pricing: '$1,499', priceRaw: 149900, pricingDetail: 'one-time + 90-day support', priceId: 'sales_process_redesign_once', bundleable: true, badge: 'PREMIUM',
+    monthlyPriceId: 'sales_process_redesign_monthly', monthlyPricing: '$1,049/mo', monthlyPriceRaw: 104900, monthlySavePercent: 30,
     description: 'Complete sales methodology overhaul + 5 training sessions + 90-day support.',
     successStat: 'Average 20–40% revenue increase within 90 days of new process',
     longDescription: 'A complete overhaul of how your team sells. Methodology selection (Consultative, Value-based, MEDDIC, etc.), full process documentation lead-to-close, 5 sales team training sessions, CRM configuration for the new process, playbook creation, new-rep onboarding materials, and 90-day implementation support.',
