@@ -204,6 +204,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: GitBranch, title: 'Lead Flow Mapper', pricing: '$99', priceRaw: 9900, pricingDetail: 'one-time', priceId: 'lead_flow_mapper_once', bundleable: true,
+    monthlyPriceId: 'lead_flow_mapper_monthly', monthlyPricing: '$65/mo', monthlyPriceRaw: 6500, monthlySavePercent: 34,
     description: 'Visual map of how leads move from prospect to close — and where they die.',
     successStat: '92% of businesses don\'t know their actual stage-by-stage conversion rates',
     longDescription: 'A visual diagram of your lead funnel showing every stage from source to close, conversion rates at each step, bottlenecks, lead-loss points, and revenue per lead. Comes with a 1-page roadmap of fixes prioritized by impact.',
