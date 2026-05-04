@@ -242,6 +242,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: LayoutTemplate, title: 'Landing Page Blueprint', pricing: '$349', priceRaw: 34900, pricingDetail: 'one-time', priceId: 'landing_page_blueprint_once', bundleable: true,
+    monthlyPriceId: 'landing_page_blueprint_monthly', monthlyPricing: '$239/mo', monthlyPriceRaw: 23900, monthlySavePercent: 32,
     description: 'Custom landing page template + copy framework + CTA optimization.',
     successStat: 'Average 30–50% conversion lift after copy + CTA rebuild',
     longDescription: 'A conversion-focused landing page blueprint built specifically for your business. Includes analysis of your current page, a custom template, 3 headline variations, value prop reframing, CTA optimization, form field recommendations, and an A/B testing roadmap.',
