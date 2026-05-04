@@ -699,7 +699,15 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Action buttons */}
                   <div className="flex items-center gap-3 flex-wrap">
-                    {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
+                    {isServiceComingSoon(expandedService) ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="inline-flex items-center gap-2 bg-red-600/15 text-red-400 border border-red-500/40 px-5 py-3 rounded-lg text-sm font-bold uppercase tracking-[0.14em] font-mono cursor-not-allowed"
+                      >
+                        <Clock className="w-4 h-4" /> Coming Soon
+                      </button>
+                    ) : billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                       <button
                         onClick={() => setCheckoutPriceId(expandedService.monthlyPriceId!)}
                         className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
@@ -714,7 +722,7 @@ export const ServicesPricing: React.FC = () => {
                         <ShoppingCart className="w-4 h-4" /> Buy Now — {expandedService.pricing}
                       </button>
                     ) : null}
-                    {expandedService.bundleable && (
+                    {expandedService.bundleable && !isServiceComingSoon(expandedService) && (
                       <button
                         onClick={() => { toggleSelect(expandedIdx); }}
                         className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97] border-2 ${
