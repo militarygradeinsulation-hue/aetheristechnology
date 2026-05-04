@@ -504,7 +504,7 @@ export const ServicesPricing: React.FC = () => {
                       {/* Footer hint + bundle checkbox */}
                       <div className="flex items-center justify-between px-5 py-3.5 border-t border-border/40 mt-auto">
                         <span className="text-xs text-primary font-semibold">Click for details →</span>
-                        {service.bundleable && (
+                        {service.bundleable && !isServiceComingSoon(service) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
                             className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
@@ -557,7 +557,7 @@ export const ServicesPricing: React.FC = () => {
                       {/* Footer hint + bundle checkbox */}
                       <div className="flex items-center justify-between pt-3 border-t border-border/40">
                         <span className="text-xs text-primary font-semibold">Click for details →</span>
-                        {service.bundleable && (
+                        {service.bundleable && !isServiceComingSoon(service) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
                             className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
