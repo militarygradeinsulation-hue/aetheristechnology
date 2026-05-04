@@ -130,6 +130,15 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "product_usage_optimization_monthly",
   "customer_research_automation_monthly",
   "sales_team_cloning_monthly",
+  // 1M IQ Innovations #31–#40 (skipped #34, #37 — overlap with Customer Research Automation)
+  "hiring_predictor_monthly",
+  "customer_health_score_monthly",
+  "territory_intelligence_once",
+  "account_growth_accelerator_monthly",
+  "operational_excellence_once",
+  "tech_debt_auditor_once",
+  "disruption_predictor_once",
+  "org_structure_optimizer_once",
 ]);
 
 export const isComingSoonPriceId = (priceId?: string | null): boolean =>
