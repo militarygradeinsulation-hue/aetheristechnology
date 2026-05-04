@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Brain, FileText, RefreshCw, Database, GitBranch, Swords, Send, Settings, Users, LayoutTemplate, ListChecks, Rocket, Workflow, Handshake, GraduationCap, Bot, Mic, DollarSign, Activity, FlaskConical, Copy } from 'lucide-react';
+import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Brain, FileText, RefreshCw, Database, GitBranch, Swords, Send, Settings, Users, LayoutTemplate, ListChecks, Rocket, Workflow, Handshake, GraduationCap, Bot, Mic, DollarSign, Activity, FlaskConical, Copy, UserPlus, HeartPulse, Map, Maximize2, Gauge, Bug, Radar, Network } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
