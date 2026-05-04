@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'The Operator', href: '/about' },
   ];
 
-  const showStickyCTA = isScrolled;
+  const showStickyCTA = true;
   const expanded = isHovered || isMobileMenuOpen;
 
   return (
