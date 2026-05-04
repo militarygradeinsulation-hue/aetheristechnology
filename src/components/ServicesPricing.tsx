@@ -232,6 +232,7 @@ const services: ServiceTile[] = [
   // ============ Phase 2: Mid-Level Implementation ============
   {
     icon: Settings, title: 'CRM Setup & Optimization', pricing: '$399', priceRaw: 39900, pricingDetail: 'one-time + training', priceId: 'crm_setup_optimization_once', bundleable: true,
+    monthlyPriceId: 'crm_setup_optimization_monthly', monthlyPricing: '$279/mo', monthlyPriceRaw: 27900, monthlySavePercent: 30,
     description: 'Full CRM rebuild + automation + 2-hour live team training.',
     successStat: '20–40% improvement in forecast accuracy after structural cleanup',
     longDescription: 'Full CRM audit + setup improvements + team training. We restructure your pipeline, standardize contact fields, build basic automation workflows, train your sales team live (2 hours), and check in 30 days later to optimize what\'s actually working.',
