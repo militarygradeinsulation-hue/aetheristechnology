@@ -341,6 +341,37 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       if (deliverable) triggerFunction("generate-purchase-delivery", { deliverableId: deliverable.id });
     }
 
+    // 13 Forensics systems — create deliverable + send magic link for client intake
+    if (priceId && SYSTEM_PRICE_IDS.has(priceId)) {
+      const accessToken = crypto.randomUUID().replace(/-/g, "") +
+        crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+      const { data: d } = await supabase.from("purchase_deliverables").insert({
+        stripe_session_id: session.id,
+        email: email || "",
+        user_id: userId,
+        price_id: priceId,
+        tool_type: priceId,
+        status: "awaiting_intake",
+        input_data: session.metadata || {},
+        access_token: accessToken,
+      }).select().single();
+
+      if (d && email) {
+        const intakeUrl =
+          `${PUBLIC_SITE_URL}/deliverable/${accessToken}`;
+        triggerFunction("send-transactional-email", {
+          templateName: "deliverable-magic-link",
+          recipientEmail: email,
+          idempotencyKey: `deliv-${d.id}`,
+          templateData: {
+            title: SYSTEM_TITLES[priceId] || "Your purchase",
+            intakeUrl,
+            name: name || undefined,
+          },
+        });
+      }
+    }
+
     if (session.metadata?.bundle_items) {
       try {
         const items: string[] = JSON.parse(session.metadata.bundle_items);
