@@ -23,6 +23,7 @@ const BlogPage = lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const DeliverablePage = lazy(() => import("./pages/DeliverablePage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -111,6 +112,7 @@ const App = () => (
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/unsubscribe" element={<UnsubscribePage />} />
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
+                      <Route path="/deliverable/:token" element={<DeliverablePage />} />
                       <Route path="/content-generator" element={<ContentGeneratorPage />} />
                       <Route path="/sales-scripts" element={<SalesScriptsPage />} />
                       <Route path="/content-calendar" element={<ContentCalendarPage />} />

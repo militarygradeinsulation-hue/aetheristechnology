@@ -149,3 +149,8 @@ verify_jwt = false
 
 [functions.run-audit]
 verify_jwt = false
+[functions.generate-system-deliverable]
+verify_jwt = false
+
+[functions.deliverable-public]
+verify_jwt = false
