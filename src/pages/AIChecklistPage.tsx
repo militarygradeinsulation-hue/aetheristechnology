@@ -130,7 +130,7 @@ export default function AIChecklistPage() {
                   </div>
                   <div>
                     <Label htmlFor="pain">Biggest operational leak right now</Label>
-                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={update('pain' as never) as never} placeholder="Optional — we read every one." />
+                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={(e) => setForm({ ...form, biggest_pain: e.target.value })} placeholder="Optional — we read every one." />
                   </div>
                   <Button type="submit" size="lg" disabled={submitting} className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                     {submitting ? 'Generating PDF…' : (<><Download className="w-4 h-4 mr-2" />Download the Checklist</>)}
