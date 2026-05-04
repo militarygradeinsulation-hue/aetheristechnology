@@ -12,12 +12,47 @@ export function AdminForensicsSystemsPanel() {
   const [active, setActive] = useState<ForensicsSystem | null>(null);
   const [intake, setIntake] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [autofilling, setAutofilling] = useState(false);
+  const [autofillUrl, setAutofillUrl] = useState('');
   const [result, setResult] = useState<{ markdown: string; title: string } | null>(null);
 
   const open = (sys: ForensicsSystem) => {
     setActive(sys);
     setIntake({});
+    setAutofillUrl('');
     setResult(null);
+  };
+
+  const autofillFromUrl = async () => {
+    if (!active) return;
+    const url = autofillUrl.trim();
+    if (!url) {
+      toast({ title: 'Enter a URL first', variant: 'destructive' });
+      return;
+    }
+    setAutofilling(true);
+    try {
+      const fieldsSpec = active.intake.map(f => ({ name: f.name, label: f.label, type: f.type }));
+      const { data, error } = await supabase.functions.invoke('autofill-intake-from-url', {
+        body: { url, fields: fieldsSpec, toolTitle: active.title },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const filled = data?.values || {};
+      setIntake(prev => {
+        const next = { ...prev };
+        for (const k of Object.keys(filled)) {
+          const v = filled[k];
+          if (v != null && String(v).trim() && !next[k]?.trim()) next[k] = String(v);
+        }
+        return next;
+      });
+      toast({ title: 'Autofilled', description: `Pulled ${Object.keys(filled).length} fields from ${url}` });
+    } catch (e: unknown) {
+      toast({ title: 'Autofill failed', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+    } finally {
+      setAutofilling(false);
+    }
   };
 
   const submit = async () => {
