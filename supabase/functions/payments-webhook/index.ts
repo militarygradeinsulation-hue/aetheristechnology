@@ -197,45 +197,49 @@ async function recordSaleAndCommissions(args: {
     return;
   }
 
-  // Commission split — company always 70%; rep 15% if rep_code; partner 15% if partner exists and != rep
+  // Commission split — tiered by sale amount.
   const amount = args.amount_cents;
+  const tierRates = ratesForAmount(amount);
   const commissionRows: any[] = [];
 
   // Company
   commissionRows.push({
     sale_id: sale.id, recipient_role: "company", recipient_code: null,
-    amount_cents: Math.floor(amount * COMPANY_RATE), rate: COMPANY_RATE,
+    amount_cents: Math.floor(amount * tierRates.company), rate: tierRates.company,
     status: "pending", environment: args.env,
+    metadata: { tier: tierRates.tier },
   });
 
-  let repRate = 0;
   if (args.rep_code) {
     const { data: rep } = await supabase
       .from("rep_codes")
       .select("commission_rate, role").eq("code", args.rep_code).eq("is_active", true).maybeSingle();
-    repRate = rep ? Number(rep.commission_rate) : 0.15;
+    // Tier rate is the source of truth; rep_codes.commission_rate is ignored under tiered model.
+    const repRate = tierRates.rep;
+    const repAmt = Math.floor(amount * repRate);
     commissionRows.push({
       sale_id: sale.id, recipient_role: "rep", recipient_code: args.rep_code,
-      amount_cents: Math.floor(amount * repRate), rate: repRate,
+      amount_cents: repAmt, rate: repRate,
       status: "pending", environment: args.env,
+      metadata: { tier: tierRates.tier },
     });
 
-    // Bump rep_codes totals
     await supabase.rpc("increment_rep_sales" as any, {
       _code: args.rep_code,
       _sales: amount,
-      _commission: Math.floor(amount * repRate),
+      _commission: repAmt,
     });
 
     // Partner override (skip if rep IS the partner)
     if (rep?.role !== "partner") {
       const partnerCode = await findActivePartnerCode();
       if (partnerCode) {
-        const partnerAmt = Math.floor(amount * PARTNER_RATE);
+        const partnerAmt = Math.floor(amount * tierRates.partner);
         commissionRows.push({
           sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-          amount_cents: partnerAmt, rate: PARTNER_RATE,
+          amount_cents: partnerAmt, rate: tierRates.partner,
           status: "pending", environment: args.env,
+          metadata: { tier: tierRates.tier },
         });
         await supabase.rpc("increment_rep_sales" as any, {
           _code: partnerCode, _sales: 0, _commission: partnerAmt,
@@ -243,14 +247,15 @@ async function recordSaleAndCommissions(args: {
       }
     }
   } else {
-    // No rep — 30% sits with company unsplit (or treat as partner if a partner exists)
+    // No rep — partner still earns their tier override if one is configured.
     const partnerCode = await findActivePartnerCode();
     if (partnerCode) {
-      const partnerAmt = Math.floor(amount * PARTNER_RATE);
+      const partnerAmt = Math.floor(amount * tierRates.partner);
       commissionRows.push({
         sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-        amount_cents: partnerAmt, rate: PARTNER_RATE,
+        amount_cents: partnerAmt, rate: tierRates.partner,
         status: "pending", environment: args.env,
+        metadata: { tier: tierRates.tier },
       });
       await supabase.rpc("increment_rep_sales" as any, {
         _code: partnerCode, _sales: 0, _commission: partnerAmt,
