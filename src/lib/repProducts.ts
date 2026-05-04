@@ -35,6 +35,8 @@ export interface RepProduct {
 }
 
 export const REP_PRODUCTS: RepProduct[] = [
+  // Lead magnet — free self-scan (no commission, listed for visibility)
+  { name: 'Free Leak Audit (Self-Scan)', priceCents: 0, tier: 1 },
   // Tier 1 — Entry ($29–$59)
   { name: 'Playbook Unlock', priceCents: 2900, tier: 1 },
   { name: 'Social Content Pack', priceCents: 3900, tier: 1 },
@@ -51,7 +53,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   // Tier 3 — High-Ticket ($599+)
   { name: 'Website Evaluation', priceCents: 59900, tier: 3 },
   { name: 'Strategic Discovery Audit', priceCents: 59900, tier: 3 },
-  { name: '14-Day Forensic Diagnostic', priceCents: 290000, tier: 3, highlight: true },
+  { name: '14-Day Forensic Diagnostic', priceCents: 250000, tier: 3, highlight: true },
   { name: 'Fractional CTO/CMO', priceCents: 590000, tier: 3, recurring: true, highlight: true },
 ];
 
