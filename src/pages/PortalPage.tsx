@@ -11,7 +11,7 @@ import {
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
-import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
