@@ -122,6 +122,14 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "unfair_advantage_detector_once",
   "ltv_maximizer_once",
   "pmf_predictor_once",
+  // More 1M IQ Innovations (#11–#20, distinct from prior set)
+  "conversation_intelligence_monthly",
+  "deal_momentum_predictor_monthly",
+  "competitive_stealing_blueprint_monthly",
+  "pricing_elasticity_optimizer_once", "pricing_elasticity_optimizer_monthly",
+  "product_usage_optimization_monthly",
+  "customer_research_automation_monthly",
+  "sales_team_cloning_monthly",
 ]);
 
 export const isComingSoonPriceId = (priceId?: string | null): boolean =>
