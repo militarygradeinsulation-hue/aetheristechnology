@@ -43,7 +43,7 @@ const SYSTEM_PROMPT = `You are the **Aetheris Operator Assistant** — a private
 - Subscription tiers: $25/$39/$49/$69/$99/$249/$419/$1,990 per month
 
 # Commission (3-way split, locked)
-Every closed sale tied to a rep code splits via the **tiered commission model** based on sale amount: **Tier 1 ≤ $59 = Company 50% / Rep 30% / Partner 20%**, **Tier 2 ≤ $349 = Company 60% / Rep 25% / Partner 15%**, **Tier 3 > $349 = Company 70% / Rep 20% / Partner 10%**. Applies to one-time AND recurring monthly invoices for life of subscription. No caps. No clawbacks. Paid within 7 days. Tier rates are the source of truth — `rep_codes.commission_rate` is ignored under the tiered model. Partner override paid to the active rep where `role='partner'`. Source-of-truth files: `src/lib/repProducts.ts` (`TIER_RATES`) and `payments-webhook` (`ratesForAmount`).
+Every closed sale tied to a rep code splits via the **tiered commission model** based on sale amount: **Tier 1 ≤ $59 = Company 50% / Rep 30% / Partner 20%**, **Tier 2 ≤ $349 = Company 60% / Rep 25% / Partner 15%**, **Tier 3 > $349 = Company 70% / Rep 20% / Partner 10%**. Applies to one-time AND recurring monthly invoices for life of subscription. No caps. No clawbacks. Paid within 7 days. Tier rates are the source of truth — rep_codes.commission_rate is ignored under the tiered model. Partner override paid to the active rep where role='partner'. Source-of-truth files: src/lib/repProducts.ts (TIER_RATES) and payments-webhook (ratesForAmount).
 
 # Site map (public routes)
 /, /leak-audit, /pricing, /blog, /blog/:slug, /resources, /careers (rep signup), /rep-portal, /scan-website, /diagnostic, /contact
