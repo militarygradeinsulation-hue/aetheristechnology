@@ -251,6 +251,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Users, title: 'Prospecting List Builder', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time · 200–500 leads', priceId: 'prospecting_list_builder_once', bundleable: true,
+    monthlyPriceId: 'prospecting_list_builder_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: '200–500 AI-scraped, qualified leads with research + decision-maker data.',
     successStat: 'Saves reps 40+ hours of manual prospecting research',
     longDescription: 'We build you a custom prospect list using AI + data scraping. Define your target profile, get 200–500 qualified leads (email + phone) with company research, decision-maker info, and personalization data — delivered in a clean, CRM-ready spreadsheet.',
