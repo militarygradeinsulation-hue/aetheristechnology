@@ -774,6 +774,51 @@ export type Database = {
         }
         Relationships: []
       }
+      checklist_leads: {
+        Row: {
+          biggest_pain: string | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          role: string | null
+          source: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          biggest_pain?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          role?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          biggest_pain?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          role?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       claim_codes: {
         Row: {
           code: string
