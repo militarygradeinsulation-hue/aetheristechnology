@@ -213,6 +213,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Swords, title: 'Competitor Landing Page Analysis', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time', priceId: 'competitor_landing_analysis_once', bundleable: true,
+    monthlyPriceId: 'competitor_landing_analysis_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Deep teardown of 3–5 competitors vs. you — what they win on, what you can copy.',
     successStat: '85% find at least 3 high-impact conversion elements competitors are using',
     longDescription: 'A side-by-side teardown of 3–5 competitor websites and landing pages compared to yours. We surface what they do better, where you out-perform, conversion-element gaps, and messaging differences — with quick copy and design wins you can ship this week.',
