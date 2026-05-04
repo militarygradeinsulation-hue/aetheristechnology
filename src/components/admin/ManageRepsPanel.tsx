@@ -189,7 +189,7 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
             <Input placeholder="Code (auto)" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
             <Input placeholder="Full name (required)" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
             <Input placeholder="Email (auto)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
-            <Input placeholder="Rate (0.15)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} />
+            <Input placeholder="Rate (tiered — ignored)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} title="Commission rate is now tier-based (T1 30% / T2 25% / T3 20%) and resolved per sale. This field is kept for legacy data only." />
             <div className="flex gap-2">
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={draft.role} onChange={e => setDraft(s => ({ ...s, role: e.target.value as "rep" | "partner" }))}>
                 <option value="rep">rep</option>
