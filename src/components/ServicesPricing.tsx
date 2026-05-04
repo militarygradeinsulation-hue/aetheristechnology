@@ -261,6 +261,7 @@ const services: ServiceTile[] = [
   // ============ Phase 3: Premium Strategic ============
   {
     icon: GraduationCap, title: 'Sales Team Onboarding', pricing: '$299', priceRaw: 29900, pricingDetail: 'one-time + 30-day support', priceId: 'sales_team_onboarding_once', bundleable: true,
+    monthlyPriceId: 'sales_team_onboarding_monthly', monthlyPricing: '$199/mo', monthlyPriceRaw: 19900, monthlySavePercent: 33,
     description: 'Customized training + playbook + role-play + 30-day accountability.',
     successStat: 'Trained reps close 30%+ more deals in their first 60 days',
     longDescription: 'A customized onboarding program for your sales team — process documentation, custom pitch deck, objection handling guide, CRM training (2 sessions), live role-play, 30-day accountability check-ins, and a delivered playbook (printable + digital).',
