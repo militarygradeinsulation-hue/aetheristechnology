@@ -2811,12 +2811,14 @@ export type Database = {
       }
       purchase_deliverables: {
         Row: {
+          access_token: string | null
           created_at: string
           email: string
           error_message: string | null
           file_url: string | null
           id: string
           input_data: Json
+          intake_data: Json
           output_data: Json
           price_id: string
           purchase_id: string | null
@@ -2827,12 +2829,14 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          access_token?: string | null
           created_at?: string
           email: string
           error_message?: string | null
           file_url?: string | null
           id?: string
           input_data?: Json
+          intake_data?: Json
           output_data?: Json
           price_id: string
           purchase_id?: string | null
@@ -2843,12 +2847,14 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          access_token?: string | null
           created_at?: string
           email?: string
           error_message?: string | null
           file_url?: string | null
           id?: string
           input_data?: Json
+          intake_data?: Json
           output_data?: Json
           price_id?: string
           purchase_id?: string | null
