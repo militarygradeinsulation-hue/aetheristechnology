@@ -21,6 +21,16 @@ import strategyBlueprintThumb from '@/assets/packages/strategy-blueprint.png';
 import socialContentPackThumb from '@/assets/packages/social-content-pack.png';
 import digitalSnapshotThumb from '@/assets/packages/digital-snapshot.png';
 import fullWebsiteReportThumb from '@/assets/packages/full-website-report.png';
+import leadNurtureAutomationThumb from '@/assets/packages/lead-nurture-automation.png';
+import salesCoachingRetainerThumb from '@/assets/packages/sales-coaching-retainer.png';
+import marketingSalesAlignmentThumb from '@/assets/packages/marketing-sales-alignment.png';
+import leadGenSprintThumb from '@/assets/packages/lead-gen-sprint.png';
+import salesProcessRedesignThumb from '@/assets/packages/sales-process-redesign.png';
+import salesTeamOnboardingThumb from '@/assets/packages/sales-team-onboarding.png';
+import prospectingListBuilderThumb from '@/assets/packages/prospecting-list-builder.png';
+import landingPageBlueprintThumb from '@/assets/packages/landing-page-blueprint.png';
+import crmSetupOptimizationThumb from '@/assets/packages/crm-setup-optimization.png';
+import emailSeriesBundleThumb from '@/assets/packages/email-series-bundle.png';
 
 interface ServiceTile {
   icon: React.ElementType;
