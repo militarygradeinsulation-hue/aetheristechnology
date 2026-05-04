@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'The Operator', href: '/about' },
   ];
 
-  const showStickyCTA = isScrolled;
+  const showStickyCTA = true;
   const expanded = isHovered || isMobileMenuOpen;
 
   return (
@@ -135,13 +135,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
       </div>
 
       {showStickyCTA && (
-        <div className={`bg-primary/90 backdrop-blur-sm py-1.5 px-4 text-center transition-all duration-300 ${expanded ? 'opacity-100 max-h-10' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+        <div className="bg-amber py-1.5 px-4 text-center">
           <Link
             to="/assessment"
-            className="text-primary-foreground text-sm font-medium hover:underline inline-flex items-center gap-1"
+            className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
             onClick={() => trackEvent('click', { label: 'sticky_cta_assessment', location: 'navbar_sticky' })}
           >
-            🔥 Get Your Free AI Readiness Score → 
+            🔥 Get Your Free AI Readiness Score →
           </Link>
         </div>
       )}

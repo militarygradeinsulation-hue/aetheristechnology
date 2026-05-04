@@ -28,6 +28,7 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
+const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
 const ScanPage = lazy(() => import("./pages/ScanPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersPage = lazy(() => import("./pages/CareersPage"));
@@ -107,6 +108,8 @@ const App = () => (
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/resources" element={<ResourcesPage />} />
                       <Route path="/assessment" element={<AssessmentPage />} />
+                      <Route path="/ai-implementation-checklist" element={<AIChecklistPage />} />
+                      <Route path="/ai-checklist" element={<AIChecklistPage />} />
                       <Route path="/scan" element={<ScanPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
