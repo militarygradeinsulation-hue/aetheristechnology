@@ -132,6 +132,21 @@ export function AdminForensicsSystemsPanel() {
 
       {!result && (
         <div className="glass p-6 rounded-xl space-y-4 max-w-2xl">
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+            <Label className="text-xs uppercase tracking-wide text-amber">Autofill from URL</Label>
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                value={autofillUrl}
+                onChange={e => setAutofillUrl(e.target.value)}
+                placeholder="https://company.com — AI scrapes & fills the rest"
+              />
+              <Button onClick={autofillFromUrl} disabled={autofilling} variant="outline" size="sm" className="shrink-0">
+                {autofilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Wand2 className="w-4 h-4 mr-1" />Autofill</>}
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Only fills empty fields. Edit anything after.</p>
+          </div>
           {active.intake.map(field => (
             <div key={field.name} className="space-y-1">
               <Label>{field.label}{field.required && <span className="text-destructive ml-1">*</span>}</Label>
