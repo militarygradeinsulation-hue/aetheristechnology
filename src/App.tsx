@@ -112,6 +112,7 @@ const App = () => (
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/unsubscribe" element={<UnsubscribePage />} />
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
+                      <Route path="/deliverable/:token" element={<DeliverablePage />} />
                       <Route path="/content-generator" element={<ContentGeneratorPage />} />
                       <Route path="/sales-scripts" element={<SalesScriptsPage />} />
                       <Route path="/content-calendar" element={<ContentCalendarPage />} />
