@@ -344,7 +344,13 @@ export const ServicesPricing: React.FC = () => {
   const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
   const [checkoutBundleItems, setCheckoutBundleItems] = useState<string[] | null>(null);
 
-  const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
+  const isServiceComingSoon = (s: { priceId?: string; monthlyPriceId?: string }) =>
+    isComingSoonPriceId(s.priceId) || isComingSoonPriceId(s.monthlyPriceId);
+
+  const bundleableServices = useMemo(
+    () => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable && !isServiceComingSoon(s)),
+    []
+  );
 
   const toggleSelect = (idx: number) => {
     setSelectedIds(prev => {
