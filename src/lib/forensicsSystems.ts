@@ -101,3 +101,17 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
       { name: "platform", label: "Email/automation platform", type: "text", required: true },
     ])},
 ];
+
+// Public checkout is disabled for these priceIds — they render a red "Coming Soon"
+// badge on /services and cannot be added to the Mix & Match bundle. Admins can
+// still run them free-of-charge from the Admin → Forensics Systems panel.
+// To re-enable sales, remove the priceId from this set.
+export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
+  ...FORENSICS_SYSTEMS.map(s => s.priceId),
+  // Monthly variants surfaced in ServicesPricing but not in this catalog
+  "crm_health_check_monthly",
+  "lead_flow_mapper_monthly",
+]);
+
+export const isComingSoonPriceId = (priceId?: string | null): boolean =>
+  !!priceId && COMING_SOON_PRICE_IDS.has(priceId);

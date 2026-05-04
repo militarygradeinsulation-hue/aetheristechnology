@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { isComingSoonPriceId } from '@/lib/forensicsSystems';
+import { Clock } from 'lucide-react';
 import frictionVocabularyAuditThumb from '@/assets/packages/friction-vocabulary-audit.png';
 import customImplementationThumb from '@/assets/packages/custom-implementation.png';
 import brandContradictionFinderThumb from '@/assets/packages/brand-contradiction-finder.png';
@@ -342,7 +344,13 @@ export const ServicesPricing: React.FC = () => {
   const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
   const [checkoutBundleItems, setCheckoutBundleItems] = useState<string[] | null>(null);
 
-  const bundleableServices = useMemo(() => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable), []);
+  const isServiceComingSoon = (s: { priceId?: string; monthlyPriceId?: string }) =>
+    isComingSoonPriceId(s.priceId) || isComingSoonPriceId(s.monthlyPriceId);
+
+  const bundleableServices = useMemo(
+    () => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable && !isServiceComingSoon(s)),
+    []
+  );
 
   const toggleSelect = (idx: number) => {
     setSelectedIds(prev => {
@@ -464,7 +472,11 @@ export const ServicesPricing: React.FC = () => {
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
                   } ${hasThumb ? 'p-0' : 'p-6'}`}
                 >
-                  {service.badge && (
+                  {isServiceComingSoon(service) ? (
+                    <span className="absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-mono border bg-red-600/15 text-red-400 border-red-500/40 backdrop-blur-md bg-background/70">
+                      Coming Soon
+                    </span>
+                  ) : service.badge && (
                     <span
                       className={`absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
                         service.badge === 'FOUNDATIONAL'
@@ -492,7 +504,7 @@ export const ServicesPricing: React.FC = () => {
                       {/* Footer hint + bundle checkbox */}
                       <div className="flex items-center justify-between px-5 py-3.5 border-t border-border/40 mt-auto">
                         <span className="text-xs text-primary font-semibold">Click for details →</span>
-                        {service.bundleable && (
+                        {service.bundleable && !isServiceComingSoon(service) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
                             className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
@@ -545,7 +557,7 @@ export const ServicesPricing: React.FC = () => {
                       {/* Footer hint + bundle checkbox */}
                       <div className="flex items-center justify-between pt-3 border-t border-border/40">
                         <span className="text-xs text-primary font-semibold">Click for details →</span>
-                        {service.bundleable && (
+                        {service.bundleable && !isServiceComingSoon(service) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleSelect(index); }}
                             className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
@@ -687,7 +699,15 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Action buttons */}
                   <div className="flex items-center gap-3 flex-wrap">
-                    {billingMode === 'monthly' && expandedService.monthlyPriceId ? (
+                    {isServiceComingSoon(expandedService) ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="inline-flex items-center gap-2 bg-red-600/15 text-red-400 border border-red-500/40 px-5 py-3 rounded-lg text-sm font-bold uppercase tracking-[0.14em] font-mono cursor-not-allowed"
+                      >
+                        <Clock className="w-4 h-4" /> Coming Soon
+                      </button>
+                    ) : billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                       <button
                         onClick={() => setCheckoutPriceId(expandedService.monthlyPriceId!)}
                         className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97]"
@@ -702,7 +722,7 @@ export const ServicesPricing: React.FC = () => {
                         <ShoppingCart className="w-4 h-4" /> Buy Now — {expandedService.pricing}
                       </button>
                     ) : null}
-                    {expandedService.bundleable && (
+                    {expandedService.bundleable && !isServiceComingSoon(expandedService) && (
                       <button
                         onClick={() => { toggleSelect(expandedIdx); }}
                         className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97] border-2 ${

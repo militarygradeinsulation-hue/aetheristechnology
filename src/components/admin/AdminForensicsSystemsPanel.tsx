@@ -62,7 +62,7 @@ export function AdminForensicsSystemsPanel() {
         <div className="flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-amber" />
           <h2 className="text-2xl font-bold text-foreground font-display">Forensics Systems</h2>
-          <span className="text-xs text-muted-foreground ml-2">Admin access — runs free, no Stripe</span>
+          <span className="text-xs text-muted-foreground ml-2">Public checkout disabled — admin-only access, runs free, no Stripe</span>
         </div>
         {tiers.map(tier => (
           <div key={tier}>
