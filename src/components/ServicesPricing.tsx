@@ -472,7 +472,11 @@ export const ServicesPricing: React.FC = () => {
                     isSelected ? 'border-2 border-primary ring-2 ring-primary/20' : 'border border-border hover:border-primary/40'
                   } ${hasThumb ? 'p-0' : 'p-6'}`}
                 >
-                  {service.badge && (
+                  {isServiceComingSoon(service) ? (
+                    <span className="absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-mono border bg-red-600/15 text-red-400 border-red-500/40 backdrop-blur-md bg-background/70">
+                      Coming Soon
+                    </span>
+                  ) : service.badge && (
                     <span
                       className={`absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-display border ${
                         service.badge === 'FOUNDATIONAL'
