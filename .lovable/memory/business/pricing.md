@@ -22,11 +22,11 @@ type: feature
   - Playbook Unlock: $29 (playbook_unlock_once)
 - Non-Stripe services (contact only): Visual Rendering ($50–$400), Custom Implementation ($25K+)
 - The 14-Day Diagnostic ($2,900) is the core entry point.
-- **Rep Commission System**: 10 six-digit codes in `rep_codes` table, 10% default commission rate.
-  - Codes: 482917, 739254, 156843, 624781, 895326, 317469, 568192, 743058, 281637, 964523
-  - Tracked via metadata.rep_code in Stripe checkout → purchases.rep_code column
-  - Commission auto-calculated via increment_rep_sales DB function
-  - Admin dashboard shows rep performance panel
-- Independent Sales Reps: 10% commission (was 8-25%), given "Rep Playbook" PDF upon signup via /careers.
+- **Tiered Commission Model** (replaces flat 70/15/15). Tier resolved from sale amount in cents:
+  - **Tier 1** ($29–$59, ≤ 5900¢): Company 50% · Rep 30% · Partner 20%
+  - **Tier 2** ($79–$349, ≤ 34900¢): Company 60% · Rep 25% · Partner 15%
+  - **Tier 3** ($599+): Company 70% · Rep 20% · Partner 10%
+  - Source of truth: `TIER_RATES` in `src/lib/repProducts.ts` and `ratesForAmount()` in `payments-webhook`. `rep_codes.commission_rate` is ignored under tiered model.
+- 10 rep codes in `rep_codes`: 482917, 739254, 156843, 624781, 895326, 317469, 568192, 743058, 281637, 964523. Tracked via metadata.rep_code in Stripe checkout → sales.rep_code.
 - User accounts: email/password + Google OAuth. Purchases linked to user_id.
 - Post-purchase: Both Buy Now buttons and Contact CTAs on all services.
