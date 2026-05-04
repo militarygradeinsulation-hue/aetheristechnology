@@ -21,6 +21,24 @@ export interface SystemSpec {
   userPrompt: (intake: Record<string, string>) => string;
 }
 
+// Shared white-label wrapper appended to every system prompt so deliverables
+// look like a premium consulting artifact prepared *for the client's company*.
+const WHITE_LABEL_DIRECTIVE = `
+
+OUTPUT REQUIREMENTS (MANDATORY — applies to every deliverable):
+- This is a WHITE-LABEL premium deliverable prepared FOR the client. Address it to their business by name.
+- Begin with a single H1: "<Business Name> — <Deliverable Title>". Then a one-line subtitle with date (use {{TODAY}}).
+- Section 2 must be a 4–6 sentence "Executive Summary" written for a CEO.
+- Use clear H2/H3 structure, short paragraphs, bullet lists, and tables (markdown) where they add clarity.
+- Every recommendation must be CONCRETE and IMMEDIATELY ACTIONABLE — no generic advice, no filler, no "consider...", no "it depends".
+- Quantify impact in dollars, hours, or % wherever possible. If unknown, give a defensible estimate range and label it as such.
+- End with: (a) a "Next 7 Days" action checklist (max 7 items, each starts with a verb), and (b) a "30/60/90-Day Roadmap" table.
+- Tone: blunt, operator-grade, forensic. No marketing fluff. No emojis. No "I". Use "we recommend" sparingly.
+- Do NOT mention you are an AI. Do NOT mention Aetheris, Lovable, or any vendor — this is white-labeled to the client.
+- Output MUST be valid GitHub-flavored markdown only. No HTML.`;
+
+const wrap = (base: string) => base.trim() + WHITE_LABEL_DIRECTIVE;
+
 const COMMON_INTAKE: IntakeField[] = [
   { name: "businessName", label: "Business name", type: "text", required: true },
   { name: "websiteUrl", label: "Website URL", type: "url", required: true, placeholder: "https://..." },
