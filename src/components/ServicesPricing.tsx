@@ -222,6 +222,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Send, title: 'Email Series Bundle', pricing: '$149', priceRaw: 14900, pricingDetail: 'one-time · 4 sequences', priceId: 'email_series_bundle_once', bundleable: true,
+    monthlyPriceId: 'email_series_bundle_monthly', monthlyPricing: '$99/mo', monthlyPriceRaw: 9900, monthlySavePercent: 34,
     description: 'Done-for-you email sequences: cold, welcome, re-engagement, upsell.',
     successStat: '20–30% of recipients convert on properly sequenced email flows',
     longDescription: 'A done-for-you bundle of 4 proven email sequences — cold outreach (5 emails), customer welcome, win-back/re-engagement, and upsell — plus 2 bonus sequences. Drop them into your email tool and send the same day.',
