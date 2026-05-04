@@ -1,51 +1,41 @@
 ## Goal
 
-The 13 newest products (the forensics-system intake products we just added) should remain **visible** on the public site so prospects can see them, but **cannot be purchased**. Replace the "Buy Now / Subscribe" CTA with a red **"Coming Soon"** badge/button. They must also be excluded from the Mix & Match bundle. Admin staff keep full access via the existing **Admin → Forensics Systems** panel (which doesn't use Stripe anyway).
+Make every "new" tool you've added recently (1M IQ Innovations #1–#10, #11–#20, #31–#40, plus the two missing monthly variants) runnable for free from **Admin → Forensics Systems**, just like the existing 13 systems. No Stripe, no checkout — admin-only, gated by `is_admin`.
 
-## The 13 products to mark Coming Soon
+## Why it isn't working today
 
-These are the priceIds added in the last batch (matching `src/lib/forensicsSystems.ts`):
+The admin panel (`AdminForensicsSystemsPanel.tsx`) lists tools by iterating `FORENSICS_SYSTEMS` from `src/lib/forensicsSystems.ts`. That array still only contains the original 13 systems. The 26 new priceIds in `COMING_SOON_PRICE_IDS` have no intake schema and no server-side AI prompt, so they can't run.
 
-```
-crm_health_check_once         lead_flow_mapper_once
-competitor_landing_analysis_once  email_series_bundle_once
-crm_setup_optimization_once   landing_page_blueprint_once
-prospecting_list_builder_once sales_team_onboarding_once
-lead_gen_sprint_once          sales_process_redesign_once
-marketing_sales_alignment_once
-sales_coaching_retainer_monthly  lead_nurture_automation_monthly
-```
+Two things are needed for each new tool:
+1. **Client**: an entry in `FORENSICS_SYSTEMS` (title + tier + intake fields) so it shows up as a tile in the admin panel.
+2. **Server**: an entry in `SYSTEM_SPECS` (`supabase/functions/_shared/system-prompts.ts`) with `title`, `intake`, `systemPrompt`, and `userPrompt` so `admin-run-system` can generate the deliverable.
 
 ## Changes
 
 ### 1. `src/lib/forensicsSystems.ts`
-Export a `COMING_SOON_PRICE_IDS: Set<string>` derived from `FORENSICS_SYSTEMS.map(s => s.priceId)` (plus the two `_monthly` variants `sales_coaching_retainer_monthly` and `lead_nurture_automation_monthly` which aren't in that file). This becomes the single source of truth.
+Add `FORENSICS_SYSTEMS` entries for the 26 new tools, grouped under three new tiers so the admin UI sections them cleanly:
 
-### 2. `src/components/ServicesPricing.tsx`
-- Import `COMING_SOON_PRICE_IDS`.
-- Add a helper `isComingSoon(s)` that returns true if either `s.priceId` or `s.monthlyPriceId` is in the set.
-- **Card grid (every tile that renders one of these services):** show a red `Coming Soon` pill in the top-right corner of the card (replacing the `POPULAR` / `RECURRING` badge for these specific services). Card stays clickable to open the detail drawer.
-- **Detail drawer action row (lines ~688–704):** when `isComingSoon(expandedService)`, replace BOTH the "Subscribe — …" and "Buy Now — …" buttons with a single disabled red button:
-  ```
-  [ ⏳ Coming Soon ]   bg-red-600/15 text-red-400 border-red-500/40 cursor-not-allowed
-  ```
-  Keep the **Talk to Us** link visible. Hide the **Add to Bundle** button for these services (so they can't enter the bundle).
-- **Bundle eligibility:** filter `bundleableServices` to exclude any service flagged coming-soon. Also defensively guard the bundle-bar checkout button against any coming-soon item slipping in.
+- **Tier "1M IQ Innovations · Core"** (10 tools): Obsession Engine, Revenue Leak Detector, Messaging Psychologist, Opportunity Radar, Death Wish Detector, Sales Psychography Builder, Market Timing Oracle, Unfair Advantage Detector, LTV Maximizer, PMF Predictor.
+- **Tier "1M IQ Innovations · Ops Intel"** (7 tools): Conversation Intelligence, Deal Momentum Predictor, Competitive Stealing Blueprint, Pricing Elasticity Optimizer, Product Usage Optimization, Customer Research Automation, Sales Team Cloning.
+- **Tier "1M IQ Innovations · Strategic"** (8 tools): Hiring Predictor, Customer Health Score, Territory Intelligence, Account Growth Accelerator, Operational Excellence Auditor, Tech Debt Auditor, Disruption Predictor, Org Structure Optimizer.
 
-### 3. Visual style for the Coming Soon badge/button
-Per the project's forensic identity rule, **crimson is reserved for "leak signal."** "Coming Soon" is a different signal, so use a distinct red token instead of the crimson leak red:
-- Tailwind: `bg-red-600/15 text-red-400 border border-red-500/40 font-mono uppercase tracking-widest text-[10px]`
-- Same red used for both the card pill and the disabled detail button — keeps it loud but clearly not a "leak" mark.
+Each entry uses the `*_once` priceId where it exists, otherwise the `*_monthly` priceId. Intake = `COMMON` (businessName/website/industry/icp) plus 2–4 tool-specific fields (e.g. competitor URL for Death Wish, top-rep name for Sales Cloning, candidate role for Hiring Predictor, etc.).
 
-### 4. Admin access — no changes required
-`src/components/admin/AdminForensicsSystemsPanel.tsx` already exposes all 13 systems through the `admin-run-system` edge function with no Stripe involvement. Admin can keep generating deliverables for these products freely. We'll add a small note in the panel header confirming "Public checkout disabled — admin-only access" so this stays clear.
+### 2. `supabase/functions/_shared/system-prompts.ts`
+Add a `SYSTEM_SPECS[priceId]` block for each of the 26 priceIds — same shape as the existing 13. Each gets:
+- `title` matching the tile,
+- `intake` mirroring the client-side field list,
+- a blunt operator-grade `systemPrompt` (tied to the tool's purpose),
+- a `userPrompt(i)` that injects the intake JSON and asks for the tool-specific deliverable structure (e.g. for Revenue Leak Detector: ranked leak inventory + $ impact + recovery playbook; for PMF Predictor: probability score + pattern-match table + kill-criteria).
 
-### 5. Out of scope
-- We are **not** archiving / deleting Stripe prices. They stay live so a quick re-enable is just removing the priceId from the `COMING_SOON_PRICE_IDS` set.
-- No changes to `repProducts.ts` (rep portal still tracks them as catalog items for commission planning).
+The shared `WHITE_LABEL_DIRECTIVE` already wraps every prompt, so all 26 outputs come out as polished white-label markdown deliverables.
 
-## Result
+### 3. No changes needed to
+- `admin-run-system` edge function — already generic over `SYSTEM_SPECS[priceId]`.
+- `AdminForensicsSystemsPanel.tsx` — auto-renders new tiers because it builds the tier list from `FORENSICS_SYSTEMS`.
+- `COMING_SOON_PRICE_IDS` / public `/services` — public stays gated and locked exactly as today.
+- Stripe / payments — none touched. These run free on Lovable AI Gateway.
 
-- Public visitors browsing `/services` see all 13 new products with a red **Coming Soon** badge, can read details, but cannot buy or bundle them.
-- Admins (you) keep the full intake → AI deliverable flow inside the admin panel.
-- Re-enabling sales later = delete two lines from `forensicsSystems.ts`.
+## After merge
+
+You'll see three new sections under Admin → Forensics Systems with all 26 new tools as tiles. Click → fill intake → Generate → markdown deliverable + download as `.md`. Iterate the prompts in `system-prompts.ts` as you test.
