@@ -270,6 +270,7 @@ const services: ServiceTile[] = [
   },
   {
     icon: Rocket, title: '30-Day Lead Gen Sprint', pricing: '$999', priceRaw: 99900, pricingDetail: '30 days · done-for-you', priceId: 'lead_gen_sprint_once', bundleable: true, badge: 'DONE-FOR-YOU',
+    monthlyPriceId: 'lead_gen_sprint_monthly', monthlyPricing: '$699/mo', monthlyPriceRaw: 69900, monthlySavePercent: 30,
     description: 'Done-for-you lead generation sprint — LinkedIn + email + ads + landing page.',
     successStat: '$999 typically pays for itself in the first 1–2 qualified deals closed',
     longDescription: 'A 30-day done-for-you lead generation campaign. We run a strategy workshop, execute LinkedIn outreach (100+ connections), email sequences, paid ads ($500 budget included), build the landing page + lead magnet, integrate with your CRM, and report results daily.',
