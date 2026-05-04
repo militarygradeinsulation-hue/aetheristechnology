@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2 } from 'lucide-react';
-import { REP_PRODUCTS, fmtUsd, commissionCents } from '@/lib/repProducts';
+import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
