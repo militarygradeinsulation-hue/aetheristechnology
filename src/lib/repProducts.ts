@@ -53,7 +53,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   // Tier 3 — High-Ticket ($599+)
   { name: 'Website Evaluation', priceCents: 59900, tier: 3 },
   { name: 'Strategic Discovery Audit', priceCents: 59900, tier: 3 },
-  { name: '14-Day Forensic Diagnostic', priceCents: 290000, tier: 3, highlight: true },
+  { name: '14-Day Forensic Diagnostic', priceCents: 250000, tier: 3, highlight: true },
   { name: 'Fractional CTO/CMO', priceCents: 590000, tier: 3, recurring: true, highlight: true },
 ];
 
