@@ -129,6 +129,8 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         <a href="/careers/test"><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
     </Card>
+
+    <div className="grid md:grid-cols-2 gap-6 mb-12">
       {[
         { icon: DollarSign, title: "Flat 10% Commission", desc: "On every closed deal — including recurring monthly revenue, for as long as the client stays." },
         { icon: Target, title: "Warm Market", desc: "These companies know they need help. They just don't know who to call." },
