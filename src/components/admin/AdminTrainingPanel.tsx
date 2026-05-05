@@ -360,13 +360,24 @@ export const AdminTrainingPanel: React.FC = () => {
                 <ul className="mt-2 space-y-1">
                   {draft.attachments.map((a, i) => (
                     <li key={i} className="flex items-center justify-between gap-2 text-sm rounded border border-border/40 bg-card/30 px-3 py-1.5">
-                      <a href={a.url} target="_blank" rel="noreferrer" className="text-amber hover:underline truncate inline-flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> {a.name}
-                      </a>
+                      <label className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="accent-amber"
+                          checked={!!genSelected[i]}
+                          onChange={(e) => setGenSelected((s) => ({ ...s, [i]: e.target.checked }))}
+                        />
+                        <a href={a.url} target="_blank" rel="noreferrer" className="text-amber hover:underline truncate inline-flex items-center gap-1">
+                          <FileText className="w-3 h-3" /> {a.name}
+                        </a>
+                      </label>
                       <button
                         type="button"
                         className="text-muted-foreground hover:text-crimson"
-                        onClick={() => setDraft((d) => ({ ...d, attachments: d.attachments.filter((_, idx) => idx !== i) }))}
+                        onClick={() => {
+                          setDraft((d) => ({ ...d, attachments: d.attachments.filter((_, idx) => idx !== i) }));
+                          setGenSelected((s) => { const n = { ...s }; delete n[i]; return n; });
+                        }}
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -384,6 +395,53 @@ export const AdminTrainingPanel: React.FC = () => {
                 value={draft.reference_text}
                 onChange={(e) => setDraft({ ...draft, reference_text: e.target.value })}
               />
+            </div>
+
+            {/* AI: Generate questions from selected uploads + reference text */}
+            <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber" />
+                <h4 className="font-semibold text-foreground">Generate questions from uploads</h4>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Tick the files above to use as source. Reference notes are also included. AI builds {draft.kind === "mcq" ? "multiple-choice" : "open-answer"} questions and appends them below — you can still edit each one.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">How many questions</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={genCount}
+                    onChange={(e) => setGenCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">Focus (optional)</Label>
+                  <Input
+                    placeholder="e.g. objection handling, pricing, discovery"
+                    value={genFocus}
+                    onChange={(e) => setGenFocus(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {Object.values(genSelected).filter(Boolean).length} file(s) selected
+                  {draft.reference_text.trim() ? " + reference notes" : ""}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={generateFromUploads}
+                  disabled={generating}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  {generating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Generate questions
+                </Button>
+              </div>
             </div>
 
             <div className="border-t border-border/40 pt-4">
