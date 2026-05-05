@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SYSTEM_SPECS } from "../_shared/system-prompts.ts";
+import { SYSTEM_SPECS, PLAYBOOK_STYLE_DIRECTIVE } from "../_shared/system-prompts.ts";
+import { HUMANIZED_PLAYBOOK_VOICE } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,13 +49,22 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
+    const businessName = (intake?.businessName || "Client").toString();
+    const today = new Date().toISOString().slice(0, 10);
+    const playbookDirective = PLAYBOOK_STYLE_DIRECTIVE
+      .replaceAll("{{TODAY}}", today)
+      .replaceAll("<Business Name>", businessName)
+      .replaceAll("<Deliverable Title>", spec.title);
+
+    const systemContent = `${spec.systemPrompt}\n\n${playbookDirective}\n\n${HUMANIZED_PLAYBOOK_VOICE}`;
+
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: spec.systemPrompt },
+          { role: "system", content: systemContent },
           { role: "user", content: spec.userPrompt(intake || {}) },
         ],
       }),
