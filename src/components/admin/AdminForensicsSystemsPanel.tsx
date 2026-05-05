@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FORENSICS_SYSTEMS, ForensicsSystem } from '@/lib/forensicsSystems';
+import { downloadForensicsPlaybookPdf } from '@/lib/generateForensicsPdf';
 
 export function AdminForensicsSystemsPanel() {
   const [active, setActive] = useState<ForensicsSystem | null>(null);
