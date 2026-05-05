@@ -289,7 +289,7 @@ const AdminDashboard: React.FC = () => {
   const statCards = [
     { label: 'Unique Visitors', value: stats.visitors, icon: Users, color: 'text-amber' },
     { label: 'Page Views', value: stats.pageViews, icon: Eye, color: 'text-amber' },
-    { label: 'LinkedIn Clicks', value: stats.linkedInClicks, icon: Linkedin, color: 'text-amber' },
+    
     { label: 'Form Submissions', value: stats.formSubmissions, icon: FileText, color: 'text-amber' },
   ];
 
