@@ -522,8 +522,7 @@ const AdminDashboard: React.FC = () => {
                 setActiveTab(tab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
                 if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
-                if (tab === 'linkedin') { fetchLinkedinStatus(); fetchLinkedinQueue(); }
-                if (tab !== 'tools') setActiveTool(null);
+                 if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
