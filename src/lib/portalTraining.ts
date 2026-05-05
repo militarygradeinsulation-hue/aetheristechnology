@@ -116,6 +116,32 @@ export const adminTraining = {
   qa: () => callWith(adminHeaders(), "admin_list_qa") as Promise<{ qa: TrainingQA[] }>,
   answerQA: (id: string, admin_answer: string) =>
     callWith(adminHeaders(), "admin_answer_qa", { id, admin_answer }) as Promise<{ ok: true }>,
+  generateFromUploads: async (params: {
+    title: string;
+    kind: TrainingKind;
+    count: number;
+    focus?: string;
+    attachments: TrainingAttachment[];
+    referenceText?: string;
+  }) => {
+    const { data, error } = await supabase.functions.invoke("admin-generate-training", {
+      body: {
+        title: params.title,
+        kind: params.kind,
+        count: params.count,
+        focus: params.focus || "",
+        attachments: params.attachments.map((a) => ({ name: a.name, url: a.url })),
+        referenceText: params.referenceText || "",
+      },
+      headers: adminHeaders(),
+    });
+    if (error) throw new Error(error.message);
+    if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+    return data as {
+      questions: Array<{ question_text: string; options?: string[]; correct_index?: number; rubric?: string; weight?: number }>;
+      sourcesUsed: number;
+    };
+  },
 };
 
 // ─── Storage upload ───
