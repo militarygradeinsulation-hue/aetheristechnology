@@ -446,6 +446,9 @@ const AdminDashboard: React.FC = () => {
             {/* Lead Browser: scan + assign to rep */}
             <AdminLeadBrowser />
 
+            {/* Careers Test reviewer */}
+            <AdminCareersTest />
+
             {/* Rep Activity (logins / claims / touches) */}
             <RepActivityPanel />
           </div>
