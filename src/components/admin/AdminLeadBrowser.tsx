@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
-  Sparkles, AlertTriangle, MessageSquare, UserPlus, X,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap,
 } from 'lucide-react';
 
 interface Lead {
@@ -60,6 +60,15 @@ export const AdminLeadBrowser: React.FC = () => {
   const [bulkRep, setBulkRep] = useState('');
   const [holdHours, setHoldHours] = useState(72);
   const [detail, setDetail] = useState<Lead | null>(null);
+  // Auto-assign panel
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoCodes, setAutoCodes] = useState<Set<string>>(new Set());
+  const [autoPerRep, setAutoPerRep] = useState(10);
+  const [autoIndustry, setAutoIndustry] = useState('');
+  const [autoMinScore, setAutoMinScore] = useState<number | ''>('');
+  const [autoBusy, setAutoBusy] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState<string | null>(null);
+  const [dripCounts, setDripCounts] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,8 +96,23 @@ export const AdminLeadBrowser: React.FC = () => {
     setReps(((data || []) as Rep[]).filter(r => r.is_active));
   }, []);
 
+  const loadDripCounts = useCallback(async () => {
+    const nowIso = new Date().toISOString();
+    const { data } = await supabase.from('rep_leads')
+      .select('assigned_to_code')
+      .is('claimed_by_code', null)
+      .not('assigned_to_code', 'is', null)
+      .gt('assignment_expires_at', nowIso)
+      .limit(5000);
+    const counts: Record<string, number> = {};
+    (data || []).forEach((r: any) => {
+      if (r.assigned_to_code) counts[r.assigned_to_code] = (counts[r.assigned_to_code] || 0) + 1;
+    });
+    setDripCounts(counts);
+  }, []);
+
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { loadReps(); }, [loadReps]);
+  useEffect(() => { loadReps(); loadDripCounts(); }, [loadReps, loadDripCounts]);
 
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -157,6 +181,41 @@ export const AdminLeadBrowser: React.FC = () => {
     } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
+  const refreshRep = async (code: string, count = 10) => {
+    setRefreshBusy(code);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'refresh_rep', code, count, hold_hours: holdHours,
+        industry: autoIndustry || undefined,
+        min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
+      });
+      const rep = reps.find(r => r.code === code);
+      toast({ title: `${rep?.rep_name || code}: +${res.assigned} new (now ${res.current}/${count})`, description: res.message || undefined });
+      load(); loadDripCounts();
+    } catch (e) {
+      toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setRefreshBusy(null); }
+  };
+
+  const autoAssign = async () => {
+    const codes = Array.from(autoCodes);
+    if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
+    setAutoBusy(true);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'auto_assign', codes, per_rep: autoPerRep, hold_hours: holdHours,
+        industry: autoIndustry || undefined,
+        min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
+        respect_current: true,
+      });
+      const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
+      toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
+      load(); loadDripCounts();
+    } catch (e) {
+      toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAutoBusy(false); }
+  };
+
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
   const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
 
@@ -194,6 +253,84 @@ export const AdminLeadBrowser: React.FC = () => {
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           </Button>
+        </div>
+
+        {/* Auto-assign panel */}
+        <div className="rounded-lg border border-border/50 bg-secondary/20">
+          <button
+            type="button"
+            onClick={() => setAutoOpen(o => !o)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm font-mono uppercase tracking-wider text-amber hover:bg-amber/5"
+          >
+            <span className="flex items-center gap-2"><Shuffle className="w-4 h-4" /> Auto-assign & per-rep refresh</span>
+            <span className="text-xs text-muted-foreground">{autoOpen ? 'Hide' : 'Show'}</span>
+          </button>
+          {autoOpen && (
+            <div className="p-3 space-y-3 border-t border-border/40">
+              <div className="grid sm:grid-cols-4 gap-2">
+                <div>
+                  <Label className="text-[10px]">Per-rep target</Label>
+                  <Input type="number" min={1} max={200} value={autoPerRep} onChange={e => setAutoPerRep(Number(e.target.value) || 10)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Hold hrs</Label>
+                  <Input type="number" min={1} max={720} value={holdHours} onChange={e => setHoldHours(Number(e.target.value) || 72)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Industry filter</Label>
+                  <Input value={autoIndustry} onChange={e => setAutoIndustry(e.target.value)} placeholder="e.g. roofing" className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Min score</Label>
+                  <Input type="number" min={0} max={100} value={autoMinScore} onChange={e => setAutoMinScore(e.target.value === '' ? '' : Number(e.target.value))} className="h-8" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-[10px] block mb-1">Reps in rotation (top-up to target each)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {reps.map(r => {
+                    const active = autoCodes.has(r.code);
+                    const cur = dripCounts[r.code] || 0;
+                    return (
+                      <button
+                        key={r.code}
+                        type="button"
+                        onClick={() => setAutoCodes(prev => { const n = new Set(prev); n.has(r.code) ? n.delete(r.code) : n.add(r.code); return n; })}
+                        className={`px-2.5 py-1.5 rounded border text-xs flex items-center gap-2 transition-colors ${
+                          active ? 'border-amber bg-amber/15 text-amber' : 'border-border/50 text-muted-foreground hover:border-amber/40'
+                        }`}
+                      >
+                        <span className="font-semibold">{r.rep_name || r.code}</span>
+                        <span className="font-mono text-[10px] opacity-70">{cur}/{autoPerRep}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); refreshRep(r.code, autoPerRep); }}
+                          disabled={refreshBusy === r.code}
+                          className="p-0.5 rounded hover:bg-amber/20"
+                          title="Refresh just this rep"
+                        >
+                          {refreshBusy === r.code
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <RefreshCw className="w-3 h-3" />}
+                        </button>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={autoAssign} disabled={autoBusy || autoCodes.size === 0}>
+                  {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+                  Auto-assign to {autoCodes.size || 0} rep{autoCodes.size === 1 ? '' : 's'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setAutoCodes(new Set(reps.map(r => r.code)))}>Select all</Button>
+                <Button size="sm" variant="ghost" onClick={() => setAutoCodes(new Set())}>Clear</Button>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  Round-robin distributes highest-score pool leads. Reps already at target are skipped.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bulk action bar */}

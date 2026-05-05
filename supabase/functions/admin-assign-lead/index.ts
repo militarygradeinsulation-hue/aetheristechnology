@@ -20,7 +20,8 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "assign");
     const ids: string[] = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
-    if (ids.length === 0) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign"]);
+    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     if (action === "assign") {
       const code = String(body.code || "").trim();
@@ -61,6 +62,142 @@ serve(async (req) => {
       const { error } = await admin.from("rep_leads").delete().in("id", ids);
       if (error) throw error;
       return new Response(JSON.stringify({ ok: true, deleted: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- REFRESH a single rep: top up their drip queue with N highest-score pool leads ----------
+    if (action === "refresh_rep") {
+      const code = String(body.code || "").trim();
+      const target = Math.max(1, Math.min(200, Number(body.count) || 10));
+      const holdHours = Math.max(1, Math.min(720, Number(body.hold_hours) || 72));
+      const industry = body.industry ? String(body.industry) : null;
+      const minScore = body.min_score != null ? Number(body.min_score) : null;
+      if (!code) return new Response(JSON.stringify({ error: "Missing rep code" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      const { data: rep } = await admin.from("rep_codes").select("code,is_active").eq("code", code).maybeSingle();
+      if (!rep || !rep.is_active) return new Response(JSON.stringify({ error: "Rep code not found or inactive" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      // count current active drip
+      const nowIso = new Date().toISOString();
+      const { count: currentDrip } = await admin.from("rep_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("assigned_to_code", code)
+        .is("claimed_by_code", null)
+        .gt("assignment_expires_at", nowIso);
+
+      const need = Math.max(0, target - (currentDrip ?? 0));
+      if (need === 0) {
+        return new Response(JSON.stringify({ ok: true, assigned: 0, current: currentDrip ?? 0, target, message: "Already at target" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      let q = admin.from("rep_leads").select("id")
+        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .order("score", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(need);
+      if (industry) q = q.ilike("industry", `%${industry}%`);
+      if (minScore != null) q = q.gte("score", minScore);
+
+      const { data: pool, error: poolErr } = await q;
+      if (poolErr) throw poolErr;
+      const pickIds = (pool || []).map((r: any) => r.id);
+      if (pickIds.length === 0) {
+        return new Response(JSON.stringify({ ok: true, assigned: 0, current: currentDrip ?? 0, target, message: "No matching pool leads" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
+      const { error: assignErr } = await admin.from("rep_leads").update({
+        assigned_to_code: code,
+        assigned_at: new Date().toISOString(),
+        assignment_expires_at: expires,
+      }).in("id", pickIds).is("claimed_by_code", null).is("assigned_to_code", null);
+      if (assignErr) throw assignErr;
+
+      return new Response(JSON.stringify({ ok: true, assigned: pickIds.length, current: (currentDrip ?? 0) + pickIds.length, target }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- AUTO-ASSIGN: round-robin highest-score pool leads across selected reps ----------
+    if (action === "auto_assign") {
+      const codes: string[] = Array.isArray(body.codes) ? body.codes.map((c: any) => String(c).trim()).filter(Boolean) : [];
+      const perRep = Math.max(1, Math.min(200, Number(body.per_rep) || 10));
+      const holdHours = Math.max(1, Math.min(720, Number(body.hold_hours) || 72));
+      const industry = body.industry ? String(body.industry) : null;
+      const minScore = body.min_score != null ? Number(body.min_score) : null;
+      const respectCurrent = body.respect_current !== false; // top-up vs additive; default top-up
+
+      if (codes.length === 0) return new Response(JSON.stringify({ error: "Pick at least one rep" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      const { data: validReps } = await admin.from("rep_codes").select("code").in("code", codes).eq("is_active", true);
+      const liveCodes = (validReps || []).map((r: any) => r.code);
+      if (liveCodes.length === 0) return new Response(JSON.stringify({ error: "No active reps in selection" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      // determine need per rep
+      const nowIso = new Date().toISOString();
+      const needs: Record<string, number> = {};
+      let totalNeed = 0;
+      for (const c of liveCodes) {
+        let cur = 0;
+        if (respectCurrent) {
+          const { count } = await admin.from("rep_leads")
+            .select("id", { count: "exact", head: true })
+            .eq("assigned_to_code", c).is("claimed_by_code", null).gt("assignment_expires_at", nowIso);
+          cur = count ?? 0;
+        }
+        const n = Math.max(0, perRep - cur);
+        needs[c] = n;
+        totalNeed += n;
+      }
+      if (totalNeed === 0) {
+        return new Response(JSON.stringify({ ok: true, assigned: 0, message: "All reps already at target", per_rep: needs }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      let q = admin.from("rep_leads").select("id,industry,score")
+        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .order("score", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(totalNeed);
+      if (industry) q = q.ilike("industry", `%${industry}%`);
+      if (minScore != null) q = q.gte("score", minScore);
+
+      const { data: pool, error: poolErr } = await q;
+      if (poolErr) throw poolErr;
+      const available = pool || [];
+      if (available.length === 0) {
+        return new Response(JSON.stringify({ ok: true, assigned: 0, message: "No pool leads available", per_rep: needs }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // round-robin allocate
+      const allocation: Record<string, string[]> = {};
+      liveCodes.forEach(c => allocation[c] = []);
+      const remaining = { ...needs };
+      let i = 0;
+      for (const lead of available) {
+        // find next rep in rotation that still needs
+        let attempts = 0;
+        while (attempts < liveCodes.length && remaining[liveCodes[i % liveCodes.length]] <= 0) {
+          i++; attempts++;
+        }
+        const code = liveCodes[i % liveCodes.length];
+        if (remaining[code] <= 0) break;
+        allocation[code].push(lead.id);
+        remaining[code]--;
+        i++;
+      }
+
+      const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
+      const assignedAt = new Date().toISOString();
+      let totalAssigned = 0;
+      const summary: Record<string, number> = {};
+      for (const [code, ids] of Object.entries(allocation)) {
+        if (ids.length === 0) { summary[code] = 0; continue; }
+        const { error } = await admin.from("rep_leads").update({
+          assigned_to_code: code, assigned_at: assignedAt, assignment_expires_at: expires,
+        }).in("id", ids).is("claimed_by_code", null).is("assigned_to_code", null);
+        if (error) throw error;
+        summary[code] = ids.length;
+        totalAssigned += ids.length;
+      }
+
+      return new Response(JSON.stringify({ ok: true, assigned: totalAssigned, per_rep: summary }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
