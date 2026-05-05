@@ -1,429 +1,368 @@
 import jsPDF from 'jspdf';
 
 /**
- * Aetheris Forensic Playbook PDF — dark case-file theme.
- * Black bg, off-white text, amber accents, JetBrains/Courier mono micro-labels,
- * Times serif for autopsy headlines. Matches the Leak Audit / Diagnostic PDFs.
+ * Aetheris Forensic Playbook PDF — matches the live "Aetheris Playbook" style
+ * used by supabase/functions/generate-playbook (dark bg, gold pillar tag,
+ * large helvetica title, gold accent bars, section numbering).
  */
 
-const INK: [number, number, number] = [18, 18, 22];           // page bg
-const PANEL: [number, number, number] = [28, 28, 34];         // card bg
-const PAPER: [number, number, number] = [245, 240, 230];      // primary text
-const MUTED: [number, number, number] = [165, 160, 150];
-const AMBER: [number, number, number] = [232, 165, 38];
-const CRIMSON: [number, number, number] = [180, 60, 60];
-const RULE: [number, number, number] = [60, 58, 64];
+const BG: [number, number, number] = [15, 15, 20];
+const PANEL_DARK: [number, number, number] = [22, 22, 30];
+const TABLE_HEADER_BG: [number, number, number] = [40, 35, 20];
+const PAPER: [number, number, number] = [235, 230, 220];
+const BODY: [number, number, number] = [200, 195, 185];
+const MUTED: [number, number, number] = [160, 155, 145];
+const FOOTER_MUTED: [number, number, number] = [100, 95, 90];
+const GOLD: [number, number, number] = [217, 158, 46];
+const GOLD_DEEP: [number, number, number] = [180, 130, 40];
+const RULE: [number, number, number] = [60, 60, 70];
 
 const PAGE_W = 210;
 const PAGE_H = 297;
-const MARGIN = 18;
+const MARGIN = 22;
 const CONTENT_W = PAGE_W - MARGIN * 2;
 
-class W {
-  doc: jsPDF;
-  y: number;
-  pageNum = 1;
-  toolLabel: string;
-
-  constructor(toolLabel: string) {
-    this.doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    this.y = MARGIN + 14;
-    this.toolLabel = toolLabel;
-  }
-
-  paintBackground() {
-    this.doc.setFillColor(...INK);
-    this.doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
-  }
-
-  drawHeader() {
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(0, 0, PAGE_W, 3, 'F');
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text('AETHERIS · BUSINESS FORENSICS', MARGIN, 11);
-    this.doc.setFont('courier', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...MUTED);
-    this.doc.text(this.toolLabel.toUpperCase(), PAGE_W - MARGIN, 11, { align: 'right' });
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
-    this.doc.line(MARGIN, 14, PAGE_W - MARGIN, 14);
-  }
-
-  drawFooter() {
-    const fy = PAGE_H - 12;
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
-    this.doc.line(MARGIN, fy - 4, PAGE_W - MARGIN, fy - 4);
-    this.doc.setFont('courier', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...MUTED);
-    this.doc.text('aetheris.technology  ·  FORENSIC PLAYBOOK', MARGIN, fy);
-    this.doc.text(`PG ${String(this.pageNum).padStart(2, '0')}`, PAGE_W - MARGIN, fy, { align: 'right' });
-  }
-
-  newPage() {
-    this.doc.addPage();
-    this.pageNum++;
-    this.paintBackground();
-    this.drawHeader();
-    this.drawFooter();
-    this.y = MARGIN + 14;
-  }
-
-  ensure(needed: number) {
-    if (this.y + needed > PAGE_H - 22) this.newPage();
-  }
-
-  cover(title: string) {
-    this.paintBackground();
-
-    // Top amber bar
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(0, 0, PAGE_W, 4, 'F');
-
-    // Case-file labels
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text('AETHERIS · BUSINESS FORENSICS', MARGIN, 16);
-    this.doc.text(`CASE FILE · ${new Date().toISOString().slice(0, 10)}`, PAGE_W - MARGIN, 16, { align: 'right' });
-
-    // Tool chip
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, 40, 2, 14, 'F');
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 6, 49);
-
-    // Headline (serif, off-white)
-    this.doc.setTextColor(...PAPER);
-    this.doc.setFont('times', 'bolditalic');
-    this.doc.setFontSize(30);
-    const lines = this.doc.splitTextToSize(title, CONTENT_W - 6);
-    let ty = 78;
-    for (const line of lines) {
-      this.doc.text(line, MARGIN, ty);
-      ty += 12;
-    }
-
-    // Sub
-    this.doc.setFont('times', 'italic');
-    this.doc.setFontSize(13);
-    this.doc.setTextColor(...MUTED);
-    this.doc.text('A forensic field report. Built for execution, not for filing.', MARGIN, ty + 4);
-
-    // Mid amber rule
-    this.doc.setDrawColor(...AMBER);
-    this.doc.setLineWidth(0.4);
-    this.doc.line(MARGIN, ty + 14, MARGIN + 32, ty + 14);
-
-    // Bottom block — confidential stamp
-    this.doc.setFillColor(...CRIMSON);
-    this.doc.rect(MARGIN, PAGE_H - 40, 38, 9, 'F');
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...PAPER);
-    this.doc.text('CONFIDENTIAL', MARGIN + 3, PAGE_H - 34);
-
-    this.doc.setFont('courier', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...MUTED);
-    this.doc.text(
-      `Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
-      MARGIN,
-      PAGE_H - 24,
-    );
-    this.doc.text('Aetheris AI Studio · aetheris.technology', MARGIN, PAGE_H - 18);
-
-    this.newPage();
-  }
-
-  h1(text: string) {
-    this.ensure(22);
-    this.y += 4;
-    this.doc.setFont('times', 'bolditalic');
-    this.doc.setFontSize(22);
-    this.doc.setTextColor(...PAPER);
-    const lines = this.doc.splitTextToSize(text, CONTENT_W);
-    for (const line of lines) {
-      this.ensure(11);
-      this.y += 10;
-      this.doc.text(line, MARGIN, this.y);
-    }
-    this.doc.setDrawColor(...AMBER);
-    this.doc.setLineWidth(0.8);
-    this.doc.line(MARGIN, this.y + 2.5, MARGIN + 30, this.y + 2.5);
-    this.y += 8;
-  }
-
-  h2(text: string) {
-    this.ensure(16);
-    this.y += 6;
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text('§ SECTION', MARGIN, this.y);
-    this.y += 5;
-    this.doc.setFont('times', 'bold');
-    this.doc.setFontSize(14);
-    this.doc.setTextColor(...PAPER);
-    const lines = this.doc.splitTextToSize(text, CONTENT_W - 4);
-    for (const line of lines) {
-      this.ensure(8);
-      this.y += 6;
-      this.doc.text(line, MARGIN, this.y);
-    }
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, this.y + 1.5, 14, 0.6, 'F');
-    this.y += 4;
-  }
-
-  h3(text: string) {
-    this.ensure(10);
-    this.y += 4;
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...AMBER);
-    this.y += 5;
-    this.doc.text(`› ${text.toUpperCase()}`, MARGIN, this.y);
-    this.y += 1;
-  }
-
-  // mixed weight + bold/italic in one paragraph
-  private renderRich(text: string, leftX: number, color: [number, number, number], size = 10) {
-    const lh = size * 0.45;
-    this.doc.setFontSize(size);
-    this.doc.setTextColor(color[0], color[1], color[2]);
-
-    // Tokenize: **bold**, *italic*, plain
-    type Part = { text: string; bold: boolean; italic: boolean };
-    const parts: Part[] = [];
-    const re = /\*\*(.+?)\*\*|\*(.+?)\*/g;
-    let last = 0;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-      if (m.index > last) parts.push({ text: text.slice(last, m.index), bold: false, italic: false });
-      if (m[1] != null) parts.push({ text: m[1], bold: true, italic: false });
-      else parts.push({ text: m[2], bold: false, italic: true });
-      last = m.index + m[0].length;
-    }
-    if (last < text.length) parts.push({ text: text.slice(last), bold: false, italic: false });
-    if (!parts.length) parts.push({ text, bold: false, italic: false });
-
-    const styleOf = (p: Part) => (p.bold && p.italic ? 'bolditalic' : p.bold ? 'bold' : p.italic ? 'italic' : 'normal');
-    const space = (p: Part) => {
-      this.doc.setFont('helvetica', styleOf(p));
-      return this.doc.getTextWidth(' ');
-    };
-
-    const maxW = PAGE_W - MARGIN - leftX;
-    let lineParts: Part[] = [];
-    let lineWidth = 0;
-
-    const flush = () => {
-      this.ensure(lh + 1);
-      this.y += lh;
-      let x = leftX;
-      for (let i = 0; i < lineParts.length; i++) {
-        const p = lineParts[i];
-        this.doc.setFont('helvetica', styleOf(p));
-        this.doc.text(p.text, x, this.y);
-        x += this.doc.getTextWidth(p.text);
-        if (i < lineParts.length - 1) x += space(p);
-      }
-      lineParts = [];
-      lineWidth = 0;
-    };
-    for (const part of parts) {
-      const words = part.text.split(/\s+/).filter(Boolean);
-      this.doc.setFont('helvetica', styleOf(part));
-      for (const word of words) {
-        const wW = this.doc.getTextWidth(word);
-        const sp = lineParts.length ? space(part) : 0;
-        if (lineWidth + sp + wW > maxW && lineParts.length) flush();
-        lineParts.push({ text: word, bold: part.bold, italic: part.italic });
-        lineWidth += (lineParts.length > 1 ? sp : 0) + wW;
-      }
-    }
-    if (lineParts.length) flush();
-    this.y += 1.5;
-  }
-
-  paragraph(text: string) {
-    if (!text.trim()) { this.y += 2; return; }
-    this.renderRich(text, MARGIN, PAPER, 10);
-  }
-
-  bullet(text: string) {
-    this.ensure(6);
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...AMBER);
-    this.doc.setFont('courier', 'bold');
-    const dotY = this.y + 4.5;
-    this.doc.text('▸', MARGIN + 3, dotY);
-    const before = this.y;
-    this.renderRich(text, MARGIN + 8, PAPER, 10);
-    if (this.y < before + 4) this.y = before + 4;
-  }
-
-  numbered(num: number, text: string) {
-    this.ensure(6);
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...AMBER);
-    this.doc.setFont('courier', 'bold');
-    this.doc.text(`${String(num).padStart(2, '0')}.`, MARGIN + 1, this.y + 4.5);
-    const before = this.y;
-    this.renderRich(text, MARGIN + 11, PAPER, 10);
-    if (this.y < before + 4) this.y = before + 4;
-  }
-
-  quote(text: string) {
-    this.ensure(10);
-    const startY = this.y + 1;
-    // panel bg
-    this.doc.setFillColor(...PANEL);
-    const before = this.y;
-    // measure by rendering off-screen? Simpler: render then draw rect behind via overlay trick.
-    // We render text first to get height, but we need bg behind. So pre-measure with split:
-    const size = 10;
-    const lh = size * 0.45;
-    this.doc.setFont('times', 'italic');
-    this.doc.setFontSize(size);
-    const wrapped = this.doc.splitTextToSize(text, CONTENT_W - 14);
-    const h = wrapped.length * lh + 6;
-    this.ensure(h + 3);
-    const yTop = this.y + 1;
-    this.doc.setFillColor(...PANEL);
-    this.doc.rect(MARGIN, yTop, CONTENT_W, h, 'F');
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, yTop, 1.6, h, 'F');
-    this.doc.setTextColor(...PAPER);
-    this.doc.setFont('times', 'italic');
-    this.doc.setFontSize(size);
-    let ty = yTop + 4;
-    for (const line of wrapped) {
-      this.doc.text(line, MARGIN + 6, ty);
-      ty += lh;
-    }
-    this.y = yTop + h + 2;
-  }
-
-  divider() {
-    this.ensure(4);
-    this.y += 2;
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
-    this.doc.line(MARGIN, this.y, PAGE_W - MARGIN, this.y);
-    this.y += 3;
-  }
-
-  table(rows: string[][]) {
-    if (!rows.length) return;
-    const cols = rows[0].length;
-    const colW = CONTENT_W / cols;
-    const cellPad = 2;
-    this.doc.setFontSize(9);
-    rows.forEach((row, ri) => {
-      const lineCounts = row.map(cell => {
-        this.doc.setFont('helvetica', ri === 0 ? 'bold' : 'normal');
-        return this.doc.splitTextToSize(cell, colW - cellPad * 2).length;
-      });
-      const maxLines = Math.max(...lineCounts);
-      const rowH = maxLines * 4 + cellPad * 2;
-      this.ensure(rowH + 2);
-      const y0 = this.y;
-      // background
-      this.doc.setFillColor(...(ri === 0 ? AMBER : PANEL));
-      this.doc.rect(MARGIN, y0, CONTENT_W, rowH, 'F');
-      // border
-      this.doc.setDrawColor(...RULE);
-      this.doc.setLineWidth(0.15);
-      this.doc.rect(MARGIN, y0, CONTENT_W, rowH, 'S');
-      row.forEach((cell, ci) => {
-        const x = MARGIN + ci * colW;
-        if (ci > 0) this.doc.line(x, y0, x, y0 + rowH);
-        this.doc.setFont('helvetica', ri === 0 ? 'bold' : 'normal');
-        this.doc.setTextColor(...(ri === 0 ? INK : PAPER));
-        const wrapped = this.doc.splitTextToSize(cell, colW - cellPad * 2);
-        wrapped.forEach((line: string, li: number) => {
-          this.doc.text(line, x + cellPad, y0 + cellPad + 3 + li * 4);
-        });
-      });
-      this.y = y0 + rowH;
-    });
-    this.y += 3;
-  }
-
-  finish(filename: string) {
-    this.doc.save(filename);
-  }
+function paintBg(doc: jsPDF) {
+  doc.setFillColor(...BG);
+  doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
 }
 
-function renderMarkdown(w: W, md: string) {
-  const lines = md.replace(/\r\n/g, '\n').split('\n');
-  let i = 0;
-  let orderedCounter = 0;
-  while (i < lines.length) {
-    const raw = lines[i];
-    const line = raw.trimEnd();
+function decoCorner(doc: jsPDF) {
+  doc.setFillColor(...GOLD);
+  doc.rect(PAGE_W - 30, 0, 30, 3, 'F');
+  doc.rect(PAGE_W - 3, 0, 3, 30, 'F');
+}
 
-    // table block
-    if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?[\s\-:|]+\|/.test(lines[i + 1])) {
-      const tableRows: string[][] = [];
-      const parseRow = (l: string) =>
-        l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
-      tableRows.push(parseRow(line));
-      i += 2;
-      while (i < lines.length && /^\s*\|/.test(lines[i])) {
-        tableRows.push(parseRow(lines[i]));
-        i++;
-      }
-      w.table(tableRows);
-      orderedCounter = 0;
-      continue;
-    }
+function footer(doc: jsPDF, pageNum: number) {
+  doc.setDrawColor(40, 40, 50);
+  doc.setLineWidth(0.3);
+  doc.line(MARGIN, PAGE_H - 14, PAGE_W - MARGIN, PAGE_H - 14);
+  doc.setFontSize(7);
+  doc.setTextColor(...FOOTER_MUTED);
+  doc.setFont('helvetica', 'normal');
+  doc.text('AETHERIS', MARGIN, PAGE_H - 9);
+  doc.text(`Page ${pageNum}`, PAGE_W - MARGIN, PAGE_H - 9, { align: 'right' });
+}
 
-    if (/^---+$/.test(line)) { w.divider(); i++; orderedCounter = 0; continue; }
-    if (/^###\s+/.test(line)) { w.h3(line.replace(/^###\s+/, '')); i++; orderedCounter = 0; continue; }
-    if (/^##\s+/.test(line)) { w.h2(line.replace(/^##\s+/, '')); i++; orderedCounter = 0; continue; }
-    if (/^#\s+/.test(line)) { w.h1(line.replace(/^#\s+/, '')); i++; orderedCounter = 0; continue; }
-    if (/^>\s?/.test(line)) {
-      const parts: string[] = [];
-      while (i < lines.length && /^>\s?/.test(lines[i])) {
-        parts.push(lines[i].replace(/^>\s?/, ''));
-        i++;
-      }
-      w.quote(parts.join(' '));
-      orderedCounter = 0;
-      continue;
-    }
-    if (/^\s*[-*]\s+/.test(line)) {
-      w.bullet(line.replace(/^\s*[-*]\s+/, ''));
-      i++;
-      orderedCounter = 0;
-      continue;
-    }
-    const olm = line.match(/^\s*\d+\.\s+(.*)$/);
-    if (olm) {
-      orderedCounter++;
-      w.numbered(orderedCounter, olm[1]);
-      i++;
-      continue;
-    }
-    if (line.trim() === '') {
-      w.y += 2;
-      i++;
-      orderedCounter = 0;
-      continue;
-    }
-    w.paragraph(line);
-    orderedCounter = 0;
-    i++;
+function renderCover(doc: jsPDF, title: string, subtitle: string, pillar: string, tags: string[]) {
+  paintBg(doc);
+
+  // Border frame
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.5);
+  doc.rect(MARGIN - 5, MARGIN - 5, CONTENT_W + 10, PAGE_H - MARGIN * 2 + 10);
+
+  // Pillar label + bar
+  doc.setFontSize(10);
+  doc.setTextColor(...GOLD);
+  doc.setFont('helvetica', 'bold');
+  doc.text(pillar.toUpperCase(), MARGIN, 50);
+  doc.setFillColor(...GOLD);
+  doc.rect(MARGIN, 55, 50, 3, 'F');
+
+  // Title
+  doc.setTextColor(...PAPER);
+  doc.setFontSize(34);
+  doc.setFont('helvetica', 'bold');
+  const titleLines = doc.splitTextToSize(title, CONTENT_W);
+  doc.text(titleLines, MARGIN, 78);
+
+  // Subtitle
+  const subY = 78 + titleLines.length * 15 + 8;
+  doc.setFontSize(16);
+  doc.setTextColor(...BODY);
+  doc.setFont('helvetica', 'normal');
+  const subLines = doc.splitTextToSize(subtitle, CONTENT_W);
+  doc.text(subLines, MARGIN, subY);
+
+  // Tags
+  if (tags.length) {
+    const tagsY = subY + subLines.length * 8 + 15;
+    doc.setFontSize(9);
+    doc.setTextColor(...GOLD_DEEP);
+    doc.text(tags.join('   •   '), MARGIN, tagsY);
   }
+
+  // Bottom block — gold bar, AETHERIS, meta
+  doc.setFillColor(...GOLD);
+  doc.rect(MARGIN, PAGE_H - 60, 50, 2, 'F');
+
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...GOLD);
+  doc.text('AETHERIS', MARGIN, PAGE_H - 45);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...MUTED);
+  doc.text('aetheris.technology', MARGIN, PAGE_H - 38);
+  doc.text(
+    new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
+    MARGIN,
+    PAGE_H - 31,
+  );
+
+  doc.setFontSize(7);
+  doc.setTextColor(80, 75, 70);
+  doc.text('CONFIDENTIAL — FOR AUTHORIZED DISTRIBUTION ONLY', MARGIN, PAGE_H - 20);
+}
+
+function renderTOC(doc: jsPDF, sections: string[]) {
+  paintBg(doc);
+  decoCorner(doc);
+
+  doc.setFillColor(...GOLD);
+  doc.rect(MARGIN, MARGIN, 35, 2, 'F');
+
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...PAPER);
+  doc.text('Table of Contents', MARGIN, MARGIN + 16);
+
+  let y = MARGIN + 35;
+  sections.forEach((section, i) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...GOLD);
+    doc.text(String(i + 1).padStart(2, '0'), MARGIN, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...BODY);
+    const truncated = section.length > 70 ? section.substring(0, 67) + '...' : section;
+    doc.text(truncated, MARGIN + 14, y);
+
+    doc.setDrawColor(...RULE);
+    const tw = doc.getTextWidth(truncated);
+    const lineStart = MARGIN + 14 + tw + 3;
+    const lineEnd = PAGE_W - MARGIN;
+    if (lineStart < lineEnd - 10) {
+      for (let x = lineStart; x < lineEnd; x += 3) {
+        doc.circle(x, y - 1, 0.3, 'F');
+      }
+    }
+    y += 10;
+  });
+
+  footer(doc, 2);
+}
+
+function renderBackCover(doc: jsPDF) {
+  paintBg(doc);
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.5);
+  doc.rect(MARGIN - 5, MARGIN - 5, CONTENT_W + 10, PAGE_H - MARGIN * 2 + 10);
+
+  doc.setFillColor(...GOLD);
+  doc.rect(PAGE_W / 2 - 25, 65, 50, 3, 'F');
+
+  doc.setFontSize(28);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...PAPER);
+  doc.text('Ready to Execute?', PAGE_W / 2, 88, { align: 'center' });
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...BODY);
+  const ctaLines = doc.splitTextToSize(
+    'This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $2,500, applied toward engagement.',
+    CONTENT_W - 20,
+  );
+  doc.text(ctaLines, PAGE_W / 2, 108, { align: 'center' });
+
+  const contactY = 108 + ctaLines.length * 7 + 20;
+  doc.setFillColor(...GOLD);
+  doc.rect(PAGE_W / 2 - 20, contactY - 5, 40, 2, 'F');
+
+  doc.setFontSize(13);
+  doc.setTextColor(...GOLD);
+  doc.setFont('helvetica', 'bold');
+  doc.text('(317) 376-2110', PAGE_W / 2, contactY + 12, { align: 'center' });
+  doc.text('joseph@aetheris.technology', PAGE_W / 2, contactY + 26, { align: 'center' });
+  doc.text('aetheris.technology', PAGE_W / 2, contactY + 40, { align: 'center' });
+
+  doc.setFontSize(9);
+  doc.setTextColor(120, 115, 110);
+  doc.setFont('helvetica', 'normal');
+  doc.text(
+    `© ${new Date().getFullYear()} Aetheris. All rights reserved.`,
+    PAGE_W / 2,
+    PAGE_H - 25,
+    { align: 'center' },
+  );
+}
+
+function renderBody(doc: jsPDF, content: string, startPageNum: number) {
+  let pageNum = startPageNum;
+  doc.addPage();
+  paintBg(doc);
+  decoCorner(doc);
+  let y = MARGIN;
+  let sectionNum = 0;
+
+  const ensure = (need: number) => {
+    if (y + need > PAGE_H - 18) {
+      footer(doc, pageNum);
+      doc.addPage();
+      pageNum++;
+      paintBg(doc);
+      decoCorner(doc);
+      y = MARGIN;
+    }
+  };
+
+  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  for (const raw of lines) {
+    const trimmed = raw.trim();
+    if (!trimmed) {
+      y += 4;
+      continue;
+    }
+
+    if (trimmed.startsWith('## ') && !trimmed.startsWith('### ')) {
+      if (y > MARGIN + 5) {
+        footer(doc, pageNum);
+        doc.addPage();
+        pageNum++;
+      }
+      paintBg(doc);
+      decoCorner(doc);
+      y = MARGIN;
+      sectionNum++;
+
+      doc.setFillColor(...GOLD);
+      doc.rect(MARGIN, y, 35, 2, 'F');
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GOLD);
+      doc.text(`SECTION ${String(sectionNum).padStart(2, '0')}`, MARGIN, y);
+      y += 8;
+
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...PAPER);
+      const headerText = trimmed.replace('## ', '').replace(/\*\*/g, '');
+      const headerLines = doc.splitTextToSize(headerText, CONTENT_W);
+      doc.text(headerLines, MARGIN, y);
+      y += headerLines.length * 9 + 8;
+    } else if (trimmed.startsWith('### ')) {
+      ensure(16);
+      y += 3;
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GOLD);
+      const subText = trimmed.replace('### ', '').replace(/\*\*/g, '');
+      const subLines = doc.splitTextToSize(subText, CONTENT_W);
+      doc.text(subLines, MARGIN, y);
+      y += subLines.length * 6 + 5;
+    } else if (trimmed.startsWith('# ')) {
+      ensure(16);
+      y += 2;
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...PAPER);
+      const t = trimmed.replace('# ', '').replace(/\*\*/g, '');
+      const lns = doc.splitTextToSize(t, CONTENT_W);
+      doc.text(lns, MARGIN, y);
+      y += lns.length * 8 + 4;
+    } else if (trimmed.startsWith('> ')) {
+      ensure(12);
+      doc.setFillColor(...PANEL_DARK);
+      doc.rect(MARGIN, y - 4, CONTENT_W, 10, 'F');
+      doc.setFillColor(...GOLD);
+      doc.rect(MARGIN, y - 4, 1.5, 10, 'F');
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(...PAPER);
+      const q = trimmed.replace(/^>\s?/, '').replace(/\*\*/g, '');
+      const ql = doc.splitTextToSize(q, CONTENT_W - 8);
+      doc.text(ql, MARGIN + 5, y + 1);
+      y += ql.length * 5 + 6;
+    } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      ensure(12);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...BODY);
+
+      doc.setFillColor(...GOLD);
+      const dx = MARGIN + 3;
+      const dy = y - 1.5;
+      doc.triangle(dx, dy - 1.5, dx + 1.5, dy, dx, dy + 1.5, 'F');
+      doc.triangle(dx, dy - 1.5, dx - 1.5, dy, dx, dy + 1.5, 'F');
+
+      const text = trimmed.replace(/^[-*]\s/, '').replace(/\*\*/g, '');
+      const bl = doc.splitTextToSize(text, CONTENT_W - 12);
+      doc.text(bl, MARGIN + 10, y);
+      y += bl.length * 6 + 3;
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      ensure(12);
+      const m = trimmed.match(/^(\d+)\.\s+(.*)$/)!;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GOLD);
+      doc.text(`${m[1]}.`, MARGIN, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...BODY);
+      const text = m[2].replace(/\*\*/g, '');
+      const bl = doc.splitTextToSize(text, CONTENT_W - 12);
+      doc.text(bl, MARGIN + 10, y);
+      y += bl.length * 6 + 3;
+    } else if (trimmed.startsWith('|')) {
+      ensure(10);
+      const cells = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
+      if (cells.some(c => /^[-:]+$/.test(c))) continue;
+      const isHeader = cells.length > 0 && cells.every(c => c === c.toUpperCase() || (c.length > 0 && /[A-Z]/.test(c[0])));
+      doc.setFontSize(9);
+      if (isHeader) {
+        doc.setFillColor(...TABLE_HEADER_BG);
+        doc.rect(MARGIN, y - 4.5, CONTENT_W, 7.5, 'F');
+        doc.setFillColor(...GOLD);
+        doc.rect(MARGIN, y - 4.5, CONTENT_W, 0.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...GOLD);
+      } else {
+        const rowIndex = Math.floor((y - MARGIN) / 6);
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor(...PANEL_DARK);
+          doc.rect(MARGIN, y - 4, CONTENT_W, 7, 'F');
+        }
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...BODY);
+      }
+      const colW = CONTENT_W / cells.length;
+      cells.forEach((cell, i) => {
+        doc.text(cell.substring(0, 35), MARGIN + i * colW + 3, y);
+      });
+      y += 7;
+    } else if (/^---+$/.test(trimmed)) {
+      ensure(6);
+      doc.setDrawColor(...RULE);
+      doc.setLineWidth(0.2);
+      doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+      y += 5;
+    } else {
+      ensure(12);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...BODY);
+      const paraLines = doc.splitTextToSize(trimmed.replace(/\*\*/g, ''), CONTENT_W);
+      doc.text(paraLines, MARGIN, y);
+      y += paraLines.length * 6 + 3;
+    }
+
+    if (y > PAGE_H - 18) {
+      footer(doc, pageNum);
+      doc.addPage();
+      pageNum++;
+      paintBg(doc);
+      decoCorner(doc);
+      y = MARGIN;
+    }
+  }
+
+  footer(doc, pageNum);
+  return pageNum;
 }
 
 export function downloadForensicsPlaybookPdf(opts: {
@@ -431,12 +370,40 @@ export function downloadForensicsPlaybookPdf(opts: {
   toolLabel: string;
   markdown: string;
   filename?: string;
+  subtitle?: string;
+  tags?: string[];
 }) {
-  const w = new W(opts.toolLabel);
-  w.cover(opts.title);
-  renderMarkdown(w, opts.markdown);
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // Collect ## headings for TOC
+  const sections: string[] = [];
+  for (const line of opts.markdown.split('\n')) {
+    const t = line.trim();
+    if (t.startsWith('## ') && !t.startsWith('### ')) {
+      sections.push(t.replace('## ', '').replace(/\*\*/g, ''));
+    }
+  }
+
+  renderCover(
+    doc,
+    opts.title,
+    opts.subtitle || 'A forensic field report. Built for execution, not for filing.',
+    opts.toolLabel,
+    opts.tags || [],
+  );
+
+  if (sections.length) {
+    doc.addPage();
+    renderTOC(doc, sections);
+  }
+
+  renderBody(doc, opts.markdown, sections.length ? 3 : 2);
+
+  doc.addPage();
+  renderBackCover(doc);
+
   const filename =
     opts.filename ||
     `aetheris-${opts.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
-  w.finish(filename);
+  doc.save(filename);
 }
