@@ -181,7 +181,41 @@ export const AdminLeadBrowser: React.FC = () => {
     } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
-  const selectedIds = useMemo(() => Array.from(selected), [selected]);
+  const refreshRep = async (code: string, count = 10) => {
+    setRefreshBusy(code);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'refresh_rep', code, count, hold_hours: holdHours,
+        industry: autoIndustry || undefined,
+        min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
+      });
+      const rep = reps.find(r => r.code === code);
+      toast({ title: `${rep?.rep_name || code}: +${res.assigned} new (now ${res.current}/${count})`, description: res.message || undefined });
+      load(); loadDripCounts();
+    } catch (e) {
+      toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setRefreshBusy(null); }
+  };
+
+  const autoAssign = async () => {
+    const codes = Array.from(autoCodes);
+    if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
+    setAutoBusy(true);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'auto_assign', codes, per_rep: autoPerRep, hold_hours: holdHours,
+        industry: autoIndustry || undefined,
+        min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
+        respect_current: true,
+      });
+      const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
+      toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
+      load(); loadDripCounts();
+    } catch (e) {
+      toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAutoBusy(false); }
+  };
+
   const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
 
   return (
