@@ -32,6 +32,7 @@ const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
 const ScanPage = lazy(() => import("./pages/ScanPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersPage = lazy(() => import("./pages/CareersPage"));
+const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
