@@ -120,6 +120,16 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </p>
     </div>
 
+    <Card className="bg-amber/10 border-amber/40 mb-10">
+      <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+        <div>
+          <p className="font-display text-lg text-foreground">Want in? Prove you've read the site.</p>
+          <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. Random apps go in the trash.</p>
+        </div>
+        <a href="/careers/test"><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
+      </CardContent>
+    </Card>
+
     <div className="grid md:grid-cols-2 gap-6 mb-12">
       {[
         { icon: DollarSign, title: "Flat 10% Commission", desc: "On every closed deal — including recurring monthly revenue, for as long as the client stays." },

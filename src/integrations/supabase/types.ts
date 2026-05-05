@@ -711,6 +711,65 @@ export type Database = {
         }
         Relationships: []
       }
+      call_recordings: {
+        Row: {
+          ai_messages: Json
+          audio_path: string | null
+          created_at: string
+          duration_sec: number | null
+          ended_at: string | null
+          id: string
+          lead_business: string | null
+          lead_id: string | null
+          mode: string
+          outcome: string | null
+          rep_code: string
+          rep_notes: string | null
+          started_at: string
+          transcript: Json
+        }
+        Insert: {
+          ai_messages?: Json
+          audio_path?: string | null
+          created_at?: string
+          duration_sec?: number | null
+          ended_at?: string | null
+          id?: string
+          lead_business?: string | null
+          lead_id?: string | null
+          mode?: string
+          outcome?: string | null
+          rep_code: string
+          rep_notes?: string | null
+          started_at?: string
+          transcript?: Json
+        }
+        Update: {
+          ai_messages?: Json
+          audio_path?: string | null
+          created_at?: string
+          duration_sec?: number | null
+          ended_at?: string | null
+          id?: string
+          lead_business?: string | null
+          lead_id?: string | null
+          mode?: string
+          outcome?: string | null
+          rep_code?: string
+          rep_notes?: string | null
+          started_at?: string
+          transcript?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_recordings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_assets: {
         Row: {
           created_at: string
@@ -770,6 +829,158 @@ export type Database = {
           id?: number
           is_active?: boolean
           signature_html?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      careers_applications: {
+        Row: {
+          admin_notes: string | null
+          attempt_id: string | null
+          candidate_email: string
+          candidate_name: string
+          candidate_phone: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          resume_filename: string | null
+          resume_path: string | null
+          reviewed: boolean
+          reviewed_at: string | null
+          score_pct: number | null
+          share_code: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          attempt_id?: string | null
+          candidate_email: string
+          candidate_name: string
+          candidate_phone?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          resume_filename?: string | null
+          resume_path?: string | null
+          reviewed?: boolean
+          reviewed_at?: string | null
+          score_pct?: number | null
+          share_code: string
+        }
+        Update: {
+          admin_notes?: string | null
+          attempt_id?: string | null
+          candidate_email?: string
+          candidate_name?: string
+          candidate_phone?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          resume_filename?: string | null
+          resume_path?: string | null
+          reviewed?: boolean
+          reviewed_at?: string | null
+          score_pct?: number | null
+          share_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "careers_applications_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "careers_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      careers_attempts: {
+        Row: {
+          answers: Json
+          candidate_email: string
+          candidate_name: string | null
+          candidate_phone: string | null
+          correct_count: number | null
+          created_at: string
+          expires_at: string
+          id: string
+          notes_to_admin: string | null
+          questions: Json
+          score_pct: number | null
+          share_code: string | null
+          started_at: string
+          status: string
+          submitted_at: string | null
+          total_count: number | null
+        }
+        Insert: {
+          answers?: Json
+          candidate_email: string
+          candidate_name?: string | null
+          candidate_phone?: string | null
+          correct_count?: number | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          notes_to_admin?: string | null
+          questions: Json
+          score_pct?: number | null
+          share_code?: string | null
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          total_count?: number | null
+        }
+        Update: {
+          answers?: Json
+          candidate_email?: string
+          candidate_name?: string | null
+          candidate_phone?: string | null
+          correct_count?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notes_to_admin?: string | null
+          questions?: Json
+          score_pct?: number | null
+          share_code?: string | null
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          total_count?: number | null
+        }
+        Relationships: []
+      }
+      careers_questions: {
+        Row: {
+          category: string | null
+          choices: Json
+          correct_choice_id: string
+          created_at: string
+          difficulty: number | null
+          id: string
+          is_active: boolean
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          choices: Json
+          correct_choice_id: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          is_active?: boolean
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          choices?: Json
+          correct_choice_id?: string
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          is_active?: boolean
+          question?: string
           updated_at?: string
         }
         Relationships: []
