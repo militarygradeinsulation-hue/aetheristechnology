@@ -159,11 +159,13 @@ serve(async (req) => {
       if (insErr) throw insErr;
 
       // Audit
-      await admin.from("rep_activity").insert({
-        rep_code: claims.code,
-        action: "forecast_push_lead",
-        metadata: { company: name, website, briefing_date: today },
-      }).catch(() => {});
+      try {
+        await admin.from("rep_activity").insert({
+          rep_code: claims.code,
+          action: "forecast_push_lead",
+          metadata: { company: name, website, briefing_date: today },
+        });
+      } catch (_) { /* non-fatal */ }
 
       return new Response(JSON.stringify({ ok: true, id: ins.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
