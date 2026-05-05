@@ -24,6 +24,7 @@ import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
+import { AdminCareersTest } from '@/components/admin/AdminCareersTest';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
