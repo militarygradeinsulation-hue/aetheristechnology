@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
-  Sparkles, AlertTriangle, MessageSquare, UserPlus, X,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap,
 } from 'lucide-react';
 
 interface Lead {
