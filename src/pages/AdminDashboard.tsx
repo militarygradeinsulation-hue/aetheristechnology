@@ -23,6 +23,7 @@ import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminA
 import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
+import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
@@ -415,6 +416,9 @@ const AdminDashboard: React.FC = () => {
 
             {/* Lead Scraper → Rep Pool */}
             <LeadPipelinePanel />
+
+            {/* Lead Browser: scan + assign to rep */}
+            <AdminLeadBrowser />
 
             {/* Rep Activity (logins / claims / touches) */}
             <RepActivityPanel />
