@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FORENSICS_SYSTEMS, ForensicsSystem } from '@/lib/forensicsSystems';
+import { downloadForensicsPlaybookPdf } from '@/lib/generateForensicsPdf';
 
 export function AdminForensicsSystemsPanel() {
   const [active, setActive] = useState<ForensicsSystem | null>(null);
@@ -80,14 +81,12 @@ export function AdminForensicsSystemsPanel() {
   };
 
   const download = () => {
-    if (!result) return;
-    const blob = new Blob([result.markdown], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${result.title.replace(/\s+/g, '-').toLowerCase()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!result || !active) return;
+    downloadForensicsPlaybookPdf({
+      title: result.title,
+      toolLabel: active.title,
+      markdown: result.markdown,
+    });
   };
 
   if (!active) {
@@ -177,7 +176,7 @@ export function AdminForensicsSystemsPanel() {
         <div className="space-y-4">
           <div className="flex gap-2">
             <Button onClick={download} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> Download .md
+              <Download className="w-4 h-4 mr-1" /> Download Playbook PDF
             </Button>
             <Button onClick={() => { setResult(null); }} variant="ghost" size="sm">Run again</Button>
           </div>
