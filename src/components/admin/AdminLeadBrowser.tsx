@@ -255,6 +255,84 @@ export const AdminLeadBrowser: React.FC = () => {
           </Button>
         </div>
 
+        {/* Auto-assign panel */}
+        <div className="rounded-lg border border-border/50 bg-secondary/20">
+          <button
+            type="button"
+            onClick={() => setAutoOpen(o => !o)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm font-mono uppercase tracking-wider text-amber hover:bg-amber/5"
+          >
+            <span className="flex items-center gap-2"><Shuffle className="w-4 h-4" /> Auto-assign & per-rep refresh</span>
+            <span className="text-xs text-muted-foreground">{autoOpen ? 'Hide' : 'Show'}</span>
+          </button>
+          {autoOpen && (
+            <div className="p-3 space-y-3 border-t border-border/40">
+              <div className="grid sm:grid-cols-4 gap-2">
+                <div>
+                  <Label className="text-[10px]">Per-rep target</Label>
+                  <Input type="number" min={1} max={200} value={autoPerRep} onChange={e => setAutoPerRep(Number(e.target.value) || 10)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Hold hrs</Label>
+                  <Input type="number" min={1} max={720} value={holdHours} onChange={e => setHoldHours(Number(e.target.value) || 72)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Industry filter</Label>
+                  <Input value={autoIndustry} onChange={e => setAutoIndustry(e.target.value)} placeholder="e.g. roofing" className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-[10px]">Min score</Label>
+                  <Input type="number" min={0} max={100} value={autoMinScore} onChange={e => setAutoMinScore(e.target.value === '' ? '' : Number(e.target.value))} className="h-8" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-[10px] block mb-1">Reps in rotation (top-up to target each)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {reps.map(r => {
+                    const active = autoCodes.has(r.code);
+                    const cur = dripCounts[r.code] || 0;
+                    return (
+                      <button
+                        key={r.code}
+                        type="button"
+                        onClick={() => setAutoCodes(prev => { const n = new Set(prev); n.has(r.code) ? n.delete(r.code) : n.add(r.code); return n; })}
+                        className={`px-2.5 py-1.5 rounded border text-xs flex items-center gap-2 transition-colors ${
+                          active ? 'border-amber bg-amber/15 text-amber' : 'border-border/50 text-muted-foreground hover:border-amber/40'
+                        }`}
+                      >
+                        <span className="font-semibold">{r.rep_name || r.code}</span>
+                        <span className="font-mono text-[10px] opacity-70">{cur}/{autoPerRep}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); refreshRep(r.code, autoPerRep); }}
+                          disabled={refreshBusy === r.code}
+                          className="p-0.5 rounded hover:bg-amber/20"
+                          title="Refresh just this rep"
+                        >
+                          {refreshBusy === r.code
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <RefreshCw className="w-3 h-3" />}
+                        </button>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={autoAssign} disabled={autoBusy || autoCodes.size === 0}>
+                  {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+                  Auto-assign to {autoCodes.size || 0} rep{autoCodes.size === 1 ? '' : 's'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setAutoCodes(new Set(reps.map(r => r.code)))}>Select all</Button>
+                <Button size="sm" variant="ghost" onClick={() => setAutoCodes(new Set())}>Clear</Button>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  Round-robin distributes highest-score pool leads. Reps already at target are skipped.
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Bulk action bar */}
         {selectedIds.length > 0 && (
           <div className="flex flex-wrap items-end gap-2 p-3 rounded-lg bg-amber/10 border border-amber/30">
