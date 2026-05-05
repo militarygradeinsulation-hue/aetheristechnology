@@ -60,6 +60,15 @@ export const AdminLeadBrowser: React.FC = () => {
   const [bulkRep, setBulkRep] = useState('');
   const [holdHours, setHoldHours] = useState(72);
   const [detail, setDetail] = useState<Lead | null>(null);
+  // Auto-assign panel
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoCodes, setAutoCodes] = useState<Set<string>>(new Set());
+  const [autoPerRep, setAutoPerRep] = useState(10);
+  const [autoIndustry, setAutoIndustry] = useState('');
+  const [autoMinScore, setAutoMinScore] = useState<number | ''>('');
+  const [autoBusy, setAutoBusy] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState<string | null>(null);
+  const [dripCounts, setDripCounts] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
