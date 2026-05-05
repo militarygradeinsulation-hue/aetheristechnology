@@ -39,18 +39,6 @@ import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSys
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
 
-interface LinkedInQueueItem {
-  id: string;
-  content: string;
-  format: string | null;
-  source_type: string | null;
-  status: string;
-  scheduled_for: string | null;
-  posted_at: string | null;
-  linkedin_post_id: string | null;
-  created_at: string;
-}
-
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
   { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
