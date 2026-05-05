@@ -1,17 +1,18 @@
 import jsPDF from 'jspdf';
 
 /**
- * Aetheris Forensics Playbook PDF.
- * Renders markdown deliverables in the same professional, light-theme style
- * as the rest of the Aetheris Playbooks (white bg, amber accents, helvetica).
+ * Aetheris Forensic Playbook PDF — dark case-file theme.
+ * Black bg, off-white text, amber accents, JetBrains/Courier mono micro-labels,
+ * Times serif for autopsy headlines. Matches the Leak Audit / Diagnostic PDFs.
  */
 
-const AMBER: [number, number, number] = [217, 167, 71];
-const INK: [number, number, number] = [25, 25, 30];
-const SUB: [number, number, number] = [110, 110, 120];
-const RULE: [number, number, number] = [220, 220, 225];
-const SOFT: [number, number, number] = [248, 246, 240];
+const INK: [number, number, number] = [18, 18, 22];           // page bg
+const PANEL: [number, number, number] = [28, 28, 34];         // card bg
+const PAPER: [number, number, number] = [245, 240, 230];      // primary text
+const MUTED: [number, number, number] = [165, 160, 150];
+const AMBER: [number, number, number] = [232, 165, 38];
 const CRIMSON: [number, number, number] = [180, 60, 60];
+const RULE: [number, number, number] = [60, 58, 64];
 
 const PAGE_W = 210;
 const PAGE_H = 297;
@@ -23,7 +24,6 @@ class W {
   y: number;
   pageNum = 1;
   toolLabel: string;
-  cardStartY: number | null = null;
 
   constructor(toolLabel: string) {
     this.doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -31,16 +31,21 @@ class W {
     this.toolLabel = toolLabel;
   }
 
+  paintBackground() {
+    this.doc.setFillColor(...INK);
+    this.doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
+  }
+
   drawHeader() {
     this.doc.setFillColor(...AMBER);
     this.doc.rect(0, 0, PAGE_W, 3, 'F');
-    this.doc.setFont('helvetica', 'bold');
+    this.doc.setFont('courier', 'bold');
     this.doc.setFontSize(9);
-    this.doc.setTextColor(...INK);
-    this.doc.text('AETHERIS', MARGIN, 11);
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(...AMBER);
+    this.doc.text('AETHERIS · BUSINESS FORENSICS', MARGIN, 11);
+    this.doc.setFont('courier', 'normal');
     this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
+    this.doc.setTextColor(...MUTED);
     this.doc.text(this.toolLabel.toUpperCase(), PAGE_W - MARGIN, 11, { align: 'right' });
     this.doc.setDrawColor(...RULE);
     this.doc.setLineWidth(0.2);
@@ -52,173 +57,195 @@ class W {
     this.doc.setDrawColor(...RULE);
     this.doc.setLineWidth(0.2);
     this.doc.line(MARGIN, fy - 4, PAGE_W - MARGIN, fy - 4);
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFont('courier', 'normal');
     this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
-    this.doc.text('aetheris.technology  ·  Forensic Playbook', MARGIN, fy);
-    this.doc.text(`Page ${this.pageNum}`, PAGE_W - MARGIN, fy, { align: 'right' });
+    this.doc.setTextColor(...MUTED);
+    this.doc.text('aetheris.technology  ·  FORENSIC PLAYBOOK', MARGIN, fy);
+    this.doc.text(`PG ${String(this.pageNum).padStart(2, '0')}`, PAGE_W - MARGIN, fy, { align: 'right' });
+  }
+
+  newPage() {
+    this.doc.addPage();
+    this.pageNum++;
+    this.paintBackground();
+    this.drawHeader();
+    this.drawFooter();
+    this.y = MARGIN + 14;
   }
 
   ensure(needed: number) {
-    if (this.y + needed > PAGE_H - 22) {
-      this.doc.addPage();
-      this.pageNum++;
-      this.y = MARGIN + 14;
-      this.drawHeader();
-      this.drawFooter();
-    }
+    if (this.y + needed > PAGE_H - 22) this.newPage();
   }
 
   cover(title: string) {
-    this.drawHeader();
-    this.drawFooter();
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(11);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text('AETHERIS  ·  FORENSIC PLAYBOOK', MARGIN, 30);
+    this.paintBackground();
 
+    // Top amber bar
     this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, 90, 2, 20, 'F');
-    this.doc.setFont('helvetica', 'bold');
+    this.doc.rect(0, 0, PAGE_W, 4, 'F');
+
+    // Case-file labels
+    this.doc.setFont('courier', 'bold');
     this.doc.setFontSize(9);
     this.doc.setTextColor(...AMBER);
-    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 6, 96);
+    this.doc.text('AETHERIS · BUSINESS FORENSICS', MARGIN, 16);
+    this.doc.text(`CASE FILE · ${new Date().toISOString().slice(0, 10)}`, PAGE_W - MARGIN, 16, { align: 'right' });
 
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(26);
-    this.doc.setTextColor(...INK);
-    const lines = this.doc.splitTextToSize(title, CONTENT_W);
-    let ty = 105;
+    // Tool chip
+    this.doc.setFillColor(...AMBER);
+    this.doc.rect(MARGIN, 40, 2, 14, 'F');
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(...AMBER);
+    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 6, 49);
+
+    // Headline (serif, off-white)
+    this.doc.setTextColor(...PAPER);
+    this.doc.setFont('times', 'bolditalic');
+    this.doc.setFontSize(30);
+    const lines = this.doc.splitTextToSize(title, CONTENT_W - 6);
+    let ty = 78;
     for (const line of lines) {
-      this.doc.text(line, MARGIN + 6, ty);
-      ty += 11;
+      this.doc.text(line, MARGIN, ty);
+      ty += 12;
     }
 
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...SUB);
+    // Sub
+    this.doc.setFont('times', 'italic');
+    this.doc.setFontSize(13);
+    this.doc.setTextColor(...MUTED);
+    this.doc.text('A forensic field report. Built for execution, not for filing.', MARGIN, ty + 4);
+
+    // Mid amber rule
+    this.doc.setDrawColor(...AMBER);
+    this.doc.setLineWidth(0.4);
+    this.doc.line(MARGIN, ty + 14, MARGIN + 32, ty + 14);
+
+    // Bottom block — confidential stamp
+    this.doc.setFillColor(...CRIMSON);
+    this.doc.rect(MARGIN, PAGE_H - 40, 38, 9, 'F');
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(...PAPER);
+    this.doc.text('CONFIDENTIAL', MARGIN + 3, PAGE_H - 34);
+
+    this.doc.setFont('courier', 'normal');
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...MUTED);
     this.doc.text(
       `Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
-      MARGIN + 6,
-      ty + 4,
+      MARGIN,
+      PAGE_H - 24,
     );
+    this.doc.text('Aetheris AI Studio · aetheris.technology', MARGIN, PAGE_H - 18);
 
-    this.doc.setDrawColor(...AMBER);
-    this.doc.setLineWidth(0.6);
-    this.doc.line(MARGIN, PAGE_H - 35, MARGIN + 25, PAGE_H - 35);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...INK);
-    this.doc.text('Confidential — Forensic Diagnostic', MARGIN, PAGE_H - 28);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
-    this.doc.text('Generated by Aetheris AI Studio. Built for execution, not for filing.', MARGIN, PAGE_H - 22);
-
-    this.doc.addPage();
-    this.pageNum++;
-    this.y = MARGIN + 14;
-    this.drawHeader();
-    this.drawFooter();
+    this.newPage();
   }
 
   h1(text: string) {
-    this.ensure(20);
+    this.ensure(22);
     this.y += 4;
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(20);
-    this.doc.setTextColor(...INK);
+    this.doc.setFont('times', 'bolditalic');
+    this.doc.setFontSize(22);
+    this.doc.setTextColor(...PAPER);
     const lines = this.doc.splitTextToSize(text, CONTENT_W);
     for (const line of lines) {
-      this.ensure(10);
-      this.y += 9;
+      this.ensure(11);
+      this.y += 10;
       this.doc.text(line, MARGIN, this.y);
     }
     this.doc.setDrawColor(...AMBER);
     this.doc.setLineWidth(0.8);
-    this.doc.line(MARGIN, this.y + 2, MARGIN + 28, this.y + 2);
+    this.doc.line(MARGIN, this.y + 2.5, MARGIN + 30, this.y + 2.5);
     this.y += 8;
   }
 
   h2(text: string) {
     this.ensure(16);
     this.y += 6;
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(13);
-    this.doc.setTextColor(...INK);
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...AMBER);
+    this.doc.text('§ SECTION', MARGIN, this.y);
     this.y += 5;
-    this.doc.text(text, MARGIN + 6, this.y);
+    this.doc.setFont('times', 'bold');
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(...PAPER);
+    const lines = this.doc.splitTextToSize(text, CONTENT_W - 4);
+    for (const line of lines) {
+      this.ensure(8);
+      this.y += 6;
+      this.doc.text(line, MARGIN, this.y);
+    }
     this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, this.y - 4, 3, 5, 'F');
-    this.y += 3;
+    this.doc.rect(MARGIN, this.y + 1.5, 14, 0.6, 'F');
+    this.y += 4;
   }
 
   h3(text: string) {
     this.ensure(10);
     this.y += 4;
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(11);
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(10);
     this.doc.setTextColor(...AMBER);
     this.y += 5;
-    this.doc.text(text, MARGIN, this.y);
+    this.doc.text(`› ${text.toUpperCase()}`, MARGIN, this.y);
     this.y += 1;
   }
 
-  // Renders a paragraph with simple **bold** inline support
-  paragraph(text: string, color: [number, number, number] = INK, size = 10) {
-    if (!text.trim()) {
-      this.y += 2;
-      return;
-    }
+  // mixed weight + bold/italic in one paragraph
+  private renderRich(text: string, leftX: number, color: [number, number, number], size = 10) {
     const lh = size * 0.45;
     this.doc.setFontSize(size);
     this.doc.setTextColor(color[0], color[1], color[2]);
 
-    // tokenize **bold**
-    const parts: { text: string; bold: boolean }[] = [];
-    const re = /\*\*(.+?)\*\*/g;
+    // Tokenize: **bold**, *italic*, plain
+    type Part = { text: string; bold: boolean; italic: boolean };
+    const parts: Part[] = [];
+    const re = /\*\*(.+?)\*\*|\*(.+?)\*/g;
     let last = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
-      if (m.index > last) parts.push({ text: text.slice(last, m.index), bold: false });
-      parts.push({ text: m[1], bold: true });
+      if (m.index > last) parts.push({ text: text.slice(last, m.index), bold: false, italic: false });
+      if (m[1] != null) parts.push({ text: m[1], bold: true, italic: false });
+      else parts.push({ text: m[2], bold: false, italic: true });
       last = m.index + m[0].length;
     }
-    if (last < text.length) parts.push({ text: text.slice(last), bold: false });
-    if (parts.length === 0) parts.push({ text, bold: false });
+    if (last < text.length) parts.push({ text: text.slice(last), bold: false, italic: false });
+    if (!parts.length) parts.push({ text, bold: false, italic: false });
 
-    // word-wrap manually with mixed weights
-    let lineParts: { text: string; bold: boolean }[] = [];
-    let lineWidth = 0;
-    const maxW = CONTENT_W - 4;
-    const space = (bold: boolean) => {
-      this.doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    const styleOf = (p: Part) => (p.bold && p.italic ? 'bolditalic' : p.bold ? 'bold' : p.italic ? 'italic' : 'normal');
+    const space = (p: Part) => {
+      this.doc.setFont('helvetica', styleOf(p));
       return this.doc.getTextWidth(' ');
     };
+
+    const maxW = PAGE_W - MARGIN - leftX;
+    let lineParts: Part[] = [];
+    let lineWidth = 0;
+
     const flush = () => {
       this.ensure(lh + 1);
       this.y += lh;
-      let x = MARGIN + 2;
+      let x = leftX;
       for (let i = 0; i < lineParts.length; i++) {
         const p = lineParts[i];
-        this.doc.setFont('helvetica', p.bold ? 'bold' : 'normal');
+        this.doc.setFont('helvetica', styleOf(p));
         this.doc.text(p.text, x, this.y);
         x += this.doc.getTextWidth(p.text);
-        if (i < lineParts.length - 1) x += space(p.bold);
+        if (i < lineParts.length - 1) x += space(p);
       }
       lineParts = [];
       lineWidth = 0;
     };
     for (const part of parts) {
       const words = part.text.split(/\s+/).filter(Boolean);
-      this.doc.setFont('helvetica', part.bold ? 'bold' : 'normal');
+      this.doc.setFont('helvetica', styleOf(part));
       for (const word of words) {
         const wW = this.doc.getTextWidth(word);
-        const sp = lineParts.length ? space(part.bold) : 0;
-        if (lineWidth + sp + wW > maxW && lineParts.length) {
-          flush();
-        }
-        lineParts.push({ text: word, bold: part.bold });
+        const sp = lineParts.length ? space(part) : 0;
+        if (lineWidth + sp + wW > maxW && lineParts.length) flush();
+        lineParts.push({ text: word, bold: part.bold, italic: part.italic });
         lineWidth += (lineParts.length > 1 ? sp : 0) + wW;
       }
     }
@@ -226,83 +253,63 @@ class W {
     this.y += 1.5;
   }
 
-  bullet(text: string) {
-    this.ensure(6);
-    const lh = 10 * 0.45;
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...AMBER);
-    this.doc.setFont('helvetica', 'bold');
-    this.y += lh;
-    this.doc.text('•', MARGIN + 4, this.y);
-    this.y -= lh;
-    // shift content right
-    const savedY = this.y;
-    this._paragraphIndented(text, MARGIN + 9);
-    if (this.y < savedY) this.y = savedY;
+  paragraph(text: string) {
+    if (!text.trim()) { this.y += 2; return; }
+    this.renderRich(text, MARGIN, PAPER, 10);
   }
 
-  _paragraphIndented(text: string, leftX: number) {
-    const size = 10;
-    const lh = size * 0.45;
-    this.doc.setFontSize(size);
-    this.doc.setTextColor(...INK);
-    const maxW = PAGE_W - MARGIN - leftX;
-    // bold support
-    const parts: { text: string; bold: boolean }[] = [];
-    const re = /\*\*(.+?)\*\*/g;
-    let last = 0;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-      if (m.index > last) parts.push({ text: text.slice(last, m.index), bold: false });
-      parts.push({ text: m[1], bold: true });
-      last = m.index + m[0].length;
-    }
-    if (last < text.length) parts.push({ text: text.slice(last), bold: false });
-    if (!parts.length) parts.push({ text, bold: false });
+  bullet(text: string) {
+    this.ensure(6);
+    this.doc.setFontSize(10);
+    this.doc.setTextColor(...AMBER);
+    this.doc.setFont('courier', 'bold');
+    const dotY = this.y + 4.5;
+    this.doc.text('▸', MARGIN + 3, dotY);
+    const before = this.y;
+    this.renderRich(text, MARGIN + 8, PAPER, 10);
+    if (this.y < before + 4) this.y = before + 4;
+  }
 
-    let lineParts: { text: string; bold: boolean }[] = [];
-    let lineWidth = 0;
-    const space = (b: boolean) => {
-      this.doc.setFont('helvetica', b ? 'bold' : 'normal');
-      return this.doc.getTextWidth(' ');
-    };
-    const flush = () => {
-      this.ensure(lh + 1);
-      this.y += lh;
-      let x = leftX;
-      for (let i = 0; i < lineParts.length; i++) {
-        const p = lineParts[i];
-        this.doc.setFont('helvetica', p.bold ? 'bold' : 'normal');
-        this.doc.text(p.text, x, this.y);
-        x += this.doc.getTextWidth(p.text);
-        if (i < lineParts.length - 1) x += space(p.bold);
-      }
-      lineParts = [];
-      lineWidth = 0;
-    };
-    for (const part of parts) {
-      const words = part.text.split(/\s+/).filter(Boolean);
-      this.doc.setFont('helvetica', part.bold ? 'bold' : 'normal');
-      for (const word of words) {
-        const wW = this.doc.getTextWidth(word);
-        const sp = lineParts.length ? space(part.bold) : 0;
-        if (lineWidth + sp + wW > maxW && lineParts.length) flush();
-        lineParts.push({ text: word, bold: part.bold });
-        lineWidth += (lineParts.length > 1 ? sp : 0) + wW;
-      }
-    }
-    if (lineParts.length) flush();
-    this.y += 1;
+  numbered(num: number, text: string) {
+    this.ensure(6);
+    this.doc.setFontSize(10);
+    this.doc.setTextColor(...AMBER);
+    this.doc.setFont('courier', 'bold');
+    this.doc.text(`${String(num).padStart(2, '0')}.`, MARGIN + 1, this.y + 4.5);
+    const before = this.y;
+    this.renderRich(text, MARGIN + 11, PAPER, 10);
+    if (this.y < before + 4) this.y = before + 4;
   }
 
   quote(text: string) {
     this.ensure(10);
     const startY = this.y + 1;
-    this._paragraphIndented(text, MARGIN + 8);
-    const endY = this.y;
+    // panel bg
+    this.doc.setFillColor(...PANEL);
+    const before = this.y;
+    // measure by rendering off-screen? Simpler: render then draw rect behind via overlay trick.
+    // We render text first to get height, but we need bg behind. So pre-measure with split:
+    const size = 10;
+    const lh = size * 0.45;
+    this.doc.setFont('times', 'italic');
+    this.doc.setFontSize(size);
+    const wrapped = this.doc.splitTextToSize(text, CONTENT_W - 14);
+    const h = wrapped.length * lh + 6;
+    this.ensure(h + 3);
+    const yTop = this.y + 1;
+    this.doc.setFillColor(...PANEL);
+    this.doc.rect(MARGIN, yTop, CONTENT_W, h, 'F');
     this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN + 2, startY, 1.4, endY - startY, 'F');
-    this.y += 1;
+    this.doc.rect(MARGIN, yTop, 1.6, h, 'F');
+    this.doc.setTextColor(...PAPER);
+    this.doc.setFont('times', 'italic');
+    this.doc.setFontSize(size);
+    let ty = yTop + 4;
+    for (const line of wrapped) {
+      this.doc.text(line, MARGIN + 6, ty);
+      ty += lh;
+    }
+    this.y = yTop + h + 2;
   }
 
   divider() {
@@ -317,35 +324,30 @@ class W {
   table(rows: string[][]) {
     if (!rows.length) return;
     const cols = rows[0].length;
-    const colW = (CONTENT_W) / cols;
+    const colW = CONTENT_W / cols;
     const cellPad = 2;
     this.doc.setFontSize(9);
     rows.forEach((row, ri) => {
-      // measure
-      const lineHeights = row.map(cell => {
+      const lineCounts = row.map(cell => {
         this.doc.setFont('helvetica', ri === 0 ? 'bold' : 'normal');
-        const wrapped = this.doc.splitTextToSize(cell, colW - cellPad * 2);
-        return wrapped.length;
+        return this.doc.splitTextToSize(cell, colW - cellPad * 2).length;
       });
-      const maxLines = Math.max(...lineHeights);
+      const maxLines = Math.max(...lineCounts);
       const rowH = maxLines * 4 + cellPad * 2;
       this.ensure(rowH + 2);
       const y0 = this.y;
-      // bg for header
-      if (ri === 0) {
-        this.doc.setFillColor(...SOFT);
-        this.doc.rect(MARGIN, y0, CONTENT_W, rowH, 'F');
-      }
-      // borders
+      // background
+      this.doc.setFillColor(...(ri === 0 ? AMBER : PANEL));
+      this.doc.rect(MARGIN, y0, CONTENT_W, rowH, 'F');
+      // border
       this.doc.setDrawColor(...RULE);
       this.doc.setLineWidth(0.15);
       this.doc.rect(MARGIN, y0, CONTENT_W, rowH, 'S');
-      // text
       row.forEach((cell, ci) => {
         const x = MARGIN + ci * colW;
         if (ci > 0) this.doc.line(x, y0, x, y0 + rowH);
         this.doc.setFont('helvetica', ri === 0 ? 'bold' : 'normal');
-        this.doc.setTextColor(...INK);
+        this.doc.setTextColor(...(ri === 0 ? INK : PAPER));
         const wrapped = this.doc.splitTextToSize(cell, colW - cellPad * 2);
         wrapped.forEach((line: string, li: number) => {
           this.doc.text(line, x + cellPad, y0 + cellPad + 3 + li * 4);
@@ -361,10 +363,10 @@ class W {
   }
 }
 
-/** Light markdown → renderer dispatch */
 function renderMarkdown(w: W, md: string) {
   const lines = md.replace(/\r\n/g, '\n').split('\n');
   let i = 0;
+  let orderedCounter = 0;
   while (i < lines.length) {
     const raw = lines[i];
     const line = raw.trimEnd();
@@ -375,48 +377,51 @@ function renderMarkdown(w: W, md: string) {
       const parseRow = (l: string) =>
         l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
       tableRows.push(parseRow(line));
-      i += 2; // skip header + separator
+      i += 2;
       while (i < lines.length && /^\s*\|/.test(lines[i])) {
         tableRows.push(parseRow(lines[i]));
         i++;
       }
       w.table(tableRows);
+      orderedCounter = 0;
       continue;
     }
 
-    if (/^---+$/.test(line)) { w.divider(); i++; continue; }
-    if (/^###\s+/.test(line)) { w.h3(line.replace(/^###\s+/, '')); i++; continue; }
-    if (/^##\s+/.test(line)) { w.h2(line.replace(/^##\s+/, '')); i++; continue; }
-    if (/^#\s+/.test(line)) { w.h1(line.replace(/^#\s+/, '')); i++; continue; }
+    if (/^---+$/.test(line)) { w.divider(); i++; orderedCounter = 0; continue; }
+    if (/^###\s+/.test(line)) { w.h3(line.replace(/^###\s+/, '')); i++; orderedCounter = 0; continue; }
+    if (/^##\s+/.test(line)) { w.h2(line.replace(/^##\s+/, '')); i++; orderedCounter = 0; continue; }
+    if (/^#\s+/.test(line)) { w.h1(line.replace(/^#\s+/, '')); i++; orderedCounter = 0; continue; }
     if (/^>\s?/.test(line)) {
-      // collect contiguous quote lines
       const parts: string[] = [];
       while (i < lines.length && /^>\s?/.test(lines[i])) {
         parts.push(lines[i].replace(/^>\s?/, ''));
         i++;
       }
       w.quote(parts.join(' '));
+      orderedCounter = 0;
       continue;
     }
     if (/^\s*[-*]\s+/.test(line)) {
       w.bullet(line.replace(/^\s*[-*]\s+/, ''));
       i++;
+      orderedCounter = 0;
       continue;
     }
-    if (/^\s*\d+\.\s+/.test(line)) {
-      const m = line.match(/^\s*(\d+)\.\s+(.*)$/);
-      if (m) {
-        w._paragraphIndented(`**${m[1]}.** ${m[2]}`, MARGIN + 4);
-        i++;
-        continue;
-      }
+    const olm = line.match(/^\s*\d+\.\s+(.*)$/);
+    if (olm) {
+      orderedCounter++;
+      w.numbered(orderedCounter, olm[1]);
+      i++;
+      continue;
     }
     if (line.trim() === '') {
       w.y += 2;
       i++;
+      orderedCounter = 0;
       continue;
     }
     w.paragraph(line);
+    orderedCounter = 0;
     i++;
   }
 }
