@@ -216,6 +216,7 @@ export const AdminLeadBrowser: React.FC = () => {
     } finally { setAutoBusy(false); }
   };
 
+  const selectedIds = useMemo(() => Array.from(selected), [selected]);
   const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
 
   return (
