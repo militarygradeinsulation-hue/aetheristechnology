@@ -176,7 +176,7 @@ export function AdminForensicsSystemsPanel() {
         <div className="space-y-4">
           <div className="flex gap-2">
             <Button onClick={download} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> Download .md
+              <Download className="w-4 h-4 mr-1" /> Download Playbook PDF
             </Button>
             <Button onClick={() => { setResult(null); }} variant="ghost" size="sm">Run again</Button>
           </div>
