@@ -3814,6 +3814,177 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_files: {
+        Row: {
+          caption: string | null
+          created_at: string
+          filename: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          task_id: string | null
+          uploader: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          task_id?: string | null
+          uploader: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          task_id?: string | null
+          uploader?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_files_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_notes: {
+        Row: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          pinned: boolean
+          task_id: string | null
+        }
+        Insert: {
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          task_id?: string | null
+        }
+        Update: {
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_notes_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          recipient: string
+          task_id: string | null
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          recipient: string
+          task_id?: string | null
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          recipient?: string
+          task_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_notifications_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_tasks: {
+        Row: {
+          assignee: string
+          bucket: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          owner: string
+          priority: string
+          starts_at: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee: string
+          bucket?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          owner?: string
+          priority?: string
+          starts_at?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string
+          bucket?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          owner?: string
+          priority?: string
+          starts_at?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_events: {
         Row: {
           created_at: string
