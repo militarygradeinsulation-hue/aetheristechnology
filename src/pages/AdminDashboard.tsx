@@ -140,14 +140,6 @@ const AdminDashboard: React.FC = () => {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [topPages, setTopPages] = useState<{ page: string; views: number }[]>([]);
   const [eventBreakdown, setEventBreakdown] = useState<{ type: string; count: number }[]>([]);
-  // LinkedIn state
-  const [linkedinConnected, setLinkedinConnected] = useState<boolean | null>(null);
-  const [linkedinPersonUrn, setLinkedinPersonUrn] = useState('');
-  const [linkedinQueue, setLinkedinQueue] = useState<LinkedInQueueItem[]>([]);
-  const [linkedinLoading, setLinkedinLoading] = useState(false);
-  const [quickPostContent, setQuickPostContent] = useState('');
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
-  const [editingContent, setEditingContent] = useState('');
   const [libraryViewMode, setLibraryViewMode] = useState<ViewMode>('calendar');
 
   const fetchData = useCallback(async () => {
