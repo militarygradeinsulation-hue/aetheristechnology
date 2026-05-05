@@ -3179,6 +3179,8 @@ export type Database = {
           created_at: string
           created_by_code: string | null
           email: string | null
+          enriched_at: string | null
+          enrichment: Json | null
           external_id: string | null
           id: string
           industry: string | null
@@ -3207,6 +3209,8 @@ export type Database = {
           created_at?: string
           created_by_code?: string | null
           email?: string | null
+          enriched_at?: string | null
+          enrichment?: Json | null
           external_id?: string | null
           id?: string
           industry?: string | null
@@ -3235,6 +3239,8 @@ export type Database = {
           created_at?: string
           created_by_code?: string | null
           email?: string | null
+          enriched_at?: string | null
+          enrichment?: Json | null
           external_id?: string | null
           id?: string
           industry?: string | null
