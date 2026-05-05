@@ -1,0 +1,391 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { getAdminToken } from '@/lib/adminAuth';
+import {
+  Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X,
+} from 'lucide-react';
+
+interface Lead {
+  id: string;
+  business_name: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  industry: string | null;
+  location: string | null;
+  score: number | null;
+  why_fit: string | null;
+  status: string;
+  source: string;
+  claimed_by_code: string | null;
+  assigned_to_code: string | null;
+  assignment_expires_at: string | null;
+  enrichment: any;
+  enriched_at: string | null;
+  created_at: string;
+}
+
+interface Rep { code: string; rep_name: string | null; is_active: boolean; role: string | null; }
+
+const STATUS_FILTERS = [
+  { value: 'pool', label: 'Unassigned pool' },
+  { value: 'assigned', label: 'Dripped (held for rep)' },
+  { value: 'claimed', label: 'Claimed / working' },
+  { value: 'all', label: 'All leads' },
+];
+
+export const AdminLeadBrowser: React.FC = () => {
+  const { toast } = useToast();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [reps, setReps] = useState<Rep[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'pool' | 'assigned' | 'claimed' | 'all'>('pool');
+  const [search, setSearch] = useState('');
+  const [minScore, setMinScore] = useState<number | ''>('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState<Record<string, 'scan' | 'assign' | 'delete' | null>>({});
+  const [bulkRep, setBulkRep] = useState('');
+  const [holdHours, setHoldHours] = useState(72);
+  const [detail, setDetail] = useState<Lead | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    let q = supabase.from('rep_leads')
+      .select('id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at')
+      .order('score', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (filter === 'pool') q = q.is('claimed_by_code', null).is('assigned_to_code', null);
+    if (filter === 'assigned') q = q.is('claimed_by_code', null).not('assigned_to_code', 'is', null);
+    if (filter === 'claimed') q = q.not('claimed_by_code', 'is', null);
+    if (search.trim()) q = q.or(`business_name.ilike.%${search.trim()}%,website.ilike.%${search.trim()}%,industry.ilike.%${search.trim()}%`);
+    if (typeof minScore === 'number') q = q.gte('score', minScore);
+
+    const { data, error } = await q;
+    if (error) toast({ title: 'Failed to load leads', description: error.message, variant: 'destructive' });
+    setLeads((data || []) as Lead[]);
+    setSelected(new Set());
+    setLoading(false);
+  }, [filter, search, minScore, toast]);
+
+  const loadReps = useCallback(async () => {
+    const { data } = await supabase.from('rep_codes').select('code,rep_name,is_active,role').order('rep_name');
+    setReps(((data || []) as Rep[]).filter(r => r.is_active));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadReps(); }, [loadReps]);
+
+  const toggle = (id: string) => {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  };
+  const toggleAll = () => setSelected(prev => prev.size === leads.length ? new Set() : new Set(leads.map(l => l.id)));
+
+  const callAdmin = async (path: string, body: Record<string, unknown>) => {
+    const token = getAdminToken();
+    if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+    const { data, error } = await supabase.functions.invoke(path, { body, headers: { 'x-admin-token': token } });
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+
+  const scan = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    ids.forEach(id => setBusy(b => ({ ...b, [id]: 'scan' })));
+    try {
+      const res = await callAdmin('admin-enrich-lead', { ids });
+      const okCount = (res.results || []).filter((r: any) => r.ok).length;
+      toast({ title: `Scanned ${okCount}/${ids.length} leads` });
+      load();
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      ids.forEach(id => setBusy(b => ({ ...b, [id]: null })));
+    }
+  };
+
+  const assign = async (ids: string[], code: string) => {
+    if (!code) return toast({ title: 'Pick a rep first', variant: 'destructive' });
+    if (ids.length === 0) return;
+    ids.forEach(id => setBusy(b => ({ ...b, [id]: 'assign' })));
+    try {
+      await callAdmin('admin-assign-lead', { action: 'assign', ids, code, hold_hours: holdHours });
+      const rep = reps.find(r => r.code === code);
+      toast({ title: `Assigned ${ids.length} lead${ids.length > 1 ? 's' : ''} → ${rep?.rep_name || code}` });
+      load();
+    } catch (e) {
+      toast({ title: 'Assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      ids.forEach(id => setBusy(b => ({ ...b, [id]: null })));
+    }
+  };
+
+  const unassign = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'unassign', ids });
+      toast({ title: `Recalled ${ids.length} from drip` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const release = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'release', ids });
+      toast({ title: `Released ${ids.length} back to pool` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const remove = async (ids: string[]) => {
+    if (!confirm(`Delete ${ids.length} lead${ids.length > 1 ? 's' : ''}?`)) return;
+    try {
+      await callAdmin('admin-assign-lead', { action: 'delete', ids });
+      toast({ title: `Deleted ${ids.length}` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const selectedIds = useMemo(() => Array.from(selected), [selected]);
+  const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber" /> Lead Browser & Assigner
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Scan leads with AI to surface weak points, talking points, and a refined fit score. Then push them to a specific rep.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex-1 min-w-[180px]">
+            <Label className="text-xs">View</Label>
+            <Select value={filter} onValueChange={(v: any) => setFilter(v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{STATUS_FILTERS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1 min-w-[180px]">
+            <Label className="text-xs">Search</Label>
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Business, website, industry" className="pl-8" />
+            </div>
+          </div>
+          <div className="w-24">
+            <Label className="text-xs">Min score</Label>
+            <Input type="number" min={0} max={100} value={minScore} onChange={e => setMinScore(e.target.value === '' ? '' : Number(e.target.value))} />
+          </div>
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          </Button>
+        </div>
+
+        {/* Bulk action bar */}
+        {selectedIds.length > 0 && (
+          <div className="flex flex-wrap items-end gap-2 p-3 rounded-lg bg-amber/10 border border-amber/30">
+            <div className="text-sm font-mono text-amber mr-2">{selectedIds.length} selected</div>
+            <Button size="sm" variant="outline" onClick={() => scan(selectedIds)}>
+              <ScanLine className="w-3 h-3 mr-1" /> Scan all
+            </Button>
+            <div className="flex items-end gap-2">
+              <div>
+                <Label className="text-[10px]">Assign to rep</Label>
+                <Select value={bulkRep} onValueChange={setBulkRep}>
+                  <SelectTrigger className="w-44 h-8"><SelectValue placeholder="Pick rep" /></SelectTrigger>
+                  <SelectContent>
+                    {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code} {r.role === 'partner' ? '(P)' : ''}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-20">
+                <Label className="text-[10px]">Hold hrs</Label>
+                <Input type="number" min={1} max={720} value={holdHours} onChange={e => setHoldHours(Number(e.target.value) || 72)} className="h-8" />
+              </div>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => assign(selectedIds, bulkRep)}>
+                <Send className="w-3 h-3 mr-1" /> Assign
+              </Button>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => unassign(selectedIds)}>Unassign</Button>
+            <Button size="sm" variant="outline" onClick={() => release(selectedIds)}>Release</Button>
+            <Button size="sm" variant="outline" className="text-red-400" onClick={() => remove(selectedIds)}>
+              <Trash2 className="w-3 h-3 mr-1" /> Delete
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}><X className="w-3 h-3" /></Button>
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="border border-border/50 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-[28px_1fr_60px_120px_140px_180px] gap-2 px-3 py-2 bg-secondary/40 text-[10px] font-mono uppercase text-muted-foreground">
+            <Checkbox checked={selected.size === leads.length && leads.length > 0} onCheckedChange={toggleAll} />
+            <span>Lead</span>
+            <span>Score</span>
+            <span>Status</span>
+            <span>Assigned</span>
+            <span className="text-right">Actions</span>
+          </div>
+          <div className="max-h-[600px] overflow-y-auto divide-y divide-border/30">
+            {leads.length === 0 && !loading && (
+              <div className="p-8 text-center text-sm text-muted-foreground">No leads match.</div>
+            )}
+            {leads.map(l => (
+              <div key={l.id} className="grid grid-cols-[28px_1fr_60px_120px_140px_180px] gap-2 px-3 py-2 items-center text-sm hover:bg-secondary/20">
+                <Checkbox checked={selected.has(l.id)} onCheckedChange={() => toggle(l.id)} />
+                <button onClick={() => setDetail(l)} className="text-left min-w-0">
+                  <div className="font-semibold text-foreground truncate flex items-center gap-1">
+                    {l.business_name || '—'}
+                    {l.enriched_at && <Sparkles className="w-3 h-3 text-amber shrink-0" />}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || '—'}
+                  </div>
+                </button>
+                <span className={`font-mono text-sm ${(l.score ?? 0) >= 70 ? 'text-green-400' : (l.score ?? 0) >= 40 ? 'text-amber' : 'text-muted-foreground'}`}>
+                  {l.score ?? '—'}
+                </span>
+                <span>
+                  <Badge variant="outline" className="text-[10px] font-mono uppercase">{l.status}</Badge>
+                </span>
+                <span className="text-xs truncate">
+                  {l.claimed_by_code ? <span className="text-blue-400">✓ {repName(l.claimed_by_code)}</span>
+                    : l.assigned_to_code ? <span className="text-amber">→ {repName(l.assigned_to_code)}</span>
+                    : <span className="text-muted-foreground">pool</span>}
+                </span>
+                <div className="flex items-center justify-end gap-1">
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => scan([l.id])} disabled={busy[l.id] === 'scan'} title="Scan with AI">
+                    {busy[l.id] === 'scan' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ScanLine className="w-3 h-3" />}
+                  </Button>
+                  <Select value="" onValueChange={(v) => assign([l.id], v)}>
+                    <SelectTrigger className="h-7 w-24 text-xs"><SelectValue placeholder="→ rep" /></SelectTrigger>
+                    <SelectContent>
+                      {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400" onClick={() => remove([l.id])} title="Delete">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+
+      {/* Detail dialog */}
+      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {detail && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display flex items-center gap-2">
+                  {detail.business_name || 'Untitled lead'}
+                  {detail.score != null && <Badge className="bg-amber text-background">{detail.score}</Badge>}
+                </DialogTitle>
+                <DialogDescription className="text-xs font-mono">
+                  {[detail.industry, detail.location].filter(Boolean).join(' · ')}
+                  {detail.website && <> · <a href={detail.website.startsWith('http') ? detail.website : `https://${detail.website}`} target="_blank" rel="noreferrer" className="text-amber inline-flex items-center gap-0.5">visit <ExternalLink className="w-3 h-3" /></a></>}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                  {detail.contact_name && <div><span className="text-muted-foreground">Contact:</span> {detail.contact_name}</div>}
+                  {detail.email && <div><span className="text-muted-foreground">Email:</span> {detail.email}</div>}
+                  {detail.phone && <div><span className="text-muted-foreground">Phone:</span> {detail.phone}</div>}
+                  <div><span className="text-muted-foreground">Source:</span> {detail.source}</div>
+                </div>
+
+                {!detail.enrichment ? (
+                  <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
+                    <p className="text-muted-foreground mb-2">No AI scan yet.</p>
+                    <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => { scan([detail.id]); setDetail(null); }}>
+                      <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {detail.enrichment.score_reason && (
+                      <div className="p-3 rounded-lg bg-amber/10 border border-amber/30 text-xs">
+                        <div className="font-mono uppercase text-[10px] text-amber mb-1">Score reason</div>
+                        {detail.enrichment.score_reason}
+                      </div>
+                    )}
+                    {Array.isArray(detail.enrichment.weak_points) && detail.enrichment.weak_points.length > 0 && (
+                      <div>
+                        <div className="font-display flex items-center gap-1 mb-1"><AlertTriangle className="w-4 h-4 text-red-400" /> Weak points</div>
+                        <ul className="text-xs space-y-1 list-disc pl-5">
+                          {detail.enrichment.weak_points.map((w: string, i: number) => <li key={i}>{w}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(detail.enrichment.talking_points) && detail.enrichment.talking_points.length > 0 && (
+                      <div>
+                        <div className="font-display flex items-center gap-1 mb-1"><MessageSquare className="w-4 h-4 text-amber" /> Talking points</div>
+                        <ul className="text-xs space-y-1 list-disc pl-5">
+                          {detail.enrichment.talking_points.map((w: string, i: number) => <li key={i}>{w}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {detail.enrichment.icebreaker && (
+                      <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 text-xs italic">
+                        "{detail.enrichment.icebreaker}"
+                      </div>
+                    )}
+                    {Array.isArray(detail.enrichment.decision_makers) && detail.enrichment.decision_makers.length > 0 && (
+                      <div className="text-xs">
+                        <div className="font-display mb-1">Likely decision makers</div>
+                        {detail.enrichment.decision_makers.map((d: any, i: number) => (
+                          <div key={i}>· <strong>{d.role}</strong> — {d.why}</div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex gap-3 text-[10px] font-mono uppercase text-muted-foreground pt-2 border-t border-border/30">
+                      {detail.enrichment.estimated_revenue_band && <span>Rev: {detail.enrichment.estimated_revenue_band}</span>}
+                      {detail.enrichment.confidence && <span>Confidence: {detail.enrichment.confidence}</span>}
+                      {detail.enriched_at && <span>Scanned: {new Date(detail.enriched_at).toLocaleString()}</span>}
+                    </div>
+                  </>
+                )}
+
+                {/* Assign */}
+                <div className="pt-3 border-t border-border/30 flex flex-wrap items-end gap-2">
+                  <div className="flex-1 min-w-[160px]">
+                    <Label className="text-xs">Assign to rep</Label>
+                    <Select value={bulkRep} onValueChange={setBulkRep}>
+                      <SelectTrigger><SelectValue placeholder="Pick rep" /></SelectTrigger>
+                      <SelectContent>
+                        {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="bg-amber text-background hover:bg-amber/90" onClick={() => { assign([detail.id], bulkRep); setDetail(null); }}>
+                    <UserPlus className="w-4 h-4 mr-1" /> Send to rep
+                  </Button>
+                  <Button variant="outline" onClick={() => { scan([detail.id]); }}>
+                    <ScanLine className="w-4 h-4 mr-1" /> Re-scan
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+};
