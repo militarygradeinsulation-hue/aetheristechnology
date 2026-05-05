@@ -20,7 +20,8 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "assign");
     const ids: string[] = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
-    if (ids.length === 0) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign"]);
+    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     if (action === "assign") {
       const code = String(body.code || "").trim();
