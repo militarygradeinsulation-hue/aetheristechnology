@@ -96,8 +96,23 @@ export const AdminLeadBrowser: React.FC = () => {
     setReps(((data || []) as Rep[]).filter(r => r.is_active));
   }, []);
 
+  const loadDripCounts = useCallback(async () => {
+    const nowIso = new Date().toISOString();
+    const { data } = await supabase.from('rep_leads')
+      .select('assigned_to_code')
+      .is('claimed_by_code', null)
+      .not('assigned_to_code', 'is', null)
+      .gt('assignment_expires_at', nowIso)
+      .limit(5000);
+    const counts: Record<string, number> = {};
+    (data || []).forEach((r: any) => {
+      if (r.assigned_to_code) counts[r.assigned_to_code] = (counts[r.assigned_to_code] || 0) + 1;
+    });
+    setDripCounts(counts);
+  }, []);
+
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { loadReps(); }, [loadReps]);
+  useEffect(() => { loadReps(); loadDripCounts(); }, [loadReps, loadDripCounts]);
 
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
