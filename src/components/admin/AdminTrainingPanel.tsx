@@ -16,7 +16,7 @@ import {
 } from "@/lib/portalTraining";
 import {
   GraduationCap, Plus, Trash2, Upload, Loader2, FileText, MessageSquare,
-  CheckCircle2, XCircle, ExternalLink, Save, Eye, EyeOff,
+  CheckCircle2, XCircle, ExternalLink, Save, Eye, EyeOff, Sparkles,
 } from "lucide-react";
 
 type Tab = "list" | "edit" | "scores" | "qa";
