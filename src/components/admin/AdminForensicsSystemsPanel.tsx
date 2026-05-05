@@ -81,14 +81,12 @@ export function AdminForensicsSystemsPanel() {
   };
 
   const download = () => {
-    if (!result) return;
-    const blob = new Blob([result.markdown], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${result.title.replace(/\s+/g, '-').toLowerCase()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!result || !active) return;
+    downloadForensicsPlaybookPdf({
+      title: result.title,
+      toolLabel: active.title,
+      markdown: result.markdown,
+    });
   };
 
   if (!active) {
