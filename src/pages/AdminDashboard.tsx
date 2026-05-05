@@ -515,7 +515,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['insights', 'sales', 'events', 'commissions', 'portal', 'engine', 'crm', 'forecast', 'submissions', 'linkedin', 'library', 'tools', 'systems', 'outlook', 'overview', 'playbook', 'training', 'calendars', 'retargeting', 'seo', 'team', 'news', 'visitors'] as const).map(tab => (
+          {(['insights', 'sales', 'events', 'commissions', 'portal', 'engine', 'crm', 'forecast', 'submissions', 'library', 'tools', 'systems', 'outlook', 'overview', 'playbook', 'training', 'calendars', 'seo', 'team', 'news'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
