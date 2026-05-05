@@ -42,17 +42,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Admin auth via x-admin-token (matches other admin functions in this project)
     const adminToken = req.headers.get("x-admin-token");
-    if (!adminToken) {
+    const isAdmin = await verifyAdminToken(adminToken, SERVICE_ROLE);
+    if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const { data: tokenRow } = await supabase
-      .from("admin_tokens").select("user_id, expires_at").eq("token", adminToken).maybeSingle();
-    if (!tokenRow || new Date(tokenRow.expires_at).getTime() < Date.now()) {
-      return new Response(JSON.stringify({ error: "Invalid admin token" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
