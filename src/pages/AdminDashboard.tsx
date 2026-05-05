@@ -36,6 +36,9 @@ import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
 import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSystemsPanel';
+import SharedWorkspace from '@/components/admin/SharedWorkspace';
+import NotificationBell from '@/components/admin/NotificationBell';
+import CustomViewSelector from '@/components/admin/CustomViewSelector';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -130,7 +133,22 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'news' | 'systems'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'news' | 'systems' | 'workspace'>('workspace');
+  const ALL_TAB_DEFS: { key: string; label: string }[] = [
+    { key: 'workspace', label: '🤝 Workspace' },
+    { key: 'insights', label: '🧠 AI Insights' }, { key: 'sales', label: '💵 Sales & Customers' },
+    { key: 'events', label: '📨 Campaign Powerhouse' }, { key: 'commissions', label: '💰 Commissions' },
+    { key: 'portal', label: '🏢 Company Portal' }, { key: 'engine', label: '⚡ Content Engine' },
+    { key: 'crm', label: '🗂 CRM' }, { key: 'forecast', label: '🔮 Forecast Center' },
+    { key: 'submissions', label: 'Leads' }, { key: 'library', label: '📚 My Library' },
+    { key: 'tools', label: '🛠 My Tools' }, { key: 'systems', label: '🔬 Forensics Systems' },
+    { key: 'outlook', label: '📤 Outlook Sync' }, { key: 'overview', label: 'Overview' },
+    { key: 'playbook', label: '📘 Rep Playbook' }, { key: 'training', label: '🎓 Team Training' },
+    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'seo', label: '✨ SEO/AEO' },
+    { key: 'team', label: '💬 Team Messages' }, { key: 'news', label: '📰 Aetheris News' },
+  ];
+  const [visibleTabs, setVisibleTabs] = useState<string[]>(ALL_TAB_DEFS.map(t => t.key));
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
@@ -310,6 +328,7 @@ const AdminDashboard: React.FC = () => {
             <span className="text-xs text-muted-foreground hidden sm:inline">Auto-refreshes every 30s</span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell me="admin" onCountChange={setUnreadNotifs} />
             <Link to="/app/dashboard">
               <Button variant="outline" size="sm" title="Open HubSpot revenue recovery dashboard">
                 <Database className="w-4 h-4 mr-1 text-primary" /> HubSpot Hub
@@ -326,25 +345,31 @@ const AdminDashboard: React.FC = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Tabs */}
+        {/* View selector + Tabs */}
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+          <CustomViewSelector allTabs={ALL_TAB_DEFS} visibleTabs={visibleTabs} onChange={setVisibleTabs} />
+          <span className="text-xs text-muted-foreground">{visibleTabs.length} of {ALL_TAB_DEFS.length} tabs shown</span>
+        </div>
         <div className="flex gap-2 mb-8 flex-wrap">
-          {(['insights', 'sales', 'events', 'commissions', 'portal', 'engine', 'crm', 'forecast', 'submissions', 'library', 'tools', 'systems', 'outlook', 'overview', 'playbook', 'training', 'calendars', 'seo', 'team', 'news'] as const).map(tab => (
+          {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label }) => (
             <button
               key={tab}
               onClick={() => {
-                setActiveTab(tab);
+                setActiveTab(tab as typeof activeTab);
                 if (tab === 'insights' && !recommendations) fetchInsights();
                 if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
-                 if (tab !== 'tools') setActiveTool(null);
+                if (tab !== 'tools') setActiveTool(null);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'submissions' ? 'Leads' : tab === 'forecast' ? '🔮 Forecast Center' : tab === 'crm' ? '🗂 CRM' : tab === 'sales' ? '💵 Sales & Customers' : tab === 'commissions' ? '💰 Commissions' : tab === 'portal' ? '🏢 Company Portal' : tab === 'playbook' ? '📘 Rep Playbook' : tab === 'training' ? '🎓 Team Training' : tab === 'calendars' ? '📅 Rep Calendars' : tab === 'team' ? '💬 Team Messages' : tab === 'news' ? '📰 Aetheris News' : tab === 'events' ? '📨 Campaign Powerhouse' : tab === 'insights' ? '🧠 AI Insights' : tab === 'tools' ? '🛠 My Tools' : tab === 'systems' ? '🔬 Forensics Systems' : tab === 'library' ? '📚 My Library' : tab === 'engine' ? '⚡ Content Engine' : tab === 'seo' ? '✨ SEO/AEO Auto-Optimizer' : '📤 Outlook Sync'}
+              {label}
             </button>
           ))}
         </div>
+
+        {activeTab === 'workspace' && <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />}
 
         {/* Overview */}
         {activeTab === 'overview' && (
