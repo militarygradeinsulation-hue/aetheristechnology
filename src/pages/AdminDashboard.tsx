@@ -19,8 +19,6 @@ import { ContentEngine } from '@/components/admin/ContentEngine';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
-import { RetargetingPanel } from '@/components/admin/RetargetingPanel';
-import { VisitorCompaniesPanel } from '@/components/admin/VisitorCompaniesPanel';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
