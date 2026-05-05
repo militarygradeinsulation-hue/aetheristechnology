@@ -7,7 +7,8 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const STALE_HOURS = 20;
@@ -19,9 +20,17 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const adminOk = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
-    const portalClaims = adminOk ? null : await verifyPortalToken(getPortalTokenFromRequest(req), SERVICE);
+    const adminTokRaw = getAdminTokenFromRequest(req);
+    const portalTokRaw = getPortalTokenFromRequest(req);
+    const adminOk = await verifyAdminToken(adminTokRaw, SERVICE);
+    const portalClaims = adminOk ? null : await verifyPortalToken(portalTokRaw, SERVICE);
     if (!adminOk && !portalClaims) {
+      console.warn("portal-forecast unauthorized", {
+        hasAdminTok: !!adminTokRaw,
+        adminTokLen: adminTokRaw?.length || 0,
+        hasPortalTok: !!portalTokRaw,
+        portalTokLen: portalTokRaw?.length || 0,
+      });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

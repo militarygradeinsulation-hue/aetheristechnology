@@ -90,7 +90,17 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
       if (r.settings?.live_pulse_minutes) setPulseMinutes(r.settings.live_pulse_minutes);
       setLivePulse(r.briefing?.live_pulse || []);
     } catch (e) {
-      toast({ title: "Could not load briefing", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      const looks401 = /unauthor|401|non-2xx/i.test(msg);
+      toast({
+        title: "Could not load briefing",
+        description: looks401 && authMode === "admin"
+          ? "Your admin session may have expired. Sign out and re-enter your PIN at /admin/login."
+          : looks401
+            ? "Session expired — please sign in again."
+            : msg,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
