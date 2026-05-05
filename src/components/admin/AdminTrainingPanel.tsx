@@ -70,6 +70,42 @@ export const AdminTrainingPanel: React.FC = () => {
   const [attempts, setAttempts] = useState<TrainingAttempt[]>([]);
   const [qaList, setQaList] = useState<TrainingQA[]>([]);
   const [answerDraft, setAnswerDraft] = useState<Record<string, string>>({});
+  const [genSelected, setGenSelected] = useState<Record<number, boolean>>({});
+  const [genCount, setGenCount] = useState(5);
+  const [genFocus, setGenFocus] = useState("");
+  const [generating, setGenerating] = useState(false);
+
+  const generateFromUploads = async () => {
+    const chosen = draft.attachments.filter((_, i) => genSelected[i]);
+    if (chosen.length === 0 && !draft.reference_text.trim()) {
+      toast({ title: "Select at least one file or add reference notes", variant: "destructive" });
+      return;
+    }
+    setGenerating(true);
+    try {
+      const res = await adminTraining.generateFromUploads({
+        title: draft.title || "Training",
+        kind: draft.kind,
+        count: genCount,
+        focus: genFocus,
+        attachments: chosen,
+        referenceText: draft.reference_text,
+      });
+      const newQs: DraftQuestion[] = (res.questions || []).map((q) => ({
+        question_text: q.question_text || "",
+        options: draft.kind === "mcq" ? (q.options && q.options.length ? q.options : ["", "", "", ""]) : undefined,
+        correct_index: draft.kind === "mcq" ? (typeof q.correct_index === "number" ? q.correct_index : 0) : undefined,
+        rubric: draft.kind === "open" ? (q.rubric || "") : undefined,
+        weight: q.weight && q.weight > 0 ? q.weight : 1,
+      }));
+      setDraftQuestions((qs) => [...qs, ...newQs]);
+      toast({ title: `Added ${newQs.length} question${newQs.length === 1 ? "" : "s"}`, description: `Pulled from ${res.sourcesUsed} source${res.sourcesUsed === 1 ? "" : "s"}.` });
+    } catch (e) {
+      toast({ title: "Generation failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
