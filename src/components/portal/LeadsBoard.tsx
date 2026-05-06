@@ -320,6 +320,75 @@ export const LeadsBoard: React.FC = () => {
 
       {/* UPLOAD/DOWNLOAD */}
       {sub === 'upload' && <UploadDownloadPanel onUploaded={() => { setSub('mine'); refreshMine(); }} />}
+
+      {/* LEAD PREVIEW DIALOG */}
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="max-w-lg">
+          {preview && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display flex items-center gap-2">
+                  {preview.business_name || preview.email || 'Lead'}
+                  {typeof preview.score === 'number' && (
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40">
+                      Score {preview.score}
+                    </span>
+                  )}
+                </DialogTitle>
+                <DialogDescription>
+                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || '—'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                {preview.contact_name && (
+                  <p><span className="text-muted-foreground">Contact:</span> <span className="text-foreground">{preview.contact_name}</span></p>
+                )}
+                {preview.email && (
+                  <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-amber" />
+                    <a href={`mailto:${preview.email}`} className="text-amber hover:underline break-all">{preview.email}</a>
+                  </p>
+                )}
+                {preview.phone && (
+                  <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-amber" />
+                    <a href={`tel:${preview.phone}`} className="text-amber hover:underline">{preview.phone}</a>
+                  </p>
+                )}
+                {preview.website && (
+                  <p className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-amber" />
+                    <a href={preview.website.startsWith('http') ? preview.website : `https://${preview.website}`}
+                       target="_blank" rel="noopener noreferrer"
+                       className="text-amber hover:underline break-all">{preview.website}</a>
+                  </p>
+                )}
+                {preview.why_fit && (
+                  <div className="border-l-2 border-amber/40 pl-3">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Why this fits</p>
+                    <p className="text-foreground italic">{preview.why_fit}</p>
+                  </div>
+                )}
+                {preview.notes && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Notes</p>
+                    <p className="text-foreground whitespace-pre-wrap">{preview.notes}</p>
+                  </div>
+                )}
+                <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  Source: {preview.source.replace('_', ' ')}
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+                <Button variant="ghost" onClick={() => { handleSkipDrip(preview); setPreview(null); }}>
+                  <X className="w-4 h-4 mr-1" /> Skip
+                </Button>
+                <Button className="bg-amber text-background hover:bg-amber/90"
+                        onClick={() => { handleClaim(preview, 'drip'); setPreview(null); }}>
+                  Accept lead
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
