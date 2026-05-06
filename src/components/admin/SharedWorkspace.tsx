@@ -229,33 +229,49 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   };
 
   const CalendarView = () => {
-    const today = new Date();
-    const start = new Date(today.getFullYear(), today.getMonth(), 1);
-    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const start = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
+    const days = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
     const startDay = start.getDay();
+    const today = new Date();
     const cells: (Date | null)[] = [];
     for (let i = 0; i < startDay; i++) cells.push(null);
-    for (let d = 1; d <= days; d++) cells.push(new Date(today.getFullYear(), today.getMonth(), d));
+    for (let d = 1; d <= days; d++) cells.push(new Date(calMonth.getFullYear(), calMonth.getMonth(), d));
     const tasksOn = (date: Date) => tasks.filter(t => t.due_at && new Date(t.due_at).toDateString() === date.toDateString());
+    const goPrev = () => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1));
+    const goNext = () => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1));
+    const goToday = () => setCalMonth(new Date(today.getFullYear(), today.getMonth(), 1));
     return (
       <div>
-        <h4 className="font-display font-semibold mb-3">{today.toLocaleString("default", { month: "long", year: "numeric" })}</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-display font-semibold">{calMonth.toLocaleString("default", { month: "long", year: "numeric" })}</h4>
+          <div className="flex gap-1">
+            <Button variant="outline" size="sm" onClick={goPrev}>‹</Button>
+            <Button variant="outline" size="sm" onClick={goToday}>Today</Button>
+            <Button variant="outline" size="sm" onClick={goNext}>›</Button>
+          </div>
+        </div>
         <div className="grid grid-cols-7 gap-1 text-xs">
           {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
             <div key={i} className="text-center text-muted-foreground font-medium py-1">{d}</div>
           ))}
           {cells.map((d, i) => (
-            <div key={i} className={`min-h-[72px] p-1 rounded border ${d ? "border-border bg-card/30" : "border-transparent"}`}>
+            <button
+              key={i}
+              type="button"
+              disabled={!d}
+              onClick={() => d && setSelectedDay(d)}
+              className={`text-left min-h-[72px] p-1 rounded border transition-colors ${d ? "border-border bg-card/30 hover:bg-card hover:border-amber/50 cursor-pointer" : "border-transparent cursor-default"}`}
+            >
               {d && (
                 <>
                   <div className={`text-[10px] font-mono ${d.toDateString() === today.toDateString() ? "text-amber font-bold" : "text-muted-foreground"}`}>{d.getDate()}</div>
                   {tasksOn(d).slice(0, 3).map(t => (
-                    <div key={t.id} className="text-[10px] truncate px-1 rounded bg-amber/15 text-amber mt-0.5" title={t.title}>{t.title}</div>
+                    <div key={t.id} className={`text-[10px] truncate px-1 rounded mt-0.5 ${t.status === "done" ? "bg-muted text-muted-foreground line-through" : "bg-amber/15 text-amber"}`} title={t.title}>{t.title}</div>
                   ))}
                   {tasksOn(d).length > 3 && <div className="text-[9px] text-muted-foreground">+{tasksOn(d).length - 3}</div>}
                 </>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
