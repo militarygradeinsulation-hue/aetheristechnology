@@ -46,7 +46,7 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 
-type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
