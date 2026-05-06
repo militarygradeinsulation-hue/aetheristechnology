@@ -352,7 +352,7 @@ export const LeadsBoard: React.FC = () => {
                 )}
                 {preview.email && (
                   <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-amber" />
-                    <a href={`mailto:${preview.email}`} className="text-amber hover:underline break-all">{preview.email}</a>
+                    <a href={`mailto:${preview.email}`} onClick={mailHandler(preview.email!)} className="text-amber hover:underline break-all">{preview.email}</a>
                   </p>
                 )}
                 {preview.phone && (
