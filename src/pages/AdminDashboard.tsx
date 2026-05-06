@@ -40,6 +40,7 @@ import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSys
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import NotificationBell from '@/components/admin/NotificationBell';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
+import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
