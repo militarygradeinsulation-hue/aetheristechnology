@@ -19,7 +19,7 @@ import {
   type ForecastSectionVisibility, type ForecastPulse,
 } from "@/lib/portalForecast";
 
-interface Props { isPartner: boolean; authMode?: ForecastAuthMode }
+interface Props { isPartner: boolean; authMode?: ForecastAuthMode; livePulseOnly?: boolean }
 
 type SectionKey = keyof ForecastSectionVisibility;
 const ALL_SECTIONS: { key: SectionKey; label: string }[] = [
