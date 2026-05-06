@@ -87,7 +87,7 @@ const CareersPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Sales Rep — Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell digital transformation to playground & recreation companies. Earn 10% on every deal — including recurring revenue."
+        description="Independent commission sales role. Sell business forensics & digital transformation to SMB owners. Earn 15% on every deal — including recurring revenue."
         path="/careers"
       />
       <Background />
@@ -115,16 +115,16 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         Commission-Only Sales Reps <span className="text-primary">Wanted</span>
       </h1>
       <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-        We sell digital transformation to playground and recreation companies — an industry full of $200K products 
-        marketed with $200 websites. The gap is massive. Your commission is real.
+        We sell <strong className="text-foreground">business forensics</strong> to SMB owners — companies leaking 8–15% of revenue
+        through invisible operational gaps. The pain is universal. The market is every business in America. Your commission is recurring.
       </p>
     </div>
 
     <Card className="bg-amber/10 border-amber/40 mb-10">
       <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
-          <p className="font-display text-lg text-foreground">Want in? Prove you've read the site.</p>
-          <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. Random apps go in the trash.</p>
+          <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
+          <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. No test = no application. Random apps go in the trash.</p>
         </div>
         <a href="/careers/test"><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
@@ -132,10 +132,10 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 
     <div className="grid md:grid-cols-2 gap-6 mb-12">
       {[
-        { icon: DollarSign, title: "Flat 10% Commission", desc: "On every closed deal — including recurring monthly revenue, for as long as the client stays." },
-        { icon: Target, title: "Warm Market", desc: "These companies know they need help. They just don't know who to call." },
-        { icon: TrendingUp, title: "$14B Industry", desc: "Global playground market growing at 7% CAGR. Money is moving." },
-        { icon: Zap, title: "No Inventory", desc: "You sell services. We deliver. You get paid." },
+        { icon: DollarSign, title: "Flat 15% Commission", desc: "On every closed deal — including recurring monthly revenue, for as long as the client stays subscribed." },
+        { icon: Target, title: "Universal Pain", desc: "Every business is leaking revenue. They just can't see it from inside the building. We hand you the flashlight." },
+        { icon: TrendingUp, title: "Recurring Revenue", desc: "Subscriptions and Fractional retainers pay you every month. One closed retainer = $885/mo to you, indefinitely." },
+        { icon: Zap, title: "No Inventory, No Delivery", desc: "You sell. We deliver. You get paid. Operator-led forensics — you don't have to know the tech." },
       ].map(({ icon: Icon, title, desc }) => (
         <Card key={title} className="bg-card/50 backdrop-blur border-border/50">
           <CardContent className="p-6 flex items-start gap-4">
@@ -149,40 +149,27 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       ))}
     </div>
 
-    <Card className="bg-card/60 backdrop-blur border-border/50">
+    <Card className="bg-card/60 backdrop-blur border-amber/40">
       <CardHeader>
-        <CardTitle className="text-2xl text-foreground">Apply Now</CardTitle>
+        <CardTitle className="text-2xl text-foreground">One Door In: The Test</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
-              <Input id="name" name="name" value={form.name} onChange={onChange} required maxLength={100} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input id="email" name="email" type="email" value={form.email} onChange={onChange} required maxLength={255} />
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" type="tel" value={form.phone} onChange={onChange} maxLength={20} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="linkedin_url">LinkedIn URL</Label>
-              <Input id="linkedin_url" name="linkedin_url" value={form.linkedin_url} onChange={onChange} placeholder="https://linkedin.com/in/..." maxLength={300} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="experience">Brief Background / Experience</Label>
-            <Textarea id="experience" name="experience" value={form.experience} onChange={onChange} rows={3} maxLength={1000} placeholder="Sales background, industry knowledge, anything relevant..." />
-          </div>
-          <Button type="submit" size="lg" className="w-full" disabled={loading}>
-            {loading ? "Submitting..." : "Join the Team — See the Playbook"}
+      <CardContent className="space-y-4">
+        <p className="text-muted-foreground">
+          We don't accept blind applications. If you can't be bothered to read the site and pass a 20-question knowledge test,
+          you won't be bothered to follow up with prospects. Pass the test → application unlocks → we review every passing app personally.
+        </p>
+        <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-5">
+          <li>Read the site — especially <a href="/leak-audit" className="text-amber hover:underline">/leak-audit</a> and <a href="/services" className="text-amber hover:underline">/services</a>.</li>
+          <li>Take the 20-question test (45 min, 70% to pass).</li>
+          <li>Pass it → application form unlocks instantly with your share code.</li>
+          <li>Joseph personally reviews every passing application within 48 hours.</li>
+        </ol>
+        <a href="/careers/test" className="block">
+          <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90">
+            Start the Test →
           </Button>
-        </form>
+        </a>
+        <p className="text-xs text-center text-muted-foreground">There is no application form on this page. The test is the only way in.</p>
       </CardContent>
     </Card>
   </div>
@@ -249,10 +236,10 @@ const PlaybookSection = () => (
       <CardContent className="space-y-6">
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
           <p className="text-foreground font-medium">
-            Flat <span className="text-primary font-bold">10%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
+            Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code — including recurring monthly invoices for the life of the subscription.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time — that's what keeps it fair to you, the business, and the owner.
+            One rule. No tiers. No caps. No clawbacks on completed work. The split is locked: 70% company / 15% rep / 15% partner override. Easy math on every product, every time.
           </p>
         </div>
 
@@ -285,8 +272,8 @@ const PlaybookSection = () => (
             <TableRow>
               <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
               <TableCell className="text-right text-muted-foreground">varies</TableCell>
-              <TableCell className="text-right text-muted-foreground">tier-based</TableCell>
-              <TableCell className="text-right font-semibold text-primary">20–30% of every invoice</TableCell>
+              <TableCell className="text-right text-muted-foreground">flat 15%</TableCell>
+              <TableCell className="text-right font-semibold text-primary">15% of every invoice, for life</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -362,13 +349,13 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math at 10% across the real product ladder:</p>
+        <p className="text-muted-foreground mb-4">Honest math at <strong className="text-foreground">15% flat</strong> across the real product ladder:</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$40' },
-            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$164' },
-            { label: 'Strong month', detail: '1 × 14-Day Diagnostic + 2 Snapshots + 1 Fractional retainer signed', total: '$910 first month + $590/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,170 first month + $590/mo recurring' },
+            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$60' },
+            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$245' },
+            { label: 'Strong month', detail: '1 × $2,500 Forensic Diagnostic + 2 Snapshots + 1 Fractional retainer signed ($5,900/mo)', total: '$1,365 first month + $885/mo recurring' },
+            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,755 first month + $885/mo recurring' },
           ].map((row) => (
             <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
               <p className="text-sm text-muted-foreground">{row.label}</p>
@@ -377,7 +364,7 @@ const PlaybookSection = () => (
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = $14,160 in residual commission alone.</p>
+        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = <strong className="text-foreground">$21,240</strong> in residual commission alone.</p>
       </CardContent>
     </Card>
 
@@ -389,10 +376,10 @@ const PlaybookSection = () => (
       <CardContent>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag playground companies. Start conversations." },
-            { icon: Mail, title: "Email Companies Directly", desc: "Find playground companies with bad websites. Send 10 emails a day with a specific observation." },
-            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed your website — I think you're losing bids because of it.'" },
-            { icon: Target, title: "Use the Website Scanner", desc: "Run their URL through our scanner at aetheristechnology.lovable.app/scan — use the report as your opener." },
+            { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
+            { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
+            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site — I think you're losing 8–15% of revenue silently. Want to see where?'" },
+            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $2,500 Forensic Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">
               <CardContent className="p-5 flex items-start gap-3">
