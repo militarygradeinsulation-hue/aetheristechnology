@@ -518,10 +518,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   const [scanning, setScanning] = useState(false);
   const [scan, setScan] = useState<any>(lead.enrichment?.scan || null);
   const [scanUrl, setScanUrl] = useState(lead.website || '');
+  const [rr, setRr] = useState<any>(lead.enrichment?.rocketreach || null);
+  const [rrLoading, setRrLoading] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
   useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
+  useEffect(() => { setRr(lead.enrichment?.rocketreach || null); }, [lead.enrichment]);
   useEffect(() => { if (lead.website) setScanUrl(lead.website); }, [lead.website]);
 
   const scheduleSaveNotes = (val: string) => {
