@@ -518,10 +518,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   const [scanning, setScanning] = useState(false);
   const [scan, setScan] = useState<any>(lead.enrichment?.scan || null);
   const [scanUrl, setScanUrl] = useState(lead.website || '');
+  const [rr, setRr] = useState<any>(lead.enrichment?.rocketreach || null);
+  const [rrLoading, setRrLoading] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
   useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
+  useEffect(() => { setRr(lead.enrichment?.rocketreach || null); }, [lead.enrichment]);
   useEffect(() => { if (lead.website) setScanUrl(lead.website); }, [lead.website]);
 
   const scheduleSaveNotes = (val: string) => {
@@ -568,6 +571,18 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setScanning(false); }
+  };
+
+  const runRocketReach = async (force = false) => {
+    setRrLoading(true);
+    try {
+      const res = await portalLeads.rocketReach(lead.id, { force });
+      setRr(res.person);
+      toast({ title: res.cached ? 'Loaded saved RocketReach data' : 'RocketReach lookup complete' });
+      onChanged();
+    } catch (e) {
+      toast({ title: 'RocketReach failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setRrLoading(false); }
   };
 
   return (
@@ -676,6 +691,84 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Next Steps</p>
                     <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-0.5">
                       {scan.nextSteps.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* RocketReach Person Lookup */}
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> RocketReach Person Lookup
+              </p>
+              {rr?.fetched_at && (
+                <span className="text-[10px] text-muted-foreground">
+                  Last lookup {new Date(rr.fetched_at).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Pulls verified emails, direct phones, title, LinkedIn, and work history.
+              </p>
+              <Button
+                size="sm"
+                onClick={() => runRocketReach(!!rr)}
+                disabled={rrLoading}
+                className="bg-amber text-background hover:bg-amber/90 flex-shrink-0"
+              >
+                {rrLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                {rr ? 'Re-lookup' : 'Deep scan person'}
+              </Button>
+            </div>
+            {rr && (
+              <div className="space-y-2 mt-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  {rr.profile_pic && <img src={rr.profile_pic} alt="" className="w-10 h-10 rounded-full" />}
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{rr.name}</p>
+                    <p className="text-muted-foreground">{[rr.title, rr.employer].filter(Boolean).join(' · ')}</p>
+                    {rr.location && <p className="text-muted-foreground">{rr.location}</p>}
+                  </div>
+                </div>
+                {rr.linkedin_url && (
+                  <a href={rr.linkedin_url} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-amber hover:underline">
+                    <ExternalLink className="w-3 h-3" /> LinkedIn
+                  </a>
+                )}
+                {Array.isArray(rr.emails) && rr.emails.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Emails</p>
+                    {rr.emails.map((e: any, i: number) => (
+                      <p key={i}>
+                        <a href={`mailto:${e.email}`} className="text-amber hover:underline">{e.email}</a>
+                        <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}]</span>
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {Array.isArray(rr.phones) && rr.phones.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Phones</p>
+                    {rr.phones.map((p: any, i: number) => (
+                      <p key={i}>
+                        <a href={`tel:${p.number}`} className="text-amber hover:underline">{p.number}</a>
+                        <span className="text-muted-foreground ml-2">[{p.type || '—'}]</span>
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {Array.isArray(rr.job_history) && rr.job_history.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Work History</p>
+                    <ul className="space-y-0.5 text-muted-foreground">
+                      {rr.job_history.map((j: any, i: number) => (
+                        <li key={i}>{j.title} @ {j.company_name} <span className="text-[10px]">({j.start_date || '?'} – {j.end_date || 'present'})</span></li>
+                      ))}
                     </ul>
                   </div>
                 )}
