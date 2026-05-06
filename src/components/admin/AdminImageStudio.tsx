@@ -159,11 +159,21 @@ export const AdminImageStudio: React.FC = () => {
           >
             {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
-          <div className="flex gap-2 flex-1">
-            <Button onClick={generate} disabled={busy || !prompt.trim()} className="flex-1">
+          <div className="flex flex-wrap gap-2 flex-1">
+            <Button onClick={() => generate(false)} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
               {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
               {editTarget ? 'Edit Image' : 'Generate'}
             </Button>
+            {!editTarget && (
+              <Button
+                onClick={() => generate(true)}
+                disabled={busy || !prompt.trim()}
+                className="flex-1 min-w-[180px] bg-amber text-background hover:bg-amber/90"
+              >
+                {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                Generate in Aetheris Style
+              </Button>
+            )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
               <Upload className="w-4 h-4 mr-1" /> Upload
             </Button>
