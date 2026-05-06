@@ -387,6 +387,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {activeTab === 'workspace' && <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />}
+        {activeTab === 'imagestudio' && <AdminImageStudio />}
 
         {/* Overview */}
         {activeTab === 'overview' && (
