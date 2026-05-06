@@ -444,6 +444,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
   useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
+  useEffect(() => { if (lead.website) setScanUrl(lead.website); }, [lead.website]);
 
   const scheduleSaveNotes = (val: string) => {
     setNotes(val);

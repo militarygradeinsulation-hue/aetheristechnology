@@ -77,6 +77,13 @@ serve(async (req) => {
       const { data, error } = await query;
       if (error) throw error;
 
+      // Prioritize leads that have a website URL (scannable businesses surface first)
+      const sorted = (data || []).slice().sort((a: any, b: any) => {
+        const aw = a.website && String(a.website).trim() ? 1 : 0;
+        const bw = b.website && String(b.website).trim() ? 1 : 0;
+        return bw - aw;
+      });
+
       const { count: activeCount } = await supabase.from("rep_leads")
         .select("id", { count: "exact", head: true })
         .eq("claimed_by_code", claims.code)
@@ -88,7 +95,7 @@ serve(async (req) => {
         .is("claimed_by_code", null)
         .gt("assignment_expires_at", new Date().toISOString());
 
-      return jsonResp({ ok: true, leads: data || [], activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED, dripCount: dripCount ?? 0 });
+      return jsonResp({ ok: true, leads: sorted, activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED, dripCount: dripCount ?? 0 });
     }
 
     // ---------- SKIP DRIP ----------
