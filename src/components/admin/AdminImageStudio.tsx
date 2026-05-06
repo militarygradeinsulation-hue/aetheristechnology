@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw, Maximize2, X } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -28,6 +29,7 @@ export const AdminImageStudio: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
+  const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const invoke = async (body: Record<string, unknown>) => {
@@ -185,7 +187,12 @@ export const AdminImageStudio: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {images.map(img => (
               <div key={img.id} className="group relative rounded-lg overflow-hidden border border-border bg-background/30">
-                <img src={img.url} alt={img.prompt} className="w-full h-44 object-cover" />
+                <img
+                  src={img.url}
+                  alt={img.prompt}
+                  className="w-full h-44 object-cover cursor-zoom-in"
+                  onClick={() => setPreview(img)}
+                />
                 <div className="p-2 space-y-1">
                   <p className="text-[11px] text-muted-foreground line-clamp-2 min-h-[2.5em]">{img.prompt || '(no prompt)'}</p>
                   <div className="flex items-center justify-between">
@@ -194,6 +201,9 @@ export const AdminImageStudio: React.FC = () => {
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-background/85 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                  <Button size="sm" variant="outline" onClick={() => setPreview(img)}>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => { setEditTarget(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" /> Edit
                   </Button>
@@ -209,6 +219,22 @@ export const AdminImageStudio: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl p-2 bg-background border-amber/30">
+          {preview && (
+            <div className="space-y-2">
+              <img src={preview.url} alt={preview.prompt} className="w-full max-h-[80vh] object-contain rounded" />
+              <div className="flex items-center justify-between gap-2 px-2 pb-1">
+                <p className="text-xs text-muted-foreground line-clamp-2 flex-1">{preview.prompt || '(no prompt)'}</p>
+                <Button size="sm" variant="outline" onClick={() => download(preview)}>
+                  <Download className="w-3.5 h-3.5 mr-1" /> Download
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
