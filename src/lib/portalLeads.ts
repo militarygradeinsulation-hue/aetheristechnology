@@ -22,6 +22,21 @@ export interface RepLead {
   created_at: string;
   assigned_to_code?: string | null;
   assignment_expires_at?: string | null;
+  enrichment?: any;
+  enriched_at?: string | null;
+}
+
+export interface LeadScan {
+  score?: number;
+  grade?: string;
+  companyName?: string;
+  executiveSummary?: string;
+  gaps?: Array<{ category: string; severity: string; title: string; description: string; annualCost: string; recommendedFix: string; projectedROI: string }>;
+  roadmap?: Array<{ month: string; action: string; estimatedCost: string; projectedRecovery: string }>;
+  nextSteps?: string[];
+  competitiveBrief?: string;
+  scanned_at?: string;
+  scanned_url?: string;
 }
 
 export type LeadStatus = 'new' | 'outreach' | 'touched' | 'replied' | 'meeting' | 'won' | 'lost' | 'dead';
