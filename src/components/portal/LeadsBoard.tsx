@@ -17,6 +17,12 @@ import {
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
 import { LeadGamePlan } from './LeadGamePlan';
+import { openRepMail } from '@/lib/repMail';
+
+const mailHandler = (email: string) => (e: React.MouseEvent) => {
+  e.preventDefault();
+  openRepMail(email);
+};
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
@@ -346,7 +352,7 @@ export const LeadsBoard: React.FC = () => {
                 )}
                 {preview.email && (
                   <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-amber" />
-                    <a href={`mailto:${preview.email}`} className="text-amber hover:underline break-all">{preview.email}</a>
+                    <a href={`mailto:${preview.email}`} onClick={mailHandler(preview.email!)} className="text-amber hover:underline break-all">{preview.email}</a>
                   </p>
                 )}
                 {preview.phone && (
@@ -822,7 +828,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     {rr.best_email && (
                       <div className="mb-2 p-2 rounded border border-amber/40 bg-amber/10">
                         <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-0.5">★ Use This Email</p>
-                        <a href={`mailto:${rr.best_email}`} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
+                        <a href={`mailto:${rr.best_email}`} onClick={mailHandler(rr.best_email)} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
                         {rr.best_email_reason && <p className="text-[10px] text-muted-foreground mt-0.5">{rr.best_email_reason}</p>}
                       </div>
                     )}
@@ -830,7 +836,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       const isBest = rr.best_email && e.email === rr.best_email;
                       return (
                         <p key={i} className={isBest ? 'opacity-60' : ''}>
-                          <a href={`mailto:${e.email}`} className="text-amber hover:underline">{e.email}</a>
+                          <a href={`mailto:${e.email}`} onClick={mailHandler(e.email)} className="text-amber hover:underline">{e.email}</a>
                           <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
                           {isBest && <span className="ml-2 text-[10px] text-amber">★ best</span>}
                         </p>
@@ -893,7 +899,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     )}
                     {Array.isArray(fc.json.emails) && fc.json.emails.length > 0 && (
                       <p><span className="text-muted-foreground">Emails on site:</span> {fc.json.emails.map((e: string, i: number) => (
-                        <a key={i} href={`mailto:${e}`} className="text-amber hover:underline mr-2">{e}</a>
+                        <a key={i} href={`mailto:${e}`} onClick={mailHandler(e)} className="text-amber hover:underline mr-2">{e}</a>
                       ))}</p>
                     )}
                     {Array.isArray(fc.json.phones) && fc.json.phones.length > 0 && (
