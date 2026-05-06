@@ -81,6 +81,17 @@ export const portalLeads = {
   download: () => callPortalLeads('download') as Promise<{ ok: true; rows: any[] }>,
   scan: (id: string, opts: { url?: string; force?: boolean } = {}) =>
     callPortalLeads('scan', { id, ...opts }) as Promise<{ ok: true; scan: LeadScan; cached: boolean }>,
+  rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string } = {}) => {
+    const token = getPortalToken();
+    if (!token) throw new Error('Not signed in');
+    const { data, error } = await supabase.functions.invoke('portal-rocketreach', {
+      body: { id, ...opts },
+      headers: { 'x-portal-token': token },
+    });
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    return data as { ok: true; cached: boolean; person: any };
+  },
 };
 
 export async function logPortalActivity(event: string, meta: Record<string, unknown> = {}) {
