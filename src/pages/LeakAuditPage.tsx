@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { CaseFileCard } from '@/components/CaseFileCard';
+import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,8 @@ import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
+import architectLogo from '@/assets/architect-logo.jpg';
+import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -239,6 +242,15 @@ const LeakAuditPage = () => {
             {step === 'intake' && (
               <div className="space-y-8">
                 <div className="text-center">
+                  <div className="flex justify-center mb-6">
+                    <ClickToPlayVideo
+                      videoSrc={leakAuditIntro}
+                      posterSrc={architectLogo}
+                      alt="The Architect — watch the Leak Audit intro"
+                      circle
+                      className="w-64 h-64 md:w-80 md:h-80"
+                    />
+                  </div>
                   <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
                     Free Self-Audit · ~6 minutes
                   </div>
