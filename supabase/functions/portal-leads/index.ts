@@ -77,6 +77,13 @@ serve(async (req) => {
       const { data, error } = await query;
       if (error) throw error;
 
+      // Prioritize leads that have a website URL (scannable businesses surface first)
+      const sorted = (data || []).slice().sort((a: any, b: any) => {
+        const aw = a.website && String(a.website).trim() ? 1 : 0;
+        const bw = b.website && String(b.website).trim() ? 1 : 0;
+        return bw - aw;
+      });
+
       const { count: activeCount } = await supabase.from("rep_leads")
         .select("id", { count: "exact", head: true })
         .eq("claimed_by_code", claims.code)
