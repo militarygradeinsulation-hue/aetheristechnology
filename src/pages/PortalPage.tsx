@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
-  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase,
+  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
@@ -48,7 +48,7 @@ import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
@@ -216,18 +216,19 @@ const PortalPage: React.FC = () => {
   }, [unreadChat]);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
-    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
-    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
-    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
-    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
-    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
+    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
+    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
+    { id: 'forecast', label: 'Forecast — Live Pulse', icon: <Activity className="w-4 h-4" /> },
+    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
+    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
+    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
+    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
+    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
   ];
 
@@ -359,6 +360,9 @@ const PortalPage: React.FC = () => {
         {/* MY TOOLS */}
         {/* LEADS */}
         {tab === 'leads' && <LeadsBoard />}
+
+        {/* FORECAST — Live Pulse only for reps; partners get full view in Company tab */}
+        {tab === 'forecast' && <ForecastCenter isPartner={isPartner} livePulseOnly={!isPartner} />}
 
         {/* MY TOOLS */}
         {tab === 'tools' && !activeTool && (

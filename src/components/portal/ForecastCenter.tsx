@@ -19,7 +19,7 @@ import {
   type ForecastSectionVisibility, type ForecastPulse,
 } from "@/lib/portalForecast";
 
-interface Props { isPartner: boolean; authMode?: ForecastAuthMode }
+interface Props { isPartner: boolean; authMode?: ForecastAuthMode; livePulseOnly?: boolean }
 
 type SectionKey = keyof ForecastSectionVisibility;
 const ALL_SECTIONS: { key: SectionKey; label: string }[] = [
@@ -59,7 +59,7 @@ function saveUserSections(v: Partial<Record<SectionKey, boolean>>) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch { /* noop */ }
 }
 
-export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal" }) => {
+export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal", livePulseOnly = false }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,13 +72,16 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const [userSections, setUserSections] = useState<Partial<Record<SectionKey, boolean>>>(() => loadUserSections());
 
   const visible = useMemo<ForecastSectionVisibility>(() => {
+    if (livePulseOnly) {
+      return { tip: false, education: false, tech: false, industry: false, live_pulse: true, companies: false };
+    }
     const base = adminSections || { tip: true, education: true, tech: true, industry: true, live_pulse: true, companies: true };
     const merged: ForecastSectionVisibility = { ...base };
     for (const k of Object.keys(userSections) as SectionKey[]) {
       if (typeof userSections[k] === "boolean") merged[k] = (base[k] ?? true) && (userSections[k] as boolean);
     }
     return merged;
-  }, [adminSections, userSections]);
+  }, [adminSections, userSections, livePulseOnly]);
 
   const load = async () => {
     setLoading(true);
