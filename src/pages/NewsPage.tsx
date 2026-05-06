@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
+import { Background } from "@/components/Background";
 import { listNews, type NewsPost } from "@/lib/newsFeed";
 import { Badge } from "@/components/ui/badge";
 import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw, X } from "lucide-react";
