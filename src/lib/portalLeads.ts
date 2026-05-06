@@ -79,6 +79,8 @@ export const portalLeads = {
     callPortalLeads('update_status', { id, ...opts }),
   upload: (rows: Partial<RepLead>[]) => callPortalLeads('upload', { rows }) as Promise<{ ok: true; inserted: number }>,
   download: () => callPortalLeads('download') as Promise<{ ok: true; rows: any[] }>,
+  scan: (id: string, opts: { url?: string; force?: boolean } = {}) =>
+    callPortalLeads('scan', { id, ...opts }) as Promise<{ ok: true; scan: LeadScan; cached: boolean }>,
 };
 
 export async function logPortalActivity(event: string, meta: Record<string, unknown> = {}) {
