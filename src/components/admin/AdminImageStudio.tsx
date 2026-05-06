@@ -219,6 +219,22 @@ export const AdminImageStudio: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl p-2 bg-background border-amber/30">
+          {preview && (
+            <div className="space-y-2">
+              <img src={preview.url} alt={preview.prompt} className="w-full max-h-[80vh] object-contain rounded" />
+              <div className="flex items-center justify-between gap-2 px-2 pb-1">
+                <p className="text-xs text-muted-foreground line-clamp-2 flex-1">{preview.prompt || '(no prompt)'}</p>
+                <Button size="sm" variant="outline" onClick={() => download(preview)}>
+                  <Download className="w-3.5 h-3.5 mr-1" /> Download
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
