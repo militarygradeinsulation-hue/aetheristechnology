@@ -65,6 +65,61 @@ serve(async (req) => {
     const company = (body.company || lead.business_name || "").trim();
     const email = (body.email || lead.email || "").trim();
 
+    // Kick off Firecrawl in parallel for max company detail
+    const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    const websiteUrl = lead.website
+      ? (lead.website.startsWith("http") ? lead.website : `https://${lead.website}`)
+      : null;
+    const firecrawlPromise = (async () => {
+      if (!FC_KEY || !websiteUrl) return null;
+      try {
+        const [scrapeRes, mapRes, searchRes] = await Promise.all([
+          fetch("https://api.firecrawl.dev/v2/scrape", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: websiteUrl,
+              formats: ["markdown", "summary", "links", "branding", {
+                type: "json",
+                prompt: "Extract company info: legal_name, tagline, description, services (array), industries (array), founded_year, employee_count, headquarters, locations (array), phones (array), emails (array), social_links (object: linkedin, twitter, facebook, instagram, youtube), leadership (array of {name,title}), key_clients (array), tech_stack (array), unique_selling_points (array)"
+              }],
+              onlyMainContent: true,
+            }),
+          }).then(r => r.json()).catch(() => null),
+          fetch("https://api.firecrawl.dev/v2/map", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ url: websiteUrl, limit: 50 }),
+          }).then(r => r.json()).catch(() => null),
+          name || company ? fetch("https://api.firecrawl.dev/v2/search", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: `${name || ""} ${company || domain || ""} site:linkedin.com OR contact OR email`.trim(),
+              limit: 5,
+            }),
+          }).then(r => r.json()).catch(() => null) : null,
+        ]);
+        const sd = (scrapeRes as any)?.data || scrapeRes;
+        return {
+          summary: sd?.summary || null,
+          json: sd?.json || null,
+          branding: sd?.branding || null,
+          links_count: Array.isArray(sd?.links) ? sd.links.length : 0,
+          metadata: sd?.metadata || null,
+          markdown_excerpt: typeof sd?.markdown === "string" ? sd.markdown.slice(0, 4000) : null,
+          sitemap: Array.isArray((mapRes as any)?.links) ? (mapRes as any).links.slice(0, 50) : [],
+          web_results: Array.isArray((searchRes as any)?.data) ? (searchRes as any).data.slice(0, 5).map((r: any) => ({
+            url: r.url, title: r.title, description: r.description,
+          })) : [],
+          fetched_at: new Date().toISOString(),
+        };
+      } catch (e) {
+        console.error("Firecrawl error:", e);
+        return null;
+      }
+    })();
+
     let person: any = null;
     let raw: any = null;
 
@@ -108,8 +163,10 @@ serve(async (req) => {
       }
     }
 
-    if (!person) {
-      return jsonResp({ error: "No RocketReach match found", details: raw?.detail || null }, 404);
+    const firecrawl = await firecrawlPromise;
+
+    if (!person && !firecrawl) {
+      return jsonResp({ error: "No RocketReach or Firecrawl match found", details: raw?.detail || null }, 404);
     }
 
     const summary = {
