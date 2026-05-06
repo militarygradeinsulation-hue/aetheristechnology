@@ -458,6 +458,9 @@ const PortalPage: React.FC = () => {
         {/* WORKSPACE */}
         {tab === 'workspace' && <WorkspaceTab />}
 
+        {/* DOCUMENTS */}
+        {tab === 'documents' && <PortalDocuments />}
+
         {/* AI COACH (embedded) */}
         {tab === 'coach' && (
           <div className="max-w-3xl mx-auto">
