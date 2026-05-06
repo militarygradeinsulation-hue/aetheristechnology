@@ -42,6 +42,7 @@ export const LeadsBoard: React.FC = () => {
   const [dripCount, setDripCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
+  const [preview, setPreview] = useState<RepLead | null>(null);
 
   const refreshDrip = useCallback(async () => {
     setLoading(true);
