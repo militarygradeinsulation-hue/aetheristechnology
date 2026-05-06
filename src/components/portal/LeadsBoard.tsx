@@ -16,6 +16,7 @@ import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
+import { LeadGamePlan } from './LeadGamePlan';
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
