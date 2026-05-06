@@ -701,30 +701,30 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             )}
           </div>
 
-          {/* RocketReach Person Lookup */}
+          {/* Deep Scan: RocketReach + Firecrawl */}
           <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> RocketReach Person Lookup
+                <Sparkles className="w-3 h-3" /> Deep Scan — Person + Company
               </p>
-              {rr?.fetched_at && (
+              {(rr?.fetched_at || fc?.fetched_at) && (
                 <span className="text-[10px] text-muted-foreground">
-                  Last lookup {new Date(rr.fetched_at).toLocaleString()}
+                  Last lookup {new Date(rr?.fetched_at || fc?.fetched_at).toLocaleString()}
                 </span>
               )}
             </div>
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
-                Pulls verified emails, direct phones, title, LinkedIn, and work history.
+                RocketReach: emails, phones, LinkedIn, work history. Firecrawl: company facts, services, leadership, sitemap.
               </p>
               <Button
                 size="sm"
-                onClick={() => runRocketReach(!!rr)}
+                onClick={() => runRocketReach(!!(rr || fc))}
                 disabled={rrLoading}
                 className="bg-amber text-background hover:bg-amber/90 flex-shrink-0"
               >
                 {rrLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                {rr ? 'Re-lookup' : 'Deep scan person'}
+                {rr || fc ? 'Re-run deep scan' : 'Deep scan'}
               </Button>
             </div>
             {rr && (
