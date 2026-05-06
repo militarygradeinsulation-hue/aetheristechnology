@@ -114,6 +114,69 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     runChat(input.trim());
   };
 
+  const toggleRecording = useCallback(async () => {
+    if (isRecording) {
+      recorderRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setIsRecording(false);
+        const blob = new Blob(chunksRef.current, { type: mime || 'audio/webm' });
+        if (blob.size === 0) return;
+        setIsTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          let bin = '';
+          const bytes = new Uint8Array(buf);
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+          }
+          const b64 = btoa(bin);
+          const token = getPortalToken();
+          const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transcribe-audio`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-portal-token': token || '',
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ audio: b64, mimeType: mime || 'audio/webm' }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Transcription failed');
+          const text = (data.text || '').trim();
+          if (text) await runChat(text);
+        } catch (err) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant',
+            content: `**Mic error:** ${err instanceof Error ? err.message : 'Unknown'}`,
+          }]);
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+      recorderRef.current = rec;
+      rec.start();
+      setIsRecording(true);
+    } catch (err) {
+      setMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: `**Mic blocked:** ${err instanceof Error ? err.message : 'Allow microphone access in your browser.'}`,
+      }]);
+    }
+  }, [isRecording, runChat]);
+
   const reset = () => {
     setMessages([initialMessage]);
     sessionStorage.removeItem(STORAGE_KEY);
