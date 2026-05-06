@@ -236,10 +236,10 @@ const PlaybookSection = () => (
       <CardContent className="space-y-6">
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
           <p className="text-foreground font-medium">
-            Flat <span className="text-primary font-bold">10%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
+            Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code — including recurring monthly invoices for the life of the subscription.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time — that's what keeps it fair to you, the business, and the owner.
+            One rule. No tiers. No caps. No clawbacks on completed work. The split is locked: 70% company / 15% rep / 15% partner override. Easy math on every product, every time.
           </p>
         </div>
 
