@@ -46,8 +46,9 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
+import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 
-type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
@@ -216,7 +217,8 @@ const PortalPage: React.FC = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
@@ -448,6 +450,7 @@ const PortalPage: React.FC = () => {
 
         {/* PLAYBOOK */}
         {tab === 'calendar' && <RepCalendarView isAdmin={false} />}
+        {tab === 'companycal' && <CompanyCalendarRepView />}
 
         {tab === 'playbook' && <PortalPlaybook />}
 

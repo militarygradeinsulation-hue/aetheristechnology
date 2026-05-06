@@ -43,6 +43,7 @@ import NotificationBell from '@/components/admin/NotificationBell';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
+import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -137,7 +138,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string }[] = [
     { key: 'workspace', label: '🤝 Workspace' },
     { key: 'insights', label: '🧠 AI Insights' }, { key: 'sales', label: '💵 Sales & Customers' },
@@ -149,7 +150,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'imagestudio', label: '🎨 Image Studio' }, { key: 'documents', label: '📄 Documents' },
     { key: 'outlook', label: '📤 Outlook Sync' }, { key: 'overview', label: 'Overview' },
     { key: 'playbook', label: '📘 Rep Playbook' }, { key: 'training', label: '🎓 Team Training' },
-    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'seo', label: '✨ SEO/AEO' },
+    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'companycal', label: '🗓 Company Calendar' }, { key: 'seo', label: '✨ SEO/AEO' },
     { key: 'team', label: '💬 Team Messages' }, { key: 'news', label: '📰 Aetheris News' },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
@@ -749,6 +750,7 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'training' && <AdminTrainingPanel />}
         {activeTab === 'calendars' && <AdminRepCalendarPanel />}
+        {activeTab === 'companycal' && <AdminCompanyCalendarPanel />}
         {activeTab === 'sales' && <SalesCrmPanel />}
 
         {/* Team Messages (admin can edit/delete/pin) */}

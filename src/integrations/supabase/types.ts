@@ -1253,6 +1253,51 @@ export type Database = {
           },
         ]
       }
+      company_calendar: {
+        Row: {
+          ai_plan: Json
+          attachments: Json
+          body: string
+          color: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          id: string
+          kind: string
+          pinned: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_plan?: Json
+          attachments?: Json
+          body?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          id?: string
+          kind?: string
+          pinned?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_plan?: Json
+          attachments?: Json
+          body?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          id?: string
+          kind?: string
+          pinned?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           company: string | null

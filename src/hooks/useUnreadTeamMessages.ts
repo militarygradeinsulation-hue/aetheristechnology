@@ -1,7 +1,42 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const KEY = (code: string) => `aetheris_team_chat_lastseen_${code}`;
+
+// Short ping built from a base64-encoded WAV beep (no asset file needed).
+function playPing() {
+  try {
+    const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.28);
+    setTimeout(() => ctx.close(), 400);
+  } catch { /* ignore */ }
+}
+
+function showBrowserNotification(title: string, body: string) {
+  try {
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission === "granted") {
+      new Notification(title, { body, icon: "/favicon.ico", tag: "team-msg" });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((p) => {
+        if (p === "granted") new Notification(title, { body, icon: "/favicon.ico", tag: "team-msg" });
+      });
+    }
+  } catch { /* ignore */ }
+}
+
 
 /**
  * Tracks unread team_messages for the given viewer code.
@@ -43,11 +78,16 @@ export function useUnreadTeamMessages(viewerCode: string | null, activeTabIsChat
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "team_messages" },
         (payload) => {
-          const row = payload.new as { author_code: string; created_at: string };
+          const row = payload.new as { author_code: string; created_at: string; body?: string; author_name?: string };
           if (row.author_code === viewerCode) return;
           setLastMessageAt(row.created_at);
+          // Always ping + notify on new incoming messages
+          playPing();
+          showBrowserNotification(
+            `New team message from ${row.author_name || row.author_code}`,
+            (row.body || "").slice(0, 140),
+          );
           if (activeTabIsChat) {
-            // Already viewing — auto-mark read
             localStorage.setItem(KEY(viewerCode), new Date().toISOString());
             return;
           }
