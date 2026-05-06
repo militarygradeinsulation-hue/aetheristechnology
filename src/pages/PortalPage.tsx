@@ -45,8 +45,9 @@ import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
+import { PortalDocuments } from '@/components/portal/PortalDocuments';
 
-type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
@@ -223,6 +224,7 @@ const PortalPage: React.FC = () => {
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
+    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
   ];
@@ -455,6 +457,9 @@ const PortalPage: React.FC = () => {
 
         {/* WORKSPACE */}
         {tab === 'workspace' && <WorkspaceTab />}
+
+        {/* DOCUMENTS */}
+        {tab === 'documents' && <PortalDocuments />}
 
         {/* AI COACH (embedded) */}
         {tab === 'coach' && (
