@@ -361,6 +361,9 @@ const PortalPage: React.FC = () => {
         {/* LEADS */}
         {tab === 'leads' && <LeadsBoard />}
 
+        {/* FORECAST — Live Pulse only for reps; partners get full view in Company tab */}
+        {tab === 'forecast' && <ForecastCenter isPartner={isPartner} livePulseOnly={!isPartner} />}
+
         {/* MY TOOLS */}
         {tab === 'tools' && !activeTool && (
           <Card>
