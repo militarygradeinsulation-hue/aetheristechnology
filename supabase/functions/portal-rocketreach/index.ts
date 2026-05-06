@@ -169,7 +169,7 @@ serve(async (req) => {
       return jsonResp({ error: "No RocketReach or Firecrawl match found", details: raw?.detail || null }, 404);
     }
 
-    const summary = {
+    const summary = person ? {
       id: person.id,
       name: person.name,
       title: person.current_title || person.normalized_title,
@@ -188,17 +188,27 @@ serve(async (req) => {
       links: person.links || {},
       lookup_status: person.status,
       fetched_at: new Date().toISOString(),
-    };
+    } : null;
 
-    // Save to enrichment.rocketreach + autosave any newly discovered email/phone if blank
-    const newEnrichment = { ...(lead.enrichment as any || {}), rocketreach: summary };
+    // Save to enrichment.rocketreach + firecrawl + autosave discovered contact info
+    const newEnrichment = {
+      ...(lead.enrichment as any || {}),
+      ...(summary ? { rocketreach: summary } : {}),
+      ...(firecrawl ? { firecrawl } : {}),
+    };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
-    if (!lead.email && summary.emails?.[0]?.email) patch.email = summary.emails[0].email.toLowerCase();
-    if (summary.phones?.[0]?.number) {
-      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
-      if (!cur?.phone) patch.phone = summary.phones[0].number;
+    const fcJson = firecrawl?.json as any;
+    if (!lead.email) {
+      const candidate = summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+      if (candidate) patch.email = String(candidate).toLowerCase();
     }
-    if (!lead.contact_name && summary.name) patch.contact_name = summary.name;
+    const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
+    if (phoneCandidate) {
+      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
+      if (!cur?.phone) patch.phone = phoneCandidate;
+    }
+    if (!lead.contact_name && summary?.name) patch.contact_name = summary.name;
+    if (!lead.business_name && fcJson?.legal_name) patch.business_name = fcJson.legal_name;
 
     await supabase.from("rep_leads").update(patch).eq("id", leadId);
 
@@ -208,11 +218,11 @@ serve(async (req) => {
         rep_code: claims.code,
         rep_name: rep?.rep_name || null,
         event: "lead_rocketreach",
-        meta: { lead_id: leadId, person_id: summary.id, has_email: !!summary.emails?.length, has_phone: !!summary.phones?.length },
+        meta: { lead_id: leadId, person_id: summary?.id, has_email: !!summary?.emails?.length, has_phone: !!summary?.phones?.length, firecrawl: !!firecrawl },
       });
     } catch { /* ignore */ }
 
-    return jsonResp({ ok: true, cached: false, person: summary });
+    return jsonResp({ ok: true, cached: false, person: summary, firecrawl });
   } catch (e) {
     console.error("portal-rocketreach error:", e);
     return jsonResp({ error: e instanceof Error ? e.message : "Server error" }, 500);
