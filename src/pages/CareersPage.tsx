@@ -13,8 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2 } from 'lucide-react';
+import {
+  DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
+  Shield, Rocket, GraduationCap, Users, Clock, Brain, Trophy, MapPin, Headphones,
+} from 'lucide-react';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
+import careersHero from '@/assets/careers-hero.jpg';
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
