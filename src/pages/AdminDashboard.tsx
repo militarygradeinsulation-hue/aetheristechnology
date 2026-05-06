@@ -750,6 +750,7 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'training' && <AdminTrainingPanel />}
         {activeTab === 'calendars' && <AdminRepCalendarPanel />}
+        {activeTab === 'companycal' && <AdminCompanyCalendarPanel />}
         {activeTab === 'sales' && <SalesCrmPanel />}
 
         {/* Team Messages (admin can edit/delete/pin) */}
