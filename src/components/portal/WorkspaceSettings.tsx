@@ -7,13 +7,20 @@ import { toast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
 import { getRepSettings, saveRepSettings } from '@/lib/portalWorkspace';
 
-const FIELDS: { key: string; label: string; placeholder: string; type?: 'textarea' }[] = [
+const FIELDS: { key: string; label: string; placeholder: string; type?: 'textarea' | 'select'; options?: { value: string; label: string }[]; help?: string }[] = [
   { key: 'business_name', label: 'Default business / target name', placeholder: 'e.g. Acme Plumbing' },
   { key: 'industry', label: 'Default industry', placeholder: 'e.g. Home services' },
   { key: 'target_audience', label: 'Target audience', placeholder: 'Owners doing $1M-$5M' },
   { key: 'tone', label: 'Default tone', placeholder: 'Direct, no fluff' },
   { key: 'sender_name', label: 'Your name (sender)', placeholder: 'Joseph T.' },
   { key: 'sender_title', label: 'Your title', placeholder: 'Business Forensics Operator' },
+  { key: 'sender_email', label: 'Your email address', placeholder: 'you@yourdomain.com', help: "Used as the 'from' account when you click a lead's email." },
+  { key: 'email_provider', label: 'Email provider', placeholder: '', type: 'select', options: [
+    { value: 'default', label: 'System default (mailto:)' },
+    { value: 'gmail', label: 'Gmail (web)' },
+    { value: 'outlook', label: 'Outlook / Office 365 (web)' },
+    { value: 'yahoo', label: 'Yahoo Mail (web)' },
+  ], help: "Which inbox opens when you click a lead's email." },
   { key: 'cta_link', label: 'Default CTA link', placeholder: 'https://aetheris.technology/leak-audit' },
   { key: 'signature', label: 'Email signature', placeholder: 'Joseph T. — aetheris.technology', type: 'textarea' },
 ];
