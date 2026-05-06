@@ -43,6 +43,7 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   const [tasks, setTasks] = useState<SharedTask[]>([]);
   const [notes, setNotes] = useState<SharedNote[]>([]);
   const [files, setFiles] = useState<SharedFile[]>([]);
+  const [previewFile, setPreviewFile] = useState<SharedFile | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newTask, setNewTask] = useState({
