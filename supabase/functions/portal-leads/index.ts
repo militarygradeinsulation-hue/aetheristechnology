@@ -194,6 +194,17 @@ serve(async (req) => {
       if (touch) {
         patch.last_touched_at = new Date().toISOString();
       }
+      // Allow editing core lead fields
+      const editable: Array<[string, number]> = [
+        ["business_name", 200], ["contact_name", 200], ["email", 200],
+        ["phone", 50], ["website", 300], ["industry", 100], ["location", 200],
+      ];
+      for (const [field, max] of editable) {
+        if (body[field] !== undefined) {
+          const v = sanitizeStr(body[field], max);
+          patch[field] = field === "email" && v ? v.toLowerCase() : (v || null);
+        }
+      }
 
       // First update non-touch fields
       const { error } = await supabase.from("rep_leads")

@@ -521,7 +521,29 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   const [rr, setRr] = useState<any>(lead.enrichment?.rocketreach || null);
   const [fc, setFc] = useState<any>(lead.enrichment?.firecrawl || null);
   const [rrLoading, setRrLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editFields, setEditFields] = useState({
+    business_name: lead.business_name || '',
+    contact_name: lead.contact_name || '',
+    email: lead.email || '',
+    phone: lead.phone || '',
+    website: lead.website || '',
+    industry: lead.industry || '',
+    location: lead.location || '',
+  });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setEditFields({
+      business_name: lead.business_name || '',
+      contact_name: lead.contact_name || '',
+      email: lead.email || '',
+      phone: lead.phone || '',
+      website: lead.website || '',
+      industry: lead.industry || '',
+      location: lead.location || '',
+    });
+  }, [lead.id, lead.business_name, lead.contact_name, lead.email, lead.phone, lead.website, lead.industry, lead.location]);
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
   useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
@@ -560,6 +582,18 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     if (!confirm('Release this lead back to the pool?')) return;
     try { await portalLeads.release(lead.id); toast({ title: 'Released' }); onChanged(); }
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
+  };
+
+  const saveEdits = async () => {
+    setSaving(true);
+    try {
+      await portalLeads.updateStatus(lead.id, { ...editFields });
+      toast({ title: 'Lead updated' });
+      setEditing(false);
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setSaving(false); }
   };
 
   const runScan = async (force = false) => {
@@ -610,7 +644,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       </button>
       {open && (
         <div className="border-t border-border/50 p-3 space-y-3">
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
             {lead.email && <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" /> {lead.email}</span>}
             {lead.phone && <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3" /> {lead.phone}</span>}
             {lead.website && (
@@ -619,7 +653,39 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 <ExternalLink className="w-3 h-3" /> {lead.website}
               </a>
             )}
+            <Button size="sm" variant="ghost" className="ml-auto h-6 text-xs"
+              onClick={() => setEditing(e => !e)}>
+              {editing ? 'Cancel' : 'Edit lead'}
+            </Button>
           </div>
+          {editing && (
+            <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {([
+                ['business_name', 'Business name'],
+                ['contact_name', 'Contact name'],
+                ['email', 'Email'],
+                ['phone', 'Phone'],
+                ['website', 'Website'],
+                ['industry', 'Industry'],
+                ['location', 'Location'],
+              ] as const).map(([k, label]) => (
+                <div key={k} className="flex flex-col gap-1">
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</label>
+                  <Input
+                    value={editFields[k] ?? ''}
+                    onChange={e => setEditFields(f => ({ ...f, [k]: e.target.value }))}
+                    className="h-8 text-sm"
+                  />
+                </div>
+              ))}
+              <div className="sm:col-span-2 flex gap-2 justify-end">
+                <Button size="sm" variant="outline" onClick={() => { setEditFields({ business_name: lead.business_name||'', contact_name: lead.contact_name||'', email: lead.email||'', phone: lead.phone||'', website: lead.website||'', industry: lead.industry||'', location: lead.location||'' }); setEditing(false); }}>Reset</Button>
+                <Button size="sm" disabled={saving} onClick={saveEdits} className="bg-amber text-background hover:bg-amber/90">
+                  {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null} Save changes
+                </Button>
+              </div>
+            </div>
+          )}
           {lead.why_fit && (
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
