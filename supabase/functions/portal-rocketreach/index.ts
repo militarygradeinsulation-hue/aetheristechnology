@@ -241,7 +241,7 @@ serve(async (req) => {
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
     if (!lead.email) {
-      const candidate = summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+      const candidate = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
       if (candidate) patch.email = String(candidate).toLowerCase();
     }
     const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
