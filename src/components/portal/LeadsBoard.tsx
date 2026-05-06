@@ -573,6 +573,18 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     } finally { setScanning(false); }
   };
 
+  const runRocketReach = async (force = false) => {
+    setRrLoading(true);
+    try {
+      const res = await portalLeads.rocketReach(lead.id, { force });
+      setRr(res.person);
+      toast({ title: res.cached ? 'Loaded saved RocketReach data' : 'RocketReach lookup complete' });
+      onChanged();
+    } catch (e) {
+      toast({ title: 'RocketReach failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setRrLoading(false); }
+  };
+
   return (
     <div className="rounded-lg border border-border/50 bg-card/40">
       <button type="button" onClick={() => setOpen(o => !o)} className="w-full text-left p-3 flex items-start justify-between gap-2 hover:bg-amber/5 transition-colors">
