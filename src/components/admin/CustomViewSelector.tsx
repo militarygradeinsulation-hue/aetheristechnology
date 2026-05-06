@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Layout, Save, Trash2, RotateCcw, Plus } from "lucide-react";
+import { Layout, Save, Trash2, RotateCcw, Plus, Cloud } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { getAdminToken } from "@/lib/adminAuth";
 
 interface SavedView {
   name: string;
@@ -13,6 +15,30 @@ interface SavedView {
 }
 const STORAGE_KEY = "admin.customViews.v1";
 const ACTIVE_KEY = "admin.customViews.active";
+const KV_KEY = "admin.customViews";
+
+async function kvGet(): Promise<{ views: SavedView[]; active: string } | null> {
+  const token = getAdminToken();
+  if (!token) return null;
+  try {
+    const { data, error } = await supabase.functions.invoke("admin-kv", {
+      body: { action: "get", key: KV_KEY },
+      headers: { "x-admin-token": token },
+    });
+    if (error) return null;
+    return (data?.value as any) || null;
+  } catch { return null; }
+}
+async function kvSet(value: { views: SavedView[]; active: string }) {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    await supabase.functions.invoke("admin-kv", {
+      body: { action: "set", key: KV_KEY, value },
+      headers: { "x-admin-token": token },
+    });
+  } catch {}
+}
 
 interface Props {
   allTabs: { key: string; label: string }[];
@@ -30,16 +56,55 @@ export const CustomViewSelector: React.FC<Props> = ({ allTabs, visibleTabs, onCh
   const [draft, setDraft] = useState<string[]>(visibleTabs);
   const [newName, setNewName] = useState("");
 
+  const hydrated = useRef(false);
+  const [syncing, setSyncing] = useState(false);
+
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Apply on mount
+  // Hydrate from cloud (so saved views follow you across devices)
   useEffect(() => {
-    if (active === "default") return;
-    const v = views.find(v => v.name === active);
-    if (v) onChange(v.tabs);
+    let cancelled = false;
+    (async () => {
+      const remote = await kvGet();
+      if (cancelled) return;
+      if (remote && Array.isArray(remote.views)) {
+        setViews(remote.views);
+        const nextActive = remote.active || "default";
+        setActive(nextActive);
+        if (nextActive !== "default") {
+          const v = remote.views.find(v => v.name === nextActive);
+          if (v) onChange(v.tabs);
+        }
+      } else {
+        if (active !== "default") {
+          const v = views.find(v => v.name === active);
+          if (v) onChange(v.tabs);
+        }
+        if (views.length > 0) await kvSet({ views, active });
+      }
+      hydrated.current = true;
+    })();
+    const onVis = () => {
+      if (document.visibilityState !== "visible") return;
+      kvGet().then(r => {
+        if (r && Array.isArray(r.views)) {
+          setViews(r.views);
+          setActive(r.active || "default");
+        }
+      });
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { cancelled = true; document.removeEventListener("visibilitychange", onVis); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Push changes to cloud after hydration
+  useEffect(() => {
+    if (!hydrated.current) return;
+    setSyncing(true);
+    kvSet({ views, active }).finally(() => setSyncing(false));
+  }, [views, active]);
 
   useEffect(() => { setDraft(visibleTabs); }, [open, visibleTabs]);
 
@@ -78,6 +143,7 @@ export const CustomViewSelector: React.FC<Props> = ({ allTabs, visibleTabs, onCh
 
   return (
     <div className="flex items-center gap-2">
+      <Cloud className={`w-3 h-3 ${syncing ? "text-amber animate-pulse" : "text-muted-foreground/60"}`} aria-label={syncing ? "Syncing views…" : "Views synced"} />
       <Select value={active} onValueChange={applyView}>
         <SelectTrigger className="w-[180px] h-9">
           <Layout className="w-3 h-3 mr-1" />
