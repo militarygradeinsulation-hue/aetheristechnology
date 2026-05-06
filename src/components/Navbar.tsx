@@ -76,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             />
           </Link>
 
-          <div className={`hidden md:flex items-center space-x-8 transition-all duration-300 ${expanded ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none -translate-y-2'}`}>
+          <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.href}
