@@ -208,29 +208,6 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </div>
     </div>
 
-    {/* HOW THE STRUCTURE WORKS */}
-    <div className="mb-14">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">How The Structure Works</p>
-      <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
-        Three roles. One simple split.
-      </h2>
-      <div className="grid md:grid-cols-3 gap-4">
-        {[
-          { role: 'COMPANY', pct: '70%', body: 'Aetheris delivers the work, hosts the tools, runs the platform, and pays the bills. We do not skim — what\'s left after delivery is profit.' },
-          { role: 'REP (You)', pct: '15%', body: 'You hunt, you pitch, you close. You earn 15% of every dollar tied to your code — recurring and lifetime.', highlight: true },
-          { role: 'PARTNER', pct: '15%', body: 'A Partner who recruited you (or you, once promoted) earns a 15% override on the same deal. Build a downline, build a book.' },
-        ].map((r) => (
-          <Card key={r.role} className={`backdrop-blur ${r.highlight ? 'bg-amber/10 border-amber' : 'bg-card/60 border-border/50'}`}>
-            <CardContent className="p-6 text-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{r.role}</p>
-              <p className={`font-display text-5xl font-bold mt-2 ${r.highlight ? 'text-amber' : 'text-foreground'}`}>{r.pct}</p>
-              <p className="text-sm text-muted-foreground mt-3">{r.body}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-
     {/* PERKS */}
     <div className="mb-14">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">The Perks</p>
