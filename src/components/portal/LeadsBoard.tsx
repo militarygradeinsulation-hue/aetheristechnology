@@ -580,10 +580,11 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     try {
       const res = await portalLeads.rocketReach(lead.id, { force });
       setRr(res.person);
-      toast({ title: res.cached ? 'Loaded saved RocketReach data' : 'RocketReach lookup complete' });
+      if (res.firecrawl) setFc(res.firecrawl);
+      toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
       onChanged();
     } catch (e) {
-      toast({ title: 'RocketReach failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      toast({ title: 'Deep scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setRrLoading(false); }
   };
 
