@@ -23,8 +23,15 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
-      v.muted = true;
-      v.play().then(() => setPlaying(true)).catch(() => {});
+      v.muted = false;
+      v.volume = 1;
+      v.play()
+        .then(() => setPlaying(true))
+        .catch(() => {
+          // Autoplay-with-sound blocked — fall back to muted
+          v.muted = true;
+          v.play().then(() => setPlaying(true)).catch(() => {});
+        });
       trackEvent('click', { label: 'hero_video_play', location: 'hero' });
     } else {
       v.pause();
@@ -58,7 +65,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <video
                 ref={videoRef}
                 src={heroLeakVideo}
-                muted
                 playsInline
                 onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
                 onPause={() => setPlaying(false)}
