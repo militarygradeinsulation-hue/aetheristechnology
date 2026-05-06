@@ -56,16 +56,55 @@ export const CustomViewSelector: React.FC<Props> = ({ allTabs, visibleTabs, onCh
   const [draft, setDraft] = useState<string[]>(visibleTabs);
   const [newName, setNewName] = useState("");
 
+  const hydrated = useRef(false);
+  const [syncing, setSyncing] = useState(false);
+
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Apply on mount
+  // Hydrate from cloud (so saved views follow you across devices)
   useEffect(() => {
-    if (active === "default") return;
-    const v = views.find(v => v.name === active);
-    if (v) onChange(v.tabs);
+    let cancelled = false;
+    (async () => {
+      const remote = await kvGet();
+      if (cancelled) return;
+      if (remote && Array.isArray(remote.views)) {
+        setViews(remote.views);
+        const nextActive = remote.active || "default";
+        setActive(nextActive);
+        if (nextActive !== "default") {
+          const v = remote.views.find(v => v.name === nextActive);
+          if (v) onChange(v.tabs);
+        }
+      } else {
+        if (active !== "default") {
+          const v = views.find(v => v.name === active);
+          if (v) onChange(v.tabs);
+        }
+        if (views.length > 0) await kvSet({ views, active });
+      }
+      hydrated.current = true;
+    })();
+    const onVis = () => {
+      if (document.visibilityState !== "visible") return;
+      kvGet().then(r => {
+        if (r && Array.isArray(r.views)) {
+          setViews(r.views);
+          setActive(r.active || "default");
+        }
+      });
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { cancelled = true; document.removeEventListener("visibilitychange", onVis); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Push changes to cloud after hydration
+  useEffect(() => {
+    if (!hydrated.current) return;
+    setSyncing(true);
+    kvSet({ views, active }).finally(() => setSyncing(false));
+  }, [views, active]);
 
   useEffect(() => { setDraft(visibleTabs); }, [open, visibleTabs]);
 
