@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Layout, Save, Trash2, RotateCcw, Plus } from "lucide-react";
+import { Layout, Save, Trash2, RotateCcw, Plus, Cloud } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { getAdminToken } from "@/lib/adminAuth";
 
 interface SavedView {
   name: string;
@@ -13,6 +15,30 @@ interface SavedView {
 }
 const STORAGE_KEY = "admin.customViews.v1";
 const ACTIVE_KEY = "admin.customViews.active";
+const KV_KEY = "admin.customViews";
+
+async function kvGet(): Promise<{ views: SavedView[]; active: string } | null> {
+  const token = getAdminToken();
+  if (!token) return null;
+  try {
+    const { data, error } = await supabase.functions.invoke("admin-kv", {
+      body: { action: "get", key: KV_KEY },
+      headers: { "x-admin-token": token },
+    });
+    if (error) return null;
+    return (data?.value as any) || null;
+  } catch { return null; }
+}
+async function kvSet(value: { views: SavedView[]; active: string }) {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    await supabase.functions.invoke("admin-kv", {
+      body: { action: "set", key: KV_KEY, value },
+      headers: { "x-admin-token": token },
+    });
+  } catch {}
+}
 
 interface Props {
   allTabs: { key: string; label: string }[];
