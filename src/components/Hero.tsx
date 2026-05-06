@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Phone, Search } from 'lucide-react';
+import { ArrowRight, Phone, Search, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import architectLogo from '@/assets/architect-logo.jpg';
+import heroLeakVideo from '@/assets/hero-leak.mp4';
 
 interface HeroProps {
   onContactClick: () => void;
