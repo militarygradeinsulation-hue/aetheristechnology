@@ -112,6 +112,24 @@ export type Database = {
           },
         ]
       }
+      admin_kv: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       admin_library: {
         Row: {
           created_at: string
