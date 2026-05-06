@@ -836,7 +836,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       const isBest = rr.best_email && e.email === rr.best_email;
                       return (
                         <p key={i} className={isBest ? 'opacity-60' : ''}>
-                          <a href={`mailto:${e.email}`} className="text-amber hover:underline">{e.email}</a>
+                          <a href={`mailto:${e.email}`} onClick={mailHandler(e.email)} className="text-amber hover:underline">{e.email}</a>
                           <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
                           {isBest && <span className="ml-2 text-[10px] text-amber">★ best</span>}
                         </p>
