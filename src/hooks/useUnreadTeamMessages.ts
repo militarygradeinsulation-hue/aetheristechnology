@@ -78,11 +78,16 @@ export function useUnreadTeamMessages(viewerCode: string | null, activeTabIsChat
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "team_messages" },
         (payload) => {
-          const row = payload.new as { author_code: string; created_at: string };
+          const row = payload.new as { author_code: string; created_at: string; body?: string; author_name?: string };
           if (row.author_code === viewerCode) return;
           setLastMessageAt(row.created_at);
+          // Always ping + notify on new incoming messages
+          playPing();
+          showBrowserNotification(
+            `New team message from ${row.author_name || row.author_code}`,
+            (row.body || "").slice(0, 140),
+          );
           if (activeTabIsChat) {
-            // Already viewing — auto-mark read
             localStorage.setItem(KEY(viewerCode), new Date().toISOString());
             return;
           }
