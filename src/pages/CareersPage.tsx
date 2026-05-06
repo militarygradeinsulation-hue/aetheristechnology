@@ -349,13 +349,13 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math at 10% across the real product ladder:</p>
+        <p className="text-muted-foreground mb-4">Honest math at <strong className="text-foreground">15% flat</strong> across the real product ladder:</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$40' },
-            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$164' },
-            { label: 'Strong month', detail: '1 × 14-Day Diagnostic + 2 Snapshots + 1 Fractional retainer signed', total: '$910 first month + $590/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,170 first month + $590/mo recurring' },
+            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$60' },
+            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$245' },
+            { label: 'Strong month', detail: '1 × $2,500 Forensic Diagnostic + 2 Snapshots + 1 Fractional retainer signed ($5,900/mo)', total: '$1,365 first month + $885/mo recurring' },
+            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,755 first month + $885/mo recurring' },
           ].map((row) => (
             <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
               <p className="text-sm text-muted-foreground">{row.label}</p>
@@ -364,7 +364,7 @@ const PlaybookSection = () => (
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = $14,160 in residual commission alone.</p>
+        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = <strong className="text-foreground">$21,240</strong> in residual commission alone.</p>
       </CardContent>
     </Card>
 
