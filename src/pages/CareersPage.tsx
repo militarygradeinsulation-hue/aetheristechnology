@@ -376,10 +376,10 @@ const PlaybookSection = () => (
       <CardContent>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag playground companies. Start conversations." },
-            { icon: Mail, title: "Email Companies Directly", desc: "Find playground companies with bad websites. Send 10 emails a day with a specific observation." },
-            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed your website — I think you're losing bids because of it.'" },
-            { icon: Target, title: "Use the Website Scanner", desc: "Run their URL through our scanner at aetheristechnology.lovable.app/scan — use the report as your opener." },
+            { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
+            { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
+            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site — I think you're losing 8–15% of revenue silently. Want to see where?'" },
+            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $2,500 Forensic Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">
               <CardContent className="p-5 flex items-start gap-3">
