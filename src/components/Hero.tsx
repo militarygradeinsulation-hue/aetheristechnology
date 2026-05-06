@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Phone, Search } from 'lucide-react';
+import { ArrowRight, Phone, Search, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import architectLogo from '@/assets/architect-logo.jpg';
+import heroLeakVideo from '@/assets/hero-leak.mp4';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -15,6 +16,22 @@ const HUBSPOT_MEETING_URL =
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  const toggleVideo = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.muted = true;
+      v.play().then(() => setPlaying(true)).catch(() => {});
+      trackEvent('click', { label: 'hero_video_play', location: 'hero' });
+    } else {
+      v.pause();
+      v.currentTime = 0;
+      setPlaying(false);
+    }
+  };
 
   return (
     <section className="relative min-h-[78vh] flex items-center justify-center px-4 pt-24 pb-12">
@@ -26,12 +43,35 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           className="space-y-6"
         >
           <div className="flex justify-center">
-            <img
-              src={architectLogo}
-              alt="The Architect — Aetheris Business Forensics Operator badge"
-              className="w-[28rem] md:w-[36rem] h-auto rounded-full shadow-2xl"
-              loading="eager"
-            />
+            <button
+              type="button"
+              onClick={toggleVideo}
+              aria-label={playing ? 'Pause video' : 'Play video'}
+              className="group relative w-[28rem] md:w-[36rem] aspect-square rounded-full overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
+            >
+              <img
+                src={architectLogo}
+                alt="The Architect — Aetheris Business Forensics Operator badge"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
+                loading="eager"
+              />
+              <video
+                ref={videoRef}
+                src={heroLeakVideo}
+                muted
+                playsInline
+                onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
+                onPause={() => setPlaying(false)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
+              />
+              {!playing && (
+                <span className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/30 transition-colors">
+                  <span className="rounded-full bg-amber/90 text-background p-5 shadow-xl group-hover:scale-110 transition-transform">
+                    <Play className="w-8 h-8 fill-current" />
+                  </span>
+                </span>
+              )}
+            </button>
           </div>
 
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-sm border-amber/30">
