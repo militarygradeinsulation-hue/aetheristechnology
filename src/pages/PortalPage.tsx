@@ -216,18 +216,19 @@ const PortalPage: React.FC = () => {
   }, [unreadChat]);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
-    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
-    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
-    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
-    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
-    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
+    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
+    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
+    { id: 'forecast', label: 'Forecast — Live Pulse', icon: <Activity className="w-4 h-4" /> },
+    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
+    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
+    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
+    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
+    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
   ];
 
