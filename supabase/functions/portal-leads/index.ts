@@ -55,7 +55,7 @@ serve(async (req) => {
     if (action === "list") {
       const view = body.view === "mine" ? "mine" : body.view === "drip" ? "drip" : "pool";
       let query = supabase.from("rep_leads").select(
-        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at,assigned_to_code,assignment_expires_at"
+        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at,assigned_to_code,assignment_expires_at,enrichment,enriched_at"
       );
       if (view === "mine") {
         query = query.eq("claimed_by_code", claims.code).order("updated_at", { ascending: false }).limit(200);
