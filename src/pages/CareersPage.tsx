@@ -232,6 +232,60 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </div>
     </div>
 
+    {/* PERFECT FOR */}
+    <div className="mb-14">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Who This Is Perfect For</p>
+      <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-3">
+        If you see yourself here, you're already half-hired.
+      </h2>
+      <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto mb-8">
+        We're not looking for resumes — we're looking for operators. These are the people who tend to print here.
+      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
+          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
+          { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds — because it bled out of yours. That insight closes deals fast.' },
+          { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first — your rolodex is an unfair advantage.' },
+          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you scripts, hooks, and AI content help — you bring the voice.' },
+          { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
+        ].map(({ title, desc }) => (
+          <div key={title} className="rounded-xl border border-border/50 bg-card/40 p-5 hover:border-amber/30 transition-colors">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">Profile</p>
+            <p className="font-semibold text-foreground font-display">{title}</p>
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* WHY NOW — GROUND FLOOR */}
+    <div className="mb-14 rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-card/40 to-card/40 p-8 md:p-10 backdrop-blur">
+      <div className="text-center mb-8">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Why Now</p>
+        <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-2">
+          Ground floor of a category that didn't exist 12 months ago.
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
+          "Business Forensics" is a brand-new lane — operator-led diagnostics powered by an in-house AI stack. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
+        </p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { tag: '01', title: 'Untapped Lane', desc: 'No one else is positioning forensics + AI + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
+          { tag: '02', title: 'AI Tailwind', desc: 'Owners are finally curious about AI but terrified to deploy it. We give them a diagnostic first — that\'s the wedge nobody else has built.' },
+          { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
+          { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
+        ].map(({ tag, title, desc }) => (
+          <div key={tag} className="rounded-xl border border-border/50 bg-card/60 p-5">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">{tag}</p>
+            <p className="font-semibold text-foreground font-display mt-2">{title}</p>
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
     {/* WHO WE'RE LOOKING FOR */}
     <div className="grid md:grid-cols-2 gap-6 mb-12">
       <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
