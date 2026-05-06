@@ -34,6 +34,11 @@ interface Props {
 export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   const { toast } = useToast();
   const [view, setView] = useState<ViewKind>(() => (localStorage.getItem("ws.view") as ViewKind) || "filter");
+  const [calMonth, setCalMonth] = useState<Date>(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [dayNewTitle, setDayNewTitle] = useState("");
+  const [dayNewTime, setDayNewTime] = useState("09:00");
+  const [dayNote, setDayNote] = useState("");
   const [filter, setFilter] = useState<"mine" | "theirs" | "shared">("mine");
   const [tasks, setTasks] = useState<SharedTask[]>([]);
   const [notes, setNotes] = useState<SharedNote[]>([]);
@@ -224,33 +229,49 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   };
 
   const CalendarView = () => {
-    const today = new Date();
-    const start = new Date(today.getFullYear(), today.getMonth(), 1);
-    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const start = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
+    const days = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
     const startDay = start.getDay();
+    const today = new Date();
     const cells: (Date | null)[] = [];
     for (let i = 0; i < startDay; i++) cells.push(null);
-    for (let d = 1; d <= days; d++) cells.push(new Date(today.getFullYear(), today.getMonth(), d));
+    for (let d = 1; d <= days; d++) cells.push(new Date(calMonth.getFullYear(), calMonth.getMonth(), d));
     const tasksOn = (date: Date) => tasks.filter(t => t.due_at && new Date(t.due_at).toDateString() === date.toDateString());
+    const goPrev = () => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1));
+    const goNext = () => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1));
+    const goToday = () => setCalMonth(new Date(today.getFullYear(), today.getMonth(), 1));
     return (
       <div>
-        <h4 className="font-display font-semibold mb-3">{today.toLocaleString("default", { month: "long", year: "numeric" })}</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-display font-semibold">{calMonth.toLocaleString("default", { month: "long", year: "numeric" })}</h4>
+          <div className="flex gap-1">
+            <Button variant="outline" size="sm" onClick={goPrev}>‹</Button>
+            <Button variant="outline" size="sm" onClick={goToday}>Today</Button>
+            <Button variant="outline" size="sm" onClick={goNext}>›</Button>
+          </div>
+        </div>
         <div className="grid grid-cols-7 gap-1 text-xs">
           {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
             <div key={i} className="text-center text-muted-foreground font-medium py-1">{d}</div>
           ))}
           {cells.map((d, i) => (
-            <div key={i} className={`min-h-[72px] p-1 rounded border ${d ? "border-border bg-card/30" : "border-transparent"}`}>
+            <button
+              key={i}
+              type="button"
+              disabled={!d}
+              onClick={() => d && setSelectedDay(d)}
+              className={`text-left min-h-[72px] p-1 rounded border transition-colors ${d ? "border-border bg-card/30 hover:bg-card hover:border-amber/50 cursor-pointer" : "border-transparent cursor-default"}`}
+            >
               {d && (
                 <>
                   <div className={`text-[10px] font-mono ${d.toDateString() === today.toDateString() ? "text-amber font-bold" : "text-muted-foreground"}`}>{d.getDate()}</div>
                   {tasksOn(d).slice(0, 3).map(t => (
-                    <div key={t.id} className="text-[10px] truncate px-1 rounded bg-amber/15 text-amber mt-0.5" title={t.title}>{t.title}</div>
+                    <div key={t.id} className={`text-[10px] truncate px-1 rounded mt-0.5 ${t.status === "done" ? "bg-muted text-muted-foreground line-through" : "bg-amber/15 text-amber"}`} title={t.title}>{t.title}</div>
                   ))}
                   {tasksOn(d).length > 3 && <div className="text-[9px] text-muted-foreground">+{tasksOn(d).length - 3}</div>}
                 </>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -458,6 +479,104 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Day detail dialog */}
+      <Dialog open={!!selectedDay} onOpenChange={(o) => { if (!o) { setSelectedDay(null); setDayNewTitle(""); setDayNote(""); } }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4 text-amber" />
+              {selectedDay?.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedDay && (() => {
+            const dayTasks = tasks.filter(t => t.due_at && new Date(t.due_at).toDateString() === selectedDay.toDateString());
+            const dayNotes = notes.filter(n => {
+              if (n.task_id) {
+                const lt = tasks.find(t => t.id === n.task_id);
+                return lt?.due_at && new Date(lt.due_at).toDateString() === selectedDay.toDateString();
+              }
+              return new Date(n.created_at).toDateString() === selectedDay.toDateString();
+            });
+            const moveTask = async (id: string, dir: -1 | 1) => {
+              const t = tasks.find(x => x.id === id); if (!t) return;
+              const cur = t.due_at ? new Date(t.due_at) : new Date(selectedDay);
+              cur.setDate(cur.getDate() + dir);
+              await updateTask(id, { due_at: cur.toISOString() });
+            };
+            const addDayTask = async () => {
+              if (!dayNewTitle.trim()) return;
+              const [hh, mm] = (dayNewTime || "09:00").split(":").map(Number);
+              const dt = new Date(selectedDay); dt.setHours(hh || 9, mm || 0, 0, 0);
+              const { error } = await supabase.from("shared_tasks").insert({
+                title: dayNewTitle.trim(), owner: me, assignee: me,
+                priority: "normal", bucket: "today", due_at: dt.toISOString(),
+              });
+              if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+              setDayNewTitle(""); load();
+            };
+            const addDayNote = async () => {
+              if (!dayNote.trim()) return;
+              const { error } = await supabase.from("shared_notes").insert({ author: me, body: `[${selectedDay.toLocaleDateString()}] ${dayNote.trim()}`, task_id: null });
+              if (error) { toast({ title: "Note failed", description: error.message, variant: "destructive" }); return; }
+              setDayNote(""); load();
+            };
+            return (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tasks ({dayTasks.length})</div>
+                  {dayTasks.length === 0 && <p className="text-xs text-muted-foreground italic">No tasks scheduled.</p>}
+                  {dayTasks.map(t => (
+                    <div key={t.id} className="flex items-center gap-2 p-2 rounded border border-border bg-card/40">
+                      <button onClick={() => updateTask(t.id, { status: t.status === "done" ? "todo" : "done" })}
+                        className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${t.status === "done" ? "bg-amber border-amber" : "border-muted-foreground"}`}>
+                        {t.status === "done" && <Check className="w-2.5 h-2.5 text-background" />}
+                      </button>
+                      <Input value={t.title} onChange={e => updateTask(t.id, { title: e.target.value })} className="h-7 text-xs flex-1" />
+                      <Select value={t.assignee} onValueChange={v => updateTask(t.id, { assignee: v as Person })}>
+                        <SelectTrigger className="h-7 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>{PERSONS.map(p => <SelectItem key={p} value={p}>{personLabel(p).split(" ")[0]}</SelectItem>)}</SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" title="Move back 1 day" onClick={() => moveTask(t.id, -1)}>‹</Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" title="Move forward 1 day" onClick={() => moveTask(t.id, 1)}>›</Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteTask(t.id)}>
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2 items-center pt-1">
+                    <Input value={dayNewTitle} onChange={e => setDayNewTitle(e.target.value)} placeholder="Add task on this day…" className="h-8 text-xs" />
+                    <Input type="time" value={dayNewTime} onChange={e => setDayNewTime(e.target.value)} className="h-8 w-[110px] text-xs" />
+                    <Button size="sm" onClick={addDayTask} className="bg-amber text-background hover:bg-amber/90 h-8">
+                      <Plus className="w-3 h-3 mr-1" /> Add
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2 border-t border-border pt-3">
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Notes</div>
+                  <div className="flex gap-2">
+                    <Textarea value={dayNote} onChange={e => setDayNote(e.target.value)} rows={2} placeholder="Note for this day…" className="text-xs" />
+                    <Button onClick={addDayNote} disabled={!dayNote.trim()}>Save</Button>
+                  </div>
+                  <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                    {dayNotes.length === 0 && <p className="text-xs text-muted-foreground italic">No notes for this day.</p>}
+                    {dayNotes.map(n => (
+                      <div key={n.id} className="p-2 rounded bg-secondary/30 text-xs">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-[9px]">{personLabel(n.author).split(" ")[0]}</Badge>
+                          <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+                        </div>
+                        <p className="whitespace-pre-wrap">{n.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
