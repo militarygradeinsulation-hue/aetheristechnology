@@ -3655,6 +3655,7 @@ export type Database = {
       }
       rep_notes: {
         Row: {
+          attachments: Json
           body: string
           code: string
           created_at: string
@@ -3665,6 +3666,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachments?: Json
           body?: string
           code: string
           created_at?: string
@@ -3675,6 +3677,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachments?: Json
           body?: string
           code?: string
           created_at?: string
