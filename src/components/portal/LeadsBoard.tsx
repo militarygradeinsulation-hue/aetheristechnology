@@ -777,8 +777,90 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 )}
               </div>
             )}
+            {fc && (
+              <div className="space-y-2 mt-3 pt-3 border-t border-amber/20 text-xs">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Firecrawl — Company Intel</p>
+                {fc.json && (
+                  <div className="space-y-1">
+                    {fc.json.legal_name && <p><span className="text-muted-foreground">Legal name:</span> <span className="text-foreground font-semibold">{fc.json.legal_name}</span></p>}
+                    {fc.json.tagline && <p className="italic text-muted-foreground">"{fc.json.tagline}"</p>}
+                    {fc.json.description && <p className="text-muted-foreground">{fc.json.description}</p>}
+                    {fc.json.founded_year && <p><span className="text-muted-foreground">Founded:</span> {fc.json.founded_year}</p>}
+                    {fc.json.employee_count && <p><span className="text-muted-foreground">Employees:</span> {fc.json.employee_count}</p>}
+                    {fc.json.headquarters && <p><span className="text-muted-foreground">HQ:</span> {fc.json.headquarters}</p>}
+                    {Array.isArray(fc.json.services) && fc.json.services.length > 0 && (
+                      <p><span className="text-muted-foreground">Services:</span> {fc.json.services.join(', ')}</p>
+                    )}
+                    {Array.isArray(fc.json.industries) && fc.json.industries.length > 0 && (
+                      <p><span className="text-muted-foreground">Industries:</span> {fc.json.industries.join(', ')}</p>
+                    )}
+                    {Array.isArray(fc.json.tech_stack) && fc.json.tech_stack.length > 0 && (
+                      <p><span className="text-muted-foreground">Tech:</span> {fc.json.tech_stack.join(', ')}</p>
+                    )}
+                    {Array.isArray(fc.json.leadership) && fc.json.leadership.length > 0 && (
+                      <div>
+                        <p className="text-muted-foreground">Leadership:</p>
+                        <ul className="pl-4 list-disc">
+                          {fc.json.leadership.slice(0, 8).map((p: any, i: number) => (
+                            <li key={i}>{p.name}{p.title ? ` — ${p.title}` : ''}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(fc.json.emails) && fc.json.emails.length > 0 && (
+                      <p><span className="text-muted-foreground">Emails on site:</span> {fc.json.emails.map((e: string, i: number) => (
+                        <a key={i} href={`mailto:${e}`} className="text-amber hover:underline mr-2">{e}</a>
+                      ))}</p>
+                    )}
+                    {Array.isArray(fc.json.phones) && fc.json.phones.length > 0 && (
+                      <p><span className="text-muted-foreground">Phones on site:</span> {fc.json.phones.join(', ')}</p>
+                    )}
+                    {fc.json.social_links && (
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(fc.json.social_links).filter(([, v]) => !!v).map(([k, v]) => (
+                          <a key={k} href={String(v)} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{k}</a>
+                        ))}
+                      </div>
+                    )}
+                    {Array.isArray(fc.json.unique_selling_points) && fc.json.unique_selling_points.length > 0 && (
+                      <div>
+                        <p className="text-muted-foreground">USPs:</p>
+                        <ul className="pl-4 list-disc text-muted-foreground">
+                          {fc.json.unique_selling_points.slice(0, 6).map((u: string, i: number) => <li key={i}>{u}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {fc.summary && (
+                  <details className="text-muted-foreground">
+                    <summary className="cursor-pointer text-amber/80">AI Summary</summary>
+                    <p className="mt-1 whitespace-pre-wrap">{fc.summary}</p>
+                  </details>
+                )}
+                {Array.isArray(fc.web_results) && fc.web_results.length > 0 && (
+                  <details>
+                    <summary className="cursor-pointer text-amber/80">Web mentions ({fc.web_results.length})</summary>
+                    <ul className="pl-4 list-disc mt-1 space-y-0.5">
+                      {fc.web_results.map((w: any, i: number) => (
+                        <li key={i}><a href={w.url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{w.title || w.url}</a>{w.description ? ` — ${w.description}` : ''}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {Array.isArray(fc.sitemap) && fc.sitemap.length > 0 && (
+                  <details>
+                    <summary className="cursor-pointer text-amber/80">Site map ({fc.sitemap.length} pages)</summary>
+                    <ul className="pl-4 list-disc mt-1 space-y-0.5 max-h-40 overflow-auto">
+                      {fc.sitemap.map((u: string, i: number) => (
+                        <li key={i}><a href={u} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{u}</a></li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
           </div>
-
           <Textarea
             value={notes}
             onChange={e => scheduleSaveNotes(e.target.value)}
