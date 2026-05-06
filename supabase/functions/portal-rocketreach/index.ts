@@ -54,8 +54,9 @@ serve(async (req) => {
     }
 
     const existing = (lead.enrichment as any)?.rocketreach;
-    if (existing && !force) {
-      return jsonResp({ ok: true, cached: true, person: existing });
+    const existingFc = (lead.enrichment as any)?.firecrawl;
+    if (existing && existingFc && !force) {
+      return jsonResp({ ok: true, cached: true, person: existing, firecrawl: existingFc });
     }
 
     const headers = { "Api-Key": RR_KEY, "Content-Type": "application/json" };
