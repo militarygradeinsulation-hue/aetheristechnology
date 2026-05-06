@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
-  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase,
+  Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
