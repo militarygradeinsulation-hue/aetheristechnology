@@ -167,6 +167,20 @@ const AdminDashboard: React.FC = () => {
     try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {}
   }, []);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [tabSearch, setTabSearch] = useState('');
+  const [tabSearchOpen, setTabSearchOpen] = useState(false);
+  const tabSearchResults = tabSearch.trim()
+    ? ALL_TAB_DEFS.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
+    : [];
+  const jumpToTab = (key: string) => {
+    if (!visibleTabs.includes(key)) setVisibleTabs([...visibleTabs, key]);
+    setActiveTab(key as typeof activeTab);
+    setTabSearch('');
+    setTabSearchOpen(false);
+    if (key === 'insights' && !recommendations) fetchInsights();
+    if (key === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+    if (key !== 'tools') setActiveTool(null);
+  };
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
