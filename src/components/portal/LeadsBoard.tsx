@@ -163,7 +163,14 @@ export const LeadsBoard: React.FC = () => {
             ) : (
               <div className="grid sm:grid-cols-2 gap-3">
                 {drip.map(l => (
-                  <div key={l.id} className="rounded-lg border border-amber/30 bg-amber/5 p-3">
+                  <div
+                    key={l.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setPreview(l)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPreview(l); }}
+                    className="rounded-lg border border-amber/30 bg-amber/5 p-3 cursor-pointer hover:bg-amber/10 hover:border-amber/50 transition-colors text-left"
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
@@ -182,7 +189,7 @@ export const LeadsBoard: React.FC = () => {
                       {l.email && <p className="truncate"><Mail className="w-3 h-3 inline mr-1" />{l.email}</p>}
                       {l.phone && <p className="truncate"><Phone className="w-3 h-3 inline mr-1" />{l.phone}</p>}
                     </div>
-                    <div className="mt-3 flex items-center justify-between gap-2">
+                    <div className="mt-3 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => handleSkipDrip(l)} className="text-muted-foreground">
                         <X className="w-3 h-3 mr-1" /> Skip
                       </Button>
