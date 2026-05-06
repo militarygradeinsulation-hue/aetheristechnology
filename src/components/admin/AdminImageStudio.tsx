@@ -201,6 +201,9 @@ export const AdminImageStudio: React.FC = () => {
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-background/85 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                  <Button size="sm" variant="outline" onClick={() => setPreview(img)}>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => { setEditTarget(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" /> Edit
                   </Button>
