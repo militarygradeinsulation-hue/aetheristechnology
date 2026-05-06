@@ -135,7 +135,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
       </div>
 
       {showStickyCTA && (
-        <div className="bg-amber py-1.5 px-4 text-center">
+        <div
+          className={`bg-amber overflow-hidden transition-all duration-300 ${
+            expanded ? 'max-h-12 py-1.5 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
+          } px-4 text-center`}
+        >
           <Link
             to="/assessment"
             className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
