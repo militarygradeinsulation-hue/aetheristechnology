@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { CaseFileCard } from '@/components/CaseFileCard';
+import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,8 @@ import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
+import architectLogo from '@/assets/architect-logo.jpg';
+import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
