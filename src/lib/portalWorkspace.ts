@@ -14,12 +14,22 @@ export interface RepLibraryItem {
   created_at: string;
 }
 
+export interface RepNoteAttachment {
+  name: string;
+  url: string;
+  path: string;
+  size: number;
+  type: string;
+  uploaded_at: string;
+}
+
 export interface RepNote {
   id: string;
   title: string;
   body: string;
   pinned: boolean;
   tags: string[];
+  attachments: RepNoteAttachment[];
   created_at: string;
   updated_at: string;
 }
