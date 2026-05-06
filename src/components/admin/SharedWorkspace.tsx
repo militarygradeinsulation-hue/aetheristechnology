@@ -458,23 +458,38 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             <div className="flex gap-2 items-center">
               <input ref={fileRef} type="file" onChange={handleFile} className="text-xs" />
             </div>
-            <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
-              {taskFiles.length === 0 && <p className="text-xs text-muted-foreground py-4 text-center">No files yet.</p>}
-              {taskFiles.map(f => (
-                <div key={f.id} className="flex items-center gap-2 p-2 rounded bg-secondary/30 text-xs">
-                  <FileText className="w-3 h-3 text-amber shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium">{f.filename}</div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {personLabel(f.uploader).split(" ")[0]} · {new Date(f.created_at).toLocaleDateString()}
-                      {f.size_bytes && ` · ${(f.size_bytes / 1024).toFixed(0)} KB`}
+            <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+              {taskFiles.length === 0 && <p className="text-xs text-muted-foreground py-4 text-center col-span-2">No files yet.</p>}
+              {taskFiles.map(f => {
+                const isImage = (f.mime_type || "").startsWith("image/");
+                const url = fileUrl(f.storage_path);
+                return (
+                  <div key={f.id} className="rounded border border-border/50 bg-secondary/30 overflow-hidden flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewFile(f)}
+                      className="aspect-video bg-background/50 flex items-center justify-center hover:bg-amber/10 transition-colors"
+                    >
+                      {isImage ? (
+                        <img src={url} alt={f.filename} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <FileText className="w-8 h-8 text-amber" />
+                      )}
+                    </button>
+                    <div className="p-2 text-xs flex items-center gap-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{f.filename}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">
+                          {personLabel(f.uploader).split(" ")[0]} · {new Date(f.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <a href={url} target="_blank" rel="noopener noreferrer" download={f.filename}>
+                        <Button variant="ghost" size="icon" className="h-6 w-6"><Download className="w-3 h-3" /></Button>
+                      </a>
                     </div>
                   </div>
-                  <a href={fileUrl(f.storage_path)} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon" className="h-6 w-6"><Download className="w-3 h-3" /></Button>
-                  </a>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
