@@ -34,6 +34,11 @@ interface Props {
 export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   const { toast } = useToast();
   const [view, setView] = useState<ViewKind>(() => (localStorage.getItem("ws.view") as ViewKind) || "filter");
+  const [calMonth, setCalMonth] = useState<Date>(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [dayNewTitle, setDayNewTitle] = useState("");
+  const [dayNewTime, setDayNewTime] = useState("09:00");
+  const [dayNote, setDayNote] = useState("");
   const [filter, setFilter] = useState<"mine" | "theirs" | "shared">("mine");
   const [tasks, setTasks] = useState<SharedTask[]>([]);
   const [notes, setNotes] = useState<SharedNote[]>([]);
