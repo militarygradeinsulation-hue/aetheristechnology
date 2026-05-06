@@ -593,6 +593,58 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* File preview dialog */}
+      <Dialog open={!!previewFile} onOpenChange={(o) => !o && setPreviewFile(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2 text-sm">
+              <FileText className="w-4 h-4 text-amber" /> {previewFile?.filename}
+            </DialogTitle>
+          </DialogHeader>
+          {previewFile && (() => {
+            const url = fileUrl(previewFile.storage_path);
+            const mime = previewFile.mime_type || "";
+            const ext = previewFile.filename.split(".").pop()?.toLowerCase() || "";
+            const isImage = mime.startsWith("image/") || ["png","jpg","jpeg","gif","webp","svg"].includes(ext);
+            const isPdf = mime === "application/pdf" || ext === "pdf";
+            const isVideo = mime.startsWith("video/");
+            const isAudio = mime.startsWith("audio/");
+            const isText = mime.startsWith("text/") || ["txt","md","csv","json","log"].includes(ext);
+            return (
+              <div className="space-y-3">
+                <div className="rounded border border-border/50 bg-background/50 overflow-hidden flex items-center justify-center min-h-[300px]">
+                  {isImage ? (
+                    <img src={url} alt={previewFile.filename} className="max-w-full max-h-[70vh] object-contain" />
+                  ) : isPdf ? (
+                    <iframe src={url} className="w-full h-[70vh]" title={previewFile.filename} />
+                  ) : isVideo ? (
+                    <video src={url} controls className="max-w-full max-h-[70vh]" />
+                  ) : isAudio ? (
+                    <audio src={url} controls className="w-full" />
+                  ) : isText ? (
+                    <iframe src={url} className="w-full h-[70vh] bg-background" title={previewFile.filename} />
+                  ) : (
+                    <div className="p-12 text-center text-muted-foreground text-sm">
+                      <FileText className="w-12 h-12 mx-auto mb-2 text-amber" />
+                      Preview not available for this file type.
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    {personLabel(previewFile.uploader)} · {new Date(previewFile.created_at).toLocaleString()}
+                    {previewFile.size_bytes ? ` · ${(previewFile.size_bytes / 1024).toFixed(0)} KB` : ""}
+                  </span>
+                  <a href={url} target="_blank" rel="noopener noreferrer" download={previewFile.filename}>
+                    <Button size="sm" variant="outline"><Download className="w-3 h-3 mr-1" /> Download</Button>
+                  </a>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
