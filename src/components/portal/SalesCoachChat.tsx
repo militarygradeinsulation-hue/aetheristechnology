@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 
