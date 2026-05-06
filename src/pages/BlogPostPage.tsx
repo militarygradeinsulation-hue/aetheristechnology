@@ -138,6 +138,7 @@ const BlogPostPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
