@@ -59,7 +59,7 @@ function saveUserSections(v: Partial<Record<SectionKey, boolean>>) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch { /* noop */ }
 }
 
-export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal" }) => {
+export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal", livePulseOnly = false }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
