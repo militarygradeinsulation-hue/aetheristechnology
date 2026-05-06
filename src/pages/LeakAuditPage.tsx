@@ -242,6 +242,15 @@ const LeakAuditPage = () => {
             {step === 'intake' && (
               <div className="space-y-8">
                 <div className="text-center">
+                  <div className="flex justify-center mb-6">
+                    <ClickToPlayVideo
+                      videoSrc={leakAuditIntro}
+                      posterSrc={architectLogo}
+                      alt="The Architect — watch the Leak Audit intro"
+                      circle
+                      className="w-64 h-64 md:w-80 md:h-80"
+                    />
+                  </div>
                   <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
                     Free Self-Audit · ~6 minutes
                   </div>
