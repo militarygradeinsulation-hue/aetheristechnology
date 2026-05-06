@@ -217,7 +217,8 @@ const PortalPage: React.FC = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
