@@ -87,7 +87,7 @@ const CareersPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Sales Rep — Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell digital transformation to playground & recreation companies. Earn 10% on every deal — including recurring revenue."
+        description="Independent commission sales role. Sell business forensics & digital transformation to SMB owners. Earn 15% on every deal — including recurring revenue."
         path="/careers"
       />
       <Background />
