@@ -150,7 +150,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'imagestudio', label: '🎨 Image Studio' }, { key: 'documents', label: '📄 Documents' },
     { key: 'outlook', label: '📤 Outlook Sync' }, { key: 'overview', label: 'Overview' },
     { key: 'playbook', label: '📘 Rep Playbook' }, { key: 'training', label: '🎓 Team Training' },
-    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'seo', label: '✨ SEO/AEO' },
+    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'companycal', label: '🗓 Company Calendar' }, { key: 'seo', label: '✨ SEO/AEO' },
     { key: 'team', label: '💬 Team Messages' }, { key: 'news', label: '📰 Aetheris News' },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
