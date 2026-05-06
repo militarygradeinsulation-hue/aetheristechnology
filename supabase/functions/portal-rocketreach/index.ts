@@ -169,6 +169,38 @@ serve(async (req) => {
       return jsonResp({ error: "No RocketReach or Firecrawl match found", details: raw?.detail || null }, 404);
     }
 
+    const rankEmail = (e: any): number => {
+      let s = 0;
+      const t = String(e?.type || "").toLowerCase();
+      const g = String(e?.grade || "").toUpperCase();
+      const addr = String(e?.email || "").toLowerCase();
+      if (t.includes("professional") || t.includes("work") || t.includes("current")) s += 60;
+      else if (t.includes("personal")) s += 10;
+      else s += 25;
+      if (e?.smtp_valid === "valid" || e?.smtp_valid === true) s += 30;
+      else if (e?.smtp_valid === "invalid" || e?.smtp_valid === false) s -= 40;
+      const gradeMap: Record<string, number> = { "A+": 25, A: 22, "A-": 20, B: 15, C: 8, D: 3, F: -20 };
+      s += gradeMap[g] ?? 0;
+      // de-prioritize generic mailboxes
+      if (/^(info|sales|support|contact|hello|admin|office|hr|billing|noreply|no-reply)@/.test(addr)) s -= 30;
+      // matching domain to website is good
+      if (domain && addr.endsWith("@" + domain)) s += 15;
+      return s;
+    };
+    const rawEmails = person ? (person.emails || []).map((e: any) => ({
+      email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid,
+    })) : [];
+    const rankedEmails = [...rawEmails].sort((a, b) => rankEmail(b) - rankEmail(a));
+    const bestEmail = rankedEmails[0]?.email || null;
+    const bestEmailReason = rankedEmails[0]
+      ? [
+          rankedEmails[0].type ? `type=${rankedEmails[0].type}` : null,
+          rankedEmails[0].grade ? `grade=${rankedEmails[0].grade}` : null,
+          rankedEmails[0].smtp_valid ? `smtp=${rankedEmails[0].smtp_valid}` : null,
+          domain && String(rankedEmails[0].email || "").toLowerCase().endsWith("@" + domain) ? "domain match" : null,
+        ].filter(Boolean).join(" · ")
+      : null;
+
     const summary = person ? {
       id: person.id,
       name: person.name,
@@ -176,9 +208,9 @@ serve(async (req) => {
       employer: person.current_employer,
       location: [person.city, person.region, person.country].filter(Boolean).join(", "),
       linkedin_url: person.linkedin_url,
-      emails: (person.emails || []).map((e: any) => ({
-        email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid,
-      })),
+      emails: rankedEmails,
+      best_email: bestEmail,
+      best_email_reason: bestEmailReason,
       phones: (person.phones || []).map((p: any) => ({ number: p.number, type: p.type, is_premium: p.is_premium })),
       profile_pic: person.profile_pic,
       job_history: (person.job_history || []).slice(0, 5).map((j: any) => ({
@@ -209,7 +241,7 @@ serve(async (req) => {
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
     if (!lead.email) {
-      const candidate = summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+      const candidate = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
       if (candidate) patch.email = String(candidate).toLowerCase();
     }
     const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
