@@ -84,6 +84,14 @@ export const WorkspaceSettings: React.FC = () => {
                 placeholder={f.placeholder}
                 rows={3}
               />
+            ) : f.type === 'select' ? (
+              <select
+                value={defaults[f.key] || 'default'}
+                onChange={e => set(f.key, e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {f.options!.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             ) : (
               <Input
                 value={defaults[f.key] || ''}
@@ -91,6 +99,7 @@ export const WorkspaceSettings: React.FC = () => {
                 placeholder={f.placeholder}
               />
             )}
+            {f.help && <p className="text-[11px] text-muted-foreground">{f.help}</p>}
           </div>
         ))}
       </div>
