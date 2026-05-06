@@ -65,7 +65,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <video
                 ref={videoRef}
                 src={heroLeakVideo}
-                muted
                 playsInline
                 onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
                 onPause={() => setPlaying(false)}
