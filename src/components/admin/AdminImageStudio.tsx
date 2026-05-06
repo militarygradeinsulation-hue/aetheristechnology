@@ -29,6 +29,7 @@ export const AdminImageStudio: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
+  const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const invoke = async (body: Record<string, unknown>) => {
