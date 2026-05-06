@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +42,7 @@ export const LeadsBoard: React.FC = () => {
   const [dripCount, setDripCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
+  const [preview, setPreview] = useState<RepLead | null>(null);
 
   const refreshDrip = useCallback(async () => {
     setLoading(true);
@@ -161,7 +163,14 @@ export const LeadsBoard: React.FC = () => {
             ) : (
               <div className="grid sm:grid-cols-2 gap-3">
                 {drip.map(l => (
-                  <div key={l.id} className="rounded-lg border border-amber/30 bg-amber/5 p-3">
+                  <div
+                    key={l.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setPreview(l)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPreview(l); }}
+                    className="rounded-lg border border-amber/30 bg-amber/5 p-3 cursor-pointer hover:bg-amber/10 hover:border-amber/50 transition-colors text-left"
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
@@ -180,7 +189,7 @@ export const LeadsBoard: React.FC = () => {
                       {l.email && <p className="truncate"><Mail className="w-3 h-3 inline mr-1" />{l.email}</p>}
                       {l.phone && <p className="truncate"><Phone className="w-3 h-3 inline mr-1" />{l.phone}</p>}
                     </div>
-                    <div className="mt-3 flex items-center justify-between gap-2">
+                    <div className="mt-3 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => handleSkipDrip(l)} className="text-muted-foreground">
                         <X className="w-3 h-3 mr-1" /> Skip
                       </Button>
@@ -311,6 +320,75 @@ export const LeadsBoard: React.FC = () => {
 
       {/* UPLOAD/DOWNLOAD */}
       {sub === 'upload' && <UploadDownloadPanel onUploaded={() => { setSub('mine'); refreshMine(); }} />}
+
+      {/* LEAD PREVIEW DIALOG */}
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="max-w-lg">
+          {preview && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display flex items-center gap-2">
+                  {preview.business_name || preview.email || 'Lead'}
+                  {typeof preview.score === 'number' && (
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40">
+                      Score {preview.score}
+                    </span>
+                  )}
+                </DialogTitle>
+                <DialogDescription>
+                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || '—'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                {preview.contact_name && (
+                  <p><span className="text-muted-foreground">Contact:</span> <span className="text-foreground">{preview.contact_name}</span></p>
+                )}
+                {preview.email && (
+                  <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-amber" />
+                    <a href={`mailto:${preview.email}`} className="text-amber hover:underline break-all">{preview.email}</a>
+                  </p>
+                )}
+                {preview.phone && (
+                  <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-amber" />
+                    <a href={`tel:${preview.phone}`} className="text-amber hover:underline">{preview.phone}</a>
+                  </p>
+                )}
+                {preview.website && (
+                  <p className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-amber" />
+                    <a href={preview.website.startsWith('http') ? preview.website : `https://${preview.website}`}
+                       target="_blank" rel="noopener noreferrer"
+                       className="text-amber hover:underline break-all">{preview.website}</a>
+                  </p>
+                )}
+                {preview.why_fit && (
+                  <div className="border-l-2 border-amber/40 pl-3">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Why this fits</p>
+                    <p className="text-foreground italic">{preview.why_fit}</p>
+                  </div>
+                )}
+                {preview.notes && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Notes</p>
+                    <p className="text-foreground whitespace-pre-wrap">{preview.notes}</p>
+                  </div>
+                )}
+                <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  Source: {preview.source.replace('_', ' ')}
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+                <Button variant="ghost" onClick={() => { handleSkipDrip(preview); setPreview(null); }}>
+                  <X className="w-4 h-4 mr-1" /> Skip
+                </Button>
+                <Button className="bg-amber text-background hover:bg-amber/90"
+                        onClick={() => { handleClaim(preview, 'drip'); setPreview(null); }}>
+                  Accept lead
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
