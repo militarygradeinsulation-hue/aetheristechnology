@@ -17,6 +17,12 @@ import {
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
 import { LeadGamePlan } from './LeadGamePlan';
+import { openRepMail } from '@/lib/repMail';
+
+const mailHandler = (email: string) => (e: React.MouseEvent) => {
+  e.preventDefault();
+  openRepMail(email);
+};
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
