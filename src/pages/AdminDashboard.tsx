@@ -43,6 +43,7 @@ import NotificationBell from '@/components/admin/NotificationBell';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
+import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
