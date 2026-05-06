@@ -86,7 +86,7 @@ serve(async (req) => {
     if (action === "notes_list") {
       const q = clean(body.q, 200);
       let query = supabase.from("rep_notes")
-        .select("id, title, body, pinned, tags, created_at, updated_at")
+        .select("id, title, body, pinned, tags, attachments, created_at, updated_at")
         .eq("code", claims.code)
         .order("pinned", { ascending: false })
         .order("updated_at", { ascending: false })
@@ -103,10 +103,20 @@ serve(async (req) => {
       const noteBody = clean(body.body, MAX_BODY_LEN) || "";
       const pinned = !!body.pinned;
       const tags = Array.isArray(body.tags) ? body.tags.slice(0, 20).map((t: unknown) => String(t).slice(0, 50)) : [];
+      const attachments = Array.isArray(body.attachments)
+        ? body.attachments.slice(0, 50).map((a: any) => ({
+            name: String(a?.name || "file").slice(0, 200),
+            url: String(a?.url || "").slice(0, 1000),
+            path: String(a?.path || "").slice(0, 500),
+            size: Number(a?.size) || 0,
+            type: String(a?.type || "").slice(0, 100),
+            uploaded_at: String(a?.uploaded_at || new Date().toISOString()).slice(0, 40),
+          })).filter((a: any) => a.url)
+        : [];
 
       if (id) {
         const { data, error } = await supabase.from("rep_notes")
-          .update({ title, body: noteBody, pinned, tags })
+          .update({ title, body: noteBody, pinned, tags, attachments })
           .eq("id", id).eq("code", claims.code)
           .select().maybeSingle();
         if (error) throw error;
@@ -115,7 +125,7 @@ serve(async (req) => {
         return jsonResp({ ok: true, note: data });
       } else {
         const { data, error } = await supabase.from("rep_notes")
-          .insert({ code: claims.code, title, body: noteBody, pinned, tags })
+          .insert({ code: claims.code, title, body: noteBody, pinned, tags, attachments })
           .select().maybeSingle();
         if (error) throw error;
         await logActivity(supabase, claims, "note_create", { id: data?.id });
