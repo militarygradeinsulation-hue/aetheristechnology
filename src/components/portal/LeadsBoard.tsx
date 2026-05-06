@@ -521,7 +521,29 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   const [rr, setRr] = useState<any>(lead.enrichment?.rocketreach || null);
   const [fc, setFc] = useState<any>(lead.enrichment?.firecrawl || null);
   const [rrLoading, setRrLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editFields, setEditFields] = useState({
+    business_name: lead.business_name || '',
+    contact_name: lead.contact_name || '',
+    email: lead.email || '',
+    phone: lead.phone || '',
+    website: lead.website || '',
+    industry: lead.industry || '',
+    location: lead.location || '',
+  });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setEditFields({
+      business_name: lead.business_name || '',
+      contact_name: lead.contact_name || '',
+      email: lead.email || '',
+      phone: lead.phone || '',
+      website: lead.website || '',
+      industry: lead.industry || '',
+      location: lead.location || '',
+    });
+  }, [lead.id, lead.business_name, lead.contact_name, lead.email, lead.phone, lead.website, lead.industry, lead.location]);
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
   useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
