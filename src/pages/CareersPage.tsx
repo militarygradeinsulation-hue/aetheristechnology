@@ -272,8 +272,8 @@ const PlaybookSection = () => (
             <TableRow>
               <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
               <TableCell className="text-right text-muted-foreground">varies</TableCell>
-              <TableCell className="text-right text-muted-foreground">tier-based</TableCell>
-              <TableCell className="text-right font-semibold text-primary">20–30% of every invoice</TableCell>
+              <TableCell className="text-right text-muted-foreground">flat 15%</TableCell>
+              <TableCell className="text-right font-semibold text-primary">15% of every invoice, for life</TableCell>
             </TableRow>
           </TableBody>
         </Table>
