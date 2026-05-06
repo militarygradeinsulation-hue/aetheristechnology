@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type Person = "admin" | "bradon";
 export const PERSONS: Person[] = ["admin", "bradon"];
-export const personLabel = (p: Person) => (p === "admin" ? "Casey (You)" : "Bradon");
+export const personLabel = (p: Person) => (p === "admin" ? "Joseph (You)" : "Bradon");
 
 export type TaskStatus = "todo" | "doing" | "done";
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
