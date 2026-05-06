@@ -143,6 +143,7 @@ export const CustomViewSelector: React.FC<Props> = ({ allTabs, visibleTabs, onCh
 
   return (
     <div className="flex items-center gap-2">
+      <Cloud className={`w-3 h-3 ${syncing ? "text-amber animate-pulse" : "text-muted-foreground/60"}`} aria-label={syncing ? "Syncing views…" : "Views synced"} />
       <Select value={active} onValueChange={applyView}>
         <SelectTrigger className="w-[180px] h-9">
           <Layout className="w-3 h-3 mr-1" />
