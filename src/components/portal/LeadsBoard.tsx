@@ -819,12 +819,23 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 {Array.isArray(rr.emails) && rr.emails.length > 0 && (
                   <div>
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Emails</p>
-                    {rr.emails.map((e: any, i: number) => (
-                      <p key={i}>
-                        <a href={`mailto:${e.email}`} className="text-amber hover:underline">{e.email}</a>
-                        <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}]</span>
-                      </p>
-                    ))}
+                    {rr.best_email && (
+                      <div className="mb-2 p-2 rounded border border-amber/40 bg-amber/10">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-0.5">★ Use This Email</p>
+                        <a href={`mailto:${rr.best_email}`} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
+                        {rr.best_email_reason && <p className="text-[10px] text-muted-foreground mt-0.5">{rr.best_email_reason}</p>}
+                      </div>
+                    )}
+                    {rr.emails.map((e: any, i: number) => {
+                      const isBest = rr.best_email && e.email === rr.best_email;
+                      return (
+                        <p key={i} className={isBest ? 'opacity-60' : ''}>
+                          <a href={`mailto:${e.email}`} className="text-amber hover:underline">{e.email}</a>
+                          <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
+                          {isBest && <span className="ml-2 text-[10px] text-amber">★ best</span>}
+                        </p>
+                      );
+                    })}
                   </div>
                 )}
                 {Array.isArray(rr.phones) && rr.phones.length > 0 && (
