@@ -45,6 +45,7 @@ import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
+import { PortalDocuments } from '@/components/portal/PortalDocuments';
 
 type Tab = 'overview' | 'calendar' | 'commissions' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
 type ToolKey =
