@@ -116,8 +116,10 @@ serve(async (req) => {
         return jsonResp({ error: `You already have ${MAX_ACTIVE_CLAIMED} active leads. Close some first.` }, 400);
       }
 
-      // Allow claim if: lead is unclaimed AND (unassigned OR assigned to this rep)
-      const { data, error } = await supabase
+      // Allow claim if: lead is unclaimed AND (unassigned OR assigned to this rep).
+      // If the hosted API schema cache is momentarily stale for assignment columns,
+      // fall back to the core claim update so reps can still accept visible leads.
+      let { data, error } = await supabase
         .from("rep_leads")
         .update({
           claimed_by_code: claims.code,
@@ -132,6 +134,24 @@ serve(async (req) => {
         .or(`assigned_to_code.is.null,assigned_to_code.eq.${claims.code}`)
         .select("id,business_name")
         .maybeSingle();
+
+      if (error?.code === "42703" && String(error.message || "").includes("assigned_to_code")) {
+        console.warn("portal-leads claim assignment-column fallback:", error.message);
+        const fallback = await supabase
+          .from("rep_leads")
+          .update({
+            claimed_by_code: claims.code,
+            claimed_at: new Date().toISOString(),
+            status: "new",
+          })
+          .eq("id", id)
+          .is("claimed_by_code", null)
+          .select("id,business_name")
+          .maybeSingle();
+        data = fallback.data;
+        error = fallback.error;
+      }
+
       if (error) throw error;
       if (!data) return jsonResp({ error: "Already claimed by someone else." }, 409);
 
