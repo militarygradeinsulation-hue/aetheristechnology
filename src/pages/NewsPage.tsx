@@ -195,6 +195,7 @@ const NewsPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <SEOHead
         title="Aetheris News — Live AI & Industry Intelligence Feed"
         description="Live AI, business, marketing, security, and industry news — aggregated from the world's top sources. Stay ahead of what's actually moving."
