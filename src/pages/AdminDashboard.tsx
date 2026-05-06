@@ -470,7 +470,12 @@ const AdminDashboard: React.FC = () => {
 
         {/* Submissions */}
         {activeTab === 'submissions' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Full lead list with scan + assign */}
+            <AdminLeadBrowser />
+
+            <div className="space-y-4">
+            <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
             {submissions.length === 0 ? (
               <div className="glass p-12 rounded-xl text-center text-muted-foreground">No submissions yet.</div>
             ) : (
