@@ -450,6 +450,7 @@ const PortalPage: React.FC = () => {
 
         {/* PLAYBOOK */}
         {tab === 'calendar' && <RepCalendarView isAdmin={false} />}
+        {tab === 'companycal' && <CompanyCalendarRepView />}
 
         {tab === 'playbook' && <PortalPlaybook />}
 
