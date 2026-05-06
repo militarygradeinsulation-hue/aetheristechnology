@@ -90,7 +90,7 @@ export const portalLeads = {
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
-    return data as { ok: true; cached: boolean; person: any };
+    return data as { ok: true; cached: boolean; person: any; firecrawl?: any };
   },
 };
 

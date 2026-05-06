@@ -54,8 +54,9 @@ serve(async (req) => {
     }
 
     const existing = (lead.enrichment as any)?.rocketreach;
-    if (existing && !force) {
-      return jsonResp({ ok: true, cached: true, person: existing });
+    const existingFc = (lead.enrichment as any)?.firecrawl;
+    if (existing && existingFc && !force) {
+      return jsonResp({ ok: true, cached: true, person: existing, firecrawl: existingFc });
     }
 
     const headers = { "Api-Key": RR_KEY, "Content-Type": "application/json" };
@@ -63,6 +64,61 @@ serve(async (req) => {
     const name = (body.name || lead.contact_name || "").trim();
     const company = (body.company || lead.business_name || "").trim();
     const email = (body.email || lead.email || "").trim();
+
+    // Kick off Firecrawl in parallel for max company detail
+    const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    const websiteUrl = lead.website
+      ? (lead.website.startsWith("http") ? lead.website : `https://${lead.website}`)
+      : null;
+    const firecrawlPromise = (async () => {
+      if (!FC_KEY || !websiteUrl) return null;
+      try {
+        const [scrapeRes, mapRes, searchRes] = await Promise.all([
+          fetch("https://api.firecrawl.dev/v2/scrape", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: websiteUrl,
+              formats: ["markdown", "summary", "links", "branding", {
+                type: "json",
+                prompt: "Extract company info: legal_name, tagline, description, services (array), industries (array), founded_year, employee_count, headquarters, locations (array), phones (array), emails (array), social_links (object: linkedin, twitter, facebook, instagram, youtube), leadership (array of {name,title}), key_clients (array), tech_stack (array), unique_selling_points (array)"
+              }],
+              onlyMainContent: true,
+            }),
+          }).then(r => r.json()).catch(() => null),
+          fetch("https://api.firecrawl.dev/v2/map", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ url: websiteUrl, limit: 50 }),
+          }).then(r => r.json()).catch(() => null),
+          name || company ? fetch("https://api.firecrawl.dev/v2/search", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: `${name || ""} ${company || domain || ""} site:linkedin.com OR contact OR email`.trim(),
+              limit: 5,
+            }),
+          }).then(r => r.json()).catch(() => null) : null,
+        ]);
+        const sd = (scrapeRes as any)?.data || scrapeRes;
+        return {
+          summary: sd?.summary || null,
+          json: sd?.json || null,
+          branding: sd?.branding || null,
+          links_count: Array.isArray(sd?.links) ? sd.links.length : 0,
+          metadata: sd?.metadata || null,
+          markdown_excerpt: typeof sd?.markdown === "string" ? sd.markdown.slice(0, 4000) : null,
+          sitemap: Array.isArray((mapRes as any)?.links) ? (mapRes as any).links.slice(0, 50) : [],
+          web_results: Array.isArray((searchRes as any)?.data) ? (searchRes as any).data.slice(0, 5).map((r: any) => ({
+            url: r.url, title: r.title, description: r.description,
+          })) : [],
+          fetched_at: new Date().toISOString(),
+        };
+      } catch (e) {
+        console.error("Firecrawl error:", e);
+        return null;
+      }
+    })();
 
     let person: any = null;
     let raw: any = null;
@@ -107,11 +163,13 @@ serve(async (req) => {
       }
     }
 
-    if (!person) {
-      return jsonResp({ error: "No RocketReach match found", details: raw?.detail || null }, 404);
+    const firecrawl = await firecrawlPromise;
+
+    if (!person && !firecrawl) {
+      return jsonResp({ error: "No RocketReach or Firecrawl match found", details: raw?.detail || null }, 404);
     }
 
-    const summary = {
+    const summary = person ? {
       id: person.id,
       name: person.name,
       title: person.current_title || person.normalized_title,
@@ -130,17 +188,27 @@ serve(async (req) => {
       links: person.links || {},
       lookup_status: person.status,
       fetched_at: new Date().toISOString(),
-    };
+    } : null;
 
-    // Save to enrichment.rocketreach + autosave any newly discovered email/phone if blank
-    const newEnrichment = { ...(lead.enrichment as any || {}), rocketreach: summary };
+    // Save to enrichment.rocketreach + firecrawl + autosave discovered contact info
+    const newEnrichment = {
+      ...(lead.enrichment as any || {}),
+      ...(summary ? { rocketreach: summary } : {}),
+      ...(firecrawl ? { firecrawl } : {}),
+    };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
-    if (!lead.email && summary.emails?.[0]?.email) patch.email = summary.emails[0].email.toLowerCase();
-    if (summary.phones?.[0]?.number) {
-      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
-      if (!cur?.phone) patch.phone = summary.phones[0].number;
+    const fcJson = firecrawl?.json as any;
+    if (!lead.email) {
+      const candidate = summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+      if (candidate) patch.email = String(candidate).toLowerCase();
     }
-    if (!lead.contact_name && summary.name) patch.contact_name = summary.name;
+    const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
+    if (phoneCandidate) {
+      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
+      if (!cur?.phone) patch.phone = phoneCandidate;
+    }
+    if (!lead.contact_name && summary?.name) patch.contact_name = summary.name;
+    if (!lead.business_name && fcJson?.legal_name) patch.business_name = fcJson.legal_name;
 
     await supabase.from("rep_leads").update(patch).eq("id", leadId);
 
@@ -150,11 +218,11 @@ serve(async (req) => {
         rep_code: claims.code,
         rep_name: rep?.rep_name || null,
         event: "lead_rocketreach",
-        meta: { lead_id: leadId, person_id: summary.id, has_email: !!summary.emails?.length, has_phone: !!summary.phones?.length },
+        meta: { lead_id: leadId, person_id: summary?.id, has_email: !!summary?.emails?.length, has_phone: !!summary?.phones?.length, firecrawl: !!firecrawl },
       });
     } catch { /* ignore */ }
 
-    return jsonResp({ ok: true, cached: false, person: summary });
+    return jsonResp({ ok: true, cached: false, person: summary, firecrawl });
   } catch (e) {
     console.error("portal-rocketreach error:", e);
     return jsonResp({ error: e instanceof Error ? e.message : "Server error" }, 500);
