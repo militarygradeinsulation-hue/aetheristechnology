@@ -190,10 +190,10 @@ const CareersTestPage = () => {
 
           {phase === 'in_test' && (
             <div className="space-y-4">
-              <div className="sticky top-20 z-20 flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-card/80 backdrop-blur">
-                <div className="text-sm font-mono">Answered: {Object.keys(answers).length}/{questions.length}</div>
-                <div className={`text-base font-mono px-3 py-1 rounded ${remainingMs < 5 * 60000 ? 'bg-destructive/20 text-destructive' : 'bg-amber/15 text-amber'}`}>
-                  <Timer className="w-4 h-4 inline mr-1" /> {remaining}
+              <div className="sticky top-16 z-20 flex items-center justify-between gap-2 px-3 py-1.5 rounded-md border border-border/50 bg-card/90 backdrop-blur shadow-sm">
+                <div className="text-xs font-mono">{Object.keys(answers).length}/{questions.length}</div>
+                <div className={`text-xs font-mono px-2 py-0.5 rounded ${remainingMs < 5 * 60000 ? 'bg-destructive/20 text-destructive' : 'bg-amber/15 text-amber'}`}>
+                  <Timer className="w-3 h-3 inline mr-1" /> {remaining}
                 </div>
               </div>
               {questions.map((q, idx) => (
