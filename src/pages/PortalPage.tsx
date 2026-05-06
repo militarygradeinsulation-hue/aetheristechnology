@@ -220,7 +220,7 @@ const PortalPage: React.FC = () => {
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
-    { id: 'forecast', label: 'Forecast — Live Pulse', icon: <Activity className="w-4 h-4" /> },
+    { id: 'forecast', label: 'Forecast Center', icon: <Activity className="w-4 h-4" /> },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
@@ -362,7 +362,7 @@ const PortalPage: React.FC = () => {
         {tab === 'leads' && <LeadsBoard />}
 
         {/* FORECAST — Live Pulse only for reps; partners get full view in Company tab */}
-        {tab === 'forecast' && <ForecastCenter isPartner={isPartner} livePulseOnly={!isPartner} />}
+        {tab === 'forecast' && <ForecastCenter isPartner={isPartner} />}
 
         {/* MY TOOLS */}
         {tab === 'tools' && !activeTool && (
