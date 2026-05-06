@@ -190,11 +190,21 @@ serve(async (req) => {
       fetched_at: new Date().toISOString(),
     } : null;
 
-    // Save to enrichment.rocketreach + firecrawl + autosave discovered contact info
+    // Save to enrichment.rocketreach + firecrawl + append to deep_scan_history (full audit trail)
+    const prevEnrichment = (lead.enrichment as any) || {};
+    const prevHistory = Array.isArray(prevEnrichment.deep_scan_history) ? prevEnrichment.deep_scan_history : [];
+    const historyEntry = {
+      ran_at: new Date().toISOString(),
+      ran_by: claims.code,
+      forced: force,
+      rocketreach: summary,
+      firecrawl,
+    };
     const newEnrichment = {
-      ...(lead.enrichment as any || {}),
+      ...prevEnrichment,
       ...(summary ? { rocketreach: summary } : {}),
       ...(firecrawl ? { firecrawl } : {}),
+      deep_scan_history: [historyEntry, ...prevHistory].slice(0, 25),
     };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
