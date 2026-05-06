@@ -72,13 +72,16 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
   const [userSections, setUserSections] = useState<Partial<Record<SectionKey, boolean>>>(() => loadUserSections());
 
   const visible = useMemo<ForecastSectionVisibility>(() => {
+    if (livePulseOnly) {
+      return { tip: false, education: false, tech: false, industry: false, live_pulse: true, companies: false };
+    }
     const base = adminSections || { tip: true, education: true, tech: true, industry: true, live_pulse: true, companies: true };
     const merged: ForecastSectionVisibility = { ...base };
     for (const k of Object.keys(userSections) as SectionKey[]) {
       if (typeof userSections[k] === "boolean") merged[k] = (base[k] ?? true) && (userSections[k] as boolean);
     }
     return merged;
-  }, [adminSections, userSections]);
+  }, [adminSections, userSections, livePulseOnly]);
 
   const load = async () => {
     setLoading(true);
