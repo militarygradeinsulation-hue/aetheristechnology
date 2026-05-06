@@ -16,6 +16,7 @@ import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
+import { LeadGamePlan } from './LeadGamePlan';
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
@@ -689,6 +690,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           {lead.why_fit && (
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
+
+          {/* Rep Game Plan — adaptive coaching */}
+          <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
           <div className="flex flex-wrap gap-2">
             <select
               value={lead.status}
