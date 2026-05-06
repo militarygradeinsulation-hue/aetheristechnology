@@ -54,22 +54,27 @@ serve(async (req) => {
 
     if (action === "generate" || action === "edit") {
       if (!LOVABLE_API_KEY) return json({ error: "LOVABLE_API_KEY not configured" }, 500);
-      const prompt = (body.prompt as string || "").trim();
-      if (!prompt) return json({ error: "prompt required" }, 400);
+      const rawPrompt = (body.prompt as string || "").trim();
+      if (!rawPrompt) return json({ error: "prompt required" }, 400);
       const model = (body.model as string) || "google/gemini-3.1-flash-image-preview";
       const sourceImageUrl = body.source_image_url as string | undefined;
+      const aetherisStyle = !!body.aetheris_style;
+
+      const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nKeep composition clean and intentional. Subject:`;
+
+      const finalPrompt = aetherisStyle ? `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}` : rawPrompt;
 
       const messages: any[] = [];
       if (action === "edit" && sourceImageUrl) {
         messages.push({
           role: "user",
           content: [
-            { type: "text", text: prompt },
+            { type: "text", text: finalPrompt },
             { type: "image_url", image_url: { url: sourceImageUrl } },
           ],
         });
       } else {
-        messages.push({ role: "user", content: prompt });
+        messages.push({ role: "user", content: finalPrompt });
       }
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
