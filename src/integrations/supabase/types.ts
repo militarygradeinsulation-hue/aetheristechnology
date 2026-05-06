@@ -112,6 +112,86 @@ export type Database = {
           },
         ]
       }
+      admin_document_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          ip_address: string | null
+          rep_code: string
+          rep_name: string | null
+          signed_at: string
+          typed_signature: string
+          user_agent: string | null
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          rep_code: string
+          rep_name?: string | null
+          signed_at?: string
+          typed_signature: string
+          user_agent?: string | null
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          rep_code?: string
+          rep_name?: string | null
+          signed_at?: string
+          typed_signature?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "admin_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_documents: {
+        Row: {
+          content: string
+          created_at: string
+          doc_type: string
+          id: string
+          prompt: string | null
+          require_signature: boolean
+          status: string
+          title: string
+          updated_at: string
+          visible_to: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          doc_type?: string
+          id?: string
+          prompt?: string | null
+          require_signature?: boolean
+          status?: string
+          title: string
+          updated_at?: string
+          visible_to?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          doc_type?: string
+          id?: string
+          prompt?: string | null
+          require_signature?: boolean
+          status?: string
+          title?: string
+          updated_at?: string
+          visible_to?: string
+        }
+        Relationships: []
+      }
       admin_image_studio: {
         Row: {
           created_at: string

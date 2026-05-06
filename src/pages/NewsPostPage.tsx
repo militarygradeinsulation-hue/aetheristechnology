@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
+import { Background } from "@/components/Background";
 import { getNews, incrementNewsView, type NewsPost } from "@/lib/newsFeed";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
@@ -30,6 +31,7 @@ const NewsPostPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <SEOHead
         title={post ? `${post.title} | Aetheris News` : "Aetheris News"}
         description={post?.summary || "Field intelligence from the operator's desk."}

@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
+import { Background } from '@/components/Background';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RelatedPosts } from '@/components/RelatedPosts';
@@ -137,6 +138,7 @@ const BlogPostPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 

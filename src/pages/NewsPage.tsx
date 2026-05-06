@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
+import { Background } from "@/components/Background";
 import { listNews, type NewsPost } from "@/lib/newsFeed";
 import { Badge } from "@/components/ui/badge";
 import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw, X } from "lucide-react";
@@ -194,6 +195,7 @@ const NewsPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <SEOHead
         title="Aetheris News — Live AI & Industry Intelligence Feed"
         description="Live AI, business, marketing, security, and industry news — aggregated from the world's top sources. Stay ahead of what's actually moving."

@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { BlogList } from '@/components/BlogList';
 import { SEOHead } from '@/components/SEOHead';
+import { Background } from '@/components/Background';
 
 const BlogPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -28,6 +29,7 @@ const BlogPage = () => {
           }
         }}
       />
+      <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <BlogList />
