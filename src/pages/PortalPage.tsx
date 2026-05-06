@@ -255,30 +255,51 @@ const PortalPage: React.FC = () => {
           </Button>
         </div>
         {/* Tab nav */}
-        <nav className="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto">
-          {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                setTab(t.id);
-                setActiveTool(null);
-                logPortalActivity('tab_view', { tab: t.id });
-              }}
-              className={`relative flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
-                tab === t.id
-                  ? 'border-amber text-amber'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t.icon}{t.label}
-              {t.badge && t.badge > 0 ? (
-                <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
-                  {t.badge > 99 ? '99+' : t.badge}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </nav>
+        <div className="relative max-w-7xl mx-auto">
+          <button
+            type="button"
+            aria-label="Scroll tabs left"
+            onClick={() => document.getElementById('portal-tab-nav')?.scrollBy({ left: -240, behavior: 'smooth' })}
+            className="absolute left-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-r from-card/90 via-card/60 to-transparent text-muted-foreground hover:text-amber"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <nav
+            id="portal-tab-nav"
+            className="px-10 flex gap-1 overflow-x-auto scroll-smooth scrollbar-thin"
+          >
+            {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setTab(t.id);
+                  setActiveTool(null);
+                  logPortalActivity('tab_view', { tab: t.id });
+                }}
+                className={`relative flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
+                  tab === t.id
+                    ? 'border-amber text-amber'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t.icon}{t.label}
+                {t.badge && t.badge > 0 ? (
+                  <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
+                    {t.badge > 99 ? '99+' : t.badge}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </nav>
+          <button
+            type="button"
+            aria-label="Scroll tabs right"
+            onClick={() => document.getElementById('portal-tab-nav')?.scrollBy({ left: 240, behavior: 'smooth' })}
+            className="absolute right-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-l from-card/90 via-card/60 to-transparent text-muted-foreground hover:text-amber rotate-180"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
