@@ -148,7 +148,21 @@ const AdminDashboard: React.FC = () => {
     { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'seo', label: '✨ SEO/AEO' },
     { key: 'team', label: '💬 Team Messages' }, { key: 'news', label: '📰 Aetheris News' },
   ];
-  const [visibleTabs, setVisibleTabs] = useState<string[]>(ALL_TAB_DEFS.map(t => t.key));
+  const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
+  const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(VISIBLE_TABS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return ALL_TAB_DEFS.map(t => t.key);
+  });
+  const setVisibleTabs = useCallback((tabs: string[]) => {
+    setVisibleTabsState(tabs);
+    try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {}
+  }, []);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
