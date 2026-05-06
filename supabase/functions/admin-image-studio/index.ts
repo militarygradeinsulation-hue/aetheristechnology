@@ -103,9 +103,9 @@ serve(async (req) => {
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const { data: row, error: insErr } = await supabase.from("admin_image_studio").insert({
-        prompt, url: pub.publicUrl, storage_path: path, model,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model,
         source: action === "edit" ? "edited" : "generated",
-        metadata: action === "edit" ? { source_image_url: sourceImageUrl } : {},
+        metadata: { ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}), aetheris_style: aetherisStyle },
       }).select().single();
       if (insErr) throw insErr;
       return json({ image: row });
