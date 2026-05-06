@@ -29,6 +29,7 @@ const BlogPage = () => {
           }
         }}
       />
+      <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <BlogList />
