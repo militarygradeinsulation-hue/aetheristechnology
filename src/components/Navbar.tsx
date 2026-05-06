@@ -97,8 +97,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             ))}
           </div>
 
+          <Link
+            to="/careers"
+            onClick={() => trackEvent('click', { label: 'nav_careers', location: 'navbar' })}
+            className="ml-auto hidden md:inline-flex text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap text-sm tracking-wide"
+          >
+            Careers
+          </Link>
+
           <button
-            className="md:hidden text-foreground"
+            className="md:hidden ml-auto text-foreground"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
