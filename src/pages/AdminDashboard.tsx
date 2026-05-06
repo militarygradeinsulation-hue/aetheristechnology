@@ -135,7 +135,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'news' | 'systems' | 'workspace'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'news' | 'systems' | 'workspace' | 'imagestudio'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string }[] = [
     { key: 'workspace', label: '🤝 Workspace' },
     { key: 'insights', label: '🧠 AI Insights' }, { key: 'sales', label: '💵 Sales & Customers' },
@@ -144,6 +144,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'crm', label: '🗂 CRM' }, { key: 'forecast', label: '🔮 Forecast Center' },
     { key: 'submissions', label: 'Leads' }, { key: 'library', label: '📚 My Library' },
     { key: 'tools', label: '🛠 My Tools' }, { key: 'systems', label: '🔬 Forensics Systems' },
+    { key: 'imagestudio', label: '🎨 Image Studio' },
     { key: 'outlook', label: '📤 Outlook Sync' }, { key: 'overview', label: 'Overview' },
     { key: 'playbook', label: '📘 Rep Playbook' }, { key: 'training', label: '🎓 Team Training' },
     { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'seo', label: '✨ SEO/AEO' },
