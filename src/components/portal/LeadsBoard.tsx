@@ -584,6 +584,18 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
   };
 
+  const saveEdits = async () => {
+    setSaving(true);
+    try {
+      await portalLeads.updateStatus(lead.id, { ...editFields });
+      toast({ title: 'Lead updated' });
+      setEditing(false);
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
   const runScan = async (force = false) => {
     if (!scanUrl) { toast({ title: 'Add a website URL first', variant: 'destructive' }); return; }
     setOpen(true); // keep the row expanded while scan runs
