@@ -564,25 +564,28 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   const runScan = async (force = false) => {
     if (!scanUrl) { toast({ title: 'Add a website URL first', variant: 'destructive' }); return; }
+    setOpen(true); // keep the row expanded while scan runs
     setScanning(true);
     try {
       const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
       setScan(res.scan);
+      setOpen(true); // ensure still open after data lands
       toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete — saved to lead' });
-      onChanged();
+      // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setScanning(false); }
   };
 
   const runRocketReach = async (force = false) => {
+    setOpen(true);
     setRrLoading(true);
     try {
       const res = await portalLeads.rocketReach(lead.id, { force });
       setRr(res.person);
       if (res.firecrawl) setFc(res.firecrawl);
+      setOpen(true);
       toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
-      onChanged();
     } catch (e) {
       toast({ title: 'Deep scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setRrLoading(false); }
