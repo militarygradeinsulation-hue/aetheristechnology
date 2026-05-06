@@ -112,6 +112,39 @@ export type Database = {
           },
         ]
       }
+      admin_image_studio: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          model: string | null
+          prompt: string
+          source: string
+          storage_path: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          prompt?: string
+          source?: string
+          storage_path?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          prompt?: string
+          source?: string
+          storage_path?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       admin_kv: {
         Row: {
           key: string
