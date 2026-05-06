@@ -95,7 +95,7 @@ serve(async (req) => {
         .is("claimed_by_code", null)
         .gt("assignment_expires_at", new Date().toISOString());
 
-      return jsonResp({ ok: true, leads: data || [], activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED, dripCount: dripCount ?? 0 });
+      return jsonResp({ ok: true, leads: sorted, activeClaimed: activeCount ?? 0, maxActive: MAX_ACTIVE_CLAIMED, dripCount: dripCount ?? 0 });
     }
 
     // ---------- SKIP DRIP ----------
