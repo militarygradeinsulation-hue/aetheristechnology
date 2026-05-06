@@ -437,9 +437,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(lead.notes || '');
   const [saving, setSaving] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scan, setScan] = useState<any>(lead.enrichment?.scan || null);
+  const [scanUrl, setScanUrl] = useState(lead.website || '');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setNotes(lead.notes || ''); }, [lead.notes]);
+  useEffect(() => { setScan(lead.enrichment?.scan || null); }, [lead.enrichment]);
 
   const scheduleSaveNotes = (val: string) => {
     setNotes(val);
@@ -474,6 +478,19 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
   };
 
+  const runScan = async (force = false) => {
+    if (!scanUrl) { toast({ title: 'Add a website URL first', variant: 'destructive' }); return; }
+    setScanning(true);
+    try {
+      const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
+      setScan(res.scan);
+      toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete — saved to lead' });
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setScanning(false); }
+  };
+
   return (
     <div className="rounded-lg border border-border/50 bg-card/40">
       <button type="button" onClick={() => setOpen(o => !o)} className="w-full text-left p-3 flex items-start justify-between gap-2 hover:bg-amber/5 transition-colors">
@@ -484,6 +501,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           </p>
         </div>
         <div className="text-right text-xs text-muted-foreground flex-shrink-0">
+          {scan?.score != null && (
+            <p className="font-mono text-amber">Scan {scan.grade || ''} · {scan.score}</p>
+          )}
           <p>{lead.touch_count} touch{lead.touch_count === 1 ? '' : 'es'}</p>
           {lead.last_touched_at && <p>{new Date(lead.last_touched_at).toLocaleDateString()}</p>}
         </div>
@@ -517,6 +537,73 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               <RotateCcw className="w-3 h-3 mr-1" /> Release
             </Button>
           </div>
+
+          {/* Company Scan */}
+          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
+                <Search className="w-3 h-3" /> Company Scan
+              </p>
+              {scan?.scanned_at && (
+                <span className="text-[10px] text-muted-foreground">
+                  Last scanned {new Date(scan.scanned_at).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                value={scanUrl}
+                onChange={e => setScanUrl(e.target.value)}
+                placeholder="https://company.com"
+                className="flex-1 min-w-[200px] h-8 text-sm"
+              />
+              <Button
+                size="sm"
+                onClick={() => runScan(!!scan)}
+                disabled={scanning}
+                className="bg-amber text-background hover:bg-amber/90"
+              >
+                {scanning ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                {scan ? 'Re-scan' : 'Scan company'}
+              </Button>
+            </div>
+            {scan && (
+              <div className="space-y-2 mt-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {scan.score != null && (
+                    <span className="font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40">
+                      {scan.grade || ''} · Score {scan.score}
+                    </span>
+                  )}
+                  {scan.companyName && <span className="text-foreground font-semibold">{scan.companyName}</span>}
+                </div>
+                {scan.executiveSummary && (
+                  <p className="text-xs text-muted-foreground italic whitespace-pre-wrap">{scan.executiveSummary}</p>
+                )}
+                {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Top Gaps</p>
+                    {scan.gaps.slice(0, 6).map((g: any, i: number) => (
+                      <div key={i} className="text-xs border-l-2 border-amber/40 pl-2">
+                        <p className="font-semibold text-foreground">{g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span></p>
+                        <p className="text-muted-foreground">{g.description}</p>
+                        <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Next Steps</p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-0.5">
+                      {scan.nextSteps.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <Textarea
             value={notes}
             onChange={e => scheduleSaveNotes(e.target.value)}
