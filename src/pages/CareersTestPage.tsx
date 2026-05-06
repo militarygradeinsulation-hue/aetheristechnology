@@ -136,7 +136,7 @@ const CareersTestPage = () => {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
-        <div className="pt-24 pb-16 px-4 max-w-3xl mx-auto">
+        <div className="pt-24 pb-32 px-4 max-w-3xl mx-auto">
 
           {phase === 'intro' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
