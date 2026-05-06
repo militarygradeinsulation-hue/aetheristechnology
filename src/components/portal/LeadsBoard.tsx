@@ -828,7 +828,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     {rr.best_email && (
                       <div className="mb-2 p-2 rounded border border-amber/40 bg-amber/10">
                         <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-0.5">★ Use This Email</p>
-                        <a href={`mailto:${rr.best_email}`} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
+                        <a href={`mailto:${rr.best_email}`} onClick={mailHandler(rr.best_email)} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
                         {rr.best_email_reason && <p className="text-[10px] text-muted-foreground mt-0.5">{rr.best_email_reason}</p>}
                       </div>
                     )}
