@@ -187,7 +187,12 @@ export const AdminImageStudio: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {images.map(img => (
               <div key={img.id} className="group relative rounded-lg overflow-hidden border border-border bg-background/30">
-                <img src={img.url} alt={img.prompt} className="w-full h-44 object-cover" />
+                <img
+                  src={img.url}
+                  alt={img.prompt}
+                  className="w-full h-44 object-cover cursor-zoom-in"
+                  onClick={() => setPreview(img)}
+                />
                 <div className="p-2 space-y-1">
                   <p className="text-[11px] text-muted-foreground line-clamp-2 min-h-[2.5em]">{img.prompt || '(no prompt)'}</p>
                   <div className="flex items-center justify-between">
