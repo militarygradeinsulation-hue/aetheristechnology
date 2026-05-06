@@ -31,6 +31,7 @@ const NewsPostPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <Background />
       <SEOHead
         title={post ? `${post.title} | Aetheris News` : "Aetheris News"}
         description={post?.summary || "Field intelligence from the operator's desk."}
