@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2 } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
@@ -166,6 +167,20 @@ const AdminDashboard: React.FC = () => {
     try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {}
   }, []);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [tabSearch, setTabSearch] = useState('');
+  const [tabSearchOpen, setTabSearchOpen] = useState(false);
+  const tabSearchResults = tabSearch.trim()
+    ? ALL_TAB_DEFS.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
+    : [];
+  const jumpToTab = (key: string) => {
+    if (!visibleTabs.includes(key)) setVisibleTabs([...visibleTabs, key]);
+    setActiveTab(key as typeof activeTab);
+    setTabSearch('');
+    setTabSearchOpen(false);
+    if (key === 'insights' && !recommendations) fetchInsights();
+    if (key === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+    if (key !== 'tools') setActiveTool(null);
+  };
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
   const [postingSchedule, setPostingSchedule] = useState<{ id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[]>([]);
@@ -345,6 +360,48 @@ const AdminDashboard: React.FC = () => {
             <span className="text-xs text-muted-foreground hidden sm:inline">Auto-refreshes every 30s</span>
           </div>
           <div className="flex items-center gap-3">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={tabSearch}
+                onChange={(e) => { setTabSearch(e.target.value); setTabSearchOpen(true); }}
+                onFocus={() => setTabSearchOpen(true)}
+                onBlur={() => setTimeout(() => setTabSearchOpen(false), 150)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && tabSearchResults[0]) jumpToTab(tabSearchResults[0].key);
+                  if (e.key === 'Escape') { setTabSearch(''); setTabSearchOpen(false); }
+                }}
+                placeholder="Search tabs…"
+                className="pl-8 pr-8 h-9 w-64"
+              />
+              {tabSearch && (
+                <button
+                  onClick={() => { setTabSearch(''); setTabSearchOpen(false); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+              {tabSearchOpen && tabSearchResults.length > 0 && (
+                <div className="absolute right-0 mt-1 w-72 max-h-80 overflow-y-auto rounded-md border border-border bg-popover shadow-lg z-50">
+                  {tabSearchResults.map(t => (
+                    <button
+                      key={t.key}
+                      onMouseDown={(e) => { e.preventDefault(); jumpToTab(t.key); }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {tabSearchOpen && tabSearch && tabSearchResults.length === 0 && (
+                <div className="absolute right-0 mt-1 w-72 rounded-md border border-border bg-popover shadow-lg z-50 px-3 py-2 text-sm text-muted-foreground">
+                  No matching tabs
+                </div>
+              )}
+            </div>
             <NotificationBell me="admin" onCountChange={setUnreadNotifs} />
             <Link to="/app/dashboard">
               <Button variant="outline" size="sm" title="Open HubSpot revenue recovery dashboard">
