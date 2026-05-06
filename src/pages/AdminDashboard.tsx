@@ -360,6 +360,48 @@ const AdminDashboard: React.FC = () => {
             <span className="text-xs text-muted-foreground hidden sm:inline">Auto-refreshes every 30s</span>
           </div>
           <div className="flex items-center gap-3">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={tabSearch}
+                onChange={(e) => { setTabSearch(e.target.value); setTabSearchOpen(true); }}
+                onFocus={() => setTabSearchOpen(true)}
+                onBlur={() => setTimeout(() => setTabSearchOpen(false), 150)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && tabSearchResults[0]) jumpToTab(tabSearchResults[0].key);
+                  if (e.key === 'Escape') { setTabSearch(''); setTabSearchOpen(false); }
+                }}
+                placeholder="Search tabs…"
+                className="pl-8 pr-8 h-9 w-64"
+              />
+              {tabSearch && (
+                <button
+                  onClick={() => { setTabSearch(''); setTabSearchOpen(false); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+              {tabSearchOpen && tabSearchResults.length > 0 && (
+                <div className="absolute right-0 mt-1 w-72 max-h-80 overflow-y-auto rounded-md border border-border bg-popover shadow-lg z-50">
+                  {tabSearchResults.map(t => (
+                    <button
+                      key={t.key}
+                      onMouseDown={(e) => { e.preventDefault(); jumpToTab(t.key); }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {tabSearchOpen && tabSearch && tabSearchResults.length === 0 && (
+                <div className="absolute right-0 mt-1 w-72 rounded-md border border-border bg-popover shadow-lg z-50 px-3 py-2 text-sm text-muted-foreground">
+                  No matching tabs
+                </div>
+              )}
+            </div>
             <NotificationBell me="admin" onCountChange={setUnreadNotifs} />
             <Link to="/app/dashboard">
               <Button variant="outline" size="sm" title="Open HubSpot revenue recovery dashboard">
