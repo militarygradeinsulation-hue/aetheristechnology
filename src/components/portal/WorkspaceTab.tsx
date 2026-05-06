@@ -26,7 +26,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson = 'brad
             Your personal CRM — saved tool runs, notes, and defaults. Tied to your code.
           </p>
         </div>
-        {sub !== 'settings' && (
+        {(sub === 'history' || sub === 'notes') && (
           <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
