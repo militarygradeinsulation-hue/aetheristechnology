@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 
@@ -54,6 +54,10 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -109,6 +113,69 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     e.preventDefault();
     runChat(input.trim());
   };
+
+  const toggleRecording = useCallback(async () => {
+    if (isRecording) {
+      recorderRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setIsRecording(false);
+        const blob = new Blob(chunksRef.current, { type: mime || 'audio/webm' });
+        if (blob.size === 0) return;
+        setIsTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          let bin = '';
+          const bytes = new Uint8Array(buf);
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+          }
+          const b64 = btoa(bin);
+          const token = getPortalToken();
+          const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transcribe-audio`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-portal-token': token || '',
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ audio: b64, mimeType: mime || 'audio/webm' }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Transcription failed');
+          const text = (data.text || '').trim();
+          if (text) await runChat(text);
+        } catch (err) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant',
+            content: `**Mic error:** ${err instanceof Error ? err.message : 'Unknown'}`,
+          }]);
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+      recorderRef.current = rec;
+      rec.start();
+      setIsRecording(true);
+    } catch (err) {
+      setMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: `**Mic blocked:** ${err instanceof Error ? err.message : 'Allow microphone access in your browser.'}`,
+      }]);
+    }
+  }, [isRecording, runChat]);
 
   const reset = () => {
     setMessages([initialMessage]);
@@ -181,12 +248,26 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="border-t border-border/50 p-3 flex items-center gap-2 bg-card/40">
+        <button
+          type="button"
+          onClick={toggleRecording}
+          disabled={isLoading || isTranscribing}
+          aria-label={isRecording ? 'Stop recording' : 'Record voice'}
+          title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+          className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+            isRecording
+              ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
+              : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
+          }`}
+        >
+          {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+        </button>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isPartner ? 'Ask for company stats or sales coaching...' : 'Ask for a script, objection-buster, pitch advice...'}
-          disabled={isLoading}
+          placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
+          disabled={isLoading || isRecording || isTranscribing}
           className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
         />
         <button
