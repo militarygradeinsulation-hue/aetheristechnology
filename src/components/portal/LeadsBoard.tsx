@@ -899,7 +899,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     )}
                     {Array.isArray(fc.json.emails) && fc.json.emails.length > 0 && (
                       <p><span className="text-muted-foreground">Emails on site:</span> {fc.json.emails.map((e: string, i: number) => (
-                        <a key={i} href={`mailto:${e}`} className="text-amber hover:underline mr-2">{e}</a>
+                        <a key={i} href={`mailto:${e}`} onClick={mailHandler(e)} className="text-amber hover:underline mr-2">{e}</a>
                       ))}</p>
                     )}
                     {Array.isArray(fc.json.phones) && fc.json.phones.length > 0 && (
