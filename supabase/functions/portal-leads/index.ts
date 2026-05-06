@@ -55,7 +55,7 @@ serve(async (req) => {
     if (action === "list") {
       const view = body.view === "mine" ? "mine" : body.view === "drip" ? "drip" : "pool";
       let query = supabase.from("rep_leads").select(
-        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at,assigned_to_code,assignment_expires_at"
+        "id,business_name,contact_name,email,phone,website,industry,location,notes,source,score,why_fit,claimed_by_code,claimed_at,status,last_touched_at,touch_count,created_at,assigned_to_code,assignment_expires_at,enrichment,enriched_at"
       );
       if (view === "mine") {
         query = query.eq("claimed_by_code", claims.code).order("updated_at", { ascending: false }).limit(200);
@@ -245,6 +245,50 @@ serve(async (req) => {
       if (error) throw error;
       await logActivity(supabase, claims, "lead_download", { count: data?.length || 0 });
       return jsonResp({ ok: true, rows: data || [] });
+    }
+
+    // ---------- SCAN (company website insights, autosaved to lead) ----------
+    if (action === "scan") {
+      const id = sanitizeStr(body.id);
+      if (!id) return jsonResp({ error: "Missing id" }, 400);
+
+      const { data: lead, error: leadErr } = await supabase.from("rep_leads")
+        .select("id,website,business_name,claimed_by_code,enrichment")
+        .eq("id", id).eq("claimed_by_code", claims.code).maybeSingle();
+      if (leadErr) throw leadErr;
+      if (!lead) return jsonResp({ error: "Lead not found or not yours" }, 404);
+
+      const rawUrl = sanitizeStr(body.url) || lead.website;
+      if (!rawUrl) return jsonResp({ error: "No website on this lead. Add one first." }, 400);
+
+      const force = !!body.force;
+      const existing = (lead.enrichment as any)?.scan;
+      if (!force && existing?.score) {
+        return jsonResp({ ok: true, scan: existing, cached: true });
+      }
+
+      const supaUrl = Deno.env.get("SUPABASE_URL")!;
+      const scanRes = await fetch(`${supaUrl}/functions/v1/scan-website`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
+          apikey: secret,
+        },
+        body: JSON.stringify({ url: rawUrl }),
+      });
+      const scanData = await scanRes.json().catch(() => ({}));
+      if (!scanRes.ok || scanData?.error) {
+        return jsonResp({ error: scanData?.error || "Scan failed" }, 502);
+      }
+
+      const enrichment = { ...((lead.enrichment as any) || {}), scan: { ...scanData, scanned_at: new Date().toISOString(), scanned_url: rawUrl } };
+      await supabase.from("rep_leads")
+        .update({ enrichment, enriched_at: new Date().toISOString() })
+        .eq("id", id).eq("claimed_by_code", claims.code);
+
+      await logActivity(supabase, claims, "lead_scan", { lead_id: id, url: rawUrl, score: scanData?.score });
+      return jsonResp({ ok: true, scan: enrichment.scan, cached: false });
     }
 
     return jsonResp({ error: "Unknown action" }, 400);
