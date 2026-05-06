@@ -248,12 +248,26 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="border-t border-border/50 p-3 flex items-center gap-2 bg-card/40">
+        <button
+          type="button"
+          onClick={toggleRecording}
+          disabled={isLoading || isTranscribing}
+          aria-label={isRecording ? 'Stop recording' : 'Record voice'}
+          title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+          className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+            isRecording
+              ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
+              : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
+          }`}
+        >
+          {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+        </button>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isPartner ? 'Ask for company stats or sales coaching...' : 'Ask for a script, objection-buster, pitch advice...'}
-          disabled={isLoading}
+          placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
+          disabled={isLoading || isRecording || isTranscribing}
           className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
         />
         <button
