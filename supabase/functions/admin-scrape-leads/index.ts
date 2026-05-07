@@ -100,7 +100,7 @@ For each lead return: business_name, website (REQUIRED), industry, location, con
                     score: { type: "number" },
                     why_fit: { type: "string" },
                   },
-                  required: ["business_name", "score", "why_fit"],
+                  required: ["business_name", "website", "score", "why_fit"],
                 },
               },
             },
