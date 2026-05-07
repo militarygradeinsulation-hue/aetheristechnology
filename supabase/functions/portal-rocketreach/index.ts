@@ -228,6 +228,22 @@ serve(async (req) => {
       education: (person.education || []).slice(0, 3),
       links: person.links || {},
       lookup_status: person.status,
+      additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
+        const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
+        const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
+        return {
+          id: p.id,
+          name: p.name,
+          title: p.current_title || p.normalized_title,
+          employer: p.current_employer,
+          linkedin_url: p.linkedin_url,
+          location: [p.city, p.region, p.country].filter(Boolean).join(", "),
+          best_email: ranked[0]?.email || null,
+          emails: ranked,
+          phones: (p.phones || []).map((ph: any) => ({ number: ph.number, type: ph.type })),
+          profile_pic: p.profile_pic,
+        };
+      }),
       fetched_at: new Date().toISOString(),
     } : null;
 
