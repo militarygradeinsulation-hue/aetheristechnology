@@ -48,7 +48,7 @@ import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
 type ToolKey =
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
