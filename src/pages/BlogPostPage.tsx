@@ -304,9 +304,9 @@ const BlogPostPage = () => {
                   const secondHalf = html.slice(midIndex);
                   return (
                     <>
-                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: firstHalf }} />
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitize(firstHalf) }} />
                       <BlogMidCTA />
-                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: secondHalf }} />
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitize(secondHalf) }} />
                     </>
                   );
                 })()}
