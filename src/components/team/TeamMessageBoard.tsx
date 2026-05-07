@@ -59,8 +59,8 @@ export default function TeamMessageBoard({ isAdmin, authorName }: Props) {
 
   useEffect(() => {
     reload();
-    const unsub = subscribeTeamMessages(reload);
-    return () => unsub();
+    const iv = setInterval(reload, 15000);
+    return () => clearInterval(iv);
   }, []);
 
   const onPickFiles = async (files: FileList | null) => {
