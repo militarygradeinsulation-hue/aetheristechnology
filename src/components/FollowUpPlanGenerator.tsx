@@ -117,6 +117,7 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
 
       {result && (
         <div className="space-y-6">
+          <QuickDownloadBar toolType="follow_up_plan" title={`${form.businessType} — Follow-up — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           <div className="text-center mb-4">
             <h2 className="text-3xl font-bold text-foreground font-display mb-2">Your <span className="text-amber">14-Day</span> Follow-Up System</h2>
             {result.overview && <p className="text-muted-foreground max-w-2xl mx-auto">{result.overview}</p>}
