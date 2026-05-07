@@ -265,17 +265,15 @@ serve(async (req) => {
     };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
-    if (!lead.email) {
-      const candidate = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
-      if (candidate) patch.email = String(candidate).toLowerCase();
-    }
-    const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
-    if (phoneCandidate) {
-      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
-      if (!cur?.phone) patch.phone = phoneCandidate;
-    }
-    if (!lead.contact_name && summary?.name) patch.contact_name = summary.name;
-    if (!lead.business_name && fcJson?.legal_name) patch.business_name = fcJson.legal_name;
+    const bestEmailFinal = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+    const bestPhoneFinal = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
+    const bestNameFinal = summary?.name || null;
+    const bestBusinessFinal = fcJson?.legal_name || null;
+    // On force re-run OR empty fields, write the latest/best info
+    if (bestEmailFinal && (force || !lead.email)) patch.email = String(bestEmailFinal).toLowerCase();
+    if (bestPhoneFinal && (force || !lead.phone)) patch.phone = bestPhoneFinal;
+    if (bestNameFinal && (force || !lead.contact_name)) patch.contact_name = bestNameFinal;
+    if (bestBusinessFinal && (force || !lead.business_name)) patch.business_name = bestBusinessFinal;
 
     await supabase.from("rep_leads").update(patch).eq("id", leadId);
 
