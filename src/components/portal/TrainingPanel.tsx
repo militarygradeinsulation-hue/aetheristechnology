@@ -208,22 +208,30 @@ export const TrainingPanel: React.FC<Props> = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {active.attachments?.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-amber mb-2">Materials</p>
-                  <ul className="space-y-1">
-                    {active.attachments.map((a, i) => (
-                      <li key={i}>
-                        <a
-                          href={a.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-amber hover:underline"
-                        >
-                          <FileText className="w-3 h-3" /> {a.name} <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="space-y-3">
+                  {active.attachments.filter((a) => (a.kind || "").startsWith("video/") || /\.(mp4|webm|mov)$/i.test(a.url)).map((a, i) => (
+                    <div key={`v-${i}`} className="space-y-1">
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-amber">{a.name}</p>
+                      <video src={a.url} controls preload="metadata" className="w-full rounded-lg border border-border/50 bg-black" />
+                    </div>
+                  ))}
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-amber mb-2">Materials</p>
+                    <ul className="space-y-1">
+                      {active.attachments.map((a, i) => (
+                        <li key={i}>
+                          <a
+                            href={a.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-amber hover:underline"
+                          >
+                            <FileText className="w-3 h-3" /> {a.name} <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
             </CardContent>
