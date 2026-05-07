@@ -13,6 +13,14 @@ import { RelatedPosts } from '@/components/RelatedPosts';
 import { ShareButtons } from '@/components/ShareButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import DOMPurify from 'dompurify';
+
+const sanitize = (html: string) =>
+  DOMPurify.sanitize(html, {
+    ADD_ATTR: ['target', 'rel'],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover'],
+  });
 
 import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
