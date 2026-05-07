@@ -174,8 +174,22 @@ serve(async (req) => {
 
     const firecrawl = await firecrawlPromise;
 
+    // If nothing found, return cached data (if any) or a soft empty response — never 404
     if (!person && !firecrawl) {
-      return jsonResp({ error: "No RocketReach or Firecrawl match found", details: raw?.detail || null }, 404);
+      const cachedRr = (lead.enrichment as any)?.rocketreach || null;
+      const cachedFc = (lead.enrichment as any)?.firecrawl || null;
+      if (cachedRr || cachedFc) {
+        return jsonResp({ ok: true, cached: true, person: cachedRr, firecrawl: cachedFc, note: "No new data — showing previously saved scan" });
+      }
+      return jsonResp({
+        ok: true,
+        cached: false,
+        person: null,
+        firecrawl: null,
+        note: lead.website
+          ? "No matching person or company data found. Try adding a contact name or email to the lead and re-run."
+          : "Add a website URL to the lead first — Firecrawl needs it to pull company info.",
+      });
     }
 
     const rankEmail = (e: any): number => {
