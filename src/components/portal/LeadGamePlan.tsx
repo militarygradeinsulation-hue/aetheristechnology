@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Target, Search, MessageSquare, Wrench, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RepLead, LeadScan } from '@/lib/portalLeads';
+import DOMPurify from 'dompurify';
 
 interface Props {
   lead: RepLead;
