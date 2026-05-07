@@ -16,13 +16,12 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
   const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("shared_notifications")
-      .select("*").eq("recipient", me)
-      .order("created_at", { ascending: false }).limit(50);
-    if (data) {
-      setItems(data as SharedNotification[]);
-      onCountChange?.((data as SharedNotification[]).filter(i => !i.read_at).length);
-    }
+    try {
+      const { fetchNotifications } = await import("@/lib/sharedWorkspaceApi");
+      const data = await fetchNotifications(me);
+      setItems(data);
+      onCountChange?.(data.filter(i => !i.read_at).length);
+    } catch { /* ignore */ }
   }, [me, onCountChange]);
 
   useEffect(() => {
