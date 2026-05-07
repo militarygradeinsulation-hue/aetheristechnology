@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Target, Search, MessageSquare, Wrench, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RepLead, LeadScan } from '@/lib/portalLeads';
+import DOMPurify from 'dompurify';
 
 interface Props {
   lead: RepLead;
@@ -98,10 +99,16 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
     setTimeout(() => setCopiedIdx(null), 1500);
   };
 
-  const renderBullet = (txt: string, key: number) => (
-    <li key={key} className="text-xs text-muted-foreground leading-relaxed"
-      dangerouslySetInnerHTML={{ __html: txt.replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>') }} />
-  );
+  const renderBullet = (txt: string, key: number) => {
+    const safe = DOMPurify.sanitize(
+      txt.replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>'),
+      { ALLOWED_TAGS: ['strong'], ALLOWED_ATTR: ['class'] },
+    );
+    return (
+      <li key={key} className="text-xs text-muted-foreground leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: safe }} />
+    );
+  };
 
   const sections = [
     { title: 'Step 1 — When you claim it', subtitle: 'Triage & enrich', items: steps.triage },

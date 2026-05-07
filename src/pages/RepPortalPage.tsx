@@ -29,26 +29,25 @@ const RepPortalPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('rep_codes')
-        .select('rep_name, code, commission_rate, total_sales_cents, total_commission_cents, is_active, rep_email')
-        .eq('code', code.trim())
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data || data.rep_email?.toLowerCase() !== email.trim().toLowerCase()) {
+      const { data, error } = await supabase.functions.invoke('rep-portal-login', {
+        body: { code: code.trim() },
+      });
+      if (error || !data?.ok || !data?.profile) {
+        toast({ title: 'Invalid credentials', description: 'Code is invalid or inactive.', variant: 'destructive' });
+        return;
+      }
+      const profile = data.profile;
+      if ((profile.rep_email || '').toLowerCase() !== email.trim().toLowerCase()) {
         toast({ title: 'Invalid credentials', description: 'Code or email does not match.', variant: 'destructive' });
         return;
       }
-
       setRepData({
-        rep_name: data.rep_name,
-        code: data.code,
-        commission_rate: Number(data.commission_rate),
-        total_sales_cents: data.total_sales_cents,
-        total_commission_cents: data.total_commission_cents,
-        is_active: data.is_active,
+        rep_name: profile.rep_name,
+        code: profile.code,
+        commission_rate: Number(profile.commission_rate),
+        total_sales_cents: profile.total_sales_cents,
+        total_commission_cents: profile.total_commission_cents,
+        is_active: true,
       });
     } catch {
       toast({ title: 'Error', description: 'Something went wrong. Try again.', variant: 'destructive' });

@@ -13,6 +13,14 @@ import { RelatedPosts } from '@/components/RelatedPosts';
 import { ShareButtons } from '@/components/ShareButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import DOMPurify from 'dompurify';
+
+const sanitize = (html: string) =>
+  DOMPurify.sanitize(html, {
+    ADD_ATTR: ['target', 'rel'],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover'],
+  });
 
 import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
@@ -296,9 +304,9 @@ const BlogPostPage = () => {
                   const secondHalf = html.slice(midIndex);
                   return (
                     <>
-                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: firstHalf }} />
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitize(firstHalf) }} />
                       <BlogMidCTA />
-                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: secondHalf }} />
+                      <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitize(secondHalf) }} />
                     </>
                   );
                 })()}

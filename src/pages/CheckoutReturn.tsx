@@ -169,10 +169,7 @@ function DeliverableReturn({ sessionId }: { sessionId: string }) {
   const { data: deliverables, isLoading } = useQuery({
     queryKey: ['purchase-deliverables', sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('purchase_deliverables')
-        .select('*')
-        .eq('stripe_session_id', sessionId);
+      const { data, error } = await supabase.rpc('get_deliverables_by_session', { _session_id: sessionId });
       if (error) throw error;
       return data || [];
     },
@@ -325,13 +322,9 @@ export default function CheckoutReturn() {
   const { data: hasDeliverables } = useQuery({
     queryKey: ['check-deliverables', sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('purchase_deliverables')
-        .select('id')
-        .eq('stripe_session_id', sessionId!)
-        .limit(1);
+      const { data, error } = await supabase.rpc('get_deliverables_by_session', { _session_id: sessionId! });
       if (error) throw error;
-      return data && data.length > 0;
+      return Array.isArray(data) && data.length > 0;
     },
     enabled: !!sessionId && !isPlaybook && !isScanReport && !isSubscription && !isDeliverable,
   });

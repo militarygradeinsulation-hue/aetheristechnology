@@ -5033,6 +5033,33 @@ export type Database = {
         Returns: number
       }
       get_avg_deal_size: { Args: { _account_id: string }; Returns: number }
+      get_deliverables_by_session: {
+        Args: { _session_id: string }
+        Returns: {
+          access_token: string | null
+          created_at: string
+          email: string
+          error_message: string | null
+          file_url: string | null
+          id: string
+          input_data: Json
+          intake_data: Json
+          output_data: Json
+          price_id: string
+          purchase_id: string | null
+          status: string
+          stripe_session_id: string
+          tool_type: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "purchase_deliverables"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       increment_rep_sales: {
         Args: { _code: string; _commission: number; _sales: number }
         Returns: undefined
@@ -5061,6 +5088,10 @@ export type Database = {
         Args: { _stale_minutes?: number }
         Returns: number
       }
+      update_deliverable_intake: {
+        Args: { _access_token: string; _intake_data: Json }
+        Returns: boolean
+      }
       upsert_customer_with_sale: {
         Args: {
           _amount_cents: number
@@ -5074,6 +5105,7 @@ export type Database = {
         }
         Returns: string
       }
+      validate_rep_code: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       claim_status:
