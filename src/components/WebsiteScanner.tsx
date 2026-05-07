@@ -9,6 +9,9 @@ import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { isPortalSession } from '@/lib/portalWorkspace';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 interface Gap {
   category: string;
@@ -252,6 +255,14 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
 
       setResult(data);
       trackEvent('website_scan_completed', { url: url.trim(), score: data.score });
+      if (isPortalSession() || hasValidAdminToken()) {
+        saveToolRun({
+          tool_type: 'website_scan',
+          title: `${url.trim()} — Website scan — ${new Date().toLocaleDateString()}`,
+          input_data: { url: url.trim() },
+          output_data: data,
+        }).catch(e => console.error('Library save failed:', e));
+      }
       checkPurchase(url.trim());
     } catch (err) {
       clearInterval(phaseInterval);
