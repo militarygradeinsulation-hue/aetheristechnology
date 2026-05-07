@@ -230,6 +230,7 @@ const PortalPage: React.FC = () => {
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
+    { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" /> },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
   ];
 
