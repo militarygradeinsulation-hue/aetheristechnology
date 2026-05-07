@@ -3554,6 +3554,42 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_image_studio: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          model: string | null
+          prompt: string
+          rep_code: string
+          source: string
+          storage_path: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          prompt?: string
+          rep_code: string
+          source?: string
+          storage_path?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          prompt?: string
+          rep_code?: string
+          source?: string
+          storage_path?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       rep_leads: {
         Row: {
           assigned_at: string | null
