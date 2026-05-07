@@ -24,7 +24,7 @@ const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 export const CompanyCalendarRepView: React.FC = () => {
   const [entries, setEntries] = useState<CompanyCalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<ViewMode>("list");
+  const [view, setView] = useState<ViewMode>("month");
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
 
