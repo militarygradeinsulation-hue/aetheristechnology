@@ -95,7 +95,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       {/* Results */}
       {result && (
         <div className="space-y-8">
-          {/* Score */}
+          <QuickDownloadBar toolType="friction_audit" title={`${form.url} — Friction audit — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Copy Friction Score</h2>
             <div className={`text-6xl font-bold font-display mb-2 ${(result.frictionScore || 0) >= 70 ? 'text-green-400' : (result.frictionScore || 0) >= 40 ? 'text-amber' : 'text-red-400'}`}>{result.frictionScore || 0}<span className="text-2xl text-muted-foreground">/100</span></div>
