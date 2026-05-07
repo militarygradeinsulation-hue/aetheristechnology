@@ -492,421 +492,97 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-          <CustomViewSelector allTabs={ALL_TAB_DEFS} visibleTabs={visibleTabs} onChange={setVisibleTabs} />
-          <span className="text-xs text-muted-foreground">{visibleTabs.length} of {ALL_TAB_DEFS.length} tabs shown</span>
-        </div>
-        <div className="flex gap-2 mb-8 flex-wrap">
-          {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label }) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setActiveTab(tab as typeof activeTab);
-                if (tab === 'insights' && !recommendations) fetchInsights();
-                if (tab === 'outlook' && postingSchedule.length === 0) fetchSchedule();
-                if (tab !== 'tools') setActiveTool(null);
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === tab ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+          <CustomViewSelector
+            allTabs={ALL_TAB_DEFS}
+            visibleTabs={visibleTabs}
+            onChange={setVisibleTabs}
+            layout={layout}
+            onLayoutChange={setLayout}
+            widgetSizes={widgetSizes}
+            onWidgetSizeChange={setWidgetSize}
+          />
+          <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+            {visibleTabs.length} / {ALL_TAB_DEFS.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
+          </span>
         </div>
 
-        {activeTab === 'workspace' && <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />}
-        {activeTab === 'imagestudio' && <AdminImageStudio />}
-        {activeTab === 'documents' && <AdminDocumentsPanel />}
-
-        {/* Overview */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {statCards.map(card => (
-                <div key={card.label} className="glass p-6 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <card.icon className={`w-5 h-5 ${card.color}`} />
-                    <span className="text-sm text-muted-foreground">{card.label}</span>
-                  </div>
-                  <div className="text-4xl font-bold text-foreground font-display">{card.value}</div>
-                </div>
-              ))}
-              <div className="glass p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <TrendingUp className="w-5 h-5 text-amber" />
-                  <span className="text-sm text-muted-foreground">Conversion Rate</span>
-                </div>
-                <div className="text-4xl font-bold text-foreground font-display">{conversionRate}%</div>
-              </div>
+        {layout === 'tabs' ? (
+          <>
+            <div className="flex gap-1.5 mb-8 flex-wrap">
+              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+                const active = activeTab === tab;
+                return (
+                  <Button
+                    key={tab}
+                    variant={active ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setActiveTab(tab as typeof activeTab);
+                      ensureTabData(tab);
+                      if (tab !== 'tools') setActiveTool(null);
+                    }}
+                    className={`h-8 ${active ? 'bg-amber text-background hover:bg-amber/90 border-amber' : 'border-border hover:border-amber/50 hover:text-amber'}`}
+                  >
+                    <Icon className="w-3.5 h-3.5 mr-1.5" />
+                    <span className="text-xs font-medium">{label}</span>
+                  </Button>
+                );
+              })}
             </div>
 
-            {/* Top Pages */}
-            {topPages.length > 0 && (
-              <div className="glass p-6 rounded-xl">
-                <h3 className="text-lg font-bold text-foreground font-display mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-amber" /> Top Pages
-                </h3>
-                <div className="space-y-2">
-                  {topPages.map(p => (
-                    <div key={p.page} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground font-mono">{p.page}</span>
-                      <div className="flex items-center gap-3">
-                        <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-amber rounded-full"
-                            style={{ width: `${Math.min(100, (p.views / (topPages[0]?.views || 1)) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-muted-foreground w-12 text-right">{p.views}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Event Breakdown */}
-            {eventBreakdown.length > 0 && (
-              <div className="glass p-6 rounded-xl">
-                <h3 className="text-lg font-bold text-foreground font-display mb-4">Event Breakdown</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {eventBreakdown.map(e => (
-                    <div key={e.type} className="bg-secondary/50 p-3 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-foreground font-display">{e.count}</div>
-                      <div className="text-xs text-muted-foreground font-mono mt-1">{e.type}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Manage Reps (codes hidden by default) */}
-            <ManageRepsPanel scope="admin" />
-
-            {/* Rep Performance (read-only sales totals) */}
-            <RepPerformancePanel />
-
-            {/* Lead Scraper → Rep Pool */}
-            <LeadPipelinePanel />
-
-            {/* Lead Browser: scan + assign to rep */}
-            <AdminLeadBrowser />
-
-            {/* Careers Test reviewer */}
-            <AdminCareersTest />
-
-            {/* Rep Activity (logins / claims / touches) */}
-            <RepActivityPanel />
-          </div>
-        )}
-
-        {/* Submissions */}
-        {activeTab === 'submissions' && (
-          <div className="space-y-6">
-            {/* Full lead list with scan + assign */}
-            <AdminLeadBrowser />
-
-            <div className="space-y-4">
-            <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
-            {submissions.length === 0 ? (
-              <div className="glass p-12 rounded-xl text-center text-muted-foreground">No submissions yet.</div>
-            ) : (
-              submissions.map(sub => (
-                <div key={sub.id} className={`glass p-6 rounded-xl border-l-4 ${sub.is_read ? 'border-l-border' : 'border-l-amber'}`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 flex-wrap mb-2">
-                        <span className="font-bold text-foreground">{sub.name}</span>
-                        {sub.company && <span className="text-sm text-muted-foreground">@ {sub.company}</span>}
-                        {!sub.is_read && <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-semibold">NEW</span>}
-                      </div>
-                      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
-                        <a href={`mailto:${sub.email}`} className="hover:text-amber">{sub.email}</a>
-                        {sub.phone && <a href={`tel:${sub.phone}`} className="hover:text-amber">{sub.phone}</a>}
-                        {sub.service_interest && <span className="text-amber/80">{sub.service_interest}</span>}
-                      </div>
-                      <p className="text-foreground text-sm whitespace-pre-wrap">{sub.message}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{new Date(sub.created_at).toLocaleString()}</p>
+            {renderTabBody(activeTab)}
+          </>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+              const size = widgetSizes[tab] || 2;
+              const colSpan =
+                size === 1 ? 'lg:col-span-1 md:col-span-1'
+                : size === 2 ? 'lg:col-span-2 md:col-span-2'
+                : size === 3 ? 'lg:col-span-3 md:col-span-2'
+                : 'lg:col-span-4 md:col-span-2';
+              return (
+                <div
+                  key={tab}
+                  className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}
+                >
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Icon className="w-4 h-4 text-amber shrink-0" />
+                      <span className="font-display font-bold text-sm text-foreground truncate">{label}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => toggleRead(sub.id, sub.is_read)} title={sub.is_read ? 'Mark unread' : 'Mark read'}>
-                        {sub.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteSubmission(sub.id)} title="Delete submission">
-                        <Trash2 className="w-4 h-4 text-red-400" />
+                      {([1, 2, 3, 4] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => setWidgetSize(tab, s)}
+                          className={`px-1.5 py-0.5 text-[10px] font-mono rounded border transition ${
+                            size === s
+                              ? 'bg-amber text-background border-amber'
+                              : 'border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                          }`}
+                          title={`Resize to ${s}/4 width`}
+                        >
+                          {s}/4
+                        </button>
+                      ))}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        title="Open full"
+                        onClick={() => { setLayout('tabs'); setActiveTab(tab as typeof activeTab); ensureTabData(tab); }}
+                      >
+                        <Maximize2 className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
-            </div>
-          </div>
-        )}
-
-        {/* Events / Campaign */}
-        {activeTab === 'events' && (
-          <div>
-            <div className="flex gap-2 mb-6">
-              {(['campaign', 'site'] as const).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setEventsSubTab(t)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    eventsSubTab === t ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {t === 'campaign' ? '📨 Powerhouse' : '🌐 Site Activity'}
-                </button>
-              ))}
-            </div>
-
-            {eventsSubTab === 'campaign' && <CampaignControlCenter />}
-
-            {eventsSubTab === 'site' && (
-              <div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['', 'page_view', 'linkedin_click', 'click', 'contact_form_submit'].map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setEventFilter(f)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        eventFilter === f ? 'bg-primary text-primary-foreground' : 'glass text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      {f || 'All'}
-                    </button>
-                  ))}
-                </div>
-                <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                  {filteredEvents.length === 0 ? (
-                    <div className="glass p-12 rounded-xl text-center text-muted-foreground">No events yet.</div>
-                  ) : (
-                    filteredEvents.map(evt => (
-                      <div key={evt.id} className="glass px-4 py-3 rounded-lg flex items-center gap-4 text-sm">
-                        <span className={`px-2 py-0.5 rounded text-xs font-mono ${
-                          evt.event_type === 'linkedin_click' ? 'bg-blue-500/20 text-blue-400' :
-                          evt.event_type === 'page_view' ? 'bg-green-500/20 text-green-400' :
-                          evt.event_type === 'contact_form_submit' ? 'bg-amber/20 text-amber' :
-                          'bg-muted text-muted-foreground'
-                        }`}>
-                          {evt.event_type}
-                        </span>
-                        <span className="text-muted-foreground flex-1 truncate">
-                          {JSON.stringify(evt.event_data)}
-                        </span>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(evt.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* AI Insights */}
-        {activeTab === 'insights' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
-                <Lightbulb className="w-6 h-6 text-amber" /> AI Growth Recommendations
-              </h2>
-              <Button onClick={fetchInsights} disabled={loadingInsights} variant="outline" size="sm">
-                {loadingInsights ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
-                Refresh Insights
-              </Button>
-            </div>
-
-            {loadingInsights ? (
-              <div className="glass p-12 rounded-xl text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-4" />
-                <p className="text-muted-foreground">Analyzing your data and generating recommendations...</p>
-              </div>
-            ) : recommendations ? (
-              <div className="glass p-8 rounded-xl">
-                <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
-                  {recommendations}
-                </div>
-              </div>
-            ) : (
-              <div className="glass p-12 rounded-xl text-center text-muted-foreground">
-                Click "Refresh Insights" to generate AI-powered recommendations.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* My Tools */}
-        {activeTab === 'tools' && (
-          <div className="space-y-6">
-            {!activeTool ? (
-              <>
-                <div className="flex items-center gap-2 mb-2">
-                  <Wrench className="w-6 h-6 text-amber" />
-                  <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
-                  <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {ADMIN_TOOLS.map(tool => (
-                    <button
-                      key={tool.key}
-                      onClick={() => setActiveTool(tool.key)}
-                      className={`glass p-6 rounded-xl text-left border transition-colors group ${
-                        tool.featured
-                          ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3'
-                          : 'border-border hover:border-amber/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                          tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'
-                        }`}>
-                          <tool.icon className="w-5 h-5 text-amber" />
-                        </div>
-                        <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
-                        {tool.featured && (
-                          <span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{tool.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
-                </Button>
-                {activeTool === 'allinone' && <AllInOneGenerator />}
-                {activeTool === 'social' && <SocialContentGenerator adminMode />}
-                {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
-                {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
-                {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
-                {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
-                {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
-                {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
-                {activeTool === 'playbook' && <PlaybookCreator />}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* My Library */}
-        {activeTab === 'systems' && <AdminForensicsSystemsPanel />}
-
-        {activeTab === 'library' && <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />}
-
-        {/* Content Engine */}
-        {activeTab === 'engine' && <ContentEngine />}
-
-        {/* CRM */}
-        {activeTab === 'crm' && <AdminCrm />}
-
-        {activeTab === 'commissions' && <CommissionStructurePanel />}
-
-        {/* Forecast Center */}
-        {activeTab === 'forecast' && <ForecastSettingsPanel />}
-
-        {/* Company Portal Preview */}
-        {activeTab === 'portal' && <CompanyPortalPreview />}
-
-        {/* Rep Playbook (schedule, plays library, quotas, idea of day) */}
-        {activeTab === 'playbook' && <RepPlaybookPanel />}
-
-        {activeTab === 'training' && <AdminTrainingPanel />}
-        {activeTab === 'calendars' && <AdminRepCalendarPanel />}
-        {activeTab === 'companycal' && <AdminCompanyCalendarPanel />}
-        {activeTab === 'sales' && <SalesCrmPanel />}
-
-        {/* Team Messages (admin can edit/delete/pin) */}
-        {activeTab === 'team' && <TeamMessageBoard isAdmin authorName="Admin" />}
-        {activeTab === 'news' && <AdminNewsPanel />}
-
-        {/* SEO Auto-Optimizer */}
-        {activeTab === 'seo' && <SEOOptimizer />}
-
-
-        {/* Outlook Sync + Posting Schedule */}
-        {activeTab === 'outlook' && (
-          <div className="space-y-8">
-            {/* Sync Button */}
-            <div className="glass p-6 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2">
-                    <Send className="w-5 h-5 text-amber" /> Sync Content to Outlook
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Pushes all published blogs and playbooks as draft emails in your Outlook mailbox for your AI to pull and post to social media.
-                  </p>
-                </div>
-                <Button onClick={handleOutlookSync} disabled={syncingOutlook} size="lg">
-                  {syncingOutlook ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                  {syncingOutlook ? 'Syncing...' : 'Sync Now'}
-                </Button>
-              </div>
-
-              {syncResults && (
-                <div className="space-y-2 mt-4">
-                  <p className="text-sm font-medium text-foreground">
-                    ✅ {syncResults.filter(r => r.status === 'synced').length} synced · 
-                    ⚠️ {syncResults.filter(r => r.status.startsWith('error')).length} errors · 
-                    📦 {syncResults.length} total
-                  </p>
-                  <div className="max-h-60 overflow-y-auto space-y-1">
-                    {syncResults.map((r, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <span className={`px-2 py-0.5 rounded text-xs font-mono ${
-                          r.status === 'synced' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                        }`}>
-                          {r.type}
-                        </span>
-                        <span className="text-foreground truncate flex-1">{r.title}</span>
-                        <span className={`text-xs ${r.status === 'synced' ? 'text-green-400' : 'text-red-400'}`}>{r.status}</span>
-                      </div>
-                    ))}
+                  <div className="p-3 max-h-[600px] overflow-y-auto">
+                    {renderTabBody(tab)}
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Posting Schedule */}
-            <div className="glass p-6 rounded-xl">
-              <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2 mb-4">
-                <Clock className="w-5 h-5 text-amber" /> LinkedIn Posting Schedule
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Weekly content framework based on the LinkedIn Growth Strategy. Your secondary AI should follow this calendar when pulling drafts.
-              </p>
-
-              {postingSchedule.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">Loading schedule...</div>
-              ) : (
-                <div className="space-y-3">
-                  {postingSchedule
-                    .sort((a, b) => a.day_of_week - b.day_of_week)
-                    .map(slot => (
-                      <div key={slot.id} className="flex items-center gap-4 bg-secondary/30 p-4 rounded-lg">
-                        <div className="w-12 h-12 rounded-lg bg-amber/10 flex items-center justify-center">
-                          <span className="text-amber font-bold font-mono text-sm">{slot.day_name}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-foreground">{slot.content_type}</div>
-                          <div className="text-sm text-muted-foreground">{slot.strategic_goal}</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground font-mono">{slot.post_time?.slice(0, 5) || '09:00'}</div>
-                        {slot.notes && (
-                          <div className="text-xs text-muted-foreground max-w-48 truncate" title={slot.notes}>{slot.notes}</div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
+              );
+            })}
           </div>
         )}
       </div>
