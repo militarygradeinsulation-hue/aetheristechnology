@@ -124,6 +124,7 @@ export const CustomViewSelector: React.FC<Props> = ({
   };
 
   const applyView = (name: string) => {
+    userTouched.current = true;
     setActive(name);
     if (name === "default") {
       onChange(allTabs.map(t => t.key));
@@ -159,12 +160,11 @@ export const CustomViewSelector: React.FC<Props> = ({
     if (!finalName) { toast({ title: "Name required", variant: "destructive" }); return; }
     if (finalName === "default") { toast({ title: "Reserved name", description: "Pick a different name.", variant: "destructive" }); return; }
 
+    userTouched.current = true;
     const newView: SavedView = { name: finalName, tabs: draft, layout: draftLayout, sizes: draftSizes };
     let next: SavedView[];
     if (editingName) {
-      // Edit/rename existing
       next = views.map(v => v.name === editingName ? newView : v);
-      // If renamed, update active marker
       if (active === editingName) setActive(finalName);
     } else {
       const exists = views.some(v => v.name === finalName);
@@ -173,6 +173,9 @@ export const CustomViewSelector: React.FC<Props> = ({
     setViews(next);
     setActive(finalName);
     applyViewLocal(newView);
+    // Force-push to cloud immediately so a slow hydration can't clobber it.
+    setSyncing(true);
+    kvSet({ views: next, active: finalName }).finally(() => setSyncing(false));
     toast({ title: editingName ? "View updated" : "View saved" });
     setOpen(false);
     setEditingName(null);
@@ -181,8 +184,12 @@ export const CustomViewSelector: React.FC<Props> = ({
 
   const deleteView = (name: string) => {
     if (!confirm(`Delete view "${name}"?`)) return;
-    setViews(views.filter(v => v.name !== name));
+    userTouched.current = true;
+    const next = views.filter(v => v.name !== name);
+    setViews(next);
     if (active === name) applyView("default");
+    setSyncing(true);
+    kvSet({ views: next, active: active === name ? "default" : active }).finally(() => setSyncing(false));
   };
 
   const toggleTab = (key: string) => {
