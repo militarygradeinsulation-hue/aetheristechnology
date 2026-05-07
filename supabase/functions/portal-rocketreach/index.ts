@@ -142,8 +142,9 @@ serve(async (req) => {
       if (r.ok && raw && (raw.id || raw.name)) person = raw;
     }
 
-    // 3) Last resort: search by company/domain to surface decision-makers
-    if (!person && (company || domain)) {
+    // 3) ALWAYS search by company/domain to surface 2-3 additional decision-makers
+    let additionalProfiles: any[] = [];
+    if (company || domain) {
       const r = await fetch(`${RR_BASE}/search`, {
         method: "POST",
         headers,
@@ -151,15 +152,23 @@ serve(async (req) => {
           query: {
             current_employer: company ? [company] : undefined,
             current_employer_domain: domain ? [domain] : undefined,
-            current_title: ["CEO", "Owner", "Founder", "President", "VP", "Director"],
+            current_title: ["CEO", "Owner", "Founder", "President", "COO", "CFO", "CMO", "VP", "Director", "Head", "Manager"],
           },
           start: 1,
-          page_size: 5,
+          page_size: 8,
         }),
       });
-      raw = await r.json().catch(() => null);
-      if (r.ok && raw?.profiles?.length) {
-        person = { ...raw.profiles[0], _alternates: raw.profiles.slice(1) };
+      const sraw = await r.json().catch(() => null);
+      if (r.ok && sraw?.profiles?.length) {
+        additionalProfiles = sraw.profiles;
+        if (!person) {
+          person = additionalProfiles[0];
+          additionalProfiles = additionalProfiles.slice(1);
+          raw = sraw;
+        } else {
+          // remove the primary person from alternates if present
+          additionalProfiles = additionalProfiles.filter((p: any) => p?.id !== person?.id && p?.name !== person?.name);
+        }
       }
     }
 
