@@ -16,6 +16,7 @@ import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
+import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { openRepMail } from '@/lib/repMail';
 
@@ -951,12 +952,45 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               </div>
             )}
           </div>
-          <Textarea
-            value={notes}
-            onChange={e => scheduleSaveNotes(e.target.value)}
-            placeholder="Notes — autosaves"
-            className="min-h-[80px] text-sm"
-          />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                Lead notes — autosaves (visible to admin)
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={async () => {
+                  const trimmed = (notes || '').trim();
+                  if (!trimmed) {
+                    toast({ title: 'Nothing to save', description: 'Write something in the lead note first.' });
+                    return;
+                  }
+                  try {
+                    await upsertRepNote({
+                      title: `Lead: ${lead.business_name || lead.contact_name || 'Untitled'}`,
+                      body: `${trimmed}\n\n— from lead ${lead.id}`,
+                      pinned: false,
+                      tags: ['lead'],
+                      attachments: [],
+                    });
+                    toast({ title: 'Saved to My Notes' });
+                  } catch (e: any) {
+                    toast({ title: 'Save failed', description: e.message, variant: 'destructive' });
+                  }
+                }}
+              >
+                <FileText className="w-3 h-3 mr-1" /> Save copy to My Notes
+              </Button>
+            </div>
+            <Textarea
+              value={notes}
+              onChange={e => scheduleSaveNotes(e.target.value)}
+              placeholder="Notes about this lead — autosaves and visible on the lead. Use 'Save copy to My Notes' to keep a private snapshot in your workspace."
+              className="min-h-[80px] text-sm"
+            />
+          </div>
         </div>
       )}
     </div>

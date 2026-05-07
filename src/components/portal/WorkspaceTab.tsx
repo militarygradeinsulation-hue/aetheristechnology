@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search, FileText, StickyNote, Settings as SettingsIcon, Users } from 'lucide-react';
+import { Search, FileText, StickyNote, Settings as SettingsIcon } from 'lucide-react';
 import { WorkspaceHistory } from './WorkspaceHistory';
 import { WorkspaceNotes } from './WorkspaceNotes';
 import { WorkspaceSettings } from './WorkspaceSettings';
-import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import type { Person } from '@/lib/sharedWorkspace';
 
-type SubTab = 'shared' | 'history' | 'notes' | 'settings';
+type SubTab = 'history' | 'notes' | 'settings';
 
 interface WorkspaceTabProps {
   sharedPerson?: Person;
 }
 
-export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson = 'bradon' }) => {
-  const [sub, setSub] = useState<SubTab>('shared');
+export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _sharedPerson = 'bradon' }) => {
+  const [sub, setSub] = useState<SubTab>('notes');
   const [search, setSearch] = useState('');
 
   return (
@@ -41,9 +40,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson = 'brad
 
       <div className="flex gap-1 border-b border-border">
         {([
-          { k: 'shared', label: 'Shared Live', Icon: Users },
-          { k: 'history', label: 'History', Icon: FileText },
           { k: 'notes', label: 'Notes', Icon: StickyNote },
+          { k: 'history', label: 'History', Icon: FileText },
           { k: 'settings', label: 'Settings', Icon: SettingsIcon },
         ] as const).map(({ k, label, Icon }) => (
           <button
@@ -58,7 +56,6 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson = 'brad
         ))}
       </div>
 
-      {sub === 'shared' && <SharedWorkspace me={sharedPerson} />}
       {sub === 'history' && <WorkspaceHistory searchQuery={search} />}
       {sub === 'notes' && <WorkspaceNotes searchQuery={search} />}
       {sub === 'settings' && <WorkspaceSettings />}
