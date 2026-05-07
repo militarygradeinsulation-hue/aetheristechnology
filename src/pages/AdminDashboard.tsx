@@ -180,6 +180,26 @@ const AdminDashboard: React.FC = () => {
     setVisibleTabsState(tabs);
     try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {}
   }, []);
+  // Layout: 'tabs' = classic tab switcher, 'widgets' = all visible tabs as resizable cards on one page
+  const LAYOUT_KEY = 'admin.layout.v1';
+  const SIZES_KEY = 'admin.widgetSizes.v1';
+  const [layout, setLayoutState] = useState<'tabs' | 'widgets'>(() => {
+    try { return (localStorage.getItem(LAYOUT_KEY) as 'tabs' | 'widgets') || 'tabs'; } catch { return 'tabs'; }
+  });
+  const setLayout = useCallback((l: 'tabs' | 'widgets') => {
+    setLayoutState(l);
+    try { localStorage.setItem(LAYOUT_KEY, l); } catch {}
+  }, []);
+  const [widgetSizes, setWidgetSizesState] = useState<Record<string, 1 | 2 | 3 | 4>>(() => {
+    try { return JSON.parse(localStorage.getItem(SIZES_KEY) || '{}'); } catch { return {}; }
+  });
+  const setWidgetSize = useCallback((key: string, size: 1 | 2 | 3 | 4) => {
+    setWidgetSizesState(prev => {
+      const next = { ...prev, [key]: size };
+      try { localStorage.setItem(SIZES_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
