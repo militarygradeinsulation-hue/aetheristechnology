@@ -591,4 +591,304 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
+// ============= Tab body subcomponents =============
+
+const OverviewBody: React.FC<{
+  statCards: { label: string; value: number; icon: React.ElementType; color: string }[];
+  conversionRate: string;
+  topPages: { page: string; views: number }[];
+  eventBreakdown: { type: string; count: number }[];
+}> = ({ statCards, conversionRate, topPages, eventBreakdown }) => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {statCards.map(card => (
+        <div key={card.label} className="glass p-6 rounded-xl">
+          <div className="flex items-center gap-3 mb-3">
+            <card.icon className={`w-5 h-5 ${card.color}`} />
+            <span className="text-sm text-muted-foreground">{card.label}</span>
+          </div>
+          <div className="text-4xl font-bold text-foreground font-display">{card.value}</div>
+        </div>
+      ))}
+      <div className="glass p-6 rounded-xl">
+        <div className="flex items-center gap-3 mb-3">
+          <TrendingUp className="w-5 h-5 text-amber" />
+          <span className="text-sm text-muted-foreground">Conversion Rate</span>
+        </div>
+        <div className="text-4xl font-bold text-foreground font-display">{conversionRate}%</div>
+      </div>
+    </div>
+    {topPages.length > 0 && (
+      <div className="glass p-6 rounded-xl">
+        <h3 className="text-lg font-bold text-foreground font-display mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-amber" /> Top Pages
+        </h3>
+        <div className="space-y-2">
+          {topPages.map(p => (
+            <div key={p.page} className="flex items-center justify-between text-sm">
+              <span className="text-foreground font-mono">{p.page}</span>
+              <div className="flex items-center gap-3">
+                <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-amber rounded-full" style={{ width: `${Math.min(100, (p.views / (topPages[0]?.views || 1)) * 100)}%` }} />
+                </div>
+                <span className="text-muted-foreground w-12 text-right">{p.views}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+    {eventBreakdown.length > 0 && (
+      <div className="glass p-6 rounded-xl">
+        <h3 className="text-lg font-bold text-foreground font-display mb-4">Event Breakdown</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {eventBreakdown.map(e => (
+            <div key={e.type} className="bg-secondary/50 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-foreground font-display">{e.count}</div>
+              <div className="text-xs text-muted-foreground font-mono mt-1">{e.type}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+    <ManageRepsPanel scope="admin" />
+    <RepPerformancePanel />
+    <LeadPipelinePanel />
+    <AdminLeadBrowser />
+    <AdminCareersTest />
+    <RepActivityPanel />
+  </div>
+);
+
+const SubmissionsBody: React.FC<{
+  submissions: ContactSubmission[];
+  toggleRead: (id: string, isRead: boolean) => void;
+  deleteSubmission: (id: string) => void;
+}> = ({ submissions, toggleRead, deleteSubmission }) => (
+  <div className="space-y-6">
+    <AdminLeadBrowser />
+    <div className="space-y-4">
+      <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
+      {submissions.length === 0 ? (
+        <div className="glass p-12 rounded-xl text-center text-muted-foreground">No submissions yet.</div>
+      ) : (
+        submissions.map(sub => (
+          <div key={sub.id} className={`glass p-6 rounded-xl border-l-4 ${sub.is_read ? 'border-l-border' : 'border-l-amber'}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 flex-wrap mb-2">
+                  <span className="font-bold text-foreground">{sub.name}</span>
+                  {sub.company && <span className="text-sm text-muted-foreground">@ {sub.company}</span>}
+                  {!sub.is_read && <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-semibold">NEW</span>}
+                </div>
+                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
+                  <a href={`mailto:${sub.email}`} className="hover:text-amber">{sub.email}</a>
+                  {sub.phone && <a href={`tel:${sub.phone}`} className="hover:text-amber">{sub.phone}</a>}
+                  {sub.service_interest && <span className="text-amber/80">{sub.service_interest}</span>}
+                </div>
+                <p className="text-foreground text-sm whitespace-pre-wrap">{sub.message}</p>
+                <p className="text-xs text-muted-foreground mt-2">{new Date(sub.created_at).toLocaleString()}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" onClick={() => toggleRead(sub.id, sub.is_read)} title={sub.is_read ? 'Mark unread' : 'Mark read'}>
+                  {sub.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => deleteSubmission(sub.id)} title="Delete submission">
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+);
+
+const EventsBody: React.FC<{
+  eventsSubTab: EventsSubTab;
+  setEventsSubTab: (t: EventsSubTab) => void;
+  eventFilter: string;
+  setEventFilter: (f: string) => void;
+  filteredEvents: SiteEvent[];
+}> = ({ eventsSubTab, setEventsSubTab, eventFilter, setEventFilter, filteredEvents }) => (
+  <div>
+    <div className="flex gap-2 mb-6">
+      {(['campaign', 'site'] as const).map(t => (
+        <Button key={t} size="sm" variant={eventsSubTab === t ? 'default' : 'outline'} onClick={() => setEventsSubTab(t)}>
+          {t === 'campaign' ? <><Megaphone className="w-3 h-3 mr-1" /> Powerhouse</> : <><Activity className="w-3 h-3 mr-1" /> Site Activity</>}
+        </Button>
+      ))}
+    </div>
+    {eventsSubTab === 'campaign' && <CampaignControlCenter />}
+    {eventsSubTab === 'site' && (
+      <div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {['', 'page_view', 'linkedin_click', 'click', 'contact_form_submit'].map(f => (
+            <Button key={f} size="sm" variant={eventFilter === f ? 'default' : 'outline'} className="h-7 text-xs" onClick={() => setEventFilter(f)}>
+              {f || 'All'}
+            </Button>
+          ))}
+        </div>
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          {filteredEvents.length === 0 ? (
+            <div className="glass p-12 rounded-xl text-center text-muted-foreground">No events yet.</div>
+          ) : (
+            filteredEvents.map(evt => (
+              <div key={evt.id} className="glass px-4 py-3 rounded-lg flex items-center gap-4 text-sm">
+                <span className={`px-2 py-0.5 rounded text-xs font-mono ${
+                  evt.event_type === 'linkedin_click' ? 'bg-blue-500/20 text-blue-400' :
+                  evt.event_type === 'page_view' ? 'bg-green-500/20 text-green-400' :
+                  evt.event_type === 'contact_form_submit' ? 'bg-amber/20 text-amber' :
+                  'bg-muted text-muted-foreground'
+                }`}>{evt.event_type}</span>
+                <span className="text-muted-foreground flex-1 truncate">{JSON.stringify(evt.event_data)}</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(evt.created_at).toLocaleString()}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+const InsightsBody: React.FC<{ recommendations: string; loadingInsights: boolean; fetchInsights: () => void }>
+= ({ recommendations, loadingInsights, fetchInsights }) => (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
+        <Lightbulb className="w-6 h-6 text-amber" /> AI Growth Recommendations
+      </h2>
+      <Button onClick={fetchInsights} disabled={loadingInsights} variant="outline" size="sm">
+        {loadingInsights ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
+        Refresh Insights
+      </Button>
+    </div>
+    {loadingInsights ? (
+      <div className="glass p-12 rounded-xl text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-4" />
+        <p className="text-muted-foreground">Analyzing your data and generating recommendations...</p>
+      </div>
+    ) : recommendations ? (
+      <div className="glass p-8 rounded-xl">
+        <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">{recommendations}</div>
+      </div>
+    ) : (
+      <div className="glass p-12 rounded-xl text-center text-muted-foreground">Click "Refresh Insights" to generate AI-powered recommendations.</div>
+    )}
+  </div>
+);
+
+const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolKey | null) => void }>
+= ({ activeTool, setActiveTool }) => (
+  <div className="space-y-6">
+    {!activeTool ? (
+      <>
+        <div className="flex items-center gap-2 mb-2">
+          <Wrench className="w-6 h-6 text-amber" />
+          <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
+          <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ADMIN_TOOLS.map(tool => (
+            <button key={tool.key} onClick={() => setActiveTool(tool.key)}
+              className={`glass p-6 rounded-xl text-left border transition-colors group ${
+                tool.featured ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3' : 'border-border hover:border-amber/40'
+              }`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'}`}>
+                  <tool.icon className="w-5 h-5 text-amber" />
+                </div>
+                <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
+                {tool.featured && (<span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
+              </div>
+              <p className="text-sm text-muted-foreground">{tool.description}</p>
+            </button>
+          ))}
+        </div>
+      </>
+    ) : (
+      <>
+        <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
+        </Button>
+        {activeTool === 'allinone' && <AllInOneGenerator />}
+        {activeTool === 'social' && <SocialContentGenerator adminMode />}
+        {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
+        {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+        {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
+        {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
+        {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
+        {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
+        {activeTool === 'playbook' && <PlaybookCreator />}
+      </>
+    )}
+  </div>
+);
+
+const OutlookBody: React.FC<{
+  syncingOutlook: boolean;
+  syncResults: { type: string; title: string; status: string }[] | null;
+  postingSchedule: { id: string; day_of_week: number; day_name: string; content_type: string; strategic_goal: string; post_time: string; notes: string | null }[];
+  handleOutlookSync: () => void;
+}> = ({ syncingOutlook, syncResults, postingSchedule, handleOutlookSync }) => (
+  <div className="space-y-8">
+    <div className="glass p-6 rounded-xl">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2">
+            <Send className="w-5 h-5 text-amber" /> Sync Content to Outlook
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Pushes all published blogs and playbooks as draft emails for your AI to pull and post.</p>
+        </div>
+        <Button onClick={handleOutlookSync} disabled={syncingOutlook} size="lg">
+          {syncingOutlook ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+          {syncingOutlook ? 'Syncing...' : 'Sync Now'}
+        </Button>
+      </div>
+      {syncResults && (
+        <div className="space-y-2 mt-4">
+          <p className="text-sm font-medium text-foreground">
+            ✅ {syncResults.filter(r => r.status === 'synced').length} synced · ⚠️ {syncResults.filter(r => r.status.startsWith('error')).length} errors · 📦 {syncResults.length} total
+          </p>
+          <div className="max-h-60 overflow-y-auto space-y-1">
+            {syncResults.map((r, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                <span className={`px-2 py-0.5 rounded text-xs font-mono ${r.status === 'synced' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{r.type}</span>
+                <span className="text-foreground truncate flex-1">{r.title}</span>
+                <span className={`text-xs ${r.status === 'synced' ? 'text-green-400' : 'text-red-400'}`}>{r.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+    <div className="glass p-6 rounded-xl">
+      <h2 className="text-xl font-bold text-foreground font-display flex items-center gap-2 mb-4">
+        <Clock className="w-5 h-5 text-amber" /> LinkedIn Posting Schedule
+      </h2>
+      {postingSchedule.length === 0 ? (
+        <div className="text-center text-muted-foreground py-8">Loading schedule...</div>
+      ) : (
+        <div className="space-y-3">
+          {postingSchedule.sort((a, b) => a.day_of_week - b.day_of_week).map(slot => (
+            <div key={slot.id} className="flex items-center gap-4 bg-secondary/30 p-4 rounded-lg">
+              <div className="w-12 h-12 rounded-lg bg-amber/10 flex items-center justify-center">
+                <span className="text-amber font-bold font-mono text-sm">{slot.day_name}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-foreground">{slot.content_type}</div>
+                <div className="text-sm text-muted-foreground">{slot.strategic_goal}</div>
+              </div>
+              <div className="text-xs text-muted-foreground font-mono">{slot.post_time?.slice(0, 5) || '09:00'}</div>
+              {slot.notes && (<div className="text-xs text-muted-foreground max-w-48 truncate" title={slot.notes}>{slot.notes}</div>)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 export default AdminDashboard;
