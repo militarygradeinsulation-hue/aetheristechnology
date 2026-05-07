@@ -16,6 +16,7 @@ import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
   STATUS_LABEL, STATUS_COLOR, type RepLead, type LeadStatus,
 } from '@/lib/portalLeads';
+import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { openRepMail } from '@/lib/repMail';
 
