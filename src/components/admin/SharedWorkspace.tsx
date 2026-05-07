@@ -89,10 +89,8 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
       } catch { /* ignore */ }
     };
     fetchUnread();
-    const ch = supabase.channel("shared-notifs-count")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_notifications" }, fetchUnread)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = setInterval(fetchUnread, 30000);
+    return () => { clearInterval(iv); };
   }, [me, onUnreadChange]);
 
   const filtered = useMemo(() => {
