@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 interface Gap {
   category: string;
