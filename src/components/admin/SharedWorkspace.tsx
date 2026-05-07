@@ -75,13 +75,8 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
 
   useEffect(() => {
     load();
-    const ch = supabase
-      .channel("shared-workspace")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_tasks" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_notes" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_files" }, load)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = setInterval(load, 20000);
+    return () => { clearInterval(iv); };
   }, [load]);
 
   // Push unread count to bell
