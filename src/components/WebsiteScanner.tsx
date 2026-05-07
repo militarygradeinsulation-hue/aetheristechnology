@@ -9,6 +9,9 @@ import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { isPortalSession } from '@/lib/portalWorkspace';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 interface Gap {
   category: string;
