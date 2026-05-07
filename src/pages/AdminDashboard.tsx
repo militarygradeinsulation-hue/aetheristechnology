@@ -380,6 +380,43 @@ const AdminDashboard: React.FC = () => {
 
   const conversionRate = stats.visitors > 0 ? ((stats.formSubmissions / stats.visitors) * 100).toFixed(1) : '0';
 
+  // Lazy fetchers when a tab/widget becomes visible
+  const ensureTabData = useCallback((key: string) => {
+    if (key === 'insights' && !recommendations) fetchInsights();
+    if (key === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+  }, [recommendations, postingSchedule.length, fetchInsights, fetchSchedule]);
+
+  // Render the body for a single tab key (used by both tabs and widgets layouts)
+  const renderTabBody = (key: string): React.ReactNode => {
+    switch (key) {
+      case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
+      case 'imagestudio': return <AdminImageStudio />;
+      case 'documents': return <AdminDocumentsPanel />;
+      case 'systems': return <AdminForensicsSystemsPanel />;
+      case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
+      case 'engine': return <ContentEngine />;
+      case 'crm': return <AdminCrm />;
+      case 'commissions': return <CommissionStructurePanel />;
+      case 'forecast': return <ForecastSettingsPanel />;
+      case 'portal': return <CompanyPortalPreview />;
+      case 'playbook': return <RepPlaybookPanel />;
+      case 'training': return <AdminTrainingPanel />;
+      case 'calendars': return <AdminRepCalendarPanel />;
+      case 'companycal': return <AdminCompanyCalendarPanel />;
+      case 'sales': return <SalesCrmPanel />;
+      case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
+      case 'news': return <AdminNewsPanel />;
+      case 'seo': return <SEOOptimizer />;
+      case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
+      case 'submissions': return <SubmissionsBody submissions={submissions} toggleRead={toggleRead} deleteSubmission={deleteSubmission} />;
+      case 'events': return <EventsBody eventsSubTab={eventsSubTab} setEventsSubTab={setEventsSubTab} eventFilter={eventFilter} setEventFilter={setEventFilter} filteredEvents={filteredEvents} />;
+      case 'insights': return <InsightsBody recommendations={recommendations} loadingInsights={loadingInsights} fetchInsights={fetchInsights} />;
+      case 'tools': return <ToolsBody activeTool={activeTool} setActiveTool={setActiveTool} />;
+      case 'outlook': return <OutlookBody syncingOutlook={syncingOutlook} syncResults={syncResults} postingSchedule={postingSchedule} handleOutlookSync={handleOutlookSync} />;
+      default: return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-4 py-4">
