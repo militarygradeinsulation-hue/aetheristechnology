@@ -169,10 +169,7 @@ function DeliverableReturn({ sessionId }: { sessionId: string }) {
   const { data: deliverables, isLoading } = useQuery({
     queryKey: ['purchase-deliverables', sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('purchase_deliverables')
-        .select('*')
-        .eq('stripe_session_id', sessionId);
+      const { data, error } = await supabase.rpc('get_deliverables_by_session', { _session_id: sessionId });
       if (error) throw error;
       return data || [];
     },
