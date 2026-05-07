@@ -170,7 +170,7 @@ serve(async (req) => {
           assigned_at: now.toISOString(),
           assignment_expires_at: expires.toISOString(),
         } : {}),
-      })).filter((r) => r.business_name);
+      })).filter((r) => r.business_name && r.website);
 
       const { data, error } = await supabase.from("rep_leads")
         .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
