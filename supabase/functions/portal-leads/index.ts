@@ -162,6 +162,20 @@ serve(async (req) => {
       if (error) throw error;
       if (!data) return jsonResp({ error: "Already claimed by someone else." }, 409);
 
+      // Auto-populate website from email domain if missing
+      try {
+        const { data: full } = await supabase.from("rep_leads")
+          .select("email,website,business_name").eq("id", id).maybeSingle();
+        if (full && !full.website && full.email) {
+          const guessed = guessWebsiteFromEmail(full.email);
+          if (guessed) {
+            await supabase.from("rep_leads").update({ website: guessed }).eq("id", id);
+          }
+        }
+      } catch (e) {
+        console.warn("website auto-populate failed:", e);
+      }
+
       await logActivity(supabase, claims, "lead_claim", { lead_id: id, business: data.business_name });
       return jsonResp({ ok: true });
     }
