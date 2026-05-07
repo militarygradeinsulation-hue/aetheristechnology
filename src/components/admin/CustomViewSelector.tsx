@@ -71,18 +71,19 @@ export const CustomViewSelector: React.FC<Props> = ({
   const [newName, setNewName] = useState("");
 
   const hydrated = useRef(false);
+  const userTouched = useRef(false);
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Hydrate from cloud
+  // Hydrate from cloud — but never overwrite changes the user already made this session.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const remote = await kvGet();
       if (cancelled) return;
-      if (remote && Array.isArray(remote.views)) {
+      if (!userTouched.current && remote && Array.isArray(remote.views)) {
         setViews(remote.views);
         const nextActive = remote.active || "default";
         setActive(nextActive);
@@ -90,7 +91,7 @@ export const CustomViewSelector: React.FC<Props> = ({
           const v = remote.views.find(v => v.name === nextActive);
           if (v) applyViewLocal(v);
         }
-      } else {
+      } else if (!remote) {
         if (active !== "default") {
           const v = views.find(v => v.name === active);
           if (v) applyViewLocal(v);
@@ -98,6 +99,11 @@ export const CustomViewSelector: React.FC<Props> = ({
         if (views.length > 0) await kvSet({ views, active });
       }
       hydrated.current = true;
+      // If the user already changed something before hydration, push that to cloud now.
+      if (userTouched.current) {
+        setSyncing(true);
+        kvSet({ views, active }).finally(() => setSyncing(false));
+      }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,6 +124,7 @@ export const CustomViewSelector: React.FC<Props> = ({
   };
 
   const applyView = (name: string) => {
+    userTouched.current = true;
     setActive(name);
     if (name === "default") {
       onChange(allTabs.map(t => t.key));
@@ -153,12 +160,11 @@ export const CustomViewSelector: React.FC<Props> = ({
     if (!finalName) { toast({ title: "Name required", variant: "destructive" }); return; }
     if (finalName === "default") { toast({ title: "Reserved name", description: "Pick a different name.", variant: "destructive" }); return; }
 
+    userTouched.current = true;
     const newView: SavedView = { name: finalName, tabs: draft, layout: draftLayout, sizes: draftSizes };
     let next: SavedView[];
     if (editingName) {
-      // Edit/rename existing
       next = views.map(v => v.name === editingName ? newView : v);
-      // If renamed, update active marker
       if (active === editingName) setActive(finalName);
     } else {
       const exists = views.some(v => v.name === finalName);
@@ -167,6 +173,9 @@ export const CustomViewSelector: React.FC<Props> = ({
     setViews(next);
     setActive(finalName);
     applyViewLocal(newView);
+    // Force-push to cloud immediately so a slow hydration can't clobber it.
+    setSyncing(true);
+    kvSet({ views: next, active: finalName }).finally(() => setSyncing(false));
     toast({ title: editingName ? "View updated" : "View saved" });
     setOpen(false);
     setEditingName(null);
@@ -175,8 +184,12 @@ export const CustomViewSelector: React.FC<Props> = ({
 
   const deleteView = (name: string) => {
     if (!confirm(`Delete view "${name}"?`)) return;
-    setViews(views.filter(v => v.name !== name));
+    userTouched.current = true;
+    const next = views.filter(v => v.name !== name);
+    setViews(next);
     if (active === name) applyView("default");
+    setSyncing(true);
+    kvSet({ views: next, active: active === name ? "default" : active }).finally(() => setSyncing(false));
   };
 
   const toggleTab = (key: string) => {
