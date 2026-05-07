@@ -71,18 +71,19 @@ export const CustomViewSelector: React.FC<Props> = ({
   const [newName, setNewName] = useState("");
 
   const hydrated = useRef(false);
+  const userTouched = useRef(false);
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Hydrate from cloud
+  // Hydrate from cloud — but never overwrite changes the user already made this session.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const remote = await kvGet();
       if (cancelled) return;
-      if (remote && Array.isArray(remote.views)) {
+      if (!userTouched.current && remote && Array.isArray(remote.views)) {
         setViews(remote.views);
         const nextActive = remote.active || "default";
         setActive(nextActive);
@@ -90,7 +91,7 @@ export const CustomViewSelector: React.FC<Props> = ({
           const v = remote.views.find(v => v.name === nextActive);
           if (v) applyViewLocal(v);
         }
-      } else {
+      } else if (!remote) {
         if (active !== "default") {
           const v = views.find(v => v.name === active);
           if (v) applyViewLocal(v);
@@ -98,6 +99,11 @@ export const CustomViewSelector: React.FC<Props> = ({
         if (views.length > 0) await kvSet({ views, active });
       }
       hydrated.current = true;
+      // If the user already changed something before hydration, push that to cloud now.
+      if (userTouched.current) {
+        setSyncing(true);
+        kvSet({ views, active }).finally(() => setSyncing(false));
+      }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
