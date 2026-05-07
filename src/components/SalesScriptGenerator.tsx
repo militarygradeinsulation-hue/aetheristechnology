@@ -110,6 +110,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
 
       {result && (
         <div className="space-y-8">
+          <QuickDownloadBar toolType="sales_scripts" title={`${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Call Script - always visible */}
           <div>
             <div className="flex items-center gap-2 mb-4">
