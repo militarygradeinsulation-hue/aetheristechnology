@@ -866,6 +866,39 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     </ul>
                   </div>
                 )}
+                {Array.isArray(rr.additional_contacts) && rr.additional_contacts.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-amber/20">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2">
+                      ★ Other Decision-Makers ({rr.additional_contacts.length})
+                    </p>
+                    <div className="space-y-2">
+                      {rr.additional_contacts.map((c: any, i: number) => (
+                        <div key={i} className="rounded border border-amber/20 bg-background/40 p-2">
+                          <div className="flex items-center gap-2">
+                            {c.profile_pic && <img src={c.profile_pic} alt="" className="w-7 h-7 rounded-full" />}
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-foreground truncate">{c.name}</p>
+                              <p className="text-muted-foreground text-[11px] truncate">{[c.title, c.employer].filter(Boolean).join(' · ')}</p>
+                            </div>
+                            {c.linkedin_url && (
+                              <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline text-[11px] inline-flex items-center gap-1">
+                                <ExternalLink className="w-3 h-3" /> LI
+                              </a>
+                            )}
+                          </div>
+                          {c.best_email && (
+                            <p className="mt-1">
+                              <a href={`mailto:${c.best_email}`} onClick={mailHandler(c.best_email)} className="text-amber hover:underline">{c.best_email}</a>
+                            </p>
+                          )}
+                          {Array.isArray(c.phones) && c.phones[0]?.number && (
+                            <p><a href={`tel:${c.phones[0].number}`} className="text-amber hover:underline">{c.phones[0].number}</a> <span className="text-muted-foreground text-[10px]">[{c.phones[0].type || '—'}]</span></p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {fc && (
