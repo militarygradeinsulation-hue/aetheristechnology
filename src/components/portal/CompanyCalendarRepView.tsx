@@ -138,16 +138,69 @@ export const CompanyCalendarRepView: React.FC = () => {
         </div>
       ) : view === "list" ? (
         <ListView entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
-      ) : view === "week" ? (
-        <WeekView entries={entries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
       ) : (
-        <MonthView entries={entries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+          <div>
+            {view === "week" ? (
+              <WeekView entries={entries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
+            ) : (
+              <MonthView entries={entries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
+            )}
+          </div>
+          <UpcomingSidebar entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
+        </div>
       )}
 
       {selectedEntry && (
         <EntryDialog entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
       )}
     </div>
+  );
+};
+
+// ---------- Upcoming events sidebar ----------
+const UpcomingSidebar: React.FC<{ entries: CompanyCalendarEntry[]; todayStr: string; onPick: (e: CompanyCalendarEntry) => void }>
+= ({ entries, todayStr, onPick }) => {
+  const upcoming = useMemo(() => {
+    return [...entries]
+      .filter(e => e.date >= todayStr)
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.title || "").localeCompare(b.title || ""));
+  }, [entries, todayStr]);
+
+  const fmt = (d: string) => {
+    const date = new Date(d + "T12:00:00");
+    if (d === todayStr) return "Today";
+    return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  };
+
+  return (
+    <Card className="lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] flex flex-col">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
+          <CalendarDays className="w-3 h-3" /> Upcoming Events
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2 overflow-y-auto">
+        {upcoming.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">Nothing on the schedule.</p>
+        ) : upcoming.map(e => {
+          const meta = KIND_META[e.kind];
+          return (
+            <button key={e.id} onClick={() => onPick(e)}
+              className={`w-full text-left rounded-md border p-2 text-xs ${meta.color} hover:opacity-90 transition`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">{fmt(e.date)}</span>
+                {e.pinned && <Pin className="w-3 h-3" />}
+              </div>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span>{meta.icon}</span>
+                <span className="font-semibold text-foreground line-clamp-2">{e.title}</span>
+              </div>
+            </button>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 };
 
