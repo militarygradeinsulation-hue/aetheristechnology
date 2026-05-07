@@ -80,30 +80,9 @@ export function useUnreadTeamMessages(viewerCode: string | null, activeTabIsChat
   useEffect(() => {
     if (!viewerCode) return;
     void refresh();
-    const ch = supabase
-      .channel(`team_unread_${viewerCode}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "team_messages" },
-        (payload) => {
-          const row = payload.new as { author_code: string; created_at: string; body?: string; author_name?: string };
-          if (row.author_code === viewerCode) return;
-          setLastMessageAt(row.created_at);
-          // Always ping + notify on new incoming messages
-          playPing();
-          showBrowserNotification(
-            `New team message from ${row.author_name || row.author_code}`,
-            (row.body || "").slice(0, 140),
-          );
-          if (activeTabIsChat) {
-            localStorage.setItem(KEY(viewerCode), new Date().toISOString());
-            return;
-          }
-          setUnread((n) => n + 1);
-        },
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    // Realtime is blocked by RLS for anon; poll every 20s as a safe fallback.
+    const iv = setInterval(() => { void refresh(); }, 20000);
+    return () => { clearInterval(iv); };
   }, [viewerCode, activeTabIsChat, refresh]);
 
   // When tab switches TO chat, mark read
