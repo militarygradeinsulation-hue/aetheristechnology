@@ -50,16 +50,24 @@ export function useUnreadTeamMessages(viewerCode: string | null, activeTabIsChat
   const refresh = useCallback(async () => {
     if (!viewerCode) return;
     const lastSeen = localStorage.getItem(KEY(viewerCode)) || new Date(0).toISOString();
-    const { data, error } = await supabase
-      .from("team_messages")
-      .select("id, created_at, author_code")
-      .gt("created_at", lastSeen)
-      .neq("author_code", viewerCode)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (error) return;
-    setUnread((data || []).length);
-    if (data && data.length > 0) setLastMessageAt(data[0].created_at);
+    try {
+      const { getAdminToken } = await import("@/lib/adminAuth");
+      const { getPortalToken } = await import("@/lib/portalAuth");
+      const h: Record<string, string> = { "Content-Type": "application/json" };
+      const a = getAdminToken(); if (a) h["x-admin-token"] = a;
+      const p = getPortalToken(); if (p) h["x-portal-token"] = p;
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/team-messages`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: h,
+        body: JSON.stringify({ action: "unread", since: lastSeen }),
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      const data = (json.messages || []) as { id: string; created_at: string; author_code: string }[];
+      setUnread(data.length);
+      if (data.length > 0) setLastMessageAt(data[0].created_at);
+    } catch { /* ignore */ }
   }, [viewerCode]);
 
   // Mark all read when chat tab is opened
