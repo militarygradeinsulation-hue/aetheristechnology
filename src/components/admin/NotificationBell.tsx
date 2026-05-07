@@ -26,10 +26,8 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
 
   useEffect(() => {
     load();
-    const ch = supabase.channel("notif-bell-" + me)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_notifications" }, load)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = setInterval(load, 30000);
+    return () => { clearInterval(iv); };
   }, [load, me]);
 
   const unread = items.filter(i => !i.read_at).length;
