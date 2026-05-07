@@ -8,6 +8,7 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Scraping your website copy...', target: 15 },
