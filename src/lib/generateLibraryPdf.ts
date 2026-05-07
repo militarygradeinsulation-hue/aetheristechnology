@@ -413,19 +413,63 @@ function renderContradictions(w: PdfWriter, d: any) {
 }
 
 function renderFriction(w: PdfWriter, d: any) {
-  const items = d.findings || d.frictionPoints || d.audit || [];
-  w.h2('Friction Vocabulary Audit', items.length);
+  if (d.businessName) w.kv('Business', d.businessName);
+  if (typeof d.frictionScore === 'number') w.kv('Friction Score', `${d.frictionScore}/100`, AMBER);
+  if (d.overallAssessment) {
+    w.h2('Overall Assessment');
+    w.paragraph(d.overallAssessment, INK, 10);
+  }
+
+  const items = d.flaggedPhrases || d.findings || d.frictionPoints || d.audit || [];
+  w.h2('Flagged Phrases', items.length);
   items.forEach((f: any, i: number) => {
-    const phrase = f.phrase || f.term || f.title;
-    const problem = f.problem || f.issue;
-    const fix = f.suggestion || f.replacement;
+    const phrase = f.originalPhrase || f.phrase || f.term || f.title;
+    const problem = f.issue || f.problem;
+    const fix = f.suggestedReplacement || f.suggestion || f.replacement;
     w.beginCard();
     w.paragraph(`Finding ${i + 1}`, AMBER, 9, true);
     if (phrase) w.paragraph(`"${phrase}"`, INK, 12, true);
+    if (f.category) w.kv('Category', String(f.category).replace(/_/g, ' '));
+    if (f.severity) w.kv('Severity', String(f.severity).toUpperCase(), RED);
     if (problem) w.kv('Why it hurts', problem, RED);
     if (fix) w.kv('Replace with', fix, AMBER);
+    if (f.context) w.kv('Where', f.context);
     w.endCard();
   });
+
+  if (d.toneAlignment) {
+    w.h2('Tone Alignment');
+    w.beginCard();
+    if (d.toneAlignment.currentTone) w.kv('Current tone', d.toneAlignment.currentTone);
+    if (d.toneAlignment.desiredTone) w.kv('Desired tone', d.toneAlignment.desiredTone, AMBER);
+    if (d.toneAlignment.gap) w.kv('Gap', d.toneAlignment.gap, RED);
+    if (Array.isArray(d.toneAlignment.recommendations)) {
+      d.toneAlignment.recommendations.forEach((r: string, i: number) => w.paragraph(`${i + 1}. ${r}`, INK, 10));
+    }
+    w.endCard();
+  }
+
+  if (Array.isArray(d.strongerCTAs) && d.strongerCTAs.length) {
+    w.h2('Stronger CTAs', d.strongerCTAs.length);
+    d.strongerCTAs.forEach((c: any, i: number) => {
+      w.beginCard();
+      w.paragraph(`CTA ${i + 1}`, AMBER, 9, true);
+      if (c.current) w.kv('Current', c.current, RED);
+      if (c.replacement) w.kv('Replace with', c.replacement, AMBER);
+      if (c.whyBetter) w.kv('Why better', c.whyBetter);
+      w.endCard();
+    });
+  }
+
+  if (Array.isArray(d.topPriorityFixes) && d.topPriorityFixes.length) {
+    w.h2('Top Priority Fixes', d.topPriorityFixes.length);
+    d.topPriorityFixes.forEach((f: string, i: number) => w.paragraph(`${i + 1}. ${f}`, INK, 10));
+  }
+
+  if (Array.isArray(d.copyStrengths) && d.copyStrengths.length) {
+    w.h2('Copy Strengths', d.copyStrengths.length);
+    d.copyStrengths.forEach((s: string, i: number) => w.paragraph(`${i + 1}. ${s}`, INK, 10));
+  }
 }
 
 /** Walk an unknown JSON shape and render it as readable sections. */
