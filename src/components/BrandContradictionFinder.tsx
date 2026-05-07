@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
 
 const PHASES = [
@@ -97,6 +98,7 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       {/* Results */}
       {result && (
         <div className="space-y-8">
+          <QuickDownloadBar toolType="brand_contradictions" title={`${form.url} — Brand audit — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Score */}
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Brand Alignment Score</h2>

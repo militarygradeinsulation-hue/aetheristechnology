@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
 
 const PHASES = [
@@ -123,6 +124,7 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
       {/* Results */}
       {result && (
         <div className="space-y-8">
+          <QuickDownloadBar toolType="strategic_questions" title={`${form.industry} — ${form.companySize} — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Snapshot */}
           <div className="glass rounded-xl p-6 border border-border">
             <h2 className="text-2xl font-bold text-foreground font-display mb-3">Company Snapshot</h2>

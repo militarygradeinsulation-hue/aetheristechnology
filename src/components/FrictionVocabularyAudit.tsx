@@ -8,6 +8,7 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Scraping your website copy...', target: 15 },
@@ -94,6 +95,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       {/* Results */}
       {result && (
         <div className="space-y-8">
+          <QuickDownloadBar toolType="friction_audit" title={`${form.url} — Friction audit — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Score */}
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Copy Friction Score</h2>

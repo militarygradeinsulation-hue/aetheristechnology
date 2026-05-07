@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
 
 const PHASES = [
@@ -109,6 +110,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
 
       {result && (
         <div className="space-y-8">
+          <QuickDownloadBar toolType="sales_scripts" title={`${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Call Script - always visible */}
           <div>
             <div className="flex items-center gap-2 mb-4">
