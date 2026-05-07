@@ -139,19 +139,31 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents'>('workspace');
-  const ALL_TAB_DEFS: { key: string; label: string }[] = [
-    { key: 'workspace', label: '🤝 Workspace' },
-    { key: 'insights', label: '🧠 AI Insights' }, { key: 'sales', label: '💵 Sales & Customers' },
-    { key: 'events', label: '📨 Campaign Powerhouse' }, { key: 'commissions', label: '💰 Commissions' },
-    { key: 'portal', label: '🏢 Company Portal' }, { key: 'engine', label: '⚡ Content Engine' },
-    { key: 'crm', label: '🗂 CRM' }, { key: 'forecast', label: '🔮 Forecast Center' },
-    { key: 'submissions', label: 'Leads' }, { key: 'library', label: '📚 My Library' },
-    { key: 'tools', label: '🛠 My Tools' }, { key: 'systems', label: '🔬 Forensics Systems' },
-    { key: 'imagestudio', label: '🎨 Image Studio' }, { key: 'documents', label: '📄 Documents' },
-    { key: 'outlook', label: '📤 Outlook Sync' }, { key: 'overview', label: 'Overview' },
-    { key: 'playbook', label: '📘 Rep Playbook' }, { key: 'training', label: '🎓 Team Training' },
-    { key: 'calendars', label: '📅 Rep Calendars' }, { key: 'companycal', label: '🗓 Company Calendar' }, { key: 'seo', label: '✨ SEO/AEO' },
-    { key: 'team', label: '💬 Team Messages' }, { key: 'news', label: '📰 Aetheris News' },
+  const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
+    { key: 'workspace', label: 'Workspace', icon: Handshake },
+    { key: 'insights', label: 'AI Insights', icon: Brain },
+    { key: 'sales', label: 'Sales & Customers', icon: DollarSign },
+    { key: 'events', label: 'Campaign', icon: Megaphone },
+    { key: 'commissions', label: 'Commissions', icon: BarChart },
+    { key: 'portal', label: 'Company Portal', icon: Building2 },
+    { key: 'engine', label: 'Content Engine', icon: Zap },
+    { key: 'crm', label: 'CRM', icon: Briefcase },
+    { key: 'forecast', label: 'Forecast', icon: TrendingUp },
+    { key: 'submissions', label: 'Leads', icon: Inbox },
+    { key: 'library', label: 'Library', icon: Library },
+    { key: 'tools', label: 'Tools', icon: Wrench },
+    { key: 'systems', label: 'Forensics', icon: FlaskConical },
+    { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'documents', label: 'Documents', icon: FileBox },
+    { key: 'outlook', label: 'Outlook Sync', icon: Send },
+    { key: 'overview', label: 'Overview', icon: BarChart3 },
+    { key: 'playbook', label: 'Rep Playbook', icon: BookMarked },
+    { key: 'training', label: 'Training', icon: GraduationCap },
+    { key: 'calendars', label: 'Rep Calendars', icon: CalendarDays },
+    { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
+    { key: 'seo', label: 'SEO/AEO', icon: Sparkles },
+    { key: 'team', label: 'Team Messages', icon: MessageSquare },
+    { key: 'news', label: 'News', icon: Newspaper },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
