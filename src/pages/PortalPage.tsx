@@ -488,6 +488,9 @@ const PortalPage: React.FC = () => {
         {/* WORKSPACE */}
         {tab === 'workspace' && <WorkspaceTab />}
 
+        {/* ART STUDIO */}
+        {tab === 'art' && <RepImageStudio />}
+
         {/* DOCUMENTS */}
         {tab === 'documents' && <PortalDocuments />}
 
