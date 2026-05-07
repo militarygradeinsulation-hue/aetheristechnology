@@ -60,41 +60,37 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [t, n, f] = await Promise.all([
-      supabase.from("shared_tasks").select("*").order("created_at", { ascending: false }),
-      supabase.from("shared_notes").select("*").order("created_at", { ascending: false }).limit(200),
-      supabase.from("shared_files").select("*").order("created_at", { ascending: false }).limit(200),
-    ]);
-    if (t.data) setTasks(t.data as SharedTask[]);
-    if (n.data) setNotes(n.data as SharedNote[]);
-    if (f.data) setFiles(f.data as SharedFile[]);
-    setLoading(false);
+    try {
+      const { fetchSharedWorkspace } = await import("@/lib/sharedWorkspaceApi");
+      const r = await fetchSharedWorkspace();
+      setTasks(r.tasks as SharedTask[]);
+      setNotes(r.notes as SharedNote[]);
+      setFiles(r.files as SharedFile[]);
+    } catch (e) {
+      console.error("workspace load failed", e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     load();
-    const ch = supabase
-      .channel("shared-workspace")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_tasks" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_notes" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_files" }, load)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = setInterval(load, 20000);
+    return () => { clearInterval(iv); };
   }, [load]);
 
   // Push unread count to bell
   useEffect(() => {
     const fetchUnread = async () => {
-      const { count } = await supabase
-        .from("shared_notifications").select("id", { head: true, count: "exact" })
-        .eq("recipient", me).is("read_at", null);
-      onUnreadChange?.(count || 0);
+      try {
+        const { fetchUnreadNotificationCount } = await import("@/lib/sharedWorkspaceApi");
+        const n = await fetchUnreadNotificationCount(me);
+        onUnreadChange?.(n);
+      } catch { /* ignore */ }
     };
     fetchUnread();
-    const ch = supabase.channel("shared-notifs-count")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shared_notifications" }, fetchUnread)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = setInterval(fetchUnread, 30000);
+    return () => { clearInterval(iv); };
   }, [me, onUnreadChange]);
 
   const filtered = useMemo(() => {

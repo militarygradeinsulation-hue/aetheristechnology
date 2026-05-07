@@ -48,6 +48,20 @@ serve(async (req) => {
       return json(200, { messages: data || [] });
     }
 
+    if (action === "unread") {
+      const viewerCode = isAdmin ? "ADMIN" : portal!.code;
+      const since = String(body.since || new Date(0).toISOString());
+      const { data, error } = await supabase
+        .from("team_messages")
+        .select("id, created_at, author_code, author_name, body")
+        .gt("created_at", since)
+        .neq("author_code", viewerCode)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return json(200, { messages: data || [] });
+    }
+
     if (action === "post") {
       const text = String(body.body || "").trim();
       const attachments = Array.isArray(body.attachments) ? body.attachments.slice(0, 10) : [];
