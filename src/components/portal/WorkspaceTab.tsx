@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search, FileText, StickyNote, Settings as SettingsIcon, Users } from 'lucide-react';
+import { Search, FileText, StickyNote, Settings as SettingsIcon } from 'lucide-react';
 import { WorkspaceHistory } from './WorkspaceHistory';
 import { WorkspaceNotes } from './WorkspaceNotes';
 import { WorkspaceSettings } from './WorkspaceSettings';
-import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import type { Person } from '@/lib/sharedWorkspace';
 
-type SubTab = 'shared' | 'history' | 'notes' | 'settings';
+type SubTab = 'history' | 'notes' | 'settings';
 
 interface WorkspaceTabProps {
   sharedPerson?: Person;
 }
 
-export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson = 'bradon' }) => {
-  const [sub, setSub] = useState<SubTab>('shared');
+export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _sharedPerson = 'bradon' }) => {
+  const [sub, setSub] = useState<SubTab>('notes');
   const [search, setSearch] = useState('');
 
   return (
