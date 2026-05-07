@@ -70,7 +70,11 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
         },
         {
           role: "user",
-          content: `From these search results, extract up to ${count} REAL businesses that fit. Industry filter: "${industry || "any"}". Location: "${location}". For each, return business_name, website, industry, location, score (0-100), and why_fit (one sentence). Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
+          content: `From these search results, extract up to ${count} REAL businesses that fit. Industry filter: "${industry || "any"}". Location: "${location}".
+
+CRITICAL: For every lead you MUST identify the company's official website URL (their primary domain — e.g. "acmeco.com", not a LinkedIn/Facebook/directory page). If the search result is a profile (LinkedIn, ZoomInfo, Yelp, BBB, etc.), infer the company they work at and return that company's real homepage URL. Never leave website blank — if you truly cannot determine it, skip the lead entirely. Prefer https:// root domains over deep links.
+
+For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), score (0-100), why_fit (one sentence). Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
         },
       ],
       tools: [{
