@@ -40,9 +40,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _share
 
       <div className="flex gap-1 border-b border-border">
         {([
-          { k: 'shared', label: 'Shared Live', Icon: Users },
-          { k: 'history', label: 'History', Icon: FileText },
           { k: 'notes', label: 'Notes', Icon: StickyNote },
+          { k: 'history', label: 'History', Icon: FileText },
           { k: 'settings', label: 'Settings', Icon: SettingsIcon },
         ] as const).map(({ k, label, Icon }) => (
           <button
@@ -57,7 +56,6 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _share
         ))}
       </div>
 
-      {sub === 'shared' && <SharedWorkspace me={sharedPerson} />}
       {sub === 'history' && <WorkspaceHistory searchQuery={search} />}
       {sub === 'notes' && <WorkspaceNotes searchQuery={search} />}
       {sub === 'settings' && <WorkspaceSettings />}
