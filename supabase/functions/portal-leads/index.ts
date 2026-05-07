@@ -25,6 +25,21 @@ function sanitizeStr(v: unknown, max = 500): string | null {
   return s.slice(0, max);
 }
 
+const FREE_EMAIL_DOMAINS = new Set([
+  "gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com",
+  "live.com","msn.com","comcast.net","ymail.com","me.com","mac.com","proton.me",
+  "protonmail.com","gmx.com","mail.com","zoho.com","yandex.com","att.net",
+  "verizon.net","sbcglobal.net","cox.net","bellsouth.net","earthlink.net",
+]);
+
+function guessWebsiteFromEmail(email: string): string | null {
+  const m = String(email || "").trim().toLowerCase().match(/^[^@\s]+@([^@\s]+\.[^@\s]+)$/);
+  if (!m) return null;
+  const domain = m[1];
+  if (FREE_EMAIL_DOMAINS.has(domain)) return null;
+  return `https://${domain}`;
+}
+
 async function logActivity(supabase: any, claims: PortalClaims, event: string, meta: Record<string, unknown> = {}) {
   try {
     const { data: rep } = await supabase.from("rep_codes").select("rep_name").eq("code", claims.code).maybeSingle();
@@ -161,6 +176,20 @@ serve(async (req) => {
 
       if (error) throw error;
       if (!data) return jsonResp({ error: "Already claimed by someone else." }, 409);
+
+      // Auto-populate website from email domain if missing
+      try {
+        const { data: full } = await supabase.from("rep_leads")
+          .select("email,website,business_name").eq("id", id).maybeSingle();
+        if (full && !full.website && full.email) {
+          const guessed = guessWebsiteFromEmail(full.email);
+          if (guessed) {
+            await supabase.from("rep_leads").update({ website: guessed }).eq("id", id);
+          }
+        }
+      } catch (e) {
+        console.warn("website auto-populate failed:", e);
+      }
 
       await logActivity(supabase, claims, "lead_claim", { lead_id: id, business: data.business_name });
       return jsonResp({ ok: true });
