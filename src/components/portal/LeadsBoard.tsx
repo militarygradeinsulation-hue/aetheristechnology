@@ -623,11 +623,15 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     setOpen(true);
     setRrLoading(true);
     try {
-      const res = await portalLeads.rocketReach(lead.id, { force });
+      const res: any = await portalLeads.rocketReach(lead.id, { force });
       setRr(res.person);
       if (res.firecrawl) setFc(res.firecrawl);
       setOpen(true);
-      toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
+      if (res.note) {
+        toast({ title: 'Deep scan note', description: res.note });
+      } else {
+        toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
+      }
     } catch (e) {
       toast({ title: 'Deep scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setRrLoading(false); }
