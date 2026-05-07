@@ -142,8 +142,9 @@ serve(async (req) => {
       if (r.ok && raw && (raw.id || raw.name)) person = raw;
     }
 
-    // 3) Last resort: search by company/domain to surface decision-makers
-    if (!person && (company || domain)) {
+    // 3) ALWAYS search by company/domain to surface 2-3 additional decision-makers
+    let additionalProfiles: any[] = [];
+    if (company || domain) {
       const r = await fetch(`${RR_BASE}/search`, {
         method: "POST",
         headers,
@@ -151,15 +152,23 @@ serve(async (req) => {
           query: {
             current_employer: company ? [company] : undefined,
             current_employer_domain: domain ? [domain] : undefined,
-            current_title: ["CEO", "Owner", "Founder", "President", "VP", "Director"],
+            current_title: ["CEO", "Owner", "Founder", "President", "COO", "CFO", "CMO", "VP", "Director", "Head", "Manager"],
           },
           start: 1,
-          page_size: 5,
+          page_size: 8,
         }),
       });
-      raw = await r.json().catch(() => null);
-      if (r.ok && raw?.profiles?.length) {
-        person = { ...raw.profiles[0], _alternates: raw.profiles.slice(1) };
+      const sraw = await r.json().catch(() => null);
+      if (r.ok && sraw?.profiles?.length) {
+        additionalProfiles = sraw.profiles;
+        if (!person) {
+          person = additionalProfiles[0];
+          additionalProfiles = additionalProfiles.slice(1);
+          raw = sraw;
+        } else {
+          // remove the primary person from alternates if present
+          additionalProfiles = additionalProfiles.filter((p: any) => p?.id !== person?.id && p?.name !== person?.name);
+        }
       }
     }
 
@@ -219,6 +228,22 @@ serve(async (req) => {
       education: (person.education || []).slice(0, 3),
       links: person.links || {},
       lookup_status: person.status,
+      additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
+        const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
+        const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
+        return {
+          id: p.id,
+          name: p.name,
+          title: p.current_title || p.normalized_title,
+          employer: p.current_employer,
+          linkedin_url: p.linkedin_url,
+          location: [p.city, p.region, p.country].filter(Boolean).join(", "),
+          best_email: ranked[0]?.email || null,
+          emails: ranked,
+          phones: (p.phones || []).map((ph: any) => ({ number: ph.number, type: ph.type })),
+          profile_pic: p.profile_pic,
+        };
+      }),
       fetched_at: new Date().toISOString(),
     } : null;
 
@@ -240,17 +265,15 @@ serve(async (req) => {
     };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
-    if (!lead.email) {
-      const candidate = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
-      if (candidate) patch.email = String(candidate).toLowerCase();
-    }
-    const phoneCandidate = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
-    if (phoneCandidate) {
-      const { data: cur } = await supabase.from("rep_leads").select("phone").eq("id", leadId).maybeSingle();
-      if (!cur?.phone) patch.phone = phoneCandidate;
-    }
-    if (!lead.contact_name && summary?.name) patch.contact_name = summary.name;
-    if (!lead.business_name && fcJson?.legal_name) patch.business_name = fcJson.legal_name;
+    const bestEmailFinal = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
+    const bestPhoneFinal = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
+    const bestNameFinal = summary?.name || null;
+    const bestBusinessFinal = fcJson?.legal_name || null;
+    // On force re-run OR empty fields, write the latest/best info
+    if (bestEmailFinal && (force || !lead.email)) patch.email = String(bestEmailFinal).toLowerCase();
+    if (bestPhoneFinal && (force || !lead.phone)) patch.phone = bestPhoneFinal;
+    if (bestNameFinal && (force || !lead.contact_name)) patch.contact_name = bestNameFinal;
+    if (bestBusinessFinal && (force || !lead.business_name)) patch.business_name = bestBusinessFinal;
 
     await supabase.from("rep_leads").update(patch).eq("id", leadId);
 
