@@ -189,6 +189,54 @@ serve(async (req) => {
       return json({ ok: true, application: app, attempt, resume_url: resumeUrl });
     }
 
+    // ---------- ADMIN: list everyone ----------
+    if (action === "admin_list") {
+      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+
+      const { data: attempts } = await admin.from("careers_attempts")
+        .select("id,candidate_name,candidate_email,candidate_phone,score_pct,correct_count,total_count,status,started_at,submitted_at,share_code,notes_to_admin")
+        .order("started_at", { ascending: false }).limit(500);
+
+      const { data: applications } = await admin.from("careers_applications")
+        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,notes,score_pct,reviewed,reviewed_at,created_at")
+        .order("created_at", { ascending: false }).limit(500);
+
+      // Page analytics for /careers and /careers/test
+      const { data: events } = await admin.from("site_events")
+        .select("event_type,event_data,session_id,created_at")
+        .in("event_type", ["page_view", "careers_cta_click"])
+        .gte("created_at", new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString())
+        .order("created_at", { ascending: false }).limit(5000);
+
+      const careersEvents = (events || []).filter((e: any) => {
+        const path = (e.event_data?.path || "") as string;
+        return path.startsWith("/careers");
+      });
+
+      const views = careersEvents.filter((e: any) => e.event_type === "page_view");
+      const ctaClicks = careersEvents.filter((e: any) => e.event_type === "careers_cta_click");
+      const uniqueVisitors = new Set(views.map((e: any) => e.session_id)).size;
+
+      const byPath: Record<string, number> = {};
+      views.forEach((e: any) => { const p = e.event_data?.path || "/careers"; byPath[p] = (byPath[p] || 0) + 1; });
+      const byCta: Record<string, number> = {};
+      ctaClicks.forEach((e: any) => { const c = e.event_data?.cta || "unknown"; byCta[c] = (byCta[c] || 0) + 1; });
+
+      return json({
+        ok: true,
+        attempts: attempts || [],
+        applications: applications || [],
+        analytics: {
+          total_views: views.length,
+          unique_visitors: uniqueVisitors,
+          total_cta_clicks: ctaClicks.length,
+          by_path: Object.entries(byPath).map(([path, count]) => ({ path, count })).sort((a, b) => b.count - a.count),
+          by_cta: Object.entries(byCta).map(([cta, count]) => ({ cta, count })).sort((a, b) => b.count - a.count),
+        },
+      });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("careers-test error:", e);
