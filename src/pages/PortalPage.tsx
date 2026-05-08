@@ -37,6 +37,7 @@ import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
