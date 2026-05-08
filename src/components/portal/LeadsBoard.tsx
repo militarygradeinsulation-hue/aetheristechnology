@@ -1156,9 +1156,11 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       <div>
                         <p className="text-muted-foreground">Leadership:</p>
                         <ul className="pl-4 list-disc">
-                          {fc.json.leadership.slice(0, 8).map((p: any, i: number) => (
-                            <li key={i}>{p.name}{p.title ? ` — ${p.title}` : ''}</li>
-                          ))}
+                          {fc.json.leadership.slice(0, 8).map((p: any, i: number) => {
+                            const name = typeof p?.name === 'string' ? p.name : (typeof p === 'string' ? p : '');
+                            const title = typeof p?.title === 'string' ? p.title : '';
+                            return <li key={i}>{name}{title ? ` — ${title}` : ''}</li>;
+                          })}
                         </ul>
                       </div>
                     )}
