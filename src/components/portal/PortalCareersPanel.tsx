@@ -365,28 +365,46 @@ export const PortalCareersPanel: React.FC = () => {
                 })
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
-                (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
-                  <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
-                      <StatusBadge s={a.status} />
-                      {a.score_pct != null && (
-                        <Badge variant="outline" className="font-mono">
-                          {a.status === 'passed' ? <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" /> : <XCircle className="w-3 h-3 mr-1 text-destructive" />}
-                          {a.score_pct}% ({a.correct_count}/{a.total_count})
-                        </Badge>
+                (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => {
+                  const noteVal = editingAttempt[a.id] ?? a.admin_notes ?? '';
+                  const dirty = noteVal !== (a.admin_notes ?? '');
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                        <StatusBadge s={a.status} />
+                        {a.score_pct != null && (
+                          <Badge variant="outline" className="font-mono">
+                            {a.status === 'passed' ? <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" /> : <XCircle className="w-3 h-3 mr-1 text-destructive" />}
+                            {a.score_pct}% ({a.correct_count}/{a.total_count})
+                          </Badge>
+                        )}
+                        {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+                        <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
+                        {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
+                        <span>Started {fmt(a.started_at)}</span>
+                        {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
+                      </div>
+                      {a.notes_to_admin && <p className="text-xs text-foreground/80 italic">Candidate said: "{a.notes_to_admin}"</p>}
+                      <Textarea
+                        value={noteVal}
+                        onChange={e => setEditingAttempt(prev => ({ ...prev, [a.id]: e.target.value }))}
+                        placeholder="Internal notes about this candidate…"
+                        className="min-h-[50px] text-sm bg-background/40"
+                      />
+                      {dirty && (
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={() => saveAttemptNotes(a)} disabled={savingAttemptId === a.id} className="bg-amber text-background hover:bg-amber/90">
+                            {savingAttemptId === a.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}
+                            Save notes
+                          </Button>
+                        </div>
                       )}
-                      {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
                     </div>
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                      <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
-                      {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
-                      <span>Started {fmt(a.started_at)}</span>
-                      {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
-                    </div>
-                    {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
