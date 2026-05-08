@@ -9,8 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame, Sparkles, MessageSquare
 } from 'lucide-react';
+import { ResumeReviewDialog } from '@/components/portal/ResumeReviewDialog';
 
 interface Attempt {
   id: string;
