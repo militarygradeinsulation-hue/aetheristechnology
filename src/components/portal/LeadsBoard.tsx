@@ -394,7 +394,7 @@ export const LeadsBoard: React.FC = () => {
               </div>
               <Button
                 size="sm"
-                onClick={bulkDeepScan}
+                onClick={openBulkPicker}
                 disabled={bulkScanning || mine.length === 0}
                 className="bg-amber text-background hover:bg-amber/90"
               >
