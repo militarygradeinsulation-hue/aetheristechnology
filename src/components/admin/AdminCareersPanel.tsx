@@ -236,7 +236,7 @@ export const AdminCareersPanel: React.FC = () => {
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
                       </div>
                       {a.resume_path && (
-                        <Button size="sm" variant="outline" onClick={() => openResume(a.resume_path!)}>
+                        <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
                           <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
                         </Button>
                       )}
