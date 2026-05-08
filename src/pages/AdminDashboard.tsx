@@ -165,6 +165,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'seo', label: 'SEO/AEO', icon: Sparkles },
     { key: 'team', label: 'Team Messages', icon: MessageSquare },
     { key: 'news', label: 'News', icon: Newspaper },
+    { key: 'careers', label: 'Careers', icon: Briefcase },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
