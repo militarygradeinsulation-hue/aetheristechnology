@@ -143,26 +143,56 @@ export const LeadsBoard: React.FC = () => {
     return g;
   }, [mine]);
 
-  const bulkDeepScan = useCallback(async () => {
-    // Pick up to 10 unscanned leads (no rocketreach yet) that have a website or email
-    const candidates = mine
-      .filter(l => !l.enrichment?.rocketreach && (l.website || l.email))
-      .slice(0, 10);
-    if (candidates.length === 0) {
+  const scanCandidates = useMemo(
+    () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
+    [mine]
+  );
+
+  const openBulkPicker = useCallback(() => {
+    if (scanCandidates.length === 0) {
       toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
       return;
     }
+    // Preselect first 10
+    setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)));
+    setBulkStatuses({});
+    setBulkPickerOpen(true);
+  }, [scanCandidates, toast]);
+
+  const toggleBulkPick = (id: string) => {
+    setBulkSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < 10) next.add(id);
+      else toast({ title: 'Max 10 leads per batch' });
+      return next;
+    });
+  };
+
+  const runBulkDeepScan = useCallback(async () => {
+    const ids = Array.from(bulkSelected);
+    const targets = scanCandidates.filter(l => ids.includes(l.id));
+    if (targets.length === 0) return;
     setBulkScanning(true);
-    toast({ title: `Deep-scanning ${candidates.length} leads in parallel…` });
+    setBulkStatuses(Object.fromEntries(targets.map(l => [l.id, 'scanning' as const])));
+    toast({ title: `Deep-scanning ${targets.length} leads in parallel…` });
     try {
       const results = await Promise.allSettled(
-        candidates.map(l => portalLeads.rocketReach(l.id, {}))
+        targets.map(async l => {
+          try {
+            const out = await portalLeads.rocketReach(l.id, {});
+            setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
+            return out;
+          } catch (e) {
+            setBulkStatuses(prev => ({ ...prev, [l.id]: 'failed' }));
+            throw e;
+          }
+        })
       );
       const ok = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.length - ok;
-      // Schedule follow-ups for the freshly scanned leads (best-effort, parallel)
       await Promise.allSettled(
-        candidates.map(async (l, i) => {
+        targets.map(async (l, i) => {
           const r = results[i];
           if (r.status !== 'fulfilled') return;
           const data: any = r.value;
@@ -189,7 +219,7 @@ export const LeadsBoard: React.FC = () => {
     } finally {
       setBulkScanning(false);
     }
-  }, [mine, refreshMine, toast]);
+  }, [bulkSelected, scanCandidates, refreshMine, toast]);
 
 
   return (
