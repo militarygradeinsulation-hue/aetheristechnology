@@ -204,7 +204,7 @@ serve(async (req) => {
 
     // ---------- ADMIN: list everyone ----------
     if (action === "admin_list") {
-      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
 
       const { data: attempts } = await admin.from("careers_attempts")
