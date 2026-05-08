@@ -471,283 +471,77 @@ const PortalPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* OVERVIEW */}
-        {tab === 'overview' && (
-          <div className="space-y-6">
-            <DailyHustleCard />
-            <RepClockWidget />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" /> Total Sales
-                </CardTitle></CardHeader>
-                <CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> Commission Earned
-                </CardTitle></CardHeader>
-                <CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Percent className="w-4 h-4" /> Commission Rate
-                </CardTitle></CardHeader>
-                <CardContent><p className="text-2xl font-bold">{(profile.commission_rate * 100).toFixed(0)}%</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Shield className="w-4 h-4" /> Code
-                </CardTitle></CardHeader>
-                <CardContent><p className="text-2xl font-bold font-mono text-amber">{profile.code}</p></CardContent>
-              </Card>
-            </div>
+        {/* View selector */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <PortalViewSelector
+            storageNamespace={ns}
+            allTabs={allTabsForSelector}
+            visibleTabs={effectiveVisible}
+            onChange={setVisibleTabs}
+            layout={layout}
+            onLayoutChange={setLayout}
+            widgetSizes={widgetSizes}
+            onWidgetSizeChange={setWidgetSize}
+          />
+          <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+            {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
+          </span>
+        </div>
 
-            <Card>
-              <CardHeader><CardTitle className="font-display">Your Commission Structure</CardTitle></CardHeader>
-              <CardContent>
-                <div className="rounded-lg border border-amber/20 bg-amber/5 p-4 mb-4">
-                  <p className="text-foreground font-medium">
-                    You earn <span className="text-amber font-bold">{(profile.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Paid within 7 days of the client's payment clearing. No tiers. No caps. No clawbacks.
-                  </p>
-                </div>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader><TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead className="text-right">Client Price</TableHead>
-                      <TableHead className="text-right">Your Cut</TableHead>
-                    </TableRow></TableHeader>
-                    <TableBody>
-                      {REP_PRODUCTS.map((p) => (
-                        <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
-                          <TableCell className={p.highlight ? 'font-semibold' : ''}>
-                            {p.name}
-                            {p.recurring && <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Repeat className="w-3 h-3" /> recurring</span>}
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground">{fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}</TableCell>
-                          <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>
-                            {fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}
-                            <span className="ml-1 text-xs text-muted-foreground">(T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%)</span>
-                          </TableCell>
-                        </TableRow>
+        {layout === 'tabs' ? (
+          renderTabBody(tab)
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+              const size = widgetSizes[t.id] || 2;
+              const colSpan =
+                size === 1 ? 'lg:col-span-1 md:col-span-1'
+                : size === 2 ? 'lg:col-span-2 md:col-span-2'
+                : size === 3 ? 'lg:col-span-3 md:col-span-2'
+                : 'lg:col-span-4 md:col-span-2';
+              const Icon = t.iconCmp;
+              return (
+                <div key={t.id} className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}>
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Icon className="w-4 h-4 text-amber shrink-0" />
+                      <span className="font-display font-bold text-sm text-foreground truncate">{t.label}</span>
+                      {t.badge && t.badge > 0 ? (
+                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold">
+                          {t.badge > 99 ? '99+' : t.badge}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {([1, 2, 3, 4] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => setWidgetSize(t.id, s)}
+                          className={`px-1.5 py-0.5 text-[10px] font-mono rounded border transition ${
+                            size === s
+                              ? 'bg-amber text-background border-amber'
+                              : 'border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                          }`}
+                          title={`Resize to ${s}/4`}
+                        >{s}/4</button>
                       ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* COMMISSIONS CALCULATOR — reuses admin panel */}
-        {tab === 'commissions' && <CommissionStructurePanel />}
-
-        {/* MY TOOLS */}
-        {/* LEADS */}
-        {tab === 'leads' && <LeadsBoard />}
-
-        {/* FORECAST — Live Pulse only for reps; partners get full view in Company tab */}
-        {tab === 'forecast' && <ForecastCenter isPartner={isPartner} />}
-
-        {/* MY TOOLS */}
-        {tab === 'tools' && !activeTool && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-display">Sales Tools</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Click any tool to use it free, right here inside the portal — no paywalls. The public link is also shown if you want to send it as a lead magnet (your code stays attached at checkout).
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {REP_TOOLS.map((t) => (
-                  <div
-                    key={t.key}
-                    className="rounded-lg border border-border/50 bg-card/50 p-4 hover:border-amber/50 hover:bg-amber/5 transition-colors group"
-                  >
-                    {t.external ? (
-                      <a href={t.href} target="_blank" rel="noopener noreferrer" className="w-full text-left block">
-                        <div className="flex items-start gap-2">
-                          <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-semibold text-foreground group-hover:text-amber transition-colors inline-flex items-center gap-1">
-                              {t.name} <ExternalLink className="w-3 h-3" />
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
-                          </div>
-                        </div>
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setActiveTool(t.key)}
-                        className="w-full text-left"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        title="Open full"
+                        onClick={() => { setLayout('tabs'); setTab(t.id); }}
                       >
-                        <div className="flex items-start gap-2">
-                          <Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
-                          </div>
-                        </div>
-                      </button>
-                    )}
-                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
-                      <a
-                        href={t.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" />
-                      </a>
+                        <Maximize2 className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {tab === 'tools' && activeTool && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveTool(null)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools
-              </Button>
-              <a
-                href={REP_TOOLS.find(t => t.key === activeTool)?.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1"
-              >
-                Open public page <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">
-              {renderEmbeddedTool(activeTool, () => {})}
-            </div>
-          </div>
-        )}
-
-        {/* PLAYBOOK */}
-        {tab === 'calendar' && <RepCalendarView isAdmin={false} />}
-        {tab === 'companycal' && <CompanyCalendarRepView />}
-
-        {tab === 'playbook' && <PortalPlaybook />}
-
-        {tab === 'training' && <TrainingPanel repName={profile?.rep_name} />}
-
-        {tab === 'team' && <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />}
-
-        {/* WORKSPACE */}
-        {tab === 'workspace' && <WorkspaceTab />}
-
-        {/* ART STUDIO */}
-        {tab === 'art' && <RepImageStudio />}
-
-        {/* DOCUMENTS */}
-        {tab === 'documents' && <PortalDocuments />}
-
-        {/* AI COACH (embedded) */}
-        {tab === 'coach' && (
-          <div className="max-w-3xl mx-auto">
-            <SalesCoachChat embedded />
-          </div>
-        )}
-
-        {/* COMPANY (partner only) */}
-        {tab === 'company' && isPartner && (
-          <div className="space-y-6">
-            <ManageRepsPanel scope="partner" />
-            <PartnerTimePanel />
-            <ForecastCenter isPartner={isPartner} />
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-display flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-amber" /> Company Portal
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Ask the AI coach for live company stats — total reps, recent leads, contact submissions, sales totals. Switch to the <button className="text-amber underline" onClick={() => setTab('coach')}>Sales Coach tab</button> and try:
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Give me a company summary"</li>
-                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "List all reps and their numbers"</li>
-                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Show recent leads from the last 30 days"</li>
-                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "What contact submissions came in this week?"</li>
-                </ul>
-                <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border/30">
-                  Read-only. No admin actions, no settings, no sensitive systems. For full admin access, use the separate /admin login.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Revenue Forensics — Sales Breakdown */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-amber" />
-                  <CardTitle className="font-display">Revenue Forensics — How Reps Sell The Leak Audit</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  This is the visual breakdown reps should walk prospects through. Frame their CRM as a "crime scene," show the 7 leak detectors, present the dollar-figure diagnosis, then close on the Hygiene Queue + Recovery Protocol.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="rounded-lg overflow-hidden border border-border/50 bg-card/50">
-                  <img
-                    src={revenueForensicsBreakdown}
-                    alt="Revenue Forensics: Investigating the HubSpot Crime Scene — full sales breakdown"
-                    className="w-full h-auto"
-                    loading="lazy"
-                  />
-                </div>
-
-                <div className="grid sm:grid-cols-5 gap-3 text-xs">
-                  {[
-                    { step: '1', label: 'The Problem', detail: 'Revenue under attack — invisible leaks' },
-                    { step: '2', label: 'Detection', detail: '7 forensic leak detectors' },
-                    { step: '3', label: 'Diagnosis', detail: 'Dollar figure of risk + record counts' },
-                    { step: '4', label: 'Correction', detail: 'Hygiene Queue with audit trail' },
-                    { step: '5', label: 'Outcome', detail: 'Stop bleeding, recover revenue' },
-                  ].map((s) => (
-                    <div key={s.step} className="rounded-lg border border-border/50 bg-card/30 p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">Step {s.step}</p>
-                      <p className="font-semibold text-foreground mt-1">{s.label}</p>
-                      <p className="text-muted-foreground mt-1">{s.detail}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <FileText className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="font-semibold text-foreground">HubSpot Revenue Recovery Protocol</p>
-                      <p className="text-sm text-muted-foreground">Full PDF breakdown of what the Leak Audit does and how to position it. Send to qualified prospects after the discovery call.</p>
-                    </div>
+                  <div className="p-3 max-h-[600px] overflow-y-auto">
+                    {renderTabBody(t.id)}
                   </div>
-                  <Button asChild className="bg-amber text-background hover:bg-amber/90 flex-shrink-0">
-                    <a href="/docs/HubSpot_Revenue_Recovery_Protocol.pdf" target="_blank" rel="noopener noreferrer">
-                      Open Protocol PDF
-                    </a>
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              );
+            })}
           </div>
         )}
       </main>
