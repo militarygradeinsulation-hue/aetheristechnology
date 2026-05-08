@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
-import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,11 +12,14 @@ const corsHeaders = {
 // Reps/partners with elevated access to careers admin data.
 const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Bradon Roberts
 
-async function isAuthorizedAdminOrAllowedPortal(req: Request, secret: string): Promise<boolean> {
-  if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return true;
+async function authorize(req: Request, secret: string): Promise<{ ok: boolean; isAdmin: boolean; claims: PortalClaims | null }> {
+  if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return { ok: true, isAdmin: true, claims: null };
   const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
-  if (claims && CAREERS_ALLOWED_PORTAL_CODES.has(claims.code)) return true;
-  return false;
+  if (claims && CAREERS_ALLOWED_PORTAL_CODES.has(claims.code)) return { ok: true, isAdmin: false, claims };
+  return { ok: false, isAdmin: false, claims: null };
+}
+async function isAuthorizedAdminOrAllowedPortal(req: Request, secret: string): Promise<boolean> {
+  return (await authorize(req, secret)).ok;
 }
 
 const TEST_MINUTES = 45;
