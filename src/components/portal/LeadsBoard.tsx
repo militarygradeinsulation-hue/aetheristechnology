@@ -656,6 +656,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         </div>
       </button>
       {open && (
+        <ErrorBoundary label="LeadRow">
         <div className="border-t border-border/50 p-3 space-y-3">
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
             {lead.email && <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" /> {lead.email}</span>}
