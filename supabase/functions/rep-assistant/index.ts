@@ -212,7 +212,7 @@ Deno.serve(async (req) => {
     const isPartner = claims.role === "partner";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    const body = await req.json() as { messages: Array<{ role: string; content: string }> };
+    const body = await req.json() as { messages: Array<{ role: string; content: any }> };
     const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
     const convo: any[] = [
       { role: "system", content: systemPrompt },

@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target, Mic, Square } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 
-type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
+type Attachment =
+  | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
+  | { kind: 'text'; name: string; text: string; mimeType: string };
+
+type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[]; attachments?: Attachment[] };
 
 const ASSISTANT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rep-assistant`;
 const STORAGE_KEY = 'aetheris_sales_coach_convo';
+
+const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
+const MAX_TEXT_CHARS = 60_000;
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
 
@@ -56,6 +63,8 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -68,17 +77,42 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  const runChat = useCallback(async (text: string) => {
-    if (!text || isLoading) return;
-    const userMsg: Msg = { role: 'user', content: text };
+  const buildApiContent = (text: string, atts: Attachment[]) => {
+    const textParts: string[] = [];
+    if (text) textParts.push(text);
+    for (const a of atts) {
+      if (a.kind === 'text') {
+        textParts.push(`\n\n--- Attached document: ${a.name} ---\n${a.text}\n--- end ${a.name} ---`);
+      }
+    }
+    const combinedText = textParts.join('').trim() || '(see attached)';
+    const images = atts.filter((a): a is Extract<Attachment, { kind: 'image' }> => a.kind === 'image');
+    if (images.length === 0) return combinedText;
+    return [
+      { type: 'text', text: combinedText },
+      ...images.map((img) => ({ type: 'image_url', image_url: { url: img.dataUrl } })),
+    ];
+  };
+
+  const runChat = useCallback(async (text: string, atts: Attachment[] = []) => {
+    if ((!text && atts.length === 0) || isLoading) return;
+    const userMsg: Msg = { role: 'user', content: text || '(see attached)', attachments: atts.length ? atts : undefined };
     const next = [...messages, userMsg];
     setMessages(next);
     setInput('');
+    setAttachments([]);
     setIsLoading(true);
 
     try {
       const token = getPortalToken();
       if (!token) throw new Error('Session expired. Sign in again.');
+
+      const apiMessages = next.map((m) => ({
+        role: m.role,
+        content: m.role === 'user' && m.attachments?.length
+          ? buildApiContent(m.content === '(see attached)' ? '' : m.content, m.attachments)
+          : m.content,
+      }));
 
       const res = await fetch(ASSISTANT_URL, {
         method: 'POST',
@@ -88,9 +122,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: next.map(({ role, content }) => ({ role, content })),
-        }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -111,8 +143,51 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    runChat(input.trim());
+    runChat(input.trim(), attachments);
   };
+
+  const handleFiles = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const accepted: Attachment[] = [];
+    const errors: string[] = [];
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_BYTES) {
+        errors.push(`${file.name}: too large (max 8 MB)`);
+        continue;
+      }
+      const isImage = file.type.startsWith('image/');
+      const isText = /^(text\/|application\/(json|xml|csv|x-yaml))/.test(file.type)
+        || /\.(txt|md|csv|json|log|yml|yaml|xml|html|tsv)$/i.test(file.name);
+      try {
+        if (isImage) {
+          const dataUrl = await new Promise<string>((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(String(r.result));
+            r.onerror = () => rej(r.error);
+            r.readAsDataURL(file);
+          });
+          accepted.push({ kind: 'image', name: file.name, dataUrl, mimeType: file.type || 'image/png' });
+        } else if (isText) {
+          let text = await file.text();
+          if (text.length > MAX_TEXT_CHARS) text = text.slice(0, MAX_TEXT_CHARS) + '\n…[truncated]';
+          accepted.push({ kind: 'text', name: file.name, text, mimeType: file.type || 'text/plain' });
+        } else {
+          errors.push(`${file.name}: unsupported (use images, .txt, .md, .csv, .json)`);
+        }
+      } catch (err) {
+        errors.push(`${file.name}: ${err instanceof Error ? err.message : 'read failed'}`);
+      }
+    }
+    if (accepted.length) setAttachments((p) => [...p, ...accepted]);
+    if (errors.length) {
+      setMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet — paste the relevant text instead.`,
+      }]);
+    }
+  }, []);
+
+  const removeAttachment = (idx: number) => setAttachments((p) => p.filter((_, i) => i !== idx));
 
   const toggleRecording = useCallback(async () => {
     if (isRecording) {
@@ -218,6 +293,24 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
                   ? 'bg-amber/20 text-foreground border border-amber/30'
                   : 'bg-secondary/40 text-foreground border border-border/50'
               }`}>
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {msg.attachments.map((a, ai) => (
+                      a.kind === 'image' ? (
+                        <img
+                          key={ai}
+                          src={a.dataUrl}
+                          alt={a.name}
+                          className="max-h-32 rounded border border-border/50"
+                        />
+                      ) : (
+                        <span key={ai} className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-border/50 bg-background/40 font-mono">
+                          <FileText className="w-3 h-3" /> {a.name}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                )}
                 <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-amber prose-code:text-amber prose-code:bg-background/40 prose-code:px-1 prose-code:rounded prose-code:before:hidden prose-code:after:hidden">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
@@ -247,36 +340,79 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="border-t border-border/50 p-3 flex items-center gap-2 bg-card/40">
-        <button
-          type="button"
-          onClick={toggleRecording}
-          disabled={isLoading || isTranscribing}
-          aria-label={isRecording ? 'Stop recording' : 'Record voice'}
-          title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
-          className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-            isRecording
-              ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
-              : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
-          }`}
-        >
-          {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
-        </button>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
-          disabled={isLoading || isRecording || isTranscribing}
-          className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="p-2 rounded-md bg-amber text-background hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          aria-label="Send"
-        ><Send className="w-4 h-4" /></button>
-      </form>
+      <div className="border-t border-border/50 bg-card/40">
+        {attachments.length > 0 && (
+          <div className="px-3 pt-3 flex flex-wrap gap-2">
+            {attachments.map((a, i) => (
+              <div key={i} className="relative group">
+                {a.kind === 'image' ? (
+                  <img src={a.dataUrl} alt={a.name} className="h-14 w-14 object-cover rounded border border-amber/40" />
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-amber/40 bg-background/60 font-mono">
+                    <FileText className="w-3 h-3" /> {a.name}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(i)}
+                  className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  aria-label={`Remove ${a.name}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="p-3 flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,.txt,.md,.csv,.json,.log,.yml,.yaml,.xml,.html,.tsv,text/*,application/json"
+            className="hidden"
+            onChange={(e) => { handleFiles(e.target.files); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || isRecording || isTranscribing}
+            aria-label="Attach file or image"
+            title="Attach an image or document"
+            className="p-2 rounded-md border bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={toggleRecording}
+            disabled={isLoading || isTranscribing}
+            aria-label={isRecording ? 'Stop recording' : 'Record voice'}
+            title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+            className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+              isRecording
+                ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
+                : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
+            }`}
+          >
+            {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+          </button>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : attachments.length ? 'Add a question about the attachment…' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
+            disabled={isLoading || isRecording || isTranscribing}
+            className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || (!input.trim() && attachments.length === 0)}
+            className="p-2 rounded-md bg-amber text-background hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            aria-label="Send"
+          ><Send className="w-4 h-4" /></button>
+        </form>
+      </div>
     </div>
   );
 
