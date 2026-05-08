@@ -18,18 +18,24 @@ interface SlideJSON {
   narration: string;
   audio_url?: string;
   duration_sec?: number;
+  route?: string;
 }
 
 async function generateScript(
   title: string,
   outline: string,
   apiKey: string,
+  routeHints: Record<string, string>,
 ): Promise<{ slides: SlideJSON[] }> {
+  const hintBlock = Object.keys(routeHints).length
+    ? `\n\nWhile narrating each slide, the player will display a LIVE screenshot of one of these app routes. Pick the most relevant key per slide from this list (use the KEY string, not the path):\n${Object.entries(routeHints).map(([k, v]) => `  - ${k} → ${v}`).join("\n")}\nIf no route fits a slide (intro/outro), set "route_key" to null.`
+    : "";
+
   const sys = `You are a sales onboarding script writer for Aetheris Technology, a Business Forensics operator.
 Voice: blunt, operator, confident, never corporate. Write like a senior closer talking to a new hire.
 Output STRICT JSON only — no markdown, no code fences:
-{ "slides": [ { "title": "<short slide title, max 6 words>", "bullets": ["<3-5 short punchy bullets, max 10 words each>"], "narration": "<60-110 words spoken naturally, conversational, includes the bullets in flow>" } ] }
-Generate exactly 4 to 6 slides. The first slide is an intro/hook. The last slide is a takeaway/next step.`;
+{ "slides": [ { "title": "<short slide title, max 6 words>", "bullets": ["<3-5 short punchy bullets, max 10 words each>"], "narration": "<60-110 words spoken naturally, conversational, includes the bullets in flow>", "route_key": "<one key from allowed list, or null>" } ] }
+Generate exactly 4 to 6 slides. The first slide is an intro/hook. The last slide is a takeaway/next step.${hintBlock}`;
   const user = `Module title: ${title}\n\nWhat to cover:\n${outline}`;
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -49,7 +55,14 @@ Generate exactly 4 to 6 slides. The first slide is an intro/hook. The last slide
   if (!Array.isArray(parsed.slides) || parsed.slides.length === 0) {
     throw new Error("AI returned no slides");
   }
-  return { slides: parsed.slides };
+  // Resolve route_key -> route path using hints
+  const slides: SlideJSON[] = parsed.slides.map((s: any) => ({
+    title: s.title,
+    bullets: Array.isArray(s.bullets) ? s.bullets : [],
+    narration: s.narration,
+    route: s.route_key && routeHints[s.route_key] ? routeHints[s.route_key] : undefined,
+  }));
+  return { slides };
 }
 
 async function ttsToBuffer(text: string, apiKey: string): Promise<Uint8Array> {
@@ -95,7 +108,7 @@ serve(async (req) => {
       });
     }
 
-    const { slug, title, summary, scriptOutline, order_index } = await req.json();
+    const { slug, title, summary, scriptOutline, order_index, routeHints } = await req.json();
     if (!slug || !title || !scriptOutline) {
       return new Response(JSON.stringify({ error: "slug, title, scriptOutline required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -111,7 +124,7 @@ serve(async (req) => {
     }, { onConflict: "slug" });
 
     // 1. Generate script
-    const { slides } = await generateScript(title, scriptOutline, LOVABLE_API_KEY);
+    const { slides } = await generateScript(title, scriptOutline, LOVABLE_API_KEY, routeHints || {});
 
     // 2. TTS per slide + upload
     const finalSlides: SlideJSON[] = [];
@@ -133,6 +146,7 @@ serve(async (req) => {
         narration: s.narration,
         audio_url: pub.publicUrl,
         duration_sec: dur,
+        route: s.route,
       });
     }
 
