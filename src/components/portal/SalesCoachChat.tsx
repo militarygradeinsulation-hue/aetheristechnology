@@ -340,36 +340,79 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="border-t border-border/50 p-3 flex items-center gap-2 bg-card/40">
-        <button
-          type="button"
-          onClick={toggleRecording}
-          disabled={isLoading || isTranscribing}
-          aria-label={isRecording ? 'Stop recording' : 'Record voice'}
-          title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
-          className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-            isRecording
-              ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
-              : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
-          }`}
-        >
-          {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
-        </button>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
-          disabled={isLoading || isRecording || isTranscribing}
-          className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="p-2 rounded-md bg-amber text-background hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          aria-label="Send"
-        ><Send className="w-4 h-4" /></button>
-      </form>
+      <div className="border-t border-border/50 bg-card/40">
+        {attachments.length > 0 && (
+          <div className="px-3 pt-3 flex flex-wrap gap-2">
+            {attachments.map((a, i) => (
+              <div key={i} className="relative group">
+                {a.kind === 'image' ? (
+                  <img src={a.dataUrl} alt={a.name} className="h-14 w-14 object-cover rounded border border-amber/40" />
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-amber/40 bg-background/60 font-mono">
+                    <FileText className="w-3 h-3" /> {a.name}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(i)}
+                  className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  aria-label={`Remove ${a.name}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="p-3 flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,.txt,.md,.csv,.json,.log,.yml,.yaml,.xml,.html,.tsv,text/*,application/json"
+            className="hidden"
+            onChange={(e) => { handleFiles(e.target.files); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || isRecording || isTranscribing}
+            aria-label="Attach file or image"
+            title="Attach an image or document"
+            className="p-2 rounded-md border bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={toggleRecording}
+            disabled={isLoading || isTranscribing}
+            aria-label={isRecording ? 'Stop recording' : 'Record voice'}
+            title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+            className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+              isRecording
+                ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
+                : 'bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60'
+            }`}
+          >
+            {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+          </button>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={isRecording ? 'Recording... tap stop when done' : isTranscribing ? 'Transcribing call...' : attachments.length ? 'Add a question about the attachment…' : (isPartner ? 'Ask for company stats or sales coaching...' : 'Ask, or tap mic to share a call...')}
+            disabled={isLoading || isRecording || isTranscribing}
+            className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || (!input.trim() && attachments.length === 0)}
+            className="p-2 rounded-md bg-amber text-background hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            aria-label="Send"
+          ><Send className="w-4 h-4" /></button>
+        </form>
+      </div>
     </div>
   );
 
