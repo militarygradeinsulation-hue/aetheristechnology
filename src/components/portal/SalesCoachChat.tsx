@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target, Mic, Square } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 
-type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
+type Attachment =
+  | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
+  | { kind: 'text'; name: string; text: string; mimeType: string };
+
+type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[]; attachments?: Attachment[] };
 
 const ASSISTANT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rep-assistant`;
 const STORAGE_KEY = 'aetheris_sales_coach_convo';
+
+const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
+const MAX_TEXT_CHARS = 60_000;
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
 
