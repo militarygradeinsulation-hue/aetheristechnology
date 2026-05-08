@@ -161,6 +161,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'overview', label: 'Overview', icon: BarChart3 },
     { key: 'playbook', label: 'Rep Playbook', icon: BookMarked },
     { key: 'training', label: 'Training', icon: GraduationCap },
+    { key: 'onboarding', label: 'New-Rep Onboarding', icon: GraduationCap },
     { key: 'calendars', label: 'Rep Calendars', icon: CalendarDays },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'seo', label: 'SEO/AEO', icon: Sparkles },
