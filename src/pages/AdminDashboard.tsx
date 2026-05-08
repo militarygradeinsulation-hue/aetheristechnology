@@ -26,6 +26,7 @@ import { CommissionStructurePanel } from '@/components/admin/CommissionStructure
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
 import { AdminCareersTest } from '@/components/admin/AdminCareersTest';
+import { AdminCareersPanel } from '@/components/admin/AdminCareersPanel';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
