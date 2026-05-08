@@ -127,6 +127,41 @@ const PortalPage: React.FC = () => {
     });
   };
 
+  // Per-rep widget order + pinned set for full board customization.
+  const ORDER_KEY = `${ns}.widgetOrder.v1`;
+  const PINNED_KEY = `${ns}.widgetPinned.v1`;
+  const [widgetOrder, setWidgetOrderState] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(ORDER_KEY) || '[]'); } catch { return []; }
+  });
+  const persistOrder = (next: string[]) => {
+    setWidgetOrderState(next);
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify(next)); } catch {}
+  };
+  const [pinnedWidgets, setPinnedWidgetsState] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(PINNED_KEY) || '[]'); } catch { return []; }
+  });
+  const togglePinned = (id: string) => {
+    setPinnedWidgetsState(prev => {
+      const next = prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id];
+      try { localStorage.setItem(PINNED_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+  const [dragId, setDragId] = useState<string | null>(null);
+  const reorderWidgets = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    // Build current sorted order based on existing logic, then move source before target.
+    const current = sortedWidgetsRef.current.slice();
+    const from = current.indexOf(sourceId);
+    const to = current.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    current.splice(from, 1);
+    current.splice(to, 0, sourceId);
+    persistOrder(current);
+  };
+  const sortedWidgetsRef = React.useRef<string[]>([]);
+
+
   // Admin preview mode: if launched from the admin dashboard with ?adminPreview=1
   // and a valid admin token, mint a synthetic profile so admins can browse the
   // exact portal UX without a rep code.
