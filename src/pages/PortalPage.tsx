@@ -54,11 +54,13 @@ import { Maximize2 } from 'lucide-react';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
 type ToolKey =
+  | 'all-in-one'
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
+  { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL — runs every prospect tool at once.' },
   { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post — instant prospect ammo.', external: true },
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
