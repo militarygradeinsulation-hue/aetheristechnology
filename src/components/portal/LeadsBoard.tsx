@@ -851,21 +851,32 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   return (
     <div className="rounded-lg border border-border/50 bg-card/40">
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full text-left p-3 flex items-start justify-between gap-2 hover:bg-amber/5 transition-colors">
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || '—'}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {[lead.contact_name, lead.email, lead.phone].filter(Boolean).join(' · ') || lead.industry || '—'}
-          </p>
-        </div>
-        <div className="text-right text-xs text-muted-foreground flex-shrink-0">
-          {scan?.score != null && (
-            <p className="font-mono text-amber">Scan {scan.grade || ''} · {scan.score}</p>
-          )}
-          <p>{lead.touch_count} touch{lead.touch_count === 1 ? '' : 'es'}</p>
-          {lead.last_touched_at && <p>{new Date(lead.last_touched_at).toLocaleDateString()}</p>}
-        </div>
-      </button>
+      <div className="w-full flex items-start gap-2 hover:bg-amber/5 transition-colors">
+        <button type="button" onClick={() => setOpen(o => !o)} className="text-left p-3 flex items-start justify-between gap-2 flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || '—'}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {[lead.contact_name, lead.email, lead.phone].filter(Boolean).join(' · ') || lead.industry || '—'}
+            </p>
+          </div>
+          <div className="text-right text-xs text-muted-foreground flex-shrink-0">
+            {scan?.score != null && (
+              <p className="font-mono text-amber">Scan {scan.grade || ''} · {scan.score}</p>
+            )}
+            <p>{lead.touch_count} touch{lead.touch_count === 1 ? '' : 'es'}</p>
+            {lead.last_touched_at && <p>{new Date(lead.last_touched_at).toLocaleDateString()}</p>}
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); remove(); }}
+          aria-label="Delete lead"
+          title="Delete lead"
+          className="p-2 mr-2 mt-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded transition-colors flex-shrink-0"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
       {open && (
         <ErrorBoundary label="LeadRow">
         <div className="border-t border-border/50 p-3 space-y-3">
@@ -1196,9 +1207,12 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <details>
                     <summary className="cursor-pointer text-amber/80">Site map ({fc.sitemap.length} pages)</summary>
                     <ul className="pl-4 list-disc mt-1 space-y-0.5 max-h-40 overflow-auto">
-                      {fc.sitemap.map((u: string, i: number) => (
-                        <li key={i}><a href={u} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{u}</a></li>
-                      ))}
+                      {fc.sitemap.map((entry: any, i: number) => {
+                        const u = typeof entry === 'string' ? entry : (entry?.url || entry?.href || '');
+                        if (!u) return null;
+                        const label = typeof entry === 'object' ? (entry?.title || u) : u;
+                        return <li key={i}><a href={u} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{label}</a></li>;
+                      })}
                     </ul>
                   </details>
                 )}
