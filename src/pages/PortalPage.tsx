@@ -249,23 +249,159 @@ const PortalPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadChat]);
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; partnerOnly?: boolean; badge?: number }[] = [
-    { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" /> },
-    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" /> },
-    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" /> },
-    { id: 'forecast', label: 'Forecast Center', icon: <Activity className="w-4 h-4" /> },
-    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
-    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" /> },
-    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, badge: unreadChat },
-    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" /> },
-    { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, partnerOnly: true },
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number }[] = [
+    { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
+    { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" />, iconCmp: Calculator },
+    { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
+    { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" />, iconCmp: FileText },
+    { id: 'forecast', label: 'Forecast Center', icon: <Activity className="w-4 h-4" />, iconCmp: Activity },
+    { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" />, iconCmp: Users },
+    { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
+    { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
+    { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
+    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
+    { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
+    { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
+    { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
+    { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
+    { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
   ];
+
+  const availableTabs = tabs.filter(t => !t.partnerOnly || isPartner);
+  const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
+  const effectiveVisible = visibleTabs.length > 0
+    ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
+    : availableTabs.map(t => t.id);
+
+  const renderTabBody = (key: Tab): React.ReactNode => {
+    switch (key) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            <DailyHustleCard />
+            <RepClockWidget />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="w-4 h-4" /> Total Sales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Commission Earned</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Percent className="w-4 h-4" /> Commission Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{(profile.commission_rate * 100).toFixed(0)}%</p></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Shield className="w-4 h-4" /> Code</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold font-mono text-amber">{profile.code}</p></CardContent></Card>
+            </div>
+            <Card>
+              <CardHeader><CardTitle className="font-display">Your Commission Structure</CardTitle></CardHeader>
+              <CardContent>
+                <div className="rounded-lg border border-amber/20 bg-amber/5 p-4 mb-4">
+                  <p className="text-foreground font-medium">You earn <span className="text-amber font-bold">{(profile.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Paid within 7 days of the client's payment clearing. No tiers. No caps. No clawbacks.</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="text-right">Client Price</TableHead><TableHead className="text-right">Your Cut</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {REP_PRODUCTS.map((p) => (
+                        <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
+                          <TableCell className={p.highlight ? 'font-semibold' : ''}>{p.name}{p.recurring && <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Repeat className="w-3 h-3" /> recurring</span>}</TableCell>
+                          <TableCell className="text-right text-muted-foreground">{fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}</TableCell>
+                          <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>{fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}<span className="ml-1 text-xs text-muted-foreground">(T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%)</span></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      case 'commissions': return <CommissionStructurePanel />;
+      case 'leads': return <LeadsBoard />;
+      case 'forecast': return <ForecastCenter isPartner={isPartner} />;
+      case 'tools':
+        return !activeTool ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display">Sales Tools</CardTitle>
+              <p className="text-sm text-muted-foreground">Click any tool to use it free, right here inside the portal.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {REP_TOOLS.map((t) => (
+                  <div key={t.key} className="rounded-lg border border-border/50 bg-card/50 p-4 hover:border-amber/50 hover:bg-amber/5 transition-colors group">
+                    {t.external ? (
+                      <a href={t.href} target="_blank" rel="noopener noreferrer" className="w-full text-left block">
+                        <div className="flex items-start gap-2"><Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" /><div className="min-w-0"><p className="font-semibold text-foreground group-hover:text-amber transition-colors inline-flex items-center gap-1">{t.name} <ExternalLink className="w-3 h-3" /></p><p className="text-sm text-muted-foreground mt-1">{t.desc}</p></div></div>
+                      </a>
+                    ) : (
+                      <button type="button" onClick={() => setActiveTool(t.key)} className="w-full text-left">
+                        <div className="flex items-start gap-2"><Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" /><div className="min-w-0"><p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p><p className="text-sm text-muted-foreground mt-1">{t.desc}</p></div></div>
+                      </button>
+                    )}
+                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
+                      <a href={t.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>{t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" /></a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools</Button>
+              <a href={REP_TOOLS.find(t => t.key === activeTool)?.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1">Open public page <ExternalLink className="w-3 h-3" /></a>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
+          </div>
+        );
+      case 'calendar': return <RepCalendarView isAdmin={false} />;
+      case 'companycal': return <CompanyCalendarRepView />;
+      case 'playbook': return <PortalPlaybook />;
+      case 'training': return <TrainingPanel repName={profile?.rep_name} />;
+      case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
+      case 'workspace': return <WorkspaceTab />;
+      case 'art': return <RepImageStudio />;
+      case 'documents': return <PortalDocuments />;
+      case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
+      case 'company':
+        return isPartner ? (
+          <div className="space-y-6">
+            <ManageRepsPanel scope="partner" />
+            <PartnerTimePanel />
+            <ForecastCenter isPartner={isPartner} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-display flex items-center gap-2"><Building2 className="w-5 h-5 text-amber" /> Company Portal</CardTitle>
+                <p className="text-sm text-muted-foreground">Ask the AI coach for live company stats. Switch to the <button className="text-amber underline" onClick={() => setTab('coach')}>Sales Coach tab</button>.</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Give me a company summary"</li>
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "List all reps and their numbers"</li>
+                  <li className="flex items-start gap-2"><span className="text-amber font-mono">→</span> "Show recent leads from the last 30 days"</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2"><Search className="w-5 h-5 text-amber" /><CardTitle className="font-display">Revenue Forensics</CardTitle></div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="rounded-lg overflow-hidden border border-border/50 bg-card/50">
+                  <img src={revenueForensicsBreakdown} alt="Revenue Forensics breakdown" className="w-full h-auto" loading="lazy" />
+                </div>
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <FileText className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0"><p className="font-semibold text-foreground">HubSpot Revenue Recovery Protocol</p></div>
+                  </div>
+                  <Button asChild className="bg-amber text-background hover:bg-amber/90 flex-shrink-0"><a href="/docs/HubSpot_Revenue_Recovery_Protocol.pdf" target="_blank" rel="noopener noreferrer">Open Protocol PDF</a></Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null;
+      default: return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
