@@ -419,6 +419,11 @@ export const PortalCareersPanel: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      <ResumeReviewDialog
+        app={reviewing}
+        onClose={() => setReviewing(null)}
+        onAppUpdated={(next) => setApplications(prev => prev.map(x => x.id === next.id ? { ...x, ...next } : x))}
+      />
     </div>
   );
 };
