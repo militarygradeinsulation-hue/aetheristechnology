@@ -88,35 +88,60 @@ export const OnboardingPlayer: React.FC<Props> = ({ module, onClose, trackProgre
     <div className="bg-background border border-border rounded-lg overflow-hidden flex flex-col">
       {/* Slide canvas */}
       <div
-        className="relative aspect-video w-full flex flex-col justify-center px-10 py-8"
+        className="relative aspect-video w-full overflow-hidden"
         style={{
           background: "linear-gradient(135deg, hsl(220 30% 8%) 0%, hsl(220 25% 12%) 100%)",
           color: "hsl(45 20% 95%)",
         }}
       >
-        {/* Header strip */}
-        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] font-mono text-amber-400/70">
-          <span>{module.title}</span>
-          <span>Slide {idx + 1} / {slides.length}</span>
-        </div>
-        {/* Body */}
-        <h2
-          className="text-3xl md:text-4xl font-serif font-bold mb-6 text-amber-100"
-          style={{ fontFamily: "Fraunces, Georgia, serif" }}
+        {/* Live screenshot / iframe of the area being narrated */}
+        {slide.image_url ? (
+          <img
+            src={slide.image_url}
+            alt={slide.title}
+            className="absolute inset-0 w-full h-full object-cover opacity-90"
+          />
+        ) : slide.route ? (
+          <iframe
+            key={slide.route}
+            src={slide.route}
+            title={`Live preview: ${slide.title}`}
+            className="absolute inset-0 w-full h-full border-0 bg-background"
+            sandbox="allow-same-origin allow-scripts allow-forms"
+          />
+        ) : null}
+
+        {/* Caption overlay (semi-transparent so the screenshot is visible behind) */}
+        <div
+          className={`absolute inset-0 flex flex-col justify-end px-10 py-8 ${
+            slide.route || slide.image_url
+              ? "bg-gradient-to-t from-black/85 via-black/55 to-transparent"
+              : ""
+          }`}
         >
-          {slide.title}
-        </h2>
-        <ul className="space-y-3">
-          {slide.bullets.map((b, i) => (
-            <li key={i} className="flex items-start gap-3 text-base md:text-lg">
-              <span className="mt-1.5 inline-block w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
-              <span className="text-foreground/90" style={{ color: "hsl(45 15% 90%)" }}>{b}</span>
-            </li>
-          ))}
-        </ul>
-        {/* Watermark */}
-        <div className="absolute bottom-3 right-4 text-[9px] font-mono uppercase tracking-widest text-amber-500/40">
-          Aetheris AI Studio
+          {/* Header strip */}
+          <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] font-mono text-amber-400/80">
+            <span className="bg-black/50 px-2 py-0.5 rounded">{module.title}</span>
+            <span className="bg-black/50 px-2 py-0.5 rounded">Slide {idx + 1} / {slides.length}</span>
+          </div>
+          <h2
+            className="text-2xl md:text-3xl font-serif font-bold mb-4 text-amber-100 drop-shadow-lg"
+            style={{ fontFamily: "Fraunces, Georgia, serif" }}
+          >
+            {slide.title}
+          </h2>
+          <ul className="space-y-2 max-w-2xl">
+            {slide.bullets.map((b, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm md:text-base">
+                <span className="mt-1.5 inline-block w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
+                <span className="text-foreground/95 drop-shadow" style={{ color: "hsl(45 15% 95%)" }}>{b}</span>
+              </li>
+            ))}
+          </ul>
+          {/* Watermark */}
+          <div className="absolute bottom-3 right-4 text-[9px] font-mono uppercase tracking-widest text-amber-500/60">
+            Aetheris AI Studio
+          </div>
         </div>
       </div>
 

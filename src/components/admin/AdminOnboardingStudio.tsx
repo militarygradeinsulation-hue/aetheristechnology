@@ -10,7 +10,7 @@ import {
   Loader2, Sparkles, RefreshCw, Play, CheckCircle2, AlertCircle,
   GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X,
 } from "lucide-react";
-import { ONBOARDING_CURRICULUM, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
+import { ONBOARDING_CURRICULUM, GLOBAL_ROUTE_HINTS, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
 import {
   listModules, generateModule, updateModule, deleteModule,
   type OnboardingModule, type OnboardingSlide,
@@ -50,6 +50,7 @@ export const AdminOnboardingStudio: React.FC = () => {
       await generateModule({
         slug: def.slug, title: def.title, summary: def.summary,
         scriptOutline: def.scriptOutline, order_index,
+        routeHints: { ...GLOBAL_ROUTE_HINTS, ...(def.routeHints || {}) },
       });
       await refresh();
       toast({ title: "Generated", description: def.title });
@@ -70,6 +71,7 @@ export const AdminOnboardingStudio: React.FC = () => {
         await generateModule({
           slug: def.slug, title: def.title, summary: def.summary,
           scriptOutline: def.scriptOutline, order_index: i,
+          routeHints: { ...GLOBAL_ROUTE_HINTS, ...(def.routeHints || {}) },
         });
       } catch (e) {
         console.error(`[onboarding] ${def.slug} failed`, e);
@@ -334,6 +336,24 @@ export const AdminOnboardingStudio: React.FC = () => {
                         onChange={(e) => updateSlide(si, { narration: e.target.value })}
                         rows={4}
                       />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground">Live route to show (e.g. /portal?tab=leads)</label>
+                        <Input
+                          value={s.route || ""}
+                          onChange={(e) => updateSlide(si, { route: e.target.value })}
+                          placeholder="/portal?tab=leads"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Or static image URL</label>
+                        <Input
+                          value={s.image_url || ""}
+                          onChange={(e) => updateSlide(si, { image_url: e.target.value })}
+                          placeholder="https://…/screenshot.png"
+                        />
+                      </div>
                     </div>
                     {s.audio_url && (
                       <audio controls src={s.audio_url} className="w-full h-8" />
