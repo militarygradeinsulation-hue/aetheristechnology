@@ -82,8 +82,8 @@ serve(async (req) => {
     }
 
     if (action === "attach_screenshots") {
-      // Build map { routePath -> publicUrl } from current screenshots + routeHints.
       const routeHints: Record<string, string> = body.routeHints || {};
+      const moduleHints: Record<string, Record<string, string>> = body.moduleHints || {};
       const { data: shots } = await supabase.storage
         .from("onboarding-assets")
         .list("screenshots", { limit: 1000 });
@@ -95,38 +95,66 @@ serve(async (req) => {
           .getPublicUrl(`screenshots/${f.name}`);
         keyToUrl[k] = pub.publicUrl;
       }
-      // routePath (e.g. "/portal?tab=leads") -> url
-      const routeToUrl: Record<string, string> = {};
+      // global routePath -> url (fallback only)
+      const globalRouteToUrl: Record<string, string> = {};
+      const globalRouteToKey: Record<string, string> = {};
       for (const [k, route] of Object.entries(routeHints)) {
-        if (keyToUrl[k]) routeToUrl[route] = keyToUrl[k];
-      }
-      // Also allow matching by key directly if slide.route happens to be a key
-      const lookupForSlide = (slide: { route?: string; image_url?: string; title?: string; narration?: string }): string | undefined => {
-        if (slide.route && routeToUrl[slide.route]) return routeToUrl[slide.route];
-        if (slide.route && keyToUrl[slide.route]) return keyToUrl[slide.route];
-        // Heuristic: pick screenshot whose key appears in slide title/narration
-        const hay = `${slide.title || ""} ${slide.narration || ""}`.toLowerCase();
-        let best: { key: string; score: number } | null = null;
-        for (const k of Object.keys(keyToUrl)) {
-          const tokens = k.split(/[_\-]/).filter(t => t.length > 2);
-          let score = 0;
-          for (const t of tokens) if (hay.includes(t)) score += 1;
-          if (score > 0 && (!best || score > best.score)) best = { key: k, score };
+        if (keyToUrl[k]) {
+          globalRouteToUrl[route] = keyToUrl[k];
+          globalRouteToKey[route] = k;
         }
-        return best ? keyToUrl[best.key] : undefined;
+      }
+
+      const tokenize = (k: string) => k.split(/[_\-]/).filter(t => t.length > 2);
+
+      const pickForSlide = (
+        slide: { route?: string; title?: string; narration?: string; bullets?: string[] },
+        allowedKeys: string[],
+      ): string | undefined => {
+        // 1) Slide already has a route → match against allowed keys' routes
+        if (slide.route) {
+          for (const k of allowedKeys) {
+            if (routeHints[k] === slide.route && keyToUrl[k]) return keyToUrl[k];
+          }
+          // 2) If slide.route is itself a key
+          if (allowedKeys.includes(slide.route) && keyToUrl[slide.route]) return keyToUrl[slide.route];
+        }
+        // 3) Score each allowed key by token presence in slide text
+        const hay = `${slide.title || ""} ${(slide.bullets || []).join(" ")} ${slide.narration || ""}`.toLowerCase();
+        let best: { key: string; score: number } | null = null;
+        for (const k of allowedKeys) {
+          if (!keyToUrl[k]) continue;
+          let score = 0;
+          for (const t of tokenize(k)) if (hay.includes(t)) score += 1;
+          if (!best || score > best.score) best = { key: k, score };
+        }
+        if (best && best.score > 0) return keyToUrl[best.key];
+        // 4) Fallback: first available allowed key (so the module's image is at least on-topic)
+        for (const k of allowedKeys) if (keyToUrl[k]) return keyToUrl[k];
+        return undefined;
       };
 
       const { data: mods, error: modErr } = await supabase
-        .from("onboarding_modules").select("id, slides_json");
+        .from("onboarding_modules").select("id, slug, slides_json");
       if (modErr) throw modErr;
 
       let updated = 0;
       let attached = 0;
       for (const m of mods || []) {
         const slides = (m.slides_json as Array<Record<string, unknown>>) || [];
+        const hints = moduleHints[m.slug as string] || {};
+        // Allowed keys: prefer this module's hints; if none provided fall back to all globals
+        const allowedKeys = Object.keys(hints).length
+          ? Object.keys(hints).filter(k => keyToUrl[k])
+          : Object.keys(routeHints).filter(k => keyToUrl[k]);
+        if (!allowedKeys.length) continue;
+
         let changed = false;
         const next = slides.map((s) => {
-          const url = lookupForSlide(s as { route?: string; image_url?: string; title?: string; narration?: string });
+          const url = pickForSlide(
+            s as { route?: string; title?: string; narration?: string; bullets?: string[] },
+            allowedKeys,
+          );
           if (url && (s as { image_url?: string }).image_url !== url) {
             changed = true;
             attached++;
