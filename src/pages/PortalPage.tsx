@@ -353,7 +353,12 @@ const PortalPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools</Button>
-              <a href={REP_TOOLS.find(t => t.key === activeTool)?.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1">Open public page <ExternalLink className="w-3 h-3" /></a>
+              {(() => {
+                const href = REP_TOOLS.find(t => t.key === activeTool)?.href;
+                return href && href !== '#' ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1">Open public page <ExternalLink className="w-3 h-3" /></a>
+                ) : null;
+              })()}
             </div>
             <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
           </div>
