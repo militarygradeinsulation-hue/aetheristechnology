@@ -17,6 +17,7 @@ import {
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
 } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
+import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
 const todayISO = () => new Date().toISOString().slice(0, 10);
