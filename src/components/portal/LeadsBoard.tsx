@@ -437,6 +437,79 @@ export const LeadsBoard: React.FC = () => {
       {/* UPLOAD/DOWNLOAD */}
       {sub === 'upload' && <UploadDownloadPanel onUploaded={() => { setSub('mine'); refreshMine(); }} />}
 
+      {/* BULK DEEP SCAN PICKER */}
+      <Dialog open={bulkPickerOpen} onOpenChange={(o) => { if (!bulkScanning) setBulkPickerOpen(o); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan — Pick up to 10
+            </DialogTitle>
+            <DialogDescription>
+              Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{bulkSelected.size}/10 selected · {scanCandidates.length} eligible</span>
+            <div className="flex gap-2">
+              <button
+                className="text-amber hover:underline disabled:opacity-50"
+                disabled={bulkScanning}
+                onClick={() => setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)))}
+              >Select first 10</button>
+              <button
+                className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+                disabled={bulkScanning}
+                onClick={() => setBulkSelected(new Set())}
+              >Clear</button>
+            </div>
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto space-y-1 border border-border/50 rounded-md p-2">
+            {scanCandidates.map(l => {
+              const checked = bulkSelected.has(l.id);
+              const status = bulkStatuses[l.id];
+              return (
+                <label
+                  key={l.id}
+                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${checked ? 'bg-amber/5' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={bulkScanning}
+                    onChange={() => toggleBulkPick(l.id)}
+                    className="accent-amber"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {[l.industry, l.location, l.website].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  {status === 'scanning' && (
+                    <span className="text-xs text-amber inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Scanning…</span>
+                  )}
+                  {status === 'done' && <span className="text-xs text-green-400">✓ Done</span>}
+                  {status === 'failed' && <span className="text-xs text-red-400">Failed</span>}
+                  {!status && checked && <span className="text-xs text-muted-foreground">Queued</span>}
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" disabled={bulkScanning} onClick={() => setBulkPickerOpen(false)}>
+              {bulkScanning ? 'Running…' : 'Cancel'}
+            </Button>
+            <Button
+              className="bg-amber text-background hover:bg-amber/90"
+              disabled={bulkScanning || bulkSelected.size === 0}
+              onClick={runBulkDeepScan}
+            >
+              {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scanning {bulkSelected.size}…</> : <>Deep Scan {bulkSelected.size}</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* LEAD PREVIEW DIALOG */}
       <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
         <DialogContent className="max-w-lg">
