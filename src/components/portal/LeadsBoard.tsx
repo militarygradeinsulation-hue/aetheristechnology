@@ -64,6 +64,9 @@ export const LeadsBoard: React.FC = () => {
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
   const [bulkScanning, setBulkScanning] = useState(false);
+  const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkStatuses, setBulkStatuses] = useState<Record<string, 'pending' | 'scanning' | 'done' | 'failed'>>({});
 
   const refreshDrip = useCallback(async () => {
     setLoading(true);
@@ -140,26 +143,56 @@ export const LeadsBoard: React.FC = () => {
     return g;
   }, [mine]);
 
-  const bulkDeepScan = useCallback(async () => {
-    // Pick up to 10 unscanned leads (no rocketreach yet) that have a website or email
-    const candidates = mine
-      .filter(l => !l.enrichment?.rocketreach && (l.website || l.email))
-      .slice(0, 10);
-    if (candidates.length === 0) {
+  const scanCandidates = useMemo(
+    () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
+    [mine]
+  );
+
+  const openBulkPicker = useCallback(() => {
+    if (scanCandidates.length === 0) {
       toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
       return;
     }
+    // Preselect first 10
+    setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)));
+    setBulkStatuses({});
+    setBulkPickerOpen(true);
+  }, [scanCandidates, toast]);
+
+  const toggleBulkPick = (id: string) => {
+    setBulkSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < 10) next.add(id);
+      else toast({ title: 'Max 10 leads per batch' });
+      return next;
+    });
+  };
+
+  const runBulkDeepScan = useCallback(async () => {
+    const ids = Array.from(bulkSelected);
+    const targets = scanCandidates.filter(l => ids.includes(l.id));
+    if (targets.length === 0) return;
     setBulkScanning(true);
-    toast({ title: `Deep-scanning ${candidates.length} leads in parallel…` });
+    setBulkStatuses(Object.fromEntries(targets.map(l => [l.id, 'scanning' as const])));
+    toast({ title: `Deep-scanning ${targets.length} leads in parallel…` });
     try {
       const results = await Promise.allSettled(
-        candidates.map(l => portalLeads.rocketReach(l.id, {}))
+        targets.map(async l => {
+          try {
+            const out = await portalLeads.rocketReach(l.id, {});
+            setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
+            return out;
+          } catch (e) {
+            setBulkStatuses(prev => ({ ...prev, [l.id]: 'failed' }));
+            throw e;
+          }
+        })
       );
       const ok = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.length - ok;
-      // Schedule follow-ups for the freshly scanned leads (best-effort, parallel)
       await Promise.allSettled(
-        candidates.map(async (l, i) => {
+        targets.map(async (l, i) => {
           const r = results[i];
           if (r.status !== 'fulfilled') return;
           const data: any = r.value;
@@ -186,7 +219,7 @@ export const LeadsBoard: React.FC = () => {
     } finally {
       setBulkScanning(false);
     }
-  }, [mine, refreshMine, toast]);
+  }, [bulkSelected, scanCandidates, refreshMine, toast]);
 
 
   return (
@@ -361,7 +394,7 @@ export const LeadsBoard: React.FC = () => {
               </div>
               <Button
                 size="sm"
-                onClick={bulkDeepScan}
+                onClick={openBulkPicker}
                 disabled={bulkScanning || mine.length === 0}
                 className="bg-amber text-background hover:bg-amber/90"
               >
@@ -403,6 +436,79 @@ export const LeadsBoard: React.FC = () => {
 
       {/* UPLOAD/DOWNLOAD */}
       {sub === 'upload' && <UploadDownloadPanel onUploaded={() => { setSub('mine'); refreshMine(); }} />}
+
+      {/* BULK DEEP SCAN PICKER */}
+      <Dialog open={bulkPickerOpen} onOpenChange={(o) => { if (!bulkScanning) setBulkPickerOpen(o); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan — Pick up to 10
+            </DialogTitle>
+            <DialogDescription>
+              Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{bulkSelected.size}/10 selected · {scanCandidates.length} eligible</span>
+            <div className="flex gap-2">
+              <button
+                className="text-amber hover:underline disabled:opacity-50"
+                disabled={bulkScanning}
+                onClick={() => setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)))}
+              >Select first 10</button>
+              <button
+                className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+                disabled={bulkScanning}
+                onClick={() => setBulkSelected(new Set())}
+              >Clear</button>
+            </div>
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto space-y-1 border border-border/50 rounded-md p-2">
+            {scanCandidates.map(l => {
+              const checked = bulkSelected.has(l.id);
+              const status = bulkStatuses[l.id];
+              return (
+                <label
+                  key={l.id}
+                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${checked ? 'bg-amber/5' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={bulkScanning}
+                    onChange={() => toggleBulkPick(l.id)}
+                    className="accent-amber"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {[l.industry, l.location, l.website].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  {status === 'scanning' && (
+                    <span className="text-xs text-amber inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Scanning…</span>
+                  )}
+                  {status === 'done' && <span className="text-xs text-green-400">✓ Done</span>}
+                  {status === 'failed' && <span className="text-xs text-red-400">Failed</span>}
+                  {!status && checked && <span className="text-xs text-muted-foreground">Queued</span>}
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" disabled={bulkScanning} onClick={() => setBulkPickerOpen(false)}>
+              {bulkScanning ? 'Running…' : 'Cancel'}
+            </Button>
+            <Button
+              className="bg-amber text-background hover:bg-amber/90"
+              disabled={bulkScanning || bulkSelected.size === 0}
+              onClick={runBulkDeepScan}
+            >
+              {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scanning {bulkSelected.size}…</> : <>Deep Scan {bulkSelected.size}</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* LEAD PREVIEW DIALOG */}
       <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
