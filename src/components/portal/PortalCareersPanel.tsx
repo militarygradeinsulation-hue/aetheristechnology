@@ -9,8 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame, Sparkles, MessageSquare
 } from 'lucide-react';
+import { ResumeReviewDialog } from '@/components/portal/ResumeReviewDialog';
 
 interface Attempt {
   id: string;
@@ -41,6 +42,11 @@ interface Application {
   reviewed: boolean;
   reviewed_at: string | null;
   created_at: string;
+  ai_fit_score: number | null;
+  ai_summary: string | null;
+  ai_strengths: string[] | null;
+  ai_concerns: string[] | null;
+  ai_analyzed_at: string | null;
 }
 
 interface Analytics {
@@ -75,6 +81,7 @@ export const PortalCareersPanel: React.FC = () => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('apps');
+  const [reviewing, setReviewing] = useState<Application | null>(null);
   const [editing, setEditing] = useState<Record<string, string>>({});
   const [editingAttempt, setEditingAttempt] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -119,15 +126,7 @@ export const PortalCareersPanel: React.FC = () => {
     a.share_code.toLowerCase().includes(q)
   ) : applications, [q, applications]);
 
-  const openResume = async (shareCode: string) => {
-    try {
-      const data = await invokeWithAuth({ action: 'admin_lookup', share_code: shareCode });
-      if (data?.resume_url) window.open(data.resume_url, '_blank');
-      else toast({ title: 'Resume not available', variant: 'destructive' });
-    } catch (e) {
-      toast({ title: 'Failed to open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    }
-  };
+  const openReview = (a: Application) => setReviewing(a);
 
   const saveNotes = async (a: Application) => {
     setSavingId(a.id);
@@ -330,6 +329,11 @@ export const PortalCareersPanel: React.FC = () => {
                             <span className="font-display font-bold text-foreground">{a.candidate_name}</span>
                             <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>
                             {a.score_pct != null && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
+                            {a.ai_fit_score != null && (
+                              <Badge className={`border ${a.ai_fit_score >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 60 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                                <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}
+                              </Badge>
+                            )}
                             <Button size="sm" variant={a.reviewed ? 'default' : 'outline'} className={`h-6 px-2 text-xs ${a.reviewed ? 'bg-amber text-background hover:bg-amber/90' : ''}`} onClick={() => toggleReviewed(a)}>
                               {a.reviewed ? 'Reviewed' : 'Mark reviewed'}
                             </Button>
@@ -340,11 +344,16 @@ export const PortalCareersPanel: React.FC = () => {
                             <span>Applied {fmt(a.created_at)}</span>
                           </div>
                         </div>
-                        {a.resume_path && (
-                          <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
-                            <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={() => openReview(a)}>
+                            <MessageSquare className="w-3 h-3 mr-1" /> Review
                           </Button>
-                        )}
+                          {a.resume_path && (
+                            <Button size="sm" onClick={() => openReview(a)} className="bg-amber text-background hover:bg-amber/90">
+                              <FileText className="w-3 h-3 mr-1" /> Resume
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <Textarea
                         value={noteVal}
@@ -410,6 +419,11 @@ export const PortalCareersPanel: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      <ResumeReviewDialog
+        app={reviewing}
+        onClose={() => setReviewing(null)}
+        onAppUpdated={(next) => setApplications(prev => prev.map(x => x.id === next.id ? { ...x, ...next } : x))}
+      />
     </div>
   );
 };

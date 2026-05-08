@@ -23,6 +23,7 @@ import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
+import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
@@ -476,9 +477,12 @@ const PortalPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-            <LogOut className="w-4 h-4 mr-1" /> Log out
-          </Button>
+          <div className="flex items-center gap-2 min-w-0 flex-1 max-w-md">
+            <div className="flex-1 min-w-0"><WhosWorkingBar /></div>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground flex-shrink-0">
+              <LogOut className="w-4 h-4 mr-1" /> Log out
+            </Button>
+          </div>
         </div>
         {/* Tab nav (only in 'tabs' layout) */}
         {layout === 'tabs' && (
