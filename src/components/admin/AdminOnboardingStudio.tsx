@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { ONBOARDING_CURRICULUM, GLOBAL_ROUTE_HINTS, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
 import {
-  listModules, generateModule, updateModule, deleteModule,
+  listModules, generateModule, updateModule, deleteModule, attachScreenshotsToSlides,
   type OnboardingModule, type OnboardingSlide,
 } from "@/lib/onboardingApi";
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
