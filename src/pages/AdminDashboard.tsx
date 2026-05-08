@@ -414,7 +414,7 @@ const AdminDashboard: React.FC = () => {
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
-      case 'onboarding': return <OnboardingStudio />;
+      case 'onboarding': return <AdminOnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
       case 'companycal': return <AdminCompanyCalendarPanel />;
       case 'sales': return <SalesCrmPanel />;
