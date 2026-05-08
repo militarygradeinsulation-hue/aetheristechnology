@@ -127,6 +127,41 @@ const PortalPage: React.FC = () => {
     });
   };
 
+  // Per-rep widget order + pinned set for full board customization.
+  const ORDER_KEY = `${ns}.widgetOrder.v1`;
+  const PINNED_KEY = `${ns}.widgetPinned.v1`;
+  const [widgetOrder, setWidgetOrderState] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(ORDER_KEY) || '[]'); } catch { return []; }
+  });
+  const persistOrder = (next: string[]) => {
+    setWidgetOrderState(next);
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify(next)); } catch {}
+  };
+  const [pinnedWidgets, setPinnedWidgetsState] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(PINNED_KEY) || '[]'); } catch { return []; }
+  });
+  const togglePinned = (id: string) => {
+    setPinnedWidgetsState(prev => {
+      const next = prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id];
+      try { localStorage.setItem(PINNED_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+  const [dragId, setDragId] = useState<string | null>(null);
+  const reorderWidgets = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    // Build current sorted order based on existing logic, then move source before target.
+    const current = sortedWidgetsRef.current.slice();
+    const from = current.indexOf(sourceId);
+    const to = current.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    current.splice(from, 1);
+    current.splice(to, 0, sourceId);
+    persistOrder(current);
+  };
+  const sortedWidgetsRef = React.useRef<string[]>([]);
+
+
   // Admin preview mode: if launched from the admin dashboard with ?adminPreview=1
   // and a valid admin token, mint a synthetic profile so admins can browse the
   // exact portal UX without a rep code.
@@ -495,15 +530,29 @@ const PortalPage: React.FC = () => {
             onWidgetSizeChange={setWidgetSize}
           />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-            {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
+            {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board · drag headers to reorder · ☆ to pin · 1/4–4/4 to resize' : 'Tab view'}
           </span>
         </div>
 
         {layout === 'tabs' ? (
           renderTabBody(tab)
-        ) : (
+        ) : (() => {
+          const visibleWidgets = availableTabs.filter(t => effectiveVisible.includes(t.id));
+          // Sort: pinned first (in pin-toggle order), then by saved order, then by default order.
+          const orderIndex = (id: string) => {
+            const i = widgetOrder.indexOf(id);
+            return i === -1 ? 999 : i;
+          };
+          const sorted = visibleWidgets.slice().sort((a, b) => {
+            const ap = pinnedWidgets.includes(a.id) ? 0 : 1;
+            const bp = pinnedWidgets.includes(b.id) ? 0 : 1;
+            if (ap !== bp) return ap - bp;
+            return orderIndex(a.id) - orderIndex(b.id);
+          });
+          sortedWidgetsRef.current = sorted.map(s => s.id);
+          return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+            {sorted.map((t) => {
               const size = widgetSizes[t.id] || 2;
               const colSpan =
                 size === 1 ? 'lg:col-span-1 md:col-span-1'
@@ -511,9 +560,31 @@ const PortalPage: React.FC = () => {
                 : size === 3 ? 'lg:col-span-3 md:col-span-2'
                 : 'lg:col-span-4 md:col-span-2';
               const Icon = t.iconCmp;
+              const isPinned = pinnedWidgets.includes(t.id);
+              const isDragging = dragId === t.id;
               return (
-                <div key={t.id} className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}>
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                <div
+                  key={t.id}
+                  draggable={!isPinned}
+                  onDragStart={(e) => {
+                    if (isPinned) { e.preventDefault(); return; }
+                    setDragId(t.id);
+                    e.dataTransfer.effectAllowed = 'move';
+                    try { e.dataTransfer.setData('text/plain', t.id); } catch {}
+                  }}
+                  onDragEnd={() => setDragId(null)}
+                  onDragOver={(e) => { if (dragId && dragId !== t.id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const src = dragId || e.dataTransfer.getData('text/plain');
+                    if (src) reorderWidgets(src, t.id);
+                    setDragId(null);
+                  }}
+                  className={`${colSpan} glass rounded-xl border overflow-hidden flex flex-col transition-all ${
+                    isDragging ? 'opacity-40 scale-[0.98]' : ''
+                  } ${isPinned ? 'border-amber/60 ring-1 ring-amber/30' : 'border-border'}`}
+                >
+                  <div className={`flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30 ${isPinned ? '' : 'cursor-grab active:cursor-grabbing'}`}>
                     <div className="flex items-center gap-2 min-w-0">
                       <Icon className="w-4 h-4 text-amber shrink-0" />
                       <span className="font-display font-bold text-sm text-foreground truncate">{t.label}</span>
@@ -539,6 +610,15 @@ const PortalPage: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className={`h-6 w-6 ${isPinned ? 'text-amber' : ''}`}
+                        title={isPinned ? 'Unpin (allow drag)' : 'Pin to top'}
+                        onClick={() => togglePinned(t.id)}
+                      >
+                        <span className="text-xs">{isPinned ? '★' : '☆'}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-6 w-6"
                         title="Open full"
                         onClick={() => { setLayout('tabs'); setTab(t.id); }}
@@ -554,7 +634,9 @@ const PortalPage: React.FC = () => {
               );
             })}
           </div>
-        )}
+          );
+        })()}
+
       </main>
     </div>
   );
