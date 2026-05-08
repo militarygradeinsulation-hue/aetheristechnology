@@ -178,7 +178,7 @@ const CareersTestPage = () => {
                 <div><Label>Phone (optional)</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} maxLength={20} /></div>
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span>Once you click below, your <strong>45-minute timer</strong> starts. This counts as 1 of your 2 attempts today.</span>
+                  <span>Once you click below, your <strong>45-minute timer</strong> starts. You get <strong>5 submitted attempts per day</strong>.</span>
                 </div>
                 <Button onClick={startTest} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
                   {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Timer className="w-4 h-4 mr-1" />}
