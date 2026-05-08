@@ -3,7 +3,7 @@
 
 const ADMIN_PIN = Deno.env.get("ADMIN_PIN");
 if (!ADMIN_PIN) {
-  console.error("ADMIN_PIN env var not configured");
+  console.error("ADMIN_PIN env var not configured - admin auth will fail");
 }
 
 export async function verifyAdminToken(token: string | null, secret: string): Promise<boolean> {
