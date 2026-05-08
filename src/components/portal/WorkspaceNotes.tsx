@@ -217,10 +217,23 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
       </div>
 
       {/* Editor */}
-      <div className="glass p-4 rounded-lg border border-border space-y-3">
-        {!active && !draftTitle ? (
+      <div
+        className={`glass p-4 rounded-lg border space-y-3 transition-colors ${
+          dragOver ? 'border-amber bg-amber/5' : 'border-border'
+        }`}
+        onDragOver={e => { e.preventDefault(); if (composing) setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => {
+          e.preventDefault();
+          setDragOver(false);
+          if (!composing) handleNew();
+          if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+        }}
+      >
+        {!composing ? (
           <p className="text-sm text-muted-foreground text-center py-12">
-            Select a note or click "New note" to start writing.
+            Select a note or click "New note" to start writing.<br />
+            <span className="text-xs">Tip: drop files here to start a new note with attachments.</span>
           </p>
         ) : (
           <>
