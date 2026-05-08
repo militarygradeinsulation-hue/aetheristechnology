@@ -536,9 +536,23 @@ const PortalPage: React.FC = () => {
 
         {layout === 'tabs' ? (
           renderTabBody(tab)
-        ) : (
+        ) : (() => {
+          const visibleWidgets = availableTabs.filter(t => effectiveVisible.includes(t.id));
+          // Sort: pinned first (in pin-toggle order), then by saved order, then by default order.
+          const orderIndex = (id: string) => {
+            const i = widgetOrder.indexOf(id);
+            return i === -1 ? 999 : i;
+          };
+          const sorted = visibleWidgets.slice().sort((a, b) => {
+            const ap = pinnedWidgets.includes(a.id) ? 0 : 1;
+            const bp = pinnedWidgets.includes(b.id) ? 0 : 1;
+            if (ap !== bp) return ap - bp;
+            return orderIndex(a.id) - orderIndex(b.id);
+          });
+          sortedWidgetsRef.current = sorted.map(s => s.id);
+          return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+            {sorted.map((t) => {
               const size = widgetSizes[t.id] || 2;
               const colSpan =
                 size === 1 ? 'lg:col-span-1 md:col-span-1'
@@ -546,9 +560,31 @@ const PortalPage: React.FC = () => {
                 : size === 3 ? 'lg:col-span-3 md:col-span-2'
                 : 'lg:col-span-4 md:col-span-2';
               const Icon = t.iconCmp;
+              const isPinned = pinnedWidgets.includes(t.id);
+              const isDragging = dragId === t.id;
               return (
-                <div key={t.id} className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}>
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                <div
+                  key={t.id}
+                  draggable={!isPinned}
+                  onDragStart={(e) => {
+                    if (isPinned) { e.preventDefault(); return; }
+                    setDragId(t.id);
+                    e.dataTransfer.effectAllowed = 'move';
+                    try { e.dataTransfer.setData('text/plain', t.id); } catch {}
+                  }}
+                  onDragEnd={() => setDragId(null)}
+                  onDragOver={(e) => { if (dragId && dragId !== t.id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const src = dragId || e.dataTransfer.getData('text/plain');
+                    if (src) reorderWidgets(src, t.id);
+                    setDragId(null);
+                  }}
+                  className={`${colSpan} glass rounded-xl border overflow-hidden flex flex-col transition-all ${
+                    isDragging ? 'opacity-40 scale-[0.98]' : ''
+                  } ${isPinned ? 'border-amber/60 ring-1 ring-amber/30' : 'border-border'}`}
+                >
+                  <div className={`flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30 ${isPinned ? '' : 'cursor-grab active:cursor-grabbing'}`}>
                     <div className="flex items-center gap-2 min-w-0">
                       <Icon className="w-4 h-4 text-amber shrink-0" />
                       <span className="font-display font-bold text-sm text-foreground truncate">{t.label}</span>
@@ -574,6 +610,15 @@ const PortalPage: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className={`h-6 w-6 ${isPinned ? 'text-amber' : ''}`}
+                        title={isPinned ? 'Unpin (allow drag)' : 'Pin to top'}
+                        onClick={() => togglePinned(t.id)}
+                      >
+                        <span className="text-xs">{isPinned ? '★' : '☆'}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-6 w-6"
                         title="Open full"
                         onClick={() => { setLayout('tabs'); setTab(t.id); }}
@@ -589,7 +634,9 @@ const PortalPage: React.FC = () => {
               );
             })}
           </div>
-        )}
+          );
+        })()}
+
       </main>
     </div>
   );
