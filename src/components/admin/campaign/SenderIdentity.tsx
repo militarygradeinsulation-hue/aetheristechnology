@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,7 +38,15 @@ export const SenderIdentity: React.FC<Props> = ({ fromName, fromEmail, signature
 
       <div>
         <Label className="text-xs text-muted-foreground">Preview</Label>
-        <div className="mt-1 p-3 rounded-lg bg-secondary/40 border border-border text-sm" dangerouslySetInnerHTML={{ __html: signatureHtml }} />
+        <div
+          className="mt-1 p-3 rounded-lg bg-secondary/40 border border-border text-sm"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(signatureHtml || '', {
+              ALLOWED_TAGS: ['a', 'b', 'br', 'p', 'span', 'strong', 'em', 'i', 'u', 'div'],
+              ALLOWED_ATTR: ['href', 'style', 'target', 'rel'],
+            }),
+          }}
+        />
       </div>
     </div>
   );
