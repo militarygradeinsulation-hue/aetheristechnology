@@ -185,7 +185,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
           <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. No test = no application. Random apps go in the trash.</p>
         </div>
-        <a href="/careers/test"><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
+        <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')}><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
     </Card>
 
