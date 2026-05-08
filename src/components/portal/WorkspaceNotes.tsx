@@ -26,6 +26,8 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
   const [draftAttachments, setDraftAttachments] = useState<RepNoteAttachment[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const dirtyRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,6 +52,7 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
     setDraftBody(n?.body || '');
     setDraftPinned(n?.pinned || false);
     setDraftAttachments(n?.attachments || []);
+    setComposing(!!n);
     dirtyRef.current = false;
   };
 
@@ -72,6 +75,7 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
         );
       });
       setActive(saved);
+      setComposing(true);
       setDraftAttachments(saved.attachments || []);
       dirtyRef.current = false;
       return saved;
@@ -88,11 +92,13 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
   };
 
   const handleNew = () => {
-    selectNote(null);
-    setDraftTitle('New note');
+    setActive(null);
+    setDraftTitle('');
     setDraftBody('');
     setDraftPinned(false);
     setDraftAttachments([]);
+    setComposing(true);
+    dirtyRef.current = false;
   };
 
   const handleDelete = async () => {
@@ -211,10 +217,23 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
       </div>
 
       {/* Editor */}
-      <div className="glass p-4 rounded-lg border border-border space-y-3">
-        {!active && !draftTitle ? (
+      <div
+        className={`glass p-4 rounded-lg border space-y-3 transition-colors ${
+          dragOver ? 'border-amber bg-amber/5' : 'border-border'
+        }`}
+        onDragOver={e => { e.preventDefault(); if (composing) setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => {
+          e.preventDefault();
+          setDragOver(false);
+          if (!composing) handleNew();
+          if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+        }}
+      >
+        {!composing ? (
           <p className="text-sm text-muted-foreground text-center py-12">
-            Select a note or click "New note" to start writing.
+            Select a note or click "New note" to start writing.<br />
+            <span className="text-xs">Tip: drop files here to start a new note with attachments.</span>
           </p>
         ) : (
           <>
