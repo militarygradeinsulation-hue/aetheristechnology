@@ -23,6 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 type RunStatus = 'idle' | 'running' | 'success' | 'error' | 'skipped';
 
