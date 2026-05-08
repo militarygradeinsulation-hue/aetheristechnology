@@ -439,7 +439,7 @@ const PortalPage: React.FC = () => {
             id="portal-tab-nav"
             className="px-10 flex gap-1 overflow-x-auto scroll-smooth scrollbar-thin"
           >
-            {tabs.filter(t => !t.partnerOnly || isPartner).map((t) => (
+            {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => (
               <button
                 key={t.id}
                 onClick={() => {
