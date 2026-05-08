@@ -181,7 +181,7 @@ serve(async (req) => {
 
     // ---------- ADMIN: lookup by code ----------
     if (action === "admin_lookup") {
-      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
       const code = String(body.share_code || "").trim().toUpperCase();
       if (!code) return json({ error: "Missing share_code" }, 400);
