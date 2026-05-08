@@ -77,17 +77,42 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  const runChat = useCallback(async (text: string) => {
-    if (!text || isLoading) return;
-    const userMsg: Msg = { role: 'user', content: text };
+  const buildApiContent = (text: string, atts: Attachment[]) => {
+    const textParts: string[] = [];
+    if (text) textParts.push(text);
+    for (const a of atts) {
+      if (a.kind === 'text') {
+        textParts.push(`\n\n--- Attached document: ${a.name} ---\n${a.text}\n--- end ${a.name} ---`);
+      }
+    }
+    const combinedText = textParts.join('').trim() || '(see attached)';
+    const images = atts.filter((a): a is Extract<Attachment, { kind: 'image' }> => a.kind === 'image');
+    if (images.length === 0) return combinedText;
+    return [
+      { type: 'text', text: combinedText },
+      ...images.map((img) => ({ type: 'image_url', image_url: { url: img.dataUrl } })),
+    ];
+  };
+
+  const runChat = useCallback(async (text: string, atts: Attachment[] = []) => {
+    if ((!text && atts.length === 0) || isLoading) return;
+    const userMsg: Msg = { role: 'user', content: text || '(see attached)', attachments: atts.length ? atts : undefined };
     const next = [...messages, userMsg];
     setMessages(next);
     setInput('');
+    setAttachments([]);
     setIsLoading(true);
 
     try {
       const token = getPortalToken();
       if (!token) throw new Error('Session expired. Sign in again.');
+
+      const apiMessages = next.map((m) => ({
+        role: m.role,
+        content: m.role === 'user' && m.attachments?.length
+          ? buildApiContent(m.content === '(see attached)' ? '' : m.content, m.attachments)
+          : m.content,
+      }));
 
       const res = await fetch(ASSISTANT_URL, {
         method: 'POST',
@@ -97,9 +122,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: next.map(({ role, content }) => ({ role, content })),
-        }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -120,8 +143,51 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    runChat(input.trim());
+    runChat(input.trim(), attachments);
   };
+
+  const handleFiles = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const accepted: Attachment[] = [];
+    const errors: string[] = [];
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_BYTES) {
+        errors.push(`${file.name}: too large (max 8 MB)`);
+        continue;
+      }
+      const isImage = file.type.startsWith('image/');
+      const isText = /^(text\/|application\/(json|xml|csv|x-yaml))/.test(file.type)
+        || /\.(txt|md|csv|json|log|yml|yaml|xml|html|tsv)$/i.test(file.name);
+      try {
+        if (isImage) {
+          const dataUrl = await new Promise<string>((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(String(r.result));
+            r.onerror = () => rej(r.error);
+            r.readAsDataURL(file);
+          });
+          accepted.push({ kind: 'image', name: file.name, dataUrl, mimeType: file.type || 'image/png' });
+        } else if (isText) {
+          let text = await file.text();
+          if (text.length > MAX_TEXT_CHARS) text = text.slice(0, MAX_TEXT_CHARS) + '\n…[truncated]';
+          accepted.push({ kind: 'text', name: file.name, text, mimeType: file.type || 'text/plain' });
+        } else {
+          errors.push(`${file.name}: unsupported (use images, .txt, .md, .csv, .json)`);
+        }
+      } catch (err) {
+        errors.push(`${file.name}: ${err instanceof Error ? err.message : 'read failed'}`);
+      }
+    }
+    if (accepted.length) setAttachments((p) => [...p, ...accepted]);
+    if (errors.length) {
+      setMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet — paste the relevant text instead.`,
+      }]);
+    }
+  }, []);
+
+  const removeAttachment = (idx: number) => setAttachments((p) => p.filter((_, i) => i !== idx));
 
   const toggleRecording = useCallback(async () => {
     if (isRecording) {
