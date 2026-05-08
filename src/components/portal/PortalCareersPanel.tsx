@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame
 } from 'lucide-react';
 
 interface Attempt {
@@ -25,6 +25,7 @@ interface Attempt {
   submitted_at: string | null;
   share_code: string | null;
   notes_to_admin: string | null;
+  admin_notes: string | null;
 }
 
 interface Application {
