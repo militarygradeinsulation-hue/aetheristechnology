@@ -293,6 +293,24 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
                   ? 'bg-amber/20 text-foreground border border-amber/30'
                   : 'bg-secondary/40 text-foreground border border-border/50'
               }`}>
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {msg.attachments.map((a, ai) => (
+                      a.kind === 'image' ? (
+                        <img
+                          key={ai}
+                          src={a.dataUrl}
+                          alt={a.name}
+                          className="max-h-32 rounded border border-border/50"
+                        />
+                      ) : (
+                        <span key={ai} className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-border/50 bg-background/40 font-mono">
+                          <FileText className="w-3 h-3" /> {a.name}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                )}
                 <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-amber prose-code:text-amber prose-code:bg-background/40 prose-code:px-1 prose-code:rounded prose-code:before:hidden prose-code:after:hidden">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
