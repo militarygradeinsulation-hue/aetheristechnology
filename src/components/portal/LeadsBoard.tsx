@@ -650,6 +650,31 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       } else {
         toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
       }
+      // Auto-add follow-up to workspace calendar on fresh deep scan
+      if (!res.cached && !res.note) {
+        try {
+          const businessName = lead.business_name || lead.email || 'Lead';
+          await createCalendarEvent({
+            kind: 'follow_up',
+            title: `Follow up: ${businessName}`,
+            body: [
+              `Lead: ${businessName}`,
+              lead.contact_name ? `Contact: ${lead.contact_name}` : null,
+              lead.email ? `Email: ${lead.email}` : null,
+              lead.phone ? `Phone: ${lead.phone}` : null,
+              lead.website ? `Website: ${lead.website}` : null,
+              '',
+              'Deep scan complete — review insights and reach out.',
+            ].filter(Boolean).join('\n'),
+            start_at: nextBusinessMorningISO(),
+            all_day: false,
+            lead_id: lead.id,
+          });
+          toast({ title: 'Follow-up added to your calendar' });
+        } catch (calErr) {
+          console.warn('calendar autosave failed:', calErr);
+        }
+      }
     } catch (e) {
       toast({ title: 'Deep scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setRrLoading(false); }
