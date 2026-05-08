@@ -140,6 +140,55 @@ export const LeadsBoard: React.FC = () => {
     return g;
   }, [mine]);
 
+  const bulkDeepScan = useCallback(async () => {
+    // Pick up to 10 unscanned leads (no rocketreach yet) that have a website or email
+    const candidates = mine
+      .filter(l => !l.enrichment?.rocketreach && (l.website || l.email))
+      .slice(0, 10);
+    if (candidates.length === 0) {
+      toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
+      return;
+    }
+    setBulkScanning(true);
+    toast({ title: `Deep-scanning ${candidates.length} leads in parallel…` });
+    try {
+      const results = await Promise.allSettled(
+        candidates.map(l => portalLeads.rocketReach(l.id, {}))
+      );
+      const ok = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.length - ok;
+      // Schedule follow-ups for the freshly scanned leads (best-effort, parallel)
+      await Promise.allSettled(
+        candidates.map(async (l, i) => {
+          const r = results[i];
+          if (r.status !== 'fulfilled') return;
+          const data: any = r.value;
+          if (data?.cached || data?.note) return;
+          const businessName = l.business_name || l.email || 'Lead';
+          await createCalendarEvent({
+            kind: 'follow_up',
+            title: `Follow up: ${businessName}`,
+            body: `Lead: ${businessName}\nDeep scan complete — review insights and reach out.`,
+            start_at: nextBusinessMorningISO(),
+            all_day: false,
+            lead_id: l.id,
+          });
+        })
+      );
+      toast({
+        title: `Bulk deep scan finished`,
+        description: `${ok} succeeded${failed ? `, ${failed} failed` : ''}. Follow-ups added to your calendar.`,
+        variant: failed && !ok ? 'destructive' : 'default',
+      });
+      refreshMine();
+    } catch (e) {
+      toast({ title: 'Bulk scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setBulkScanning(false);
+    }
+  }, [mine, refreshMine, toast]);
+
+
   return (
     <div className="space-y-4">
       {/* Sub tabs */}
