@@ -330,7 +330,29 @@ export const TrainingPanel: React.FC<Props> = () => {
                     </div>
                   );
                 })}
-                <Button variant="outline" onClick={() => { setResult(null); setAnswers({}); }}>Retake</Button>
+                <Button variant="outline" onClick={() => { setResult(null); setAnswers({}); setPlayWelcome(false); }}>Retake</Button>
+
+                {/* Welcome to Aetheris unlock — only after passing */}
+                {result.passed && welcome && (
+                  <div className="mt-4 rounded-lg border border-amber/40 bg-gradient-to-br from-amber/10 to-amber/5 p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <PartyPopper className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display text-base text-foreground">You're in. Watch this next.</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          <strong className="text-amber">Welcome to Aetheris</strong> — {welcome.slides_json?.length || 5} narrated slides ({Math.round(welcome.total_duration_sec || 0)}s) walking you through who we are, what we sell, and how you get paid.
+                        </p>
+                      </div>
+                    </div>
+                    {!playWelcome ? (
+                      <Button onClick={() => setPlayWelcome(true)} className="bg-amber text-background hover:bg-amber/90">
+                        <Play className="w-4 h-4 mr-1.5" /> Play Welcome to Aetheris
+                      </Button>
+                    ) : (
+                      <OnboardingPlayer module={welcome} onClose={() => setPlayWelcome(false)} trackProgress />
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
