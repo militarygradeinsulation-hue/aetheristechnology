@@ -37,6 +37,7 @@ import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
+import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
@@ -53,11 +54,13 @@ import { Maximize2 } from 'lucide-react';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
 type ToolKey =
+  | 'all-in-one'
   | 'business-post-analyst'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
+  { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL — runs every prospect tool at once.' },
   { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post — instant prospect ammo.', external: true },
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
@@ -72,6 +75,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
 const renderEmbeddedTool = (key: ToolKey, noop: () => void): React.ReactNode => {
   switch (key) {
     case 'business-post-analyst': return null;
+    case 'all-in-one':           return <AllInOneGenerator />;
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
     case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
     case 'business-diagnostic':  return <BusinessDiagnostic />;
@@ -334,10 +338,12 @@ const PortalPage: React.FC = () => {
                         <div className="flex items-start gap-2"><Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" /><div className="min-w-0"><p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p><p className="text-sm text-muted-foreground mt-1">{t.desc}</p></div></div>
                       </button>
                     )}
-                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
-                      <a href={t.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>{t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" /></a>
-                    </div>
+                    {t.href !== '#' && (
+                      <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                        <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
+                        <a href={t.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>{t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" /></a>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -347,7 +353,12 @@ const PortalPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-4 h-4 mr-1" /> Back to all tools</Button>
-              <a href={REP_TOOLS.find(t => t.key === activeTool)?.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1">Open public page <ExternalLink className="w-3 h-3" /></a>
+              {(() => {
+                const href = REP_TOOLS.find(t => t.key === activeTool)?.href;
+                return href && href !== '#' ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1">Open public page <ExternalLink className="w-3 h-3" /></a>
+                ) : null;
+              })()}
             </div>
             <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
           </div>
