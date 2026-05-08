@@ -116,9 +116,14 @@ export const PortalCareersPanel: React.FC = () => {
     a.share_code.toLowerCase().includes(q)
   ) : applications, [q, applications]);
 
-  const openResume = async (path: string) => {
-    const { data } = await supabase.storage.from('careers-resumes').createSignedUrl(path, 60 * 30);
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  const openResume = async (shareCode: string) => {
+    try {
+      const data = await invokeWithAuth({ action: 'admin_lookup', share_code: shareCode });
+      if (data?.resume_url) window.open(data.resume_url, '_blank');
+      else toast({ title: 'Resume not available', variant: 'destructive' });
+    } catch (e) {
+      toast({ title: 'Failed to open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    }
   };
 
   const saveNotes = async (a: Application) => {
