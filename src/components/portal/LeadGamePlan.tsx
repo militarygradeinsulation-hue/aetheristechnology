@@ -28,9 +28,11 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
   const isSales = /sales|cro|revenue|bd|business development/.test(role);
   const isTech = /cto|engineer|tech|it/.test(role);
   const company = lead.business_name || rr?.employer || fc?.json?.legal_name || 'your company';
-  const topGap = scan?.gaps?.[0];
-  const tech = fc?.json?.tech_stack || [];
-  const services = fc?.json?.services || [];
+  const asArray = (v: any): any[] => Array.isArray(v) ? v : (v == null ? [] : [v]);
+  const gaps = asArray(scan?.gaps);
+  const topGap = gaps[0];
+  const tech = asArray(fc?.json?.tech_stack);
+  const services = asArray(fc?.json?.services);
 
   const steps = useMemo(() => {
     // 1. Triage
