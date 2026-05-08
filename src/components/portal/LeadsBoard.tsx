@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
