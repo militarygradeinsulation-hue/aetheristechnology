@@ -26,9 +26,10 @@ async function generateScript(
   outline: string,
   apiKey: string,
   routeHints: Record<string, string>,
+  screenshotMap: Record<string, string>,
 ): Promise<{ slides: SlideJSON[] }> {
   const hintBlock = Object.keys(routeHints).length
-    ? `\n\nWhile narrating each slide, the player will display a LIVE screenshot of one of these app routes. Pick the most relevant key per slide from this list (use the KEY string, not the path):\n${Object.entries(routeHints).map(([k, v]) => `  - ${k} → ${v}`).join("\n")}\nIf no route fits a slide (intro/outro), set "route_key" to null.`
+    ? `\n\nWhile narrating each slide, the player will display a captured SCREENSHOT of one of these app areas. Pick the most relevant key per slide from this list (use the KEY string, not the path):\n${Object.entries(routeHints).map(([k, v]) => `  - ${k} → ${v}${screenshotMap[k] ? " [screenshot ready]" : ""}`).join("\n")}\nIf no area fits a slide (intro/outro), set "route_key" to null.`
     : "";
 
   const sys = `You are a sales onboarding script writer for Aetheris Technology, a Business Forensics operator.
@@ -55,13 +56,19 @@ Generate exactly 4 to 6 slides. The first slide is an intro/hook. The last slide
   if (!Array.isArray(parsed.slides) || parsed.slides.length === 0) {
     throw new Error("AI returned no slides");
   }
-  // Resolve route_key -> route path using hints
-  const slides: SlideJSON[] = parsed.slides.map((s: any) => ({
-    title: s.title,
-    bullets: Array.isArray(s.bullets) ? s.bullets : [],
-    narration: s.narration,
-    route: s.route_key && routeHints[s.route_key] ? routeHints[s.route_key] : undefined,
-  }));
+  // Resolve route_key -> screenshot URL (preferred) or live route fallback.
+  const slides: SlideJSON[] = parsed.slides.map((s: any) => {
+    const key = s.route_key as string | undefined;
+    const shot = key && screenshotMap[key];
+    const route = key && routeHints[key] ? routeHints[key] : undefined;
+    return {
+      title: s.title,
+      bullets: Array.isArray(s.bullets) ? s.bullets : [],
+      narration: s.narration,
+      route: shot ? undefined : route,
+      image_url: shot || undefined,
+    };
+  });
   return { slides };
 }
 
