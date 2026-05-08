@@ -64,6 +64,9 @@ export const LeadsBoard: React.FC = () => {
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
   const [bulkScanning, setBulkScanning] = useState(false);
+  const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkStatuses, setBulkStatuses] = useState<Record<string, 'pending' | 'scanning' | 'done' | 'failed'>>({});
 
   const refreshDrip = useCallback(async () => {
     setLoading(true);
