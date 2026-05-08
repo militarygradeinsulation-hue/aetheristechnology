@@ -173,6 +173,18 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Full visual calendar (month/week/list) — same view reps see */}
+      <CompanyCalendarRepView />
+
+      {/* Admin list with edit/delete controls */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            All entries — click to edit
+          </CardTitle>
+        </CardHeader>
+      </Card>
+
       {loading ? (
         <div className="glass p-12 rounded-xl text-center">
           <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
