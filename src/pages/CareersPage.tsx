@@ -13,6 +13,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+
+const trackCareersCta = (cta: string) => {
+  try {
+    const sid = localStorage.getItem('aetheris_session_id') || crypto.randomUUID();
+    localStorage.setItem('aetheris_session_id', sid);
+    supabase.from('site_events').insert([{
+      event_type: 'careers_cta_click',
+      event_data: { cta, path: '/careers' } as any,
+      session_id: sid,
+      user_agent: navigator.userAgent,
+    }]);
+  } catch {}
+};
 import {
   DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
   Shield, Rocket, GraduationCap, Users, Clock, Brain, Trophy, MapPin, Headphones,
