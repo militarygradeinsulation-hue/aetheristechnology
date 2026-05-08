@@ -108,7 +108,9 @@ serve(async (req) => {
           links_count: Array.isArray(sd?.links) ? sd.links.length : 0,
           metadata: sd?.metadata || null,
           markdown_excerpt: typeof sd?.markdown === "string" ? sd.markdown.slice(0, 4000) : null,
-          sitemap: Array.isArray((mapRes as any)?.links) ? (mapRes as any).links.slice(0, 50) : [],
+          sitemap: Array.isArray((mapRes as any)?.links)
+            ? (mapRes as any).links.slice(0, 50).map((l: any) => typeof l === "string" ? l : (l?.url || l?.href || "")).filter(Boolean)
+            : [],
           web_results: Array.isArray((searchRes as any)?.data) ? (searchRes as any).data.slice(0, 5).map((r: any) => ({
             url: r.url, title: r.title, description: r.description,
           })) : [],
