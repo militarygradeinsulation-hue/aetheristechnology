@@ -117,6 +117,33 @@ export const AdminCareersPanel: React.FC = () => {
     }
   };
 
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const analyzeResume = async (shareCode: string) => {
+    setAnalyzingId(shareCode);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'ai_analyze_resume', share_code: shareCode },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const d = data as any;
+      setApplications(prev => prev.map(a => a.share_code === shareCode ? {
+        ...a,
+        ai_fit_score: d.fit_score,
+        ai_summary: d.summary,
+        ai_strengths: d.strengths,
+        ai_concerns: d.concerns,
+        ai_analyzed_at: new Date().toISOString(),
+      } : a));
+      toast({ title: `Fit score: ${d.fit_score}/100` });
+    } catch (e) {
+      toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAnalyzingId(null); }
+  };
+
   const StatusBadge = ({ s }: { s: string }) => {
     const map: Record<string, string> = {
       passed: 'bg-green-500/20 text-green-400 border-green-500/30',
