@@ -8,11 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, RefreshCw, Play, CheckCircle2, AlertCircle,
-  GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X,
+  GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X, Image as ImageIcon,
 } from "lucide-react";
 import { ONBOARDING_CURRICULUM, GLOBAL_ROUTE_HINTS, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
 import {
-  listModules, generateModule, updateModule, deleteModule,
+  listModules, generateModule, updateModule, deleteModule, attachScreenshotsToSlides,
   type OnboardingModule, type OnboardingSlide,
 } from "@/lib/onboardingApi";
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
@@ -35,6 +35,25 @@ export const AdminOnboardingStudio: React.FC = () => {
   const [preview, setPreview] = useState<OnboardingModule | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [attaching, setAttaching] = useState(false);
+
+  const attachShots = async () => {
+    setAttaching(true);
+    try {
+      const merged = { ...GLOBAL_ROUTE_HINTS };
+      for (const def of ONBOARDING_CURRICULUM) Object.assign(merged, def.routeHints || {});
+      const res = await attachScreenshotsToSlides(merged);
+      await refresh();
+      toast({
+        title: "Screenshots attached",
+        description: `${res.slides_attached} slides updated across ${res.modules_updated} modules (${res.screenshots_available} screenshots available).`,
+      });
+    } catch (e) {
+      toast({ title: "Attach failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setAttaching(false);
+    }
+  };
 
   const refresh = async () => {
     try { setModules(await listModules()); } catch (e) {
@@ -205,6 +224,10 @@ export const AdminOnboardingStudio: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={attachShots} disabled={attaching || !!bulkProgress || !!busy} title="Match uploaded screenshots to existing slides without regenerating audio">
+              {attaching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ImageIcon className="w-4 h-4 mr-2" />}
+              Attach Screenshots
+            </Button>
             <Button onClick={generateAll} disabled={!!bulkProgress || !!busy}>
               {bulkProgress ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{bulkProgress.done}/{bulkProgress.total}</> : <><Sparkles className="w-4 h-4 mr-2" />Generate Full Curriculum</>}
             </Button>

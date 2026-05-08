@@ -81,6 +81,72 @@ serve(async (req) => {
       });
     }
 
+    if (action === "attach_screenshots") {
+      // Build map { routePath -> publicUrl } from current screenshots + routeHints.
+      const routeHints: Record<string, string> = body.routeHints || {};
+      const { data: shots } = await supabase.storage
+        .from("onboarding-assets")
+        .list("screenshots", { limit: 1000 });
+      const keyToUrl: Record<string, string> = {};
+      for (const f of shots || []) {
+        const k = f.name.replace(/\.png$/i, "");
+        const { data: pub } = supabase.storage
+          .from("onboarding-assets")
+          .getPublicUrl(`screenshots/${f.name}`);
+        keyToUrl[k] = pub.publicUrl;
+      }
+      // routePath (e.g. "/portal?tab=leads") -> url
+      const routeToUrl: Record<string, string> = {};
+      for (const [k, route] of Object.entries(routeHints)) {
+        if (keyToUrl[k]) routeToUrl[route] = keyToUrl[k];
+      }
+      // Also allow matching by key directly if slide.route happens to be a key
+      const lookupForSlide = (slide: { route?: string; image_url?: string; title?: string; narration?: string }): string | undefined => {
+        if (slide.route && routeToUrl[slide.route]) return routeToUrl[slide.route];
+        if (slide.route && keyToUrl[slide.route]) return keyToUrl[slide.route];
+        // Heuristic: pick screenshot whose key appears in slide title/narration
+        const hay = `${slide.title || ""} ${slide.narration || ""}`.toLowerCase();
+        let best: { key: string; score: number } | null = null;
+        for (const k of Object.keys(keyToUrl)) {
+          const tokens = k.split(/[_\-]/).filter(t => t.length > 2);
+          let score = 0;
+          for (const t of tokens) if (hay.includes(t)) score += 1;
+          if (score > 0 && (!best || score > best.score)) best = { key: k, score };
+        }
+        return best ? keyToUrl[best.key] : undefined;
+      };
+
+      const { data: mods, error: modErr } = await supabase
+        .from("onboarding_modules").select("id, slides_json");
+      if (modErr) throw modErr;
+
+      let updated = 0;
+      let attached = 0;
+      for (const m of mods || []) {
+        const slides = (m.slides_json as Array<Record<string, unknown>>) || [];
+        let changed = false;
+        const next = slides.map((s) => {
+          const url = lookupForSlide(s as { route?: string; image_url?: string; title?: string; narration?: string });
+          if (url && (s as { image_url?: string }).image_url !== url) {
+            changed = true;
+            attached++;
+            return { ...s, image_url: url };
+          }
+          return s;
+        });
+        if (changed) {
+          const { error: uErr } = await supabase
+            .from("onboarding_modules")
+            .update({ slides_json: next })
+            .eq("id", m.id);
+          if (!uErr) updated++;
+        }
+      }
+      return new Response(JSON.stringify({ ok: true, modules_updated: updated, slides_attached: attached, screenshots_available: Object.keys(keyToUrl).length }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "update") {
       if (!id && !slug) {
         return new Response(JSON.stringify({ error: "id or slug required" }), {
