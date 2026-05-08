@@ -41,6 +41,11 @@ interface Application {
   reviewed: boolean;
   reviewed_at: string | null;
   created_at: string;
+  ai_fit_score: number | null;
+  ai_summary: string | null;
+  ai_strengths: string[] | null;
+  ai_concerns: string[] | null;
+  ai_analyzed_at: string | null;
 }
 
 interface Analytics {
