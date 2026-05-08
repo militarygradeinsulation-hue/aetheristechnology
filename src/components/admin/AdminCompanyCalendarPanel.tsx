@@ -17,6 +17,7 @@ import {
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
 } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
+import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -170,6 +171,18 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
             Use the <strong>AI planner</strong> inside any entry to draft tactics/KPIs in seconds.
           </p>
         </CardContent>
+      </Card>
+
+      {/* Full visual calendar (month/week/list) — same view reps see */}
+      <CompanyCalendarRepView />
+
+      {/* Admin list with edit/delete controls */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            All entries — click to edit
+          </CardTitle>
+        </CardHeader>
       </Card>
 
       {loading ? (
