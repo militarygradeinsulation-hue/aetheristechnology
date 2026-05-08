@@ -33,7 +33,7 @@ import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
-import { OnboardingStudio } from '@/components/admin/OnboardingStudio';
+import { AdminOnboardingStudio } from '@/components/admin/AdminOnboardingStudio';
 import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
 import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
 
@@ -414,7 +414,7 @@ const AdminDashboard: React.FC = () => {
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
-      case 'onboarding': return <OnboardingStudio />;
+      case 'onboarding': return <AdminOnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
       case 'companycal': return <AdminCompanyCalendarPanel />;
       case 'sales': return <SalesCrmPanel />;
