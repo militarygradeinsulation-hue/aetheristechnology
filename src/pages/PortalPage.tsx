@@ -530,7 +530,7 @@ const PortalPage: React.FC = () => {
             onWidgetSizeChange={setWidgetSize}
           />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-            {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
+            {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board · drag headers to reorder · ☆ to pin · 1/4–4/4 to resize' : 'Tab view'}
           </span>
         </div>
 
