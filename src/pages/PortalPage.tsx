@@ -338,10 +338,12 @@ const PortalPage: React.FC = () => {
                         <div className="flex items-start gap-2"><Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" /><div className="min-w-0"><p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p><p className="text-sm text-muted-foreground mt-1">{t.desc}</p></div></div>
                       </button>
                     )}
-                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
-                      <a href={t.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>{t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" /></a>
-                    </div>
+                    {t.href !== '#' && (
+                      <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                        <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
+                        <a href={t.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-amber inline-flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>{t.external ? 'Open' : 'Public page'} <ExternalLink className="w-3 h-3" /></a>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
