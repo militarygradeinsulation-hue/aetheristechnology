@@ -337,6 +337,24 @@ export const AdminOnboardingStudio: React.FC = () => {
                         rows={4}
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground">Live route to show (e.g. /portal?tab=leads)</label>
+                        <Input
+                          value={s.route || ""}
+                          onChange={(e) => updateSlide(si, { route: e.target.value })}
+                          placeholder="/portal?tab=leads"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Or static image URL</label>
+                        <Input
+                          value={s.image_url || ""}
+                          onChange={(e) => updateSlide(si, { image_url: e.target.value })}
+                          placeholder="https://…/screenshot.png"
+                        />
+                      </div>
+                    </div>
                     {s.audio_url && (
                       <audio controls src={s.audio_url} className="w-full h-8" />
                     )}
