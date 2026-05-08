@@ -48,20 +48,29 @@ function extractPlainText(buf: Uint8Array) {
   return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
 }
 
+function toBase64(bytes: Uint8Array) {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 async function aiExtractResumeText(params: {
   apiKey: string;
   bytes: Uint8Array;
   filename: string;
   mime: string;
 }) {
-  const base64 = btoa(String.fromCharCode(...params.bytes));
+  const base64 = toBase64(params.bytes);
   const prompt = [
     "Extract all readable text from this resume.",
     "Preserve section order and line breaks where possible.",
     "Return plain text only. No commentary, no JSON, no markdown."
   ].join(" ");
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${params.apiKey}`,
@@ -69,16 +78,18 @@ async function aiExtractResumeText(params: {
     },
     body: JSON.stringify({
       model: "openai/gpt-5-mini",
-      input: [{
+      messages: [{
         role: "user",
         content: [
           {
-            type: "input_file",
-            filename: params.filename,
-            file_data: `data:${params.mime};base64,${base64}`,
+            type: "file",
+            file: {
+              filename: params.filename,
+              file_data: `data:${params.mime};base64,${base64}`,
+            },
           },
           {
-            type: "input_text",
+            type: "text",
             text: prompt,
           },
         ],
@@ -92,12 +103,12 @@ async function aiExtractResumeText(params: {
   }
 
   const json = await res.json();
-  const text = String(
-    json.output_text ||
-    json.output?.map((item: any) => item?.content?.map((c: any) => c?.text || "").join("\n") || "").join("\n") ||
-    json.choices?.[0]?.message?.content ||
-    ""
-  ).trim();
+  const content = json.choices?.[0]?.message?.content;
+  const text = typeof content === "string"
+    ? content.trim()
+    : Array.isArray(content)
+      ? content.map((part: any) => part?.text || "").join("\n").trim()
+      : "";
 
   return text;
 }
