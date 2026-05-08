@@ -2980,6 +2980,78 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_modules: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          generated_at: string | null
+          id: string
+          order_index: number
+          slides_json: Json
+          slug: string
+          status: string
+          summary: string | null
+          title: string
+          total_duration_sec: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          generated_at?: string | null
+          id?: string
+          order_index?: number
+          slides_json?: Json
+          slug: string
+          status?: string
+          summary?: string | null
+          title: string
+          total_duration_sec?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          generated_at?: string | null
+          id?: string
+          order_index?: number
+          slides_json?: Json
+          slug?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          total_duration_sec?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          module_slug: string
+          rep_code: string
+          updated_at: string
+          watched_seconds: number
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          module_slug: string
+          rep_code: string
+          updated_at?: string
+          watched_seconds?: number
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          module_slug?: string
+          rep_code?: string
+          updated_at?: string
+          watched_seconds?: number
+        }
+        Relationships: []
+      }
       operator_headshots: {
         Row: {
           created_at: string
