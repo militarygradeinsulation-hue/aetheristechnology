@@ -11,7 +11,7 @@ const corsHeaders = {
 const TEST_MINUTES = 45;
 const QUESTION_COUNT = 20;
 const PASS_PCT = 70;
-const MAX_ATTEMPTS_PER_DAY = 2;
+const MAX_ATTEMPTS_PER_DAY = 5;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -48,11 +48,13 @@ serve(async (req) => {
       if (!email || !name) return json({ error: "Name and email required" }, 400);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
 
-      // attempts in last 24h
+      // Only count *submitted* attempts toward the daily limit so abandoned/lost
+      // sessions and quick mis-clicks don't lock candidates out.
       const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
       const { count } = await admin.from("careers_attempts")
         .select("id", { count: "exact", head: true })
         .ilike("candidate_email", email)
+        .not("submitted_at", "is", null)
         .gte("started_at", dayAgo);
       if ((count ?? 0) >= MAX_ATTEMPTS_PER_DAY) {
         return json({ error: `You've used your ${MAX_ATTEMPTS_PER_DAY} attempts for today. Try again tomorrow.` }, 429);
