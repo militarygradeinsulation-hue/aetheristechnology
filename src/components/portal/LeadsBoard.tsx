@@ -350,12 +350,25 @@ export const LeadsBoard: React.FC = () => {
       {sub === 'mine' && (
         <Card>
           <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-amber" /> My Active Leads
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Move them through the pipeline. Click "Log touch" each time you contact them. {activeCount}/{maxActive} active slots used.
-            </p>
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <CardTitle className="font-display flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-amber" /> My Active Leads
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Move them through the pipeline. Click "Log touch" each time you contact them. {activeCount}/{maxActive} active slots used.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={bulkDeepScan}
+                disabled={bulkScanning || mine.length === 0}
+                className="bg-amber text-background hover:bg-amber/90"
+              >
+                {bulkScanning ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                Deep Scan Next 10
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {loading && mine.length === 0 ? (
