@@ -131,8 +131,23 @@ serve(async (req) => {
       status: "generating", error_message: null,
     }, { onConflict: "slug" });
 
+    // Load existing screenshots so the AI can prefer keys that have one captured
+    const screenshotMap: Record<string, string> = {};
+    try {
+      const { data: shots } = await supabase.storage
+        .from("onboarding-assets")
+        .list("screenshots", { limit: 1000 });
+      for (const f of shots || []) {
+        const k = f.name.replace(/\.png$/i, "");
+        const { data: pub } = supabase.storage
+          .from("onboarding-assets")
+          .getPublicUrl(`screenshots/${f.name}`);
+        screenshotMap[k] = pub.publicUrl;
+      }
+    } catch { /* ignore */ }
+
     // 1. Generate script
-    const { slides } = await generateScript(title, scriptOutline, LOVABLE_API_KEY, routeHints || {});
+    const { slides } = await generateScript(title, scriptOutline, LOVABLE_API_KEY, routeHints || {}, screenshotMap);
 
     // 2. TTS per slide + upload
     const finalSlides: SlideJSON[] = [];
@@ -155,6 +170,7 @@ serve(async (req) => {
         audio_url: pub.publicUrl,
         duration_sec: dur,
         route: s.route,
+        image_url: s.image_url,
       });
     }
 
