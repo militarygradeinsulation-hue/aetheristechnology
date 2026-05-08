@@ -75,6 +75,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
 const renderEmbeddedTool = (key: ToolKey, noop: () => void): React.ReactNode => {
   switch (key) {
     case 'business-post-analyst': return null;
+    case 'all-in-one':           return <AllInOneGenerator />;
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
     case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
     case 'business-diagnostic':  return <BusinessDiagnostic />;
