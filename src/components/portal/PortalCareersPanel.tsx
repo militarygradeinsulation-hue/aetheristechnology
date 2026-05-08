@@ -76,7 +76,9 @@ export const PortalCareersPanel: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('apps');
   const [editing, setEditing] = useState<Record<string, string>>({});
+  const [editingAttempt, setEditingAttempt] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [savingAttemptId, setSavingAttemptId] = useState<string | null>(null);
 
   const invokeWithAuth = async (body: Record<string, unknown>) => {
     const token = getPortalToken();
@@ -148,6 +150,61 @@ export const PortalCareersPanel: React.FC = () => {
       toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
   };
+
+  const saveAttemptNotes = async (a: Attempt) => {
+    setSavingAttemptId(a.id);
+    try {
+      const next = editingAttempt[a.id] ?? a.admin_notes ?? '';
+      await invokeWithAuth({ action: 'admin_update_attempt', attempt_id: a.id, admin_notes: next });
+      setAttempts(prev => prev.map(x => x.id === a.id ? { ...x, admin_notes: next } : x));
+      toast({ title: 'Saved' });
+    } catch (e) {
+      toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setSavingAttemptId(null); }
+  };
+
+  // "Who to contact first": prioritize unreviewed applications with the highest score and most recent submission.
+  // Falls back to top-scoring un-contacted passed attempts (no application yet).
+  const contactFirst = useMemo(() => {
+    const appCandidates = applications
+      .filter(a => !a.reviewed)
+      .sort((a, b) =>
+        ((b.score_pct ?? 0) - (a.score_pct ?? 0)) ||
+        (new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
+    if (appCandidates[0]) {
+      const a = appCandidates[0];
+      return {
+        kind: 'app' as const,
+        name: a.candidate_name,
+        email: a.candidate_email,
+        phone: a.candidate_phone,
+        score: a.score_pct,
+        share_code: a.share_code,
+        why: a.score_pct != null ? `Top unreviewed application · ${a.score_pct}%` : 'Newest unreviewed application',
+      };
+    }
+    const appCodes = new Set(applications.map(a => a.share_code));
+    const passedNoApp = attempts
+      .filter(a => a.status === 'passed' && a.share_code && !appCodes.has(a.share_code))
+      .sort((a, b) =>
+        ((b.score_pct ?? 0) - (a.score_pct ?? 0)) ||
+        (new Date(b.submitted_at || b.started_at).getTime() - new Date(a.submitted_at || a.started_at).getTime())
+      );
+    if (passedNoApp[0]) {
+      const a = passedNoApp[0];
+      return {
+        kind: 'attempt' as const,
+        name: a.candidate_name || a.candidate_email,
+        email: a.candidate_email,
+        phone: a.candidate_phone,
+        score: a.score_pct,
+        share_code: a.share_code,
+        why: `Passed test · awaiting application · ${a.score_pct}%`,
+      };
+    }
+    return null;
+  }, [applications, attempts]);
 
   const exportAttempts = () => {
     downloadCsv(`careers-attempts-${new Date().toISOString().slice(0,10)}.csv`,
