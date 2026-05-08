@@ -208,12 +208,21 @@ const AdminDashboard: React.FC = () => {
     : [];
   const jumpToTab = (key: string) => {
     if (!visibleTabs.includes(key)) setVisibleTabs([...visibleTabs, key]);
+    setLayout('tabs');
     setActiveTab(key as typeof activeTab);
     setTabSearch('');
     setTabSearchOpen(false);
     if (key === 'insights' && !recommendations) fetchInsights();
     if (key === 'outlook' && postingSchedule.length === 0) fetchSchedule();
     if (key !== 'tools') setActiveTool(null);
+    // Scroll the tab into view so the user lands on what they searched for.
+    setTimeout(() => {
+      const el = document.getElementById(`admin-tab-btn-${key}`);
+      el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      const main = document.querySelector('main');
+      main?.scrollTo?.({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
   };
   const [syncingOutlook, setSyncingOutlook] = useState(false);
   const [syncResults, setSyncResults] = useState<{ type: string; title: string; status: string }[] | null>(null);
