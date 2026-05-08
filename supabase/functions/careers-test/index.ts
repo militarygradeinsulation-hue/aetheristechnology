@@ -285,6 +285,173 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ---------- ADMIN: signed view URL for resume (used by inline viewer) ----------
+    if (action === "admin_resume_url") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      const { data: app } = await admin.from("careers_applications").select("resume_path,resume_filename").eq("share_code", code).maybeSingle();
+      if (!app?.resume_path) return json({ error: "No resume on file" }, 404);
+      const { data: signed, error } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
+      if (error) throw error;
+      const ext = (app.resume_filename || app.resume_path).split(".").pop()?.toLowerCase() || "";
+      const mime = ext === "pdf" ? "application/pdf"
+        : ext === "doc" ? "application/msword"
+        : ext === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        : ext === "txt" ? "text/plain"
+        : "application/octet-stream";
+      return json({ ok: true, url: signed?.signedUrl, filename: app.resume_filename, mime });
+    }
+
+    // ---------- ADMIN: AI fit-score analysis ----------
+    if (action === "ai_analyze_resume") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) return json({ error: "AI not configured" }, 500);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+
+      const { data: app } = await admin.from("careers_applications")
+        .select("id,share_code,candidate_name,candidate_email,resume_path,resume_filename,score_pct,notes")
+        .eq("share_code", code).maybeSingle();
+      if (!app) return json({ error: "Application not found" }, 404);
+
+      // Pull resume bytes -> text. PDFs and complex DOCX get a best-effort plain-text extraction.
+      let resumeText = "";
+      if (app.resume_path) {
+        const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
+        if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
+        const buf = new Uint8Array(await file.arrayBuffer());
+        const raw = new TextDecoder("utf-8", { fatal: false }).decode(buf);
+        // Strip non-printable bytes, keep ascii + newlines
+        resumeText = raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").slice(0, 18000);
+      }
+      if (!resumeText.trim()) {
+        resumeText = `(Could not extract text from resume file ${app.resume_filename || ""}. Score based on candidate metadata only.)`;
+      }
+
+      const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
+We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
+Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
+Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
+Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
+
+Output STRICT JSON only — no markdown, no code fences:
+{
+  "fit_score": <integer 0-100>,
+  "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
+  "strengths": ["<bullet>", "<bullet>", "..."],
+  "concerns": ["<bullet>", "<bullet>", "..."],
+  "recommended_next_step": "<one line: e.g. 'Phone screen this week', 'Pass', 'Final interview'>"
+}`;
+      const user = `Candidate: ${app.candidate_name} (${app.candidate_email})
+Test score: ${app.score_pct ?? "n/a"}%
+Resume filename: ${app.resume_filename || "(none)"}
+Notes from candidate: ${app.notes || "(none)"}
+
+--- Resume text ---
+${resumeText}`;
+
+      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (!r.ok) {
+        const txt = await r.text();
+        if (r.status === 429) return json({ error: "AI rate limited — try again shortly." }, 429);
+        if (r.status === 402) return json({ error: "AI credits exhausted — add credits in Settings." }, 402);
+        return json({ error: `AI ${r.status}: ${txt.slice(0, 200)}` }, 500);
+      }
+      const j = await r.json();
+      let txt = j.choices?.[0]?.message?.content || "{}";
+      txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+      const parsed = JSON.parse(txt);
+      const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
+      const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
+      const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
+      const summary = String(parsed.summary || "").slice(0, 2000) +
+        (parsed.recommended_next_step ? `\n\nNext step: ${parsed.recommended_next_step}` : "");
+
+      await admin.from("careers_applications").update({
+        ai_fit_score: fitScore,
+        ai_summary: summary,
+        ai_strengths: strengths,
+        ai_concerns: concerns,
+        ai_analyzed_at: new Date().toISOString(),
+      }).eq("share_code", code);
+
+      return json({ ok: true, fit_score: fitScore, summary, strengths, concerns });
+    }
+
+    // ---------- ADMIN: list private messages (only the caller's own) ----------
+    if (action === "messages_list") {
+      const auth = await authorize(req, SERVICE);
+      if (!auth.ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      // Admin sees all; portal user only sees their own
+      let q = admin.from("careers_messages").select("*").eq("share_code", code).order("created_at", { ascending: true });
+      if (!auth.isAdmin && auth.claims) q = q.eq("author_rep_code", auth.claims.code);
+      const { data, error } = await q;
+      if (error) throw error;
+      // Sign attachment URLs for display
+      const messages = await Promise.all((data || []).map(async (m: any) => {
+        let attachment_url: string | null = null;
+        if (m.attachment_path) {
+          const { data: signed } = await admin.storage.from("careers-messages").createSignedUrl(m.attachment_path, 60 * 30);
+          attachment_url = signed?.signedUrl || null;
+        }
+        return { ...m, attachment_url };
+      }));
+      return json({ ok: true, messages });
+    }
+
+    // ---------- ADMIN: send a private message (optionally with attachment) ----------
+    if (action === "messages_send") {
+      const auth = await authorize(req, SERVICE);
+      if (!auth.ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      const text = String(body.body || "").slice(0, 4000);
+      const author_rep_code = auth.isAdmin ? "admin" : (auth.claims?.code || "unknown");
+      const author_name = String(body.author_name || "").slice(0, 80) || null;
+      const attachment_path = body.attachment_path ? String(body.attachment_path).slice(0, 400) : null;
+      const attachment_filename = body.attachment_filename ? String(body.attachment_filename).slice(0, 200) : null;
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      if (!text && !attachment_path) return json({ error: "Empty message" }, 400);
+
+      const { data, error } = await admin.from("careers_messages").insert({
+        share_code: code,
+        author_rep_code,
+        author_name,
+        body: text,
+        attachment_path,
+        attachment_filename,
+      }).select().single();
+      if (error) throw error;
+      return json({ ok: true, message: data });
+    }
+
+    // ---------- ADMIN: signed upload URL for a message attachment ----------
+    if (action === "messages_upload_url") {
+      const auth = await authorize(req, SERVICE);
+      if (!auth.ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      const filename = String(body.filename || "file").replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 80);
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      const author = auth.isAdmin ? "admin" : (auth.claims?.code || "unknown");
+      const path = `${code}/${author}/${Date.now()}_${filename}`;
+      const { data: signed, error } = await admin.storage.from("careers-messages").createSignedUploadUrl(path);
+      if (error) throw error;
+      return json({ ok: true, path, token: signed.token, signed_url: signed.signedUrl });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("careers-test error:", e);
