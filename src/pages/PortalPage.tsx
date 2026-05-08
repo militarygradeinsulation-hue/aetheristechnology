@@ -309,9 +309,11 @@ const PortalPage: React.FC = () => {
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
+    { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
   ];
 
-  const availableTabs = tabs.filter(t => !t.partnerOnly || isPartner);
+  const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const availableTabs = tabs.filter(t => (!t.partnerOnly || isPartner) && (t.id !== 'careers' || careersUnlocked));
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
     ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
