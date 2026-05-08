@@ -17,6 +17,7 @@ import {
 } from "@/lib/onboardingApi";
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
+import { AdminOnboardingScreenshots } from "@/components/admin/AdminOnboardingScreenshots";
 
 interface EditorState {
   id: string;
