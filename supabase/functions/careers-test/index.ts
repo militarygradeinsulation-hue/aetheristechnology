@@ -208,7 +208,7 @@ serve(async (req) => {
       if (!ok) return json({ error: "Unauthorized" }, 401);
 
       const { data: attempts } = await admin.from("careers_attempts")
-        .select("id,candidate_name,candidate_email,candidate_phone,score_pct,correct_count,total_count,status,started_at,submitted_at,share_code,notes_to_admin")
+        .select("id,candidate_name,candidate_email,candidate_phone,score_pct,correct_count,total_count,status,started_at,submitted_at,share_code,notes_to_admin,admin_notes")
         .order("started_at", { ascending: false }).limit(500);
 
       const { data: applications } = await admin.from("careers_applications")
@@ -264,6 +264,20 @@ serve(async (req) => {
       }
       if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
       const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
+    // ---------- ADMIN: update attempt (admin notes) ----------
+    if (action === "admin_update_attempt") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const attemptId = String(body.attempt_id || "");
+      if (!attemptId) return json({ error: "Missing attempt_id" }, 400);
+      const patch: Record<string, unknown> = {};
+      if (typeof body.admin_notes === "string") patch.admin_notes = body.admin_notes.slice(0, 4000) || null;
+      if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
+      const { error } = await admin.from("careers_attempts").update(patch).eq("id", attemptId);
       if (error) throw error;
       return json({ ok: true });
     }
