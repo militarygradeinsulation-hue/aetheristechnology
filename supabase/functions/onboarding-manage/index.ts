@@ -24,7 +24,62 @@ serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { action, id, slug, patch } = await req.json();
+    const body = await req.json();
+    const { action, id, slug, patch, key, base64 } = body;
+
+    // ─── Screenshot management ───
+    if (action === "list_screenshots") {
+      const { data, error } = await supabase.storage
+        .from("onboarding-assets")
+        .list("screenshots", { limit: 1000 });
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const f of data || []) {
+        const k = f.name.replace(/\.png$/i, "");
+        const { data: pub } = supabase.storage
+          .from("onboarding-assets")
+          .getPublicUrl(`screenshots/${f.name}`);
+        map[k] = `${pub.publicUrl}?v=${Date.now()}`;
+      }
+      return new Response(JSON.stringify({ ok: true, screenshots: map }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "upload_screenshot") {
+      if (!key || !base64) {
+        return new Response(JSON.stringify({ error: "key and base64 required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const safeKey = String(key).replace(/[^a-z0-9_\-]/gi, "_");
+      const b64 = String(base64).replace(/^data:image\/[a-z]+;base64,/, "");
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const path = `screenshots/${safeKey}.png`;
+      const { error: upErr } = await supabase.storage
+        .from("onboarding-assets")
+        .upload(path, bytes, { contentType: "image/png", upsert: true });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage
+        .from("onboarding-assets")
+        .getPublicUrl(path);
+      return new Response(JSON.stringify({ ok: true, url: `${pub.publicUrl}?v=${Date.now()}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "delete_screenshot") {
+      if (!key) {
+        return new Response(JSON.stringify({ error: "key required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const safeKey = String(key).replace(/[^a-z0-9_\-]/gi, "_");
+      await supabase.storage.from("onboarding-assets").remove([`screenshots/${safeKey}.png`]);
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (action === "update") {
       if (!id && !slug) {
