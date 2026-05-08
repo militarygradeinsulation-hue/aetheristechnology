@@ -191,7 +191,9 @@ export const AdminOnboardingStudio: React.FC = () => {
   const readyModules = modules.filter(m => m.status === "ready").sort((a, b) => a.order_index - b.order_index);
 
   return (
-    <Card>
+    <div className="space-y-6">
+      <AdminOnboardingScreenshots />
+      <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
