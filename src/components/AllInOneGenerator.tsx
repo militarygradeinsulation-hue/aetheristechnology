@@ -265,13 +265,15 @@ export const AllInOneGenerator: React.FC = () => {
     const started = Date.now();
     try {
       const data = await invokeWithRetry(job.fn, job.body());
-      // Save to library
-      await saveToAdminLibrary({
-        tool_type: job.toolType,
-        title: `${job.titleFor(data)} — ${new Date().toLocaleDateString()}`,
-        input_data: { source: 'all-in-one', ...form, ...job.body() },
-        output_data: data,
-      }).catch((e) => console.error(`Library save failed for ${job.key}:`, e));
+      // Save to library — only when an admin token is present (reps don't have admin library access)
+      if (hasValidAdminToken()) {
+        await saveToAdminLibrary({
+          tool_type: job.toolType,
+          title: `${job.titleFor(data)} — ${new Date().toLocaleDateString()}`,
+          input_data: { source: 'all-in-one', ...form, ...job.body() },
+          output_data: data,
+        }).catch((e) => console.error(`Library save failed for ${job.key}:`, e));
+      }
       return { status: 'success', durationMs: Date.now() - started };
     } catch (err: any) {
       console.error(`[all-in-one] ${job.key} failed:`, err);
