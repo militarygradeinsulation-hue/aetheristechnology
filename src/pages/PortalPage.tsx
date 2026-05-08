@@ -22,6 +22,9 @@ import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
+import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
+
+const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
@@ -53,7 +56,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art' | 'careers';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -306,9 +309,11 @@ const PortalPage: React.FC = () => {
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
+    { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
   ];
 
-  const availableTabs = tabs.filter(t => !t.partnerOnly || isPartner);
+  const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const availableTabs = tabs.filter(t => (!t.partnerOnly || isPartner) && (t.id !== 'careers' || careersUnlocked));
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
     ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
@@ -409,6 +414,7 @@ const PortalPage: React.FC = () => {
       case 'workspace': return <WorkspaceTab />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
+      case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
         return isPartner ? (

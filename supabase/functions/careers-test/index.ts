@@ -2,11 +2,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
+
+// Reps/partners with elevated access to careers admin data.
+const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Bradon Roberts
+
+async function isAuthorizedAdminOrAllowedPortal(req: Request, secret: string): Promise<boolean> {
+  if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return true;
+  const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
+  if (claims && CAREERS_ALLOWED_PORTAL_CODES.has(claims.code)) return true;
+  return false;
+}
 
 const TEST_MINUTES = 45;
 const QUESTION_COUNT = 20;
@@ -170,7 +181,7 @@ serve(async (req) => {
 
     // ---------- ADMIN: lookup by code ----------
     if (action === "admin_lookup") {
-      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
       const code = String(body.share_code || "").trim().toUpperCase();
       if (!code) return json({ error: "Missing share_code" }, 400);
@@ -193,7 +204,7 @@ serve(async (req) => {
 
     // ---------- ADMIN: list everyone ----------
     if (action === "admin_list") {
-      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), SERVICE);
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
 
       const { data: attempts } = await admin.from("careers_attempts")
@@ -237,6 +248,24 @@ serve(async (req) => {
           by_cta: Object.entries(byCta).map(([cta, count]) => ({ cta, count })).sort((a, b) => b.count - a.count),
         },
       });
+    }
+
+    // ---------- ADMIN: update application (notes / reviewed flag) ----------
+    if (action === "admin_update_application") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      const patch: Record<string, unknown> = {};
+      if (typeof body.notes === "string") patch.notes = body.notes.slice(0, 4000) || null;
+      if (typeof body.reviewed === "boolean") {
+        patch.reviewed = body.reviewed;
+        patch.reviewed_at = body.reviewed ? new Date().toISOString() : null;
+      }
+      if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
+      const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
+      if (error) throw error;
+      return json({ ok: true });
     }
 
     return json({ error: "Unknown action" }, 400);
