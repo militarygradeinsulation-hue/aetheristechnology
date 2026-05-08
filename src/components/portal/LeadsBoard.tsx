@@ -20,6 +20,17 @@ import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { openRepMail } from '@/lib/repMail';
+import { createCalendarEvent } from '@/lib/portalCalendar';
+
+function nextBusinessMorningISO(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  // skip Sat (6) → Mon, Sun (0) → Mon
+  if (d.getDay() === 6) d.setDate(d.getDate() + 2);
+  else if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  return d.toISOString();
+}
 
 const mailHandler = (email: string) => (e: React.MouseEvent) => {
   e.preventDefault();
@@ -52,6 +63,7 @@ export const LeadsBoard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
+  const [bulkScanning, setBulkScanning] = useState(false);
 
   const refreshDrip = useCallback(async () => {
     setLoading(true);
@@ -127,6 +139,55 @@ export const LeadsBoard: React.FC = () => {
     mine.forEach(l => g[l.status].push(l));
     return g;
   }, [mine]);
+
+  const bulkDeepScan = useCallback(async () => {
+    // Pick up to 10 unscanned leads (no rocketreach yet) that have a website or email
+    const candidates = mine
+      .filter(l => !l.enrichment?.rocketreach && (l.website || l.email))
+      .slice(0, 10);
+    if (candidates.length === 0) {
+      toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
+      return;
+    }
+    setBulkScanning(true);
+    toast({ title: `Deep-scanning ${candidates.length} leads in parallel…` });
+    try {
+      const results = await Promise.allSettled(
+        candidates.map(l => portalLeads.rocketReach(l.id, {}))
+      );
+      const ok = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.length - ok;
+      // Schedule follow-ups for the freshly scanned leads (best-effort, parallel)
+      await Promise.allSettled(
+        candidates.map(async (l, i) => {
+          const r = results[i];
+          if (r.status !== 'fulfilled') return;
+          const data: any = r.value;
+          if (data?.cached || data?.note) return;
+          const businessName = l.business_name || l.email || 'Lead';
+          await createCalendarEvent({
+            kind: 'follow_up',
+            title: `Follow up: ${businessName}`,
+            body: `Lead: ${businessName}\nDeep scan complete — review insights and reach out.`,
+            start_at: nextBusinessMorningISO(),
+            all_day: false,
+            lead_id: l.id,
+          });
+        })
+      );
+      toast({
+        title: `Bulk deep scan finished`,
+        description: `${ok} succeeded${failed ? `, ${failed} failed` : ''}. Follow-ups added to your calendar.`,
+        variant: failed && !ok ? 'destructive' : 'default',
+      });
+      refreshMine();
+    } catch (e) {
+      toast({ title: 'Bulk scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setBulkScanning(false);
+    }
+  }, [mine, refreshMine, toast]);
+
 
   return (
     <div className="space-y-4">
@@ -289,12 +350,25 @@ export const LeadsBoard: React.FC = () => {
       {sub === 'mine' && (
         <Card>
           <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-amber" /> My Active Leads
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Move them through the pipeline. Click "Log touch" each time you contact them. {activeCount}/{maxActive} active slots used.
-            </p>
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <CardTitle className="font-display flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-amber" /> My Active Leads
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Move them through the pipeline. Click "Log touch" each time you contact them. {activeCount}/{maxActive} active slots used.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={bulkDeepScan}
+                disabled={bulkScanning || mine.length === 0}
+                className="bg-amber text-background hover:bg-amber/90"
+              >
+                {bulkScanning ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                Deep Scan Next 10
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {loading && mine.length === 0 ? (
@@ -638,6 +712,31 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         toast({ title: 'Deep scan note', description: res.note });
       } else {
         toast({ title: res.cached ? 'Loaded saved deep scan' : 'Deep scan complete (RocketReach + Firecrawl)' });
+      }
+      // Auto-add follow-up to workspace calendar on fresh deep scan
+      if (!res.cached && !res.note) {
+        try {
+          const businessName = lead.business_name || lead.email || 'Lead';
+          await createCalendarEvent({
+            kind: 'follow_up',
+            title: `Follow up: ${businessName}`,
+            body: [
+              `Lead: ${businessName}`,
+              lead.contact_name ? `Contact: ${lead.contact_name}` : null,
+              lead.email ? `Email: ${lead.email}` : null,
+              lead.phone ? `Phone: ${lead.phone}` : null,
+              lead.website ? `Website: ${lead.website}` : null,
+              '',
+              'Deep scan complete — review insights and reach out.',
+            ].filter(Boolean).join('\n'),
+            start_at: nextBusinessMorningISO(),
+            all_day: false,
+            lead_id: lead.id,
+          });
+          toast({ title: 'Follow-up added to your calendar' });
+        } catch (calErr) {
+          console.warn('calendar autosave failed:', calErr);
+        }
       }
     } catch (e) {
       toast({ title: 'Deep scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
