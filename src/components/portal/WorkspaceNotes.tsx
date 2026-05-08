@@ -26,6 +26,8 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
   const [draftAttachments, setDraftAttachments] = useState<RepNoteAttachment[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const dirtyRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
