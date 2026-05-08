@@ -11,7 +11,7 @@ const corsHeaders = {
 const TEST_MINUTES = 45;
 const QUESTION_COUNT = 20;
 const PASS_PCT = 70;
-const MAX_ATTEMPTS_PER_DAY = 2;
+const MAX_ATTEMPTS_PER_DAY = 5;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
