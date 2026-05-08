@@ -967,6 +967,11 @@ export type Database = {
       careers_applications: {
         Row: {
           admin_notes: string | null
+          ai_analyzed_at: string | null
+          ai_concerns: Json | null
+          ai_fit_score: number | null
+          ai_strengths: Json | null
+          ai_summary: string | null
           attempt_id: string | null
           candidate_email: string
           candidate_name: string
@@ -983,6 +988,11 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          ai_analyzed_at?: string | null
+          ai_concerns?: Json | null
+          ai_fit_score?: number | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
           attempt_id?: string | null
           candidate_email: string
           candidate_name: string
@@ -999,6 +1009,11 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          ai_analyzed_at?: string | null
+          ai_concerns?: Json | null
+          ai_fit_score?: number | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
           attempt_id?: string | null
           candidate_email?: string
           candidate_name?: string
@@ -1080,6 +1095,42 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           total_count?: number | null
+        }
+        Relationships: []
+      }
+      careers_messages: {
+        Row: {
+          attachment_filename: string | null
+          attachment_path: string | null
+          author_name: string | null
+          author_rep_code: string
+          body: string
+          created_at: string
+          delivered_via: string | null
+          id: string
+          share_code: string
+        }
+        Insert: {
+          attachment_filename?: string | null
+          attachment_path?: string | null
+          author_name?: string | null
+          author_rep_code: string
+          body?: string
+          created_at?: string
+          delivered_via?: string | null
+          id?: string
+          share_code: string
+        }
+        Update: {
+          attachment_filename?: string | null
+          attachment_path?: string | null
+          author_name?: string | null
+          author_rep_code?: string
+          body?: string
+          created_at?: string
+          delivered_via?: string | null
+          id?: string
+          share_code?: string
         }
         Relationships: []
       }
