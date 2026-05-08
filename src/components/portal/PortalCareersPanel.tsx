@@ -267,7 +267,7 @@ export const PortalCareersPanel: React.FC = () => {
                           </div>
                         </div>
                         {a.resume_path && (
-                          <Button size="sm" variant="outline" onClick={() => openResume(a.resume_path!)}>
+                          <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
                             <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
                           </Button>
                         )}
