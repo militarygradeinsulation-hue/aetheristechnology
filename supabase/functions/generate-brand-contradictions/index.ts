@@ -39,29 +39,65 @@ serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    // Scrape website content + branding
-    const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: formattedUrl,
-        formats: ["markdown", "branding"],
-        onlyMainContent: false,
-      }),
-    });
+    // Scrape website content + branding (with fallbacks for tough sites)
+    async function fcScrape(body: Record<string, unknown>) {
+      const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return r.json().catch(() => ({}));
+    }
 
-    const scrapeData = await scrapeRes.json();
-    const siteContent = scrapeData?.data?.markdown || scrapeData?.markdown || "";
-    const branding = scrapeData?.data?.branding || scrapeData?.branding || null;
+    const stripHtml = (html: string) =>
+      html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    let scrapeData = await fcScrape({
+      url: formattedUrl,
+      formats: ["markdown", "html", "branding", "summary"],
+      onlyMainContent: false,
+    });
+    let siteContent: string =
+      scrapeData?.data?.markdown || scrapeData?.markdown || "";
+    let branding = scrapeData?.data?.branding || scrapeData?.branding || null;
+    let summary: string = scrapeData?.data?.summary || scrapeData?.summary || "";
+    let html: string = scrapeData?.data?.html || scrapeData?.html || "";
+
+    // Fallback 1: retry with waitFor for JS-heavy sites
+    if ((!siteContent || siteContent.length < 50) && (!html || html.length < 200)) {
+      scrapeData = await fcScrape({
+        url: formattedUrl,
+        formats: ["markdown", "html"],
+        onlyMainContent: false,
+        waitFor: 2500,
+      });
+      siteContent = scrapeData?.data?.markdown || scrapeData?.markdown || siteContent;
+      html = scrapeData?.data?.html || scrapeData?.html || html;
+    }
+
+    // Fallback 2: derive content from HTML if markdown is empty
+    if ((!siteContent || siteContent.length < 50) && html && html.length > 200) {
+      siteContent = stripHtml(html);
+    }
+
+    // Fallback 3: use the AI-summary if all else fails
+    if ((!siteContent || siteContent.length < 50) && summary && summary.length > 50) {
+      siteContent = summary;
+    }
 
     if (!siteContent || siteContent.length < 50) {
-      return new Response(JSON.stringify({ error: "Could not extract enough content from the website." }), {
+      return new Response(JSON.stringify({
+        error: "Could not extract enough content from the website. The site may be blocking scrapers or be heavily JavaScript-driven. Try a different page (like /about) or paste the URL of a more content-rich page.",
+      }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     const truncated = siteContent.substring(0, 10000);
     const brandingStr = branding ? JSON.stringify(branding).substring(0, 3000) : "No branding data extracted";
