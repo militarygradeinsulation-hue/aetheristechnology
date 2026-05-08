@@ -149,7 +149,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           You bring the flashlight. We deliver the fix. You earn <strong className="text-foreground">15% of every dollar — for life of the client.</strong>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <a href="/careers/test">
+          <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
             <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
               Take the Qualifying Test →
             </Button>
