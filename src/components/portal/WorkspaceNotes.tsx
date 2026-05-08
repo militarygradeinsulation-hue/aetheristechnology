@@ -52,6 +52,7 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
     setDraftBody(n?.body || '');
     setDraftPinned(n?.pinned || false);
     setDraftAttachments(n?.attachments || []);
+    setComposing(!!n);
     dirtyRef.current = false;
   };
 
@@ -74,6 +75,7 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
         );
       });
       setActive(saved);
+      setComposing(true);
       setDraftAttachments(saved.attachments || []);
       dirtyRef.current = false;
       return saved;
@@ -90,11 +92,13 @@ export const WorkspaceNotes: React.FC<Props> = ({ searchQuery = '' }) => {
   };
 
   const handleNew = () => {
-    selectNote(null);
-    setDraftTitle('New note');
+    setActive(null);
+    setDraftTitle('');
     setDraftBody('');
     setDraftPinned(false);
     setDraftAttachments([]);
+    setComposing(true);
+    dirtyRef.current = false;
   };
 
   const handleDelete = async () => {
