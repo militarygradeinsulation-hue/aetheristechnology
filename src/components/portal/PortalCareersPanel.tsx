@@ -81,6 +81,7 @@ export const PortalCareersPanel: React.FC = () => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('apps');
+  const [reviewing, setReviewing] = useState<Application | null>(null);
   const [editing, setEditing] = useState<Record<string, string>>({});
   const [editingAttempt, setEditingAttempt] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -125,15 +126,7 @@ export const PortalCareersPanel: React.FC = () => {
     a.share_code.toLowerCase().includes(q)
   ) : applications, [q, applications]);
 
-  const openResume = async (shareCode: string) => {
-    try {
-      const data = await invokeWithAuth({ action: 'admin_lookup', share_code: shareCode });
-      if (data?.resume_url) window.open(data.resume_url, '_blank');
-      else toast({ title: 'Resume not available', variant: 'destructive' });
-    } catch (e) {
-      toast({ title: 'Failed to open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    }
-  };
+  const openReview = (a: Application) => setReviewing(a);
 
   const saveNotes = async (a: Application) => {
     setSavingId(a.id);
