@@ -8,6 +8,10 @@ export interface OnboardingSlide {
   narration: string;
   audio_url?: string;
   duration_sec?: number;
+  /** Route inside the app to embed as a live screenshot while this slide narrates (e.g. "/portal?tab=leads"). */
+  route?: string;
+  /** Optional override: a static image URL to show instead of the live route iframe. */
+  image_url?: string;
 }
 
 export interface OnboardingModule {
