@@ -129,7 +129,7 @@ export const CompanyPortalPreview: React.FC = () => {
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
               disabled={loadingReps}
-              className="bg-transparent text-xs py-1.5 pr-2 focus:outline-none cursor-pointer max-w-[220px]"
+              className="bg-background text-foreground text-xs py-1.5 pr-2 focus:outline-none cursor-pointer max-w-[220px] [&>optgroup]:bg-background [&>optgroup]:text-muted-foreground [&>option]:bg-background [&>option]:text-foreground"
             >
               <optgroup label="Generic preview">
                 <option value={GENERIC_PARTNER}>Generic Partner view</option>
