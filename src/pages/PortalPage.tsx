@@ -21,6 +21,7 @@ import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
+import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
