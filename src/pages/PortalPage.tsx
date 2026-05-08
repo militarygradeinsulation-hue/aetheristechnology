@@ -92,6 +92,37 @@ const PortalPage: React.FC = () => {
   const [tab, setTab] = useState<Tab>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
 
+  // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
+  const ns = `portal.${profile?.code || 'anon'}`;
+  const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
+  const LAYOUT_KEY = `${ns}.layout.v1`;
+  const SIZES_KEY = `${ns}.widgetSizes.v1`;
+  const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
+    try { const raw = localStorage.getItem(VISIBLE_KEY); if (raw) return JSON.parse(raw); } catch {}
+    return [];
+  });
+  const setVisibleTabs = (t: string[]) => {
+    setVisibleTabsState(t);
+    try { localStorage.setItem(VISIBLE_KEY, JSON.stringify(t)); } catch {}
+  };
+  const [layout, setLayoutState] = useState<LayoutMode>(() => {
+    try { return (localStorage.getItem(LAYOUT_KEY) as LayoutMode) || 'tabs'; } catch { return 'tabs'; }
+  });
+  const setLayout = (l: LayoutMode) => {
+    setLayoutState(l);
+    try { localStorage.setItem(LAYOUT_KEY, l); } catch {}
+  };
+  const [widgetSizes, setWidgetSizesState] = useState<Record<string, WidgetSize>>(() => {
+    try { return JSON.parse(localStorage.getItem(SIZES_KEY) || '{}'); } catch { return {}; }
+  });
+  const setWidgetSize = (key: string, size: WidgetSize) => {
+    setWidgetSizesState(prev => {
+      const next = { ...prev, [key]: size };
+      try { localStorage.setItem(SIZES_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
   // Admin preview mode: if launched from the admin dashboard with ?adminPreview=1
   // and a valid admin token, mint a synthetic profile so admins can browse the
   // exact portal UX without a rep code.
