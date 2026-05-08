@@ -18,6 +18,7 @@ import {
 } from '@/lib/portalLeads';
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { openRepMail } from '@/lib/repMail';
 
 const mailHandler = (email: string) => (e: React.MouseEvent) => {
