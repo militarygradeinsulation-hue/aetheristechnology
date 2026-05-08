@@ -21,6 +21,7 @@ import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
+import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
@@ -52,7 +53,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -301,6 +302,7 @@ const PortalPage: React.FC = () => {
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
+    { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
@@ -402,6 +404,7 @@ const PortalPage: React.FC = () => {
       case 'companycal': return <CompanyCalendarRepView />;
       case 'playbook': return <PortalPlaybook />;
       case 'training': return <TrainingPanel repName={profile?.rep_name} />;
+      case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
       case 'art': return <RepImageStudio />;

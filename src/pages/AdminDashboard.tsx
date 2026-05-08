@@ -33,6 +33,7 @@ import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
 import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
+import { OnboardingStudio } from '@/components/admin/OnboardingStudio';
 import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
 import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
 
@@ -139,7 +140,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'insights', label: 'AI Insights', icon: Brain },
@@ -160,6 +161,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'overview', label: 'Overview', icon: BarChart3 },
     { key: 'playbook', label: 'Rep Playbook', icon: BookMarked },
     { key: 'training', label: 'Training', icon: GraduationCap },
+    { key: 'onboarding', label: 'New-Rep Onboarding', icon: GraduationCap },
     { key: 'calendars', label: 'Rep Calendars', icon: CalendarDays },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'seo', label: 'SEO/AEO', icon: Sparkles },
@@ -412,6 +414,7 @@ const AdminDashboard: React.FC = () => {
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
+      case 'onboarding': return <OnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
       case 'companycal': return <AdminCompanyCalendarPanel />;
       case 'sales': return <SalesCrmPanel />;
