@@ -355,7 +355,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           <li>Pass it → application form unlocks instantly with your share code.</li>
           <li>Joseph personally reviews every passing application within 48 hours.</li>
         </ol>
-        <a href="/careers/test" className="block">
+        <a href="/careers/test" onClick={() => trackCareersCta('how_in_start_test')} className="block">
           <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
             Start the Test →
           </Button>
