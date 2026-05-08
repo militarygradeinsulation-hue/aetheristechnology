@@ -43,6 +43,7 @@ export async function generateModule(args: {
   summary: string;
   scriptOutline: string;
   order_index: number;
+  routeHints?: Record<string, string>;
 }): Promise<OnboardingModule> {
   const token = getAdminToken();
   if (!token) throw new Error("Admin session required");
