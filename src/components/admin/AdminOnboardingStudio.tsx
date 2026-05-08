@@ -17,6 +17,7 @@ import {
 } from "@/lib/onboardingApi";
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
+import { AdminOnboardingScreenshots } from "@/components/admin/AdminOnboardingScreenshots";
 
 interface EditorState {
   id: string;
@@ -190,7 +191,9 @@ export const AdminOnboardingStudio: React.FC = () => {
   const readyModules = modules.filter(m => m.status === "ready").sort((a, b) => a.order_index - b.order_index);
 
   return (
-    <Card>
+    <div className="space-y-6">
+      <AdminOnboardingScreenshots />
+      <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -373,6 +376,7 @@ export const AdminOnboardingStudio: React.FC = () => {
         </DialogContent>
       </Dialog>
     </Card>
+    </div>
   );
 };
 
