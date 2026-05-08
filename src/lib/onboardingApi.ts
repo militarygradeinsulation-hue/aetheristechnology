@@ -82,6 +82,42 @@ export async function deleteModule(id: string): Promise<void> {
   if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
 }
 
+// ─── Screenshots ───
+export async function listScreenshots(): Promise<Record<string, string>> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "list_screenshots" },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { screenshots: Record<string, string> }).screenshots || {};
+}
+
+export async function uploadScreenshot(key: string, base64: string): Promise<string> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "upload_screenshot", key, base64 },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { url: string }).url;
+}
+
+export async function deleteScreenshot(key: string): Promise<void> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "delete_screenshot", key },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+}
+
 // ─── Rep progress ───
 export interface ProgressRow {
   module_slug: string;
