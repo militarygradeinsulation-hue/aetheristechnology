@@ -7,6 +7,7 @@ if (!ADMIN_PIN) {
 }
 
 export async function verifyAdminToken(token: string | null, secret: string): Promise<boolean> {
+  if (!ADMIN_PIN) return false;
   if (!token) return false;
   const dot = token.indexOf(".");
   if (dot < 0) return false;
