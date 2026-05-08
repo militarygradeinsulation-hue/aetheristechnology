@@ -1139,7 +1139,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <div className="space-y-1">
                     {fc.json.legal_name && <p><span className="text-muted-foreground">Legal name:</span> <span className="text-foreground font-semibold">{fc.json.legal_name}</span></p>}
                     {fc.json.tagline && <p className="italic text-muted-foreground">"{fc.json.tagline}"</p>}
-                    {fc.json.description && <p className="text-muted-foreground">{fc.json.description}</p>}
+                    {fc.json.description && <p className="text-muted-foreground">{typeof fc.json.description === 'string' ? fc.json.description : JSON.stringify(fc.json.description)}</p>}
                     {fc.json.founded_year && <p><span className="text-muted-foreground">Founded:</span> {fc.json.founded_year}</p>}
                     {fc.json.employee_count && <p><span className="text-muted-foreground">Employees:</span> {fc.json.employee_count}</p>}
                     {fc.json.headquarters && <p><span className="text-muted-foreground">HQ:</span> {fc.json.headquarters}</p>}
