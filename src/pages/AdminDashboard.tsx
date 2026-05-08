@@ -417,6 +417,7 @@ const AdminDashboard: React.FC = () => {
       case 'sales': return <SalesCrmPanel />;
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;
+      case 'careers': return <AdminCareersPanel />;
       case 'seo': return <SEOOptimizer />;
       case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
       case 'submissions': return <SubmissionsBody submissions={submissions} toggleRead={toggleRead} deleteSubmission={deleteSubmission} />;
