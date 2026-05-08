@@ -268,10 +268,38 @@ export const PortalCareersPanel: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
             <CardTitle className="font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-amber" /> Candidates & Applications
             </CardTitle>
+            {contactFirst && (
+              <div className="flex items-center gap-2 rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs">
+                <Flame className="w-4 h-4 text-amber flex-shrink-0" />
+                <div className="leading-tight">
+                  <div className="font-mono uppercase tracking-wider text-[10px] text-amber">Contact first</div>
+                  <div className="font-display font-bold text-foreground">{contactFirst.name}</div>
+                  <div className="text-muted-foreground">{contactFirst.why}</div>
+                  <div className="flex gap-2 mt-1">
+                    <a href={`mailto:${contactFirst.email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> Email</a>
+                    {contactFirst.phone && <a href={`tel:${contactFirst.phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> Call</a>}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 flex-wrap mt-3">
+            <div className="flex gap-2 flex-wrap">
+              {([
+                { k: 'apps', label: `Applications (${filteredApps.length})` },
+                { k: 'passed', label: `Passed (${passedAttempts.length})` },
+                { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
+              ] as const).map(t => (
+                <Button key={t.k} size="sm" variant={tab === t.k ? 'default' : 'outline'} onClick={() => setTab(t.k)}
+                  className={tab === t.k ? 'bg-amber text-background hover:bg-amber/90' : ''}>
+                  {t.label}
+                </Button>
+              ))}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -284,18 +312,6 @@ export const PortalCareersPanel: React.FC = () => {
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
             </div>
-          </div>
-          <div className="flex gap-2 mt-3">
-            {([
-              { k: 'apps', label: `Applications (${filteredApps.length})` },
-              { k: 'passed', label: `Passed (${passedAttempts.length})` },
-              { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
-            ] as const).map(t => (
-              <Button key={t.k} size="sm" variant={tab === t.k ? 'default' : 'outline'} onClick={() => setTab(t.k)}
-                className={tab === t.k ? 'bg-amber text-background hover:bg-amber/90' : ''}>
-                {t.label}
-              </Button>
-            ))}
           </div>
         </CardHeader>
         <CardContent>
