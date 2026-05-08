@@ -117,6 +117,18 @@ export async function deleteScreenshot(key: string): Promise<void> {
   if (error) throw new Error(error.message);
   if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
 }
+export async function attachScreenshotsToSlides(routeHints: Record<string, string>): Promise<{ modules_updated: number; slides_attached: number; screenshots_available: number }> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "attach_screenshots", routeHints },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return data as { modules_updated: number; slides_attached: number; screenshots_available: number };
+}
+
 
 // ─── Rep progress ───
 export interface ProgressRow {
