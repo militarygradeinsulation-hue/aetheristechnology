@@ -77,39 +77,205 @@ const PostCard = ({ post, id, copiedId, setCopiedId }: any) => {
   );
 };
 
-const SocialContentView = ({ data, copiedId, setCopiedId }: any) => (
-  <div>
-    {data.businessName && <p className="text-sm text-muted-foreground mb-4">For <span className="text-amber font-semibold">{data.businessName}</span></p>}
-    {data.linkedinPosts?.length > 0 && <>
-      <SectionTitle icon={Linkedin} label="LinkedIn Posts" count={data.linkedinPosts.length} color="text-blue-400" />
-      <div className="grid md:grid-cols-2 gap-3">
-        {data.linkedinPosts.map((p: any, i: number) => <PostCard key={`li-${i}`} post={p} id={`li-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />)}
-      </div>
-    </>}
-    {data.facebookPosts?.length > 0 && <>
-      <SectionTitle icon={Facebook} label="Facebook Posts" count={data.facebookPosts.length} color="text-blue-500" />
-      <div className="grid md:grid-cols-2 gap-3">
-        {data.facebookPosts.map((p: any, i: number) => <PostCard key={`fb-${i}`} post={p} id={`fb-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />)}
-      </div>
-    </>}
-    {data.adHooks?.length > 0 && <>
-      <SectionTitle icon={Megaphone} label="Ad Hooks" count={data.adHooks.length} />
-      <div className="grid md:grid-cols-2 gap-3">
-        {data.adHooks.map((h: any, i: number) => {
-          const text = `${h.headline}\n${h.subheadline}\n${h.cta}`;
-          return (
-            <div key={`ad-${i}`} className="relative glass rounded-lg p-4 border border-border">
-              <CopyBtn text={text} id={`ad-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
-              <p className="text-base font-bold text-foreground mb-1 pr-8">{h.headline}</p>
-              <p className="text-sm text-muted-foreground mb-2">{h.subheadline}</p>
-              <p className="text-xs text-primary font-semibold">{h.cta}</p>
-            </div>
-          );
-        })}
-      </div>
-    </>}
+const SoftFrontDoor = ({ s }: { s: any }) => {
+  if (!s) return null;
+  return (
+    <div className="mt-3 pt-3 border-t border-border/60 space-y-1">
+      {s.publicCta && <p className="text-xs text-primary font-semibold">CTA: {s.publicCta}</p>}
+      {s.keyword && <p className="text-[11px] text-muted-foreground"><span className="text-amber font-bold">Keyword:</span> {s.keyword}</p>}
+      {s.assetName && <p className="text-[11px] text-muted-foreground"><span className="text-amber font-bold">Asset:</span> {s.assetName}</p>}
+      {s.dmScript && <p className="text-[11px] text-muted-foreground"><span className="text-amber font-bold">DM:</span> {s.dmScript}</p>}
+      {s.followUpQuestion && <p className="text-[11px] text-muted-foreground"><span className="text-amber font-bold">Follow-up:</span> {s.followUpQuestion}</p>}
+    </div>
+  );
+};
+
+const ForensicCard = ({ children, copyText, id, copiedId, setCopiedId }: any) => (
+  <div className="relative glass rounded-lg p-4 border border-border">
+    <CopyBtn text={copyText} id={id} copiedId={copiedId} setCopiedId={setCopiedId} />
+    {children}
   </div>
 );
+
+const SocialContentView = ({ data, copiedId, setCopiedId }: any) => {
+  const hasForensic =
+    data.caseFiles?.length || data.leakOfTheWeek?.length || data.deadSimpleDiagnostics?.length ||
+    data.operatorsJournal?.length || data.contrarians?.length || data.weeklySchedule?.length;
+
+  return (
+    <div>
+      {data.businessName && <p className="text-sm text-muted-foreground mb-4">For <span className="text-amber font-semibold">{data.businessName}</span></p>}
+
+      {hasForensic ? (
+        <>
+          {data.weeklySchedule?.length > 0 && (
+            <>
+              <SectionTitle icon={Calendar} label="Weekly Schedule" count={data.weeklySchedule.length} />
+              <div className="grid md:grid-cols-2 gap-2">
+                {data.weeklySchedule.map((s: any, i: number) => (
+                  <div key={`ws-${i}`} className="glass rounded-lg p-3 border border-border">
+                    <p className="text-sm font-bold text-amber">{s.day} · <span className="text-primary">{s.format}</span></p>
+                    {s.goal && <p className="text-xs text-muted-foreground mt-1">{s.goal}</p>}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.caseFiles?.length > 0 && (
+            <>
+              <SectionTitle icon={Search} label="Case Files" count={data.caseFiles.length} color="text-amber" />
+              <div className="space-y-3">
+                {data.caseFiles.map((c: any, i: number) => (
+                  <ForensicCard key={`cf-${i}`} id={`cf-${i}`} copiedId={copiedId} setCopiedId={setCopiedId}
+                    copyText={`${c.hook || ''}\n\nFinding: ${c.finding || ''}\nEvidence: ${c.evidence || ''}\nMath: ${c.math || ''}\nFix: ${c.fixTease || ''}\nLesson: ${c.lesson || ''}\n\n${c.softFrontDoor?.publicCta || ''}`}>
+                    <p className="text-[10px] uppercase font-mono text-primary mb-2 pr-8">
+                      {[c.caseId, c.status, c.isAutopsy && 'AUTOPSY'].filter(Boolean).join(' · ')}
+                    </p>
+                    {c.hook && <p className="text-sm font-bold text-amber mb-2 pr-8">{c.hook}</p>}
+                    {c.finding && <p className="text-xs text-muted-foreground"><span className="text-amber font-bold">Finding:</span> {c.finding}</p>}
+                    {c.evidence && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">Evidence:</span> {c.evidence}</p>}
+                    {c.math && <p className="text-xs text-red-400 mt-1"><span className="font-bold">Math:</span> {c.math}</p>}
+                    {c.fixTease && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">Fix:</span> {c.fixTease}</p>}
+                    {c.lesson && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">Lesson:</span> {c.lesson}</p>}
+                    {Array.isArray(c.carouselSlides) && c.carouselSlides.length > 0 && (
+                      <details className="mt-2">
+                        <summary className="text-xs text-primary cursor-pointer">Carousel — {c.carouselSlides.length} slides</summary>
+                        <div className="mt-2 space-y-1 pl-2 border-l border-border">
+                          {c.carouselSlides.map((sl: any, idx: number) => (
+                            <div key={idx} className="text-xs">
+                              <p className="font-bold text-foreground">Slide {sl.slideNumber} — {sl.headline}</p>
+                              {sl.body && <p className="text-muted-foreground">{sl.body}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
+                    <SoftFrontDoor s={c.softFrontDoor} />
+                  </ForensicCard>
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.leakOfTheWeek?.length > 0 && (
+            <>
+              <SectionTitle icon={AlertTriangle} label="Leak of the Week" count={data.leakOfTheWeek.length} />
+              <div className="space-y-3">
+                {data.leakOfTheWeek.map((l: any, i: number) => (
+                  <ForensicCard key={`lw-${i}`} id={`lw-${i}`} copiedId={copiedId} setCopiedId={setCopiedId}
+                    copyText={`${l.leakName || ''}\n${l.definition || ''}\n\nSigns:\n${(l.signs || []).map((s: string) => `- ${s}`).join('\n')}\n\nSpot it: ${l.spotIt || ''}`}>
+                    {l.leakName && <p className="text-sm font-bold text-amber mb-1 pr-8">{l.leakName}</p>}
+                    {l.definition && <p className="text-xs text-muted-foreground mb-2">{l.definition}</p>}
+                    {Array.isArray(l.signs) && l.signs.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-0.5 mb-2 list-disc pl-4">
+                        {l.signs.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                      </ul>
+                    )}
+                    {l.spotIt && <p className="text-xs text-muted-foreground"><span className="text-amber font-bold">How to spot it:</span> {l.spotIt}</p>}
+                    <SoftFrontDoor s={l.softFrontDoor} />
+                  </ForensicCard>
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.deadSimpleDiagnostics?.length > 0 && (
+            <>
+              <SectionTitle icon={Stethoscope} label="Dead Simple Diagnostics" count={data.deadSimpleDiagnostics.length} />
+              <div className="space-y-3">
+                {data.deadSimpleDiagnostics.map((t: any, i: number) => (
+                  <ForensicCard key={`ds-${i}`} id={`ds-${i}`} copiedId={copiedId} setCopiedId={setCopiedId}
+                    copyText={`${t.testName || ''}\n${Array.isArray(t.test) ? t.test.map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n') : (t.test || '')}\n\nThreshold: ${t.threshold || ''}\nMeans: ${t.whatItMeans || ''}`}>
+                    {t.testName && <p className="text-sm font-bold text-amber mb-2 pr-8">{t.testName}</p>}
+                    {Array.isArray(t.test) ? (
+                      <ol className="text-xs text-muted-foreground space-y-0.5 mb-2 list-decimal pl-4">
+                        {t.test.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                      </ol>
+                    ) : t.test ? <p className="text-xs text-muted-foreground mb-2">{t.test}</p> : null}
+                    {t.threshold && <p className="text-xs text-muted-foreground"><span className="text-amber font-bold">Threshold:</span> {t.threshold}</p>}
+                    {t.whatItMeans && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">What it means:</span> {t.whatItMeans}</p>}
+                    <SoftFrontDoor s={t.softFrontDoor} />
+                  </ForensicCard>
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.operatorsJournal?.length > 0 && (
+            <>
+              <SectionTitle icon={Lightbulb} label="Operator's Journal" count={data.operatorsJournal.length} />
+              <div className="grid md:grid-cols-2 gap-3">
+                {data.operatorsJournal.map((j: any, i: number) => (
+                  <ForensicCard key={`oj-${i}`} id={`oj-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} copyText={j.body || ''}>
+                    <p className="text-[10px] uppercase font-mono text-primary mb-2 pr-8">Field Note {i + 1}</p>
+                    {j.body && <p className="text-sm text-foreground whitespace-pre-line">{j.body}</p>}
+                  </ForensicCard>
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.contrarians?.length > 0 && (
+            <>
+              <SectionTitle icon={Zap} label="Contrarian" count={data.contrarians.length} />
+              <div className="space-y-3">
+                {data.contrarians.map((c: any, i: number) => (
+                  <ForensicCard key={`co-${i}`} id={`co-${i}`} copiedId={copiedId} setCopiedId={setCopiedId}
+                    copyText={`Claim: ${c.claim || ''}\nEvidence: ${c.evidence || ''}\nCounter: ${c.counter || ''}\nPosition: ${c.position || ''}`}>
+                    {c.claim && <p className="text-sm text-muted-foreground pr-8"><span className="text-amber font-bold">Claim:</span> {c.claim}</p>}
+                    {c.evidence && <p className="text-sm text-muted-foreground mt-1"><span className="text-amber font-bold">Evidence:</span> {c.evidence}</p>}
+                    {c.counter && <p className="text-sm text-muted-foreground mt-1"><span className="text-amber font-bold">Counter:</span> {c.counter}</p>}
+                    {c.position && <p className="text-sm font-bold text-foreground mt-1"><span className="text-amber font-bold">Position:</span> {c.position}</p>}
+                    <SoftFrontDoor s={c.softFrontDoor} />
+                  </ForensicCard>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          {data.linkedinPosts?.length > 0 && (
+            <>
+              <SectionTitle icon={Linkedin} label="LinkedIn Posts" count={data.linkedinPosts.length} color="text-blue-400" />
+              <div className="grid md:grid-cols-2 gap-3">
+                {data.linkedinPosts.map((p: any, i: number) => <PostCard key={`li-${i}`} post={p} id={`li-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />)}
+              </div>
+            </>
+          )}
+          {data.facebookPosts?.length > 0 && (
+            <>
+              <SectionTitle icon={Facebook} label="Facebook Posts" count={data.facebookPosts.length} color="text-blue-500" />
+              <div className="grid md:grid-cols-2 gap-3">
+                {data.facebookPosts.map((p: any, i: number) => <PostCard key={`fb-${i}`} post={p} id={`fb-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />)}
+              </div>
+            </>
+          )}
+          {data.adHooks?.length > 0 && (
+            <>
+              <SectionTitle icon={Megaphone} label="Ad Hooks" count={data.adHooks.length} />
+              <div className="grid md:grid-cols-2 gap-3">
+                {data.adHooks.map((h: any, i: number) => {
+                  const text = `${h.headline}\n${h.subheadline}\n${h.cta}`;
+                  return (
+                    <div key={`ad-${i}`} className="relative glass rounded-lg p-4 border border-border">
+                      <CopyBtn text={text} id={`ad-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
+                      <p className="text-base font-bold text-foreground mb-1 pr-8">{h.headline}</p>
+                      <p className="text-sm text-muted-foreground mb-2">{h.subheadline}</p>
+                      <p className="text-xs text-primary font-semibold">{h.cta}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 
 // ────────────────────────────────────────────────────────────────────────────
 // CONTENT CALENDAR

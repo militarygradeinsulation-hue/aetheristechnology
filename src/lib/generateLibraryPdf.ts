@@ -291,6 +291,123 @@ function renderSocial(w: PdfWriter, d: any) {
     w.paragraph(`Prepared for: ${d.businessName}`, SUB, 10);
     w.divider();
   }
+
+  // ───── New forensic schema ─────
+  const hasForensic =
+    d.caseFiles?.length || d.leakOfTheWeek?.length || d.deadSimpleDiagnostics?.length ||
+    d.operatorsJournal?.length || d.contrarians?.length || d.weeklySchedule?.length;
+
+  if (hasForensic) {
+    const renderSoftFrontDoor = (s: any) => {
+      if (!s) return;
+      if (s.publicCta) w.kv('Public CTA', s.publicCta);
+      if (s.keyword) w.kv('Keyword', s.keyword);
+      if (s.assetName) w.kv('Asset', s.assetName);
+      if (s.dmScript) w.kv('DM script', s.dmScript);
+      if (s.followUpQuestion) w.kv('Follow-up', s.followUpQuestion);
+    };
+
+    if (d.weeklySchedule?.length) {
+      w.h2('Weekly Schedule', d.weeklySchedule.length);
+      d.weeklySchedule.forEach((s: any) => {
+        w.beginCard();
+        w.paragraph(`${s.day || ''}  ·  ${s.format || ''}`, AMBER, 10, true);
+        if (s.goal) w.paragraph(s.goal, INK, 10);
+        w.endCard();
+      });
+    }
+
+    if (d.caseFiles?.length) {
+      w.h2('Case Files', d.caseFiles.length);
+      d.caseFiles.forEach((c: any, i: number) => {
+        w.beginCard();
+        const head = [c.caseId, c.status, c.isAutopsy ? `Autopsy` : null].filter(Boolean).join(' · ');
+        w.paragraph(head || `Case File ${i + 1}`, BLUE, 9, true);
+        if (c.hook) w.paragraph(c.hook, AMBER, 12, true);
+        if (c.finding) w.kv('Finding', c.finding);
+        if (c.evidence) w.kv('Evidence', c.evidence);
+        if (c.math) w.kv('Math', c.math, RED);
+        if (c.fixTease) w.kv('Fix tease', c.fixTease);
+        if (c.lesson) w.kv('Lesson', c.lesson);
+        if (Array.isArray(c.carouselSlides) && c.carouselSlides.length) {
+          w.paragraph(`Carousel — ${c.carouselSlides.length} slides`, SUB, 9, true);
+          c.carouselSlides.forEach((sl: any) => {
+            const line = `Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`;
+            w.paragraph(line.trim(), INK, 9, true);
+            if (sl.body) w.paragraph(String(sl.body), INK, 9);
+          });
+        }
+        renderSoftFrontDoor(c.softFrontDoor);
+        w.endCard();
+      });
+    }
+
+    if (d.leakOfTheWeek?.length) {
+      w.h2('Leak of the Week', d.leakOfTheWeek.length);
+      d.leakOfTheWeek.forEach((l: any) => {
+        w.beginCard();
+        if (l.leakName) w.paragraph(l.leakName, AMBER, 12, true);
+        if (l.definition) w.kv('Definition', l.definition);
+        if (Array.isArray(l.signs) && l.signs.length) {
+          w.paragraph('Signs to watch for:', INK, 10, true);
+          l.signs.forEach((s: string) => w.paragraph(`• ${s}`, INK, 10));
+        }
+        if (l.spotIt) w.kv('How to spot it', l.spotIt);
+        renderSoftFrontDoor(l.softFrontDoor);
+        w.endCard();
+      });
+    }
+
+    if (d.deadSimpleDiagnostics?.length) {
+      w.h2('Dead Simple Diagnostics', d.deadSimpleDiagnostics.length);
+      d.deadSimpleDiagnostics.forEach((t: any) => {
+        w.beginCard();
+        if (t.testName) w.paragraph(t.testName, AMBER, 12, true);
+        if (t.test) {
+          if (Array.isArray(t.test)) t.test.forEach((step: string, idx: number) =>
+            w.paragraph(`${idx + 1}. ${step}`, INK, 10));
+          else w.paragraph(String(t.test), INK, 10);
+        }
+        if (t.threshold) w.kv('Threshold', t.threshold);
+        if (t.whatItMeans) w.kv('What it means', t.whatItMeans);
+        if (Array.isArray(t.carouselSlides) && t.carouselSlides.length) {
+          w.paragraph(`Carousel — ${t.carouselSlides.length} slides`, SUB, 9, true);
+          t.carouselSlides.forEach((sl: any) => {
+            w.paragraph(`Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`.trim(), INK, 9, true);
+            if (sl.body) w.paragraph(String(sl.body), INK, 9);
+          });
+        }
+        renderSoftFrontDoor(t.softFrontDoor);
+        w.endCard();
+      });
+    }
+
+    if (d.operatorsJournal?.length) {
+      w.h2(`Operator's Journal`, d.operatorsJournal.length);
+      d.operatorsJournal.forEach((j: any, i: number) => {
+        w.beginCard();
+        w.paragraph(`Field Note ${i + 1}`, BLUE, 9, true);
+        if (j.body) w.paragraph(String(j.body), INK, 10);
+        w.endCard();
+      });
+    }
+
+    if (d.contrarians?.length) {
+      w.h2('Contrarian', d.contrarians.length);
+      d.contrarians.forEach((c: any) => {
+        w.beginCard();
+        if (c.claim) w.kv('Claim', c.claim);
+        if (c.evidence) w.kv('Evidence', c.evidence);
+        if (c.counter) w.kv('Counter', c.counter);
+        if (c.position) w.kv('Position', c.position);
+        renderSoftFrontDoor(c.softFrontDoor);
+        w.endCard();
+      });
+    }
+    return;
+  }
+
+  // ───── Legacy schema fallback ─────
   if (d.linkedinPosts?.length) {
     w.h2('LinkedIn Posts', d.linkedinPosts.length);
     d.linkedinPosts.forEach((p: any, i: number) => {
