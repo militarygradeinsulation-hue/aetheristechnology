@@ -10,7 +10,7 @@ import {
   Loader2, Sparkles, RefreshCw, Play, CheckCircle2, AlertCircle,
   GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X,
 } from "lucide-react";
-import { ONBOARDING_CURRICULUM, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
+import { ONBOARDING_CURRICULUM, GLOBAL_ROUTE_HINTS, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
 import {
   listModules, generateModule, updateModule, deleteModule,
   type OnboardingModule, type OnboardingSlide,
@@ -50,6 +50,7 @@ export const AdminOnboardingStudio: React.FC = () => {
       await generateModule({
         slug: def.slug, title: def.title, summary: def.summary,
         scriptOutline: def.scriptOutline, order_index,
+        routeHints: { ...GLOBAL_ROUTE_HINTS, ...(def.routeHints || {}) },
       });
       await refresh();
       toast({ title: "Generated", description: def.title });
@@ -70,6 +71,7 @@ export const AdminOnboardingStudio: React.FC = () => {
         await generateModule({
           slug: def.slug, title: def.title, summary: def.summary,
           scriptOutline: def.scriptOutline, order_index: i,
+          routeHints: { ...GLOBAL_ROUTE_HINTS, ...(def.routeHints || {}) },
         });
       } catch (e) {
         console.error(`[onboarding] ${def.slug} failed`, e);
