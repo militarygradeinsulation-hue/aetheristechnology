@@ -250,6 +250,24 @@ serve(async (req) => {
       });
     }
 
+    // ---------- ADMIN: update application (notes / reviewed flag) ----------
+    if (action === "admin_update_application") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      const patch: Record<string, unknown> = {};
+      if (typeof body.notes === "string") patch.notes = body.notes.slice(0, 4000) || null;
+      if (typeof body.reviewed === "boolean") {
+        patch.reviewed = body.reviewed;
+        patch.reviewed_at = body.reviewed ? new Date().toISOString() : null;
+      }
+      if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
+      const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("careers-test error:", e);
