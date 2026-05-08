@@ -12,9 +12,11 @@ import {
   type TrainingAttempt,
   type TrainingQA,
 } from "@/lib/portalTraining";
+import { listModules, type OnboardingModule } from "@/lib/onboardingApi";
+import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
 import {
   GraduationCap, FileText, Loader2, ArrowLeft, CheckCircle2, XCircle,
-  Send, Sparkles, MessageCircleQuestion, Trophy, ExternalLink,
+  Send, Sparkles, MessageCircleQuestion, Trophy, ExternalLink, PartyPopper,
 } from "lucide-react";
 
 type View = "list" | "training";
