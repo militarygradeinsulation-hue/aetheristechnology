@@ -1031,6 +1031,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             />
           </div>
         </div>
+        </ErrorBoundary>
       )}
     </div>
   );
