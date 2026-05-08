@@ -40,9 +40,13 @@ export const AdminOnboardingStudio: React.FC = () => {
   const attachShots = async () => {
     setAttaching(true);
     try {
-      const merged = { ...GLOBAL_ROUTE_HINTS };
+       const merged = { ...GLOBAL_ROUTE_HINTS };
       for (const def of ONBOARDING_CURRICULUM) Object.assign(merged, def.routeHints || {});
-      const res = await attachScreenshotsToSlides(merged);
+      const moduleHints: Record<string, Record<string, string>> = {};
+      for (const def of ONBOARDING_CURRICULUM) {
+        moduleHints[def.slug] = { ...(def.routeHints || {}) };
+      }
+      const res = await attachScreenshotsToSlides(merged, moduleHints);
       await refresh();
       toast({
         title: "Screenshots attached",
