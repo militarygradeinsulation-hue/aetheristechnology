@@ -13,6 +13,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+
+const trackCareersCta = (cta: string) => {
+  try {
+    const sid = localStorage.getItem('aetheris_session_id') || crypto.randomUUID();
+    localStorage.setItem('aetheris_session_id', sid);
+    supabase.from('site_events').insert([{
+      event_type: 'careers_cta_click',
+      event_data: { cta, path: '/careers' } as any,
+      session_id: sid,
+      user_agent: navigator.userAgent,
+    }]);
+  } catch {}
+};
 import {
   DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
   Shield, Rocket, GraduationCap, Users, Clock, Brain, Trophy, MapPin, Headphones,
@@ -136,7 +149,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           You bring the flashlight. We deliver the fix. You earn <strong className="text-foreground">15% of every dollar — for life of the client.</strong>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <a href="/careers/test">
+          <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
             <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
               Take the Qualifying Test →
             </Button>
@@ -172,7 +185,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
           <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. No test = no application. Random apps go in the trash.</p>
         </div>
-        <a href="/careers/test"><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
+        <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')}><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
     </Card>
 
@@ -342,7 +355,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           <li>Pass it → application form unlocks instantly with your share code.</li>
           <li>Joseph personally reviews every passing application within 48 hours.</li>
         </ol>
-        <a href="/careers/test" className="block">
+        <a href="/careers/test" onClick={() => trackCareersCta('how_in_start_test')} className="block">
           <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
             Start the Test →
           </Button>
