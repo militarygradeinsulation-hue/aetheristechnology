@@ -404,6 +404,7 @@ const PortalPage: React.FC = () => {
       case 'companycal': return <CompanyCalendarRepView />;
       case 'playbook': return <PortalPlaybook />;
       case 'training': return <TrainingPanel repName={profile?.rep_name} />;
+      case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
       case 'art': return <RepImageStudio />;
