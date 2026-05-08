@@ -38,6 +38,19 @@ export const TrainingPanel: React.FC<Props> = () => {
   const [qa, setQa] = useState<TrainingQA[]>([]);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
+  const [welcome, setWelcome] = useState<OnboardingModule | null>(null);
+  const [playWelcome, setPlayWelcome] = useState(false);
+
+  // Preload Welcome to Aetheris module so we can unlock it after a passing score
+  useEffect(() => {
+    (async () => {
+      try {
+        const mods = await listModules();
+        const w = mods.find((m) => m.slug === "welcome" && m.status === "ready");
+        if (w) setWelcome(w);
+      } catch { /* ignore */ }
+    })();
+  }, []);
 
   const refresh = async () => {
     setLoading(true);
