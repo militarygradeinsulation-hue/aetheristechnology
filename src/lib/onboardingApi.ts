@@ -51,6 +51,32 @@ export async function generateModule(args: {
   return (data as { module: OnboardingModule }).module;
 }
 
+export async function updateModule(
+  id: string,
+  patch: Partial<Pick<OnboardingModule, "title" | "summary" | "slides_json" | "order_index" | "status">>,
+): Promise<OnboardingModule> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "update", id, patch },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { module: OnboardingModule }).module;
+}
+
+export async function deleteModule(id: string): Promise<void> {
+  const token = getAdminToken();
+  if (!token) throw new Error("Admin session required");
+  const { data, error } = await supabase.functions.invoke("onboarding-manage", {
+    body: { action: "delete", id },
+    headers: { "x-admin-token": token },
+  });
+  if (error) throw new Error(error.message);
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+}
+
 // ─── Rep progress ───
 export interface ProgressRow {
   module_slug: string;
