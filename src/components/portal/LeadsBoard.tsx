@@ -588,9 +588,15 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   };
 
   const release = async () => {
-    if (!confirm('Release this lead back to the pool?')) return;
-    try { await portalLeads.release(lead.id); toast({ title: 'Released' }); onChanged(); }
+    if (!confirm('Release this lead back to the pool? Other reps will be able to claim it.')) return;
+    try { await portalLeads.release(lead.id); toast({ title: 'Released to pool' }); onChanged(); }
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
+  };
+
+  const remove = async () => {
+    if (!confirm('Permanently delete this lead? This cannot be undone.')) return;
+    try { await portalLeads.remove(lead.id); toast({ title: 'Lead deleted' }); onChanged(); }
+    catch (e) { toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
   const saveEdits = async () => {
