@@ -1139,7 +1139,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <div className="space-y-1">
                     {fc.json.legal_name && <p><span className="text-muted-foreground">Legal name:</span> <span className="text-foreground font-semibold">{fc.json.legal_name}</span></p>}
                     {fc.json.tagline && <p className="italic text-muted-foreground">"{fc.json.tagline}"</p>}
-                    {fc.json.description && <p className="text-muted-foreground">{fc.json.description}</p>}
+                    {fc.json.description && <p className="text-muted-foreground">{typeof fc.json.description === 'string' ? fc.json.description : JSON.stringify(fc.json.description)}</p>}
                     {fc.json.founded_year && <p><span className="text-muted-foreground">Founded:</span> {fc.json.founded_year}</p>}
                     {fc.json.employee_count && <p><span className="text-muted-foreground">Employees:</span> {fc.json.employee_count}</p>}
                     {fc.json.headquarters && <p><span className="text-muted-foreground">HQ:</span> {fc.json.headquarters}</p>}
@@ -1156,9 +1156,11 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       <div>
                         <p className="text-muted-foreground">Leadership:</p>
                         <ul className="pl-4 list-disc">
-                          {fc.json.leadership.slice(0, 8).map((p: any, i: number) => (
-                            <li key={i}>{p.name}{p.title ? ` — ${p.title}` : ''}</li>
-                          ))}
+                          {fc.json.leadership.slice(0, 8).map((p: any, i: number) => {
+                            const name = typeof p?.name === 'string' ? p.name : (typeof p === 'string' ? p : '');
+                            const title = typeof p?.title === 'string' ? p.title : '';
+                            return <li key={i}>{name}{title ? ` — ${title}` : ''}</li>;
+                          })}
                         </ul>
                       </div>
                     )}
@@ -1197,9 +1199,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <details>
                     <summary className="cursor-pointer text-amber/80">Web mentions ({fc.web_results.length})</summary>
                     <ul className="pl-4 list-disc mt-1 space-y-0.5">
-                      {fc.web_results.map((w: any, i: number) => (
-                        <li key={i}><a href={w.url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{w.title || w.url}</a>{w.description ? ` — ${w.description}` : ''}</li>
-                      ))}
+                      {fc.web_results.map((w: any, i: number) => {
+                        const url = typeof w?.url === 'string' ? w.url : (typeof w === 'string' ? w : '');
+                        const title = typeof w?.title === 'string' ? w.title : (w?.title ? JSON.stringify(w.title) : '');
+                        const desc = typeof w?.description === 'string' ? w.description : '';
+                        if (!url && !title) return null;
+                        return <li key={i}><a href={url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{title || url}</a>{desc ? ` — ${desc}` : ''}</li>;
+                      })}
                     </ul>
                   </details>
                 )}
