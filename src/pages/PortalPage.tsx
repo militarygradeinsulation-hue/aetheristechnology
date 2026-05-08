@@ -414,6 +414,7 @@ const PortalPage: React.FC = () => {
       case 'workspace': return <WorkspaceTab />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
+      case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
         return isPartner ? (
