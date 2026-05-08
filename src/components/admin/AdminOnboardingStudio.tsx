@@ -376,6 +376,7 @@ export const AdminOnboardingStudio: React.FC = () => {
         </DialogContent>
       </Dialog>
     </Card>
+    </div>
   );
 };
 
