@@ -19,6 +19,7 @@ interface SlideJSON {
   audio_url?: string;
   duration_sec?: number;
   route?: string;
+  image_url?: string;
 }
 
 async function generateScript(
