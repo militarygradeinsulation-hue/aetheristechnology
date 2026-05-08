@@ -27,6 +27,81 @@ const QUESTION_COUNT = 20;
 const PASS_PCT = 70;
 const MAX_ATTEMPTS_PER_DAY = 5;
 
+function extFromName(name: string | null | undefined) {
+  return (name || "").split(".").pop()?.toLowerCase() || "";
+}
+
+function mimeFromExt(ext: string) {
+  if (ext === "pdf") return "application/pdf";
+  if (ext === "doc") return "application/msword";
+  if (ext === "docx") return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (ext === "txt") return "text/plain";
+  if (ext === "rtf") return "application/rtf";
+  if (ext === "png") return "image/png";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "webp") return "image/webp";
+  return "application/octet-stream";
+}
+
+function extractPlainText(buf: Uint8Array) {
+  const raw = new TextDecoder("utf-8", { fatal: false }).decode(buf);
+  return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
+}
+
+async function aiExtractResumeText(params: {
+  apiKey: string;
+  bytes: Uint8Array;
+  filename: string;
+  mime: string;
+}) {
+  const base64 = btoa(String.fromCharCode(...params.bytes));
+  const prompt = [
+    "Extract all readable text from this resume.",
+    "Preserve section order and line breaks where possible.",
+    "Return plain text only. No commentary, no JSON, no markdown."
+  ].join(" ");
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${params.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-5-mini",
+      input: [{
+        role: "user",
+        content: [
+          {
+            type: "input_file",
+            filename: params.filename,
+            file_data: `data:${params.mime};base64,${base64}`,
+          },
+          {
+            type: "input_text",
+            text: prompt,
+          },
+        ],
+      }],
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`OCR ${res.status}: ${txt.slice(0, 240)}`);
+  }
+
+  const json = await res.json();
+  const text = String(
+    json.output_text ||
+    json.output?.map((item: any) => item?.content?.map((c: any) => c?.text || "").join("\n") || "").join("\n") ||
+    json.choices?.[0]?.message?.content ||
+    ""
+  ).trim();
+
+  return text;
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
@@ -295,12 +370,8 @@ serve(async (req) => {
       if (!app?.resume_path) return json({ error: "No resume on file" }, 404);
       const { data: signed, error } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
       if (error) throw error;
-      const ext = (app.resume_filename || app.resume_path).split(".").pop()?.toLowerCase() || "";
-      const mime = ext === "pdf" ? "application/pdf"
-        : ext === "doc" ? "application/msword"
-        : ext === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        : ext === "txt" ? "text/plain"
-        : "application/octet-stream";
+      const ext = extFromName(app.resume_filename || app.resume_path);
+      const mime = mimeFromExt(ext);
       return json({ ok: true, url: signed?.signedUrl, filename: app.resume_filename, mime });
     }
 
@@ -318,15 +389,35 @@ serve(async (req) => {
         .eq("share_code", code).maybeSingle();
       if (!app) return json({ error: "Application not found" }, 404);
 
-      // Pull resume bytes -> text. PDFs and complex DOCX get a best-effort plain-text extraction.
       let resumeText = "";
       if (app.resume_path) {
         const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
         if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
         const buf = new Uint8Array(await file.arrayBuffer());
-        const raw = new TextDecoder("utf-8", { fatal: false }).decode(buf);
-        // Strip non-printable bytes, keep ascii + newlines
-        resumeText = raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").slice(0, 18000);
+        const filename = app.resume_filename || app.resume_path.split("/").pop() || "resume";
+        const ext = extFromName(filename);
+        const mime = mimeFromExt(ext);
+
+        const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
+        if (plainTextable.has(ext)) {
+          resumeText = extractPlainText(buf);
+        }
+
+        if (resumeText.trim().length < 120) {
+          try {
+            resumeText = await aiExtractResumeText({
+              apiKey: LOVABLE_API_KEY,
+              bytes: buf,
+              filename,
+              mime,
+            });
+          } catch (ocrErr) {
+            console.error("resume OCR fallback failed", ocrErr);
+            if (!resumeText.trim()) resumeText = extractPlainText(buf);
+          }
+        }
+
+        resumeText = resumeText.replace(/\u0000/g, " ").replace(/\s{3,}/g, "  ").trim().slice(0, 18000);
       }
       if (!resumeText.trim()) {
         resumeText = `(Could not extract text from resume file ${app.resume_filename || ""}. Score based on candidate metadata only.)`;
