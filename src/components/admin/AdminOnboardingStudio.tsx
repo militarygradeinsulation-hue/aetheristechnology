@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, RefreshCw, Play, CheckCircle2, AlertCircle,
-  GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X,
+  GraduationCap, Package, Pencil, Trash2, Download, Save, Plus, X, Image as ImageIcon,
 } from "lucide-react";
 import { ONBOARDING_CURRICULUM, GLOBAL_ROUTE_HINTS, type OnboardingModuleDef } from "@/lib/onboardingCurriculum";
 import {
