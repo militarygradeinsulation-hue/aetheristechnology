@@ -35,6 +35,25 @@ export const AdminOnboardingStudio: React.FC = () => {
   const [preview, setPreview] = useState<OnboardingModule | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [attaching, setAttaching] = useState(false);
+
+  const attachShots = async () => {
+    setAttaching(true);
+    try {
+      const merged = { ...GLOBAL_ROUTE_HINTS };
+      for (const def of ONBOARDING_CURRICULUM) Object.assign(merged, def.routeHints || {});
+      const res = await attachScreenshotsToSlides(merged);
+      await refresh();
+      toast({
+        title: "Screenshots attached",
+        description: `${res.slides_attached} slides updated across ${res.modules_updated} modules (${res.screenshots_available} screenshots available).`,
+      });
+    } catch (e) {
+      toast({ title: "Attach failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setAttaching(false);
+    }
+  };
 
   const refresh = async () => {
     try { setModules(await listModules()); } catch (e) {
