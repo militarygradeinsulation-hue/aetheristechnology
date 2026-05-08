@@ -94,9 +94,22 @@ export const AdminCareersPanel: React.FC = () => {
     a.share_code.toLowerCase().includes(q)
   ) : applications;
 
-  const openResume = async (path: string) => {
-    const { data } = await supabase.storage.from('careers-resumes').createSignedUrl(path, 60 * 30);
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  const openResume = async (shareCode: string) => {
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'admin_resume_url', share_code: shareCode },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const url = (data as any)?.url;
+      if (!url) throw new Error('No resume URL returned');
+      window.open(url, '_blank');
+    } catch (e) {
+      toast({ title: 'Could not open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    }
   };
 
   const StatusBadge = ({ s }: { s: string }) => {
@@ -223,7 +236,7 @@ export const AdminCareersPanel: React.FC = () => {
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
                       </div>
                       {a.resume_path && (
-                        <Button size="sm" variant="outline" onClick={() => openResume(a.resume_path!)}>
+                        <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
                           <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
                         </Button>
                       )}
