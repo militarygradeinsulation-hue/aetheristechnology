@@ -523,6 +523,7 @@ const AdminDashboard: React.FC = () => {
                 return (
                   <Button
                     key={tab}
+                    id={`admin-tab-btn-${tab}`}
                     variant={active ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => {
