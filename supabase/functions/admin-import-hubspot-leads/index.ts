@@ -15,7 +15,9 @@ async function verifyAdminToken(token: string | null, secret: string): Promise<b
   if (!Number.isFinite(exp) || exp < Date.now()) return false;
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(`${Deno.env.get("ADMIN_PIN") ?? "9822"}.${exp}`));
+  const adminPin = Deno.env.get("ADMIN_PIN");
+  if (!adminPin) return false;
+  const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(`${adminPin}.${exp}`));
   const expected = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
   if (expected.length !== sig.length) return false;
   let mismatch = 0;

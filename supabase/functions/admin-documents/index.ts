@@ -1,5 +1,5 @@
 // Admin Documents — list/create/update/delete legal docs + AI generation in Aetheris voice.
-// Auth: HMAC admin token (PIN 9822).
+// Auth: HMAC admin token.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 

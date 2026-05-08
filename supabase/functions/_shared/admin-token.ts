@@ -1,9 +1,13 @@
 // Shared HMAC token verifier for PIN-based admin endpoints.
 // Token format: "<expEpochMs>.<hmacHex>" signed over "<PIN>.<exp>".
 
-const ADMIN_PIN = Deno.env.get("ADMIN_PIN") ?? "9822";
+const ADMIN_PIN = Deno.env.get("ADMIN_PIN");
+if (!ADMIN_PIN) {
+  console.error("ADMIN_PIN env var not configured - admin auth will fail");
+}
 
 export async function verifyAdminToken(token: string | null, secret: string): Promise<boolean> {
+  if (!ADMIN_PIN) return false;
   if (!token) return false;
   const dot = token.indexOf(".");
   if (dot < 0) return false;

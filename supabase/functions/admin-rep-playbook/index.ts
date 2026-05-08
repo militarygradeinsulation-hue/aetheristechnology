@@ -1,5 +1,5 @@
 // Admin CRUD for Rep Playbook: weekly schedule, plays library, quotas, AI Idea of the Day.
-// Auth: admin HMAC token (PIN-9822 system).
+// Auth: admin HMAC token system.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";

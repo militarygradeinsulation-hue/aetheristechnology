@@ -19,18 +19,23 @@ Deno.serve(async (req) => {
   // Shared-secret auth: require Authorization: Bearer <RB2B_WEBHOOK_SECRET>
   // or X-RB2B-Signature header matching the secret. Configure on the sender side.
   const expectedSecret = Deno.env.get('RB2B_WEBHOOK_SECRET');
-  if (expectedSecret) {
-    const authHeader = req.headers.get('authorization') || '';
-    const sigHeader = req.headers.get('x-rb2b-signature') || '';
-    const bearer = authHeader.toLowerCase().startsWith('bearer ')
-      ? authHeader.slice(7).trim()
-      : '';
-    if (bearer !== expectedSecret && sigHeader !== expectedSecret) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+  if (!expectedSecret) {
+    console.error('rb2b-webhook: RB2B_WEBHOOK_SECRET not configured');
+    return new Response(JSON.stringify({ error: 'Webhook not configured' }), {
+      status: 503,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const authHeader = req.headers.get('authorization') || '';
+  const sigHeader = req.headers.get('x-rb2b-signature') || '';
+  const bearer = authHeader.toLowerCase().startsWith('bearer ')
+    ? authHeader.slice(7).trim()
+    : '';
+  if (bearer !== expectedSecret && sigHeader !== expectedSecret) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
