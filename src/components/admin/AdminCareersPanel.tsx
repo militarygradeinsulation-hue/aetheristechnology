@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 
@@ -40,6 +40,11 @@ interface Application {
   reviewed: boolean;
   reviewed_at: string | null;
   created_at: string;
+  ai_fit_score?: number | null;
+  ai_summary?: string | null;
+  ai_strengths?: string[] | null;
+  ai_concerns?: string[] | null;
+  ai_analyzed_at?: string | null;
 }
 
 interface Analytics {
@@ -110,6 +115,33 @@ export const AdminCareersPanel: React.FC = () => {
     } catch (e) {
       toast({ title: 'Could not open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
+  };
+
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const analyzeResume = async (shareCode: string) => {
+    setAnalyzingId(shareCode);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'ai_analyze_resume', share_code: shareCode },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const d = data as any;
+      setApplications(prev => prev.map(a => a.share_code === shareCode ? {
+        ...a,
+        ai_fit_score: d.fit_score,
+        ai_summary: d.summary,
+        ai_strengths: d.strengths,
+        ai_concerns: d.concerns,
+        ai_analyzed_at: new Date().toISOString(),
+      } : a));
+      toast({ title: `Fit score: ${d.fit_score}/100` });
+    } catch (e) {
+      toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAnalyzingId(null); }
   };
 
   const StatusBadge = ({ s }: { s: string }) => {
@@ -226,6 +258,11 @@ export const AdminCareersPanel: React.FC = () => {
                           <span className="font-display font-bold text-foreground">{a.candidate_name}</span>
                           <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>
                           {a.score_pct != null && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
+                          {a.ai_fit_score != null && (
+                            <Badge className={`border ${a.ai_fit_score >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 60 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/100
+                            </Badge>
+                          )}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
@@ -234,12 +271,37 @@ export const AdminCareersPanel: React.FC = () => {
                           <span>Applied {fmt(a.created_at)}</span>
                         </div>
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
+                        {a.ai_summary && (
+                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-1">
+                            <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
+                            {!!a.ai_strengths?.length && (
+                              <div>
+                                <div className="text-[10px] font-mono uppercase text-green-400 mt-1">Strengths</div>
+                                <ul className="text-xs list-disc list-inside">{a.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                              </div>
+                            )}
+                            {!!a.ai_concerns?.length && (
+                              <div>
+                                <div className="text-[10px] font-mono uppercase text-destructive mt-1">Concerns</div>
+                                <ul className="text-xs list-disc list-inside">{a.ai_concerns.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {a.resume_path && (
-                        <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
-                          <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
-                        </Button>
-                      )}
+                      <div className="flex flex-col gap-2">
+                        {a.resume_path && (
+                          <Button size="sm" variant="outline" onClick={() => openResume(a.share_code)}>
+                            <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                        {a.resume_path && (
+                          <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
+                            {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                            {a.ai_analyzed_at ? 'Re-analyze' : 'Analyze AI'}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
