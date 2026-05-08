@@ -1196,9 +1196,12 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <details>
                     <summary className="cursor-pointer text-amber/80">Site map ({fc.sitemap.length} pages)</summary>
                     <ul className="pl-4 list-disc mt-1 space-y-0.5 max-h-40 overflow-auto">
-                      {fc.sitemap.map((u: string, i: number) => (
-                        <li key={i}><a href={u} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{u}</a></li>
-                      ))}
+                      {fc.sitemap.map((entry: any, i: number) => {
+                        const u = typeof entry === 'string' ? entry : (entry?.url || entry?.href || '');
+                        if (!u) return null;
+                        const label = typeof entry === 'object' ? (entry?.title || u) : u;
+                        return <li key={i}><a href={u} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{label}</a></li>;
+                      })}
                     </ul>
                   </details>
                 )}
