@@ -75,6 +75,7 @@ export const portalLeads = {
   claim: (id: string) => callPortalLeads('claim', { id }),
   skipDrip: (id: string) => callPortalLeads('skip_drip', { id }),
   release: (id: string) => callPortalLeads('release', { id }),
+  remove: (id: string) => callPortalLeads('delete', { id }),
   updateStatus: (id: string, opts: { status?: LeadStatus; notes?: string; touch?: boolean; business_name?: string; contact_name?: string; email?: string; phone?: string; website?: string; industry?: string; location?: string }) =>
     callPortalLeads('update_status', { id, ...opts }),
   upload: (rows: Partial<RepLead>[]) => callPortalLeads('upload', { rows }) as Promise<{ ok: true; inserted: number }>,

@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
@@ -588,9 +588,15 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   };
 
   const release = async () => {
-    if (!confirm('Release this lead back to the pool?')) return;
-    try { await portalLeads.release(lead.id); toast({ title: 'Released' }); onChanged(); }
+    if (!confirm('Release this lead back to the pool? Other reps will be able to claim it.')) return;
+    try { await portalLeads.release(lead.id); toast({ title: 'Released to pool' }); onChanged(); }
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
+  };
+
+  const remove = async () => {
+    if (!confirm('Permanently delete this lead? This cannot be undone.')) return;
+    try { await portalLeads.remove(lead.id); toast({ title: 'Lead deleted' }); onChanged(); }
+    catch (e) { toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
   const saveEdits = async () => {
@@ -717,7 +723,10 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             </select>
             <Button size="sm" variant="outline" onClick={logTouch} disabled={saving}>Log touch</Button>
             <Button size="sm" variant="ghost" onClick={release} className="text-muted-foreground">
-              <RotateCcw className="w-3 h-3 mr-1" /> Release
+              <RotateCcw className="w-3 h-3 mr-1" /> Repool
+            </Button>
+            <Button size="sm" variant="ghost" onClick={remove} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+              <Trash2 className="w-3 h-3 mr-1" /> Delete
             </Button>
           </div>
 

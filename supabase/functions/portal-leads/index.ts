@@ -207,6 +207,22 @@ serve(async (req) => {
       return jsonResp({ ok: true });
     }
 
+    // ---------- DELETE ----------
+    if (action === "delete") {
+      const id = sanitizeStr(body.id);
+      if (!id) return jsonResp({ error: "Missing id" }, 400);
+      const { data, error } = await supabase.from("rep_leads")
+        .delete()
+        .eq("id", id)
+        .eq("claimed_by_code", claims.code)
+        .select("id,business_name")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return jsonResp({ error: "Lead not found or not yours" }, 404);
+      await logActivity(supabase, claims, "lead_delete", { lead_id: id, business: data.business_name });
+      return jsonResp({ ok: true });
+    }
+
     // ---------- UPDATE STATUS / NOTES / TOUCH ----------
     if (action === "update_status") {
       const id = sanitizeStr(body.id);
