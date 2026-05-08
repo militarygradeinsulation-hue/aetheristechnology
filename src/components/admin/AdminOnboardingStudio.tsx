@@ -224,6 +224,10 @@ export const AdminOnboardingStudio: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={attachShots} disabled={attaching || !!bulkProgress || !!busy} title="Match uploaded screenshots to existing slides without regenerating audio">
+              {attaching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ImageIcon className="w-4 h-4 mr-2" />}
+              Attach Screenshots
+            </Button>
             <Button onClick={generateAll} disabled={!!bulkProgress || !!busy}>
               {bulkProgress ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{bulkProgress.done}/{bulkProgress.total}</> : <><Sparkles className="w-4 h-4 mr-2" />Generate Full Curriculum</>}
             </Button>
