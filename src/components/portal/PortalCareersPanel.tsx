@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Download, Save, Flame
 } from 'lucide-react';
 
 interface Attempt {
@@ -25,6 +25,7 @@ interface Attempt {
   submitted_at: string | null;
   share_code: string | null;
   notes_to_admin: string | null;
+  admin_notes: string | null;
 }
 
 interface Application {
@@ -75,7 +76,9 @@ export const PortalCareersPanel: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('apps');
   const [editing, setEditing] = useState<Record<string, string>>({});
+  const [editingAttempt, setEditingAttempt] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [savingAttemptId, setSavingAttemptId] = useState<string | null>(null);
 
   const invokeWithAuth = async (body: Record<string, unknown>) => {
     const token = getPortalToken();
@@ -148,6 +151,61 @@ export const PortalCareersPanel: React.FC = () => {
     }
   };
 
+  const saveAttemptNotes = async (a: Attempt) => {
+    setSavingAttemptId(a.id);
+    try {
+      const next = editingAttempt[a.id] ?? a.admin_notes ?? '';
+      await invokeWithAuth({ action: 'admin_update_attempt', attempt_id: a.id, admin_notes: next });
+      setAttempts(prev => prev.map(x => x.id === a.id ? { ...x, admin_notes: next } : x));
+      toast({ title: 'Saved' });
+    } catch (e) {
+      toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setSavingAttemptId(null); }
+  };
+
+  // "Who to contact first": prioritize unreviewed applications with the highest score and most recent submission.
+  // Falls back to top-scoring un-contacted passed attempts (no application yet).
+  const contactFirst = useMemo(() => {
+    const appCandidates = applications
+      .filter(a => !a.reviewed)
+      .sort((a, b) =>
+        ((b.score_pct ?? 0) - (a.score_pct ?? 0)) ||
+        (new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
+    if (appCandidates[0]) {
+      const a = appCandidates[0];
+      return {
+        kind: 'app' as const,
+        name: a.candidate_name,
+        email: a.candidate_email,
+        phone: a.candidate_phone,
+        score: a.score_pct,
+        share_code: a.share_code,
+        why: a.score_pct != null ? `Top unreviewed application · ${a.score_pct}%` : 'Newest unreviewed application',
+      };
+    }
+    const appCodes = new Set(applications.map(a => a.share_code));
+    const passedNoApp = attempts
+      .filter(a => a.status === 'passed' && a.share_code && !appCodes.has(a.share_code))
+      .sort((a, b) =>
+        ((b.score_pct ?? 0) - (a.score_pct ?? 0)) ||
+        (new Date(b.submitted_at || b.started_at).getTime() - new Date(a.submitted_at || a.started_at).getTime())
+      );
+    if (passedNoApp[0]) {
+      const a = passedNoApp[0];
+      return {
+        kind: 'attempt' as const,
+        name: a.candidate_name || a.candidate_email,
+        email: a.candidate_email,
+        phone: a.candidate_phone,
+        score: a.score_pct,
+        share_code: a.share_code,
+        why: `Passed test · awaiting application · ${a.score_pct}%`,
+      };
+    }
+    return null;
+  }, [applications, attempts]);
+
   const exportAttempts = () => {
     downloadCsv(`careers-attempts-${new Date().toISOString().slice(0,10)}.csv`,
       filteredAttempts.map(a => ({
@@ -210,10 +268,38 @@ export const PortalCareersPanel: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
             <CardTitle className="font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-amber" /> Candidates & Applications
             </CardTitle>
+            {contactFirst && (
+              <div className="flex items-center gap-2 rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs">
+                <Flame className="w-4 h-4 text-amber flex-shrink-0" />
+                <div className="leading-tight">
+                  <div className="font-mono uppercase tracking-wider text-[10px] text-amber">Contact first</div>
+                  <div className="font-display font-bold text-foreground">{contactFirst.name}</div>
+                  <div className="text-muted-foreground">{contactFirst.why}</div>
+                  <div className="flex gap-2 mt-1">
+                    <a href={`mailto:${contactFirst.email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> Email</a>
+                    {contactFirst.phone && <a href={`tel:${contactFirst.phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> Call</a>}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 flex-wrap mt-3">
+            <div className="flex gap-2 flex-wrap">
+              {([
+                { k: 'apps', label: `Applications (${filteredApps.length})` },
+                { k: 'passed', label: `Passed (${passedAttempts.length})` },
+                { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
+              ] as const).map(t => (
+                <Button key={t.k} size="sm" variant={tab === t.k ? 'default' : 'outline'} onClick={() => setTab(t.k)}
+                  className={tab === t.k ? 'bg-amber text-background hover:bg-amber/90' : ''}>
+                  {t.label}
+                </Button>
+              ))}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -226,18 +312,6 @@ export const PortalCareersPanel: React.FC = () => {
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
             </div>
-          </div>
-          <div className="flex gap-2 mt-3">
-            {([
-              { k: 'apps', label: `Applications (${filteredApps.length})` },
-              { k: 'passed', label: `Passed (${passedAttempts.length})` },
-              { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
-            ] as const).map(t => (
-              <Button key={t.k} size="sm" variant={tab === t.k ? 'default' : 'outline'} onClick={() => setTab(t.k)}
-                className={tab === t.k ? 'bg-amber text-background hover:bg-amber/90' : ''}>
-                {t.label}
-              </Button>
-            ))}
           </div>
         </CardHeader>
         <CardContent>
@@ -291,28 +365,46 @@ export const PortalCareersPanel: React.FC = () => {
                 })
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
-                (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
-                  <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
-                      <StatusBadge s={a.status} />
-                      {a.score_pct != null && (
-                        <Badge variant="outline" className="font-mono">
-                          {a.status === 'passed' ? <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" /> : <XCircle className="w-3 h-3 mr-1 text-destructive" />}
-                          {a.score_pct}% ({a.correct_count}/{a.total_count})
-                        </Badge>
+                (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => {
+                  const noteVal = editingAttempt[a.id] ?? a.admin_notes ?? '';
+                  const dirty = noteVal !== (a.admin_notes ?? '');
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                        <StatusBadge s={a.status} />
+                        {a.score_pct != null && (
+                          <Badge variant="outline" className="font-mono">
+                            {a.status === 'passed' ? <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" /> : <XCircle className="w-3 h-3 mr-1 text-destructive" />}
+                            {a.score_pct}% ({a.correct_count}/{a.total_count})
+                          </Badge>
+                        )}
+                        {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+                        <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
+                        {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
+                        <span>Started {fmt(a.started_at)}</span>
+                        {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
+                      </div>
+                      {a.notes_to_admin && <p className="text-xs text-foreground/80 italic">Candidate said: "{a.notes_to_admin}"</p>}
+                      <Textarea
+                        value={noteVal}
+                        onChange={e => setEditingAttempt(prev => ({ ...prev, [a.id]: e.target.value }))}
+                        placeholder="Internal notes about this candidate…"
+                        className="min-h-[50px] text-sm bg-background/40"
+                      />
+                      {dirty && (
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={() => saveAttemptNotes(a)} disabled={savingAttemptId === a.id} className="bg-amber text-background hover:bg-amber/90">
+                            {savingAttemptId === a.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}
+                            Save notes
+                          </Button>
+                        </div>
                       )}
-                      {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
                     </div>
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                      <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
-                      {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
-                      <span>Started {fmt(a.started_at)}</span>
-                      {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
-                    </div>
-                    {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}

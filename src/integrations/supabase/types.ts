@@ -1025,6 +1025,7 @@ export type Database = {
       }
       careers_attempts: {
         Row: {
+          admin_notes: string | null
           answers: Json
           candidate_email: string
           candidate_name: string | null
@@ -1043,6 +1044,7 @@ export type Database = {
           total_count: number | null
         }
         Insert: {
+          admin_notes?: string | null
           answers?: Json
           candidate_email: string
           candidate_name?: string | null
@@ -1061,6 +1063,7 @@ export type Database = {
           total_count?: number | null
         }
         Update: {
+          admin_notes?: string | null
           answers?: Json
           candidate_email?: string
           candidate_name?: string | null
