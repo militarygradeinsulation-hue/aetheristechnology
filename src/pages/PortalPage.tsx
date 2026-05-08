@@ -48,6 +48,8 @@ import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
+import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
+import { Maximize2 } from 'lucide-react';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art';
 type ToolKey =
