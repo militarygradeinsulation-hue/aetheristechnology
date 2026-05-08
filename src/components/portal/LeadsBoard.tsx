@@ -723,7 +723,10 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             </select>
             <Button size="sm" variant="outline" onClick={logTouch} disabled={saving}>Log touch</Button>
             <Button size="sm" variant="ghost" onClick={release} className="text-muted-foreground">
-              <RotateCcw className="w-3 h-3 mr-1" /> Release
+              <RotateCcw className="w-3 h-3 mr-1" /> Repool
+            </Button>
+            <Button size="sm" variant="ghost" onClick={remove} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+              <Trash2 className="w-3 h-3 mr-1" /> Delete
             </Button>
           </div>
 
