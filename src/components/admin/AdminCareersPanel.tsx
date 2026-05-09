@@ -188,6 +188,26 @@ export const AdminCareersPanel: React.FC = () => {
     } finally { setAnalyzingId(null); }
   };
 
+  const [bulkAnalyze, setBulkAnalyze] = useState<{ done: number; total: number } | null>(null);
+  const analyzeAllPassed = async (onlyMissing = true) => {
+    const targets = applications.filter(a => a.resume_path && (!onlyMissing || a.ai_fit_score == null));
+    if (!targets.length) {
+      toast({ title: onlyMissing ? 'All passed candidates already analyzed' : 'No passed candidates with resumes' });
+      return;
+    }
+    setBulkAnalyze({ done: 0, total: targets.length });
+    let ok = 0, fail = 0;
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        await analyzeResume(targets[i].share_code);
+        ok++;
+      } catch { fail++; }
+      setBulkAnalyze({ done: i + 1, total: targets.length });
+    }
+    setBulkAnalyze(null);
+    toast({ title: `Analyzed ${ok}/${targets.length}`, description: fail ? `${fail} failed` : undefined });
+  };
+
   const [contactingId, setContactingId] = useState<string | null>(null);
   const toggleContacted = async (shareCode: string, next: boolean) => {
     setContactingId(shareCode);
@@ -370,6 +390,16 @@ export const AdminCareersPanel: React.FC = () => {
               <Button key={p.k} size="sm" variant="outline" className="h-7"
                 onClick={() => applyPreset(p.k)}>{p.label}</Button>
             ))}
+            <Button size="sm" className="h-7 bg-amber text-background hover:bg-amber/90"
+              onClick={() => analyzeAllPassed(true)} disabled={!!bulkAnalyze}>
+              {bulkAnalyze
+                ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing {bulkAnalyze.done}/{bulkAnalyze.total}</>
+                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all passed resumes</>}
+            </Button>
+            {applications.some(a => a.ai_fit_score != null) && !bulkAnalyze && (
+              <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground"
+                onClick={() => analyzeAllPassed(false)}>Re-analyze all</Button>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Filters:</span>
