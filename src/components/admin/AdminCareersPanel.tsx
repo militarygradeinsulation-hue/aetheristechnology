@@ -507,6 +507,40 @@ export const AdminCareersPanel: React.FC = () => {
                         </Button>
                       </div>
                     </div>
+                    <div className="mt-3 pt-3 border-t border-border/40 flex flex-wrap gap-2 items-center">
+                      <span className="text-[10px] font-mono uppercase text-muted-foreground">Stage:</span>
+                      {([
+                        { k: 'interview', label: 'Move to interview', icon: CalendarCheck, cls: 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30' },
+                        { k: 'wait', label: 'Wait', icon: Clock, cls: 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30' },
+                        { k: 'no', label: 'No', icon: Ban, cls: 'bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30' },
+                      ] as const).map(s => {
+                        const Icon = s.icon;
+                        const active = (a.stage || 'new') === s.k;
+                        return (
+                          <Button key={s.k} size="sm" variant="outline"
+                            disabled={stageSavingId === a.share_code}
+                            onClick={() => setStage(a.share_code, s.k)}
+                            className={`h-7 border ${active ? s.cls : ''}`}>
+                            <Icon className="w-3 h-3 mr-1" />{s.label}
+                          </Button>
+                        );
+                      })}
+                      {(a.stage && a.stage !== 'new') && (
+                        <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
+                          onClick={() => setStage(a.share_code, 'new')}>Reset stage</Button>
+                      )}
+                    </div>
+                    <div className="mt-2">
+                      <label className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1 mb-1">
+                        <StickyNote className="w-3 h-3" /> Internal notes
+                      </label>
+                      <Textarea
+                        value={a.admin_notes || ''}
+                        onChange={e => onNotesChange(a.share_code, e.target.value)}
+                        placeholder="Notes only your team will see…"
+                        className="min-h-[60px] text-sm bg-background/40"
+                      />
+                    </div>
                   </div>
                 ))
               ) : (
