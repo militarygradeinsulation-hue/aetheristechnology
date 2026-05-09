@@ -417,6 +417,30 @@ export const AdminCareersPanel: React.FC = () => {
                 onClick={() => analyzeAllPassed(false)}>Re-analyze all</Button>
             )}
           </div>
+          {bulkAnalyze && (
+            <div className="mt-2 rounded-lg border border-amber/30 bg-amber/5 p-2 text-xs space-y-1">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-3 h-3 animate-spin text-amber" />
+                <span className="font-mono uppercase text-amber">Analyzing {bulkAnalyze.done}/{bulkAnalyze.total}</span>
+                {bulkAnalyze.current && <span className="text-muted-foreground truncate">· {bulkAnalyze.current}</span>}
+              </div>
+              <div className="h-1 w-full bg-background/40 rounded overflow-hidden">
+                <div className="h-full bg-amber transition-all" style={{ width: `${(bulkAnalyze.done / bulkAnalyze.total) * 100}%` }} />
+              </div>
+              {bulkAnalyze.recent.length > 0 && (
+                <ul className="space-y-0.5 pt-1">
+                  {bulkAnalyze.recent.map((r, i) => (
+                    <li key={i} className="flex items-center justify-between gap-2">
+                      <span className="truncate text-foreground">{r.name}</span>
+                      {r.ok && r.score != null
+                        ? <Badge className={`h-4 px-1 text-[10px] ${r.score >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' : r.score >= 60 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>Fit {r.score}</Badge>
+                        : <Badge variant="outline" className="h-4 px-1 text-[10px] text-destructive">failed</Badge>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Filters:</span>
             <label className="flex items-center gap-1">
