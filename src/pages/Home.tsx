@@ -56,6 +56,29 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+        {/* Front-and-center booking — first thing under the hero */}
+        <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Skip the form — book the operator
+              </div>
+              <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
+                Book a meeting <span className="text-gradient-amber">with me directly</span>
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto">
+                30 minutes. I'll tell you on the call where your business is most likely leaking — before you spend a dollar on the Diagnostic.
+              </p>
+            </div>
+            <div className="glass rounded-sm border border-amber/30 p-2 md:p-4">
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* AEO TL;DR */}
         <section className="px-4 -mt-2 md:-mt-6 mb-10">
           <div
