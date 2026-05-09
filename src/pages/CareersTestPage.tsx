@@ -240,8 +240,8 @@ const CareersTestPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 70%.</p>
-                <p className="text-sm text-muted-foreground">You can try again — up to 2 attempts per day. Re-read the site first; the questions test what's actually on it.</p>
+                <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 80%.</p>
+                <p className="text-sm text-muted-foreground">You can try again — up to 5 attempts per day. Re-read the site first; the questions test what's actually on it.</p>
                 <Button variant="outline" onClick={() => { setPhase('intro'); setResult(null); setAnswers({}); setNotes(''); }}>Go back to intro</Button>
               </CardContent>
             </Card>
