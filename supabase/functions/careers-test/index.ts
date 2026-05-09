@@ -1,6 +1,7 @@
 // Careers test: start attempt, submit answers, upload resume, admin lookup by code.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
 
@@ -43,9 +44,41 @@ function mimeFromExt(ext: string) {
   return "application/octet-stream";
 }
 
+function detectResumeType(bytes: Uint8Array, filename: string) {
+  const ext = extFromName(filename);
+  if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) return { ext: "pdf", mime: "application/pdf" };
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b) return { ext: ext === "docx" ? "docx" : ext, mime: mimeFromExt(ext) };
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { ext: "png", mime: "image/png" };
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return { ext: "jpg", mime: "image/jpeg" };
+  return { ext, mime: mimeFromExt(ext) };
+}
+
 function extractPlainText(buf: Uint8Array) {
   const raw = new TextDecoder("utf-8", { fatal: false }).decode(buf);
   return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
+}
+
+function decodeXmlText(xml: string) {
+  return xml
+    .replace(/<w:tab\/>/g, "\t")
+    .replace(/<w:br\/>/g, "\n")
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function extractDocxText(buf: Uint8Array) {
+  const zip = await JSZip.loadAsync(buf);
+  const names = Object.keys(zip.files).filter((name) => /^word\/(document|header\d+|footer\d+)\.xml$/.test(name));
+  const parts = await Promise.all(names.map(async (name) => decodeXmlText(await zip.files[name].async("text"))));
+  return parts.filter(Boolean).join("\n\n").trim();
 }
 
 function toBase64(bytes: Uint8Array) {
@@ -63,6 +96,10 @@ async function aiExtractResumeText(params: {
   filename: string;
   mime: string;
 }) {
+  const gatewaySupportedFile = params.mime === "application/pdf" || params.mime.startsWith("image/");
+  if (!gatewaySupportedFile) {
+    return "";
+  }
   const base64 = toBase64(params.bytes);
   const prompt = [
     "Extract all readable text from this resume.",
@@ -73,11 +110,12 @@ async function aiExtractResumeText(params: {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${params.apiKey}`,
+      "Lovable-API-Key": params.apiKey,
+      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-5-mini",
+      model: "google/gemini-2.5-flash",
       messages: [{
         role: "user",
         content: [
@@ -410,15 +448,20 @@ serve(async (req) => {
         if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
         const buf = new Uint8Array(await file.arrayBuffer());
         const filename = app.resume_filename || app.resume_path.split("/").pop() || "resume";
-        const ext = extFromName(filename);
-        const mime = mimeFromExt(ext);
+        const { ext, mime } = detectResumeType(buf, filename);
 
         const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
         if (plainTextable.has(ext)) {
           resumeText = extractPlainText(buf);
+        } else if (ext === "docx") {
+          try {
+            resumeText = await extractDocxText(buf);
+          } catch (docxErr) {
+            console.error("DOCX text extraction failed", docxErr);
+          }
         }
 
-        if (resumeText.trim().length < 120) {
+        if (resumeText.trim().length < 120 && mime !== "application/msword") {
           try {
             resumeText = await aiExtractResumeText({
               apiKey: LOVABLE_API_KEY,
@@ -462,7 +505,7 @@ ${resumeText}`;
 
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        headers: { "Lovable-API-Key": LOVABLE_API_KEY, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "google/gemini-2.5-pro",
           messages: [{ role: "system", content: sys }, { role: "user", content: user }],
