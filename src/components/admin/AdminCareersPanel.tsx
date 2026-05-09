@@ -153,7 +153,26 @@ export const AdminCareersPanel: React.FC = () => {
     } finally { setAnalyzingId(null); }
   };
 
-  const StatusBadge = ({ s }: { s: string }) => {
+  const [contactingId, setContactingId] = useState<string | null>(null);
+  const toggleContacted = async (shareCode: string, next: boolean) => {
+    setContactingId(shareCode);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'admin_update_application', share_code: shareCode, contacted: next },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setApplications(prev => prev.map(a => a.share_code === shareCode ? {
+        ...a, contacted: next, contacted_at: next ? new Date().toISOString() : null,
+      } : a));
+      toast({ title: next ? 'Marked as contacted' : 'Unmarked contacted' });
+    } catch (e) {
+      toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setContactingId(null); }
+  };
     const map: Record<string, string> = {
       passed: 'bg-green-500/20 text-green-400 border-green-500/30',
       failed: 'bg-destructive/20 text-destructive border-destructive/30',
