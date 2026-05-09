@@ -90,19 +90,23 @@ export const AdminCareersPanel: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const fmt = (s: string | null) => s ? new Date(s).toLocaleString() : '—';
+  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : '—';
   const q = filter.trim().toLowerCase();
-  const filteredAttempts = q ? attempts.filter(a =>
-    (a.candidate_name || '').toLowerCase().includes(q) ||
-    a.candidate_email.toLowerCase().includes(q) ||
-    (a.share_code || '').toLowerCase().includes(q)
-  ) : attempts;
+  const minTest = minTestScore === '' ? null : Number(minTestScore);
+  const minFit = minFitScore === '' ? null : Number(minFitScore);
+  const matchesText = (name: string | null, email: string, code: string | null) =>
+    !q || (name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q) || (code || '').toLowerCase().includes(q);
+  const filteredAttempts = attempts.filter(a =>
+    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+    (minTest == null || (a.score_pct ?? -1) >= minTest)
+  );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
-  const filteredApps = q ? applications.filter(a =>
-    a.candidate_name.toLowerCase().includes(q) ||
-    a.candidate_email.toLowerCase().includes(q) ||
-    a.share_code.toLowerCase().includes(q)
-  ) : applications;
+  const filteredApps = applications.filter(a =>
+    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+    (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+    (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted))
+  );
 
   const openResume = async (shareCode: string) => {
     try {
