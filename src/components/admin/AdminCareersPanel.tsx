@@ -375,6 +375,7 @@ export const AdminCareersPanel: React.FC = () => {
                           {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
                           {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
                         </Button>
+                      </div>
                     </div>
                   </div>
                 ))
