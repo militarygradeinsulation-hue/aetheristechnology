@@ -162,8 +162,10 @@ export const AdminCareersPanel: React.FC = () => {
   };
 
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
-  const analyzeResume = async (shareCode: string) => {
+  const [analyzingSet, setAnalyzingSet] = useState<Set<string>>(new Set());
+  const analyzeResume = async (shareCode: string, opts?: { silent?: boolean }) => {
     setAnalyzingId(shareCode);
+    setAnalyzingSet(prev => { const n = new Set(prev); n.add(shareCode); return n; });
     try {
       const token = getAdminToken();
       if (!token) throw new Error('Admin session expired');
@@ -182,27 +184,41 @@ export const AdminCareersPanel: React.FC = () => {
         ai_concerns: d.concerns,
         ai_analyzed_at: new Date().toISOString(),
       } : a));
-      toast({ title: `Fit score: ${d.fit_score}/100` });
+      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/100` });
+      return d.fit_score as number;
     } catch (e) {
-      toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    } finally { setAnalyzingId(null); }
+      if (!opts?.silent) toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      throw e;
+    } finally {
+      setAnalyzingId(null);
+      setAnalyzingSet(prev => { const n = new Set(prev); n.delete(shareCode); return n; });
+    }
   };
 
-  const [bulkAnalyze, setBulkAnalyze] = useState<{ done: number; total: number } | null>(null);
+  const [bulkAnalyze, setBulkAnalyze] = useState<{ done: number; total: number; current: string | null; recent: { name: string; score: number | null; ok: boolean }[] } | null>(null);
   const analyzeAllPassed = async (onlyMissing = true) => {
     const targets = applications.filter(a => a.resume_path && (!onlyMissing || a.ai_fit_score == null));
     if (!targets.length) {
       toast({ title: onlyMissing ? 'All passed candidates already analyzed' : 'No passed candidates with resumes' });
       return;
     }
-    setBulkAnalyze({ done: 0, total: targets.length });
+    setBulkAnalyze({ done: 0, total: targets.length, current: null, recent: [] });
     let ok = 0, fail = 0;
     for (let i = 0; i < targets.length; i++) {
+      const t = targets[i];
+      setBulkAnalyze(b => b ? { ...b, current: t.candidate_name } : b);
+      let score: number | null = null;
+      let success = false;
       try {
-        await analyzeResume(targets[i].share_code);
-        ok++;
+        score = await analyzeResume(t.share_code, { silent: true });
+        ok++; success = true;
       } catch { fail++; }
-      setBulkAnalyze({ done: i + 1, total: targets.length });
+      setBulkAnalyze(b => b ? {
+        ...b,
+        done: i + 1,
+        current: null,
+        recent: [{ name: t.candidate_name, score, ok: success }, ...b.recent].slice(0, 6),
+      } : b);
     }
     setBulkAnalyze(null);
     toast({ title: `Analyzed ${ok}/${targets.length}`, description: fail ? `${fail} failed` : undefined });
