@@ -97,6 +97,9 @@ async function aiExtractResumeText(params: {
   filename: string;
   mime: string;
 }) {
+  if (params.mime === "application/msword") {
+    return "";
+  }
   const base64 = toBase64(params.bytes);
   const prompt = [
     "Extract all readable text from this resume.",
@@ -107,11 +110,12 @@ async function aiExtractResumeText(params: {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${params.apiKey}`,
+      "Lovable-API-Key": params.apiKey,
+      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-5-mini",
+      model: "google/gemini-2.5-flash",
       messages: [{
         role: "user",
         content: [
