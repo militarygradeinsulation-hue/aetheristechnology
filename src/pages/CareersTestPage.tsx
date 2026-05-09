@@ -277,14 +277,18 @@ const CareersTestPage = () => {
                   <p className="text-xs text-muted-foreground mt-2">I'll use this code to pull up your test results, resume, and notes. Don't lose it.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Upload your resume (PDF/DOC, max 10 MB)</Label>
+                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
                   <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
+                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes for me (why you, anything else)</Label>
-                  <Textarea rows={4} maxLength={4000} value={appNotes} onChange={e => setAppNotes(e.target.value)} />
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words)</span></Label>
+                  <Textarea rows={8} maxLength={4000} value={appNotes} onChange={e => setAppNotes(e.target.value)} placeholder="Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected." />
+                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
+                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
+                  </p>
                 </div>
-                <Button onClick={submitApplication} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
+                <Button onClick={submitApplication} disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS} className="bg-amber text-background hover:bg-amber/90">
                   {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
                   Submit application
                 </Button>
