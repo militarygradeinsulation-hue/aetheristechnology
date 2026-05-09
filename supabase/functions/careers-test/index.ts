@@ -448,15 +448,20 @@ serve(async (req) => {
         if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
         const buf = new Uint8Array(await file.arrayBuffer());
         const filename = app.resume_filename || app.resume_path.split("/").pop() || "resume";
-        const ext = extFromName(filename);
-        const mime = mimeFromExt(ext);
+        const { ext, mime } = detectResumeType(buf, filename);
 
         const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
         if (plainTextable.has(ext)) {
           resumeText = extractPlainText(buf);
+        } else if (ext === "docx") {
+          try {
+            resumeText = await extractDocxText(buf);
+          } catch (docxErr) {
+            console.error("DOCX text extraction failed", docxErr);
+          }
         }
 
-        if (resumeText.trim().length < 120) {
+        if (resumeText.trim().length < 120 && mime !== "application/msword") {
           try {
             resumeText = await aiExtractResumeText({
               apiKey: LOVABLE_API_KEY,
@@ -500,7 +505,7 @@ ${resumeText}`;
 
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        headers: { "Lovable-API-Key": LOVABLE_API_KEY, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "google/gemini-2.5-pro",
           messages: [{ role: "system", content: sys }, { role: "user", content: user }],
