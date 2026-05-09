@@ -390,6 +390,16 @@ export const AdminCareersPanel: React.FC = () => {
               <Button key={p.k} size="sm" variant="outline" className="h-7"
                 onClick={() => applyPreset(p.k)}>{p.label}</Button>
             ))}
+            <Button size="sm" className="h-7 bg-amber text-background hover:bg-amber/90"
+              onClick={() => analyzeAllPassed(true)} disabled={!!bulkAnalyze}>
+              {bulkAnalyze
+                ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing {bulkAnalyze.done}/{bulkAnalyze.total}</>
+                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all passed resumes</>}
+            </Button>
+            {applications.some(a => a.ai_fit_score != null) && !bulkAnalyze && (
+              <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground"
+                onClick={() => analyzeAllPassed(false)}>Re-analyze all</Button>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Filters:</span>
