@@ -12,6 +12,7 @@ import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
+import { HubSpotMeeting } from '@/components/HubSpotMeeting';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
