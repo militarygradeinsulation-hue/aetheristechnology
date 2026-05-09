@@ -46,8 +46,7 @@ function mimeFromExt(ext: string) {
 
 function detectResumeType(bytes: Uint8Array, filename: string) {
   const ext = extFromName(filename);
-  const head = new TextDecoder("latin1", { fatal: false }).decode(bytes.slice(0, 16));
-  if (head.startsWith("%PDF")) return { ext: "pdf", mime: "application/pdf" };
+  if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) return { ext: "pdf", mime: "application/pdf" };
   if (bytes[0] === 0x50 && bytes[1] === 0x4b) return { ext: ext === "docx" ? "docx" : ext, mime: mimeFromExt(ext) };
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { ext: "png", mime: "image/png" };
   if (bytes[0] === 0xff && bytes[1] === 0xd8) return { ext: "jpg", mime: "image/jpeg" };
@@ -97,7 +96,8 @@ async function aiExtractResumeText(params: {
   filename: string;
   mime: string;
 }) {
-  if (params.mime === "application/msword") {
+  const gatewaySupportedFile = params.mime === "application/pdf" || params.mime.startsWith("image/");
+  if (!gatewaySupportedFile) {
     return "";
   }
   const base64 = toBase64(params.bytes);
