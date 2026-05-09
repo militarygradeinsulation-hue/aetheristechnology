@@ -53,6 +53,7 @@ const invokeAuth = async (body: Record<string, unknown>) => {
 export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated }) => {
   const { toast } = useToast();
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeHtml, setResumeHtml] = useState<string | null>(null);
   const [resumeMime, setResumeMime] = useState<string>('application/pdf');
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -65,7 +66,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
 
   // Local copy so we can show fresh AI results immediately
   const [local, setLocal] = useState<Application | null>(app);
-  useEffect(() => { setLocal(app); setResumeUrl(null); setMessages([]); setDraft(''); setPendingFile(null); }, [app?.id]);
+  useEffect(() => { setLocal(app); setResumeUrl(null); setResumeHtml(null); setMessages([]); setDraft(''); setPendingFile(null); }, [app?.id]);
 
   useEffect(() => {
     if (!app) return;
@@ -73,7 +74,13 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
       setLoadingUrl(true);
       try {
         const data = await invokeAuth({ action: 'admin_resume_url', share_code: app.share_code });
-        setResumeUrl(data.url);
+        if (data.html) {
+          const blobUrl = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
+          setResumeHtml(blobUrl);
+          setResumeUrl(data.url || blobUrl);
+        } else {
+          setResumeUrl(data.url);
+        }
         setResumeMime(data.mime || 'application/pdf');
       } catch (e) {
         toast({ title: 'Could not load resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -82,6 +89,8 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
     loadMessages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [app?.id]);
+
+  useEffect(() => () => { if (resumeHtml) URL.revokeObjectURL(resumeHtml); }, [resumeHtml]);
 
   const loadMessages = async () => {
     if (!app) return;
@@ -183,8 +192,10 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
             <div className="flex-1 min-h-0">
               {loadingUrl ? (
                 <div className="flex items-center justify-center h-full"><Loader2 className="w-5 h-5 animate-spin" /></div>
-              ) : !resumeUrl ? (
+              ) : !resumeUrl && !resumeHtml ? (
                 <div className="flex items-center justify-center h-full text-sm text-muted-foreground">No resume on file.</div>
+              ) : resumeHtml ? (
+                <iframe src={resumeHtml} title="Recreated resume" className="w-full h-full border-0" />
               ) : isPdf ? (
                 <iframe src={resumeUrl} title="Resume" className="w-full h-full border-0" />
               ) : (
