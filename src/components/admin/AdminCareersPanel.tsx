@@ -112,7 +112,8 @@ export const AdminCareersPanel: React.FC = () => {
   );
 
   const openResume = async (shareCode: string) => {
-    const popup = window.open('', '_blank', 'noopener,noreferrer');
+    const popup = window.open('', '_blank');
+    if (popup) popup.opener = null;
     popup?.document.write('<!doctype html><title>Loading resume</title><body style="font-family:system-ui;padding:24px">Rebuilding readable resume…</body>');
     try {
       const token = getAdminToken();
