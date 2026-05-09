@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 
@@ -39,6 +39,8 @@ interface Application {
   score_pct: number | null;
   reviewed: boolean;
   reviewed_at: string | null;
+  contacted?: boolean;
+  contacted_at?: string | null;
   created_at: string;
   ai_fit_score?: number | null;
   ai_summary?: string | null;
@@ -63,6 +65,9 @@ export const AdminCareersPanel: React.FC = () => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('all');
+  const [minTestScore, setMinTestScore] = useState<string>('');
+  const [minFitScore, setMinFitScore] = useState<string>('');
+  const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
 
   const load = async () => {
     setLoading(true);
@@ -85,19 +90,23 @@ export const AdminCareersPanel: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const fmt = (s: string | null) => s ? new Date(s).toLocaleString() : '—';
+  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : '—';
   const q = filter.trim().toLowerCase();
-  const filteredAttempts = q ? attempts.filter(a =>
-    (a.candidate_name || '').toLowerCase().includes(q) ||
-    a.candidate_email.toLowerCase().includes(q) ||
-    (a.share_code || '').toLowerCase().includes(q)
-  ) : attempts;
+  const minTest = minTestScore === '' ? null : Number(minTestScore);
+  const minFit = minFitScore === '' ? null : Number(minFitScore);
+  const matchesText = (name: string | null, email: string, code: string | null) =>
+    !q || (name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q) || (code || '').toLowerCase().includes(q);
+  const filteredAttempts = attempts.filter(a =>
+    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+    (minTest == null || (a.score_pct ?? -1) >= minTest)
+  );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
-  const filteredApps = q ? applications.filter(a =>
-    a.candidate_name.toLowerCase().includes(q) ||
-    a.candidate_email.toLowerCase().includes(q) ||
-    a.share_code.toLowerCase().includes(q)
-  ) : applications;
+  const filteredApps = applications.filter(a =>
+    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+    (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+    (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted))
+  );
 
   const openResume = async (shareCode: string) => {
     try {
@@ -142,6 +151,27 @@ export const AdminCareersPanel: React.FC = () => {
     } catch (e) {
       toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAnalyzingId(null); }
+  };
+
+  const [contactingId, setContactingId] = useState<string | null>(null);
+  const toggleContacted = async (shareCode: string, next: boolean) => {
+    setContactingId(shareCode);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'admin_update_application', share_code: shareCode, contacted: next },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setApplications(prev => prev.map(a => a.share_code === shareCode ? {
+        ...a, contacted: next, contacted_at: next ? new Date().toISOString() : null,
+      } : a));
+      toast({ title: next ? 'Marked as contacted' : 'Unmarked contacted' });
+    } catch (e) {
+      toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setContactingId(null); }
   };
 
   const StatusBadge = ({ s }: { s: string }) => {
@@ -232,7 +262,7 @@ export const AdminCareersPanel: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-2 mt-3 flex-wrap">
             {([
               { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
               { k: 'passed', label: `Passed (${passedAttempts.length})` },
@@ -243,6 +273,38 @@ export const AdminCareersPanel: React.FC = () => {
                 {t.label}
               </Button>
             ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Filters:</span>
+            <label className="flex items-center gap-1">
+              <span className="text-muted-foreground">Min test %</span>
+              <Input type="number" min={0} max={100} value={minTestScore}
+                onChange={e => setMinTestScore(e.target.value)}
+                placeholder="0" className="h-7 w-16" />
+            </label>
+            {tab === 'apps' && (
+              <>
+                <label className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Min fit</span>
+                  <Input type="number" min={0} max={100} value={minFitScore}
+                    onChange={e => setMinFitScore(e.target.value)}
+                    placeholder="0" className="h-7 w-16" />
+                </label>
+                {(['any', 'not', 'yes'] as const).map(v => (
+                  <Button key={v} size="sm" variant={contactFilter === v ? 'default' : 'outline'}
+                    onClick={() => setContactFilter(v)}
+                    className={`h-7 ${contactFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    {v === 'any' ? 'All' : v === 'not' ? 'Not contacted' : 'Contacted'}
+                  </Button>
+                ))}
+              </>
+            )}
+            {(minTestScore || minFitScore || contactFilter !== 'any') && (
+              <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); }}>
+                Clear
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -264,6 +326,11 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
+                          {a.contacted && (
+                            <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/40 text-xs">
+                              <PhoneCall className="w-3 h-3 mr-1" />Contacted
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
                           <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
@@ -301,6 +368,13 @@ export const AdminCareersPanel: React.FC = () => {
                             {a.ai_analyzed_at ? 'Re-analyze' : 'Analyze AI'}
                           </Button>
                         )}
+                        <Button size="sm" variant={a.contacted ? 'outline' : 'default'}
+                          onClick={() => toggleContacted(a.share_code, !a.contacted)}
+                          disabled={contactingId === a.share_code}
+                          className={a.contacted ? '' : 'bg-blue-500 text-white hover:bg-blue-500/90'}>
+                          {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
+                          {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
+                        </Button>
                       </div>
                     </div>
                   </div>

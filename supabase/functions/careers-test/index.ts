@@ -301,7 +301,7 @@ serve(async (req) => {
         .order("started_at", { ascending: false }).limit(500);
 
       const { data: applications } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,notes,score_pct,reviewed,reviewed_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
+        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,notes,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
         .order("created_at", { ascending: false }).limit(500);
 
       // Page analytics for /careers and /careers/test
@@ -350,6 +350,10 @@ serve(async (req) => {
       if (typeof body.reviewed === "boolean") {
         patch.reviewed = body.reviewed;
         patch.reviewed_at = body.reviewed ? new Date().toISOString() : null;
+      }
+      if (typeof body.contacted === "boolean") {
+        patch.contacted = body.contacted;
+        patch.contacted_at = body.contacted ? new Date().toISOString() : null;
       }
       if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
       const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
