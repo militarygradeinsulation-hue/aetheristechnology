@@ -519,8 +519,14 @@ serve(async (req) => {
       const code = String(body.share_code || "").trim().toUpperCase();
       const resumePath = body.resume_path ? String(body.resume_path) : null;
       const resumeFilename = body.resume_filename ? String(body.resume_filename).slice(0, 200) : null;
-      const notes = (body.notes || "").toString().slice(0, 4000) || null;
+      const rawNotes = (body.notes || "").toString().slice(0, 4000);
+      const notes = rawNotes || null;
       if (!code) return json({ error: "Missing share_code" }, 400);
+      if (!resumePath) return json({ error: "Resume is required." }, 400);
+      const wordCount = rawNotes.trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount < 150) {
+        return json({ error: `Your note must be at least 150 words (currently ${wordCount}).` }, 400);
+      }
 
       const { data: attempt } = await admin.from("careers_attempts")
         .select("id,share_code,status,candidate_email,candidate_name,candidate_phone,score_pct")
