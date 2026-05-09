@@ -527,11 +527,11 @@ serve(async (req) => {
 
       const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (LOVABLE_API_KEY && savedApp) {
-        try {
-          await analyzeApplicationFit(admin, savedApp, LOVABLE_API_KEY);
-        } catch (autoErr) {
-          console.error("Automatic resume analysis failed", autoErr);
-        }
+        const autoAnalyze = analyzeApplicationFit(admin, savedApp, LOVABLE_API_KEY)
+          .catch((autoErr) => console.error("Automatic resume analysis failed", autoErr));
+        const edgeRuntime = (globalThis as any).EdgeRuntime;
+        if (edgeRuntime?.waitUntil) edgeRuntime.waitUntil(autoAnalyze);
+        else await autoAnalyze;
       }
 
       return json({ ok: true, share_code: code });
