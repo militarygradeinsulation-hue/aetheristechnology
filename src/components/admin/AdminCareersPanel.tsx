@@ -326,6 +326,11 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
+                          {a.contacted && (
+                            <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/40 text-xs">
+                              <PhoneCall className="w-3 h-3 mr-1" />Contacted
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
                           <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
