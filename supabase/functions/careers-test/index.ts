@@ -25,9 +25,9 @@ async function isAuthorizedAdminOrAllowedPortal(req: Request, secret: string): P
   return (await authorize(req, secret)).ok;
 }
 
-const TEST_MINUTES = 45;
-const QUESTION_COUNT = 20;
-const PASS_PCT = 70;
+const TEST_MINUTES = 50;
+const QUESTION_COUNT = 25;
+const PASS_PCT = 80;
 const MAX_ATTEMPTS_PER_DAY = 5;
 
 function extFromName(name: string | null | undefined) {
