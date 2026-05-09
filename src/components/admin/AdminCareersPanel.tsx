@@ -209,6 +209,55 @@ export const AdminCareersPanel: React.FC = () => {
     } finally { setContactingId(null); }
   };
 
+  const updateApp = async (shareCode: string, patch: Record<string, unknown>) => {
+    const token = getAdminToken();
+    if (!token) throw new Error('Admin session expired');
+    const { data, error } = await supabase.functions.invoke('careers-test', {
+      body: { action: 'admin_update_application', share_code: shareCode, ...patch },
+      headers: { 'x-admin-token': token },
+    });
+    if (error) throw new Error(error.message);
+    if ((data as any)?.error) throw new Error((data as any).error);
+  };
+
+  const [stageSavingId, setStageSavingId] = useState<string | null>(null);
+  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no') => {
+    setStageSavingId(shareCode);
+    const prev = applications;
+    setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, stage } : a));
+    try {
+      await updateApp(shareCode, { stage });
+      toast({ title: `Moved to ${stage}` });
+    } catch (e) {
+      setApplications(prev);
+      toast({ title: 'Could not update stage', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setStageSavingId(null); }
+  };
+
+  const notesTimers = useRef<Record<string, number>>({});
+  const onNotesChange = (shareCode: string, value: string) => {
+    setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, admin_notes: value } : a));
+    const existing = notesTimers.current[shareCode];
+    if (existing) window.clearTimeout(existing);
+    notesTimers.current[shareCode] = window.setTimeout(async () => {
+      try { await updateApp(shareCode, { admin_notes: value }); }
+      catch (e) { toast({ title: 'Notes save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+    }, 700);
+  };
+
+  const applyPreset = (preset: 'top' | 'passedNew' | 'pending' | 'rejected' | 'reset') => {
+    setTab('apps');
+    setStageFilter('all');
+    setContactFilter('any');
+    setMinTestScore('');
+    setMinFitScore('');
+    setFitSort('none');
+    if (preset === 'top') { setMinFitScore('80'); setFitSort('desc'); }
+    else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
+    else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
+    else if (preset === 'rejected') { setStageFilter('no'); }
+  };
+
   const StatusBadge = ({ s }: { s: string }) => {
     const map: Record<string, string> = {
       passed: 'bg-green-500/20 text-green-400 border-green-500/30',
