@@ -39,6 +39,8 @@ interface Application {
   score_pct: number | null;
   reviewed: boolean;
   reviewed_at: string | null;
+  contacted?: boolean;
+  contacted_at?: string | null;
   created_at: string;
   ai_fit_score?: number | null;
   ai_summary?: string | null;
