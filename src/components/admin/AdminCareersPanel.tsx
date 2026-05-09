@@ -110,12 +110,20 @@ export const AdminCareersPanel: React.FC = () => {
     (minTest == null || (a.score_pct ?? -1) >= minTest)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
-  const filteredApps = applications.filter(a =>
-    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
-    (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
-    (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted))
-  );
+  const filteredApps = applications
+    .filter(a =>
+      matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+      (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+      (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+      (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
+      (stageFilter === 'all' || (a.stage || 'new') === stageFilter)
+    )
+    .sort((a, b) => {
+      if (fitSort === 'none') return 0;
+      const av = a.ai_fit_score ?? -1;
+      const bv = b.ai_fit_score ?? -1;
+      return fitSort === 'desc' ? bv - av : av - bv;
+    });
 
   const openResume = async (shareCode: string) => {
     const popup = window.open('', '_blank');
