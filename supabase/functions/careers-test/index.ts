@@ -624,6 +624,11 @@ serve(async (req) => {
         patch.contacted = body.contacted;
         patch.contacted_at = body.contacted ? new Date().toISOString() : null;
       }
+      if (typeof body.admin_notes === "string") patch.admin_notes = body.admin_notes.slice(0, 4000) || null;
+      if (typeof body.stage === "string") {
+        const s = body.stage.trim().toLowerCase();
+        if (["new", "interview", "wait", "no"].includes(s)) patch.stage = s;
+      }
       if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
       const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
       if (error) throw error;
