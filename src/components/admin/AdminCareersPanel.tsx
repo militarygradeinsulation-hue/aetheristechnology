@@ -262,7 +262,7 @@ export const AdminCareersPanel: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-2 mt-3 flex-wrap">
             {([
               { k: 'all', label: `All Attempts (${filteredAttempts.length})` },
               { k: 'passed', label: `Passed (${passedAttempts.length})` },
@@ -273,6 +273,38 @@ export const AdminCareersPanel: React.FC = () => {
                 {t.label}
               </Button>
             ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Filters:</span>
+            <label className="flex items-center gap-1">
+              <span className="text-muted-foreground">Min test %</span>
+              <Input type="number" min={0} max={100} value={minTestScore}
+                onChange={e => setMinTestScore(e.target.value)}
+                placeholder="0" className="h-7 w-16" />
+            </label>
+            {tab === 'apps' && (
+              <>
+                <label className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Min fit</span>
+                  <Input type="number" min={0} max={100} value={minFitScore}
+                    onChange={e => setMinFitScore(e.target.value)}
+                    placeholder="0" className="h-7 w-16" />
+                </label>
+                {(['any', 'not', 'yes'] as const).map(v => (
+                  <Button key={v} size="sm" variant={contactFilter === v ? 'default' : 'outline'}
+                    onClick={() => setContactFilter(v)}
+                    className={`h-7 ${contactFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    {v === 'any' ? 'All' : v === 'not' ? 'Not contacted' : 'Contacted'}
+                  </Button>
+                ))}
+              </>
+            )}
+            {(minTestScore || minFitScore || contactFilter !== 'any') && (
+              <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); }}>
+                Clear
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
