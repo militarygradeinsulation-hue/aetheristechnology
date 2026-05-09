@@ -992,6 +992,7 @@ export type Database = {
           reviewed_at: string | null
           score_pct: number | null
           share_code: string
+          stage: string
         }
         Insert: {
           admin_notes?: string | null
@@ -1020,6 +1021,7 @@ export type Database = {
           reviewed_at?: string | null
           score_pct?: number | null
           share_code: string
+          stage?: string
         }
         Update: {
           admin_notes?: string | null
@@ -1048,6 +1050,7 @@ export type Database = {
           reviewed_at?: string | null
           score_pct?: number | null
           share_code?: string
+          stage?: string
         }
         Relationships: [
           {

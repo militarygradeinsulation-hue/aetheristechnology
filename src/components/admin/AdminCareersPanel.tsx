@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
+  ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 
@@ -39,6 +41,8 @@ interface Application {
   resume_extract_error?: string | null;
   resume_recreated_at?: string | null;
   notes: string | null;
+  admin_notes?: string | null;
+  stage?: 'new' | 'interview' | 'wait' | 'no' | string | null;
   score_pct: number | null;
   reviewed: boolean;
   reviewed_at: string | null;
@@ -71,6 +75,8 @@ export const AdminCareersPanel: React.FC = () => {
   const [minTestScore, setMinTestScore] = useState<string>('');
   const [minFitScore, setMinFitScore] = useState<string>('');
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
+  const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
+  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
 
   const load = async () => {
     setLoading(true);
@@ -104,12 +110,20 @@ export const AdminCareersPanel: React.FC = () => {
     (minTest == null || (a.score_pct ?? -1) >= minTest)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
-  const filteredApps = applications.filter(a =>
-    matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
-    (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
-    (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted))
-  );
+  const filteredApps = applications
+    .filter(a =>
+      matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+      (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+      (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+      (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
+      (stageFilter === 'all' || (a.stage || 'new') === stageFilter)
+    )
+    .sort((a, b) => {
+      if (fitSort === 'none') return 0;
+      const av = a.ai_fit_score ?? -1;
+      const bv = b.ai_fit_score ?? -1;
+      return fitSort === 'desc' ? bv - av : av - bv;
+    });
 
   const openResume = async (shareCode: string) => {
     const popup = window.open('', '_blank');
@@ -193,6 +207,55 @@ export const AdminCareersPanel: React.FC = () => {
     } catch (e) {
       toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setContactingId(null); }
+  };
+
+  const updateApp = async (shareCode: string, patch: Record<string, unknown>) => {
+    const token = getAdminToken();
+    if (!token) throw new Error('Admin session expired');
+    const { data, error } = await supabase.functions.invoke('careers-test', {
+      body: { action: 'admin_update_application', share_code: shareCode, ...patch },
+      headers: { 'x-admin-token': token },
+    });
+    if (error) throw new Error(error.message);
+    if ((data as any)?.error) throw new Error((data as any).error);
+  };
+
+  const [stageSavingId, setStageSavingId] = useState<string | null>(null);
+  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no') => {
+    setStageSavingId(shareCode);
+    const prev = applications;
+    setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, stage } : a));
+    try {
+      await updateApp(shareCode, { stage });
+      toast({ title: `Moved to ${stage}` });
+    } catch (e) {
+      setApplications(prev);
+      toast({ title: 'Could not update stage', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setStageSavingId(null); }
+  };
+
+  const notesTimers = useRef<Record<string, number>>({});
+  const onNotesChange = (shareCode: string, value: string) => {
+    setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, admin_notes: value } : a));
+    const existing = notesTimers.current[shareCode];
+    if (existing) window.clearTimeout(existing);
+    notesTimers.current[shareCode] = window.setTimeout(async () => {
+      try { await updateApp(shareCode, { admin_notes: value }); }
+      catch (e) { toast({ title: 'Notes save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+    }, 700);
+  };
+
+  const applyPreset = (preset: 'top' | 'passedNew' | 'pending' | 'rejected' | 'reset') => {
+    setTab('apps');
+    setStageFilter('all');
+    setContactFilter('any');
+    setMinTestScore('');
+    setMinFitScore('');
+    setFitSort('none');
+    if (preset === 'top') { setMinFitScore('80'); setFitSort('desc'); }
+    else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
+    else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
+    else if (preset === 'rejected') { setStageFilter('no'); }
   };
 
   const StatusBadge = ({ s }: { s: string }) => {
@@ -296,6 +359,19 @@ export const AdminCareersPanel: React.FC = () => {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Quick:</span>
+            {([
+              { k: 'top', label: '🔥 Top fit (80+)' },
+              { k: 'passedNew', label: '✅ Passed · uncontacted' },
+              { k: 'pending', label: '🕒 Pending review' },
+              { k: 'rejected', label: '🚫 Rejected' },
+              { k: 'reset', label: 'Reset' },
+            ] as const).map(p => (
+              <Button key={p.k} size="sm" variant="outline" className="h-7"
+                onClick={() => applyPreset(p.k)}>{p.label}</Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Filters:</span>
             <label className="flex items-center gap-1">
               <span className="text-muted-foreground">Min test %</span>
@@ -311,6 +387,29 @@ export const AdminCareersPanel: React.FC = () => {
                     onChange={e => setMinFitScore(e.target.value)}
                     placeholder="0" className="h-7 w-16" />
                 </label>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Sort fit:</span>
+                  <Button size="sm" variant={fitSort === 'desc' ? 'default' : 'outline'}
+                    onClick={() => setFitSort(fitSort === 'desc' ? 'none' : 'desc')}
+                    className={`h-7 ${fitSort === 'desc' ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    <ArrowDownAZ className="w-3 h-3 mr-1" /> Best
+                  </Button>
+                  <Button size="sm" variant={fitSort === 'asc' ? 'default' : 'outline'}
+                    onClick={() => setFitSort(fitSort === 'asc' ? 'none' : 'asc')}
+                    className={`h-7 ${fitSort === 'asc' ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    <ArrowUpAZ className="w-3 h-3 mr-1" /> Worst
+                  </Button>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Stage:</span>
+                  {(['all', 'new', 'interview', 'wait', 'no'] as const).map(v => (
+                    <Button key={v} size="sm" variant={stageFilter === v ? 'default' : 'outline'}
+                      onClick={() => setStageFilter(v)}
+                      className={`h-7 capitalize ${stageFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                      {v}
+                    </Button>
+                  ))}
+                </div>
                 {(['any', 'not', 'yes'] as const).map(v => (
                   <Button key={v} size="sm" variant={contactFilter === v ? 'default' : 'outline'}
                     onClick={() => setContactFilter(v)}
@@ -320,9 +419,9 @@ export const AdminCareersPanel: React.FC = () => {
                 ))}
               </>
             )}
-            {(minTestScore || minFitScore || contactFilter !== 'any') && (
+            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none') && (
               <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
-                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); }}>
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); }}>
                 Clear
               </Button>
             )}
@@ -352,6 +451,14 @@ export const AdminCareersPanel: React.FC = () => {
                             <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/40 text-xs">
                               <PhoneCall className="w-3 h-3 mr-1" />Contacted
                             </Badge>
+                          )}
+                          {a.stage && a.stage !== 'new' && (
+                            <Badge className={`border text-xs capitalize ${
+                              a.stage === 'interview' ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+                              a.stage === 'wait' ? 'bg-amber/20 text-amber border-amber/40' :
+                              a.stage === 'no' ? 'bg-destructive/20 text-destructive border-destructive/40' :
+                              'bg-muted'
+                            }`}>{a.stage}</Badge>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
@@ -399,6 +506,40 @@ export const AdminCareersPanel: React.FC = () => {
                           {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
                         </Button>
                       </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-border/40 flex flex-wrap gap-2 items-center">
+                      <span className="text-[10px] font-mono uppercase text-muted-foreground">Stage:</span>
+                      {([
+                        { k: 'interview', label: 'Move to interview', icon: CalendarCheck, cls: 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30' },
+                        { k: 'wait', label: 'Wait', icon: Clock, cls: 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30' },
+                        { k: 'no', label: 'No', icon: Ban, cls: 'bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30' },
+                      ] as const).map(s => {
+                        const Icon = s.icon;
+                        const active = (a.stage || 'new') === s.k;
+                        return (
+                          <Button key={s.k} size="sm" variant="outline"
+                            disabled={stageSavingId === a.share_code}
+                            onClick={() => setStage(a.share_code, s.k)}
+                            className={`h-7 border ${active ? s.cls : ''}`}>
+                            <Icon className="w-3 h-3 mr-1" />{s.label}
+                          </Button>
+                        );
+                      })}
+                      {(a.stage && a.stage !== 'new') && (
+                        <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
+                          onClick={() => setStage(a.share_code, 'new')}>Reset stage</Button>
+                      )}
+                    </div>
+                    <div className="mt-2">
+                      <label className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1 mb-1">
+                        <StickyNote className="w-3 h-3" /> Internal notes
+                      </label>
+                      <Textarea
+                        value={a.admin_notes || ''}
+                        onChange={e => onNotesChange(a.share_code, e.target.value)}
+                        placeholder="Notes only your team will see…"
+                        className="min-h-[60px] text-sm bg-background/40"
+                      />
                     </div>
                   </div>
                 ))
