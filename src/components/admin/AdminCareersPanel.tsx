@@ -452,6 +452,14 @@ export const AdminCareersPanel: React.FC = () => {
                               <PhoneCall className="w-3 h-3 mr-1" />Contacted
                             </Badge>
                           )}
+                          {a.stage && a.stage !== 'new' && (
+                            <Badge className={`border text-xs capitalize ${
+                              a.stage === 'interview' ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+                              a.stage === 'wait' ? 'bg-amber/20 text-amber border-amber/40' :
+                              a.stage === 'no' ? 'bg-destructive/20 text-destructive border-destructive/40' :
+                              'bg-muted'
+                            }`}>{a.stage}</Badge>
+                          )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
                           <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
