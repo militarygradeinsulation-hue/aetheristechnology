@@ -17,6 +17,16 @@ import { HubSpotMeeting } from '@/components/HubSpotMeeting';
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
+  // Load HubSpot Meetings embed script for the front-and-center booking section
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
   const faqs = [
     { question: 'What is a Leak Audit™?', answer: 'A 7-step forensic process Aetheris runs on every business: Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. We name where revenue is leaking (lead capture, response time, operational drag, trust gaps) and put a real annual dollar figure on each leak before we touch a system.' },
     { question: 'How do you find revenue leaks in a business?', answer: 'We run reconnaissance on every system, channel, and handoff — CRMs, inboxes, forms, dashboards, the spreadsheets nobody admits to. Then we trace each lead and dollar from entry to exit and identify where they stall, vanish, or duplicate. Output: a sealed case file with each leak named and quantified.' },
