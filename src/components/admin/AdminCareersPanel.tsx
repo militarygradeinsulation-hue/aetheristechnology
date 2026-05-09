@@ -112,6 +112,8 @@ export const AdminCareersPanel: React.FC = () => {
   );
 
   const openResume = async (shareCode: string) => {
+    const popup = window.open('', '_blank', 'noopener,noreferrer');
+    popup?.document.write('<!doctype html><title>Loading resume</title><body style="font-family:system-ui;padding:24px">Rebuilding readable resume…</body>');
     try {
       const token = getAdminToken();
       if (!token) throw new Error('Admin session expired');
@@ -123,15 +125,23 @@ export const AdminCareersPanel: React.FC = () => {
       if ((data as any)?.error) throw new Error((data as any).error);
       const html = (data as any)?.html;
       if (html) {
-        const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-        window.open(url, '_blank', 'noopener,noreferrer');
-        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        if (popup) {
+          popup.document.open();
+          popup.document.write(html);
+          popup.document.close();
+        } else {
+          const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+          window.open(blobUrl, '_blank', 'noopener,noreferrer');
+          window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        }
         return;
       }
       const url = (data as any)?.url;
       if (!url) throw new Error('No readable resume returned');
-      window.open(url, '_blank', 'noopener,noreferrer');
+      if (popup) popup.location.href = url;
+      else window.open(url, '_blank', 'noopener,noreferrer');
     } catch (e) {
+      popup?.close();
       toast({ title: 'Could not open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
   };
