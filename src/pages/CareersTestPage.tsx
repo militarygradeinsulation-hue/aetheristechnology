@@ -103,8 +103,19 @@ const CareersTestPage = () => {
     } finally { setLoading(false); }
   };
 
+  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
+  const MIN_NOTE_WORDS = 150;
+
   const submitApplication = async () => {
     if (!result?.share_code) return;
+    if (!resumeFile) {
+      toast({ title: 'Resume required', description: 'Upload your resume (PDF or DOC) to apply.', variant: 'destructive' });
+      return;
+    }
+    if (noteWordCount < MIN_NOTE_WORDS) {
+      toast({ title: 'Note too short', description: `Write at least ${MIN_NOTE_WORDS} words on why I should interview you (currently ${noteWordCount}).`, variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     try {
       let resumePath: string | null = null;
