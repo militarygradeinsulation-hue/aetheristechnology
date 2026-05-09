@@ -644,19 +644,30 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
-    // ---------- ADMIN: signed view URL for resume (used by inline viewer) ----------
+    // ---------- ADMIN: rebuilt readable resume view ----------
     if (action === "admin_resume_url") {
       const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
       const code = String(body.share_code || "").trim().toUpperCase();
       if (!code) return json({ error: "Missing share_code" }, 400);
-      const { data: app } = await admin.from("careers_applications").select("resume_path,resume_filename").eq("share_code", code).maybeSingle();
-      if (!app?.resume_path) return json({ error: "No resume on file" }, 404);
-      const { data: signed, error } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
-      if (error) throw error;
-      const ext = extFromName(app.resume_filename || app.resume_path);
-      const mime = mimeFromExt(ext);
-      return json({ ok: true, url: signed?.signedUrl, filename: app.resume_filename, mime });
+      const { data: app } = await admin.from("careers_applications").select("*").eq("share_code", code).maybeSingle();
+      if (!app) return json({ error: "Application not found" }, 404);
+
+      let originalUrl: string | null = null;
+      if (app.resume_path) {
+        const { data: signed } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
+        originalUrl = signed?.signedUrl || null;
+      }
+
+      let resumeHtml = app.resume_html || "";
+      if (!resumeHtml) {
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+        if (!LOVABLE_API_KEY) return json({ error: "AI not configured" }, 500);
+        const recreated = await recreateResumeForApplication(admin, app, LOVABLE_API_KEY);
+        resumeHtml = recreated.resumeHtml;
+      }
+
+      return json({ ok: true, html: resumeHtml, url: originalUrl, filename: app.resume_filename || `${code}-resume.html`, mime: "text/html" });
     }
 
     // ---------- ADMIN: AI fit-score analysis ----------
@@ -669,105 +680,18 @@ serve(async (req) => {
       if (!code) return json({ error: "Missing share_code" }, 400);
 
       const { data: app } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,resume_path,resume_filename,score_pct,notes")
+        .select("*")
         .eq("share_code", code).maybeSingle();
       if (!app) return json({ error: "Application not found" }, 404);
-
-      let resumeText = "";
-      if (app.resume_path) {
-        const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
-        if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
-        const buf = new Uint8Array(await file.arrayBuffer());
-        const filename = app.resume_filename || app.resume_path.split("/").pop() || "resume";
-        const { ext, mime } = detectResumeType(buf, filename);
-
-        const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
-        if (plainTextable.has(ext)) {
-          resumeText = extractPlainText(buf);
-        } else if (ext === "docx") {
-          try {
-            resumeText = await extractDocxText(buf);
-          } catch (docxErr) {
-            console.error("DOCX text extraction failed", docxErr);
-          }
-        }
-
-        if (resumeText.trim().length < 120 && mime !== "application/msword") {
-          try {
-            resumeText = await aiExtractResumeText({
-              apiKey: LOVABLE_API_KEY,
-              bytes: buf,
-              filename,
-              mime,
-            });
-          } catch (ocrErr) {
-            console.error("resume OCR fallback failed", ocrErr);
-            if (!resumeText.trim()) resumeText = extractPlainText(buf);
-          }
-        }
-
-        resumeText = resumeText.replace(/\u0000/g, " ").replace(/\s{3,}/g, "  ").trim().slice(0, 18000);
+      try {
+        const result = await analyzeApplicationFit(admin, app, LOVABLE_API_KEY);
+        return json({ ok: true, fit_score: result.fit_score, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "AI analysis failed";
+        if (message.includes("rate limited")) return json({ error: message }, 429);
+        if (message.includes("credits exhausted")) return json({ error: message }, 402);
+        return json({ error: message }, 500);
       }
-      if (!resumeText.trim()) {
-        resumeText = `(Could not extract text from resume file ${app.resume_filename || ""}. Score based on candidate metadata only.)`;
-      }
-
-      const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
-We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
-Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
-Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
-Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
-
-Output STRICT JSON only — no markdown, no code fences:
-{
-  "fit_score": <integer 0-100>,
-  "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
-  "strengths": ["<bullet>", "<bullet>", "..."],
-  "concerns": ["<bullet>", "<bullet>", "..."],
-  "recommended_next_step": "<one line: e.g. 'Phone screen this week', 'Pass', 'Final interview'>"
-}`;
-      const user = `Candidate: ${app.candidate_name} (${app.candidate_email})
-Test score: ${app.score_pct ?? "n/a"}%
-Resume filename: ${app.resume_filename || "(none)"}
-Notes from candidate: ${app.notes || "(none)"}
-
---- Resume text ---
-${resumeText}`;
-
-      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Lovable-API-Key": LOVABLE_API_KEY, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          messages: [{ role: "system", content: sys }, { role: "user", content: user }],
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (!r.ok) {
-        const txt = await r.text();
-        if (r.status === 429) return json({ error: "AI rate limited — try again shortly." }, 429);
-        if (r.status === 402) return json({ error: "AI credits exhausted — add credits in Settings." }, 402);
-        return json({ error: `AI ${r.status}: ${txt.slice(0, 200)}` }, 500);
-      }
-      const j = await r.json();
-      let txt = j.choices?.[0]?.message?.content || "{}";
-      txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-      const parsed = JSON.parse(txt);
-      const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
-      const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
-      const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
-      const summary = String(parsed.summary || "").slice(0, 2000) +
-        (parsed.recommended_next_step ? `\n\nNext step: ${parsed.recommended_next_step}` : "");
-
-      await admin.from("careers_applications").update({
-        ai_fit_score: fitScore,
-        ai_summary: summary,
-        ai_strengths: strengths,
-        ai_concerns: concerns,
-        ai_analyzed_at: new Date().toISOString(),
-      }).eq("share_code", code);
-
-      return json({ ok: true, fit_score: fitScore, summary, strengths, concerns });
     }
 
     // ---------- ADMIN: list private messages (only the caller's own) ----------
