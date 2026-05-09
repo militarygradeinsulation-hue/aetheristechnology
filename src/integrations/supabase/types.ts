@@ -976,6 +976,8 @@ export type Database = {
           candidate_email: string
           candidate_name: string
           candidate_phone: string | null
+          contacted: boolean
+          contacted_at: string | null
           created_at: string
           id: string
           notes: string | null
@@ -997,6 +999,8 @@ export type Database = {
           candidate_email: string
           candidate_name: string
           candidate_phone?: string | null
+          contacted?: boolean
+          contacted_at?: string | null
           created_at?: string
           id?: string
           notes?: string | null
@@ -1018,6 +1022,8 @@ export type Database = {
           candidate_email?: string
           candidate_name?: string
           candidate_phone?: string | null
+          contacted?: boolean
+          contacted_at?: string | null
           created_at?: string
           id?: string
           notes?: string | null
