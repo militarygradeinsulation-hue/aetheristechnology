@@ -65,6 +65,9 @@ export const AdminCareersPanel: React.FC = () => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [filter, setFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'passed' | 'apps'>('all');
+  const [minTestScore, setMinTestScore] = useState<string>('');
+  const [minFitScore, setMinFitScore] = useState<string>('');
+  const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
 
   const load = async () => {
     setLoading(true);
