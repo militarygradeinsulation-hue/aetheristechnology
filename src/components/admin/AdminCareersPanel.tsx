@@ -188,6 +188,26 @@ export const AdminCareersPanel: React.FC = () => {
     } finally { setAnalyzingId(null); }
   };
 
+  const [bulkAnalyze, setBulkAnalyze] = useState<{ done: number; total: number } | null>(null);
+  const analyzeAllPassed = async (onlyMissing = true) => {
+    const targets = applications.filter(a => a.resume_path && (!onlyMissing || a.ai_fit_score == null));
+    if (!targets.length) {
+      toast({ title: onlyMissing ? 'All passed candidates already analyzed' : 'No passed candidates with resumes' });
+      return;
+    }
+    setBulkAnalyze({ done: 0, total: targets.length });
+    let ok = 0, fail = 0;
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        await analyzeResume(targets[i].share_code);
+        ok++;
+      } catch { fail++; }
+      setBulkAnalyze({ done: i + 1, total: targets.length });
+    }
+    setBulkAnalyze(null);
+    toast({ title: `Analyzed ${ok}/${targets.length}`, description: fail ? `${fail} failed` : undefined });
+  };
+
   const [contactingId, setContactingId] = useState<string | null>(null);
   const toggleContacted = async (shareCode: string, next: boolean) => {
     setContactingId(shareCode);
