@@ -75,6 +75,8 @@ export const AdminCareersPanel: React.FC = () => {
   const [minTestScore, setMinTestScore] = useState<string>('');
   const [minFitScore, setMinFitScore] = useState<string>('');
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
+  const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
+  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
 
   const load = async () => {
     setLoading(true);
