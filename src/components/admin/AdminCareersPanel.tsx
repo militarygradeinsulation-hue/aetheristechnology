@@ -35,6 +35,9 @@ interface Application {
   candidate_phone: string | null;
   resume_path: string | null;
   resume_filename: string | null;
+  resume_extract_method?: string | null;
+  resume_extract_error?: string | null;
+  resume_recreated_at?: string | null;
   notes: string | null;
   score_pct: number | null;
   reviewed: boolean;
@@ -109,6 +112,9 @@ export const AdminCareersPanel: React.FC = () => {
   );
 
   const openResume = async (shareCode: string) => {
+    const popup = window.open('', '_blank');
+    if (popup) popup.opener = null;
+    popup?.document.write('<!doctype html><title>Loading resume</title><body style="font-family:system-ui;padding:24px">Rebuilding readable resume…</body>');
     try {
       const token = getAdminToken();
       if (!token) throw new Error('Admin session expired');
@@ -118,10 +124,25 @@ export const AdminCareersPanel: React.FC = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
+      const html = (data as any)?.html;
+      if (html) {
+        if (popup) {
+          popup.document.open();
+          popup.document.write(html);
+          popup.document.close();
+        } else {
+          const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+          window.open(blobUrl, '_blank', 'noopener,noreferrer');
+          window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        }
+        return;
+      }
       const url = (data as any)?.url;
-      if (!url) throw new Error('No resume URL returned');
-      window.open(url, '_blank');
+      if (!url) throw new Error('No readable resume returned');
+      if (popup) popup.location.href = url;
+      else window.open(url, '_blank', 'noopener,noreferrer');
     } catch (e) {
+      popup?.close();
       toast({ title: 'Could not open resume', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
   };
@@ -326,6 +347,7 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
+                          {a.resume_recreated_at && <Badge variant="outline" className="text-xs">Readable resume</Badge>}
                           {a.contacted && (
                             <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/40 text-xs">
                               <PhoneCall className="w-3 h-3 mr-1" />Contacted
@@ -338,6 +360,7 @@ export const AdminCareersPanel: React.FC = () => {
                           <span>Applied {fmt(a.created_at)}</span>
                         </div>
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
+                        {a.resume_extract_error && <p className="text-xs text-destructive mt-2">Resume extraction note: {a.resume_extract_error}</p>}
                         {a.ai_summary && (
                           <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-1">
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>

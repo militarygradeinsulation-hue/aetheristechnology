@@ -1,6 +1,8 @@
 // Careers test: start attempt, submit answers, upload resume, admin lookup by code.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { Buffer } from "node:buffer";
+import pdfParse from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
@@ -58,6 +60,33 @@ function extractPlainText(buf: Uint8Array) {
   return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
 }
 
+function normalizeResumeText(text: string) {
+  return text
+    .replace(/\u0000/g, " ")
+    .replace(/\r/g, "\n")
+    .replace(/[\t ]{3,}/g, "  ")
+    .replace(/\n[\t ]+/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim();
+}
+
+function isUsableResumeText(text: string) {
+  const clean = normalizeResumeText(text);
+  const letters = (clean.match(/[A-Za-z]/g) || []).length;
+  const words = (clean.match(/[A-Za-z]{2,}/g) || []).length;
+  return clean.length >= 160 && letters >= 80 && words >= 25;
+}
+
+async function extractPdfText(buf: Uint8Array) {
+  try {
+    const data = await pdfParse(Buffer.from(buf));
+    return normalizeResumeText(data?.text || "");
+  } catch (error) {
+    console.error("PDF text extraction failed", error);
+    return "";
+  }
+}
+
 function decodeXmlText(xml: string) {
   return xml
     .replace(/<w:tab\/>/g, "\t")
@@ -79,6 +108,66 @@ async function extractDocxText(buf: Uint8Array) {
   const names = Object.keys(zip.files).filter((name) => /^word\/(document|header\d+|footer\d+)\.xml$/.test(name));
   const parts = await Promise.all(names.map(async (name) => decodeXmlText(await zip.files[name].async("text"))));
   return parts.filter(Boolean).join("\n\n").trim();
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function rebuiltResumeHtml(app: any, resumeText: string, meta: { method: string; filename: string; error?: string | null }) {
+  const lines = normalizeResumeText(resumeText).split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 500);
+  const sectionNames = /^(summary|profile|objective|experience|employment|work history|professional experience|sales experience|education|skills|certifications|licenses|awards|references|projects|contact)$/i;
+  const body = lines.length ? lines.map((line, idx) => {
+    const plain = line.replace(/[:\s]+$/g, "");
+    const looksHeading = sectionNames.test(plain) || (plain.length <= 42 && plain === plain.toUpperCase() && /[A-Z]{3,}/.test(plain));
+    if (looksHeading && idx > 0) return `<h2>${escapeHtml(plain)}</h2>`;
+    if (/^[•\-*]\s+/.test(line)) return `<li>${escapeHtml(line.replace(/^[•\-*]\s+/, ""))}</li>`;
+    return `<p>${escapeHtml(line)}</p>`;
+  }).join("\n") : `<p>No readable text could be extracted from the uploaded file.</p>`;
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(app.candidate_name || "Candidate")} — Recreated Resume</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #f3f0ea; color: #171411; }
+    main { width: min(860px, calc(100vw - 32px)); margin: 28px auto; background: #fffaf1; border: 1px solid #d8c7a5; box-shadow: 0 20px 60px rgba(33, 24, 8, .18); }
+    header { padding: 32px 38px 20px; border-bottom: 2px solid #b5832f; }
+    h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(30px, 5vw, 48px); line-height: 1; letter-spacing: 0; color: #171411; }
+    .contact { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px 18px; color: #5c5042; font-size: 14px; }
+    .meta { margin-top: 14px; color: #7b3f24; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+    article { padding: 26px 38px 38px; }
+    h2 { margin: 24px 0 8px; padding-top: 10px; border-top: 1px solid #e3d7c1; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: #8a5a18; }
+    p { margin: 0 0 9px; line-height: 1.48; font-size: 14.5px; white-space: pre-wrap; }
+    li { margin: 0 0 6px 20px; line-height: 1.45; font-size: 14.5px; }
+    .notice { margin: 0 38px 22px; padding: 10px 12px; background: #fff3d6; border: 1px solid #e6c875; color: #6a4a08; font-size: 12px; }
+    @media print { body { background: white; } main { margin: 0; width: 100%; box-shadow: none; border: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>${escapeHtml(app.candidate_name || "Candidate")}</h1>
+      <div class="contact">
+        <span>${escapeHtml(app.candidate_email || "")}</span>
+        ${app.candidate_phone ? `<span>${escapeHtml(app.candidate_phone)}</span>` : ""}
+        ${app.score_pct != null ? `<span>Test score: ${escapeHtml(String(app.score_pct))}%</span>` : ""}
+      </div>
+      <div class="meta">Recreated readable resume · ${escapeHtml(meta.filename)} · ${escapeHtml(meta.method)}</div>
+    </header>
+    ${meta.error ? `<div class="notice">Extraction note: ${escapeHtml(meta.error)}</div>` : ""}
+    <article>${body}</article>
+  </main>
+</body>
+</html>`;
 }
 
 function toBase64(bytes: Uint8Array) {
@@ -149,6 +238,139 @@ async function aiExtractResumeText(params: {
       : "";
 
   return text;
+}
+
+async function recreateResumeForApplication(admin: any, app: any, apiKey: string) {
+  let resumeText = "";
+  let method = "metadata-only";
+  let extractError: string | null = null;
+  const filename = app.resume_filename || app.resume_path?.split("/").pop() || "resume";
+
+  if (app.resume_path) {
+    const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
+    if (dlErr) throw new Error(`Resume download failed: ${dlErr.message}`);
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const { ext, mime } = detectResumeType(buf, filename);
+    const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
+
+    if (ext === "pdf") {
+      resumeText = await extractPdfText(buf);
+      method = "pdf-text";
+    } else if (ext === "docx") {
+      try {
+        resumeText = await extractDocxText(buf);
+        method = "docx-xml";
+      } catch (docxErr) {
+        extractError = docxErr instanceof Error ? docxErr.message : "DOCX extraction failed";
+        console.error("DOCX text extraction failed", docxErr);
+      }
+    } else if (plainTextable.has(ext)) {
+      resumeText = extractPlainText(buf);
+      method = "plain-text";
+    }
+
+    if (!isUsableResumeText(resumeText) && mime !== "application/msword") {
+      try {
+        const ocrText = await aiExtractResumeText({ apiKey, bytes: buf, filename, mime });
+        if (isUsableResumeText(ocrText) || ocrText.trim().length > resumeText.trim().length) {
+          resumeText = ocrText;
+          method = ext === "pdf" ? "pdf-vision" : "ai-vision";
+          extractError = null;
+        }
+      } catch (ocrErr) {
+        extractError = ocrErr instanceof Error ? ocrErr.message : "AI document extraction failed";
+        console.error("resume OCR fallback failed", ocrErr);
+      }
+    }
+
+    resumeText = normalizeResumeText(resumeText).slice(0, 30000);
+  }
+
+  if (!resumeText.trim()) {
+    resumeText = [
+      `Candidate: ${app.candidate_name || "Unknown"}`,
+      `Email: ${app.candidate_email || "Unknown"}`,
+      app.candidate_phone ? `Phone: ${app.candidate_phone}` : "",
+      app.notes ? `Candidate notes: ${app.notes}` : "",
+      app.resume_filename ? `Uploaded file: ${app.resume_filename}` : "No resume file was uploaded.",
+    ].filter(Boolean).join("\n");
+    method = "metadata-only";
+  }
+
+  const resumeHtml = rebuiltResumeHtml(app, resumeText, { method, filename, error: extractError });
+  await admin.from("careers_applications").update({
+    resume_text: resumeText,
+    resume_html: resumeHtml,
+    resume_extract_method: method,
+    resume_extract_error: extractError,
+    resume_recreated_at: new Date().toISOString(),
+  }).eq("share_code", app.share_code);
+
+  return { resumeText, resumeHtml, method, extractError };
+}
+
+async function analyzeApplicationFit(admin: any, app: any, apiKey: string) {
+  const recreated = app.resume_text && app.resume_html
+    ? { resumeText: app.resume_text, resumeHtml: app.resume_html, method: app.resume_extract_method || "stored", extractError: app.resume_extract_error || null }
+    : await recreateResumeForApplication(admin, app, apiKey);
+
+  const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
+We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
+Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
+Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
+Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
+
+Output STRICT JSON only — no markdown, no code fences:
+{
+  "fit_score": <integer 0-100>,
+  "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
+  "strengths": ["<bullet>", "<bullet>", "..."],
+  "concerns": ["<bullet>", "<bullet>", "..."],
+  "recommended_next_step": "<one line: e.g. 'Phone screen this week', 'Pass', 'Final interview'>"
+}`;
+  const user = `Candidate: ${app.candidate_name} (${app.candidate_email})
+Test score: ${app.score_pct ?? "n/a"}%
+Resume filename: ${app.resume_filename || "(none)"}
+Resume extraction: ${recreated.method}${recreated.extractError ? ` (${recreated.extractError})` : ""}
+Notes from candidate: ${app.notes || "(none)"}
+
+--- Recreated resume text ---
+${recreated.resumeText.slice(0, 18000)}`;
+
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-pro",
+      messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    if (r.status === 429) throw new Error("AI rate limited — try again shortly.");
+    if (r.status === 402) throw new Error("AI credits exhausted — add credits in Settings.");
+    throw new Error(`AI ${r.status}: ${txt.slice(0, 200)}`);
+  }
+  const j = await r.json();
+  let txt = j.choices?.[0]?.message?.content || "{}";
+  txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  const parsed = JSON.parse(txt);
+  const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
+  const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
+  const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
+  const summary = String(parsed.summary || "").slice(0, 2000) +
+    (parsed.recommended_next_step ? `\n\nNext step: ${parsed.recommended_next_step}` : "");
+
+  await admin.from("careers_applications").update({
+    ai_fit_score: fitScore,
+    ai_summary: summary,
+    ai_strengths: strengths,
+    ai_concerns: concerns,
+    ai_analyzed_at: new Date().toISOString(),
+  }).eq("share_code", app.share_code);
+
+  return { fit_score: fitScore, summary, strengths, concerns, ...recreated };
 }
 
 function json(body: unknown, status = 200) {
@@ -290,7 +512,7 @@ serve(async (req) => {
       if (!attempt || attempt.status !== "passed") return json({ error: "Invalid share code" }, 404);
 
       // upsert by share_code
-      const { error } = await admin.from("careers_applications").upsert({
+      const { data: savedApp, error } = await admin.from("careers_applications").upsert({
         attempt_id: attempt.id,
         share_code: code,
         candidate_name: attempt.candidate_name || "",
@@ -300,8 +522,17 @@ serve(async (req) => {
         resume_filename: resumeFilename,
         notes,
         score_pct: attempt.score_pct,
-      }, { onConflict: "share_code" });
+      }, { onConflict: "share_code" }).select("*").single();
       if (error) throw error;
+
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (LOVABLE_API_KEY && savedApp) {
+        const autoAnalyze = analyzeApplicationFit(admin, savedApp, LOVABLE_API_KEY)
+          .catch((autoErr) => console.error("Automatic resume analysis failed", autoErr));
+        const edgeRuntime = (globalThis as any).EdgeRuntime;
+        if (edgeRuntime?.waitUntil) edgeRuntime.waitUntil(autoAnalyze);
+        else await autoAnalyze;
+      }
 
       return json({ ok: true, share_code: code });
     }
@@ -339,7 +570,7 @@ serve(async (req) => {
         .order("started_at", { ascending: false }).limit(500);
 
       const { data: applications } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,notes,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
+        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,resume_extract_method,resume_extract_error,resume_recreated_at,notes,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
         .order("created_at", { ascending: false }).limit(500);
 
       // Page analytics for /careers and /careers/test
@@ -413,19 +644,30 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
-    // ---------- ADMIN: signed view URL for resume (used by inline viewer) ----------
+    // ---------- ADMIN: rebuilt readable resume view ----------
     if (action === "admin_resume_url") {
       const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
       if (!ok) return json({ error: "Unauthorized" }, 401);
       const code = String(body.share_code || "").trim().toUpperCase();
       if (!code) return json({ error: "Missing share_code" }, 400);
-      const { data: app } = await admin.from("careers_applications").select("resume_path,resume_filename").eq("share_code", code).maybeSingle();
-      if (!app?.resume_path) return json({ error: "No resume on file" }, 404);
-      const { data: signed, error } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
-      if (error) throw error;
-      const ext = extFromName(app.resume_filename || app.resume_path);
-      const mime = mimeFromExt(ext);
-      return json({ ok: true, url: signed?.signedUrl, filename: app.resume_filename, mime });
+      const { data: app } = await admin.from("careers_applications").select("*").eq("share_code", code).maybeSingle();
+      if (!app) return json({ error: "Application not found" }, 404);
+
+      let originalUrl: string | null = null;
+      if (app.resume_path) {
+        const { data: signed } = await admin.storage.from("careers-resumes").createSignedUrl(app.resume_path, 60 * 30);
+        originalUrl = signed?.signedUrl || null;
+      }
+
+      let resumeHtml = app.resume_html || "";
+      if (!resumeHtml) {
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+        if (!LOVABLE_API_KEY) return json({ error: "AI not configured" }, 500);
+        const recreated = await recreateResumeForApplication(admin, app, LOVABLE_API_KEY);
+        resumeHtml = recreated.resumeHtml;
+      }
+
+      return json({ ok: true, html: resumeHtml, url: originalUrl, filename: app.resume_filename || `${code}-resume.html`, mime: "text/html" });
     }
 
     // ---------- ADMIN: AI fit-score analysis ----------
@@ -438,105 +680,18 @@ serve(async (req) => {
       if (!code) return json({ error: "Missing share_code" }, 400);
 
       const { data: app } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,resume_path,resume_filename,score_pct,notes")
+        .select("*")
         .eq("share_code", code).maybeSingle();
       if (!app) return json({ error: "Application not found" }, 404);
-
-      let resumeText = "";
-      if (app.resume_path) {
-        const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
-        if (dlErr) return json({ error: `Resume download failed: ${dlErr.message}` }, 500);
-        const buf = new Uint8Array(await file.arrayBuffer());
-        const filename = app.resume_filename || app.resume_path.split("/").pop() || "resume";
-        const { ext, mime } = detectResumeType(buf, filename);
-
-        const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
-        if (plainTextable.has(ext)) {
-          resumeText = extractPlainText(buf);
-        } else if (ext === "docx") {
-          try {
-            resumeText = await extractDocxText(buf);
-          } catch (docxErr) {
-            console.error("DOCX text extraction failed", docxErr);
-          }
-        }
-
-        if (resumeText.trim().length < 120 && mime !== "application/msword") {
-          try {
-            resumeText = await aiExtractResumeText({
-              apiKey: LOVABLE_API_KEY,
-              bytes: buf,
-              filename,
-              mime,
-            });
-          } catch (ocrErr) {
-            console.error("resume OCR fallback failed", ocrErr);
-            if (!resumeText.trim()) resumeText = extractPlainText(buf);
-          }
-        }
-
-        resumeText = resumeText.replace(/\u0000/g, " ").replace(/\s{3,}/g, "  ").trim().slice(0, 18000);
+      try {
+        const result = await analyzeApplicationFit(admin, app, LOVABLE_API_KEY);
+        return json({ ok: true, fit_score: result.fit_score, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "AI analysis failed";
+        if (message.includes("rate limited")) return json({ error: message }, 429);
+        if (message.includes("credits exhausted")) return json({ error: message }, 402);
+        return json({ error: message }, 500);
       }
-      if (!resumeText.trim()) {
-        resumeText = `(Could not extract text from resume file ${app.resume_filename || ""}. Score based on candidate metadata only.)`;
-      }
-
-      const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
-We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
-Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
-Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
-Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
-
-Output STRICT JSON only — no markdown, no code fences:
-{
-  "fit_score": <integer 0-100>,
-  "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
-  "strengths": ["<bullet>", "<bullet>", "..."],
-  "concerns": ["<bullet>", "<bullet>", "..."],
-  "recommended_next_step": "<one line: e.g. 'Phone screen this week', 'Pass', 'Final interview'>"
-}`;
-      const user = `Candidate: ${app.candidate_name} (${app.candidate_email})
-Test score: ${app.score_pct ?? "n/a"}%
-Resume filename: ${app.resume_filename || "(none)"}
-Notes from candidate: ${app.notes || "(none)"}
-
---- Resume text ---
-${resumeText}`;
-
-      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Lovable-API-Key": LOVABLE_API_KEY, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          messages: [{ role: "system", content: sys }, { role: "user", content: user }],
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (!r.ok) {
-        const txt = await r.text();
-        if (r.status === 429) return json({ error: "AI rate limited — try again shortly." }, 429);
-        if (r.status === 402) return json({ error: "AI credits exhausted — add credits in Settings." }, 402);
-        return json({ error: `AI ${r.status}: ${txt.slice(0, 200)}` }, 500);
-      }
-      const j = await r.json();
-      let txt = j.choices?.[0]?.message?.content || "{}";
-      txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-      const parsed = JSON.parse(txt);
-      const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
-      const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
-      const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
-      const summary = String(parsed.summary || "").slice(0, 2000) +
-        (parsed.recommended_next_step ? `\n\nNext step: ${parsed.recommended_next_step}` : "");
-
-      await admin.from("careers_applications").update({
-        ai_fit_score: fitScore,
-        ai_summary: summary,
-        ai_strengths: strengths,
-        ai_concerns: concerns,
-        ai_analyzed_at: new Date().toISOString(),
-      }).eq("share_code", code);
-
-      return json({ ok: true, fit_score: fitScore, summary, strengths, concerns });
     }
 
     // ---------- ADMIN: list private messages (only the caller's own) ----------

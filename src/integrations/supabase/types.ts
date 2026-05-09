@@ -981,8 +981,13 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          resume_extract_error: string | null
+          resume_extract_method: string | null
           resume_filename: string | null
+          resume_html: string | null
           resume_path: string | null
+          resume_recreated_at: string | null
+          resume_text: string | null
           reviewed: boolean
           reviewed_at: string | null
           score_pct: number | null
@@ -1004,8 +1009,13 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          resume_extract_error?: string | null
+          resume_extract_method?: string | null
           resume_filename?: string | null
+          resume_html?: string | null
           resume_path?: string | null
+          resume_recreated_at?: string | null
+          resume_text?: string | null
           reviewed?: boolean
           reviewed_at?: string | null
           score_pct?: number | null
@@ -1027,8 +1037,13 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          resume_extract_error?: string | null
+          resume_extract_method?: string | null
           resume_filename?: string | null
+          resume_html?: string | null
           resume_path?: string | null
+          resume_recreated_at?: string | null
+          resume_text?: string | null
           reviewed?: boolean
           reviewed_at?: string | null
           score_pct?: number | null
