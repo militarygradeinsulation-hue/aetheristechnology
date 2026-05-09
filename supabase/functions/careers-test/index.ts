@@ -240,6 +240,139 @@ async function aiExtractResumeText(params: {
   return text;
 }
 
+async function recreateResumeForApplication(admin: any, app: any, apiKey: string) {
+  let resumeText = "";
+  let method = "metadata-only";
+  let extractError: string | null = null;
+  const filename = app.resume_filename || app.resume_path?.split("/").pop() || "resume";
+
+  if (app.resume_path) {
+    const { data: file, error: dlErr } = await admin.storage.from("careers-resumes").download(app.resume_path);
+    if (dlErr) throw new Error(`Resume download failed: ${dlErr.message}`);
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const { ext, mime } = detectResumeType(buf, filename);
+    const plainTextable = new Set(["txt", "md", "csv", "json", "rtf"]);
+
+    if (ext === "pdf") {
+      resumeText = await extractPdfText(buf);
+      method = "pdf-text";
+    } else if (ext === "docx") {
+      try {
+        resumeText = await extractDocxText(buf);
+        method = "docx-xml";
+      } catch (docxErr) {
+        extractError = docxErr instanceof Error ? docxErr.message : "DOCX extraction failed";
+        console.error("DOCX text extraction failed", docxErr);
+      }
+    } else if (plainTextable.has(ext)) {
+      resumeText = extractPlainText(buf);
+      method = "plain-text";
+    }
+
+    if (!isUsableResumeText(resumeText) && mime !== "application/msword") {
+      try {
+        const ocrText = await aiExtractResumeText({ apiKey, bytes: buf, filename, mime });
+        if (isUsableResumeText(ocrText) || ocrText.trim().length > resumeText.trim().length) {
+          resumeText = ocrText;
+          method = ext === "pdf" ? "pdf-vision" : "ai-vision";
+          extractError = null;
+        }
+      } catch (ocrErr) {
+        extractError = ocrErr instanceof Error ? ocrErr.message : "AI document extraction failed";
+        console.error("resume OCR fallback failed", ocrErr);
+      }
+    }
+
+    resumeText = normalizeResumeText(resumeText).slice(0, 30000);
+  }
+
+  if (!resumeText.trim()) {
+    resumeText = [
+      `Candidate: ${app.candidate_name || "Unknown"}`,
+      `Email: ${app.candidate_email || "Unknown"}`,
+      app.candidate_phone ? `Phone: ${app.candidate_phone}` : "",
+      app.notes ? `Candidate notes: ${app.notes}` : "",
+      app.resume_filename ? `Uploaded file: ${app.resume_filename}` : "No resume file was uploaded.",
+    ].filter(Boolean).join("\n");
+    method = "metadata-only";
+  }
+
+  const resumeHtml = rebuiltResumeHtml(app, resumeText, { method, filename, error: extractError });
+  await admin.from("careers_applications").update({
+    resume_text: resumeText,
+    resume_html: resumeHtml,
+    resume_extract_method: method,
+    resume_extract_error: extractError,
+    resume_recreated_at: new Date().toISOString(),
+  }).eq("share_code", app.share_code);
+
+  return { resumeText, resumeHtml, method, extractError };
+}
+
+async function analyzeApplicationFit(admin: any, app: any, apiKey: string) {
+  const recreated = app.resume_text && app.resume_html
+    ? { resumeText: app.resume_text, resumeHtml: app.resume_html, method: app.resume_extract_method || "stored", extractError: app.resume_extract_error || null }
+    : await recreateResumeForApplication(admin, app, apiKey);
+
+  const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
+We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
+Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
+Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
+Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
+
+Output STRICT JSON only — no markdown, no code fences:
+{
+  "fit_score": <integer 0-100>,
+  "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
+  "strengths": ["<bullet>", "<bullet>", "..."],
+  "concerns": ["<bullet>", "<bullet>", "..."],
+  "recommended_next_step": "<one line: e.g. 'Phone screen this week', 'Pass', 'Final interview'>"
+}`;
+  const user = `Candidate: ${app.candidate_name} (${app.candidate_email})
+Test score: ${app.score_pct ?? "n/a"}%
+Resume filename: ${app.resume_filename || "(none)"}
+Resume extraction: ${recreated.method}${recreated.extractError ? ` (${recreated.extractError})` : ""}
+Notes from candidate: ${app.notes || "(none)"}
+
+--- Recreated resume text ---
+${recreated.resumeText.slice(0, 18000)}`;
+
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-pro",
+      messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    if (r.status === 429) throw new Error("AI rate limited — try again shortly.");
+    if (r.status === 402) throw new Error("AI credits exhausted — add credits in Settings.");
+    throw new Error(`AI ${r.status}: ${txt.slice(0, 200)}`);
+  }
+  const j = await r.json();
+  let txt = j.choices?.[0]?.message?.content || "{}";
+  txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  const parsed = JSON.parse(txt);
+  const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
+  const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
+  const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
+  const summary = String(parsed.summary || "").slice(0, 2000) +
+    (parsed.recommended_next_step ? `\n\nNext step: ${parsed.recommended_next_step}` : "");
+
+  await admin.from("careers_applications").update({
+    ai_fit_score: fitScore,
+    ai_summary: summary,
+    ai_strengths: strengths,
+    ai_concerns: concerns,
+    ai_analyzed_at: new Date().toISOString(),
+  }).eq("share_code", app.share_code);
+
+  return { fit_score: fitScore, summary, strengths, concerns, ...recreated };
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
