@@ -351,6 +351,10 @@ serve(async (req) => {
         patch.reviewed = body.reviewed;
         patch.reviewed_at = body.reviewed ? new Date().toISOString() : null;
       }
+      if (typeof body.contacted === "boolean") {
+        patch.contacted = body.contacted;
+        patch.contacted_at = body.contacted ? new Date().toISOString() : null;
+      }
       if (Object.keys(patch).length === 0) return json({ error: "Nothing to update" }, 400);
       const { error } = await admin.from("careers_applications").update(patch).eq("share_code", code);
       if (error) throw error;
