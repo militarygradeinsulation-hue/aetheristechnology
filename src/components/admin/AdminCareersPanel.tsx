@@ -515,6 +515,11 @@ export const AdminCareersPanel: React.FC = () => {
                               <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/100
                             </Badge>
                           )}
+                          {analyzingSet.has(a.share_code) && (
+                            <Badge className="bg-amber/20 text-amber border border-amber/40 text-xs">
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing…
+                            </Badge>
+                          )}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
                           {a.resume_recreated_at && <Badge variant="outline" className="text-xs">Readable resume</Badge>}
                           {a.contacted && (
