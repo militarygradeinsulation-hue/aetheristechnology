@@ -157,3 +157,12 @@ verify_jwt = false
 
 [functions.transcribe-audio]
 verify_jwt = false
+
+[functions.inbound-email-webhook]
+verify_jwt = false
+
+[functions.admin-mailboxes]
+verify_jwt = false
+
+[functions.portal-mailbox]
+verify_jwt = false
