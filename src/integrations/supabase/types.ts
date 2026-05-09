@@ -3671,6 +3671,75 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_email_messages: {
+        Row: {
+          attachments: Json
+          bcc_addresses: string[]
+          body_html: string | null
+          body_text: string | null
+          cc_addresses: string[]
+          created_at: string
+          direction: string
+          folder: string
+          from_address: string
+          from_name: string | null
+          id: string
+          in_reply_to: string | null
+          is_read: boolean
+          is_starred: boolean
+          mailbox_address: string
+          message_id: string | null
+          raw_mime_path: string | null
+          subject: string | null
+          thread_id: string | null
+          to_addresses: string[]
+        }
+        Insert: {
+          attachments?: Json
+          bcc_addresses?: string[]
+          body_html?: string | null
+          body_text?: string | null
+          cc_addresses?: string[]
+          created_at?: string
+          direction: string
+          folder?: string
+          from_address: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          is_read?: boolean
+          is_starred?: boolean
+          mailbox_address: string
+          message_id?: string | null
+          raw_mime_path?: string | null
+          subject?: string | null
+          thread_id?: string | null
+          to_addresses?: string[]
+        }
+        Update: {
+          attachments?: Json
+          bcc_addresses?: string[]
+          body_html?: string | null
+          body_text?: string | null
+          cc_addresses?: string[]
+          created_at?: string
+          direction?: string
+          folder?: string
+          from_address?: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          is_read?: boolean
+          is_starred?: boolean
+          mailbox_address?: string
+          message_id?: string | null
+          raw_mime_path?: string | null
+          subject?: string | null
+          thread_id?: string | null
+          to_addresses?: string[]
+        }
+        Relationships: []
+      }
       rep_idea_of_day: {
         Row: {
           body: string
@@ -3881,6 +3950,59 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "rep_leads"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      rep_mailboxes: {
+        Row: {
+          address: string
+          auto_reply_body: string | null
+          auto_reply_enabled: boolean
+          code: string
+          created_at: string
+          forwarding_to: string | null
+          id: string
+          is_active: boolean
+          last_inbound_at: string | null
+          last_outbound_at: string | null
+          signature: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          auto_reply_body?: string | null
+          auto_reply_enabled?: boolean
+          code: string
+          created_at?: string
+          forwarding_to?: string | null
+          id?: string
+          is_active?: boolean
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          signature?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          auto_reply_body?: string | null
+          auto_reply_enabled?: boolean
+          code?: string
+          created_at?: string
+          forwarding_to?: string | null
+          id?: string
+          is_active?: boolean
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          signature?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_mailboxes_code_fkey"
+            columns: ["code"]
+            isOneToOne: true
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
           },
         ]
       }

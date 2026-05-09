@@ -24,6 +24,8 @@ import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
+import { InboxTab } from '@/components/portal/InboxTab';
+import { Mail as MailIcon } from 'lucide-react';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
@@ -57,7 +59,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art' | 'careers';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -304,6 +306,7 @@ const PortalPage: React.FC = () => {
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
+    { id: 'inbox', label: 'Inbox', icon: <MailIcon className="w-4 h-4" />, iconCmp: MailIcon },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -415,6 +418,7 @@ const PortalPage: React.FC = () => {
       case 'workspace': return <WorkspaceTab />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
+      case 'inbox': return <InboxTab />;
       case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':

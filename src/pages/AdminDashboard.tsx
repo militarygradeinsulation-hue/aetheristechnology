@@ -46,6 +46,7 @@ import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
+import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
 type EventsSubTab = 'campaign' | 'site';
@@ -140,7 +141,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'insights', label: 'AI Insights', icon: Brain },
@@ -168,6 +169,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'team', label: 'Team Messages', icon: MessageSquare },
     { key: 'news', label: 'News', icon: Newspaper },
     { key: 'careers', label: 'Careers', icon: Briefcase },
+    { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
@@ -421,6 +423,7 @@ const AdminDashboard: React.FC = () => {
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;
       case 'careers': return <AdminCareersPanel />;
+      case 'mailboxes': return <AdminMailboxesPanel />;
       case 'seo': return <SEOOptimizer />;
       case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
       case 'submissions': return <SubmissionsBody submissions={submissions} toggleRead={toggleRead} deleteSubmission={deleteSubmission} />;
