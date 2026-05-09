@@ -173,6 +173,8 @@ export const AdminCareersPanel: React.FC = () => {
       toast({ title: 'Update failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setContactingId(null); }
   };
+
+  const StatusBadge = ({ s }: { s: string }) => {
     const map: Record<string, string> = {
       passed: 'bg-green-500/20 text-green-400 border-green-500/30',
       failed: 'bg-destructive/20 text-destructive border-destructive/30',
