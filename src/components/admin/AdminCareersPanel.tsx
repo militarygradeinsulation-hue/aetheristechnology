@@ -359,6 +359,19 @@ export const AdminCareersPanel: React.FC = () => {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Quick:</span>
+            {([
+              { k: 'top', label: '🔥 Top fit (80+)' },
+              { k: 'passedNew', label: '✅ Passed · uncontacted' },
+              { k: 'pending', label: '🕒 Pending review' },
+              { k: 'rejected', label: '🚫 Rejected' },
+              { k: 'reset', label: 'Reset' },
+            ] as const).map(p => (
+              <Button key={p.k} size="sm" variant="outline" className="h-7"
+                onClick={() => applyPreset(p.k)}>{p.label}</Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Filters:</span>
             <label className="flex items-center gap-1">
               <span className="text-muted-foreground">Min test %</span>
@@ -374,6 +387,29 @@ export const AdminCareersPanel: React.FC = () => {
                     onChange={e => setMinFitScore(e.target.value)}
                     placeholder="0" className="h-7 w-16" />
                 </label>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Sort fit:</span>
+                  <Button size="sm" variant={fitSort === 'desc' ? 'default' : 'outline'}
+                    onClick={() => setFitSort(fitSort === 'desc' ? 'none' : 'desc')}
+                    className={`h-7 ${fitSort === 'desc' ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    <ArrowDownAZ className="w-3 h-3 mr-1" /> Best
+                  </Button>
+                  <Button size="sm" variant={fitSort === 'asc' ? 'default' : 'outline'}
+                    onClick={() => setFitSort(fitSort === 'asc' ? 'none' : 'asc')}
+                    className={`h-7 ${fitSort === 'asc' ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                    <ArrowUpAZ className="w-3 h-3 mr-1" /> Worst
+                  </Button>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Stage:</span>
+                  {(['all', 'new', 'interview', 'wait', 'no'] as const).map(v => (
+                    <Button key={v} size="sm" variant={stageFilter === v ? 'default' : 'outline'}
+                      onClick={() => setStageFilter(v)}
+                      className={`h-7 capitalize ${stageFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                      {v}
+                    </Button>
+                  ))}
+                </div>
                 {(['any', 'not', 'yes'] as const).map(v => (
                   <Button key={v} size="sm" variant={contactFilter === v ? 'default' : 'outline'}
                     onClick={() => setContactFilter(v)}
@@ -383,9 +419,9 @@ export const AdminCareersPanel: React.FC = () => {
                 ))}
               </>
             )}
-            {(minTestScore || minFitScore || contactFilter !== 'any') && (
+            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none') && (
               <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
-                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); }}>
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); }}>
                 Clear
               </Button>
             )}
