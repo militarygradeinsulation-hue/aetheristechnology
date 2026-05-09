@@ -1,6 +1,8 @@
 // Careers test: start attempt, submit answers, upload resume, admin lookup by code.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { Buffer } from "node:buffer";
+import pdfParse from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
@@ -58,6 +60,33 @@ function extractPlainText(buf: Uint8Array) {
   return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
 }
 
+function normalizeResumeText(text: string) {
+  return text
+    .replace(/\u0000/g, " ")
+    .replace(/\r/g, "\n")
+    .replace(/[\t ]{3,}/g, "  ")
+    .replace(/\n[\t ]+/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim();
+}
+
+function isUsableResumeText(text: string) {
+  const clean = normalizeResumeText(text);
+  const letters = (clean.match(/[A-Za-z]/g) || []).length;
+  const words = (clean.match(/[A-Za-z]{2,}/g) || []).length;
+  return clean.length >= 160 && letters >= 80 && words >= 25;
+}
+
+async function extractPdfText(buf: Uint8Array) {
+  try {
+    const data = await pdfParse(Buffer.from(buf));
+    return normalizeResumeText(data?.text || "");
+  } catch (error) {
+    console.error("PDF text extraction failed", error);
+    return "";
+  }
+}
+
 function decodeXmlText(xml: string) {
   return xml
     .replace(/<w:tab\/>/g, "\t")
@@ -79,6 +108,66 @@ async function extractDocxText(buf: Uint8Array) {
   const names = Object.keys(zip.files).filter((name) => /^word\/(document|header\d+|footer\d+)\.xml$/.test(name));
   const parts = await Promise.all(names.map(async (name) => decodeXmlText(await zip.files[name].async("text"))));
   return parts.filter(Boolean).join("\n\n").trim();
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function rebuiltResumeHtml(app: any, resumeText: string, meta: { method: string; filename: string; error?: string | null }) {
+  const lines = normalizeResumeText(resumeText).split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 500);
+  const sectionNames = /^(summary|profile|objective|experience|employment|work history|professional experience|sales experience|education|skills|certifications|licenses|awards|references|projects|contact)$/i;
+  const body = lines.length ? lines.map((line, idx) => {
+    const plain = line.replace(/[:\s]+$/g, "");
+    const looksHeading = sectionNames.test(plain) || (plain.length <= 42 && plain === plain.toUpperCase() && /[A-Z]{3,}/.test(plain));
+    if (looksHeading && idx > 0) return `<h2>${escapeHtml(plain)}</h2>`;
+    if (/^[•\-*]\s+/.test(line)) return `<li>${escapeHtml(line.replace(/^[•\-*]\s+/, ""))}</li>`;
+    return `<p>${escapeHtml(line)}</p>`;
+  }).join("\n") : `<p>No readable text could be extracted from the uploaded file.</p>`;
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(app.candidate_name || "Candidate")} — Recreated Resume</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #f3f0ea; color: #171411; }
+    main { width: min(860px, calc(100vw - 32px)); margin: 28px auto; background: #fffaf1; border: 1px solid #d8c7a5; box-shadow: 0 20px 60px rgba(33, 24, 8, .18); }
+    header { padding: 32px 38px 20px; border-bottom: 2px solid #b5832f; }
+    h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(30px, 5vw, 48px); line-height: 1; letter-spacing: 0; color: #171411; }
+    .contact { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px 18px; color: #5c5042; font-size: 14px; }
+    .meta { margin-top: 14px; color: #7b3f24; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+    article { padding: 26px 38px 38px; }
+    h2 { margin: 24px 0 8px; padding-top: 10px; border-top: 1px solid #e3d7c1; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: #8a5a18; }
+    p { margin: 0 0 9px; line-height: 1.48; font-size: 14.5px; white-space: pre-wrap; }
+    li { margin: 0 0 6px 20px; line-height: 1.45; font-size: 14.5px; }
+    .notice { margin: 0 38px 22px; padding: 10px 12px; background: #fff3d6; border: 1px solid #e6c875; color: #6a4a08; font-size: 12px; }
+    @media print { body { background: white; } main { margin: 0; width: 100%; box-shadow: none; border: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>${escapeHtml(app.candidate_name || "Candidate")}</h1>
+      <div class="contact">
+        <span>${escapeHtml(app.candidate_email || "")}</span>
+        ${app.candidate_phone ? `<span>${escapeHtml(app.candidate_phone)}</span>` : ""}
+        ${app.score_pct != null ? `<span>Test score: ${escapeHtml(String(app.score_pct))}%</span>` : ""}
+      </div>
+      <div class="meta">Recreated readable resume · ${escapeHtml(meta.filename)} · ${escapeHtml(meta.method)}</div>
+    </header>
+    ${meta.error ? `<div class="notice">Extraction note: ${escapeHtml(meta.error)}</div>` : ""}
+    <article>${body}</article>
+  </main>
+</body>
+</html>`;
 }
 
 function toBase64(bytes: Uint8Array) {
