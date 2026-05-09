@@ -39,6 +39,8 @@ interface Application {
   resume_extract_error?: string | null;
   resume_recreated_at?: string | null;
   notes: string | null;
+  admin_notes?: string | null;
+  stage?: 'new' | 'interview' | 'wait' | 'no' | string | null;
   score_pct: number | null;
   reviewed: boolean;
   reviewed_at: string | null;
