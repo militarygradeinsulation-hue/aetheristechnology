@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
@@ -13,8 +13,19 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 
+
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Load HubSpot Meetings embed script for the front-and-center booking section
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   const faqs = [
     { question: 'What is a Leak Audit™?', answer: 'A 7-step forensic process Aetheris runs on every business: Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. We name where revenue is leaking (lead capture, response time, operational drag, trust gaps) and put a real annual dollar figure on each leak before we touch a system.' },
@@ -54,6 +65,29 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
+
+        {/* Front-and-center booking — first thing under the hero */}
+        <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Skip the form — book the operator
+              </div>
+              <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
+                Book a meeting <span className="text-gradient-amber">with me directly</span>
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto">
+                30 minutes. I'll tell you on the call where your business is most likely leaking — before you spend a dollar on the Diagnostic.
+              </p>
+            </div>
+            <div className="glass rounded-sm border border-amber/30 p-2 md:p-4">
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              />
+            </div>
+          </div>
+        </section>
 
         {/* AEO TL;DR */}
         <section className="px-4 -mt-2 md:-mt-6 mb-10">
