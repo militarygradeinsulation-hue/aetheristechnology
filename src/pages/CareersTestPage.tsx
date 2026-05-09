@@ -143,7 +143,7 @@ const CareersTestPage = () => {
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  We don't accept random applications. To prove you've read the site, you'll take a 20-question multiple-choice test pulled from a 60-question bank. Score <strong>70%+</strong> in <strong>45 minutes</strong>. <strong>5 attempts per day</strong>.
+                  We don't accept random applications. To prove you've read the site, you'll take a 25-question multiple-choice test pulled from a 60-question bank. Score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day</strong>. Answer order is randomized per attempt — guessing one letter won't pass.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
