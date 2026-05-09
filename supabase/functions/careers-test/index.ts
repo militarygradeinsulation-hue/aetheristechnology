@@ -512,7 +512,7 @@ serve(async (req) => {
       if (!attempt || attempt.status !== "passed") return json({ error: "Invalid share code" }, 404);
 
       // upsert by share_code
-      const { error } = await admin.from("careers_applications").upsert({
+      const { data: savedApp, error } = await admin.from("careers_applications").upsert({
         attempt_id: attempt.id,
         share_code: code,
         candidate_name: attempt.candidate_name || "",
@@ -522,8 +522,17 @@ serve(async (req) => {
         resume_filename: resumeFilename,
         notes,
         score_pct: attempt.score_pct,
-      }, { onConflict: "share_code" });
+      }, { onConflict: "share_code" }).select("*").single();
       if (error) throw error;
+
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (LOVABLE_API_KEY && savedApp) {
+        try {
+          await analyzeApplicationFit(admin, savedApp, LOVABLE_API_KEY);
+        } catch (autoErr) {
+          console.error("Automatic resume analysis failed", autoErr);
+        }
+      }
 
       return json({ ok: true, share_code: code });
     }
@@ -561,7 +570,7 @@ serve(async (req) => {
         .order("started_at", { ascending: false }).limit(500);
 
       const { data: applications } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,notes,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
+        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,resume_extract_method,resume_extract_error,resume_recreated_at,notes,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
         .order("created_at", { ascending: false }).limit(500);
 
       // Page analytics for /careers and /careers/test
