@@ -426,7 +426,23 @@ serve(async (req) => {
       if (poolErr) throw poolErr;
       if (!pool || pool.length < QUESTION_COUNT) return json({ error: "Question bank not ready yet." }, 500);
 
-      const picked = shuffle(pool).slice(0, QUESTION_COUNT);
+      // Pick questions, then shuffle each question's choices and re-key them a/b/c/d
+      // so guessing a single letter (the bank was skewed toward 'b') no longer passes.
+      const LETTERS = ["a", "b", "c", "d", "e", "f"];
+      const picked = shuffle(pool).slice(0, QUESTION_COUNT).map((q: any) => {
+        const originalChoices = Array.isArray(q.choices) ? q.choices : [];
+        const shuffled = shuffle(originalChoices);
+        const remapped = shuffled.map((c: any, i: number) => ({ id: LETTERS[i], text: c.text }));
+        const originalCorrect = originalChoices.find((c: any) => c.id === q.correct_choice_id);
+        const newCorrectIdx = shuffled.findIndex((c: any) => c.id === q.correct_choice_id);
+        return {
+          id: q.id,
+          question: q.question,
+          choices: remapped,
+          correct_choice_id: newCorrectIdx >= 0 ? LETTERS[newCorrectIdx] : q.correct_choice_id,
+          _orig_correct_text: originalCorrect?.text || null,
+        };
+      });
       // Strip correct answers before sending to client
       const clientQuestions = picked.map((q: any) => ({
         id: q.id,
