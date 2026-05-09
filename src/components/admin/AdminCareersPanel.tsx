@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
-  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles
+  CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 
