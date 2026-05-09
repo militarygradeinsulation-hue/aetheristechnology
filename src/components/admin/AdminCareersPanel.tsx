@@ -368,7 +368,13 @@ export const AdminCareersPanel: React.FC = () => {
                             {a.ai_analyzed_at ? 'Re-analyze' : 'Analyze AI'}
                           </Button>
                         )}
-                      </div>
+                        <Button size="sm" variant={a.contacted ? 'outline' : 'default'}
+                          onClick={() => toggleContacted(a.share_code, !a.contacted)}
+                          disabled={contactingId === a.share_code}
+                          className={a.contacted ? '' : 'bg-blue-500 text-white hover:bg-blue-500/90'}>
+                          {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
+                          {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
+                        </Button>
                     </div>
                   </div>
                 ))
