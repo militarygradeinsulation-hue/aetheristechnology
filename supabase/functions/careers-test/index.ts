@@ -1,6 +1,7 @@
 // Careers test: start attempt, submit answers, upload resume, admin lookup by code.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
 
@@ -43,9 +44,42 @@ function mimeFromExt(ext: string) {
   return "application/octet-stream";
 }
 
+function detectResumeType(bytes: Uint8Array, filename: string) {
+  const ext = extFromName(filename);
+  const head = new TextDecoder("latin1", { fatal: false }).decode(bytes.slice(0, 16));
+  if (head.startsWith("%PDF")) return { ext: "pdf", mime: "application/pdf" };
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b) return { ext: ext === "docx" ? "docx" : ext, mime: mimeFromExt(ext) };
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { ext: "png", mime: "image/png" };
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return { ext: "jpg", mime: "image/jpeg" };
+  return { ext, mime: mimeFromExt(ext) };
+}
+
 function extractPlainText(buf: Uint8Array) {
   const raw = new TextDecoder("utf-8", { fatal: false }).decode(buf);
   return raw.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, " ").replace(/\s{3,}/g, "  ").trim();
+}
+
+function decodeXmlText(xml: string) {
+  return xml
+    .replace(/<w:tab\/>/g, "\t")
+    .replace(/<w:br\/>/g, "\n")
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function extractDocxText(buf: Uint8Array) {
+  const zip = await JSZip.loadAsync(buf);
+  const names = Object.keys(zip.files).filter((name) => /^word\/(document|header\d+|footer\d+)\.xml$/.test(name));
+  const parts = await Promise.all(names.map(async (name) => decodeXmlText(await zip.files[name].async("text"))));
+  return parts.filter(Boolean).join("\n\n").trim();
 }
 
 function toBase64(bytes: Uint8Array) {
