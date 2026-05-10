@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
-import { LeakAuditMethod } from '@/components/LeakAuditMethod';
 import { CaseFileCard } from '@/components/CaseFileCard';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-
-import { FreeTools } from '@/components/FreeTools';
-import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
-import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
-
+import { Button } from '@/components/ui/button';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Load HubSpot Meetings embed script for the front-and-center booking section
   useEffect(() => {
     const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
     if (existing) return;
@@ -28,36 +24,42 @@ const Home = () => {
   }, []);
 
   const faqs = [
-    { question: 'What is a Leak Audit™?', answer: 'A 7-step forensic process Aetheris runs on every business: Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. We name where revenue is leaking (lead capture, response time, operational drag, trust gaps) and put a real annual dollar figure on each leak before we touch a system.' },
-    { question: 'How do you find revenue leaks in a business?', answer: 'We run reconnaissance on every system, channel, and handoff — CRMs, inboxes, forms, dashboards, the spreadsheets nobody admits to. Then we trace each lead and dollar from entry to exit and identify where they stall, vanish, or duplicate. Output: a sealed case file with each leak named and quantified.' },
-    { question: 'How much does the Forensic Diagnostic cost?', answer: 'The Forensic Diagnostic is a flat $2,500 — 14 days inside your operation with operator-led investigation. Applied toward a Co-CEO engagement if you proceed. The free Leak Audit (self-scan) is the door opener.' },
-    { question: 'Does Aetheris serve businesses outside Indianapolis?', answer: 'Yes. Headquartered in Indianapolis, Indiana — we run forensic engagements with US businesses remotely and on-site.' },
+    { question: 'What does the 21-Day Revenue Diagnostic include?', answer: 'A 12-month CRM snapshot, lead-to-contact and deal-stage analysis, a written 15–30 page report with prioritized fixes and ROI projections, a source-data appendix, and a 60-minute readout. Fixed fee: $18,500.' },
+    { question: 'Do I need to be on HubSpot or Salesforce?', answer: 'No. The Diagnostic is CRM-agnostic and runs on a CSV export of contacts, deals, and activity. Live integration with your CRM is an optional upsell, not a prerequisite.' },
+    { question: 'How does the implementation retainer work?', answer: '$15,000 per month, 3-month minimum, available only to Diagnostic clients. We execute the prioritized fixes ourselves and re-measure recovery monthly.' },
+    { question: 'Who do you work with?', answer: 'Specialty manufacturers, $5M–$25M in revenue, US-based. Headquartered in Indianapolis, Indiana — engagements run remotely and on-site.' },
+  ];
+
+  const steps = [
+    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.' },
+    { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.' },
+    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Business Forensics Operator — Find Where You're Leaking | Aetheris"
-        description="We run forensic audits on operations, marketing & systems — find where revenue is leaking, then rebuild with AI. Indianapolis-based. (317) 376-2110."
+        title="Revenue Systems for Specialty Manufacturers | Aetheris"
+        description="20 years building revenue systems. Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M — find the $200K–$2M you're losing to broken CRM and sales follow-up."
         path="/"
-        keywords="business forensics, revenue leak audit, AI consultant Indianapolis, B2B AI consulting, operational diagnostic, business autopsy, AI strategy consulting, sales leak finder, fix your business consulting, technology consultant Indianapolis"
+        keywords="revenue diagnostic, specialty manufacturers, manufacturing CRM, sales operations, HubSpot Salesforce audit, Indianapolis"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         faqs={faqs}
-        speakable={['h1', '.tldr', 'h2']}
+        speakable={['h1', 'h2']}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "ProfessionalService",
           "name": "Aetheris",
           "url": "https://aetheris.technology",
           "logo": "https://aetheris.technology/aetheris-logo.png",
-          "description": "Business Forensics Operator. We run forensic audits on operations, marketing, and systems to find where revenue is leaking — then rebuild with AI, automation, and CRM. Indianapolis-based, US-wide.",
+          "description": "Revenue systems for specialty manufacturers. Fixed-fee 21-Day Revenue Diagnostic ($18,500) finds where CRM, sales follow-up, and lead flow are losing money. Indianapolis-based, US-wide.",
           "telephone": "+1-317-376-2110",
           "email": "aetheris.technology@outlook.com",
           "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
           "geo": { "@type": "GeoCoordinates", "latitude": 39.7684, "longitude": -86.1581 },
-          "priceRange": "$0 - $25,000+",
+          "priceRange": "$15,000 - $18,500",
           "areaServed": { "@type": "Country", "name": "United States" },
-          "serviceType": ["Business Forensics", "Revenue Leak Audit", "Operational Diagnostic", "AI Strategy Consulting", "AI Agents", "Workflow Automation", "CRM Implementation", "Co-CEO Embed"],
+          "serviceType": ["Revenue System Diagnostic", "CRM Implementation", "Sales Operations", "Manufacturing Revenue Operations"],
           "sameAs": ["https://www.linkedin.com/in/thejosephtoney", "https://ctoguy.ai"],
         }}
       />
@@ -66,7 +68,7 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
-        {/* Front-and-center booking — first thing under the hero */}
+        {/* Front-and-center booking */}
         <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-5">
@@ -74,10 +76,10 @@ const Home = () => {
                 Skip the form — book the operator
               </div>
               <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
-                Book a meeting <span className="text-gradient-amber">with me directly</span>
+                Book a meeting <span className="text-amber">with me directly.</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto">
-                30 minutes. I'll tell you on the call where your business is most likely leaking — before you spend a dollar on the Diagnostic.
+                30 minutes. I'll tell you on the call where your revenue systems are most likely losing money — before you spend a dollar on the Diagnostic.
               </p>
             </div>
             <div className="glass rounded-sm border border-amber/30 p-2 md:p-4">
@@ -89,29 +91,47 @@ const Home = () => {
           </div>
         </section>
 
-        {/* AEO TL;DR */}
-        <section className="px-4 -mt-2 md:-mt-6 mb-10">
-          <div
-            className="tldr glass rounded-sm border border-amber/30 p-5 md:p-6 max-w-3xl mx-auto"
-            data-speakable="true"
-          >
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Quick Answer
+        {/* How the 21-Day Diagnostic works */}
+        <section className="px-4 py-12">
+          <div className="max-w-5xl mx-auto">
+            <RevealOnScroll>
+              <div className="text-center mb-10">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                  The 21-Day Revenue Diagnostic
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
+                  Map. Quantify. Roadmap.
+                </h2>
+                <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+                  Fixed fee: $18,500. CRM-agnostic. Specialty manufacturers $5M–$25M.
+                </p>
+              </div>
+            </RevealOnScroll>
+            <div className="grid md:grid-cols-3 gap-4">
+              {steps.map((s) => (
+                <div key={s.n} className="glass rounded-sm border border-border/60 p-6">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
+                  <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
-              <strong className="text-foreground">Aetheris</strong> is a Business Forensics Operator
-              based in Indianapolis. We run a 7-step methodology — <em>The Leak Audit™</em> — on
-              operations, marketing, and systems to find exactly where revenue is bleeding out, then
-              rebuild it with AI agents, automation, and CRM. The free self-scan is at{' '}
-              <strong>/leak-audit</strong>. The operator-led <strong>Forensic Diagnostic</strong> is{' '}
-              <strong>$2,500 flat</strong>, applied toward engagement.
-            </p>
+            <div className="text-center mt-8 flex flex-wrap justify-center gap-3">
+              <Link to="/diagnostic">
+                <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                  See the Diagnostic <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/methodology">
+                <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
+                  Read the methodology
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
-        <LeakAuditMethod />
-
-        {/* Sample case files — credibility before methodology */}
+        {/* Sample case files */}
         <section className="px-4 py-10">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
@@ -120,7 +140,7 @@ const Home = () => {
                   Field Reports
                 </div>
                 <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                  What we've found inside other businesses.
+                  What we've found inside specialty manufacturers.
                 </h2>
               </div>
             </RevealOnScroll>
@@ -147,9 +167,6 @@ const Home = () => {
           </div>
         </section>
 
-        <FreeTools />
-        <VerifiableOutcomes />
-        <WhatsWrongDiagnostic />
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />

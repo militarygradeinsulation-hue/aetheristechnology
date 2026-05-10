@@ -45,13 +45,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
     { label: 'Home', href: '/', special: true },
-    { label: 'Free Leak Audit™', href: '/leak-audit', tone: 'red' },
-    { label: 'Forensic Diagnostic', href: '/services', tone: 'yellow' },
-    { label: 'Industries', href: '/industries' },
+    { label: 'Diagnostic', href: '/diagnostic', tone: 'yellow' },
+    { label: 'Methodology', href: '/methodology' },
+    { label: 'Credentials', href: '/credentials' },
     { label: 'Field Notes', href: '/blog' },
-    { label: 'News', href: '/news' },
-    { label: 'Playbooks', href: '/resources' },
-    { label: 'The Operator', href: '/about' },
+    { label: 'About', href: '/about' },
   ];
 
   const showStickyCTA = true;
@@ -148,13 +146,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             expanded ? 'max-h-12 py-1.5 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
           } px-4 text-center`}
         >
-          <Link
-            to="/assessment"
+          <a
+            href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
-            onClick={() => trackEvent('click', { label: 'sticky_cta_assessment', location: 'navbar_sticky' })}
+            onClick={() => trackEvent('click', { label: 'sticky_cta_book_call', location: 'navbar_sticky' })}
           >
-            🔥 Get Your Free AI Readiness Score →
-          </Link>
+            Book a 15-min call with the Operator →
+          </a>
         </div>
       )}
     </nav>
