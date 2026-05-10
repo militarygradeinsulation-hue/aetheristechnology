@@ -41,7 +41,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
   return (
     <section className="relative min-h-[78vh] flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="max-w-5xl mx-auto text-center">
+      <div className="max-w-7xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -85,17 +85,31 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </span>
           </div>
 
-          <h1 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto">
+          <h1 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight max-w-6xl mx-auto">
             <span className="text-foreground">20 years building revenue systems for </span>
-            <span className="text-amber">manufacturers.</span>
-            <br className="hidden md:block" />
-            <span className="text-foreground"> Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with </span>
-            <span className="text-amber">SpaceX accounts.</span>
+            <span className="text-amber">specialty manufacturers.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-body">
-            We help specialty manufacturers find the <span className="text-foreground font-semibold">$200K–$2M</span> they're losing to broken CRM, sales, and operational systems — and fix it.
-          </p>
+          <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4 pt-2">
+            <div className="glass rounded-sm border border-amber/20 px-5 py-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Operator</div>
+              <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                Marine Corps veteran. Two decades inside revenue, sales, and operations.
+              </p>
+            </div>
+            <div className="glass rounded-sm border border-amber/20 px-5 py-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Track Record</div>
+              <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                Former Director of Strategy at a $25M aerospace firm with <span className="text-amber font-semibold">SpaceX</span> accounts.
+              </p>
+            </div>
+            <div className="glass rounded-sm border border-amber/20 px-5 py-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">The Work</div>
+              <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                Find the <span className="text-foreground font-semibold">$200K–$2M</span> you're losing to broken CRM, sales, and ops — and fix it.
+              </p>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             <a
