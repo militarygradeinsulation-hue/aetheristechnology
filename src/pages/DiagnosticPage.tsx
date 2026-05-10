@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Check, X, Database, Globe, MessagesSquare, FileSearch,
-  CalendarRange, Mic2, ListChecks, ShieldAlert, Search,
+  CalendarRange, Mic2, ListChecks, ShieldAlert, Search, ChevronDown,
 } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
