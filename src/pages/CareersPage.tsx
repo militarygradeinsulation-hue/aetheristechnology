@@ -32,6 +32,8 @@ import {
 } from 'lucide-react';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import careersHero from '@/assets/careers-hero.jpg';
+import careersIntroVideo from '@/assets/careers-intro.mp4';
+import careersIntroPoster from '@/assets/careers-intro-poster.jpg';
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -163,7 +165,28 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </div>
     </div>
 
+    {/* OPERATOR INTRO VIDEO */}
+    <div className="mb-12">
+      <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
+        <video
+          src={careersIntroVideo}
+          poster={careersIntroPoster}
+          controls
+          muted
+          playsInline
+          preload="metadata"
+          className="w-full h-auto block"
+        >
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
+        Message from the Operator · Tap to unmute
+      </p>
+    </div>
+
     {/* QUICK STATS */}
+
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
       {[
         { stat: '15%', label: 'Flat commission, recurring' },
