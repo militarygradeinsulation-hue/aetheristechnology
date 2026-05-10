@@ -122,17 +122,17 @@ const DiagnosticPage: React.FC = () => {
             <section className="glass rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                  Bundled — Operator Tool Suite
+                  Automatically included · $18,500 package
                 </div>
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Included · No add-on fee
+                  No add-on fee · No upsell
                 </div>
               </div>
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
-                Nine live diagnostic tools your operator runs against your business.
+                The full Operator Tool Suite ships with every Diagnostic.
               </h2>
               <p className="text-sm text-foreground/75 mb-5">
-                Every Diagnostic engagement includes the full Aetheris tool suite — the same instruments our reps use in the field. Findings from each tool feed the final leak map. You see CRM bleed, digital footprint exposure, brand contradictions, and AI visibility — all in one report.
+                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business — the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {TOOL_BUNDLE.map((t) => {
