@@ -80,32 +80,39 @@ export const BlogList: React.FC = () => {
               {activeTag && <> tagged <span className="text-foreground">#{activeTag.replace(/\s+/g, '')}</span></>}
             </div>
             {topTags.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-2">
-                {activeTag && (
-                  <button
-                    onClick={() => { setActiveTag(null); setVisibleCount(PAGE_SIZE); }}
-                    className="inline-flex items-center gap-1 text-xs bg-amber/20 text-amber px-3 py-1.5 rounded-full hover:bg-amber/30 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                    Clear filter
-                  </button>
-                )}
-                {topTags.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => {
-                      setActiveTag(activeTag === tag ? null : tag);
-                      setVisibleCount(PAGE_SIZE);
-                    }}
-                    className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
-                      activeTag === tag
-                        ? 'bg-amber text-background'
-                        : 'glass text-muted-foreground hover:text-amber'
-                    }`}
-                  >
-                    #{tag.replace(/\s+/g, '')}
-                  </button>
-                ))}
+              <div className="space-y-2">
+                <div className="text-center font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Filter by topic
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {activeTag && (
+                    <button
+                      onClick={() => { setActiveTag(null); setVisibleCount(PAGE_SIZE); }}
+                      className="premium-tile rounded-full px-4 py-2 text-[10px] font-case uppercase tracking-widest text-amber hover:text-amber/80 transition-colors"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        <X className="w-3 h-3" />
+                        Clear
+                      </span>
+                    </button>
+                  )}
+                  {topTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => {
+                        setActiveTag(activeTag === tag ? null : tag);
+                        setVisibleCount(PAGE_SIZE);
+                      }}
+                      className={`premium-tile rounded-full px-4 py-2 text-[10px] font-case uppercase tracking-widest transition-colors ${
+                        activeTag === tag
+                          ? 'text-amber bg-amber/10 border-amber/40'
+                          : 'text-muted-foreground hover:text-amber'
+                      }`}
+                    >
+                      #{tag.replace(/\s+/g, '')}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -153,7 +160,7 @@ export const BlogList: React.FC = () => {
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-20 glass rounded-2xl p-8 md:p-12 text-center">
+        <div className="mt-20 premium-tile rounded-2xl p-8 md:p-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
             Stop Wasting Money on Broken Systems
           </h2>
