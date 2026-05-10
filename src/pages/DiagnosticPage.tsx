@@ -123,6 +123,7 @@ const NOT_INCLUDED = [
 
 const DiagnosticPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const [openTool, setOpenTool] = useState<string | null>(null);
   return (
     <div className="relative min-h-screen">
       <SEOHead
