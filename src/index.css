@@ -280,7 +280,6 @@
       background: hsl(var(--surface-elevated) / 0.6);
       backdrop-filter: blur(12px);
       border: 1px solid hsl(var(--border) / 0.6);
-      border-radius: inherit;
       transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
                   box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
                   border-color 0.4s ease,

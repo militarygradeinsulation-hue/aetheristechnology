@@ -150,7 +150,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </div>
 
-            <section className="glass rounded-sm border border-crimson/40 p-6 mb-10">
+            <section className="premium-tile rounded-sm border border-crimson/40 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
                 Why we're not another AI company
               </div>
@@ -158,7 +158,7 @@ const DiagnosticPage: React.FC = () => {
                 Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="rounded-sm border border-border/60 bg-background/40 p-4">
+                <div className="premium-tile rounded-sm border border-border/60 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
                   <ul className="space-y-1.5 text-sm text-foreground/65">
                     <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
@@ -169,7 +169,7 @@ const DiagnosticPage: React.FC = () => {
                     <li>• You do the work of finding what's broken</li>
                   </ul>
                 </div>
-                <div className="rounded-sm border border-amber/40 bg-amber/5 p-4">
+                <div className="premium-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
@@ -186,7 +186,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <div className="glass rounded-sm border border-amber/40 p-8 mb-10 text-center">
+            <div className="premium-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
               <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
               <p className="text-sm text-muted-foreground mt-2">21 calendar days. No retainer required. No percentage-of-savings.</p>
@@ -208,7 +208,7 @@ const DiagnosticPage: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 mb-10">
-              <section className="glass rounded-sm border border-border/60 p-6">
+              <section className="premium-tile rounded-sm border border-border/60 p-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What you get</div>
                 <ul className="space-y-2.5">
                   {INCLUDES.map((i) => (
@@ -219,7 +219,7 @@ const DiagnosticPage: React.FC = () => {
                   ))}
                 </ul>
               </section>
-              <section className="glass rounded-sm border border-border/60 p-6">
+              <section className="premium-tile rounded-sm border border-border/60 p-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">What it isn't</div>
                 <ul className="space-y-2.5">
                   {NOT_INCLUDED.map((i) => (
@@ -232,7 +232,7 @@ const DiagnosticPage: React.FC = () => {
               </section>
             </div>
 
-            <section className="glass rounded-sm border border-amber/40 p-6 mb-10">
+            <section className="premium-tile rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber">
                   Automatically included · $18,500 package
@@ -254,7 +254,7 @@ const DiagnosticPage: React.FC = () => {
                   return (
                     <div
                       key={t.name}
-                      className={`rounded-sm border bg-background/40 transition-colors ${
+                      className={`premium-tile rounded-sm transition-colors ${
                         isOpen ? 'border-amber/60 md:col-span-2 lg:col-span-3' : 'border-border/60 hover:border-amber/40'
                       }`}
                     >
@@ -313,7 +313,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <section className="glass rounded-sm border border-border/60 p-6 mb-10">
+            <section className="premium-tile rounded-sm border border-border/60 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
               <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
               <p className="text-sm text-foreground/80">
@@ -321,7 +321,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <section className="glass rounded-sm border border-amber/30 p-6 text-center">
+            <section className="premium-tile rounded-sm border border-amber/30 p-6 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">After the diagnostic</div>
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer — $15K/month.</h2>
               <p className="text-sm text-foreground/80 mb-4">

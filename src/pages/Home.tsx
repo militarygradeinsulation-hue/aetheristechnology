@@ -82,7 +82,7 @@ const Home = () => {
                 30 minutes. I'll tell you on the call where your revenue systems are most likely losing money — before you spend a dollar on the Diagnostic.
               </p>
             </div>
-            <div className="glass rounded-sm border border-amber/30 p-2 md:p-4">
+            <div className="premium-tile rounded-sm border border-amber/30 p-2 md:p-4">
               <div
                 className="meetings-iframe-container"
                 data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
@@ -109,7 +109,7 @@ const Home = () => {
             </RevealOnScroll>
             <div className="grid md:grid-cols-3 gap-4">
               {steps.map((s) => (
-                <div key={s.n} className="glass rounded-sm border border-border/60 p-6">
+                <div key={s.n} className="premium-tile rounded-sm border border-border/60 p-6">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
                   <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
                   <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
