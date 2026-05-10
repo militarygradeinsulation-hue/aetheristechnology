@@ -25,18 +25,94 @@ interface ToolItem {
   icon: React.ComponentType<{ className?: string }>;
   name: string;
   finds: string;
+  inputs: string[];
+  process: string[];
+  deliverables: string[];
+  exampleLeak: string;
 }
 
 const TOOL_BUNDLE: ToolItem[] = [
-  { icon: Globe, name: 'Website + Digital Footprint Scan', finds: 'AI-readiness, SEO/GEO gaps, schema, page-speed leaks visible to buyers.' },
-  { icon: Database, name: 'CRM Hygiene Audit', finds: 'Duplicate contacts, stalled deals, broken stage definitions, ghost pipeline.' },
-  { icon: ShieldAlert, name: 'Brand Contradiction Finder', finds: 'Where your homepage, sales deck, and proposal say three different things.' },
-  { icon: MessagesSquare, name: 'Friction Vocabulary Audit', finds: 'Words on your site that quietly cost you the deal.' },
-  { icon: FileSearch, name: 'Strategic Question Engine', finds: 'The 12 questions a CFO will ask that your team can\'t answer yet.' },
-  { icon: ListChecks, name: '20-Question Business Diagnostic', finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.' },
-  { icon: Mic2, name: 'Sales Script + Follow-Up Generator', finds: 'Custom outbound + post-quote sequences mapped to your stalled deals.' },
-  { icon: CalendarRange, name: '90-Day Content Calendar', finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.' },
-  { icon: Search, name: 'AI Visibility Scorecard', finds: 'How ChatGPT, Perplexity, and Google AI describe you vs. competitors.' },
+  {
+    icon: Globe,
+    name: 'Website + Digital Footprint Scan',
+    finds: 'AI-readiness, SEO/GEO gaps, schema, page-speed leaks visible to buyers.',
+    inputs: ['Public domain + up to 25 priority URLs', 'Google Business Profile + LinkedIn company page', 'Top 5 competitor domains for benchmark'],
+    process: ['Crawl pages for schema, meta, alt text, Core Web Vitals', 'Score AI-readability (how LLMs parse and quote your site)', 'Compare local/GEO presence vs. competitors'],
+    deliverables: ['Page-by-page scorecard with red/amber/green flags', 'Prioritized fix list with effort vs. revenue impact', 'GEO + schema patch recommendations'],
+    exampleLeak: '$240K/yr in inbound leads lost because product pages had no schema and were invisible to ChatGPT and Perplexity searches.',
+  },
+  {
+    icon: Database,
+    name: 'CRM Hygiene Audit',
+    finds: 'Duplicate contacts, stalled deals, broken stage definitions, ghost pipeline.',
+    inputs: ['12-month CSV export from HubSpot, Salesforce, or any CRM', 'Pipeline + deal stage definitions', 'Sales rep activity log if available'],
+    process: ['De-duplicate contacts and companies', 'Flag deals stalled >30/60/90 days at each stage', 'Audit stage definitions against actual rep behavior'],
+    deliverables: ['Cleaned contact + deal database returned to you', 'Stalled-deal report by rep, stage, and dollar value', 'Rewritten stage exit criteria'],
+    exampleLeak: '$1.1M in pipeline marked "Proposal Sent" that had no follow-up activity in 60+ days — quietly dying in the CRM.',
+  },
+  {
+    icon: ShieldAlert,
+    name: 'Brand Contradiction Finder',
+    finds: 'Where your homepage, sales deck, and proposal say three different things.',
+    inputs: ['Homepage + about page copy', 'Latest sales deck (PDF or Google Slides)', 'Sample proposal or SOW from last 90 days'],
+    process: ['Extract positioning claims, value props, and proof points from each asset', 'Map contradictions in language, pricing posture, and ICP', 'Score buyer-confusion risk on each touchpoint'],
+    deliverables: ['Contradiction matrix (asset × claim × conflict)', 'Single-source-of-truth message rewrite', 'Sales-deck red-line for the highest-leverage 3 slides'],
+    exampleLeak: 'Homepage said "enterprise-grade." Deck said "made for SMB." Proposal quoted enterprise pricing. Buyers walked.',
+  },
+  {
+    icon: MessagesSquare,
+    name: 'Friction Vocabulary Audit',
+    finds: 'Words on your site that quietly cost you the deal.',
+    inputs: ['Top 10 site pages by traffic', 'Last 20 lost-deal reasons from CRM', 'Last 10 sales call transcripts (optional)'],
+    process: ['Flag jargon, hedging language, and fear-words', 'Cross-reference site copy against actual buyer objections', 'Score each page for clarity, specificity, and momentum'],
+    deliverables: ['Word-by-word red-line of priority pages', 'Replacement vocabulary tied to buyer language', 'CTA copy rewrites with predicted lift'],
+    exampleLeak: 'The word "solutions" appeared 47 times on the homepage. Buyers couldn\'t tell what was actually being sold.',
+  },
+  {
+    icon: FileSearch,
+    name: 'Strategic Question Engine',
+    finds: 'The 12 questions a CFO will ask that your team can\'t answer yet.',
+    inputs: ['Your industry + business model', 'Last 3 board or investor decks', 'Current revenue, COGS, and pipeline snapshot'],
+    process: ['Generate the 12 questions a sharp CFO/board member will ask', 'Stress-test your existing answers against operator benchmarks', 'Identify the data you don\'t yet track'],
+    deliverables: ['12-question briefing doc with model answers', 'Gap list of metrics you should be tracking but aren\'t', 'KPI dashboard spec for your finance team'],
+    exampleLeak: 'CEO couldn\'t answer "what\'s your CAC by channel?" in a board meeting. Lost a $2M follow-on raise.',
+  },
+  {
+    icon: ListChecks,
+    name: '20-Question Business Diagnostic',
+    finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.',
+    inputs: ['60–90 minutes from the founder/CEO', '15 minutes each from sales lead + ops lead', 'Last 90 days of revenue + pipeline data'],
+    process: ['Structured interview across 4 functional pillars', 'Operator scoring against industry benchmarks', 'Triangulation of leadership answers vs. actual data'],
+    deliverables: ['Pillar-by-pillar scorecard (0–100 per area)', 'Top 5 leverage points ranked by ROI', 'Quick-win list executable inside 30 days'],
+    exampleLeak: 'Marketing scored 82/100 for activity, 19/100 for attribution. They were spending $40K/mo with no idea what worked.',
+  },
+  {
+    icon: Mic2,
+    name: 'Sales Script + Follow-Up Generator',
+    finds: 'Custom outbound + post-quote sequences mapped to your stalled deals.',
+    inputs: ['ICP definition + top 3 buyer personas', 'Top 5 stalled-deal reasons from CRM', 'Existing email + call templates if any'],
+    process: ['Pattern-match stalled deals to objection clusters', 'Write outbound + follow-up sequences per persona', 'Build talk-tracks for the 3 most common objections'],
+    deliverables: ['7-touch outbound cadence (email + LinkedIn + call)', '5-touch post-quote follow-up sequence', 'Objection-handling cheat sheet for the sales team'],
+    exampleLeak: 'Reps stopped following up after touch 2. The data says 80% of closed deals took 5–9 touches. We rebuilt the cadence.',
+  },
+  {
+    icon: CalendarRange,
+    name: '90-Day Content Calendar',
+    finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.',
+    inputs: ['Findings from the diagnostic (auto-fed)', 'Founder/CEO voice samples (3–5 posts or articles)', 'Top 3 customer-success stories'],
+    process: ['Cluster diagnostic findings into 4–6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
+    deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer or agency'],
+    exampleLeak: 'Founder posted twice a quarter, randomly. We turned the diagnostic into 90 days of content that pre-sold the next engagement.',
+  },
+  {
+    icon: Search,
+    name: 'AI Visibility Scorecard',
+    finds: 'How ChatGPT, Perplexity, and Google AI describe you vs. competitors.',
+    inputs: ['Company name + 3 product/service names', 'Top 5 competitors', '10 buyer-intent prompts you want to win'],
+    process: ['Query ChatGPT, Perplexity, Claude, and Google AI Overviews live', 'Score visibility, accuracy, and sentiment per prompt', 'Identify the source pages each AI is pulling from'],
+    deliverables: ['Side-by-side AI visibility report (you vs. competitors)', 'Prompt-by-prompt remediation list', 'GEO content brief for the 5 highest-value prompts'],
+    exampleLeak: 'ChatGPT recommended a competitor 9 out of 10 times for their core service category. We knew exactly which 3 pages to fix.',
+  },
 ];
 
 const NOT_INCLUDED = [
