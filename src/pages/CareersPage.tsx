@@ -167,7 +167,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 
     {/* OPERATOR INTRO VIDEO */}
     <div className="mb-12">
-      <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
+      <div className="max-w-md mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
         <video
           src={careersIntroVideo}
           poster={careersIntroPoster}
@@ -181,7 +181,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </video>
       </div>
       <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
-        Message from the Operator · Tap to unmute
+        Message from the Architect · Tap to unmute
       </p>
     </div>
 
