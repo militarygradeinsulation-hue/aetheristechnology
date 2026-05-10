@@ -14,8 +14,9 @@ import { Button } from '@/components/ui/button';
 const INCLUDES = [
   '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
   'Lead-to-contact, deal-stage progression, and touch-frequency analysis',
+  'Full Operator Tool Suite (9 live tools) run against your business — see below',
   'Written report (15–30 pages): leak map + prioritized fixes + ROI projections',
-  'Source-data appendix — every CSV and query used',
+  'Source-data appendix — every CSV, query, and tool export used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
 ];
