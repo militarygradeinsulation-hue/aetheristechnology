@@ -43,24 +43,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow'; prefetch?: () => Promise<unknown> }[] = [
+  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
     { label: 'Home', href: '/', special: true },
-    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red', prefetch: () => import('@/pages/DiagnosticPage') },
-    { label: 'Industries', href: '/industries', prefetch: () => import('@/pages/IndustriesPage') },
-    { label: 'Methodology', href: '/methodology', prefetch: () => import('@/pages/MethodologyPage') },
-    { label: 'About', href: '/about', prefetch: () => import('@/pages/AboutPage') },
-    { label: 'Field Notes', href: '/blog', prefetch: () => import('@/pages/BlogPage') },
-    { label: 'Playbooks', href: '/resources', prefetch: () => import('@/pages/ResourcesPage') },
-    { label: 'News', href: '/news', prefetch: () => import('@/pages/NewsPage') },
-    { label: 'Careers', href: '/careers', tone: 'yellow', prefetch: () => import('@/pages/CareersPage') },
+    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red' },
+    { label: 'Industries', href: '/industries' },
+    { label: 'Methodology', href: '/methodology' },
+    { label: 'About', href: '/about' },
+    { label: 'Field Notes', href: '/blog' },
+    { label: 'Playbooks', href: '/resources' },
+    { label: 'News', href: '/news' },
+    { label: 'Careers', href: '/careers', tone: 'yellow' },
   ];
-
-  const prefetchedRef = useRef<Set<string>>(new Set());
-  const handlePrefetch = (item: { href: string; prefetch?: () => Promise<unknown> }) => {
-    if (!item.prefetch || prefetchedRef.current.has(item.href)) return;
-    prefetchedRef.current.add(item.href);
-    item.prefetch().catch(() => prefetchedRef.current.delete(item.href));
-  };
 
   const showStickyCTA = true;
   const expanded = isHovered || isMobileMenuOpen;
@@ -98,9 +91,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
-                onMouseEnter={() => handlePrefetch(item)}
-                onFocus={() => handlePrefetch(item)}
-                onTouchStart={() => handlePrefetch(item)}
                 onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
               >
                 {item.label}

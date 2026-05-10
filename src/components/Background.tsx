@@ -27,7 +27,15 @@ export const Background: React.FC = () => {
     window.addEventListener('resize', setCanvasSize);
 
     const particles: Particle[] = [];
-    const particleCount = 100;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const particleCount = prefersReducedMotion ? 0 : Math.min(40, Math.max(24, Math.floor(window.innerWidth / 40)));
+    const rootStyles = getComputedStyle(document.documentElement);
+    const amber = rootStyles.getPropertyValue('--amber-glow').trim() || '36 90% 55%';
+    const background = rootStyles.getPropertyValue('--background').trim() || '220 15% 8%';
+    const maxDistance = 120;
+    const maxDistanceSquared = maxDistance * maxDistance;
+    let animationFrameId = 0;
+    let lastFrame = 0;
 
     // Create particles
     for (let i = 0; i < particleCount; i++) {
@@ -40,47 +48,59 @@ export const Background: React.FC = () => {
       });
     }
 
-    const animate = () => {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    const animate = (timestamp = 0) => {
+      if (document.hidden) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
+      if (timestamp - lastFrame < 33) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
+      lastFrame = timestamp;
+      ctx.fillStyle = `hsl(${background} / 0.12)`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((particle, i) => {
+      for (let i = 0; i < particles.length; i++) {
+        const particle = particles[i];
         particle.x += particle.vx;
         particle.y += particle.vy;
 
         if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
         if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
 
-        // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(229, 163, 26, 0.6)';
+        ctx.fillStyle = `hsl(${amber} / 0.42)`;
         ctx.fill();
 
-        // Draw connections
-        particles.slice(i + 1).forEach((otherParticle) => {
+        for (let j = i + 1; j < particles.length; j++) {
+          const otherParticle = particles[j];
           const dx = particle.x - otherParticle.x;
           const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distanceSquared = dx * dx + dy * dy;
 
-          if (distance < 150) {
+          if (distanceSquared < maxDistanceSquared) {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = `rgba(229, 163, 26, ${0.2 * (1 - distance / 150)})`;
+            ctx.strokeStyle = `hsl(${amber} / ${0.14 * (1 - distanceSquared / maxDistanceSquared)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
-        });
-      });
+        }
+      }
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
       window.removeEventListener('resize', setCanvasSize);
+      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
