@@ -254,7 +254,7 @@ const DiagnosticPage: React.FC = () => {
                   return (
                     <div
                       key={t.name}
-                      className={`rounded-sm border bg-background/40 transition-colors ${
+                      className={`premium-tile rounded-sm transition-colors ${
                         isOpen ? 'border-amber/60 md:col-span-2 lg:col-span-3' : 'border-border/60 hover:border-amber/40'
                       }`}
                     >
