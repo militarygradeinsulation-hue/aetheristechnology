@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, X } from 'lucide-react';
+import {
+  ArrowRight, Check, X, Database, Globe, MessagesSquare, FileSearch,
+  CalendarRange, Mic2, ListChecks, ShieldAlert, Search,
+} from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -15,6 +18,24 @@ const INCLUDES = [
   'Source-data appendix — every CSV and query used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
+];
+
+interface ToolItem {
+  icon: React.ComponentType<{ className?: string }>;
+  name: string;
+  finds: string;
+}
+
+const TOOL_BUNDLE: ToolItem[] = [
+  { icon: Globe, name: 'Website + Digital Footprint Scan', finds: 'AI-readiness, SEO/GEO gaps, schema, page-speed leaks visible to buyers.' },
+  { icon: Database, name: 'CRM Hygiene Audit', finds: 'Duplicate contacts, stalled deals, broken stage definitions, ghost pipeline.' },
+  { icon: ShieldAlert, name: 'Brand Contradiction Finder', finds: 'Where your homepage, sales deck, and proposal say three different things.' },
+  { icon: MessagesSquare, name: 'Friction Vocabulary Audit', finds: 'Words on your site that quietly cost you the deal.' },
+  { icon: FileSearch, name: 'Strategic Question Engine', finds: 'The 12 questions a CFO will ask that your team can\'t answer yet.' },
+  { icon: ListChecks, name: '20-Question Business Diagnostic', finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.' },
+  { icon: Mic2, name: 'Sales Script + Follow-Up Generator', finds: 'Custom outbound + post-quote sequences mapped to your stalled deals.' },
+  { icon: CalendarRange, name: '90-Day Content Calendar', finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.' },
+  { icon: Search, name: 'AI Visibility Scorecard', finds: 'How ChatGPT, Perplexity, and Google AI describe you vs. competitors.' },
 ];
 
 const NOT_INCLUDED = [
