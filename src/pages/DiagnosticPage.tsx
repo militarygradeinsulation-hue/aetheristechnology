@@ -118,6 +118,48 @@ const DiagnosticPage: React.FC = () => {
               </section>
             </div>
 
+            <section className="glass rounded-sm border border-amber/40 p-6 mb-10">
+              <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                  Bundled — Operator Tool Suite
+                </div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Included · No add-on fee
+                </div>
+              </div>
+              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
+                Nine live diagnostic tools your operator runs against your business.
+              </h2>
+              <p className="text-sm text-foreground/75 mb-5">
+                Every Diagnostic engagement includes the full Aetheris tool suite — the same instruments our reps use in the field. Findings from each tool feed the final leak map. You see CRM bleed, digital footprint exposure, brand contradictions, and AI visibility — all in one report.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {TOOL_BUNDLE.map((t) => {
+                  const Icon = t.icon;
+                  return (
+                    <div
+                      key={t.name}
+                      className="rounded-sm border border-border/60 bg-background/40 p-3.5 hover:border-amber/40 transition-colors"
+                    >
+                      <div className="flex items-start gap-2.5 mb-1.5">
+                        <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4 text-amber" />
+                        </div>
+                        <div className="font-bold text-foreground text-sm leading-tight">{t.name}</div>
+                      </div>
+                      <p className="text-xs text-foreground/65 leading-snug pl-9">
+                        <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
+                        {t.finds}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground italic mt-4">
+                Tool outputs land in the source-data appendix. Your team keeps the raw exports after the engagement.
+              </p>
+            </section>
+
             <section className="glass rounded-sm border border-border/60 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
               <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
