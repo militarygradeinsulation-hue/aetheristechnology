@@ -158,7 +158,7 @@ const DiagnosticPage: React.FC = () => {
                 Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="rounded-sm border border-border/60 bg-background/40 p-4">
+                <div className="premium-tile rounded-sm border border-border/60 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
                   <ul className="space-y-1.5 text-sm text-foreground/65">
                     <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
@@ -169,7 +169,7 @@ const DiagnosticPage: React.FC = () => {
                     <li>• You do the work of finding what's broken</li>
                   </ul>
                 </div>
-                <div className="rounded-sm border border-amber/40 bg-amber/5 p-4">
+                <div className="premium-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
