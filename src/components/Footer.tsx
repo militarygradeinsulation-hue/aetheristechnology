@@ -37,7 +37,7 @@ export const Footer: React.FC = () => {
                 <span className="text-xl font-bold text-foreground font-forensic">Aetheris</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Business Forensics Operator. We find where revenue is leaking — then rebuild with AI.
+                Revenue systems for specialty manufacturers. Fixed-fee diagnostic, operator-led implementation.
               </p>
               <div className="flex flex-col gap-2 mt-3">
                 <a href="tel:+13173762110" className="text-sm text-amber hover:text-amber/80 transition-colors font-medium" onClick={() => trackEvent('click', { label: 'phone', location: 'footer' })}>
@@ -50,23 +50,23 @@ export const Footer: React.FC = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-foreground mb-4">Methodology</h4>
+              <h4 className="font-bold text-foreground mb-4">Offer</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/leak-audit" className="hover:text-amber transition-colors">Free Leak Audit™</Link></li>
-                <li><Link to="/services" className="hover:text-amber transition-colors">Forensic Diagnostic — $2,500</Link></li>
-                <li><Link to="/services" className="hover:text-amber transition-colors">Co-CEO Engagements</Link></li>
-                <li><Link to="/business-diagnostic" className="hover:text-amber transition-colors">20-Question Self-Diagnostic</Link></li>
+                <li><Link to="/diagnostic" className="hover:text-amber transition-colors">21-Day Diagnostic — $18,500</Link></li>
+                <li><Link to="/implementation" className="hover:text-amber transition-colors">Implementation — $15K/mo</Link></li>
+                <li><Link to="/methodology" className="hover:text-amber transition-colors">Measurement Methodology</Link></li>
+                <li><Link to="/credentials" className="hover:text-amber transition-colors">Credentials</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-foreground mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/about" className="hover:text-amber transition-colors">The Operator</Link></li>
-                <li><Link to="/industries" className="hover:text-amber transition-colors">Industries</Link></li>
+                <li><Link to="/about" className="hover:text-amber transition-colors">About</Link></li>
                 <li><Link to="/blog" className="hover:text-amber transition-colors">Field Notes</Link></li>
-                <li><Link to="/contact" className="hover:text-amber transition-colors">Open a Case</Link></li>
+                <li><Link to="/contact" className="hover:text-amber transition-colors">Contact</Link></li>
                 <li><Link to="/careers" className="hover:text-amber transition-colors">Careers</Link></li>
+                <li><Link to="/leak-audit" className="hover:text-amber transition-colors text-xs opacity-70">Free self-scan</Link></li>
               </ul>
             </div>
 
