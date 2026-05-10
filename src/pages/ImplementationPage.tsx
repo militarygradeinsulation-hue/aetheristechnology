@@ -44,7 +44,7 @@ const ImplementationPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="glass rounded-sm border border-amber/40 p-8 mb-8 text-center">
+            <div className="premium-tile rounded-sm border border-amber/40 p-8 mb-8 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Retainer</div>
               <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground">$15,000<span className="text-2xl text-muted-foreground"> / month</span></div>
               <p className="text-sm text-muted-foreground mt-2">3-month minimum. Diagnostic clients only.</p>
@@ -55,7 +55,7 @@ const ImplementationPage: React.FC = () => {
               </a>
             </div>
 
-            <section className="glass rounded-sm border border-border/60 p-6 mb-6">
+            <section className="premium-tile rounded-sm border border-border/60 p-6 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What we run</div>
               <ul className="space-y-2.5">
                 {INCLUDES.map((i) => (
@@ -67,7 +67,7 @@ const ImplementationPage: React.FC = () => {
               </ul>
             </section>
 
-            <section className="glass rounded-sm border border-border/60 p-6">
+            <section className="premium-tile rounded-sm border border-border/60 p-6">
               <p className="text-foreground/80">
                 Implementation is only available after the Diagnostic. We will not take a retainer without first running the 21 days — that's how we keep our scope honest and our recovery numbers verifiable.
               </p>

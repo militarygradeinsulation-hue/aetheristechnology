@@ -143,7 +143,7 @@ const IndustriesPage: React.FC = () => {
               Same fixed-fee diagnostic. Same forensic deliverable. Different wound patterns by sector.
             </p>
 
-            <div className="glass rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
+            <div className="premium-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 What you get — every industry, every engagement
               </div>
@@ -183,7 +183,7 @@ const IndustriesPage: React.FC = () => {
                   <Link
                     key={v.slug}
                     to={`/${v.slug}`}
-                    className="glass rounded-sm p-6 border border-border/60 hover:border-amber/50 transition-all hover:-translate-y-1 group flex flex-col"
+                    className="premium-tile rounded-sm p-6 border border-border/60 hover:border-amber/50 transition-all hover:-translate-y-1 group flex flex-col"
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
@@ -218,7 +218,7 @@ const IndustriesPage: React.FC = () => {
         </section>
 
         <section className="py-16 px-4">
-          <div className="max-w-3xl mx-auto text-center glass rounded-sm p-10 border border-amber/30">
+          <div className="max-w-3xl mx-auto text-center premium-tile rounded-sm p-10 border border-amber/30">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
               Industry not listed?
             </div>

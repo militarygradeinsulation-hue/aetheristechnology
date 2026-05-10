@@ -38,7 +38,7 @@ const ServicesPage: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
-              <div className="glass rounded-sm border border-amber/40 p-7 flex flex-col">
+              <div className="premium-tile rounded-sm border border-amber/40 p-7 flex flex-col">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 1 · Sales-led</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">21-Day Revenue Diagnostic</h2>
                 <div className="font-forensic text-5xl font-bold text-foreground mt-4">$18,500</div>
@@ -60,7 +60,7 @@ const ServicesPage: React.FC = () => {
                 </Link>
               </div>
 
-              <div className="glass rounded-sm border border-border/60 p-7 flex flex-col">
+              <div className="premium-tile rounded-sm border border-border/60 p-7 flex flex-col">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 2 · Diagnostic clients only</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">Implementation Retainer</h2>
                 <div className="font-forensic text-5xl font-bold text-foreground mt-4">$15,000<span className="text-xl text-muted-foreground"> /mo</span></div>
@@ -83,7 +83,7 @@ const ServicesPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-12 text-center glass rounded-sm border border-amber/30 p-6">
+            <div className="mt-12 text-center premium-tile rounded-sm border border-amber/30 p-6">
               <p className="text-foreground font-semibold">Methodology goes to every prospect before pricing.</p>
               <Link to="/methodology" className="text-amber font-semibold hover:underline">Read it →</Link>
             </div>
