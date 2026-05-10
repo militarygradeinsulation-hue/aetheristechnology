@@ -46,18 +46,12 @@ export const Background: React.FC = () => {
       });
     }
 
-    const animate = (timestamp = 0) => {
+    const animate = () => {
       if (document.hidden) {
         animationFrameId = requestAnimationFrame(animate);
         return;
       }
 
-      if (timestamp - lastFrame < 33) {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-
-      lastFrame = timestamp;
       ctx.fillStyle = `hsl(${background} / 0.12)`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
