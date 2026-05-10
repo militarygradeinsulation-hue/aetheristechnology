@@ -250,21 +250,60 @@ const DiagnosticPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {TOOL_BUNDLE.map((t) => {
                   const Icon = t.icon;
+                  const isOpen = openTool === t.name;
                   return (
                     <div
                       key={t.name}
-                      className="rounded-sm border border-border/60 bg-background/40 p-3.5 hover:border-amber/40 transition-colors"
+                      className={`rounded-sm border bg-background/40 transition-colors ${
+                        isOpen ? 'border-amber/60 md:col-span-2 lg:col-span-3' : 'border-border/60 hover:border-amber/40'
+                      }`}
                     >
-                      <div className="flex items-start gap-2.5 mb-1.5">
-                        <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
-                          <Icon className="w-4 h-4 text-amber" />
+                      <button
+                        type="button"
+                        onClick={() => setOpenTool(isOpen ? null : t.name)}
+                        aria-expanded={isOpen}
+                        className="w-full text-left p-3.5"
+                      >
+                        <div className="flex items-start gap-2.5 mb-1.5">
+                          <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
+                            <Icon className="w-4 h-4 text-amber" />
+                          </div>
+                          <div className="flex-1 font-bold text-foreground text-sm leading-tight">{t.name}</div>
+                          <ChevronDown className={`w-4 h-4 text-amber shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                         </div>
-                        <div className="font-bold text-foreground text-sm leading-tight">{t.name}</div>
-                      </div>
-                      <p className="text-xs text-foreground/65 leading-snug pl-9">
-                        <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
-                        {t.finds}
-                      </p>
+                        <p className="text-xs text-foreground/65 leading-snug pl-9">
+                          <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
+                          {t.finds}
+                        </p>
+                      </button>
+                      {isOpen && (
+                        <div className="px-3.5 pb-4 pt-1 border-t border-border/40 mt-1 space-y-3">
+                          <div className="grid md:grid-cols-3 gap-3 pt-3">
+                            <div>
+                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">Inputs we need</div>
+                              <ul className="space-y-1 text-xs text-foreground/75">
+                                {t.inputs.map((x) => <li key={x}>• {x}</li>)}
+                              </ul>
+                            </div>
+                            <div>
+                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">How the operator runs it</div>
+                              <ul className="space-y-1 text-xs text-foreground/75">
+                                {t.process.map((x) => <li key={x}>• {x}</li>)}
+                              </ul>
+                            </div>
+                            <div>
+                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">What you get back</div>
+                              <ul className="space-y-1 text-xs text-foreground/75">
+                                {t.deliverables.map((x) => <li key={x}>• {x}</li>)}
+                              </ul>
+                            </div>
+                          </div>
+                          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3">
+                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">Real leak we caught</div>
+                            <p className="text-xs text-foreground/85 italic">{t.exampleLeak}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
