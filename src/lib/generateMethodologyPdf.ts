@@ -1,63 +1,39 @@
 import jsPDF from 'jspdf';
 
-const INK: [number, number, number] = [18, 18, 22];
+const INK: [number, number, number] = [12, 12, 16];
 const AMBER: [number, number, number] = [232, 165, 38];
-const MUTED: [number, number, number] = [120, 120, 130];
-const PAPER: [number, number, number] = [240, 235, 224];
+const MUTED: [number, number, number] = [150, 150, 160];
+const PAPER: [number, number, number] = [235, 230, 218];
 
 interface Section {
   title: string;
-  body: string[];
+  body: string;
 }
 
 const SECTIONS: Section[] = [
   {
-    title: '1. How we define a revenue leak',
-    body: [
-      'A revenue leak is a measurable gap between revenue a business should have captured and revenue it actually captured, attributable to a specific operational, sales, or system failure. It is not a forecast, a projection, or a "potential opportunity." It is a delta between two observable numbers.',
-      'Examples: leads received but never contacted within SLA; quoted deals not followed up after Day 3; signed contracts that never converted to billable activity; CRM records duplicated across tools causing rep double-work; marketing-attributed pipeline that never matched to closed-won.',
-    ],
+    title: 'Definition',
+    body: 'A revenue leak is a measurable gap between revenue captured and revenue that should have been captured, attributable to a specific operational, sales, or system failure. Not a forecast. A delta between two observable numbers — leads not contacted in SLA, deals stalled past Day 3, contracts never billed, duplicate CRM records, marketing pipeline that never matched closed-won.',
   },
   {
-    title: '2. How we measure baseline',
-    body: [
-      'We pull a 12-month snapshot from your system of record (HubSpot, Salesforce, or a CSV export of contacts, deals, and activities). We then sample three measurement layers:',
-      '- Lead-to-contact: time from inbound capture to first human response.',
-      '- Deal-stage progression: time-in-stage by deal value, conversion rate per stage, and stalled-deal aging.',
-      '- Touch frequency: number of outbound touches per opportunity vs. industry benchmark for the deal size.',
-      'Where data is missing, we say so explicitly in the report. We do not estimate around missing data.',
-    ],
+    title: 'Baseline',
+    body: '12-month snapshot from your system of record (HubSpot, Salesforce, or CSV export). Three layers: lead-to-contact time, deal-stage progression and stalled-deal aging, outbound touch frequency vs. benchmark for deal size. Missing data is named explicitly. We do not estimate around gaps.',
   },
   {
-    title: '3. How we attribute recovered revenue',
-    body: [
-      'Every leak in the report is tagged with: (a) the baseline metric we measured, (b) the proposed fix, (c) the conservative and aggressive ROI projection, and (d) the metric we will re-measure after implementation to confirm recovery.',
-      'Recovered revenue is only claimed against pre/post measurement of the same metric on the same population, with the same definition. No counterfactuals. No "would have been."',
-    ],
+    title: 'Attribution',
+    body: 'Each leak is tagged with: baseline metric, proposed fix, conservative + aggressive ROI projection, and the metric we re-measure post-implementation. Recovered revenue is only claimed against pre/post measurement on the same population. No counterfactuals.',
   },
   {
-    title: '4. Scope — what is in, what is out',
-    body: [
-      'In scope: CRM data, sales activity logs, lead-source attribution, sales-stage definitions, follow-up cadences, quote-to-close timelines, and operational handoffs between marketing, sales, and delivery.',
-      'Out of scope: product pricing strategy, brand strategy, hiring decisions, equity / capital structure, legal compliance, manufacturing operations on the shop floor.',
-    ],
+    title: 'Scope',
+    body: 'In: CRM data, sales activity, lead-source attribution, sales-stage definitions, follow-up cadences, quote-to-close, marketing/sales/delivery handoffs. Out: pricing strategy, brand, hiring, capital structure, legal, manufacturing shop floor.',
   },
   {
-    title: '5. What an auditor would need to verify it',
-    body: [
-      'Every claim in the final report can be traced to a record export. We deliver: the source CSVs / API pulls used, the SQL or pandas queries that produced each metric, the methodology document (this one), and a re-runnable script for any post-implementation re-measurement.',
-      'A CFO, controller, or external auditor with read-only access to your CRM can re-derive every number in the report.',
-    ],
+    title: 'Audit trail',
+    body: 'Every claim traces to a record export. Deliverables include source CSVs/API pulls, the SQL or pandas queries behind each metric, this methodology doc, and a re-runnable post-implementation script. A controller or external auditor with read-only CRM access can re-derive every number.',
   },
   {
-    title: '6. The 21-Day Diagnostic — deliverables',
-    body: [
-      '- Written report (15–30 pages): leak map, prioritized fixes, ROI projections, implementation roadmap.',
-      '- Source-data appendix: every CSV / query used.',
-      '- 60-minute readout call with you and up to two of your team.',
-      '- A fixed-fee quote for implementation if you choose to proceed.',
-      'Fixed fee: $18,500. Timeline: 21 calendar days from kickoff. CRM-agnostic — runs on a CSV export. HubSpot or Salesforce live integration is an upsell, not a prerequisite.',
-    ],
+    title: '21-Day Diagnostic — deliverables',
+    body: 'Written report (15–30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic — runs on a CSV export.',
   },
 ];
 
@@ -65,81 +41,75 @@ export function generateMethodologyPdf() {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageW = 210;
   const pageH = 297;
-  const margin = 20;
+  const margin = 16;
   const contentW = pageW - margin * 2;
 
-  // Cover
-  doc.setFillColor(...INK);
-  doc.rect(0, 0, pageW, pageH, 'F');
-  doc.setFillColor(...AMBER);
-  doc.rect(0, 0, pageW, 4, 'F');
+  const paintBg = () => {
+    doc.setFillColor(...INK);
+    doc.rect(0, 0, pageW, pageH, 'F');
+    doc.setFillColor(...AMBER);
+    doc.rect(0, 0, pageW, 3, 'F');
+  };
+
+  // Page 1 — Title + first half
+  paintBg();
 
   doc.setFont('courier', 'bold');
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(...AMBER);
-  doc.text('AETHERIS · MEASUREMENT METHODOLOGY', margin, 18);
-  doc.text('v1.0', pageW - margin, 18, { align: 'right' });
+  doc.text('AETHERIS · MEASUREMENT METHODOLOGY · v1.0', margin, 14);
 
   doc.setFont('times', 'bold');
-  doc.setFontSize(30);
-  doc.setTextColor(245, 240, 230);
-  doc.text('Revenue Diagnostic', margin, 70);
-  doc.text('Methodology', margin, 84);
+  doc.setFontSize(24);
+  doc.setTextColor(...PAPER);
+  doc.text('Revenue Diagnostic Methodology', margin, 30);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12);
+  doc.setFontSize(9.5);
   doc.setTextColor(190, 185, 170);
   const intro = doc.splitTextToSize(
-    'How we define, measure, and attribute revenue leaks for specialty manufacturers ($5M–$25M). This document is sent to every prospect before pricing is discussed.',
+    'How we define, measure, and attribute revenue leaks for specialty manufacturers ($5M–$25M). Sent to every prospect before pricing.',
     contentW,
   );
-  doc.text(intro, margin, 100);
+  doc.text(intro, margin, 40);
 
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...MUTED);
-  doc.text('Aetheris · Indianapolis, IN · (317) 376-2110 · aetheris.technology', margin, pageH - 10);
-
-  // Sections
-  SECTIONS.forEach((sec) => {
-    doc.addPage();
-    doc.setFillColor(...PAPER);
-    doc.rect(0, 0, pageW, pageH, 'F');
-    doc.setFillColor(...INK);
-    doc.rect(0, 0, pageW, 4, 'F');
-
-    let y = 28;
-    doc.setFont('times', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(...INK);
-    const titleLines = doc.splitTextToSize(sec.title, contentW);
-    doc.text(titleLines, margin, y);
-    y += titleLines.length * 8 + 6;
-
+  let y = 56;
+  const drawSection = (sec: Section) => {
+    // estimate height
+    const bodyLines = doc.splitTextToSize(sec.body, contentW);
+    const blockH = 8 + bodyLines.length * 4.5 + 4;
+    if (y + blockH > pageH - 14) {
+      doc.addPage();
+      paintBg();
+      y = 20;
+    }
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...AMBER);
+    doc.text(sec.title.toUpperCase(), margin, y);
     doc.setDrawColor(...AMBER);
-    doc.setLineWidth(0.6);
-    doc.line(margin, y - 4, margin + 30, y - 4);
-
+    doc.setLineWidth(0.3);
+    doc.line(margin, y + 1.5, margin + 14, y + 1.5);
+    y += 6;
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(40, 40, 50);
-    sec.body.forEach((para) => {
-      const lines = doc.splitTextToSize(para, contentW);
-      if (y + lines.length * 6 > pageH - 20) {
-        doc.addPage();
-        doc.setFillColor(...PAPER);
-        doc.rect(0, 0, pageW, pageH, 'F');
-        y = 28;
-      }
-      doc.text(lines, margin, y);
-      y += lines.length * 6 + 5;
-    });
+    doc.setFontSize(9.5);
+    doc.setTextColor(220, 215, 200);
+    doc.text(bodyLines, margin, y);
+    y += bodyLines.length * 4.5 + 5;
+  };
 
+  SECTIONS.forEach(drawSection);
+
+  // Footer on every page
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
     doc.setFont('courier', 'normal');
     doc.setFontSize(7);
     doc.setTextColor(...MUTED);
-    doc.text('AETHERIS · METHODOLOGY · ' + sec.title.split('.')[0], margin, pageH - 8);
-  });
+    doc.text('Aetheris · Indianapolis, IN · (317) 376-2110 · aetheris.technology', margin, pageH - 7);
+    doc.text(`${i}/${pageCount}`, pageW - margin, pageH - 7, { align: 'right' });
+  }
 
   doc.save('Aetheris-Revenue-Diagnostic-Methodology.pdf');
 }
