@@ -32,6 +32,8 @@ import {
 } from 'lucide-react';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import careersHero from '@/assets/careers-hero.jpg';
+import careersIntroVideo from '@/assets/careers-intro.mp4';
+import careersIntroPoster from '@/assets/careers-intro-poster.jpg';
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
