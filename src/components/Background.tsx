@@ -30,7 +30,7 @@ export const Background: React.FC = () => {
     const particleCount = Math.min(80, Math.max(50, Math.floor(window.innerWidth / 20)));
     const rootStyles = getComputedStyle(document.documentElement);
     const amber = rootStyles.getPropertyValue('--amber-glow').trim() || '36 90% 55%';
-    const background = rootStyles.getPropertyValue('--background').trim() || '220 15% 8%';
+    const background = '0 0% 0%';
     const maxDistance = 150;
     const maxDistanceSquared = maxDistance * maxDistance;
     let animationFrameId = 0;
