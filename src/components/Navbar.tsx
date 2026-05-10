@@ -47,9 +47,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Home', href: '/', special: true },
     { label: 'Diagnostic', href: '/diagnostic', tone: 'yellow' },
     { label: 'Methodology', href: '/methodology' },
-    { label: 'Credentials', href: '/credentials' },
-    { label: 'Field Notes', href: '/blog' },
     { label: 'About', href: '/about' },
+    { label: 'Field Notes', href: '/blog' },
+    { label: 'Playbook', href: '/playbook/linkedin' },
+    { label: 'News', href: '/news' },
+    { label: 'Careers', href: '/careers', tone: 'yellow' },
   ];
 
   const showStickyCTA = true;
@@ -95,13 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             ))}
           </div>
 
-          <Link
-            to="/careers"
-            onClick={() => trackEvent('click', { label: 'nav_careers', location: 'navbar' })}
-            className="ml-auto hidden md:inline-flex text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap text-sm tracking-wide"
-          >
-            Careers
-          </Link>
+          <div className="ml-auto hidden md:block" />
 
           <button
             className="md:hidden ml-auto text-foreground"

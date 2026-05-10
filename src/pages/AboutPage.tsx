@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { OperatorBio } from '@/components/OperatorBio';
@@ -7,7 +8,17 @@ import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
+import { Button } from '@/components/ui/button';
 import { combineSchemas, personSchema } from '@/lib/schemas';
+import { generateCredentialsPdf } from '@/lib/generateCredentialsPdf';
+
+const CRED_BLOCKS: { label: string; body: string }[] = [
+  { label: 'Background', body: '20 years building revenue systems for manufacturers. Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with SpaceX accounts.' },
+  { label: 'Prior operator roles', body: 'Director of Strategy, $25M aerospace contract manufacturer. Revenue operations, CRM implementation, and sales-process rebuild for specialty manufacturing across construction, aerospace, and equipment categories.' },
+  { label: 'Certifications', body: 'IBM · Harvard · Google · HubSpot. Continuing operator-track training in revenue operations and CRM administration.' },
+  { label: 'Company', body: 'Aetheris. Headquartered in Indianapolis, Indiana. US-wide engagements remote and on-site. Intellectual property held by CTOguy.ai.' },
+  { label: 'Business continuity', body: 'Sales calls run by Joseph Toney. Active engagements delivered jointly with operating partner. Client files, contracts, and credentials live in a documented, partner-accessible system. Continuity contact and escalation path provided to every retained client.' },
+];
 
 const AboutPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -56,6 +67,37 @@ const AboutPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
           <OperatorBio />
+
+          <section className="px-4 py-16">
+            <div className="max-w-3xl mx-auto">
+              <div className="mb-8">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                  Credentials · Aetheris
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  Joseph Toney — Operator.
+                </h2>
+                <p className="text-lg text-muted-foreground mt-4">
+                  Background, certifications, prior operator roles, and the business-continuity plan procurement teams ask for.
+                </p>
+                <div className="mt-5">
+                  <Button onClick={() => generateCredentialsPdf()} className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download as PDF
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-5">
+                {CRED_BLOCKS.map((b) => (
+                  <section key={b.label} className="glass rounded-sm border border-border/60 p-6">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">{b.label}</div>
+                    <p className="text-foreground/85 leading-relaxed">{b.body}</p>
+                  </section>
+                ))}
+              </div>
+            </div>
+          </section>
+
           <VerifiableOutcomes />
           <TechLogos />
         </div>

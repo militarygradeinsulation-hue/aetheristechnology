@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { SalesChat } from "@/components/SalesChat";
 import { PageViewTracker } from "@/components/PageViewTracker";
@@ -154,7 +154,7 @@ const App = () => (
                       <Route path="/news" element={<NewsPage />} />
                       <Route path="/news/:slug" element={<NewsPostPage />} />
                       <Route path="/methodology" element={<MethodologyPage />} />
-                      <Route path="/credentials" element={<CredentialsPage />} />
+                      <Route path="/credentials" element={<Navigate to="/about" replace />} />
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
