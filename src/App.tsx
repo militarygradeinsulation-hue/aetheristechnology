@@ -154,7 +154,7 @@ const App = () => (
                       <Route path="/news" element={<NewsPage />} />
                       <Route path="/news/:slug" element={<NewsPostPage />} />
                       <Route path="/methodology" element={<MethodologyPage />} />
-                      <Route path="/credentials" element={<CredentialsPage />} />
+                      <Route path="/credentials" element={<Navigate to="/about" replace />} />
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
