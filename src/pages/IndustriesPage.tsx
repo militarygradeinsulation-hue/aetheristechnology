@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2 } from 'lucide-react';
+import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,42 +8,116 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
-import { VERTICALS } from '@/config/verticals';
 
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Healthcare: Heart,
-  Finance: Banknote,
-  Logistics: Truck,
-  Construction: HardHat,
-  Manufacturing: Factory,
-  SaaS: Code2,
-};
+interface IndustryLeak {
+  industry: string;
+  icon: React.ComponentType<{ className?: string }>;
+  primaryLeak: string;
+  typicalLoss: string;
+  whatWeMeasure: string[];
+  slug: string;
+}
+
+const INDUSTRIES: IndustryLeak[] = [
+  {
+    industry: 'Specialty Manufacturing',
+    icon: Factory,
+    primaryLeak: 'Quote-to-close drag and stalled deals after Day 3.',
+    typicalLoss: '$300K–$1.8M / yr',
+    whatWeMeasure: [
+      'Quote follow-up SLA vs. actual',
+      'Time-in-stage by deal value',
+      'RFQ-to-PO conversion by lane',
+    ],
+    slug: 'ai-for-manufacturing',
+  },
+  {
+    industry: 'Construction',
+    icon: HardHat,
+    primaryLeak: 'Bid follow-up gaps and RFI cycle bleed.',
+    typicalLoss: '$200K–$1.2M / yr',
+    whatWeMeasure: [
+      'Bid → award follow-up cadence',
+      'RFI cycle time and stall points',
+      'Change-order capture rate',
+    ],
+    slug: 'ai-for-construction',
+  },
+  {
+    industry: 'Logistics',
+    icon: Truck,
+    primaryLeak: 'Quote response lag and lane-margin invisibility.',
+    typicalLoss: '$250K–$2M / yr',
+    whatWeMeasure: [
+      'Quote response time vs. carrier SLA',
+      'Lane-level margin attribution',
+      'Exception triage cycle',
+    ],
+    slug: 'ai-for-logistics',
+  },
+  {
+    industry: 'Healthcare',
+    icon: Heart,
+    primaryLeak: 'Intake fall-off and prior-auth aging.',
+    typicalLoss: '$180K–$900K / yr',
+    whatWeMeasure: [
+      'Inquiry-to-appointment conversion',
+      'No-show + reschedule loss',
+      'Prior-auth aging buckets',
+    ],
+    slug: 'ai-for-healthcare',
+  },
+  {
+    industry: 'Finance',
+    icon: Banknote,
+    primaryLeak: 'Underwriting cycle drag and KYC handoff loss.',
+    typicalLoss: '$400K–$2.5M / yr',
+    whatWeMeasure: [
+      'Application-to-decision days',
+      'KYC handoff drop-off',
+      'Re-work rate per file',
+    ],
+    slug: 'ai-for-finance',
+  },
+  {
+    industry: 'B2B SaaS',
+    icon: Code2,
+    primaryLeak: 'Trial-to-paid drop and renewal silent churn.',
+    typicalLoss: '$150K–$1M / yr',
+    whatWeMeasure: [
+      'Trial activation by cohort',
+      'Renewal at-risk signals',
+      'Expansion playbook touch-rate',
+    ],
+    slug: 'ai-for-saas',
+  },
+];
 
 const IndustriesPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const jsonLd = combineSchemas(
     serviceSchema(
-      'Industry-Specific AI Consulting',
-      'AI strategy, governance, and deployment tailored to healthcare, finance, logistics, construction, manufacturing, and SaaS.',
-      { serviceType: 'AI Consulting', areaServed: 'United States' }
+      'The Leak Audit — by Industry',
+      '21-Day Revenue Diagnostic ($18,500) applied to specialty manufacturing, construction, logistics, healthcare, finance, and B2B SaaS. Fixed-fee. Source-data appendix included.',
+      { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'Do you specialize in one industry or many?', answer: 'Aetheris is a forensics operator first — the methodology (The Leak Audit™) works across any operation where revenue moves through systems and people. The vertical pages exist because the *patterns* of leaks differ by industry: lead-routing leaks bleed differently in healthcare than in construction.' },
-    { question: 'Why pick a forensics operator over a generic AI consultant?', answer: 'Generic AI consultants ship generic deployments. A forensics operator names the leak before prescribing the fix — so the AI, automation, or CRM you build is solving the actual wound, not the symptom.' },
-    { question: 'Do you serve industries not listed?', answer: 'Yes. The vertical pages reflect deeper pattern libraries. We engage in any industry where leaks compress cycle time, lose leads, or unlock pricing power. Run the free Leak Audit™ or book the Forensic Diagnostic to scope your case.' },
-    { question: 'How fast does the diagnosis happen?', answer: 'Self-scan: 14 minutes (free Leak Audit™). Operator-led Forensic Diagnostic: 14 days inside the operation. Sealed case file with each leak named and quantified delivered Day 14.' },
+    { question: 'What does the 21-Day Leak Audit actually deliver per industry?', answer: 'Same deliverable shape across industries: a 15–30 page leak map, dollar-quantified leaks, prioritized fixes, ROI projections, source-data appendix, and a 60-min readout. The leak *patterns* differ by industry — that\'s what these vertical pages document.' },
+    { question: 'How much is the Leak Audit?', answer: 'Fixed fee of $18,500. 21 calendar days from kickoff. CRM-agnostic — runs on a CSV export from HubSpot, Salesforce, or any system of record.' },
+    { question: 'What if my industry isn\'t listed?', answer: 'The methodology travels. If your business has leads, dollars, or hours moving through systems and people, there are leaks. Book a 15-minute call and we\'ll scope it.' },
+    { question: 'How fast do you find the first leak?', answer: 'Free self-scan: 14 minutes. Operator-led 21-Day Leak Audit: first leaks named within Week 1, full sealed report Day 21.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Forensic Audits by Industry | Aetheris"
-        description="The Leak Audit™ — applied to healthcare, finance, logistics, construction, manufacturing, and SaaS. Find where revenue is bleeding, then rebuild."
+        title="The Leak Audit by Industry | $18,500 Revenue Diagnostic | Aetheris"
+        description="21-Day Revenue Diagnostic by industry. Fixed $18,500 fee. Manufacturing, construction, logistics, healthcare, finance, SaaS. Source-data appendix included."
         path="/industries"
-        keywords="business forensics by industry, revenue leak audit healthcare, AI for finance operations, logistics leak audit, construction operational diagnostic, manufacturing AI consultant, SaaS revenue leaks"
+        keywords="revenue leak audit by industry, manufacturing revenue diagnostic, construction bid leak, logistics quote response, healthcare intake leak, B2B SaaS churn audit, fixed-fee revenue diagnostic"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Industries', path: '/industries' },
@@ -58,22 +132,44 @@ const IndustriesPage: React.FC = () => {
 
         <section className="pt-32 pb-12 px-4">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-case uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-crimson/10 border border-crimson/30 text-crimson text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
-              Forensics by Industry
+              The Leak Audit · By Industry
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
               Every industry leaks <span className="text-crimson">differently</span>.
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Same methodology. Different wound patterns. Pick the file.
+              Same fixed-fee diagnostic. Same forensic deliverable. Different wound patterns by sector.
             </p>
-            <div className="glass rounded-sm p-6 max-w-3xl mx-auto border border-amber/20">
-              <p className="tldr text-lg text-foreground leading-relaxed">
-                The Leak Audit™ runs on any operation — but where the bleeding shows up changes by industry. 
-                Healthcare hemorrhages in intake & no-shows. Construction leaks at quote-follow-up. SaaS bleeds at trial-to-paid. 
-                Pick your file to see the leak patterns we've already mapped.
-              </p>
+
+            <div className="glass rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                What you get — every industry, every engagement
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3">
+                  <DollarSign className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-foreground text-sm">$18,500 fixed</div>
+                    <div className="text-xs text-muted-foreground">No hourly. No scope creep.</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-foreground text-sm">21 calendar days</div>
+                    <div className="text-xs text-muted-foreground">Kickoff to sealed report.</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FileText className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-foreground text-sm">15–30 page report</div>
+                    <div className="text-xs text-muted-foreground">+ source-data appendix.</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -81,21 +177,38 @@ const IndustriesPage: React.FC = () => {
         <section className="py-12 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {VERTICALS.map((v) => {
-                const Icon = ICONS[v.industry] || Building2;
+              {INDUSTRIES.map((v) => {
+                const Icon = v.icon;
                 return (
                   <Link
                     key={v.slug}
                     to={`/${v.slug}`}
-                    className="glass rounded-2xl p-6 border border-border/50 hover:border-amber/50 transition-all hover:-translate-y-1 group"
+                    className="glass rounded-sm p-6 border border-border/60 hover:border-amber/50 transition-all hover:-translate-y-1 group flex flex-col"
                   >
-                    <div className="w-14 h-14 rounded-xl bg-amber/10 flex items-center justify-center mb-4 group-hover:bg-amber/20 transition-colors">
-                      <Icon className="w-7 h-7 text-amber" />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+                        <Icon className="w-6 h-6 text-amber" />
+                      </div>
+                      <div className="text-right">
+                        <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">Typical bleed</div>
+                        <div className="font-mono text-crimson font-bold text-sm">{v.typicalLoss}</div>
+                      </div>
                     </div>
-                    <h2 className="text-2xl font-bold font-display mb-2">{v.industry}</h2>
-                    <p className="text-muted-foreground mb-4">{v.heroSubheadline}</p>
-                    <div className="text-amber font-semibold inline-flex items-center gap-1">
-                      Explore {v.industry} AI <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <h2 className="text-xl font-bold font-forensic mb-2 text-foreground">{v.industry}</h2>
+                    <p className="text-sm text-muted-foreground mb-4 italic">"{v.primaryLeak}"</p>
+
+                    <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
+                      What we measure
+                    </div>
+                    <ul className="space-y-1 mb-5 flex-1">
+                      {v.whatWeMeasure.map((m) => (
+                        <li key={m} className="text-xs text-foreground/75 flex gap-2">
+                          <span className="text-amber">›</span>{m}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40">
+                      Open the case file <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
                 );
@@ -107,24 +220,23 @@ const IndustriesPage: React.FC = () => {
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto text-center glass rounded-sm p-10 border border-amber/30">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-              Industry Not Listed?
+              Industry not listed?
             </div>
             <h2 className="font-forensic text-3xl md:text-4xl font-bold mb-4">
               The methodology travels.
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              If your business has leads, dollars, or hours moving through systems and people — there are leaks. 
-              Run the free self-scan or open a case.
+              If revenue moves through systems and people, there are leaks. $18,500. 21 days. Sealed report.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/leak-audit">
-                <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
-                  Run the Free Leak Audit™ <ArrowRight className="ml-2 w-4 h-4" />
+              <Link to="/diagnostic">
+                <Button size="lg" className="bg-crimson hover:bg-crimson/90 text-foreground font-semibold">
+                  Open The Leak Audit — $18,500 <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
-              <Link to="/contact">
+              <Link to="/leak-audit">
                 <Button size="lg" variant="outline">
-                  Open a Case
+                  Run the free self-scan
                 </Button>
               </Link>
             </div>
