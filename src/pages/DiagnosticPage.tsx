@@ -73,6 +73,42 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </div>
 
+            <section className="glass rounded-sm border border-crimson/40 p-6 mb-10">
+              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
+                Why we're not another AI company
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-4 leading-tight">
+                Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-sm border border-border/60 bg-background/40 p-4">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
+                  <ul className="space-y-1.5 text-sm text-foreground/65">
+                    <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
+                    <li>• Hand you software and walk away</li>
+                    <li>• Charge per seat, per token, per month, forever</li>
+                    <li>• Pitch "AI transformation" with no operator on the floor</li>
+                    <li>• Generic playbooks from a junior consultant + GPT wrapper</li>
+                    <li>• You do the work of finding what's broken</li>
+                  </ul>
+                </div>
+                <div className="rounded-sm border border-amber/40 bg-amber/5 p-4">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
+                  <ul className="space-y-1.5 text-sm text-foreground/90">
+                    <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
+                    <li>• You get a written leak map — not a software login</li>
+                    <li>• One fixed fee. $18,500. No retainer to read the report</li>
+                    <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
+                    <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
+                    <li>• We tell you exactly where the money is leaking and what to fix first</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground italic mt-4 text-center">
+                AI is the microscope. The operator is the one holding it. That's the difference.
+              </p>
+            </section>
+
             <div className="glass rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
               <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
