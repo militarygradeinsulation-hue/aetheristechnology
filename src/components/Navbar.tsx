@@ -98,6 +98,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                     ? 'text-amber hover:text-amber/80 font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
+                onMouseEnter={() => handlePrefetch(item)}
+                onFocus={() => handlePrefetch(item)}
+                onTouchStart={() => handlePrefetch(item)}
                 onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
               >
                 {item.label}
