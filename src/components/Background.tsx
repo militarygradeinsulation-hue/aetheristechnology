@@ -27,15 +27,13 @@ export const Background: React.FC = () => {
     window.addEventListener('resize', setCanvasSize);
 
     const particles: Particle[] = [];
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const particleCount = prefersReducedMotion ? 0 : Math.min(40, Math.max(24, Math.floor(window.innerWidth / 40)));
+    const particleCount = Math.min(80, Math.max(50, Math.floor(window.innerWidth / 20)));
     const rootStyles = getComputedStyle(document.documentElement);
     const amber = rootStyles.getPropertyValue('--amber-glow').trim() || '36 90% 55%';
     const background = rootStyles.getPropertyValue('--background').trim() || '220 15% 8%';
-    const maxDistance = 120;
+    const maxDistance = 150;
     const maxDistanceSquared = maxDistance * maxDistance;
     let animationFrameId = 0;
-    let lastFrame = 0;
 
     // Create particles
     for (let i = 0; i < particleCount; i++) {
@@ -48,18 +46,12 @@ export const Background: React.FC = () => {
       });
     }
 
-    const animate = (timestamp = 0) => {
+    const animate = () => {
       if (document.hidden) {
         animationFrameId = requestAnimationFrame(animate);
         return;
       }
 
-      if (timestamp - lastFrame < 33) {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-
-      lastFrame = timestamp;
       ctx.fillStyle = `hsl(${background} / 0.12)`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
