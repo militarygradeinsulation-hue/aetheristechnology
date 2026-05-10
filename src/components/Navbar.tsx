@@ -43,17 +43,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
+  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow'; prefetch?: () => Promise<unknown> }[] = [
     { label: 'Home', href: '/', special: true },
-    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red' },
-    { label: 'Industries', href: '/industries' },
-    { label: 'Methodology', href: '/methodology' },
-    { label: 'About', href: '/about' },
-    { label: 'Field Notes', href: '/blog' },
-    { label: 'Playbooks', href: '/resources' },
-    { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers', tone: 'yellow' },
+    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red', prefetch: () => import('@/pages/DiagnosticPage') },
+    { label: 'Industries', href: '/industries', prefetch: () => import('@/pages/IndustriesPage') },
+    { label: 'Methodology', href: '/methodology', prefetch: () => import('@/pages/MethodologyPage') },
+    { label: 'About', href: '/about', prefetch: () => import('@/pages/AboutPage') },
+    { label: 'Field Notes', href: '/blog', prefetch: () => import('@/pages/BlogPage') },
+    { label: 'Playbooks', href: '/resources', prefetch: () => import('@/pages/ResourcesPage') },
+    { label: 'News', href: '/news', prefetch: () => import('@/pages/NewsPage') },
+    { label: 'Careers', href: '/careers', tone: 'yellow', prefetch: () => import('@/pages/CareersPage') },
   ];
+
+  const prefetchedRef = useRef<Set<string>>(new Set());
+  const handlePrefetch = (item: { href: string; prefetch?: () => Promise<unknown> }) => {
+    if (!item.prefetch || prefetchedRef.current.has(item.href)) return;
+    prefetchedRef.current.add(item.href);
+    item.prefetch().catch(() => prefetchedRef.current.delete(item.href));
+  };
 
   const showStickyCTA = true;
   const expanded = isHovered || isMobileMenuOpen;
