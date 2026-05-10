@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, X } from 'lucide-react';
+import {
+  ArrowRight, Check, X, Database, Globe, MessagesSquare, FileSearch,
+  CalendarRange, Mic2, ListChecks, ShieldAlert, Search,
+} from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -15,6 +18,24 @@ const INCLUDES = [
   'Source-data appendix — every CSV and query used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
+];
+
+interface ToolItem {
+  icon: React.ComponentType<{ className?: string }>;
+  name: string;
+  finds: string;
+}
+
+const TOOL_BUNDLE: ToolItem[] = [
+  { icon: Globe, name: 'Website + Digital Footprint Scan', finds: 'AI-readiness, SEO/GEO gaps, schema, page-speed leaks visible to buyers.' },
+  { icon: Database, name: 'CRM Hygiene Audit', finds: 'Duplicate contacts, stalled deals, broken stage definitions, ghost pipeline.' },
+  { icon: ShieldAlert, name: 'Brand Contradiction Finder', finds: 'Where your homepage, sales deck, and proposal say three different things.' },
+  { icon: MessagesSquare, name: 'Friction Vocabulary Audit', finds: 'Words on your site that quietly cost you the deal.' },
+  { icon: FileSearch, name: 'Strategic Question Engine', finds: 'The 12 questions a CFO will ask that your team can\'t answer yet.' },
+  { icon: ListChecks, name: '20-Question Business Diagnostic', finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.' },
+  { icon: Mic2, name: 'Sales Script + Follow-Up Generator', finds: 'Custom outbound + post-quote sequences mapped to your stalled deals.' },
+  { icon: CalendarRange, name: '90-Day Content Calendar', finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.' },
+  { icon: Search, name: 'AI Visibility Scorecard', finds: 'How ChatGPT, Perplexity, and Google AI describe you vs. competitors.' },
 ];
 
 const NOT_INCLUDED = [
@@ -96,6 +117,48 @@ const DiagnosticPage: React.FC = () => {
                 </ul>
               </section>
             </div>
+
+            <section className="glass rounded-sm border border-amber/40 p-6 mb-10">
+              <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                  Bundled — Operator Tool Suite
+                </div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Included · No add-on fee
+                </div>
+              </div>
+              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
+                Nine live diagnostic tools your operator runs against your business.
+              </h2>
+              <p className="text-sm text-foreground/75 mb-5">
+                Every Diagnostic engagement includes the full Aetheris tool suite — the same instruments our reps use in the field. Findings from each tool feed the final leak map. You see CRM bleed, digital footprint exposure, brand contradictions, and AI visibility — all in one report.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {TOOL_BUNDLE.map((t) => {
+                  const Icon = t.icon;
+                  return (
+                    <div
+                      key={t.name}
+                      className="rounded-sm border border-border/60 bg-background/40 p-3.5 hover:border-amber/40 transition-colors"
+                    >
+                      <div className="flex items-start gap-2.5 mb-1.5">
+                        <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4 text-amber" />
+                        </div>
+                        <div className="font-bold text-foreground text-sm leading-tight">{t.name}</div>
+                      </div>
+                      <p className="text-xs text-foreground/65 leading-snug pl-9">
+                        <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
+                        {t.finds}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground italic mt-4">
+                Tool outputs land in the source-data appendix. Your team keeps the raw exports after the engagement.
+              </p>
+            </section>
 
             <section className="glass rounded-sm border border-border/60 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
