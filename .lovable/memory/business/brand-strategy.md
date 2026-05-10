@@ -1,63 +1,42 @@
 ---
-name: Brand Strategy — Business Forensics Operator
-description: Core positioning, value prop, methodology, and brand voice for Aetheris as a Business Forensics Operator
+name: Brand Strategy — Specialty Manufacturer Revenue Systems
+description: Credentials-first positioning for specialty manufacturers $5M–$25M, two-offer surface, 21-Day Revenue Diagnostic
 type: feature
 ---
 
-## Positioning
-**Business Forensics Operator.** Not a consultant, not an advisor, not a thought leader. An operator who embeds into businesses, finds where they're bleeding, and stops the bleeding.
+## Positioning (public site)
+Aetheris helps **specialty manufacturers ($5M–$25M revenue, US-based)** find the **$200K–$2M** they're losing to broken CRM, sales follow-up, and operational systems — and fix it.
 
-**Hook:** "Your business is leaking. You just can't see it from the inside."
+## Wedge
+Internally: commercial playground equipment manufacturers. Publicly: "specialty manufacturers" — broader phrase, same wedge.
 
-## Core Methodology
-**The Leak Audit™** — 7-step forensic methodology:
-1. Pipeline Forensics — Track every lead from first touch to close, measure every drop-off
-2. CRM Autopsy — Adoption audit, data quality, process compliance
-3. Revenue Attribution — Map marketing spend to actual pipeline revenue
-4. Vendor Stack Audit — 137 avg SaaS tools, 30% unused — find the waste
-5. Process Failure Analysis — Document the gap between claimed and actual operations
-6. Margin Compression Diagnostic — Why the P&L looks healthy but cash flow is dying
-7. Follow-Up System Audit — 80% of sales need 5+ touches, most teams stop at 1
+## Credentials-first hook (not metaphors)
+- 20 years building revenue systems for manufacturers
+- Marine Corps veteran
+- Former Director of Strategy at a $25M aerospace firm with SpaceX accounts
+- Certifications: IBM, Harvard, Google, HubSpot
 
-## Entry Point
-**Forensic Diagnostic — $2,500 flat.** 14-day deep-dive producing a prioritized leak map. Fee applied toward any engagement (making diagnosis free if you fix the problem). Converts at 72%.
+## Two public offers — only two
+1. **21-Day Revenue Diagnostic — $18,500 fixed fee.** Map where CRM, sales follow-up, and lead flow are losing money. Deliverable: written report, prioritized fixes, ROI projections, implementation roadmap. Fixed fee — no percentage-of-savings, no retainer required. CRM-agnostic (runs on a CSV export). HubSpot/Salesforce live integration is an upsell.
+2. **Implementation Retainer — $15K/month, 3-month minimum.** Available only to Diagnostic clients.
 
-## Brand Voice
-- Forensic, blunt, aggressive, non-corporate
-- Language: "revenue hemorrhage", "operational autopsy", "pipeline leakage", "margin drain", "systemic breakdown"
-- Every sentence is a diagnosis, not a suggestion
-- Crimson accent reserved for "leak" signals only
+## Methodology doc
+Two-page measurement methodology lives at `/methodology` and PDF download. Goes to every prospect before pricing is discussed. Sections: how we define a leak, how we baseline, how we attribute recovery, scope, audit verification, deliverables.
 
-## LinkedIn Growth Content Framework
-Four strategic post formats for reach:
-1. **Brandjacking** — Analyze brand decisions (Salesforce, HubSpot, Stripe) through the revenue leak lens
-2. **Newsjacking** — Industry shifts reframed through The Leak Audit (24-48 hour window critical)
-3. **Namejacking** — Reference figures the ICP follows (Hormozi, Nadella, Dharmesh Shah) as pattern interrupts
-4. **Hot Takes** — Contrarian positions that force agreement or disagreement
+## Credentials sheet
+One-page PDF at `/credentials`: bio, military service, prior operator roles, certs, formation date, structure, business-continuity plan. Attached to every proposal.
 
-### Weekly Content Mix
-| Day | Format | Goal |
-|-----|--------|------|
-| Mon | Growth (Brandjack/Newsjack) | New audience acquisition |
-| Tue | Authority / Deep-Dive | Trust with existing followers |
-| Wed | Case Study / Forensic Report | Social proof |
-| Thu | Growth (Namejack/Hot Take) | Scale visibility |
-| Fri | Niche Expertise / Q&A | Engagement and retention |
+## Sales mechanics (not visible on site)
+- Pilot pricing: $9,500 for first three signed by hard deadline. Full case study + video testimonial + named reference required. Lives in outreach scripts only — never on the public site.
+- Rep program is intact in code but not publicly promoted until 3 case studies + documented playbook exist.
 
-### Pre-Publishing Filters
-- **"So What?" Test**: Must answer "so what?" in one sentence or it's still summarizing
-- **"Anxiety Test" (Hot Takes)**: If it doesn't make you nervous to publish, it's not contrarian enough
-- **Contextualization > Summarization**: Brand/person/event is EVIDENCE for a forensic point only Aetheris would make
-
-## Proprietary Frameworks
-- The Leak Audit™ — 7-step forensic methodology
-- The Forensic Diagnostic — $2,500 entry-point diagnostic
-- The Revenue Autopsy Framework™ — Post-mortem on lost deals and churned clients
-- The Operational X-Ray™ — Rapid gap analysis between claimed and actual operations
+## Tone
+- Blunt. Operator. Specialty-manufacturer-literate.
+- "Revenue leak" / "Leak Audit™" language survives in `/blog`, `/leak-audit`, and downloadable content. It does not lead the homepage, hero, or services page.
 
 ## Forbidden
-- "AI Systems Architect" title
-- Generic AI-guru gradients
+- Public pilot pricing or discount banners
+- Tool-pack mega-menus / 40-tool roadmap surfaces
 - Social proof popups, testimonials carousels
-- "Magic Robot" analogies
-- Consultant/advisor positioning — always Operator
+- "AI Systems Architect" title, generic AI-guru gradients
+- 10-industry keyword stacks above the fold
