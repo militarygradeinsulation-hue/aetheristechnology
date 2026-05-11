@@ -263,21 +263,26 @@ const MessageView: React.FC<{
 };
 
 const ComposeDialog: React.FC<{
-  initial: { to?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
+  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
   mailbox: RepMailbox;
   onClose: () => void;
   onSent: () => void;
-}> = ({ initial, mailbox, onClose, onSent }) => {
+  onDraftSaved?: () => void;
+}> = ({ initial, mailbox, onClose, onSent, onDraftSaved }) => {
   const { toast } = useToast();
+  const [draftId, setDraftId] = useState<string | null>(initial.id || null);
   const [to, setTo] = useState(initial.to || "");
-  const [cc, setCc] = useState("");
+  const [cc, setCc] = useState(initial.cc || "");
   const [subject, setSubject] = useState(initial.subject || "");
   const [body, setBody] = useState(initial.body || "");
   const [sending, setSending] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+
+  const parseAddrs = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
 
   const send = async () => {
-    const toList = to.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
-    const ccList = cc.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+    const toList = parseAddrs(to);
+    const ccList = parseAddrs(cc);
     if (toList.length === 0) { toast({ title: "Add a recipient", variant: "destructive" }); return; }
     if (!subject.trim()) { toast({ title: "Add a subject", variant: "destructive" }); return; }
     if (!body.trim()) { toast({ title: "Body cannot be empty", variant: "destructive" }); return; }
@@ -288,10 +293,32 @@ const ComposeDialog: React.FC<{
         in_reply_to: initial.in_reply_to || null,
         thread_id: initial.thread_id || null,
       });
+      // Clean up draft if we're sending a previously-saved draft
+      if (draftId) {
+        try { await repMailbox.deleteForever(draftId); } catch { /* non-fatal */ }
+      }
       onSent();
     } catch (e: any) {
       toast({ title: "Send failed", description: e.message, variant: "destructive" });
     } finally { setSending(false); }
+  };
+
+  const saveDraft = async () => {
+    setSavingDraft(true);
+    try {
+      const saved = await repMailbox.saveDraft({
+        id: draftId,
+        to: parseAddrs(to), cc: parseAddrs(cc),
+        subject, body_text: body,
+        in_reply_to: initial.in_reply_to || null,
+        thread_id: initial.thread_id || null,
+      });
+      setDraftId(saved.id);
+      toast({ title: "Draft saved" });
+      onDraftSaved?.();
+    } catch (e: any) {
+      toast({ title: "Couldn't save draft", description: e.message, variant: "destructive" });
+    } finally { setSavingDraft(false); }
   };
 
   return (
