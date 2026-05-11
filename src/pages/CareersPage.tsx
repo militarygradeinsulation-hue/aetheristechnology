@@ -229,8 +229,8 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. One math equation. The split is locked at 70/15/15 — company / rep / partner. We don\'t move the goalposts.' },
           { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
         ].map(({ icon: Icon, title, desc }) => (
-          <Card key={title} className="bg-card/60 backdrop-blur border-border/50 hover:border-amber/40 transition-colors">
-            <CardContent className="p-6 flex items-start gap-4">
+          <div key={title} className="premium-tile rounded-xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
+            <div className="flex items-start gap-4">
               <div className="w-11 h-11 rounded-lg bg-amber/15 border border-amber/30 flex items-center justify-center flex-shrink-0">
                 <Icon className="w-5 h-5 text-amber" />
               </div>
@@ -238,8 +238,8 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
                 <h3 className="font-semibold text-foreground font-display text-lg">{title}</h3>
                 <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>
