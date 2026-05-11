@@ -13,14 +13,21 @@ interface Flagship {
   priceCents: number;
   recurring?: boolean;
   cadence: string;
+  included: string[];
 }
 
 const FLAGSHIPS: Flagship[] = [
   {
-    name: 'Forensic Diagnostic (Leak Audit)',
-    blurb: 'Operator-led leak audit. The entry offer featured on aetheris.technology — applied toward the 21-Day engagement if they upgrade.',
-    priceCents: 250000,
+    name: '21-Day Revenue Diagnostic',
+    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.',
+    priceCents: 1850000,
     cadence: 'one-time',
+    included: [
+      '12-month CRM snapshot and lead-flow review',
+      'Lead-to-contact, follow-up, and deal-stage leak analysis',
+      '15–30 page written findings report with prioritized fixes',
+      'ROI projections, source-data appendix, and 60-minute readout',
+    ],
   },
   {
     name: 'Implementation Retainer',
@@ -28,12 +35,23 @@ const FLAGSHIPS: Flagship[] = [
     priceCents: 1500000,
     recurring: true,
     cadence: 'per month',
+    included: [
+      'Execution of the highest-value leaks found in the Diagnostic',
+      'CRM, follow-up, sales process, reporting, and automation fixes',
+      'Operator-led weekly priorities and implementation oversight',
+      'Monthly progress math tied to retained revenue and pipeline movement',
+    ],
   },
   {
-    name: '21-Day Revenue Diagnostic',
-    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.',
-    priceCents: 1850000,
+    name: 'Forensic Diagnostic (Leak Audit)',
+    blurb: 'Operator-led leak audit. Entry offer applied toward the 21-Day engagement if they upgrade.',
+    priceCents: 250000,
     cadence: 'one-time',
+    included: [
+      'Operator review of the free Leak Audit self-scan',
+      'Surface-level revenue leak map and next-step recommendation',
+      'Applied toward a larger engagement when the client upgrades',
+    ],
   },
 ];
 
@@ -85,6 +103,18 @@ export const FlagshipCommissionPanel: React.FC = () => {
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-3xl font-bold text-foreground">{fmtUsd(f.priceCents)}</span>
                   <span className="text-xs text-muted-foreground font-mono uppercase">{f.cadence}</span>
+                </div>
+
+                <div className="mb-4 rounded-md border border-border/50 bg-card/40 p-3">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2">What's included</div>
+                  <ul className="space-y-1.5 text-xs text-muted-foreground">
+                    {f.included.map((item) => (
+                      <li key={item} className="flex gap-2">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div className="space-y-0">
