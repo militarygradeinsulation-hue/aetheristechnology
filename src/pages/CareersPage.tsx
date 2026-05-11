@@ -425,9 +425,9 @@ const PlaybookSection = () => (
           </TableHeader>
           <TableBody>
             {[
-              ["Digital Snapshot", "$125", "Automated report", "Door opener — shows them their gaps"],
-              ["Website Evaluation", "$500", "Detailed analysis + call", "Builds authority, earns trust"],
-              ["14-Day Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
+              ["Digital Snapshot", "$149", "Automated report", "Door opener — shows them their gaps"],
+              ["Website Evaluation", "$599", "Detailed analysis + call", "Builds authority, earns trust"],
+              ["14-Day Forensic Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
               ["Implementation", "$5K–$25K+", "Full build-out", "Website, CRM, automation, the works"],
             ].map(([service, price, format, purpose]) => (
               <TableRow key={service}>
