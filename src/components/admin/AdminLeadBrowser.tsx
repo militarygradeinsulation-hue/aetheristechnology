@@ -72,47 +72,32 @@ export const AdminLeadBrowser: React.FC = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from('rep_leads')
-      .select('id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at')
-      .order('score', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false })
-      .limit(200);
-
-    if (filter === 'pool') q = q.is('claimed_by_code', null).is('assigned_to_code', null);
-    if (filter === 'assigned') q = q.is('claimed_by_code', null).not('assigned_to_code', 'is', null);
-    if (filter === 'claimed') q = q.not('claimed_by_code', 'is', null);
-    if (search.trim()) q = q.or(`business_name.ilike.%${search.trim()}%,website.ilike.%${search.trim()}%,industry.ilike.%${search.trim()}%`);
-    if (typeof minScore === 'number') q = q.gte('score', minScore);
-
-    const { data, error } = await q;
-    if (error) toast({ title: 'Failed to load leads', description: error.message, variant: 'destructive' });
-    setLeads((data || []) as Lead[]);
-    setSelected(new Set());
-    setLoading(false);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: {
+          action: 'leads_browser',
+          filter,
+          search,
+          minScore: typeof minScore === 'number' ? minScore : null,
+        },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setLeads((data?.leads || []) as Lead[]);
+      setReps(((data?.reps || []) as Rep[]).filter(r => r.is_active));
+      setDripCounts((data?.dripCounts || {}) as Record<string, number>);
+      setSelected(new Set());
+    } catch (e) {
+      toast({ title: 'Failed to load leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   }, [filter, search, minScore, toast]);
 
-  const loadReps = useCallback(async () => {
-    const { data } = await supabase.from('rep_codes').select('code,rep_name,is_active,role').order('rep_name');
-    setReps(((data || []) as Rep[]).filter(r => r.is_active));
-  }, []);
-
-  const loadDripCounts = useCallback(async () => {
-    const nowIso = new Date().toISOString();
-    const { data } = await supabase.from('rep_leads')
-      .select('assigned_to_code')
-      .is('claimed_by_code', null)
-      .not('assigned_to_code', 'is', null)
-      .gt('assignment_expires_at', nowIso)
-      .limit(5000);
-    const counts: Record<string, number> = {};
-    (data || []).forEach((r: any) => {
-      if (r.assigned_to_code) counts[r.assigned_to_code] = (counts[r.assigned_to_code] || 0) + 1;
-    });
-    setDripCounts(counts);
-  }, []);
-
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { loadReps(); loadDripCounts(); }, [loadReps, loadDripCounts]);
 
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
