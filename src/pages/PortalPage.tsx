@@ -361,7 +361,12 @@ const PortalPage: React.FC = () => {
             </Card>
           </div>
         );
-      case 'commissions': return <CommissionStructurePanel />;
+      case 'commissions': return (
+        <div className="space-y-6">
+          <FlagshipCommissionPanel />
+          <CommissionStructurePanel />
+        </div>
+      );
       case 'leads': return <LeadsBoard />;
       case 'forecast': return <ForecastCenter isPartner={isPartner} />;
       case 'tools':
