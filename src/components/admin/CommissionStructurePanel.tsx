@@ -15,6 +15,7 @@ import {
   companyCentsForProduct,
   type CommissionTier,
 } from '@/lib/repProducts';
+import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionPanel';
 
 const TIERS: CommissionTier[] = [1, 2, 3];
 
@@ -82,6 +83,8 @@ export const CommissionStructurePanel: React.FC = () => {
         <span className="text-xs text-amber font-mono hidden group-open:inline">Collapse ▴</span>
       </summary>
       <div className="space-y-6 p-4 pt-2">
+      <FlagshipCommissionPanel />
+
       {/* Tiered rules */}
       <Card>
         <CardHeader>
