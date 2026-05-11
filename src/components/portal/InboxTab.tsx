@@ -337,9 +337,13 @@ const ComposeDialog: React.FC<{
             <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
           )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={send} disabled={sending}>
+          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending}>
+            {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+            Save draft
+          </Button>
+          <Button onClick={send} disabled={sending || savingDraft}>
             {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
             Send
           </Button>
