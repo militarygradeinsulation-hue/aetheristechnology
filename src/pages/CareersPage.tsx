@@ -192,9 +192,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         { stat: '15%', label: 'Flat commission, recurring' },
         { stat: '7d', label: 'Pay timeline post-clearance' },
         { stat: '$885/mo', label: 'Per Fractional retainer, residual' },
-        { stat: '0', label: 'Caps. Tiers. Clawbacks.' },
+        { stat: '0', label: 'Caps. Clawbacks. Goalposts moved.' },
       ].map((s) => (
-        <div key={s.label} className="rounded-xl border border-amber/20 bg-card/50 p-5 text-center backdrop-blur">
+        <div key={s.label} className="premium-tile rounded-xl p-5 text-center border border-amber/20">
           <p className="font-display text-3xl md:text-4xl text-amber font-bold">{s.stat}</p>
           <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
         </div>
