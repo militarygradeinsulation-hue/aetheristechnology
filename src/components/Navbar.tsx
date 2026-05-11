@@ -77,19 +77,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             />
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`transition-colors whitespace-nowrap ${
+                className={`premium-pill-btn whitespace-nowrap ${
                   item.tone === 'red'
-                    ? 'text-crimson hover:text-crimson/80 font-semibold'
+                    ? '!text-crimson'
                     : item.tone === 'yellow'
-                    ? 'text-yellow-400 hover:text-yellow-300 font-semibold'
+                    ? '!text-yellow-400'
                     : item.special
-                    ? 'text-amber hover:text-amber/80 font-semibold'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? '!text-amber'
+                    : ''
                 }`}
                 onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
               >
