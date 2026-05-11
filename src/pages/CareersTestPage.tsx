@@ -150,7 +150,7 @@ const CareersTestPage = () => {
         <div className="pt-24 pb-32 px-4 max-w-3xl mx-auto">
 
           {phase === 'intro' && (
-            <Card className="bg-card/60 backdrop-blur border-border/50">
+            <Card className="bg-card/60 backdrop-blur border-border/50 premium-tile">
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -158,18 +158,24 @@ const CareersTestPage = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 space-y-2">
-                  <div className="font-mono uppercase text-xs text-amber flex items-center gap-2"><BookOpen className="w-4 h-4" /> Study these first</div>
-                  <ul className="text-sm space-y-1">
+                <div className="space-y-2">
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber flex items-center gap-2"><BookOpen className="w-3.5 h-3.5" /> Study these first</div>
+                  <div className="flex flex-wrap gap-2">
                     {STUDY_LINKS.map(l => (
-                      <li key={l.href}>
-                        · <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{l.label}</a>
-                      </li>
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="premium-tile rounded-full px-4 py-2 text-xs font-case uppercase tracking-widest text-amber hover:text-amber/80 border border-amber/30 transition-colors"
+                      >
+                        {l.label}
+                      </a>
                     ))}
-                  </ul>
+                  </div>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                  <li>Topics: positioning, Leak Audit, pricing, commission, sales process, brand rules.</li>
+                  <li>Topics: positioning, Leak Audit, pricing ($149 Snapshot · $599 Eval · $2,500 Forensic Diagnostic · Fractional retainers), commission (15% flat, recurring for life), sales process, brand rules.</li>
                   <li>Questions are randomized. No back-tracking once submitted.</li>
                   <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code — it's how I review you.</li>
                 </ul>
