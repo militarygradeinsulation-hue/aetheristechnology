@@ -313,7 +313,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
           { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
-          <div key={tag} className="rounded-xl border border-border/50 bg-card/60 p-5">
+          <div key={tag} className="premium-tile rounded-xl p-5 border border-border/50">
             <p className="font-mono text-[10px] tracking-[0.3em] text-amber">{tag}</p>
             <p className="font-semibold text-foreground font-display mt-2">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
