@@ -97,6 +97,58 @@ serve(async (req) => {
       });
     }
 
+    if (action === "leads_browser") {
+      const filter = (body.filter as string) || "pool";
+      const search = (body.search as string) || "";
+      const minScore = typeof body.minScore === "number" ? body.minScore : null;
+
+      let q = supabase
+        .from("rep_leads")
+        .select(
+          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at",
+        )
+        .order("score", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (filter === "pool") q = q.is("claimed_by_code", null).is("assigned_to_code", null);
+      if (filter === "assigned") q = q.is("claimed_by_code", null).not("assigned_to_code", "is", null);
+      if (filter === "claimed") q = q.not("claimed_by_code", "is", null);
+      if (search.trim()) {
+        const s = search.trim();
+        q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
+      }
+      if (minScore !== null) q = q.gte("score", minScore);
+
+      const nowIso = new Date().toISOString();
+      const [leadsR, repsR, dripR] = await Promise.all([
+        q,
+        supabase.from("rep_codes").select("code,rep_name,is_active,role").order("rep_name"),
+        supabase
+          .from("rep_leads")
+          .select("assigned_to_code")
+          .is("claimed_by_code", null)
+          .not("assigned_to_code", "is", null)
+          .gt("assignment_expires_at", nowIso)
+          .limit(5000),
+      ]);
+
+      if (leadsR.error) throw leadsR.error;
+      const dripCounts: Record<string, number> = {};
+      (dripR.data || []).forEach((r: any) => {
+        if (r.assigned_to_code) dripCounts[r.assigned_to_code] = (dripCounts[r.assigned_to_code] || 0) + 1;
+      });
+
+      return new Response(
+        JSON.stringify({
+          leads: leadsR.data || [],
+          reps: repsR.data || [],
+          dripCounts,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
