@@ -68,6 +68,29 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+        {/* Listen: who we are & what we do */}
+        <section className="px-4 pt-8 pb-2">
+          <div className="max-w-3xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-7">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Listen · 5 min briefing
+            </div>
+            <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Who we are. What we do for you. <span className="text-amber">In our own words.</span>
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Stopping revenue leaks with Aetheris forensics — an in-depth audio briefing on the methodology, the math, and what an engagement actually looks like.
+            </p>
+            <audio
+              controls
+              preload="metadata"
+              className="w-full"
+              src="/audio/stopping-revenue-leaks-aetheris-forensics.m4a"
+            >
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        </section>
+
         {/* Front-and-center booking */}
         <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
           <div className="max-w-4xl mx-auto">
