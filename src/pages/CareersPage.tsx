@@ -259,7 +259,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: Rocket, title: 'Fast Ramp Path', desc: 'Onboarding playbook, daily hustle goals, AI coach, and the company calendar all push you toward your first close in week 1.' },
           { icon: Trophy, title: 'Promotion to Partner', desc: 'Hit consistent numbers, get promoted. Partner status = recruit reps, earn overrides, get a seat at the strategy table.' },
         ].map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="rounded-xl border border-border/50 bg-card/40 p-5 hover:border-amber/30 transition-colors">
+          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
             <Icon className="w-5 h-5 text-amber mb-3" />
             <p className="font-semibold text-foreground">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5">{desc}</p>
