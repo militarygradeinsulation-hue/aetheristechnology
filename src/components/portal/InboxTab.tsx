@@ -217,7 +217,8 @@ export const InboxTab: React.FC = () => {
           initial={composing}
           mailbox={mailbox}
           onClose={() => setComposing(null)}
-          onSent={() => { setComposing(null); if (folder === "sent") refresh(); else toast({ title: "Sent" }); }}
+          onSent={() => { setComposing(null); if (folder === "sent" || folder === "drafts") refresh(); else toast({ title: "Sent" }); }}
+          onDraftSaved={() => { if (folder === "drafts") refresh(); }}
         />
       )}
 
