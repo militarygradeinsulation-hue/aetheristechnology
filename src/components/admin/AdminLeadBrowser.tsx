@@ -176,7 +176,7 @@ export const AdminLeadBrowser: React.FC = () => {
       });
       const rep = reps.find(r => r.code === code);
       toast({ title: `${rep?.rep_name || code}: +${res.assigned} new (now ${res.current}/${count})`, description: res.message || undefined });
-      load(); loadDripCounts();
+      load(); load();
     } catch (e) {
       toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setRefreshBusy(null); }
@@ -195,7 +195,7 @@ export const AdminLeadBrowser: React.FC = () => {
       });
       const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
       toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
-      load(); loadDripCounts();
+      load(); load();
     } catch (e) {
       toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAutoBusy(false); }
