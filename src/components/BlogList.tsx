@@ -88,7 +88,7 @@ export const BlogList: React.FC = () => {
                   {activeTag && (
                     <button
                       onClick={() => { setActiveTag(null); setVisibleCount(PAGE_SIZE); }}
-                      className="premium-tile rounded-full px-4 py-2 text-[10px] font-case uppercase tracking-widest text-amber hover:text-amber/80 transition-colors"
+                      className="premium-pill-btn text-amber"
                     >
                       <span className="inline-flex items-center gap-1">
                         <X className="w-3 h-3" />
@@ -103,11 +103,7 @@ export const BlogList: React.FC = () => {
                         setActiveTag(activeTag === tag ? null : tag);
                         setVisibleCount(PAGE_SIZE);
                       }}
-                      className={`premium-tile rounded-full px-4 py-2 text-[10px] font-case uppercase tracking-widest transition-colors ${
-                        activeTag === tag
-                          ? 'text-amber bg-amber/10 border-amber/40'
-                          : 'text-muted-foreground hover:text-amber'
-                      }`}
+                      className={`premium-pill-btn ${activeTag === tag ? 'active' : ''}`}
                     >
                       #{tag.replace(/\s+/g, '')}
                     </button>
