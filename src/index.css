@@ -511,6 +511,85 @@
       position: relative;
       z-index: 1;
     }
+
+    /* ===== Premium animated pill buttons (filter tabs) ===== */
+    .premium-pill-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      background: hsl(var(--surface-elevated) / 0.55);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid hsl(var(--border) / 0.65);
+      color: hsl(var(--muted-foreground));
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  background 0.35s ease,
+                  border-color 0.35s ease,
+                  color 0.3s ease,
+                  box-shadow 0.4s ease;
+      will-change: transform;
+    }
+    .premium-pill-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 55%;
+      height: 100%;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        hsl(var(--amber-glow) / 0.06) 40%,
+        hsl(var(--amber-glow) / 0.2) 50%,
+        hsl(var(--amber-glow) / 0.06) 60%,
+        transparent 100%
+      );
+      transform: translateX(-160%) skewX(-22deg);
+      pointer-events: none;
+      z-index: 2;
+      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .premium-pill-btn:hover {
+      transform: translateY(-2px) scale(1.04);
+      background: hsl(var(--surface-elevated) / 0.85);
+      border-color: hsl(var(--amber-glow) / 0.55);
+      color: hsl(var(--amber-glow));
+      box-shadow:
+        0 8px 24px -6px hsl(var(--amber-glow) / 0.2),
+        0 4px 12px -4px hsl(0 0% 0% / 0.5),
+        inset 0 1px 0 0 hsl(var(--amber-glow) / 0.08);
+    }
+    .premium-pill-btn:hover::before {
+      transform: translateX(260%) skewX(-22deg);
+    }
+    .premium-pill-btn:active {
+      transform: translateY(0) scale(0.97);
+      transition-duration: 0.1s;
+    }
+    .premium-pill-btn.active {
+      background: hsl(var(--amber-glow) / 0.12);
+      border-color: hsl(var(--amber-glow) / 0.6);
+      color: hsl(var(--amber-glow));
+      box-shadow:
+        0 0 16px hsl(var(--amber-glow) / 0.15),
+        inset 0 1px 0 0 hsl(var(--amber-glow) / 0.1);
+    }
+    .premium-pill-btn.active::before {
+      transform: translateX(260%) skewX(-22deg);
+    }
+    .premium-pill-btn > * {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   /* Reduced-motion fallback: still apply hover-lift state-change but skip continuous motion */
