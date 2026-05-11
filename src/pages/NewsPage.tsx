@@ -232,9 +232,7 @@ const NewsPage = () => {
               <button
                 key={c.id}
                 onClick={() => setCategory(c.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono uppercase tracking-widest transition ${
-                  category === c.id ? 'bg-amber text-background border border-amber' : 'border border-border text-muted-foreground hover:text-foreground hover:border-amber/40'
-                }`}
+                className={`premium-pill-btn ${category === c.id ? 'active' : ''}`}
               >
                 {c.label}
               </button>

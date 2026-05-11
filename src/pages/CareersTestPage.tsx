@@ -167,7 +167,7 @@ const CareersTestPage = () => {
                         href={l.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="premium-tile rounded-full px-4 py-2 text-xs font-case uppercase tracking-widest text-amber hover:text-amber/80 border border-amber/30 transition-colors"
+                        className="premium-pill-btn text-amber"
                       >
                         {l.label}
                       </a>
