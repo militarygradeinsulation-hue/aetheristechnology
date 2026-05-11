@@ -337,29 +337,7 @@ const PortalPage: React.FC = () => {
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Percent className="w-4 h-4" /> Commission Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{(profile.commission_rate * 100).toFixed(0)}%</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Shield className="w-4 h-4" /> Code</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold font-mono text-amber">{profile.code}</p></CardContent></Card>
             </div>
-            <Card>
-              <CardHeader><CardTitle className="font-display">Your Commission Structure</CardTitle></CardHeader>
-              <CardContent>
-                <div className="rounded-lg border border-amber/20 bg-amber/5 p-4 mb-4">
-                  <p className="text-foreground font-medium">You earn <span className="text-amber font-bold">{(profile.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.</p>
-                  <p className="text-sm text-muted-foreground mt-2">Paid within 7 days of the client's payment clearing. No tiers. No caps. No clawbacks.</p>
-                </div>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="text-right">Client Price</TableHead><TableHead className="text-right">Your Cut</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {REP_PRODUCTS.map((p) => (
-                        <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
-                          <TableCell className={p.highlight ? 'font-semibold' : ''}>{p.name}{p.recurring && <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Repeat className="w-3 h-3" /> recurring</span>}</TableCell>
-                          <TableCell className="text-right text-muted-foreground">{fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}</TableCell>
-                          <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>{fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}<span className="ml-1 text-xs text-muted-foreground">(T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%)</span></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+            <FlagshipCommissionPanel />
           </div>
         );
       case 'commissions': return (
