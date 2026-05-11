@@ -204,6 +204,54 @@ serve(async (req) => {
       return json(200, { mailbox: data });
     }
 
+    if (action === "save_draft") {
+      const draftId = body.id ? String(body.id) : null;
+      const to = Array.isArray(body.to) ? body.to.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
+      const cc = Array.isArray(body.cc) ? body.cc.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
+      const bcc = Array.isArray(body.bcc) ? body.bcc.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
+      const subject = String(body.subject || "").slice(0, 500);
+      const bodyText = String(body.body_text || "").slice(0, 100000);
+      const inReplyTo = body.in_reply_to ? String(body.in_reply_to) : null;
+      const threadId = body.thread_id ? String(body.thread_id) : null;
+
+      if (draftId) {
+        const { data: updated, error } = await sb
+          .from("rep_email_messages")
+          .update({
+            to_addresses: to, cc_addresses: cc, bcc_addresses: bcc,
+            subject, body_text: bodyText, body_html: textToHtml(bodyText),
+            in_reply_to: inReplyTo, thread_id: threadId,
+          })
+          .eq("id", draftId)
+          .eq("mailbox_address", addr)
+          .eq("folder", "drafts")
+          .select()
+          .single();
+        if (error) return json(400, { error: error.message });
+        return json(200, { ok: true, message: updated });
+      }
+
+      const { data: saved, error } = await sb
+        .from("rep_email_messages")
+        .insert({
+          mailbox_address: addr,
+          direction: "outbound",
+          folder: "drafts",
+          from_address: addr,
+          from_name: mailbox.code,
+          to_addresses: to, cc_addresses: cc, bcc_addresses: bcc,
+          subject, body_text: bodyText, body_html: textToHtml(bodyText),
+          message_id: `<draft-${crypto.randomUUID()}@${EMAIL_DOMAIN}>`,
+          in_reply_to: inReplyTo,
+          thread_id: threadId,
+          is_read: true,
+        })
+        .select()
+        .single();
+      if (error) return json(400, { error: error.message });
+      return json(200, { ok: true, message: saved });
+    }
+
     if (action === "send") {
       const to = Array.isArray(body.to) ? body.to.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
       const cc = Array.isArray(body.cc) ? body.cc.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
