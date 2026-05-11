@@ -1,28 +1,22 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTrackEvent } from '@/hooks/useTrackEvent';
+import React from 'react';
 import aetherisLogo from '@/assets/aetheris-new-logo.png';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
-  const { trackEvent } = useTrackEvent();
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <footer
-      className="relative border-t border-border px-4 transition-all duration-500 overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <footer className="relative border-t border-border px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Minimized state — always visible */}
-        <div className={`flex items-center justify-between py-4 transition-opacity duration-300 ${isHovered ? 'opacity-0 h-0 py-0' : 'opacity-100'}`}>
+        <div className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-3">
             <img src={aetherisLogo} alt="Aetheris AI Logo" className="w-14 h-14 object-contain" />
             <span className="text-sm text-muted-foreground">© {currentYear} Aetheris AI</span>
           </div>
-          <span className="text-xs text-muted-foreground/50">Hover for more</span>
         </div>
+      </div>
+    </footer>
+  );
+};
 
         {/* Expanded state — shown on hover */}
         <div className={`transition-all duration-500 ${isHovered ? 'max-h-[800px] opacity-100 py-12' : 'max-h-0 opacity-0 py-0'}`}>
