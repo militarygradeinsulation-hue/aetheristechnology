@@ -73,7 +73,7 @@ export const CommissionStructurePanel: React.FC = () => {
   }, [quantities, retentionMonths]);
 
   return (
-    <details className="group rounded-lg border border-border/50 bg-card/30">
+    <details open className="group rounded-lg border border-border/50 bg-card/30">
       <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-card/50">
         <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
           Product catalog · tiered splits · mix-&amp;-match calculator
