@@ -85,6 +85,18 @@ export const repMailbox = {
   }) {
     return await call("send", payload);
   },
+  async saveDraft(payload: {
+    id?: string | null;
+    to: string[];
+    cc?: string[];
+    bcc?: string[];
+    subject: string;
+    body_text: string;
+    in_reply_to?: string | null;
+    thread_id?: string | null;
+  }) {
+    return (await call("save_draft", payload)).message as RepEmailMessage;
+  },
   async updateSettings(patch: Partial<Pick<RepMailbox, "signature" | "forwarding_to" | "auto_reply_enabled" | "auto_reply_body">>) {
     return (await call("update_settings", patch)).mailbox as RepMailbox;
   },
