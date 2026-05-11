@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
