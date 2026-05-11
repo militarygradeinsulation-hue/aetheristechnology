@@ -115,15 +115,13 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
           </div>
           <div className="flex gap-2 flex-wrap">
             {PILLARS.map(p => (
-              <Button
+              <button
                 key={p}
-                variant={activePillar === p ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setActivePillar(p)}
-                className={activePillar === p ? 'bg-primary text-primary-foreground' : 'glass-hover border-border'}
+                className={`premium-pill-btn ${activePillar === p ? 'active' : ''}`}
               >
                 {p}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
