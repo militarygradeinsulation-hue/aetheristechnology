@@ -206,7 +206,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
           <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
-          <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. No test = no application. Random apps go in the trash.</p>
+          <p className="text-sm text-muted-foreground">25 questions pulled from a 60-question bank · 50 minutes · 80% to pass · 5 attempts/day. No test = no application. Random apps go in the trash.</p>
         </div>
         <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')}><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
