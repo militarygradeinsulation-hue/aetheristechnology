@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -80,14 +81,7 @@ const Home = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Stopping revenue leaks with Aetheris forensics — an in-depth audio briefing on the methodology, the math, and what an engagement actually looks like.
             </p>
-            <audio
-              controls
-              preload="metadata"
-              className="w-full"
-              src="/audio/stopping-revenue-leaks-aetheris-forensics.m4a"
-            >
-              Your browser does not support the audio element.
-            </audio>
+            <AudioBriefingPlayer src="/audio/stopping-revenue-leaks-aetheris-forensics.m4a" />
           </div>
         </section>
 
