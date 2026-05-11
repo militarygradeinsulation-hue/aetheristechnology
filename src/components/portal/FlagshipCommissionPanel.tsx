@@ -17,17 +17,23 @@ interface Flagship {
 
 const FLAGSHIPS: Flagship[] = [
   {
-    name: '21-Day Revenue Diagnostic',
-    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.',
-    priceCents: 1850000,
+    name: 'Forensic Diagnostic (Leak Audit)',
+    blurb: 'Operator-led leak audit. The entry offer featured on aetheris.technology — applied toward the 21-Day engagement if they upgrade.',
+    priceCents: 250000,
     cadence: 'one-time',
   },
   {
     name: 'Implementation Retainer',
-    blurb: '3-month minimum. Diagnostic clients only. We execute the prioritized fixes.',
+    blurb: '3-month minimum. Diagnostic clients only. We execute the prioritized fixes. Recurring monthly.',
     priceCents: 1500000,
     recurring: true,
     cadence: 'per month',
+  },
+  {
+    name: '21-Day Revenue Diagnostic',
+    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.',
+    priceCents: 1850000,
+    cadence: 'one-time',
   },
 ];
 
@@ -59,7 +65,7 @@ export const FlagshipCommissionPanel: React.FC = () => {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           {FLAGSHIPS.map((f) => {
             const repCut = Math.round(f.priceCents * SPLIT.rep);
             const partnerCut = Math.round(f.priceCents * SPLIT.partner);
