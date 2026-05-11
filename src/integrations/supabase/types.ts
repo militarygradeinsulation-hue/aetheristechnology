@@ -5392,6 +5392,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      rep_mailbox_local_part: {
+        Args: { _code: string; _rep_name: string }
+        Returns: string
+      }
       reset_stuck_hygiene_actions: {
         Args: { _stale_minutes?: number }
         Returns: number

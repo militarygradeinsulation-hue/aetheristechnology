@@ -27,7 +27,7 @@ export const InboxTab: React.FC = () => {
   const [selected, setSelected] = useState<RepEmailMessage | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [composing, setComposing] = useState<{ to?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
+  const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const refresh = async (preserveSelected = false) => {
@@ -68,6 +68,19 @@ export const InboxTab: React.FC = () => {
   const openMessage = async (m: RepEmailMessage) => {
     try {
       const full = await repMailbox.get(m.id);
+      // Drafts open straight into the compose dialog so they can be edited & sent
+      if (full.folder === "drafts") {
+        setComposing({
+          id: full.id,
+          to: (full.to_addresses || []).join(", "),
+          cc: (full.cc_addresses || []).join(", "),
+          subject: full.subject || "",
+          body: full.body_text || "",
+          in_reply_to: full.in_reply_to || null,
+          thread_id: full.thread_id || null,
+        });
+        return;
+      }
       setSelected(full);
       if (!m.is_read && m.direction === "inbound") {
         await repMailbox.markRead(m.id, true);
@@ -204,7 +217,8 @@ export const InboxTab: React.FC = () => {
           initial={composing}
           mailbox={mailbox}
           onClose={() => setComposing(null)}
-          onSent={() => { setComposing(null); if (folder === "sent") refresh(); else toast({ title: "Sent" }); }}
+          onSent={() => { setComposing(null); if (folder === "sent" || folder === "drafts") refresh(); else toast({ title: "Sent" }); }}
+          onDraftSaved={() => { if (folder === "drafts") refresh(); }}
         />
       )}
 
@@ -263,21 +277,26 @@ const MessageView: React.FC<{
 };
 
 const ComposeDialog: React.FC<{
-  initial: { to?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
+  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
   mailbox: RepMailbox;
   onClose: () => void;
   onSent: () => void;
-}> = ({ initial, mailbox, onClose, onSent }) => {
+  onDraftSaved?: () => void;
+}> = ({ initial, mailbox, onClose, onSent, onDraftSaved }) => {
   const { toast } = useToast();
+  const [draftId, setDraftId] = useState<string | null>(initial.id || null);
   const [to, setTo] = useState(initial.to || "");
-  const [cc, setCc] = useState("");
+  const [cc, setCc] = useState(initial.cc || "");
   const [subject, setSubject] = useState(initial.subject || "");
   const [body, setBody] = useState(initial.body || "");
   const [sending, setSending] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+
+  const parseAddrs = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
 
   const send = async () => {
-    const toList = to.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
-    const ccList = cc.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+    const toList = parseAddrs(to);
+    const ccList = parseAddrs(cc);
     if (toList.length === 0) { toast({ title: "Add a recipient", variant: "destructive" }); return; }
     if (!subject.trim()) { toast({ title: "Add a subject", variant: "destructive" }); return; }
     if (!body.trim()) { toast({ title: "Body cannot be empty", variant: "destructive" }); return; }
@@ -288,10 +307,32 @@ const ComposeDialog: React.FC<{
         in_reply_to: initial.in_reply_to || null,
         thread_id: initial.thread_id || null,
       });
+      // Clean up draft if we're sending a previously-saved draft
+      if (draftId) {
+        try { await repMailbox.deleteForever(draftId); } catch { /* non-fatal */ }
+      }
       onSent();
     } catch (e: any) {
       toast({ title: "Send failed", description: e.message, variant: "destructive" });
     } finally { setSending(false); }
+  };
+
+  const saveDraft = async () => {
+    setSavingDraft(true);
+    try {
+      const saved = await repMailbox.saveDraft({
+        id: draftId,
+        to: parseAddrs(to), cc: parseAddrs(cc),
+        subject, body_text: body,
+        in_reply_to: initial.in_reply_to || null,
+        thread_id: initial.thread_id || null,
+      });
+      setDraftId(saved.id);
+      toast({ title: "Draft saved" });
+      onDraftSaved?.();
+    } catch (e: any) {
+      toast({ title: "Couldn't save draft", description: e.message, variant: "destructive" });
+    } finally { setSavingDraft(false); }
   };
 
   return (
@@ -310,9 +351,13 @@ const ComposeDialog: React.FC<{
             <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
           )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={send} disabled={sending}>
+          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending}>
+            {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+            Save draft
+          </Button>
+          <Button onClick={send} disabled={sending || savingDraft}>
             {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
             Send
           </Button>
