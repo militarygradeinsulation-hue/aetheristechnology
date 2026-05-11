@@ -55,8 +55,12 @@ export function generateCredentialsPdf() {
     'Director of Strategy, $25M aerospace contract manufacturer. Revenue operations, CRM implementation, and sales-process rebuild for specialty manufacturing across construction, aerospace, and equipment categories.',
   );
   block(
+    'EDUCATION',
+    'B.A. in Psychology and Communication. M.S. in Business Marketing. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
+  );
+  block(
     'CERTIFICATIONS',
-    'IBM · Harvard · Google · HubSpot. Continuing operator-track training in revenue operations and CRM administration.',
+    'Vibe Coding — Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis) — Google. AI for Business — Harvard edX AI for Business Systems. AI Engineer — IBM AI Engineering. HubSpot Certification — HubSpot. Biomedical & Health Science Researchers — CITI Program (Credential ID 76234047). Google Analytics Individual Qualification — Google Operations Center. Marketing & Analytics — Google Digital Academy (Skillshop).',
   );
   block(
     'COMPANY',
