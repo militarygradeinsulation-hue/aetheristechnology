@@ -299,6 +299,7 @@ export const CommissionStructurePanel: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </details>
   );
 };
