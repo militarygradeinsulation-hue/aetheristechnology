@@ -299,6 +299,29 @@ serve(async (req) => {
 
       const messageId = `<${crypto.randomUUID()}@${EMAIL_DOMAIN}>`;
 
+      // Get/create unsubscribe token for the primary recipient (required by the email API)
+      const primaryRecipient = allowedTo[0].toLowerCase();
+      let unsubscribeToken: string | null = null;
+      const { data: existingTok } = await sb
+        .from("email_unsubscribe_tokens")
+        .select("token, used_at")
+        .eq("email", primaryRecipient)
+        .maybeSingle();
+      if (existingTok && !existingTok.used_at) {
+        unsubscribeToken = existingTok.token;
+      } else {
+        const newTok = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+        await sb
+          .from("email_unsubscribe_tokens")
+          .upsert({ token: newTok, email: primaryRecipient }, { onConflict: "email", ignoreDuplicates: true });
+        const { data: stored } = await sb
+          .from("email_unsubscribe_tokens")
+          .select("token")
+          .eq("email", primaryRecipient)
+          .maybeSingle();
+        unsubscribeToken = stored?.token || newTok;
+      }
+
       // Build headers — Reply-To and Return-Path so replies come back to us
       const extraHeaders: Record<string, string> = {
         "Reply-To": addr,
@@ -324,6 +347,7 @@ serve(async (req) => {
           html: finalHtml,
           text: finalText,
           purpose: "transactional",
+          unsubscribe_token: unsubscribeToken,
           label: `rep-mail:${mailbox.code}`,
           idempotency_key: `rep-mail-${messageId}`,
           headers: extraHeaders,
