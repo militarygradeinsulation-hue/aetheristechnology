@@ -215,6 +215,31 @@ const Home = () => {
           </div>
         </section>
 
+        {/* What makes us different — AI-native operator */}
+        <section className="px-4 py-14">
+          <div className="max-w-5xl mx-auto">
+            <RevealOnScroll>
+              <div className="premium-tile rounded-sm border border-amber/40 p-8 md:p-12 text-center">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                  What makes us different
+                </div>
+                <h2 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-5">
+                  Everyone else is selling you advice.<br className="hidden md:block" />
+                  <span className="text-amber"> We're an AI-native operator.</span>
+                </h2>
+                <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-7">
+                  Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
+                </p>
+                <Link to="/why-us">
+                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                    See exactly what makes us different <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
+
         {/* Sample case files */}
         <section className="px-4 py-10">
           <div className="max-w-5xl mx-auto">
