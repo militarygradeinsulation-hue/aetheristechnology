@@ -85,17 +85,20 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </span>
           </div>
 
-          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
+          <h1 className="font-forensic text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
+            <span className="text-foreground">We help specialty manufacturers find the </span>
+            <span className="text-amber">$200K–$2M</span>
+            <br className="hidden md:block" />
+            <span className="text-foreground"> they're losing to broken CRM, sales, and operational systems — and fix it.</span>
+          </h1>
+
+          <h2 className="font-forensic text-xl md:text-2xl lg:text-3xl font-bold leading-[1.1] tracking-tight max-w-5xl mx-auto text-muted-foreground">
             <span className="text-foreground">20 years building revenue systems for </span>
             <span className="text-amber">manufacturers.</span>
             <br className="hidden md:block" />
             <span className="text-foreground"> Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with </span>
             <span className="text-amber">SpaceX accounts.</span>
-          </h1>
-
-          <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-5xl mx-auto leading-relaxed font-body">
-            We help specialty manufacturers find the <span className="text-foreground font-semibold">$200K–$2M</span> they're losing to broken CRM, sales, and operational systems — and fix it.
-          </p>
+          </h2>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             <a
