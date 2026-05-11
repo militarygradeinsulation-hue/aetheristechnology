@@ -30,6 +30,7 @@ import { Mail as MailIcon } from 'lucide-react';
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
+import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionPanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
@@ -361,7 +362,12 @@ const PortalPage: React.FC = () => {
             </Card>
           </div>
         );
-      case 'commissions': return <CommissionStructurePanel />;
+      case 'commissions': return (
+        <div className="space-y-6">
+          <FlagshipCommissionPanel />
+          <CommissionStructurePanel />
+        </div>
+      );
       case 'leads': return <LeadsBoard />;
       case 'forecast': return <ForecastCenter isPartner={isPartner} />;
       case 'tools':

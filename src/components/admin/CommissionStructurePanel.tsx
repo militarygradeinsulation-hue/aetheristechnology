@@ -73,7 +73,15 @@ export const CommissionStructurePanel: React.FC = () => {
   }, [quantities, retentionMonths]);
 
   return (
-    <div className="space-y-6">
+    <details className="group rounded-lg border border-border/50 bg-card/30">
+      <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-card/50">
+        <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Product catalog · tiered splits · mix-&amp;-match calculator
+        </span>
+        <span className="text-xs text-amber font-mono group-open:hidden">Expand ▾</span>
+        <span className="text-xs text-amber font-mono hidden group-open:inline">Collapse ▴</span>
+      </summary>
+      <div className="space-y-6 p-4 pt-2">
       {/* Tiered rules */}
       <Card>
         <CardHeader>
@@ -291,6 +299,7 @@ export const CommissionStructurePanel: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </details>
   );
 };
