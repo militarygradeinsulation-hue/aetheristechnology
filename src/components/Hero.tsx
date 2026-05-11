@@ -89,7 +89,11 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-foreground">We help specialty manufacturers find the </span>
             <span className="text-amber">$200K–$2M</span>
             <br className="hidden md:block" />
-            <span className="text-foreground"> they're losing to broken CRM, sales, and operational systems — and fix it.</span>
+            <span className="text-foreground"> they're </span>
+            <span className="text-crimson">losing</span>
+            <span className="text-foreground"> to broken </span>
+            <span className="text-crimson">CRM</span>
+            <span className="text-foreground">, sales, and operational systems — and fix it.</span>
           </h1>
 
           <h2 className="font-forensic text-xl md:text-2xl lg:text-3xl font-bold leading-[1.1] tracking-tight max-w-5xl mx-auto text-muted-foreground">
