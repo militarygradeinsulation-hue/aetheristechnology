@@ -286,7 +286,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you scripts, hooks, and AI content help — you bring the voice.' },
           { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
         ].map(({ title, desc }) => (
-          <div key={title} className="rounded-xl border border-border/50 bg-card/40 p-5 hover:border-amber/30 transition-colors">
+          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">Profile</p>
             <p className="font-semibold text-foreground font-display">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
