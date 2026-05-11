@@ -79,13 +79,13 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </button>
           </div>
 
-          <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-sm border-amber/30">
-            <span className="font-case text-[10px] uppercase tracking-widest text-amber">
+          <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
+            <span className="font-case text-xs uppercase tracking-widest text-amber">
               Revenue systems for specialty manufacturers · Indianapolis
             </span>
           </div>
 
-          <h1 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
+          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
             <span className="text-foreground">20 years building revenue systems for </span>
             <span className="text-amber">manufacturers.</span>
             <br className="hidden md:block" />
@@ -93,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-amber">SpaceX accounts.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-5xl mx-auto leading-relaxed font-body">
+          <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-5xl mx-auto leading-relaxed font-body">
             We help specialty manufacturers find the <span className="text-foreground font-semibold">$200K–$2M</span> they're losing to broken CRM, sales, and operational systems — and fix it.
           </p>
 
