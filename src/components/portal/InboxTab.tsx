@@ -68,6 +68,19 @@ export const InboxTab: React.FC = () => {
   const openMessage = async (m: RepEmailMessage) => {
     try {
       const full = await repMailbox.get(m.id);
+      // Drafts open straight into the compose dialog so they can be edited & sent
+      if (full.folder === "drafts") {
+        setComposing({
+          id: full.id,
+          to: (full.to_addresses || []).join(", "),
+          cc: (full.cc_addresses || []).join(", "),
+          subject: full.subject || "",
+          body: full.body_text || "",
+          in_reply_to: full.in_reply_to || null,
+          thread_id: full.thread_id || null,
+        });
+        return;
+      }
       setSelected(full);
       if (!m.is_read && m.direction === "inbound") {
         await repMailbox.markRead(m.id, true);
