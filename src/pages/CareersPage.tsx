@@ -192,9 +192,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         { stat: '15%', label: 'Flat commission, recurring' },
         { stat: '7d', label: 'Pay timeline post-clearance' },
         { stat: '$885/mo', label: 'Per Fractional retainer, residual' },
-        { stat: '0', label: 'Caps. Tiers. Clawbacks.' },
+        { stat: '0', label: 'Caps. Clawbacks. Goalposts moved.' },
       ].map((s) => (
-        <div key={s.label} className="rounded-xl border border-amber/20 bg-card/50 p-5 text-center backdrop-blur">
+        <div key={s.label} className="premium-tile rounded-xl p-5 text-center border border-amber/20">
           <p className="font-display text-3xl md:text-4xl text-amber font-bold">{s.stat}</p>
           <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
         </div>
@@ -206,7 +206,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
           <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
-          <p className="text-sm text-muted-foreground">20 questions, 45 minutes, 70% to pass. No test = no application. Random apps go in the trash.</p>
+          <p className="text-sm text-muted-foreground">25 questions pulled from a 60-question bank · 50 minutes · 80% to pass · 5 attempts/day. No test = no application. Random apps go in the trash.</p>
         </div>
         <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')}><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
       </CardContent>
@@ -229,8 +229,8 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. One math equation. The split is locked at 70/15/15 — company / rep / partner. We don\'t move the goalposts.' },
           { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
         ].map(({ icon: Icon, title, desc }) => (
-          <Card key={title} className="bg-card/60 backdrop-blur border-border/50 hover:border-amber/40 transition-colors">
-            <CardContent className="p-6 flex items-start gap-4">
+          <div key={title} className="premium-tile rounded-xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
+            <div className="flex items-start gap-4">
               <div className="w-11 h-11 rounded-lg bg-amber/15 border border-amber/30 flex items-center justify-center flex-shrink-0">
                 <Icon className="w-5 h-5 text-amber" />
               </div>
@@ -238,8 +238,8 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
                 <h3 className="font-semibold text-foreground font-display text-lg">{title}</h3>
                 <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -259,7 +259,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: Rocket, title: 'Fast Ramp Path', desc: 'Onboarding playbook, daily hustle goals, AI coach, and the company calendar all push you toward your first close in week 1.' },
           { icon: Trophy, title: 'Promotion to Partner', desc: 'Hit consistent numbers, get promoted. Partner status = recruit reps, earn overrides, get a seat at the strategy table.' },
         ].map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="rounded-xl border border-border/50 bg-card/40 p-5 hover:border-amber/30 transition-colors">
+          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
             <Icon className="w-5 h-5 text-amber mb-3" />
             <p className="font-semibold text-foreground">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5">{desc}</p>
@@ -286,7 +286,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you scripts, hooks, and AI content help — you bring the voice.' },
           { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
         ].map(({ title, desc }) => (
-          <div key={title} className="rounded-xl border border-border/50 bg-card/40 p-5 hover:border-amber/30 transition-colors">
+          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">Profile</p>
             <p className="font-semibold text-foreground font-display">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
@@ -313,7 +313,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
           { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
-          <div key={tag} className="rounded-xl border border-border/50 bg-card/60 p-5">
+          <div key={tag} className="premium-tile rounded-xl p-5 border border-border/50">
             <p className="font-mono text-[10px] tracking-[0.3em] text-amber">{tag}</p>
             <p className="font-semibold text-foreground font-display mt-2">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
@@ -425,9 +425,9 @@ const PlaybookSection = () => (
           </TableHeader>
           <TableBody>
             {[
-              ["Digital Snapshot", "$125", "Automated report", "Door opener — shows them their gaps"],
-              ["Website Evaluation", "$500", "Detailed analysis + call", "Builds authority, earns trust"],
-              ["14-Day Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
+              ["Digital Snapshot", "$149", "Automated report", "Door opener — shows them their gaps"],
+              ["Website Evaluation", "$599", "Detailed analysis + call", "Builds authority, earns trust"],
+              ["14-Day Forensic Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
               ["Implementation", "$5K–$25K+", "Full build-out", "Website, CRM, automation, the works"],
             ].map(([service, price, format, purpose]) => (
               <TableRow key={service}>
