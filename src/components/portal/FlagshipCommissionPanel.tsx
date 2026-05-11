@@ -65,7 +65,7 @@ export const FlagshipCommissionPanel: React.FC = () => {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           {FLAGSHIPS.map((f) => {
             const repCut = Math.round(f.priceCents * SPLIT.rep);
             const partnerCut = Math.round(f.priceCents * SPLIT.partner);
