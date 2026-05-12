@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 import { upsertCompanyEntry } from '@/lib/companyCalendar';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 interface Attempt {
   id: string;
