@@ -55,6 +55,10 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   });
   const [noteBody, setNoteBody] = useState("");
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [editTaskId, setEditTaskId] = useState<string | null>(null);
+  const [editTaskDraft, setEditTaskDraft] = useState<Partial<SharedTask>>({});
+  const [editNoteId, setEditNoteId] = useState<string | null>(null);
+  const [editNoteBody, setEditNoteBody] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const them: Person = me === "admin" ? "bradon" : "admin";
