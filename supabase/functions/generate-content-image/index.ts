@@ -77,21 +77,26 @@ COMPOSITION RULES:
   • Premium editorial feel — looks like it was commissioned for The Economist or Bloomberg Businessweek.
   • Aspect ratio square. High contrast. Cinematic.`;
 
-    console.log("Generating image. Style:", styleKey, "Prompt:", imagePrompt.slice(0, 200));
+    const callModel = async (model: string, promptText: string) => {
+      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: promptText }],
+          modalities: ["image", "text"],
+        }),
+      });
+      return r;
+    };
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image-preview",
-        messages: [{ role: "user", content: imagePrompt }],
-        modalities: ["image", "text"],
-      }),
-    });
+    const FORCE = `\n\nIMPORTANT: Respond by GENERATING THE IMAGE itself. Do not describe it in words. Output the image only.`;
 
+    console.log("Generating image. Style:", styleKey);
+    let aiResponse = await callModel("google/gemini-2.5-flash-image", imagePrompt + FORCE);
     if (!aiResponse.ok) {
       const status = aiResponse.status;
       const text = await aiResponse.text();
@@ -109,12 +114,22 @@ COMPOSITION RULES:
       throw new Error(`AI gateway error: ${status}`);
     }
 
-    const aiData = await aiResponse.json();
-    const imageUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    let aiData = await aiResponse.json();
+    let imageUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+    // Fallback: retry on the preview model with the forced instruction
+    if (!imageUrl || !imageUrl.startsWith("data:image")) {
+      console.warn("First model returned no image; retrying with gemini-3.1-flash-image-preview");
+      const retry = await callModel("google/gemini-3.1-flash-image-preview", imagePrompt + FORCE);
+      if (retry.ok) {
+        aiData = await retry.json();
+        imageUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      }
+    }
 
     if (!imageUrl || !imageUrl.startsWith("data:image")) {
       console.error("No image in response:", JSON.stringify(aiData).slice(0, 500));
-      throw new Error("AI did not return an image");
+      throw new Error("AI did not return an image. Try a more visual prompt (describe the scene, not the message).");
     }
 
     // Extract base64 data and upload to storage
