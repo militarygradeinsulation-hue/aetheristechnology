@@ -24,6 +24,7 @@ import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
+import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { Mail as MailIcon } from 'lucide-react';
@@ -61,7 +62,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -317,6 +318,7 @@ const PortalPage: React.FC = () => {
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
+    { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -325,6 +327,7 @@ const PortalPage: React.FC = () => {
     (!t.partnerOnly || isPartner)
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
+    && (t.id !== 'interviews' || sharedWsUnlocked)
   );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
@@ -408,6 +411,7 @@ const PortalPage: React.FC = () => {
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
       case 'sharedws': return <SharedWorkspace me="bradon" />;
+      case 'interviews': return <InterviewsPanel me="bradon" />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
