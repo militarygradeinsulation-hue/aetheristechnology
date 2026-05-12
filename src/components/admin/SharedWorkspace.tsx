@@ -672,6 +672,86 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit task dialog */}
+      <Dialog open={!!editTaskId} onOpenChange={(o) => { if (!o) { setEditTaskId(null); setEditTaskDraft({}); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-amber" /> Edit task
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Title</Label>
+              <Input value={editTaskDraft.title || ""} onChange={e => setEditTaskDraft(s => ({ ...s, title: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="text-xs">Description</Label>
+              <Textarea value={editTaskDraft.description || ""} onChange={e => setEditTaskDraft(s => ({ ...s, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Assignee</Label>
+                <Select value={editTaskDraft.assignee as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, assignee: v as Person }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{PERSONS.map(p => <SelectItem key={p} value={p}>{personLabel(p)}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Status</Label>
+                <Select value={editTaskDraft.status as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, status: v as TaskStatus }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">Todo</SelectItem>
+                    <SelectItem value="doing">Doing</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Priority</Label>
+                <Select value={editTaskDraft.priority as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, priority: v as TaskPriority }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(["low","normal","high","urgent"] as TaskPriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Bucket</Label>
+                <Select value={editTaskDraft.bucket as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, bucket: v as TaskBucket }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="later">Later</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Due</Label>
+              <Input
+                type="datetime-local"
+                value={editTaskDraft.due_at ? new Date(editTaskDraft.due_at).toISOString().slice(0,16) : ""}
+                onChange={e => setEditTaskDraft(s => ({ ...s, due_at: e.target.value ? new Date(e.target.value).toISOString() : null }))}
+              />
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button variant="outline" className="text-red-400" onClick={() => { if (editTaskId) { deleteTask(editTaskId); setEditTaskId(null); } }}>
+                <Trash2 className="w-4 h-4 mr-1" /> Delete
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={() => { setEditTaskId(null); setEditTaskDraft({}); }}>Cancel</Button>
+                <Button className="bg-amber text-background hover:bg-amber/90" onClick={saveEditTask}>
+                  <SaveIcon className="w-4 h-4 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* File preview dialog */}
       <Dialog open={!!previewFile} onOpenChange={(o) => !o && setPreviewFile(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
