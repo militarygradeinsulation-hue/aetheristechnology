@@ -330,6 +330,7 @@ const PortalPage: React.FC = () => {
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
+    && (t.id !== 'briefing' || sharedWsUnlocked)
   );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
