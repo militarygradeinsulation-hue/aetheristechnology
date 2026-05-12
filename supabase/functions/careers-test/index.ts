@@ -698,6 +698,19 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ---------- ADMIN: delete application (and its attempts) ----------
+    if (action === "admin_delete_application") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      // Best-effort: delete attempts tied to this share_code, then the application
+      try { await admin.from("careers_attempts").delete().eq("share_code", code); } catch {}
+      const { error } = await admin.from("careers_applications").delete().eq("share_code", code);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
     // ---------- ADMIN: update attempt (admin notes) ----------
     if (action === "admin_update_attempt") {
       const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
