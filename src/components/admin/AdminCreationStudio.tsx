@@ -204,8 +204,8 @@ export const AdminCreationStudio: React.FC = () => {
       // 1) Get TTS for each scene (sequential to avoid rate limits)
       const audios: HTMLAudioElement[] = [];
       const audioBuffers: ArrayBuffer[] = [];
-      for (let i = 0; i < plan.scenes.length; i++) {
-        const s = plan.scenes[i];
+      for (let i = 0; i < activePlan.scenes.length; i++) {
+        const s = activePlan.scenes[i];
         const { data, error } = await adminInvoke('tts', { text: s.voiceover, voiceId });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
@@ -219,7 +219,7 @@ export const AdminCreationStudio: React.FC = () => {
         const dur = isFinite(audio.duration) ? Math.max(2.2, audio.duration + 0.3) : (s.durationMs / 1000);
         s.durationMs = Math.round(dur * 1000);
         audios.push(audio);
-        setProgress(Math.round(((i + 1) / plan.scenes.length) * 30));
+        setProgress(Math.round(((i + 1) / activePlan.scenes.length) * 30));
       }
 
       // 2) Setup canvas
@@ -230,7 +230,7 @@ export const AdminCreationStudio: React.FC = () => {
 
       // 3) Preload images
       const sceneImgs: HTMLImageElement[] = [];
-      for (const s of plan.scenes) {
+      for (const s of activePlan.scenes) {
         const a = allAvailable.find(x => x.id === s.imageId)!;
         sceneImgs.push(await loadImage(a.url));
       }
@@ -267,7 +267,7 @@ export const AdminCreationStudio: React.FC = () => {
         src.buffer = decoded[i];
         src.connect(dest);
         src.start(startTime + acc);
-        acc += plan.scenes[i].durationMs / 1000;
+        acc += activePlan.scenes[i].durationMs / 1000;
       }
       const totalSec = acc;
 
@@ -277,7 +277,7 @@ export const AdminCreationStudio: React.FC = () => {
 
       const drawScene = (sceneIdx: number, localT: number, sceneDur: number) => {
         const img = sceneImgs[sceneIdx];
-        const s = plan.scenes[sceneIdx];
+        const s = activePlan.scenes[sceneIdx];
         const cw = canvas.width, ch = canvas.height;
 
         // Cover-fit + zoom
@@ -326,13 +326,13 @@ export const AdminCreationStudio: React.FC = () => {
         const elapsed = (performance.now() - animStart) / 1000;
         // find scene
         let cum = 0; let idx = 0; let local = 0;
-        for (let i = 0; i < plan.scenes.length; i++) {
-          const d = plan.scenes[i].durationMs / 1000;
+        for (let i = 0; i < activePlan.scenes.length; i++) {
+          const d = activePlan.scenes[i].durationMs / 1000;
           if (elapsed < cum + d) { idx = i; local = elapsed - cum; break; }
           cum += d; idx = i; local = d;
         }
         scenePtr = idx;
-        drawScene(idx, local, plan.scenes[idx].durationMs / 1000);
+        drawScene(idx, local, activePlan.scenes[idx].durationMs / 1000);
         const pct = Math.min(99, 30 + Math.round((elapsed / totalSec) * 70));
         setProgress(pct);
         if (elapsed < totalSec) requestAnimationFrame(tick);
@@ -495,7 +495,7 @@ export const AdminCreationStudio: React.FC = () => {
             </Button>
           </div>
           <div className="space-y-3">
-            {plan.scenes.map((s, i) => {
+            {activePlan.scenes.map((s, i) => {
               const img = allAvailable.find(a => a.id === s.imageId);
               return (
                 <div key={i} className="flex gap-3 p-3 bg-background/40 rounded-lg border border-border">
