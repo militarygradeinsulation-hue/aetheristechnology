@@ -123,6 +123,15 @@ export const AdminNewsPanel: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <Dialog open={liveOpen} onOpenChange={setLiveOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display"><Radio className="w-4 h-4 text-amber" /> Live feed preview</DialogTitle>
+          </DialogHeader>
+          <NewsFeedPanel />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
