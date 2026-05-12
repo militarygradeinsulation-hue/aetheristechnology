@@ -82,6 +82,7 @@ export const repMailbox = {
     body_text: string;
     in_reply_to?: string | null;
     thread_id?: string | null;
+    attachments?: Array<{ name: string; size: number; mime: string; storage_path: string; signed_url?: string | null }>;
   }) {
     return await call("send", payload);
   },
