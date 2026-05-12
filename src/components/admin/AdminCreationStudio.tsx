@@ -222,6 +222,30 @@ export const AdminCreationStudio: React.FC = () => {
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
   const [generatingSceneIdx, setGeneratingSceneIdx] = useState<number | null>(null);
 
+  // ===== Video library (auto-saved past renders) =====
+  const [videoLibrary, setVideoLibrary] = useState<AdminLibraryItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
+  const [libDeletingId, setLibDeletingId] = useState<string | null>(null);
+  const loadVideoLibrary = async () => {
+    setLibLoading(true);
+    try {
+      const items = await listAdminLibrary();
+      setVideoLibrary(items.filter(i => i.tool_type === 'video'));
+    } catch (e) {
+      console.error('[CreationStudio] load library failed', e);
+    } finally { setLibLoading(false); }
+  };
+  useEffect(() => { loadVideoLibrary(); }, []);
+  const deleteLibraryVideo = async (id: string) => {
+    if (!window.confirm('Delete this video from your library? This cannot be undone.')) return;
+    setLibDeletingId(id);
+    const prev = videoLibrary;
+    setVideoLibrary(p => p.filter(v => v.id !== id));
+    try { await deleteFromAdminLibrary(id); toast({ title: 'Removed from library' }); }
+    catch (e) { setVideoLibrary(prev); toast({ title: 'Delete failed', description: (e as Error).message, variant: 'destructive' }); }
+    finally { setLibDeletingId(null); }
+  };
+
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
     const scene = plan.scenes[sceneIdx];
