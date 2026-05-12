@@ -668,8 +668,23 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
             <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Premade Title Ideas</div>
             <span className="text-[10px] text-muted-foreground">Click to add as a topic seed</span>
           </div>
-          <div className="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto p-1 border border-border/40 rounded-md bg-background/30">
-            {PREMADE_TITLES.map((t) => {
+          <div className="flex flex-wrap gap-1 mb-2">
+            {['All', ...Object.keys(PREMADE_TITLE_GROUPS)].map((cat) => {
+              const on = titleCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setTitleCategory(cat)}
+                  className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
+                    on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}
+                >{cat}</button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto p-2 border border-border/40 rounded-md bg-background/30">
+            {(titleCategory === 'All' ? PREMADE_TITLES : PREMADE_TITLE_GROUPS[titleCategory] || []).map((t) => {
               const on = topicSeeds.includes(t);
               return (
                 <button
