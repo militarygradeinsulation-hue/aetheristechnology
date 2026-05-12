@@ -3611,6 +3611,7 @@ export type Database = {
           role: string
           total_commission_cents: number
           total_sales_cents: number
+          webinar_boost_bps: number
         }
         Insert: {
           code: string
@@ -3623,6 +3624,7 @@ export type Database = {
           role?: string
           total_commission_cents?: number
           total_sales_cents?: number
+          webinar_boost_bps?: number
         }
         Update: {
           code?: string
@@ -3635,6 +3637,7 @@ export type Database = {
           role?: string
           total_commission_cents?: number
           total_sales_cents?: number
+          webinar_boost_bps?: number
         }
         Relationships: []
       }
@@ -4898,6 +4901,41 @@ export type Database = {
         }
         Relationships: []
       }
+      team_message_reads: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string
+          viewer_code: string
+          viewer_name: string
+          viewer_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id: string
+          viewer_code: string
+          viewer_name: string
+          viewer_role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string
+          viewer_code?: string
+          viewer_name?: string
+          viewer_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "team_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_messages: {
         Row: {
           attachments: Json
@@ -5254,6 +5292,114 @@ export type Database = {
         }
         Relationships: []
       }
+      webinar_registrations: {
+        Row: {
+          attended: boolean
+          attended_at: string | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          ip: string | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          rep_code: string | null
+          user_agent: string | null
+          webinar_id: string
+        }
+        Insert: {
+          attended?: boolean
+          attended_at?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          ip?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          user_agent?: string | null
+          webinar_id: string
+        }
+        Update: {
+          attended?: boolean
+          attended_at?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          ip?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          user_agent?: string | null
+          webinar_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webinar_registrations_rep_code_fkey"
+            columns: ["rep_code"]
+            isOneToOne: false
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "webinar_registrations_webinar_id_fkey"
+            columns: ["webinar_id"]
+            isOneToOne: false
+            referencedRelation: "webinars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webinars: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          description: string | null
+          duration_min: number
+          host: string | null
+          id: string
+          is_published: boolean
+          join_url: string | null
+          scheduled_at: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host?: string | null
+          id?: string
+          is_published?: boolean
+          join_url?: string | null
+          scheduled_at: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host?: string | null
+          id?: string
+          is_published?: boolean
+          join_url?: string | null
+          scheduled_at?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       website_scans: {
         Row: {
           created_at: string
@@ -5339,6 +5485,15 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      find_webinar_rep_for_email: {
+        Args: { _email: string }
+        Returns: {
+          boost_bps: number
+          registration_id: string
+          rep_code: string
+          webinar_id: string
+        }[]
       }
       get_avg_deal_size: { Args: { _account_id: string }; Returns: number }
       get_deliverables_by_session: {
