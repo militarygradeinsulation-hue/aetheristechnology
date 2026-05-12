@@ -148,21 +148,22 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'insights', label: 'AI Insights', icon: Brain },
-    { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
-    { key: 'careers', label: 'Careers', icon: Briefcase },
     { key: 'events', label: 'Campaign', icon: Megaphone },
+    { key: 'careers', label: 'Careers', icon: Briefcase },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
-    { key: 'creation', label: 'Video Studio', icon: Film },
     { key: 'documents', label: 'Documents', icon: FileBox },
-    { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
+    { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
+    { key: 'interviews', label: 'Interviews', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
     { key: 'library', label: 'Library', icon: Library },
+    { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
     { key: 'onboarding', label: 'New-Rep Onboarding', icon: GraduationCap },
     { key: 'news', label: 'News', icon: Newspaper },
     { key: 'outlook', label: 'Outlook Sync', icon: Send },
@@ -174,9 +175,8 @@ const AdminDashboard: React.FC = () => {
     { key: 'team', label: 'Team Messages', icon: MessageSquare },
     { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'training', label: 'Training', icon: GraduationCap },
+    { key: 'creation', label: 'Video Studio', icon: Film },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
-    { key: 'interviews', label: 'Interviews', icon: CalendarClock },
-    { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const ALWAYS_INCLUDE_NEW = ['briefing']; // newly added tabs auto-show even if user has saved prefs
