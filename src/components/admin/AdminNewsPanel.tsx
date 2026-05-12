@@ -18,6 +18,7 @@ export const AdminNewsPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editor, setEditor] = useState<Partial<NewsPost> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [liveOpen, setLiveOpen] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
 
   const reload = async () => {
