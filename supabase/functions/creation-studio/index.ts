@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const ELEVEN_GATEWAY = "https://connector-gateway.lovable.dev/elevenlabs";
+const ELEVEN_API = "https://api.elevenlabs.io";
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
@@ -95,20 +95,15 @@ Total runtime target: ~${opts.durationSec}s. Aspect: ${opts.aspect}.`;
   return plan;
 }
 
-async function elevenHeaders() {
-  const lov = Deno.env.get("LOVABLE_API_KEY");
+function elevenHeaders() {
   const el = Deno.env.get("ELEVENLABS_API_KEY");
-  if (!lov) throw new Error("LOVABLE_API_KEY missing");
   if (!el) throw new Error("ELEVENLABS_API_KEY missing — connect ElevenLabs in Connectors");
-  return {
-    Authorization: `Bearer ${lov}`,
-    "X-Connection-Api-Key": el,
-  };
+  return { "xi-api-key": el };
 }
 
 async function listVoices() {
-  const headers = await elevenHeaders();
-  const res = await fetch(`${ELEVEN_GATEWAY}/v1/voices`, { headers });
+  const headers = elevenHeaders();
+  const res = await fetch(`${ELEVEN_API}/v1/voices`, { headers });
   if (!res.ok) throw new Error(`ElevenLabs voices ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   const voices = (data.voices || []).map((v: any) => ({
@@ -122,9 +117,9 @@ async function listVoices() {
 }
 
 async function tts(text: string, voiceId: string) {
-  const headers = await elevenHeaders();
+  const headers = elevenHeaders();
   const res = await fetch(
-    `${ELEVEN_GATEWAY}/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+    `${ELEVEN_API}/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
     {
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
