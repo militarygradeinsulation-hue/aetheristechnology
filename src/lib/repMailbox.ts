@@ -53,6 +53,18 @@ export const repMailbox = {
   async getMailbox() {
     return (await call("get_mailbox")).mailbox as RepMailbox;
   },
+  async uploadAttachment(file: File): Promise<{ name: string; size: number; mime: string; storage_path: string }> {
+    const buf = await file.arrayBuffer();
+    let bin = "";
+    const bytes = new Uint8Array(buf);
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+    }
+    const data_b64 = btoa(bin);
+    const res = await call("upload_attachment", { name: file.name, mime: file.type || "application/octet-stream", data_b64 });
+    return res.attachment;
+  },
   async unreadCount(): Promise<number> {
     return (await call("unread_count")).count || 0;
   },
@@ -82,6 +94,7 @@ export const repMailbox = {
     body_text: string;
     in_reply_to?: string | null;
     thread_id?: string | null;
+    attachments?: Array<{ name: string; size: number; mime: string; storage_path: string; signed_url?: string | null }>;
   }) {
     return await call("send", payload);
   },
