@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PostImageGenerator } from './admin/PostImageGenerator';
 
 type SourceType = 'idea' | 'blog' | 'playbook';
 
@@ -16,7 +17,7 @@ interface GeneratedPost {
   hashtags: string[];
 }
 
-export const PostFromSourceGenerator: React.FC = () => {
+export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [sourceType, setSourceType] = useState<SourceType>('idea');
   const [ideaPrompt, setIdeaPrompt] = useState('');
   const [count, setCount] = useState(3);
@@ -155,6 +156,15 @@ export const PostFromSourceGenerator: React.FC = () => {
                 <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">{post.caption}</p>
                 {post.hashtags?.length > 0 && (
                   <p className="text-xs text-primary mt-3">{post.hashtags.map(h => `#${h.replace(/^#/, '')}`).join(' ')}</p>
+                )}
+                {adminMode && (
+                  <div className="mt-4">
+                    <PostImageGenerator
+                      prompt={`${post.hook}. ${post.caption}`}
+                      editablePrompt
+                      onImageGenerated={() => {}}
+                    />
+                  </div>
                 )}
               </div>
             ))}

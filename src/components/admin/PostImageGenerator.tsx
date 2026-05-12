@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImageIcon, Loader2, RefreshCw, ChevronDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ImageIcon, Loader2, RefreshCw, ChevronDown, Wand2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -12,9 +13,12 @@ interface Props {
   existingImageUrl?: string;
   onImageGenerated: (url: string) => void;
   compact?: boolean;
+  /** Allow editing the prompt freely before generating (for content creator / calendar). */
+  editablePrompt?: boolean;
 }
 
 export const STYLE_OPTIONS = [
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
   { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction bars · crimson signature' },
   { key: 'autopsy_diagram',   label: 'Autopsy Diagram',   desc: 'Anatomical chart of a broken process' },
   { key: 'blueprint',         label: 'Blueprint',         desc: 'CRM pipeline schematic with breach callout' },
@@ -33,19 +37,22 @@ export const PostImageGenerator: React.FC<Props> = ({
   existingImageUrl,
   onImageGenerated,
   compact = false,
+  editablePrompt = false,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
-  const [style, setStyle] = useState<StyleKey>('case_file');
+  const [style, setStyle] = useState<StyleKey>(editablePrompt ? 'free' : 'case_file');
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState(prompt);
 
   const generate = async () => {
     setGenerating(true);
     setStylePickerOpen(false);
     try {
       const token = getAdminToken();
+      const finalPrompt = editablePrompt ? (customPrompt.trim() || prompt) : prompt;
       const { data, error } = await supabase.functions.invoke('generate-content-image', {
-        body: { prompt, library_item_id: libraryItemId, post_index: postIndex, style },
+        body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
         headers: token ? { 'x-admin-token': token } : {},
       });
       if (error) throw error;
@@ -123,6 +130,20 @@ export const PostImageGenerator: React.FC<Props> = ({
     <div className="glass rounded-lg p-4 border border-border space-y-3">
       {imageUrl && (
         <img src={imageUrl} alt="Generated brand visual" className="w-full rounded-md border border-border" />
+      )}
+      {editablePrompt && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber font-mono">
+            <Wand2 className="w-3 h-3" /> Image prompt
+          </div>
+          <Textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            rows={3}
+            placeholder="Describe the image you want — anything goes."
+            className="text-sm"
+          />
+        </div>
       )}
       {StylePicker}
       <Button

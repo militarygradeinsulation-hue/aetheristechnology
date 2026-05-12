@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
@@ -851,7 +852,12 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
         {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
-        {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+        {activeTool === 'calendar' && (
+          <div className="space-y-12">
+            <ContentCalendarGenerator adminMode />
+            <PostFromSourceGenerator adminMode />
+          </div>
+        )}
         {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
         {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
         {activeTool === 'brand' && <BrandContradictionFinder adminMode />}

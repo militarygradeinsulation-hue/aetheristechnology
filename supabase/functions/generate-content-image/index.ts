@@ -55,10 +55,17 @@ serve(async (req) => {
       isometric: `Clean isometric vector illustration. Charcoal background, amber and bone geometric shapes representing the business system. One node rendered in crimson with a subtle "leak" emission. Flat shading, sharp edges, generous negative space.`,
     };
 
-    const styleKey = (typeof style === "string" && STYLES[style]) ? style : "editorial_cartoon";
-    const styleDirective = STYLES[styleKey];
+    const isFree = style === "free";
+    const styleKey = isFree ? "free" : ((typeof style === "string" && STYLES[style]) ? style : "editorial_cartoon");
 
-    const imagePrompt = `${styleDirective}
+    const imagePrompt = isFree
+      ? `${prompt}
+
+COMPOSITION RULES:
+  • No celebrities or recognizable real people unless explicitly described.
+  • No on-image headlines or paragraphs of text unless explicitly requested.
+  • High quality, sharp focus, well-composed.`
+      : `${STYLES[styleKey]}
 
 ${BRAND_PALETTE}
 

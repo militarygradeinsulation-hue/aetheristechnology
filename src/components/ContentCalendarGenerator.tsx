@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { PostImageGenerator } from './admin/PostImageGenerator';
 
 const PHASES = [
   { label: 'Analyzing your industry...', target: 25 },
@@ -166,6 +167,15 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                       </Button>
                     )}
                   </div>
+                  {visible && adminMode && (
+                    <div className="mt-4">
+                      <PostImageGenerator
+                        prompt={`${day.topic}. ${day.hook}. ${day.caption}`}
+                        editablePrompt
+                        onImageGenerated={() => {}}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
