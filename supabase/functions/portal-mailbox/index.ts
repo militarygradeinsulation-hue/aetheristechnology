@@ -252,6 +252,21 @@ serve(async (req) => {
       return json(200, { ok: true, message: saved });
     }
 
+    if (action === "upload_attachment") {
+      const name = String(body.name || "").slice(0, 200);
+      const mime = String(body.mime || "application/octet-stream").slice(0, 100);
+      const dataB64 = String(body.data_b64 || "");
+      if (!name || !dataB64) return json(400, { error: "name + data_b64 required" });
+      const bin = Uint8Array.from(atob(dataB64), c => c.charCodeAt(0));
+      if (bin.length > 10 * 1024 * 1024) return json(400, { error: "File exceeds 10MB" });
+      const path = `${mailbox.code}/${crypto.randomUUID()}-${name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+      const { error: upErr } = await sb.storage
+        .from("rep-email-attachments")
+        .upload(path, bin, { contentType: mime, upsert: false });
+      if (upErr) return json(500, { error: upErr.message });
+      return json(200, { ok: true, attachment: { name, size: bin.length, mime, storage_path: path } });
+    }
+
     if (action === "send") {
       const to = Array.isArray(body.to) ? body.to.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
       const cc = Array.isArray(body.cc) ? body.cc.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
