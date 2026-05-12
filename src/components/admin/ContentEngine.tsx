@@ -592,6 +592,30 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
           )}
         </div>
 
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Premade Title Ideas</div>
+            <span className="text-[10px] text-muted-foreground">Click to add as a topic seed</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto p-1 border border-border/40 rounded-md bg-background/30">
+            {PREMADE_TITLES.map((t) => {
+              const on = topicSeeds.includes(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTopicSeeds(on ? topicSeeds.filter(x => x !== t) : [...topicSeeds, t])}
+                  className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                    on
+                      ? 'bg-amber/15 border-amber text-amber'
+                      : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                  }`}
+                >{t}</button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
