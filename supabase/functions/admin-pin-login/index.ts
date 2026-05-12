@@ -58,18 +58,30 @@ Deno.serve(async (req) => {
 
   try {
     const { pin } = await req.json().catch(() => ({}));
-    if (pin !== ADMIN_PIN) {
-      return new Response(JSON.stringify({ error: "Invalid PIN" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+
+    // Accept either the master ADMIN_PIN or an active partner's portal code.
+    let isPartnerPin = false;
+    if (pin !== ADMIN_PIN) {
+      const { data: partner } = await admin
+        .from("rep_codes")
+        .select("code, role, is_active")
+        .eq("code", String(pin || ""))
+        .eq("role", "partner")
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!partner) {
+        return new Response(JSON.stringify({ error: "Invalid PIN" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      isPartnerPin = true;
+    }
 
     // 1. PIN-token for admin-data edge function calls.
     const exp = Date.now() + TOKEN_TTL_MS;
