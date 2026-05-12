@@ -83,7 +83,7 @@ export const CommissionStructurePanel: React.FC = () => {
         <span className="text-xs text-amber font-mono hidden group-open:inline">Collapse ▴</span>
       </summary>
       <div className="space-y-6 p-4 pt-2">
-      <FlagshipCommissionPanel />
+      <FlagshipCommissionPanel audience="admin" />
 
       {/* Tiered rules */}
       <Card>

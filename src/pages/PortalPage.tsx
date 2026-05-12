@@ -363,12 +363,12 @@ const PortalPage: React.FC = () => {
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Percent className="w-4 h-4" /> Commission Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{(profile.commission_rate * 100).toFixed(0)}%</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Shield className="w-4 h-4" /> Code</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold font-mono text-amber">{profile.code}</p></CardContent></Card>
             </div>
-            <FlagshipCommissionPanel />
+            <FlagshipCommissionPanel audience={isPartner ? 'partner' : 'rep'} />
           </div>
         );
       case 'commissions': return (
         <div className="space-y-6">
-          <FlagshipCommissionPanel />
+          <FlagshipCommissionPanel audience={isPartner ? 'partner' : 'rep'} />
           <CommissionStructurePanel />
         </div>
       );
