@@ -134,9 +134,13 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
 
   const deleteTask = async (id: string) => {
     if (!confirm("Delete this task?")) return;
-    const { error } = await supabase.from("shared_tasks").delete().eq("id", id);
-    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
-    else load();
+    try {
+      const { deleteSharedTask } = await import("@/lib/sharedWorkspaceApi");
+      await deleteSharedTask(id);
+      load();
+    } catch (e) {
+      toast({ title: "Delete failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   const openEditTask = (t: SharedTask) => {
@@ -166,17 +170,25 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   };
   const deleteNote = async (id: string) => {
     if (!confirm("Delete this note?")) return;
-    const { error } = await supabase.from("shared_notes").delete().eq("id", id);
-    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
-    else load();
+    try {
+      const { deleteSharedNote } = await import("@/lib/sharedWorkspaceApi");
+      await deleteSharedNote(id);
+      load();
+    } catch (e) {
+      toast({ title: "Delete failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   const deleteFile = async (f: SharedFile) => {
     if (!confirm(`Delete "${f.filename}"?`)) return;
-    await supabase.storage.from("workspace-files").remove([f.storage_path]);
-    const { error } = await supabase.from("shared_files").delete().eq("id", f.id);
-    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
-    else { toast({ title: "File deleted" }); load(); }
+    try {
+      const { deleteSharedFile } = await import("@/lib/sharedWorkspaceApi");
+      await deleteSharedFile(f.id, f.storage_path);
+      toast({ title: "File deleted" });
+      load();
+    } catch (e) {
+      toast({ title: "Delete failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   const addNote = async () => {

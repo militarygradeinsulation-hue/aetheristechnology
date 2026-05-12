@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -77,6 +78,16 @@ export const AdminCareersPanel: React.FC = () => {
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
   const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
+  const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
+  const matchingApp = useMemo(
+    () => detailAttempt
+      ? applications.find(app =>
+          app.candidate_email.toLowerCase() === detailAttempt.candidate_email.toLowerCase()
+          || (detailAttempt.share_code && app.share_code === detailAttempt.share_code)
+        ) || null
+      : null,
+    [detailAttempt, applications]
+  );
 
   const load = async () => {
     setLoading(true);
@@ -686,11 +697,16 @@ export const AdminCareersPanel: React.FC = () => {
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
                 (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
-                  <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setDetailAttempt(a)}
+                    className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
+                  >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                          <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || '—'}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
                             <Badge variant="outline" className="font-mono">
@@ -701,15 +717,15 @@ export const AdminCareersPanel: React.FC = () => {
                           {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
-                          {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
+                          <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
+                          {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
                           <span>Started {fmt(a.started_at)}</span>
                           {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
                         </div>
                         {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -718,6 +734,118 @@ export const AdminCareersPanel: React.FC = () => {
       </Card>
 
       <AdminCareersTest />
+
+      <Dialog open={!!detailAttempt} onOpenChange={(o) => !o && setDetailAttempt(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span>{detailAttempt?.candidate_name || detailAttempt?.candidate_email || 'Candidate'}</span>
+              {detailAttempt && <StatusBadge s={detailAttempt.status} />}
+              {detailAttempt?.score_pct != null && (
+                <Badge variant="outline" className="font-mono">
+                  {detailAttempt.score_pct}% ({detailAttempt.correct_count}/{detailAttempt.total_count})
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {detailAttempt && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Email</div>
+                  <a href={`mailto:${detailAttempt.candidate_email}`} className="text-amber hover:underline flex items-center gap-1">
+                    <Mail className="w-3 h-3" /> {detailAttempt.candidate_email}
+                  </a>
+                </div>
+                {detailAttempt.candidate_phone && (
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Phone</div>
+                    <a href={`tel:${detailAttempt.candidate_phone}`} className="text-amber hover:underline flex items-center gap-1">
+                      <Phone className="w-3 h-3" /> {detailAttempt.candidate_phone}
+                    </a>
+                  </div>
+                )}
+                {detailAttempt.share_code && (
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Share code</div>
+                    <div className="font-mono">{detailAttempt.share_code}</div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Started</div>
+                  <div>{fmt(detailAttempt.started_at)}</div>
+                </div>
+                {detailAttempt.submitted_at && (
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Submitted</div>
+                    <div>{fmt(detailAttempt.submitted_at)}</div>
+                  </div>
+                )}
+              </div>
+
+              {detailAttempt.notes_to_admin && (
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes from candidate</div>
+                  <p className="italic text-foreground/90 bg-secondary/30 rounded p-2">"{detailAttempt.notes_to_admin}"</p>
+                </div>
+              )}
+
+              {matchingApp ? (
+                <div className="border-t border-border/50 pt-3 space-y-2">
+                  <div className="font-semibold text-amber flex items-center gap-2"><FileText className="w-4 h-4" /> Application on file</div>
+                  {matchingApp.ai_summary && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">AI summary</div>
+                      <p className="text-foreground/90">{matchingApp.ai_summary}</p>
+                    </div>
+                  )}
+                  {matchingApp.ai_fit_score != null && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">AI fit score</div>
+                      <Badge variant="outline" className="font-mono">{matchingApp.ai_fit_score}/100</Badge>
+                    </div>
+                  )}
+                  {matchingApp.ai_strengths && matchingApp.ai_strengths.length > 0 && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Strengths</div>
+                      <ul className="list-disc list-inside text-foreground/90">
+                        {matchingApp.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {matchingApp.ai_concerns && matchingApp.ai_concerns.length > 0 && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Concerns</div>
+                      <ul className="list-disc list-inside text-foreground/90">
+                        {matchingApp.ai_concerns.map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {matchingApp.notes && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Candidate notes</div>
+                      <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.notes}</p>
+                    </div>
+                  )}
+                  {matchingApp.admin_notes && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Admin notes</div>
+                      <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.admin_notes}</p>
+                    </div>
+                  )}
+                  {matchingApp.resume_filename && (
+                    <div className="text-xs text-muted-foreground">Resume: {matchingApp.resume_filename}</div>
+                  )}
+                </div>
+              ) : (
+                <div className="border-t border-border/50 pt-3 text-xs text-muted-foreground italic">
+                  No application submitted yet for this candidate.
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
