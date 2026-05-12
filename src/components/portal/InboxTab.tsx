@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { repMailbox, type RepEmailMessage, type RepMailbox } from "@/lib/repMailbox";
 import {
   Loader2, Mail, Pencil, Inbox as InboxIcon, Send, FileText, Trash2,
-  Star, Reply, Forward, Search, Settings, RefreshCcw,
+  Star, Reply, Forward, Search, Settings, RefreshCcw, Paperclip, X,
 } from "lucide-react";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
@@ -291,8 +291,37 @@ const ComposeDialog: React.FC<{
   const [body, setBody] = useState(initial.body || "");
   const [sending, setSending] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [attachments, setAttachments] = useState<Array<{ name: string; size: number; mime: string; storage_path: string }>>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const parseAddrs = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const totalNew = Array.from(files).reduce((s, f) => s + f.size, 0);
+    const totalExisting = attachments.reduce((s, a) => s + a.size, 0);
+    if (totalNew + totalExisting > 25 * 1024 * 1024) {
+      toast({ title: "Too large", description: "Attachments must total under 25MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      for (const f of Array.from(files)) {
+        if (f.size > 10 * 1024 * 1024) {
+          toast({ title: `${f.name} skipped`, description: "Each file must be under 10MB.", variant: "destructive" });
+          continue;
+        }
+        const att = await repMailbox.uploadAttachment(f);
+        setAttachments(prev => [...prev, att]);
+      }
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const send = async () => {
     const toList = parseAddrs(to);
@@ -306,6 +335,7 @@ const ComposeDialog: React.FC<{
         to: toList, cc: ccList, subject, body_text: body,
         in_reply_to: initial.in_reply_to || null,
         thread_id: initial.thread_id || null,
+        attachments,
       });
       // Clean up draft if we're sending a previously-saved draft
       if (draftId) {
@@ -347,17 +377,42 @@ const ComposeDialog: React.FC<{
           <Input placeholder="Cc (optional)" value={cc} onChange={(e) => setCc(e.target.value)} />
           <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
           <Textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {attachments.map((a, i) => (
+                <div key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 border rounded bg-muted">
+                  <Paperclip className="w-3 h-3" />
+                  <span>{a.name}</span>
+                  <span className="text-muted-foreground">({Math.round(a.size / 1024)} KB)</span>
+                  <button type="button" onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-muted-foreground hover:text-destructive">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
           {mailbox.signature && (
             <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
           )}
         </div>
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending}>
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || sending}>
+            {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Paperclip className="w-4 h-4 mr-2" />}
+            Attach
+          </Button>
+          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending || uploading}>
             {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
             Save draft
           </Button>
-          <Button onClick={send} disabled={sending || savingDraft}>
+          <Button onClick={send} disabled={sending || savingDraft || uploading}>
             {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
             Send
           </Button>
