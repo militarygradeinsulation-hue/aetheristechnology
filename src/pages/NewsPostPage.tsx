@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 
 const NewsPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
