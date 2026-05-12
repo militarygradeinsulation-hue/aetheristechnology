@@ -852,7 +852,12 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
         {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
-        {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+        {activeTool === 'calendar' && (
+          <div className="space-y-12">
+            <ContentCalendarGenerator adminMode />
+            <PostFromSourceGenerator adminMode />
+          </div>
+        )}
         {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
         {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
         {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
