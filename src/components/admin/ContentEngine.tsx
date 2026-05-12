@@ -82,6 +82,29 @@ const STATUS_INFO: Record<string, { label: string; cls: string }> = {
   posted:   { label: 'Posted',   cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 };
 
+const PREMADE_TITLES: string[] = [
+  'The 5 silent leaks bleeding 6-figures from your ops',
+  'Why your "best" rep is actually your biggest leak',
+  'The follow-up gap that costs $40k/month (and nobody tracks it)',
+  'Stop calling it a pipeline problem — it\'s a process leak',
+  'How a $7M shop found $1.2M in 14 days without hiring',
+  'The 3 metrics every operator should run weekly (most don\'t)',
+  'Your CRM is lying to you. Here\'s how to prove it.',
+  'Why "we tried automation" usually means "we bought software"',
+  'The ghosted-proposal autopsy: where the deal actually died',
+  'AI won\'t fix a broken process — it\'ll just speed up the bleed',
+  'The case for a forensic diagnostic before any tech stack rebuild',
+  'What I found inside a $30M company\'s revenue ops in 90 minutes',
+  'Owner-operators: the 4 reports your finance lead should be running',
+  'Why discounting is a symptom, not a strategy',
+  'The 14-day audit framework I run on every new engagement',
+  'How to stop your ops team from being a glorified inbox',
+  'Three questions that expose a leaking sales process in 10 minutes',
+  'The retention leak hiding in your onboarding (and how to seal it)',
+  'Quote-to-cash: where most B2B operators lose 8-12% margin',
+  'Why "more leads" is the wrong fix 70% of the time',
+];
+
 function pad(n: number) { return String(n).padStart(2, '0'); }
 function ymd(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function dayShort(d: Date) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
