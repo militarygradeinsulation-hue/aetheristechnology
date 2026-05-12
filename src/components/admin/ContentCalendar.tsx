@@ -412,12 +412,23 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
                         <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1" title="Move to date">
+                        <CalendarClock className="w-3 h-3 text-muted-foreground" />
+                        <Input
+                          type="date"
+                          defaultValue={dateKey(new Date(item.created_at))}
+                          onChange={(e) => handleReschedule(item, e.target.value)}
+                          className="h-7 w-[120px] px-1.5 text-[10px]"
+                        />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                      </div>
                     </div>
                   </div>
                 ))
