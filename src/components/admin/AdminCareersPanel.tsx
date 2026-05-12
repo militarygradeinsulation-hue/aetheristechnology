@@ -929,6 +929,54 @@ export const AdminCareersPanel: React.FC = () => {
                   No application submitted yet for this candidate.
                 </div>
               )}
+
+              {/* ===== Quick actions ===== */}
+              <div className="border-t border-border/50 pt-4 space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs font-mono uppercase tracking-wide text-amber">Actions</div>
+                  <Button
+                    type="button" size="sm"
+                    variant={detailAttempt && savedIds.has(detailAttempt.id) ? 'default' : 'outline'}
+                    className={detailAttempt && savedIds.has(detailAttempt.id) ? 'bg-amber text-background hover:bg-amber/90' : ''}
+                    onClick={() => detailAttempt && toggleSaved(detailAttempt.id)}
+                  >
+                    <Star className={`w-3.5 h-3.5 mr-1 ${detailAttempt && savedIds.has(detailAttempt.id) ? 'fill-background' : ''}`} />
+                    {detailAttempt && savedIds.has(detailAttempt.id) ? 'Saved' : 'Save'}
+                  </Button>
+                </div>
+
+                {/* Move to calendar */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><CalendarPlus className="w-3.5 h-3.5 text-amber" /> Move to Company Calendar</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input type="date" value={calDate} onChange={e => setCalDate(e.target.value)} className="h-8 w-auto" />
+                    <Input type="time" value={calTime} onChange={e => setCalTime(e.target.value)} className="h-8 w-auto" />
+                    <Button size="sm" onClick={moveToCalendar} disabled={calBusy} className="bg-amber text-background hover:bg-amber/90">
+                      {calBusy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
+                      Add interview
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Share with notes */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-amber" /> Share with notes</div>
+                  <Textarea
+                    value={shareNote}
+                    onChange={e => setShareNote(e.target.value)}
+                    placeholder="Add context for whoever you're sharing this candidate with…"
+                    className="min-h-[70px] text-sm bg-background/40"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={copyShare}>
+                      <Copy className="w-3.5 h-3.5 mr-1" /> Copy summary + notes
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={emailShare}>
+                      <Send className="w-3.5 h-3.5 mr-1" /> Email…
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
