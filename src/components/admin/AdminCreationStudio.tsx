@@ -24,6 +24,73 @@ const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
   { key: '16:9', w: 1920, h: 1080, label: '16:9 (LinkedIn/YouTube)' },
 ];
 
+// ===== Premade ideation: titles, topics, prompt recipes =====
+const PREMADE_TITLES: string[] = [
+  'Your Business Is Leaking — You Just Can\'t See It',
+  'The $200k Leak Hiding in Your CRM',
+  'Why Your "Best Rep" Is Your Biggest Leak',
+  '7 Steps of The Leak Audit™',
+  'Stop Hiring Reps. Fix the Process They\'re Drowning In.',
+  'AI Won\'t Save a Broken Process — It Speeds the Bleed',
+  'The Forensic Diagnostic: $2,500 to Find the Bleed',
+  'Trade-Show Leads Decay in 72 Hours. Here\'s the Fix.',
+  'Quote-to-Cash Leakage: The Silent 8-12% Margin Killer',
+  'The Follow-Up Gap Costing Commercial Services $40k/Month',
+  'Change-Order Leak: 4-7% of Every Construction Project',
+  'Your Tech Stack Isn\'t the Problem. The Handoffs Are.',
+];
+
+const PREMADE_TOPICS: Record<string, string[]> = {
+  'Revenue Leaks': [
+    'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
+    'The dead-lead pile worth $200k that nobody resurrects.',
+    'Quote-to-cash leakage between sales and ops.',
+    'Stalled deals nobody triages — the silent revenue killer.',
+  ],
+  'Systems & Ops': [
+    'CEO dashboards growth-stage owners refuse to build.',
+    'Handoff failures between CRM, quoting, and dispatch.',
+    'Why "more reps" is the wrong fix.',
+    'Process documentation that actually gets followed.',
+  ],
+  'AI / Practical': [
+    'Dead-lead resurrection with AI — the cheapest win.',
+    'AI-assisted CRM hygiene for $5M-$50M operators.',
+    'Why most AI consultants are SaaS resellers in a hoodie.',
+    'Forensic diagnostics powered by your own data.',
+  ],
+  'Sales & Pipeline': [
+    'Stuck-deal triage — 4 questions that move or kill a deal.',
+    'Discovery calls leak deals — here\'s the script that plugs it.',
+    'CRM stages lying about pipeline value.',
+    'The 72-hour warm-lead decay curve.',
+  ],
+  'Founder POV': [
+    'Owner-operators: the 4 weekly reports finance should run.',
+    'Discounting is a symptom, not a strategy.',
+    'When to fire your "rockstar" — operator\'s checklist.',
+    'Stop measuring activity. Start measuring leaks.',
+  ],
+  'Industry-Specific': [
+    'Specialty manufacturers and the trade-show decay curve.',
+    'Commercial services: dispatch as a revenue leak.',
+    'Construction change-order leakage.',
+    'Indianapolis mid-market margin squeeze.',
+  ],
+};
+
+const PREMADE_PROMPTS: { label: string; text: string }[] = [
+  { label: 'Hook + Stat + CTA', text: 'Open with a hard hook in scene 1. Cite one specific dollar figure. End with a CTA to the free Leak Audit at /leak-audit.' },
+  { label: 'Story-driven (no names)', text: 'Tell a 30-second case story (no names). Mid-video pivot to the lesson. Close with the Forensic Diagnostic offer ($2,500, applied toward engagement).' },
+  { label: 'Contrarian take', text: 'Disagree with a piece of conventional wisdom in scene 1. Defend it with 3 sharp scenes. Close with one blunt question.' },
+  { label: 'Numbered list (3-5)', text: 'Structure as a numbered list of 3-5 leak points. One sentence per scene. Close with "Which one is bleeding you right now?"' },
+  { label: 'Founder-to-founder', text: 'Founder-to-founder voice. Blunt. No buzzwords. Cite real numbers. End with "What\'s leaking in yours?"' },
+  { label: 'Demo / walkthrough', text: 'Walk through one specific leak with on-screen captions naming the metric. Close with the Forensic Diagnostic.' },
+];
+
+const ALL_TOPICS_FLAT = Object.values(PREMADE_TOPICS).flat();
+const pickRand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 function adminInvoke(action: string, body: Record<string, unknown> = {}) {
   const token = getAdminToken();
   return supabase.functions.invoke('creation-studio', {
@@ -83,6 +150,50 @@ export const AdminCreationStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [aspect, setAspect] = useState<typeof ASPECTS[number]['key']>('9:16');
   const [durationSec, setDurationSec] = useState(30);
+
+  // Premade ideation state
+  const [pickedTitle, setPickedTitle] = useState<string>('');
+  const [pickedTopics, setPickedTopics] = useState<string[]>([]);
+  const [pickedRecipe, setPickedRecipe] = useState<string>('');
+  const [topicCategory, setTopicCategory] = useState<string>('All');
+
+  const composePrompt = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
+    const t = overrides?.title ?? pickedTitle;
+    const topics = overrides?.topics ?? pickedTopics;
+    const recipe = overrides?.recipe ?? pickedRecipe;
+    const parts: string[] = [];
+    if (t) parts.push(`TITLE: ${t}`);
+    if (topics.length) parts.push(`TOPICS:\n- ${topics.join('\n- ')}`);
+    if (recipe) parts.push(`STRUCTURE: ${recipe}`);
+    return parts.join('\n\n');
+  };
+
+  const applyComposed = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
+    const composed = composePrompt(overrides);
+    if (composed) setPrompt(composed);
+  };
+
+  const toggleTopic = (t: string) => {
+    setPickedTopics((prev) => {
+      const next = prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t];
+      applyComposed({ topics: next });
+      return next;
+    });
+  };
+
+  const cycleAll = () => {
+    const title = pickRand(PREMADE_TITLES);
+    const pool = topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || ALL_TOPICS_FLAT);
+    const t1 = pickRand(pool);
+    let t2 = pickRand(pool);
+    if (t2 === t1) t2 = pickRand(pool);
+    const topics = [t1, t2];
+    const recipe = pickRand(PREMADE_PROMPTS).text;
+    setPickedTitle(title);
+    setPickedTopics(topics);
+    setPickedRecipe(recipe);
+    applyComposed({ title, topics, recipe });
+  };
 
   const [uploads, setUploads] = useState<AssetImage[]>([]);
   const [selectedSiteIds, setSelectedSiteIds] = useState<Set<string>>(new Set());
@@ -377,10 +488,10 @@ export const AdminCreationStudio: React.FC = () => {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold font-display flex items-center gap-2">
-              <Film className="w-5 h-5 text-amber" /> Creation Studio
+              <Film className="w-5 h-5 text-amber" /> Video Studio
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              AI-scripted video with your ElevenLabs voice + real site photos. Renders in your browser.
+              AI-scripted video with your ElevenLabs voice + real site photos. Mix premade titles, topics, and prompt recipes — or write your own.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchVoices} disabled={loadingVoices}>
@@ -424,13 +535,127 @@ export const AdminCreationStudio: React.FC = () => {
           </div>
         </div>
 
+        {/* Premade ideation: titles, topics, prompt recipes */}
+        <div className="mt-5 space-y-4 rounded-lg border border-amber/20 bg-background/30 p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Idea Mixer — pick & combine</div>
+            <button
+              type="button"
+              onClick={cycleAll}
+              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" /> Surprise me
+            </button>
+          </div>
+
+          {/* Titles */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Titles</div>
+            <div className="flex flex-wrap gap-1.5">
+              {PREMADE_TITLES.map((t) => {
+                const on = pickedTitle === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      const next = on ? '' : t;
+                      setPickedTitle(next);
+                      applyComposed({ title: next });
+                    }}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{t}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Topics */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics — click to combine</div>
+              {pickedTopics.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
+                  className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
+                >Clear ({pickedTopics.length})</button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1 mb-2">
+              {['All', ...Object.keys(PREMADE_TOPICS)].map((cat) => {
+                const on = topicCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setTopicCategory(cat)}
+                    className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
+                      on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                    }`}
+                  >{cat}</button>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              {(topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || [])).map((t) => {
+                const on = pickedTopics.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTopic(t)}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{t}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Prompt recipes */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Prompt recipes — pick a structure</div>
+            <div className="flex flex-wrap gap-1.5">
+              {PREMADE_PROMPTS.map((p) => {
+                const on = pickedRecipe === p.text;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => {
+                      const next = on ? '' : p.text;
+                      setPickedRecipe(next);
+                      applyComposed({ recipe: next });
+                    }}
+                    title={p.text}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{p.label}</button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="mt-4">
-          <Label>Prompt — what's the video about?</Label>
+          <div className="flex items-center justify-between">
+            <Label>Prompt — what's the video about?</Label>
+            <button
+              type="button"
+              onClick={() => { setPickedTitle(''); setPickedTopics([]); setPickedRecipe(''); setPrompt(''); }}
+              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber"
+            >Clear all</button>
+          </div>
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            rows={4}
-            placeholder='e.g. "Punchy 30-second LinkedIn post about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals — pitch the 21-Day Revenue Diagnostic."'
+            rows={6}
+            placeholder='Pick from the Idea Mixer above, or write your own. e.g. "Punchy 30-second LinkedIn video about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals — pitch the Forensic Diagnostic."'
             className="mt-1"
           />
         </div>
