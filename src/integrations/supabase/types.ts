@@ -4559,6 +4559,89 @@ export type Database = {
           },
         ]
       }
+      shared_interviews: {
+        Row: {
+          ai_concerns: Json | null
+          ai_fit_score: number | null
+          ai_strengths: Json | null
+          ai_summary: string | null
+          candidate_email: string | null
+          candidate_name: string
+          candidate_phone: string | null
+          created_at: string
+          created_by: string
+          id: string
+          interviewer: string
+          location: string | null
+          meeting_link: string | null
+          notes: string | null
+          resume_filename: string | null
+          resume_path: string | null
+          scheduled_at: string | null
+          share_code: string | null
+          source: string
+          status: string
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_concerns?: Json | null
+          ai_fit_score?: number | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
+          candidate_email?: string | null
+          candidate_name: string
+          candidate_phone?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          interviewer?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          resume_filename?: string | null
+          resume_path?: string | null
+          scheduled_at?: string | null
+          share_code?: string | null
+          source?: string
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_concerns?: Json | null
+          ai_fit_score?: number | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
+          candidate_email?: string | null
+          candidate_name?: string
+          candidate_phone?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          interviewer?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          resume_filename?: string | null
+          resume_path?: string | null
+          scheduled_at?: string | null
+          share_code?: string | null
+          source?: string
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_interviews_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_notes: {
         Row: {
           author: string
