@@ -139,6 +139,46 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
     else load();
   };
 
+  const openEditTask = (t: SharedTask) => {
+    setEditTaskId(t.id);
+    setEditTaskDraft({
+      title: t.title, description: t.description, assignee: t.assignee,
+      priority: t.priority, bucket: t.bucket, status: t.status,
+      due_at: t.due_at,
+    });
+  };
+  const saveEditTask = async () => {
+    if (!editTaskId) return;
+    const patch: any = { ...editTaskDraft };
+    if (patch.due_at === "") patch.due_at = null;
+    const { error } = await supabase.from("shared_tasks").update(patch).eq("id", editTaskId);
+    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Task updated" });
+    setEditTaskId(null); setEditTaskDraft({}); load();
+  };
+
+  const startEditNote = (n: SharedNote) => { setEditNoteId(n.id); setEditNoteBody(n.body); };
+  const saveEditNote = async () => {
+    if (!editNoteId || !editNoteBody.trim()) return;
+    const { error } = await supabase.from("shared_notes").update({ body: editNoteBody.trim() }).eq("id", editNoteId);
+    if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
+    setEditNoteId(null); setEditNoteBody(""); load();
+  };
+  const deleteNote = async (id: string) => {
+    if (!confirm("Delete this note?")) return;
+    const { error } = await supabase.from("shared_notes").delete().eq("id", id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else load();
+  };
+
+  const deleteFile = async (f: SharedFile) => {
+    if (!confirm(`Delete "${f.filename}"?`)) return;
+    await supabase.storage.from("workspace-files").remove([f.storage_path]);
+    const { error } = await supabase.from("shared_files").delete().eq("id", f.id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else { toast({ title: "File deleted" }); load(); }
+  };
+
   const addNote = async () => {
     if (!noteBody.trim()) return;
     const { error } = await supabase.from("shared_notes").insert({
