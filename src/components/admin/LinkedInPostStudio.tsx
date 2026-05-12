@@ -361,6 +361,39 @@ export default function LinkedInPostStudio() {
           ) : (
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{generated}</div>
           )}
+
+          {generated && !loading && (
+            <div className="mt-4 pt-4 border-t border-border space-y-2">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber flex items-center gap-1.5">
+                <CalendarPlus className="w-3 h-3" /> Save & schedule on calendar
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Pick the date this post should land on. It will appear in the Content Calendar and can be moved later.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => { setScheduleDate(e.target.value); setSavedId(null); }}
+                  className="w-auto h-9 text-xs"
+                />
+                <Button
+                  size="sm"
+                  onClick={saveToCalendar}
+                  disabled={saving || !scheduleDate}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
+                  {saving ? 'Saving…' : savedId ? 'Saved — save again' : 'Save to calendar'}
+                </Button>
+                {savedId && (
+                  <span className="text-[11px] text-amber flex items-center gap-1">
+                    <Check className="w-3 h-3" /> On {new Date(`${scheduleDate}T12:00:00`).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </Card>
       )}
     </div>
