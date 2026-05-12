@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Newspaper, Loader2, ArrowRight, ExternalLink, RefreshCw, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 
 interface IndustryItem {
   id: string;
