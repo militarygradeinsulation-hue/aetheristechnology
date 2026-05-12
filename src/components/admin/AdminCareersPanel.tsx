@@ -391,6 +391,7 @@ export const AdminCareersPanel: React.FC = () => {
       try { await updateApp(shareCode, { admin_notes: value }); }
       catch (e) { toast({ title: 'Notes save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
     }, 700);
+  };
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const deleteApplication = async (a: Application) => {
