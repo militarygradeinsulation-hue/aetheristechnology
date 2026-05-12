@@ -61,6 +61,15 @@ interface Application {
   ai_analyzed_at?: string | null;
 }
 
+const SECTION_LABELS: [string, string][] = [
+  ['b2b_sales_experience',     'B2B Sales Experience'],
+  ['closing_track_record',     'Closing Track Record'],
+  ['communication_confidence', 'Communication & Confidence'],
+  ['hustle_ownership',         'Hustle & Ownership'],
+  ['domain_fit',               'Domain Fit'],
+  ['resilience_tenure',        'Resilience & Tenure'],
+];
+
 interface Analytics {
   total_views: number;
   unique_visitors: number;
