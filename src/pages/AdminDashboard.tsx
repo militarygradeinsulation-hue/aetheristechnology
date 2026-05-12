@@ -178,12 +178,19 @@ const AdminDashboard: React.FC = () => {
     { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
+  const ALWAYS_INCLUDE_NEW = ['briefing']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const merged = [...parsed];
+          for (const k of ALWAYS_INCLUDE_NEW) {
+            if (!merged.includes(k) && ALL_TAB_DEFS.some(t => t.key === k)) merged.push(k);
+          }
+          return merged;
+        }
       }
     } catch {}
     return ALL_TAB_DEFS.map(t => t.key);
