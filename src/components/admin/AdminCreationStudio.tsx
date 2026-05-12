@@ -943,14 +943,110 @@ export const AdminCreationStudio: React.FC = () => {
                         const next = { ...plan }; next.scenes[i] = { ...s, voiceover: e.target.value };
                         setPlan(next);
                       }}
-                      className="text-sm"
-                      placeholder="Voiceover line (also drives image generation)"
+                      className="text-sm mb-2"
+                      placeholder="Voiceover line (spoken aloud)"
                     />
+                    <div className="rounded-md border border-amber/20 bg-amber/5 p-2 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] uppercase tracking-widest text-amber font-mono flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" /> Image prompt for this scene
+                        </span>
+                        <select
+                          value={s.imageStyle || 'case_file'}
+                          onChange={(e) => {
+                            const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
+                            setPlan(next);
+                          }}
+                          className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
+                        >
+                          {SCENE_STYLE_OPTIONS.map(o => (
+                            <option key={o.key} value={o.key}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <Textarea
+                        value={s.imagePrompt ?? ''}
+                        rows={2}
+                        onChange={(e) => {
+                          const next = { ...plan }; next.scenes[i] = { ...s, imagePrompt: e.target.value };
+                          setPlan(next);
+                        }}
+                        placeholder={`Describe the visual you want. Falls back to caption + voiceover. e.g. "Manila case file open on a desk, redaction bars over a CRM screenshot, hard amber rim light, $187,400 stamped in red."`}
+                        className="text-xs bg-background"
+                      />
+                      <div className="text-[10px] text-muted-foreground">
+                        {SCENE_STYLE_OPTIONS.find(o => o.key === (s.imageStyle || 'case_file'))?.desc}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* Music panel */}
+          <div className="mt-5 rounded-lg border border-amber/30 bg-background/40 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Background music (optional)</div>
+                <div className="text-xs text-muted-foreground">AI-generated original score via ElevenLabs Music — royalty-free, yours to use.</div>
+              </div>
+              {musicUrl && (
+                <button type="button" onClick={clearMusic} className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-destructive">
+                  Remove
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {MUSIC_PRESETS.map(p => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => setMusicPrompt(p.text)}
+                  title={p.text}
+                  className="text-[11px] rounded-full px-2.5 py-1 border bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber transition"
+                >{p.label}</button>
+              ))}
+            </div>
+            <Textarea
+              value={musicPrompt}
+              onChange={(e) => setMusicPrompt(e.target.value)}
+              rows={2}
+              placeholder='Describe the music. e.g. "Slow forensic underscore, dark piano, low cello drone, ticking clock, no vocals, loopable."'
+              className="text-sm"
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={generateMusic}
+                disabled={musicGenerating}
+                className="border-amber/40 text-amber hover:bg-amber/10"
+              >
+                {musicGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
+                {musicUrl ? 'Regenerate music' : 'Generate music'}
+              </Button>
+              <label className="text-[11px] text-muted-foreground flex items-center gap-2">
+                Volume
+                <input
+                  type="range"
+                  min={0}
+                  max={0.6}
+                  step={0.02}
+                  value={musicVolume}
+                  onChange={(e) => setMusicVolume(Number(e.target.value))}
+                  className="w-32"
+                />
+                <span className="font-mono text-amber w-8">{Math.round(musicVolume * 100)}%</span>
+              </label>
+              {musicUrl && <audio src={musicUrl} controls className="h-8 max-w-xs" />}
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              Free music alternatives if you'd rather: <a href="https://pixabay.com/music/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Pixabay Music</a>, <a href="https://www.bensound.com/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Bensound</a>, <a href="https://freemusicarchive.org/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Free Music Archive</a>. Generated music auto-mixes into the next render.
+            </div>
+          </div>
+
           {rendering && (
             <div className="mt-4">
               <div className="h-2 bg-border rounded overflow-hidden">
