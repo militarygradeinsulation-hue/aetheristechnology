@@ -22,6 +22,7 @@ const TOOL_LABELS: Record<string, string> = {
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
   day_post: 'Day Post',
+  linkedin_post: 'LinkedIn Post',
 };
 
 const TOOL_COLORS: Record<string, string> = {
@@ -34,6 +35,7 @@ const TOOL_COLORS: Record<string, string> = {
   friction_audit: 'bg-orange-500/80',
   playbook: 'bg-pink-500/80',
   day_post: 'bg-amber',
+  linkedin_post: 'bg-sky-500/80',
 };
 
 function getDaysInMonth(year: number, month: number) {
