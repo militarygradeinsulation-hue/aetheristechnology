@@ -33,6 +33,7 @@ const TOOL_COLORS: Record<string, string> = {
   brand_contradictions: 'bg-[hsl(var(--crimson))]/80',
   friction_audit: 'bg-orange-500/80',
   playbook: 'bg-pink-500/80',
+  day_post: 'bg-amber',
 };
 
 function getDaysInMonth(year: number, month: number) {
