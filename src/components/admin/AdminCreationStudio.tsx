@@ -151,6 +151,50 @@ export const AdminCreationStudio: React.FC = () => {
   const [aspect, setAspect] = useState<typeof ASPECTS[number]['key']>('9:16');
   const [durationSec, setDurationSec] = useState(30);
 
+  // Premade ideation state
+  const [pickedTitle, setPickedTitle] = useState<string>('');
+  const [pickedTopics, setPickedTopics] = useState<string[]>([]);
+  const [pickedRecipe, setPickedRecipe] = useState<string>('');
+  const [topicCategory, setTopicCategory] = useState<string>('All');
+
+  const composePrompt = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
+    const t = overrides?.title ?? pickedTitle;
+    const topics = overrides?.topics ?? pickedTopics;
+    const recipe = overrides?.recipe ?? pickedRecipe;
+    const parts: string[] = [];
+    if (t) parts.push(`TITLE: ${t}`);
+    if (topics.length) parts.push(`TOPICS:\n- ${topics.join('\n- ')}`);
+    if (recipe) parts.push(`STRUCTURE: ${recipe}`);
+    return parts.join('\n\n');
+  };
+
+  const applyComposed = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
+    const composed = composePrompt(overrides);
+    if (composed) setPrompt(composed);
+  };
+
+  const toggleTopic = (t: string) => {
+    setPickedTopics((prev) => {
+      const next = prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t];
+      applyComposed({ topics: next });
+      return next;
+    });
+  };
+
+  const cycleAll = () => {
+    const title = pickRand(PREMADE_TITLES);
+    const pool = topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || ALL_TOPICS_FLAT);
+    const t1 = pickRand(pool);
+    let t2 = pickRand(pool);
+    if (t2 === t1) t2 = pickRand(pool);
+    const topics = [t1, t2];
+    const recipe = pickRand(PREMADE_PROMPTS).text;
+    setPickedTitle(title);
+    setPickedTopics(topics);
+    setPickedRecipe(recipe);
+    applyComposed({ title, topics, recipe });
+  };
+
   const [uploads, setUploads] = useState<AssetImage[]>([]);
   const [selectedSiteIds, setSelectedSiteIds] = useState<Set<string>>(new Set());
 
