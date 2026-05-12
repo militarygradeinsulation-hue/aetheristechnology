@@ -780,8 +780,9 @@ export const AdminCareersPanel: React.FC = () => {
                     className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
+                          {savedIds.has(a.id) && <Star className="w-3.5 h-3.5 text-amber fill-amber" />}
                           <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || '—'}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
@@ -799,6 +800,16 @@ export const AdminCareersPanel: React.FC = () => {
                           {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
                         </div>
                         {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        <Button
+                          type="button" size="sm" variant="ghost"
+                          className={`h-8 ${savedIds.has(a.id) ? 'text-amber' : 'text-muted-foreground hover:text-amber'}`}
+                          onClick={(e) => { e.stopPropagation(); toggleSaved(a.id); }}
+                          title={savedIds.has(a.id) ? 'Remove from saved' : 'Save candidate'}
+                        >
+                          <Star className={`w-4 h-4 ${savedIds.has(a.id) ? 'fill-amber' : ''}`} />
+                        </Button>
                       </div>
                     </div>
                   </button>
