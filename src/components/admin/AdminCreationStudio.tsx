@@ -912,7 +912,7 @@ export const AdminCreationStudio: React.FC = () => {
                       className="h-7 text-[10px] px-2 border-amber/40 text-amber hover:bg-amber/10"
                       disabled={generatingSceneIdx === i}
                       onClick={() => generateSceneImage(i)}
-                      title="Generate an image from this scene's caption + voiceover"
+                      title="Generate an image using this scene's image prompt + style"
                     >
                       {generatingSceneIdx === i ? (
                         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
