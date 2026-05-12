@@ -294,8 +294,8 @@ const CareersTestPage = () => {
                     maxLength={4000}
                     value={appNotes}
                     onChange={e => setAppNotes(e.target.value)}
-                    onPaste={e => { e.preventDefault(); toast.error('Paste disabled — I want your original thoughts, not ChatGPT copy/paste.'); }}
-                    onDrop={e => { e.preventDefault(); toast.error('Drag-and-drop disabled — type your own answer.'); }}
+                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
+                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
                     onContextMenu={e => e.preventDefault()}
                     autoComplete="off"
                     spellCheck={true}
