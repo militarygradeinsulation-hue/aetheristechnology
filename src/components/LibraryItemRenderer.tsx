@@ -1116,6 +1116,26 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'website_scan': return <WebsiteScanView {...props} />;
     case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
+    case 'video': return (
+      <div className="space-y-3">
+        {item.file_url ? (
+          <video src={item.file_url} controls className="w-full max-h-[70vh] rounded-lg bg-black" />
+        ) : (
+          <p className="text-sm text-muted-foreground">Video file missing.</p>
+        )}
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {data.aspect && <span>Aspect: {String(data.aspect)}</span>}
+          {data.ext && <span>Format: .{String(data.ext)}</span>}
+          {data.size_mb != null && <span>Size: {String(data.size_mb)} MB</span>}
+          {Array.isArray(data.scenes) && <span>Scenes: {data.scenes.length}</span>}
+        </div>
+        {item.file_url && (
+          <a href={item.file_url} download target="_blank" rel="noopener noreferrer" className="text-amber text-sm underline">
+            Download original
+          </a>
+        )}
+      </div>
+    );
     default:
       return (
         <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">

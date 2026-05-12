@@ -16,6 +16,7 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions',
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
+  video: 'Video',
 };
 
 export const AdminLibrary: React.FC = () => {
