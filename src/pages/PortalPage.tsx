@@ -318,6 +318,7 @@ const PortalPage: React.FC = () => {
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
+    { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -326,6 +327,7 @@ const PortalPage: React.FC = () => {
     (!t.partnerOnly || isPartner)
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
+    && (t.id !== 'interviews' || sharedWsUnlocked)
   );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
