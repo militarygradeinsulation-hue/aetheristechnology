@@ -790,12 +790,10 @@ export const AdminCareersPanel: React.FC = () => {
                             <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
                           </Button>
                         )}
-                        {a.resume_path && (
-                          <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
-                            {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                            {a.ai_analyzed_at ? 'Re-analyze' : 'Analyze AI'}
-                          </Button>
-                        )}
+                        <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
+                          {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                          {a.ai_analyzed_at ? 'Re-analyze' : a.resume_path ? 'Analyze AI' : 'Analyze (no resume)'}
+                        </Button>
                         <Button size="sm" variant={a.contacted ? 'outline' : 'default'}
                           onClick={() => toggleContacted(a.share_code, !a.contacted)}
                           disabled={contactingId === a.share_code}
