@@ -439,7 +439,7 @@ export const AdminCareersPanel: React.FC = () => {
     setMinTestScore('');
     setMinFitScore('');
     setFitSort('none');
-    if (preset === 'top') { setMinFitScore('80'); setFitSort('desc'); }
+    if (preset === 'top') { setMinFitScore('45'); setFitSort('desc'); }
     else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
     else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
     else if (preset === 'rejected') { setStageFilter('no'); }
