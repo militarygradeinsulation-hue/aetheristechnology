@@ -219,6 +219,86 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </div>
 
+            {/* Objection / rebuttal */}
+            <section className="premium-tile rounded-sm border border-crimson/50 p-6 md:p-8 mb-10">
+              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
+                The objection we hear every time
+              </div>
+              <blockquote className="font-forensic text-3xl md:text-4xl font-bold text-crimson leading-tight mb-2">
+                "That's just too expensive!"
+              </blockquote>
+              <p className="text-sm text-muted-foreground italic mb-6">
+                Said by every CFO who hasn't done the math yet. Here's the math.
+              </p>
+
+              <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
+                $18,500 buys you what an agency charges $90K–$240K for — and most agencies still won't touch your CRM data.
+              </h3>
+
+              <div className="overflow-x-auto mb-6">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-amber/30">
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 pr-3">Line item</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">Typical agency / consultancy</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Diagnostic</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-foreground/85">
+                    {[
+                      ['CRM audit + cleanup (HubSpot/Salesforce)', '$15,000 – $40,000', 'Included'],
+                      ['Sales process + pipeline diagnostic', '$20,000 – $50,000', 'Included'],
+                      ['Website + SEO/GEO + AI-visibility audit', '$8,000 – $25,000', 'Included'],
+                      ['Brand/messaging contradiction audit', '$10,000 – $20,000', 'Included'],
+                      ['Sales script + 7-touch follow-up build', '$6,000 – $15,000', 'Included'],
+                      ['90-day content calendar + first 14 drafts', '$8,000 – $20,000', 'Included'],
+                      ['Operator-graded scorecard + readout', '$10,000 – $30,000', 'Included'],
+                      ['Written report w/ ROI projections + roadmap', '$5,000 – $15,000', 'Included'],
+                      ['Source-data appendix (every CSV + query)', 'Rarely offered', 'Included'],
+                    ].map(([item, agency, us]) => (
+                      <tr key={item} className="border-b border-border/30">
+                        <td className="py-2 pr-3">{item}</td>
+                        <td className="py-2 px-3 text-muted-foreground">{agency}</td>
+                        <td className="py-2 pl-3 text-amber font-semibold">{us}</td>
+                      </tr>
+                    ))}
+                    <tr className="border-t-2 border-amber/50">
+                      <td className="py-3 pr-3 font-bold text-foreground">TOTAL</td>
+                      <td className="py-3 px-3 font-bold text-muted-foreground">$82,000 – $215,000</td>
+                      <td className="py-3 pl-3 font-bold text-amber text-lg">$18,500 flat</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                  <div className="font-forensic text-3xl font-bold text-amber">21 days</div>
+                  <div className="text-xs text-muted-foreground mt-1">Fixed timeline. Agencies average 90–120 days to deliver less.</div>
+                </div>
+                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                  <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
+                  <div className="text-xs text-muted-foreground mt-1">20+ years running real P&Ls. Not a junior + a GPT wrapper.</div>
+                </div>
+                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                  <div className="font-forensic text-3xl font-bold text-amber">$0 retainer</div>
+                  <div className="text-xs text-muted-foreground mt-1">Read the report. Walk away. Or hire us to fix it. Your call.</div>
+                </div>
+              </div>
+
+              <div className="premium-tile rounded-sm border border-crimson/40 p-5">
+                <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
+                  The real math
+                </div>
+                <p className="text-foreground/90 text-sm md:text-base leading-relaxed">
+                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$18,500 to find the leak is roughly 1.3% – 4.6% of what it's costing you to ignore it.</span> One recovered deal usually pays for the engagement 5–20x over.
+                </p>
+                <p className="text-xs text-muted-foreground italic mt-3">
+                  If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves — before you sign anything else.
+                </p>
+              </div>
+            </section>
+
             <div className="grid md:grid-cols-2 gap-4 mb-10">
               <section className="premium-tile rounded-sm border border-border/60 p-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What you get</div>
