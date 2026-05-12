@@ -208,6 +208,19 @@ export const AdminCareersPanel: React.FC = () => {
     (minTest == null || (a.score_pct ?? -1) >= minTest)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
+
+  // Count attempts per candidate (keyed by lowercased email).
+  const attemptCountByEmail = React.useMemo(() => {
+    const m: Record<string, number> = {};
+    attempts.forEach(at => {
+      const k = (at.candidate_email || '').toLowerCase().trim();
+      if (!k) return;
+      m[k] = (m[k] || 0) + 1;
+    });
+    return m;
+  }, [attempts]);
+  const countFor = (email: string | null | undefined) =>
+    attemptCountByEmail[(email || '').toLowerCase().trim()] || 0;
   const filteredApps = applications
     .filter(a =>
       matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
