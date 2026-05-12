@@ -146,12 +146,12 @@ export const ContentEngine: React.FC = () => {
     return () => clearTimeout(t);
   }, [strategy, loading]);
 
-  async function handleGenerate(numPosts: number) {
+  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) {
     if (generating) return;
     setGenerating(true);
     setGenerationStatus('Planning slots and writing scripts in parallel...');
     try {
-      const res = await call('plan_and_generate', { numPosts });
+      const res = await call('plan_and_generate', { numPosts, ...(opts || {}) });
       const newPosts = (res.posts || []) as Post[];
       setPosts((prev) => [...prev, ...newPosts].sort((a, b) => (a.scheduled_date + a.scheduled_time).localeCompare(b.scheduled_date + b.scheduled_time)));
       setGenerationStatus(`✓ Generated ${res.generated} posts${res.failures ? ` (${res.failures} failed)` : ''}`);
