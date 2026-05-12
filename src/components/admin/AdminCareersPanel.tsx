@@ -57,8 +57,18 @@ interface Application {
   ai_summary?: string | null;
   ai_strengths?: string[] | null;
   ai_concerns?: string[] | null;
+  ai_section_scores?: Record<string, { rating: number; reason: string }> | null;
   ai_analyzed_at?: string | null;
 }
+
+const SECTION_LABELS: [string, string][] = [
+  ['b2b_sales_experience',     'B2B Sales Experience'],
+  ['closing_track_record',     'Closing Track Record'],
+  ['communication_confidence', 'Communication & Confidence'],
+  ['hustle_ownership',         'Hustle & Ownership'],
+  ['domain_fit',               'Domain Fit'],
+  ['resilience_tenure',        'Resilience & Tenure'],
+];
 
 interface Analytics {
   total_views: number;
@@ -146,7 +156,7 @@ export const AdminCareersPanel: React.FC = () => {
       detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
       detailAttempt.notes_to_admin ? `Candidate note: "${detailAttempt.notes_to_admin}"` : '',
       matchingApp?.ai_summary ? `AI summary: ${matchingApp.ai_summary}` : '',
-      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/100` : '',
+      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/60` : '',
       shareNote ? `\nNotes:\n${shareNote}` : '',
     ].filter(Boolean);
     return lines.join('\n');
@@ -270,9 +280,10 @@ export const AdminCareersPanel: React.FC = () => {
         ai_summary: d.summary,
         ai_strengths: d.strengths,
         ai_concerns: d.concerns,
+        ai_section_scores: d.section_scores || a.ai_section_scores || null,
         ai_analyzed_at: new Date().toISOString(),
       } : a));
-      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/100` });
+      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/60` });
       return d.fit_score as number;
     } catch (e) {
       if (!opts?.silent) toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -428,7 +439,7 @@ export const AdminCareersPanel: React.FC = () => {
     setMinTestScore('');
     setMinFitScore('');
     setFitSort('none');
-    if (preset === 'top') { setMinFitScore('80'); setFitSort('desc'); }
+    if (preset === 'top') { setMinFitScore('45'); setFitSort('desc'); }
     else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
     else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
     else if (preset === 'rejected') { setStageFilter('no'); }
@@ -592,8 +603,8 @@ export const AdminCareersPanel: React.FC = () => {
             {tab === 'apps' && (
               <>
                 <label className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Min fit</span>
-                  <Input type="number" min={0} max={100} value={minFitScore}
+                  <span className="text-muted-foreground">Min fit /60</span>
+                  <Input type="number" min={0} max={60} value={minFitScore}
                     onChange={e => setMinFitScore(e.target.value)}
                     placeholder="0" className="h-7 w-16" />
                 </label>
@@ -651,8 +662,8 @@ export const AdminCareersPanel: React.FC = () => {
                           <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>
                           {a.score_pct != null && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
                           {a.ai_fit_score != null && (
-                            <Badge className={`border ${a.ai_fit_score >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 60 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
-                              <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/100
+                            <Badge className={`border ${a.ai_fit_score >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 30 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/60
                             </Badge>
                           )}
                           {analyzingSet.has(a.share_code) && (
@@ -684,8 +695,29 @@ export const AdminCareersPanel: React.FC = () => {
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
                         {a.resume_extract_error && <p className="text-xs text-destructive mt-2">Resume extraction note: {a.resume_extract_error}</p>}
                         {a.ai_summary && (
-                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-1">
+                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-2">
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
+                            {a.ai_section_scores && Object.keys(a.ai_section_scores).length > 0 && (
+                              <div>
+                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1–10) — sum = fit score / 60</div>
+                                <div className="grid sm:grid-cols-2 gap-1">
+                                  {SECTION_LABELS.map(([key, label]) => {
+                                    const s = a.ai_section_scores?.[key];
+                                    if (!s) return null;
+                                    const tone = s.rating >= 8 ? 'text-green-400' : s.rating >= 5 ? 'text-amber' : 'text-destructive';
+                                    return (
+                                      <div key={key} className="flex items-start gap-2 bg-background/40 rounded px-2 py-1">
+                                        <span className={`font-mono font-bold text-xs ${tone} shrink-0 w-10`}>{s.rating}/10</span>
+                                        <div className="min-w-0">
+                                          <div className="text-[11px] font-bold text-foreground leading-tight">{label}</div>
+                                          {s.reason && <div className="text-[10px] text-muted-foreground leading-snug">{s.reason}</div>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                             {!!a.ai_strengths?.length && (
                               <div>
                                 <div className="text-[10px] font-mono uppercase text-green-400 mt-1">Strengths</div>
@@ -905,7 +937,7 @@ export const AdminCareersPanel: React.FC = () => {
                   {matchingApp.ai_fit_score != null && (
                     <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-500/5 p-3">
                       <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300 mb-1">AI Fit Score</div>
-                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/100</Badge>
+                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/60</Badge>
                     </div>
                   )}
 

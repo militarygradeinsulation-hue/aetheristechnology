@@ -228,8 +228,8 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
                       <span className="font-display font-bold text-foreground">{i.candidate_name}</span>
                       <Badge className={`border text-xs capitalize ${STATUS_COLORS[i.status]}`}>{i.status}</Badge>
                       {i.ai_fit_score != null && (
-                        <Badge className={`border text-xs ${i.ai_fit_score >= 80 ? "bg-green-500/20 text-green-400 border-green-500/40" : i.ai_fit_score >= 60 ? "bg-amber/20 text-amber border-amber/40" : "bg-destructive/20 text-destructive border-destructive/40"}`}>
-                          <Sparkles className="w-3 h-3 mr-1" />Fit {i.ai_fit_score}/100
+                        <Badge className={`border text-xs ${i.ai_fit_score >= 45 ? "bg-green-500/20 text-green-400 border-green-500/40" : i.ai_fit_score >= 30 ? "bg-amber/20 text-amber border-amber/40" : "bg-destructive/20 text-destructive border-destructive/40"}`}>
+                          <Sparkles className="w-3 h-3 mr-1" />Fit {i.ai_fit_score}/60
                         </Badge>
                       )}
                       <Badge variant="outline" className="text-[10px]"><UserIcon className="w-2.5 h-2.5 mr-1" />{i.interviewer}</Badge>
