@@ -495,7 +495,7 @@ export const AdminCreationStudio: React.FC = () => {
             </Button>
           </div>
           <div className="space-y-3">
-            {activePlan.scenes.map((s, i) => {
+            {plan.scenes.map((s, i) => {
               const img = allAvailable.find(a => a.id === s.imageId);
               return (
                 <div key={i} className="flex gap-3 p-3 bg-background/40 rounded-lg border border-border">
