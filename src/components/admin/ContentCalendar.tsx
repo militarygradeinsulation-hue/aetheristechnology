@@ -21,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions',
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
+  day_post: 'Day Post',
 };
 
 const TOOL_COLORS: Record<string, string> = {
