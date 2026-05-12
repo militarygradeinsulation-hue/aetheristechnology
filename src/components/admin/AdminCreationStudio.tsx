@@ -91,6 +91,8 @@ export const AdminCreationStudio: React.FC = () => {
   const [planning, setPlanning] = useState(false);
   const [rendering, setRendering] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState<string>('');
+  const [lastError, setLastError] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
 
@@ -145,36 +147,65 @@ export const AdminCreationStudio: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const generatePlan = async () => {
-    if (!prompt.trim()) { toast({ title: 'Add a prompt first', variant: 'destructive' }); return; }
-    if (allAvailable.length === 0) { toast({ title: 'Pick or upload at least one image', variant: 'destructive' }); return; }
-    setPlanning(true); setPlan(null); setVideoUrl('');
+  const generatePlan = async (): Promise<Plan | null> => {
+    setLastError('');
+    if (!prompt.trim()) {
+      const m = 'Add a prompt first';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return null;
+    }
+    if (allAvailable.length === 0) {
+      const m = 'Pick or upload at least one image';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return null;
+    }
+    setPlanning(true); setPlan(null); setVideoUrl(''); setStep('Asking AI for scene plan…');
     try {
+      console.log('[CreationStudio] plan_video request', { prompt, durationSec, aspect, imageCount: allAvailable.length });
       const { data, error } = await adminInvoke('plan_video', {
         prompt,
         durationSec,
         aspect,
-        images: allAvailable.map(i => ({ id: i.id, url: i.url, label: i.label })),
+        images: allAvailable.map(i => ({ id: i.id, label: i.label })),
       });
+      console.log('[CreationStudio] plan_video response', { data, error });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      if (!data?.plan) throw new Error('Empty response from server');
       setPlan(data.plan);
+      setStep('Plan ready — review or render.');
+      return data.plan as Plan;
     } catch (e) {
-      toast({ title: 'Plan failed', description: (e as Error).message, variant: 'destructive' });
+      const msg = (e as Error).message || 'Plan failed';
+      console.error('[CreationStudio] plan failed', e);
+      setLastError(msg);
+      setStep('');
+      toast({ title: 'Plan failed', description: msg, variant: 'destructive' });
+      return null;
     } finally { setPlanning(false); }
   };
 
-  const renderVideo = async () => {
-    if (!plan) return;
-    if (!voiceId) { toast({ title: 'Pick a voice first', variant: 'destructive' }); return; }
+  const renderVideo = async (overridePlan?: Plan) => {
+    const activePlan = overridePlan || plan;
+    if (!activePlan) return;
+    if (!voiceId) {
+      const m = 'Pick a voice first (Reload voices if empty)';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return;
+    }
+    setLastError('');
     setRendering(true); setProgress(0); setVideoUrl('');
+    setStep('Generating voiceover…');
 
     try {
       // 1) Get TTS for each scene (sequential to avoid rate limits)
       const audios: HTMLAudioElement[] = [];
       const audioBuffers: ArrayBuffer[] = [];
-      for (let i = 0; i < plan.scenes.length; i++) {
-        const s = plan.scenes[i];
+      for (let i = 0; i < activePlan.scenes.length; i++) {
+        const s = activePlan.scenes[i];
         const { data, error } = await adminInvoke('tts', { text: s.voiceover, voiceId });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
@@ -188,7 +219,7 @@ export const AdminCreationStudio: React.FC = () => {
         const dur = isFinite(audio.duration) ? Math.max(2.2, audio.duration + 0.3) : (s.durationMs / 1000);
         s.durationMs = Math.round(dur * 1000);
         audios.push(audio);
-        setProgress(Math.round(((i + 1) / plan.scenes.length) * 30));
+        setProgress(Math.round(((i + 1) / activePlan.scenes.length) * 30));
       }
 
       // 2) Setup canvas
@@ -199,7 +230,7 @@ export const AdminCreationStudio: React.FC = () => {
 
       // 3) Preload images
       const sceneImgs: HTMLImageElement[] = [];
-      for (const s of plan.scenes) {
+      for (const s of activePlan.scenes) {
         const a = allAvailable.find(x => x.id === s.imageId)!;
         sceneImgs.push(await loadImage(a.url));
       }
@@ -236,7 +267,7 @@ export const AdminCreationStudio: React.FC = () => {
         src.buffer = decoded[i];
         src.connect(dest);
         src.start(startTime + acc);
-        acc += plan.scenes[i].durationMs / 1000;
+        acc += activePlan.scenes[i].durationMs / 1000;
       }
       const totalSec = acc;
 
@@ -246,7 +277,7 @@ export const AdminCreationStudio: React.FC = () => {
 
       const drawScene = (sceneIdx: number, localT: number, sceneDur: number) => {
         const img = sceneImgs[sceneIdx];
-        const s = plan.scenes[sceneIdx];
+        const s = activePlan.scenes[sceneIdx];
         const cw = canvas.width, ch = canvas.height;
 
         // Cover-fit + zoom
@@ -295,13 +326,13 @@ export const AdminCreationStudio: React.FC = () => {
         const elapsed = (performance.now() - animStart) / 1000;
         // find scene
         let cum = 0; let idx = 0; let local = 0;
-        for (let i = 0; i < plan.scenes.length; i++) {
-          const d = plan.scenes[i].durationMs / 1000;
+        for (let i = 0; i < activePlan.scenes.length; i++) {
+          const d = activePlan.scenes[i].durationMs / 1000;
           if (elapsed < cum + d) { idx = i; local = elapsed - cum; break; }
           cum += d; idx = i; local = d;
         }
         scenePtr = idx;
-        drawScene(idx, local, plan.scenes[idx].durationMs / 1000);
+        drawScene(idx, local, activePlan.scenes[idx].durationMs / 1000);
         const pct = Math.min(99, 30 + Math.round((elapsed / totalSec) * 70));
         setProgress(pct);
         if (elapsed < totalSec) requestAnimationFrame(tick);
@@ -316,10 +347,20 @@ export const AdminCreationStudio: React.FC = () => {
       setVideoUrl(url);
       setVideoExt(mime.includes('mp4') ? 'mp4' : 'webm');
       setProgress(100);
+      setStep(`Done — ${(blob.size / 1024 / 1024).toFixed(1)} MB`);
       toast({ title: 'Video ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB` });
     } catch (e) {
-      toast({ title: 'Render failed', description: (e as Error).message, variant: 'destructive' });
+      const msg = (e as Error).message || 'Render failed';
+      console.error('[CreationStudio] render failed', e);
+      setLastError(msg);
+      setStep('');
+      toast({ title: 'Render failed', description: msg, variant: 'destructive' });
     } finally { setRendering(false); }
+  };
+
+  const generateAll = async () => {
+    const p = await generatePlan();
+    if (p) await renderVideo(p);
   };
 
   const toggleSiteImg = (id: string) => {
@@ -394,14 +435,30 @@ export const AdminCreationStudio: React.FC = () => {
           />
         </div>
 
-        <Button
-          onClick={generatePlan}
-          disabled={planning || rendering || !prompt.trim()}
-          className="mt-4 bg-amber text-charcoal hover:bg-amber/90"
-        >
-          {planning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-          Generate Script & Scene Plan
-        </Button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            onClick={generateAll}
+            disabled={planning || rendering || !prompt.trim()}
+            className="bg-amber text-charcoal hover:bg-amber/90"
+          >
+            {(planning || rendering) ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Film className="w-4 h-4 mr-2" />}
+            {planning ? 'Planning…' : rendering ? `Rendering ${progress}%` : 'Generate Video (one click)'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => generatePlan()}
+            disabled={planning || rendering || !prompt.trim()}
+          >
+            {planning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+            Plan only (review first)
+          </Button>
+        </div>
+
+        {(step || lastError) && (
+          <div className={`mt-3 text-sm rounded-md px-3 py-2 border ${lastError ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-background/40 text-muted-foreground'}`}>
+            {lastError ? <><strong>Error:</strong> {lastError}</> : step}
+          </div>
+        )}
       </div>
 
       {/* Image library + uploads */}
@@ -458,7 +515,7 @@ export const AdminCreationStudio: React.FC = () => {
         <div className="glass p-6 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold font-display text-lg">{plan.title}</h3>
-            <Button onClick={renderVideo} disabled={rendering} className="bg-amber text-charcoal hover:bg-amber/90">
+            <Button onClick={() => renderVideo()} disabled={rendering} className="bg-amber text-charcoal hover:bg-amber/90">
               {rendering ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
               {rendering ? `Rendering ${progress}%` : 'Generate Voice + Render Video'}
             </Button>

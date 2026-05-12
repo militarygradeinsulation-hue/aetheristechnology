@@ -63,9 +63,13 @@ Never use "Hey guys", "Today I'm going to". Open with the punch.
 Pick images from the provided list — do NOT invent ids.
 Total runtime target: ~${opts.durationSec}s. Aspect: ${opts.aspect}.`;
 
+  // Cap images to keep prompt small + reliable
+  const trimmed = images.slice(0, 40);
   const usr = `USER PROMPT:\n${prompt}\n\nAVAILABLE IMAGES (use imageId values exactly):\n${
-    images.map(i => `- ${i.id}${i.label ? ` (${i.label})` : ""}`).join("\n")
+    trimmed.map(i => `- ${i.id}${i.label ? ` (${i.label})` : ""}`).join("\n")
   }`;
+
+  console.log("plan_video: calling AI gateway", { promptLen: prompt.length, imageCount: trimmed.length });
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
@@ -79,19 +83,38 @@ Total runtime target: ~${opts.durationSec}s. Aspect: ${opts.aspect}.`;
   });
 
   if (!res.ok) {
-    if (res.status === 429) throw new Error("Rate limited. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    throw new Error(`AI gateway ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const bodyText = await res.text();
+    console.error("plan_video gateway error", res.status, bodyText.slice(0, 400));
+    if (res.status === 429) throw new Error("Rate limited. Wait a moment and try again.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Lovable Cloud → AI Gateway.");
+    throw new Error(`AI gateway ${res.status}: ${bodyText.slice(0, 200)}`);
   }
   const data = await res.json();
-  const call = data?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!call?.function?.arguments) throw new Error("No plan returned");
-  const plan = JSON.parse(call.function.arguments);
+  const msg = data?.choices?.[0]?.message;
+  let call = msg?.tool_calls?.[0];
+
+  // Fallback: some models occasionally return JSON in content instead of tool_calls
+  let plan: any = null;
+  if (call?.function?.arguments) {
+    try { plan = JSON.parse(call.function.arguments); } catch (e) {
+      console.error("plan_video parse args failed", e, call.function.arguments?.slice(0, 200));
+    }
+  }
+  if (!plan && typeof msg?.content === "string") {
+    const m = msg.content.match(/\{[\s\S]*\}/);
+    if (m) { try { plan = JSON.parse(m[0]); } catch { /* ignore */ } }
+  }
+  if (!plan) {
+    console.error("plan_video no plan", JSON.stringify(data).slice(0, 500));
+    throw new Error("AI did not return a plan. Try again or simplify the prompt.");
+  }
 
   // Sanitize: drop scenes whose imageId isn't in the catalog
-  const validIds = new Set(images.map(i => i.id));
+  const validIds = new Set(trimmed.map(i => i.id));
   plan.scenes = (plan.scenes || []).filter((s: any) => validIds.has(s.imageId));
-  if (plan.scenes.length === 0) throw new Error("AI returned no usable scenes");
+  if (!plan.scenes || plan.scenes.length === 0) {
+    throw new Error("AI returned no usable scenes (none of its imageIds matched). Try again.");
+  }
   return plan;
 }
 
