@@ -69,8 +69,9 @@ serve(async (req) => {
       return json({ ok: true, plan });
     }
 
-    // ============== ADMIN-ONLY MUTATIONS ==============
-    if (!isAdmin) return json({ error: "Admin only" }, 403);
+    // ============== MUTATIONS (admin + partner) ==============
+    const canMutate = isAdmin || portalClaims?.role === "partner";
+    if (!canMutate) return json({ error: "Admin or partner only" }, 403);
 
     if (action === "create" || action === "update") {
       const id = body.id ? String(body.id) : null;
