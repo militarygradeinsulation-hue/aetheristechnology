@@ -131,6 +131,20 @@ export const PostImageGenerator: React.FC<Props> = ({
       {imageUrl && (
         <img src={imageUrl} alt="Generated brand visual" className="w-full rounded-md border border-border" />
       )}
+      {editablePrompt && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber font-mono">
+            <Wand2 className="w-3 h-3" /> Image prompt
+          </div>
+          <Textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            rows={3}
+            placeholder="Describe the image you want — anything goes."
+            className="text-sm"
+          />
+        </div>
+      )}
       {StylePicker}
       <Button
         variant="outline"
