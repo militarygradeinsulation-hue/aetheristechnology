@@ -26,6 +26,7 @@ import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
 import { BlogMidCTA } from '@/components/BlogMidCTA';
 import { articleSchema, breadcrumbSchema, speakableSchema, combineSchemas } from '@/lib/schemas';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 const SITE_URL = 'https://aetheris.technology';
 
