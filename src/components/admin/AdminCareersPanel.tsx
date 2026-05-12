@@ -684,6 +684,19 @@ export const AdminCareersPanel: React.FC = () => {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing…
                             </Badge>
                           )}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 0 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : n >= 2 ? 'border-blue-400/50 text-blue-300' : 'text-muted-foreground'}`}
+                                title={`${n} test attempt${n === 1 ? '' : 's'} from this email`}
+                              >
+                                <RefreshCcw className="w-3 h-3" />
+                                {n} attempt{n === 1 ? '' : 's'}
+                              </Badge>
+                            ) : null;
+                          })()}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
                           {a.resume_recreated_at && <Badge variant="outline" className="text-xs">Readable resume</Badge>}
                           {a.contacted && (
