@@ -435,14 +435,30 @@ export const AdminCreationStudio: React.FC = () => {
           />
         </div>
 
-        <Button
-          onClick={generatePlan}
-          disabled={planning || rendering || !prompt.trim()}
-          className="mt-4 bg-amber text-charcoal hover:bg-amber/90"
-        >
-          {planning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-          Generate Script & Scene Plan
-        </Button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            onClick={generateAll}
+            disabled={planning || rendering || !prompt.trim()}
+            className="bg-amber text-charcoal hover:bg-amber/90"
+          >
+            {(planning || rendering) ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Film className="w-4 h-4 mr-2" />}
+            {planning ? 'Planning…' : rendering ? `Rendering ${progress}%` : 'Generate Video (one click)'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => generatePlan()}
+            disabled={planning || rendering || !prompt.trim()}
+          >
+            {planning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+            Plan only (review first)
+          </Button>
+        </div>
+
+        {(step || lastError) && (
+          <div className={`mt-3 text-sm rounded-md px-3 py-2 border ${lastError ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-background/40 text-muted-foreground'}`}>
+            {lastError ? <><strong>Error:</strong> {lastError}</> : step}
+          </div>
+        )}
       </div>
 
       {/* Image library + uploads */}
