@@ -342,6 +342,13 @@ serve(async (req) => {
     // ---- plan + generate batch ----
     if (action === "plan_and_generate") {
       const numPosts = Math.min(Math.max(parseInt(body.numPosts) || 12, 1), 30);
+      const userPrompt: string = (body.userPrompt || "").toString().trim();
+      const blogIds: string[] = Array.isArray(body.blogIds) ? body.blogIds.slice(0, 10) : [];
+      const playbookIds: string[] = Array.isArray(body.playbookIds) ? body.playbookIds.slice(0, 10) : [];
+      const topicSeeds: string[] = Array.isArray(body.topicSeeds)
+        ? body.topicSeeds.map((t: any) => String(t).trim()).filter(Boolean).slice(0, 20)
+        : [];
+
       const { data: strategy, error: serr } = await supabase
         .from("content_engine_strategy").select("*").limit(1).maybeSingle();
       if (serr || !strategy) throw serr || new Error("Strategy missing");
@@ -351,13 +358,44 @@ serve(async (req) => {
         return json({ error: "No posting slots available. Configure posting days in Strategy." }, 400);
       }
 
+      // Pull source context (blogs + playbooks) if any selected
+      const sourceSnippets: string[] = [];
+      if (blogIds.length) {
+        const { data: blogs } = await supabase
+          .from("blog_posts")
+          .select("title, excerpt, content")
+          .in("id", blogIds);
+        for (const b of blogs || []) {
+          const body = (b.excerpt || b.content || "").toString().replace(/<[^>]+>/g, " ").slice(0, 1200);
+          sourceSnippets.push(`BLOG — ${b.title}\n${body}`);
+        }
+      }
+      if (playbookIds.length) {
+        const { data: pbs } = await supabase
+          .from("playbooks")
+          .select("title, description, content")
+          .in("id", playbookIds);
+        for (const p of pbs || []) {
+          const body = (p.description || p.content || "").toString().replace(/<[^>]+>/g, " ").slice(0, 1200);
+          sourceSnippets.push(`PLAYBOOK — ${p.title}\n${body}`);
+        }
+      }
+
+      const directionBlock = [
+        userPrompt && `OPERATOR DIRECTION (highest priority — every post must serve this):\n${userPrompt}`,
+        topicSeeds.length && `TOPIC SEEDS (mix into the angles, do not just repeat):\n- ${topicSeeds.join("\n- ")}`,
+        sourceSnippets.length && `SOURCE MATERIAL (mine these for hooks, numbers, and angles — do not paraphrase, extract the sharpest insights):\n\n${sourceSnippets.join("\n\n---\n\n")}`,
+      ].filter(Boolean).join("\n\n");
+
       const planUserPrompt = `Plan ${slots.length} LinkedIn video posts across these dates: ${slots.map(s => s.date).join(", ")}.
 
 Format mix to respect approximately: ${JSON.stringify((strategy as Strategy).format_mix)}
 
 For each date return: date, format (auditRoast|patternReveal|founderPOV|counterTake), topicAngle (1 sentence), targetEmotion (curiosity|urgency|validation|contrarian).
 
-Topic angles must be DIVERSE. Mine the full landscape of ${(strategy as Strategy).niche} pain points: lead leakage, follow-up failures, sales process gaps, CRM hygiene, quote-to-close gaps, ghosted deals, owner workload, missed re-engagement, broken intake forms, response time, attribution gaps, automation gaps.`;
+${directionBlock || `Topic angles must be DIVERSE. Mine the full landscape of ${(strategy as Strategy).niche} pain points: lead leakage, follow-up failures, sales process gaps, CRM hygiene, quote-to-close gaps, ghosted deals, owner workload, missed re-engagement, broken intake forms, response time, attribution gaps, automation gaps.`}
+
+${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the same angle twice.` : ""}`;
 
       const plan = await callAI(PLAN_MODEL, systemPrompt(strategy as Strategy), planUserPrompt, PLAN_TOOL);
       if (!plan?.slots?.length) throw new Error("Planner returned no slots");
