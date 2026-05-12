@@ -55,6 +55,34 @@ serve(async (req) => {
       return json(200, { count: count || 0 });
     }
 
+    if (action === "delete_task") {
+      const id = String(body.id || "");
+      if (!id) return json(400, { error: "id required" });
+      const { error } = await supabase.from("shared_tasks").delete().eq("id", id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
+    if (action === "delete_note") {
+      const id = String(body.id || "");
+      if (!id) return json(400, { error: "id required" });
+      const { error } = await supabase.from("shared_notes").delete().eq("id", id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
+    if (action === "delete_file") {
+      const id = String(body.id || "");
+      const storage_path = String(body.storage_path || "");
+      if (!id) return json(400, { error: "id required" });
+      if (storage_path) {
+        await supabase.storage.from("workspace-files").remove([storage_path]);
+      }
+      const { error } = await supabase.from("shared_files").delete().eq("id", id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
     return json(400, { error: "Unknown action" });
   } catch (e) {
     return json(500, { error: e instanceof Error ? e.message : "Unknown" });
