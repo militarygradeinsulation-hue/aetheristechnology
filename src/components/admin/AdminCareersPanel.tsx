@@ -12,8 +12,10 @@ import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
   ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
+  Star, CalendarPlus, Share2, Copy,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
+import { upsertCompanyEntry } from '@/lib/companyCalendar';
 
 interface Attempt {
   id: string;
@@ -79,6 +81,25 @@ export const AdminCareersPanel: React.FC = () => {
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
   const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
   const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('aetheris_saved_candidates') || '[]')); }
+    catch { return new Set(); }
+  });
+  const persistSaved = (s: Set<string>) => {
+    setSavedIds(new Set(s));
+    localStorage.setItem('aetheris_saved_candidates', JSON.stringify(Array.from(s)));
+  };
+  const toggleSaved = (id: string) => {
+    const next = new Set(savedIds);
+    if (next.has(id)) { next.delete(id); toast({ title: 'Removed from saved' }); }
+    else { next.add(id); toast({ title: 'Saved candidate ★' }); }
+    persistSaved(next);
+  };
+  const [calDate, setCalDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [calTime, setCalTime] = useState<string>('10:00');
+  const [calBusy, setCalBusy] = useState(false);
+  const [shareNote, setShareNote] = useState<string>('');
+
   const matchingApp = useMemo(
     () => detailAttempt
       ? applications.find(app =>
@@ -88,6 +109,61 @@ export const AdminCareersPanel: React.FC = () => {
       : null,
     [detailAttempt, applications]
   );
+
+  const moveToCalendar = async () => {
+    if (!detailAttempt) return;
+    setCalBusy(true);
+    try {
+      const who = detailAttempt.candidate_name || detailAttempt.candidate_email;
+      const body = [
+        `Candidate: ${who}`,
+        `Email: ${detailAttempt.candidate_email}`,
+        detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+        detailAttempt.score_pct != null ? `Test score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+        `Interview time: ${calTime}`,
+        detailAttempt.notes_to_admin ? `Notes from candidate: ${detailAttempt.notes_to_admin}` : '',
+      ].filter(Boolean).join('\n');
+      await upsertCompanyEntry({
+        date: calDate,
+        kind: 'event',
+        title: `Interview ${calTime} — ${who}`,
+        body,
+        pinned: true,
+      });
+      toast({ title: 'Added to Company Calendar', description: `${calDate} at ${calTime}` });
+    } catch (e) {
+      toast({ title: 'Failed to add to calendar', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setCalBusy(false); }
+  };
+
+  const buildShareText = () => {
+    if (!detailAttempt) return '';
+    const lines = [
+      `Candidate: ${detailAttempt.candidate_name || '—'}`,
+      `Email: ${detailAttempt.candidate_email}`,
+      detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+      detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+      detailAttempt.notes_to_admin ? `Candidate note: "${detailAttempt.notes_to_admin}"` : '',
+      matchingApp?.ai_summary ? `AI summary: ${matchingApp.ai_summary}` : '',
+      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/100` : '',
+      shareNote ? `\nNotes:\n${shareNote}` : '',
+    ].filter(Boolean);
+    return lines.join('\n');
+  };
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      toast({ title: 'Copied to clipboard' });
+    } catch {
+      toast({ title: 'Copy failed', variant: 'destructive' });
+    }
+  };
+
+  const emailShare = () => {
+    const subject = `Candidate: ${detailAttempt?.candidate_name || detailAttempt?.candidate_email || ''}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildShareText())}`;
+  };
 
   const load = async () => {
     setLoading(true);
@@ -704,8 +780,9 @@ export const AdminCareersPanel: React.FC = () => {
                     className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
+                          {savedIds.has(a.id) && <Star className="w-3.5 h-3.5 text-amber fill-amber" />}
                           <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || '—'}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
@@ -724,6 +801,16 @@ export const AdminCareersPanel: React.FC = () => {
                         </div>
                         {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
                       </div>
+                      <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        <Button
+                          type="button" size="sm" variant="ghost"
+                          className={`h-8 ${savedIds.has(a.id) ? 'text-amber' : 'text-muted-foreground hover:text-amber'}`}
+                          onClick={(e) => { e.stopPropagation(); toggleSaved(a.id); }}
+                          title={savedIds.has(a.id) ? 'Remove from saved' : 'Save candidate'}
+                        >
+                          <Star className={`w-4 h-4 ${savedIds.has(a.id) ? 'fill-amber' : ''}`} />
+                        </Button>
+                      </div>
                     </div>
                   </button>
                 ))
@@ -735,7 +822,7 @@ export const AdminCareersPanel: React.FC = () => {
 
       <AdminCareersTest />
 
-      <Dialog open={!!detailAttempt} onOpenChange={(o) => !o && setDetailAttempt(null)}>
+      <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 flex-wrap">
@@ -842,6 +929,54 @@ export const AdminCareersPanel: React.FC = () => {
                   No application submitted yet for this candidate.
                 </div>
               )}
+
+              {/* ===== Quick actions ===== */}
+              <div className="border-t border-border/50 pt-4 space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs font-mono uppercase tracking-wide text-amber">Actions</div>
+                  <Button
+                    type="button" size="sm"
+                    variant={detailAttempt && savedIds.has(detailAttempt.id) ? 'default' : 'outline'}
+                    className={detailAttempt && savedIds.has(detailAttempt.id) ? 'bg-amber text-background hover:bg-amber/90' : ''}
+                    onClick={() => detailAttempt && toggleSaved(detailAttempt.id)}
+                  >
+                    <Star className={`w-3.5 h-3.5 mr-1 ${detailAttempt && savedIds.has(detailAttempt.id) ? 'fill-background' : ''}`} />
+                    {detailAttempt && savedIds.has(detailAttempt.id) ? 'Saved' : 'Save'}
+                  </Button>
+                </div>
+
+                {/* Move to calendar */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><CalendarPlus className="w-3.5 h-3.5 text-amber" /> Move to Company Calendar</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input type="date" value={calDate} onChange={e => setCalDate(e.target.value)} className="h-8 w-auto" />
+                    <Input type="time" value={calTime} onChange={e => setCalTime(e.target.value)} className="h-8 w-auto" />
+                    <Button size="sm" onClick={moveToCalendar} disabled={calBusy} className="bg-amber text-background hover:bg-amber/90">
+                      {calBusy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
+                      Add interview
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Share with notes */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-amber" /> Share with notes</div>
+                  <Textarea
+                    value={shareNote}
+                    onChange={e => setShareNote(e.target.value)}
+                    placeholder="Add context for whoever you're sharing this candidate with…"
+                    className="min-h-[70px] text-sm bg-background/40"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={copyShare}>
+                      <Copy className="w-3.5 h-3.5 mr-1" /> Copy summary + notes
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={emailShare}>
+                      <Send className="w-3.5 h-3.5 mr-1" /> Email…
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
