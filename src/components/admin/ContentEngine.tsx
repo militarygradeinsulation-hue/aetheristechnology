@@ -82,6 +82,29 @@ const STATUS_INFO: Record<string, { label: string; cls: string }> = {
   posted:   { label: 'Posted',   cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 };
 
+const PREMADE_TITLES: string[] = [
+  'The 5 silent leaks bleeding 6-figures from your ops',
+  'Why your "best" rep is actually your biggest leak',
+  'The follow-up gap that costs $40k/month (and nobody tracks it)',
+  'Stop calling it a pipeline problem — it\'s a process leak',
+  'How a $7M shop found $1.2M in 14 days without hiring',
+  'The 3 metrics every operator should run weekly (most don\'t)',
+  'Your CRM is lying to you. Here\'s how to prove it.',
+  'Why "we tried automation" usually means "we bought software"',
+  'The ghosted-proposal autopsy: where the deal actually died',
+  'AI won\'t fix a broken process — it\'ll just speed up the bleed',
+  'The case for a forensic diagnostic before any tech stack rebuild',
+  'What I found inside a $30M company\'s revenue ops in 90 minutes',
+  'Owner-operators: the 4 reports your finance lead should be running',
+  'Why discounting is a symptom, not a strategy',
+  'The 14-day audit framework I run on every new engagement',
+  'How to stop your ops team from being a glorified inbox',
+  'Three questions that expose a leaking sales process in 10 minutes',
+  'The retention leak hiding in your onboarding (and how to seal it)',
+  'Quote-to-cash: where most B2B operators lose 8-12% margin',
+  'Why "more leads" is the wrong fix 70% of the time',
+];
+
 function pad(n: number) { return String(n).padStart(2, '0'); }
 function ymd(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function dayShort(d: Date) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
@@ -592,6 +615,30 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
           )}
         </div>
 
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Premade Title Ideas</div>
+            <span className="text-[10px] text-muted-foreground">Click to add as a topic seed</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto p-1 border border-border/40 rounded-md bg-background/30">
+            {PREMADE_TITLES.map((t) => {
+              const on = topicSeeds.includes(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTopicSeeds(on ? topicSeeds.filter(x => x !== t) : [...topicSeeds, t])}
+                  className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                    on
+                      ? 'bg-amber/15 border-amber text-amber'
+                      : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                  }`}
+                >{t}</button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
@@ -781,16 +828,53 @@ function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrate
         <div className={`text-xs mb-3 ${totalMix === 100 ? 'text-emerald-500' : 'text-amber'}`}>
           Total: {totalMix}% {totalMix === 100 ? '✓' : '(should equal 100)'}
         </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            if (!keys.length) return;
+            const even = Math.floor(100 / keys.length / 5) * 5;
+            const next: Record<string, number> = {};
+            keys.forEach((k, i) => { next[k] = i === 0 ? 100 - even * (keys.length - 1) : even; });
+            update('format_mix', next);
+          }}>Even split</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            const total = totalMix || 1;
+            const next: Record<string, number> = {};
+            let running = 0;
+            keys.forEach((k, i) => {
+              if (i === keys.length - 1) next[k] = 100 - running;
+              else { const v = Math.round((strategy.format_mix[k] / total) * 100 / 5) * 5; next[k] = v; running += v; }
+            });
+            update('format_mix', next);
+          }}>Normalize to 100%</Button>
+        </div>
         {Object.entries(strategy.format_mix).map(([k, pct]) => {
           const fmt = FORMAT_INFO[k];
           if (!fmt) return null;
+          const bump = (delta: number) => updateMix(k, Math.max(0, Math.min(100, pct + delta)));
           return (
             <div key={k} className="mb-4">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className={`font-bold ${fmt.text}`}>{fmt.name}</span>
-                <span className="text-muted-foreground">{pct}%</span>
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <span className={`font-bold text-xs ${fmt.text}`}>{fmt.name}</span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(-5)}>−</Button>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={pct}
+                    onChange={(e) => updateMix(k, Math.max(0, Math.min(100, parseInt(e.target.value || '0', 10))))}
+                    className="h-7 w-16 text-center text-xs"
+                  />
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(5)}>+</Button>
+                  <span className="text-[10px] text-muted-foreground w-6">%</span>
+                </div>
               </div>
-              <Slider min={0} max={100} step={5} value={[pct]} onValueChange={(v) => updateMix(k, v[0])} />
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full ${fmt.bar} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1.5">{fmt.description}</p>
             </div>
           );
