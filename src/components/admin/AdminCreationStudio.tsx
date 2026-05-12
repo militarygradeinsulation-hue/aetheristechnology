@@ -455,12 +455,47 @@ export const AdminCreationStudio: React.FC = () => {
       await stopped;
       audioCtx.close();
       const blob = new Blob(chunks, { type: mime });
+      const ext = mime.includes('mp4') ? 'mp4' : 'webm';
       const url = URL.createObjectURL(blob);
       setVideoUrl(url);
-      setVideoExt(mime.includes('mp4') ? 'mp4' : 'webm');
+      setVideoExt(ext);
       setProgress(100);
-      setStep(`Done — ${(blob.size / 1024 / 1024).toFixed(1)} MB`);
-      toast({ title: 'Video ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB` });
+      const sizeMb = (blob.size / 1024 / 1024).toFixed(1);
+      setStep(`Done — ${sizeMb} MB`);
+      toast({ title: 'Video ready', description: `${sizeMb} MB` });
+
+      // Auto-save to library so it can be revisited
+      try {
+        const path = `videos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const upload = await supabase.storage
+          .from('workspace-files')
+          .upload(path, blob, { contentType: mime, upsert: false });
+        if (upload.error) throw upload.error;
+        const { data: pub } = supabase.storage.from('workspace-files').getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        await saveToolRun({
+          tool_type: 'video',
+          title: activePlan.title || `Video — ${new Date().toLocaleString()}`,
+          input_data: { prompt, aspect: aspect.key, scenes: activePlan.scenes.length },
+          output_data: {
+            title: activePlan.title,
+            video_url: publicUrl,
+            ext,
+            size_mb: Number(sizeMb),
+            aspect: aspect.key,
+            scenes: activePlan.scenes,
+          },
+          file_url: publicUrl,
+        });
+        toast({ title: 'Saved to Library', description: 'Find it any time in your Library.' });
+      } catch (saveErr) {
+        console.error('[CreationStudio] save to library failed', saveErr);
+        toast({
+          title: 'Saved locally only',
+          description: (saveErr as Error).message || 'Could not upload to library.',
+          variant: 'destructive',
+        });
+      }
     } catch (e) {
       const msg = (e as Error).message || 'Render failed';
       console.error('[CreationStudio] render failed', e);
