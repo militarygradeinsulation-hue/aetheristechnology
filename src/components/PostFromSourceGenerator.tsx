@@ -157,6 +157,15 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adm
                 {post.hashtags?.length > 0 && (
                   <p className="text-xs text-primary mt-3">{post.hashtags.map(h => `#${h.replace(/^#/, '')}`).join(' ')}</p>
                 )}
+                {adminMode && (
+                  <div className="mt-4">
+                    <PostImageGenerator
+                      prompt={`${post.hook}. ${post.caption}`}
+                      editablePrompt
+                      onImageGenerated={() => {}}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
