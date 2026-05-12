@@ -208,6 +208,19 @@ export const AdminCareersPanel: React.FC = () => {
     (minTest == null || (a.score_pct ?? -1) >= minTest)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
+
+  // Count attempts per candidate (keyed by lowercased email).
+  const attemptCountByEmail = React.useMemo(() => {
+    const m: Record<string, number> = {};
+    attempts.forEach(at => {
+      const k = (at.candidate_email || '').toLowerCase().trim();
+      if (!k) return;
+      m[k] = (m[k] || 0) + 1;
+    });
+    return m;
+  }, [attempts]);
+  const countFor = (email: string | null | undefined) =>
+    attemptCountByEmail[(email || '').toLowerCase().trim()] || 0;
   const filteredApps = applications
     .filter(a =>
       matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
@@ -671,6 +684,19 @@ export const AdminCareersPanel: React.FC = () => {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing…
                             </Badge>
                           )}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 0 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : n >= 2 ? 'border-blue-400/50 text-blue-300' : 'text-muted-foreground'}`}
+                                title={`${n} test attempt${n === 1 ? '' : 's'} from this email`}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                {n} attempt{n === 1 ? '' : 's'}
+                              </Badge>
+                            ) : null;
+                          })()}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
                           {a.resume_recreated_at && <Badge variant="outline" className="text-xs">Readable resume</Badge>}
                           {a.contacted && (
@@ -825,6 +851,19 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 1 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : 'border-blue-400/50 text-blue-300'}`}
+                                title={`${n} test attempts from this email`}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                {n} attempts
+                              </Badge>
+                            ) : null;
+                          })()}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
                           <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
