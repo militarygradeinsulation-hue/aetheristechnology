@@ -23,6 +23,7 @@ import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
+import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { Mail as MailIcon } from 'lucide-react';
