@@ -28,7 +28,8 @@ import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
-import { Mail as MailIcon } from 'lucide-react';
+import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
+import { Mail as MailIcon, Newspaper } from 'lucide-react';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
