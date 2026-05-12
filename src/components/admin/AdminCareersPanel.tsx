@@ -271,9 +271,10 @@ export const AdminCareersPanel: React.FC = () => {
         ai_summary: d.summary,
         ai_strengths: d.strengths,
         ai_concerns: d.concerns,
+        ai_section_scores: d.section_scores || a.ai_section_scores || null,
         ai_analyzed_at: new Date().toISOString(),
       } : a));
-      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/100` });
+      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/60` });
       return d.fit_score as number;
     } catch (e) {
       if (!opts?.silent) toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
