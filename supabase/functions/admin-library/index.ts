@@ -41,22 +41,26 @@ serve(async (req) => {
     }
 
     if (action === "save") {
-      const { tool_type, title, input_data, output_data, file_url } = body;
+      const { tool_type, title, input_data, output_data, file_url, created_at } = body;
       if (!tool_type || !title) {
         return new Response(JSON.stringify({ error: "tool_type and title required" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      const insertRow: Record<string, unknown> = {
+        tool_type,
+        title,
+        input_data: input_data || {},
+        output_data: output_data || {},
+        file_url: file_url || null,
+      };
+      if (created_at && typeof created_at === "string" && !isNaN(Date.parse(created_at))) {
+        insertRow.created_at = created_at;
+      }
       const { data, error } = await supabase
         .from("admin_library")
-        .insert({
-          tool_type,
-          title,
-          input_data: input_data || {},
-          output_data: output_data || {},
-          file_url: file_url || null,
-        })
+        .insert(insertRow)
         .select()
         .single();
       if (error) throw error;
