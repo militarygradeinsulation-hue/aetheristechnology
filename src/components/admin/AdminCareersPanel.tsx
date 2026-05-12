@@ -686,8 +686,29 @@ export const AdminCareersPanel: React.FC = () => {
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
                         {a.resume_extract_error && <p className="text-xs text-destructive mt-2">Resume extraction note: {a.resume_extract_error}</p>}
                         {a.ai_summary && (
-                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-1">
+                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-2">
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
+                            {a.ai_section_scores && Object.keys(a.ai_section_scores).length > 0 && (
+                              <div>
+                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1–10) — sum = fit score / 60</div>
+                                <div className="grid sm:grid-cols-2 gap-1">
+                                  {SECTION_LABELS.map(([key, label]) => {
+                                    const s = a.ai_section_scores?.[key];
+                                    if (!s) return null;
+                                    const tone = s.rating >= 8 ? 'text-green-400' : s.rating >= 5 ? 'text-amber' : 'text-destructive';
+                                    return (
+                                      <div key={key} className="flex items-start gap-2 bg-background/40 rounded px-2 py-1">
+                                        <span className={`font-mono font-bold text-xs ${tone} shrink-0 w-10`}>{s.rating}/10</span>
+                                        <div className="min-w-0">
+                                          <div className="text-[11px] font-bold text-foreground leading-tight">{label}</div>
+                                          {s.reason && <div className="text-[10px] text-muted-foreground leading-snug">{s.reason}</div>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                             {!!a.ai_strengths?.length && (
                               <div>
                                 <div className="text-[10px] font-mono uppercase text-green-400 mt-1">Strengths</div>
