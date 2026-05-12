@@ -88,7 +88,7 @@ serve(async (req) => {
         ai_plan: body.ai_plan && typeof body.ai_plan === "object" ? body.ai_plan : {},
         pinned: !!body.pinned,
         color: body.color ? String(body.color).slice(0, 30) : null,
-        created_by: "admin",
+        created_by: isAdmin ? "admin" : `partner:${portalClaims?.code || ""}`,
       };
       if (action === "update" && id) {
         const { data, error } = await supabase.from("company_calendar").update(payload).eq("id", id).select().maybeSingle();
