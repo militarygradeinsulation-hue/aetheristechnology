@@ -488,10 +488,10 @@ export const AdminCreationStudio: React.FC = () => {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold font-display flex items-center gap-2">
-              <Film className="w-5 h-5 text-amber" /> Creation Studio
+              <Film className="w-5 h-5 text-amber" /> Video Studio
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              AI-scripted video with your ElevenLabs voice + real site photos. Renders in your browser.
+              AI-scripted video with your ElevenLabs voice + real site photos. Mix premade titles, topics, and prompt recipes — or write your own.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchVoices} disabled={loadingVoices}>
