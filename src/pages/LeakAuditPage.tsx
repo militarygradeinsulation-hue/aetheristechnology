@@ -242,18 +242,6 @@ const LeakAuditPage = () => {
             {step === 'intake' && (
               <div className="space-y-8">
                 <div className="text-center">
-                  <div className="mb-6 max-w-3xl mx-auto">
-                    <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
-                      <iframe
-                        src="https://player.vimeo.com/video/1191299864?badge=0&autopause=0&player_id=0&app_id=58479"
-                        loading="lazy"
-                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                        allowFullScreen
-                        title="The Leak Audit — intro"
-                        className="absolute inset-0 w-full h-full"
-                      />
-                    </div>
-                  </div>
                   <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
                     Free Self-Audit · ~6 minutes
                   </div>
