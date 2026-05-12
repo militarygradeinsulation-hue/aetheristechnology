@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Newspaper, Plus, Trash2, Pencil, Eye, EyeOff, Loader2, X, ExternalLink } from "lucide-react";
+import { Newspaper, Plus, Trash2, Pencil, Eye, EyeOff, Loader2, X, Radio } from "lucide-react";
 import { format } from "date-fns";
+import { NewsFeedPanel } from "@/components/portal/NewsFeedPanel";
 
 const empty: Partial<NewsPost> = { title: "", summary: "", body: "", category: "", cover_image_url: "", tags: [], author_name: "Aetheris Operator", published: true };
 
@@ -16,6 +18,7 @@ export const AdminNewsPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editor, setEditor] = useState<Partial<NewsPost> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [liveOpen, setLiveOpen] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
 
   const reload = async () => {
@@ -62,7 +65,7 @@ export const AdminNewsPanel: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild><a href="/news" target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3.5 h-3.5 mr-1" />View live feed</a></Button>
+          <Button variant="outline" size="sm" onClick={() => setLiveOpen(true)}><Radio className="w-3.5 h-3.5 mr-1" />View live feed</Button>
           <Button size="sm" onClick={openNew}><Plus className="w-3.5 h-3.5 mr-1" />New dispatch</Button>
         </div>
       </div>
@@ -120,6 +123,15 @@ export const AdminNewsPanel: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <Dialog open={liveOpen} onOpenChange={setLiveOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display"><Radio className="w-4 h-4 text-amber" /> Live feed preview</DialogTitle>
+          </DialogHeader>
+          <NewsFeedPanel />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

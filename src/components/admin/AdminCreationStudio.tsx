@@ -207,6 +207,38 @@ export const AdminCreationStudio: React.FC = () => {
   const [lastError, setLastError] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
+  const [generatingSceneIdx, setGeneratingSceneIdx] = useState<number | null>(null);
+
+  const generateSceneImage = async (sceneIdx: number) => {
+    if (!plan) return;
+    const scene = plan.scenes[sceneIdx];
+    const promptText = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    if (!promptText) {
+      toast({ title: 'Add a caption or voiceover first', variant: 'destructive' });
+      return;
+    }
+    setGeneratingSceneIdx(sceneIdx);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('generate-content-image', {
+        body: { prompt: promptText, style: 'case_file' },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const url = data.image_url as string;
+      const id = `gen-${Date.now()}-${sceneIdx}`;
+      const newImg: AssetImage = { id, url, label: `Scene ${sceneIdx + 1}: ${scene.caption || 'Generated'}`, source: 'upload' };
+      setUploads(prev => [...prev, newImg]);
+      const next = { ...plan, scenes: plan.scenes.map((s, i) => i === sceneIdx ? { ...s, imageId: id } : s) };
+      setPlan(next);
+      toast({ title: `Scene ${sceneIdx + 1} image generated` });
+    } catch (e) {
+      toast({ title: 'Image generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setGeneratingSceneIdx(null);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -786,8 +818,30 @@ export const AdminCreationStudio: React.FC = () => {
               const img = allAvailable.find(a => a.id === s.imageId);
               return (
                 <div key={i} className="flex gap-3 p-3 bg-background/40 rounded-lg border border-border">
-                  <div className="w-24 h-24 flex-shrink-0 rounded overflow-hidden bg-charcoal">
-                    {img && <img src={img.url} alt="" className="w-full h-full object-cover" />}
+                  <div className="w-24 flex-shrink-0 flex flex-col gap-2">
+                    <div className="w-24 h-24 rounded overflow-hidden bg-charcoal border border-border/40 flex items-center justify-center">
+                      {img ? (
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground text-center px-1">No image</span>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[10px] px-2 border-amber/40 text-amber hover:bg-amber/10"
+                      disabled={generatingSceneIdx === i}
+                      onClick={() => generateSceneImage(i)}
+                      title="Generate an image from this scene's caption + voiceover"
+                    >
+                      {generatingSceneIdx === i ? (
+                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3 h-3 mr-1" />
+                      )}
+                      {img ? 'Regenerate' : 'Generate'}
+                    </Button>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
@@ -801,6 +855,7 @@ export const AdminCreationStudio: React.FC = () => {
                         setPlan(next);
                       }}
                       className="font-bold mb-2"
+                      placeholder="Caption (also drives image generation)"
                     />
                     <Textarea
                       value={s.voiceover}
@@ -810,6 +865,7 @@ export const AdminCreationStudio: React.FC = () => {
                         setPlan(next);
                       }}
                       className="text-sm"
+                      placeholder="Voiceover line (also drives image generation)"
                     />
                   </div>
                 </div>

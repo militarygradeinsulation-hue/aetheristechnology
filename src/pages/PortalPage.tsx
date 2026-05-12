@@ -28,7 +28,8 @@ import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
-import { Mail as MailIcon } from 'lucide-react';
+import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
+import { Mail as MailIcon, Newspaper } from 'lucide-react';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
@@ -63,7 +64,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -112,7 +113,7 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews']; // newly added tabs auto-show
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
@@ -344,6 +345,7 @@ const PortalPage: React.FC = () => {
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'inbox', label: 'Inbox', icon: <MailIcon className="w-4 h-4" />, iconCmp: MailIcon },
+    { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -451,6 +453,7 @@ const PortalPage: React.FC = () => {
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
+      case 'news': return <NewsFeedPanel />;
       case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
