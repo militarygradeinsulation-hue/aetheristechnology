@@ -413,6 +413,7 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             {view === "kanban" && <KanbanView />}
             {view === "calendar" && <CalendarView />}
             {view === "timeline" && <TimelineView />}
+            {view === "interviews" && <InterviewsPanel me={me} />}
           </div>
         </CardContent>
       </Card>
