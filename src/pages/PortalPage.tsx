@@ -113,7 +113,7 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews']; // newly added tabs auto-show
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
