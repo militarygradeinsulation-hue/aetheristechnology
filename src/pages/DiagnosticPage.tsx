@@ -148,6 +148,18 @@ const DiagnosticPage: React.FC = () => {
               <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
                 We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap.
               </p>
+              <div className="mt-8 max-w-3xl mx-auto">
+                <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
+                  <iframe
+                    src="https://player.vimeo.com/video/1191299864?badge=0&autopause=0&player_id=0&app_id=58479"
+                    loading="lazy"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                    allowFullScreen
+                    title="The 21-Day Revenue Diagnostic"
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+              </div>
             </div>
 
             <section className="premium-tile rounded-sm border border-crimson/40 p-6 mb-10">
