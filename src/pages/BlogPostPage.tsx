@@ -239,6 +239,11 @@ const BlogPostPage = () => {
                       {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                       <span className="hidden sm:inline">{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
                     </button>
+                    <ReadAloudButton
+                      text={[post.title, post.summary || '', (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()].filter(Boolean).join('. ')}
+                      label="Listen"
+                      className="shrink-0"
+                    />
                   </div>
                   
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
