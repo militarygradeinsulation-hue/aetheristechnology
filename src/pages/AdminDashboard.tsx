@@ -153,6 +153,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
+    { key: 'creation', label: 'Creation Studio', icon: Film },
     { key: 'documents', label: 'Documents', icon: FileBox },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
