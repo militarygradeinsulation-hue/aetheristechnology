@@ -41,6 +41,7 @@ import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
 import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSystemsPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
+import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import NotificationBell from '@/components/admin/NotificationBell';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
@@ -172,6 +173,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'training', label: 'Training', icon: GraduationCap },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
+    { key: 'interviews', label: 'Interviews', icon: CalendarClock },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
@@ -407,6 +409,7 @@ const AdminDashboard: React.FC = () => {
   const renderTabBody = (key: string): React.ReactNode => {
     switch (key) {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
+      case 'interviews': return <InterviewsPanel me="admin" />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
       case 'systems': return <AdminForensicsSystemsPanel />;
