@@ -937,7 +937,7 @@ export const AdminCareersPanel: React.FC = () => {
                   {matchingApp.ai_fit_score != null && (
                     <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-500/5 p-3">
                       <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300 mb-1">AI Fit Score</div>
-                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/100</Badge>
+                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/60</Badge>
                     </div>
                   )}
 
