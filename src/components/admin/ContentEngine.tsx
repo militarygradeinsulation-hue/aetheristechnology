@@ -1257,4 +1257,64 @@ function ThumbnailBlock({ post, headshots, onGenerate }: {
   );
 }
 
+function UnifiedImageStudio({ post, headshots, onUpdate, onGenerateThumbnail }: {
+  post: Post;
+  headshots: Headshot[];
+  onUpdate: (id: string, updates: Partial<Post>) => void;
+  onGenerateThumbnail: (id: string, headshotId?: string) => Promise<void>;
+}) {
+  const [mode, setMode] = useState<'ai' | 'headshot'>('ai');
+  const hasThumb = !!post.thumbnail_url;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Post Image</div>
+        <div className="inline-flex rounded-md border border-border overflow-hidden text-[10px] font-bold uppercase tracking-wider">
+          <button
+            type="button"
+            onClick={() => setMode('ai')}
+            className={`px-3 py-1.5 transition-colors ${mode === 'ai' ? 'bg-amber text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+          >
+            AI Image
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('headshot')}
+            className={`px-3 py-1.5 transition-colors border-l border-border ${mode === 'headshot' ? 'bg-amber text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+          >
+            Use My Headshot
+          </button>
+        </div>
+      </div>
+
+      {hasThumb && (
+        <div className="mb-2 flex justify-end">
+          <a href={post.thumbnail_url!} target="_blank" rel="noreferrer" className="text-[10px] text-cyan-400 hover:underline flex items-center gap-1">
+            <Download className="w-3 h-3" /> Download current image
+          </a>
+        </div>
+      )}
+
+      {mode === 'ai' ? (
+        <PostImageGenerator
+          key={`ai-${post.id}`}
+          prompt={`${post.hook}\n\n${post.caption?.slice(0, 400) || ''}`}
+          editablePrompt
+          existingImageUrl={post.thumbnail_url || ''}
+          onImageGenerated={(url) => onUpdate(post.id, { thumbnail_url: url, thumbnail_status: 'ready' })}
+        />
+      ) : (
+        <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
+      )}
+
+      <p className="text-[11px] text-muted-foreground mt-2">
+        {mode === 'ai'
+          ? 'Free prompt — generate any image you want with AI.'
+          : 'Generates a branded thumbnail from one of your reference photos.'}
+      </p>
+    </div>
+  );
+}
+
 export default ContentEngine;
