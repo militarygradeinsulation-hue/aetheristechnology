@@ -473,6 +473,27 @@ export const AdminCreationStudio: React.FC = () => {
       }
       const totalSec = acc;
 
+      // 6b) Mix background music if present (ducked + faded)
+      if (musicBufferRef.current) {
+        try {
+          const musicBuf = await audioCtx.decodeAudioData(musicBufferRef.current.slice(0));
+          const musicSrc = audioCtx.createBufferSource();
+          musicSrc.buffer = musicBuf;
+          musicSrc.loop = musicBuf.duration < totalSec;
+          const gain = audioCtx.createGain();
+          const v = Math.max(0, Math.min(1, musicVolume));
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(v, startTime + 0.8);
+          gain.gain.setValueAtTime(v, startTime + totalSec - 1.2);
+          gain.gain.linearRampToValueAtTime(0, startTime + totalSec);
+          musicSrc.connect(gain).connect(dest);
+          musicSrc.start(startTime);
+          musicSrc.stop(startTime + totalSec + 0.1);
+        } catch (musicErr) {
+          console.warn('[CreationStudio] music mix failed', musicErr);
+        }
+      }
+
       // 7) Animate canvas. Ken-Burns on each scene + caption.
       const animStart = performance.now();
       let scenePtr = 0;
