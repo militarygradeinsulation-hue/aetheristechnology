@@ -237,10 +237,13 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setActiveTaskId(task.id)} title="Open">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEditTask(task)} title="Edit">
+              <Pencil className="w-3 h-3" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setActiveTaskId(task.id)} title="Notes & files">
               <MessageSquare className="w-3 h-3" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteTask(task.id)}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteTask(task.id)} title="Delete">
               <Trash2 className="w-3 h-3 text-red-400" />
             </Button>
           </div>
