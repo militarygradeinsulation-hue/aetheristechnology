@@ -237,8 +237,15 @@ const PortalPage: React.FC = () => {
   }, [profile]);
 
   useEffect(() => {
-    if (hasValidPortalSession() && !profile) setProfile(getPortalProfile());
-  }, [profile]);
+    if (hasValidPortalSession() && !profile) {
+      const p = getPortalProfile();
+      setProfile(p);
+      // Partner sessions land on the Admin Console by default.
+      if (p?.role === 'partner' && hasValidAdminToken()) {
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [profile, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
