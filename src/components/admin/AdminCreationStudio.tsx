@@ -91,6 +91,8 @@ export const AdminCreationStudio: React.FC = () => {
   const [planning, setPlanning] = useState(false);
   const [rendering, setRendering] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState<string>('');
+  const [lastError, setLastError] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
 
