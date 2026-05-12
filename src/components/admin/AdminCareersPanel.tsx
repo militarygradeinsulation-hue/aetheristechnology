@@ -12,8 +12,10 @@ import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
   ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
+  Star, CalendarPlus, Share2, Copy,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
+import { upsertCompanyEntry } from '@/lib/companyCalendar';
 
 interface Attempt {
   id: string;
