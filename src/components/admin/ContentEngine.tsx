@@ -13,8 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
+  PenLine,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
+import LinkedInPostStudio from './LinkedInPostStudio';
 
 type Strategy = {
   id: string;
