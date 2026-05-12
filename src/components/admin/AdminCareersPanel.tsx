@@ -851,6 +851,19 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 1 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : 'border-blue-400/50 text-blue-300'}`}
+                                title={`${n} test attempts from this email`}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                {n} attempts
+                              </Badge>
+                            ) : null;
+                          })()}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
                           <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
