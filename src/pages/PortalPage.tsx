@@ -25,6 +25,7 @@ import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
+import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { Mail as MailIcon } from 'lucide-react';
@@ -62,7 +63,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -319,6 +320,7 @@ const PortalPage: React.FC = () => {
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
+    { id: 'briefing', label: 'Interview Briefing', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -328,6 +330,7 @@ const PortalPage: React.FC = () => {
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
+    && (t.id !== 'briefing' || sharedWsUnlocked)
   );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
