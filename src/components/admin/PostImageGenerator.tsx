@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImageIcon, Loader2, RefreshCw, ChevronDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ImageIcon, Loader2, RefreshCw, ChevronDown, Wand2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -12,9 +13,12 @@ interface Props {
   existingImageUrl?: string;
   onImageGenerated: (url: string) => void;
   compact?: boolean;
+  /** Allow editing the prompt freely before generating (for content creator / calendar). */
+  editablePrompt?: boolean;
 }
 
 export const STYLE_OPTIONS = [
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
   { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction bars · crimson signature' },
   { key: 'autopsy_diagram',   label: 'Autopsy Diagram',   desc: 'Anatomical chart of a broken process' },
   { key: 'blueprint',         label: 'Blueprint',         desc: 'CRM pipeline schematic with breach callout' },
