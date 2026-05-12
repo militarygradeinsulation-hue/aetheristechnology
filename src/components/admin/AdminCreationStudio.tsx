@@ -24,6 +24,73 @@ const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
   { key: '16:9', w: 1920, h: 1080, label: '16:9 (LinkedIn/YouTube)' },
 ];
 
+// ===== Premade ideation: titles, topics, prompt recipes =====
+const PREMADE_TITLES: string[] = [
+  'Your Business Is Leaking — You Just Can\'t See It',
+  'The $200k Leak Hiding in Your CRM',
+  'Why Your "Best Rep" Is Your Biggest Leak',
+  '7 Steps of The Leak Audit™',
+  'Stop Hiring Reps. Fix the Process They\'re Drowning In.',
+  'AI Won\'t Save a Broken Process — It Speeds the Bleed',
+  'The Forensic Diagnostic: $2,500 to Find the Bleed',
+  'Trade-Show Leads Decay in 72 Hours. Here\'s the Fix.',
+  'Quote-to-Cash Leakage: The Silent 8-12% Margin Killer',
+  'The Follow-Up Gap Costing Commercial Services $40k/Month',
+  'Change-Order Leak: 4-7% of Every Construction Project',
+  'Your Tech Stack Isn\'t the Problem. The Handoffs Are.',
+];
+
+const PREMADE_TOPICS: Record<string, string[]> = {
+  'Revenue Leaks': [
+    'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
+    'The dead-lead pile worth $200k that nobody resurrects.',
+    'Quote-to-cash leakage between sales and ops.',
+    'Stalled deals nobody triages — the silent revenue killer.',
+  ],
+  'Systems & Ops': [
+    'CEO dashboards growth-stage owners refuse to build.',
+    'Handoff failures between CRM, quoting, and dispatch.',
+    'Why "more reps" is the wrong fix.',
+    'Process documentation that actually gets followed.',
+  ],
+  'AI / Practical': [
+    'Dead-lead resurrection with AI — the cheapest win.',
+    'AI-assisted CRM hygiene for $5M-$50M operators.',
+    'Why most AI consultants are SaaS resellers in a hoodie.',
+    'Forensic diagnostics powered by your own data.',
+  ],
+  'Sales & Pipeline': [
+    'Stuck-deal triage — 4 questions that move or kill a deal.',
+    'Discovery calls leak deals — here\'s the script that plugs it.',
+    'CRM stages lying about pipeline value.',
+    'The 72-hour warm-lead decay curve.',
+  ],
+  'Founder POV': [
+    'Owner-operators: the 4 weekly reports finance should run.',
+    'Discounting is a symptom, not a strategy.',
+    'When to fire your "rockstar" — operator\'s checklist.',
+    'Stop measuring activity. Start measuring leaks.',
+  ],
+  'Industry-Specific': [
+    'Specialty manufacturers and the trade-show decay curve.',
+    'Commercial services: dispatch as a revenue leak.',
+    'Construction change-order leakage.',
+    'Indianapolis mid-market margin squeeze.',
+  ],
+};
+
+const PREMADE_PROMPTS: { label: string; text: string }[] = [
+  { label: 'Hook + Stat + CTA', text: 'Open with a hard hook in scene 1. Cite one specific dollar figure. End with a CTA to the free Leak Audit at /leak-audit.' },
+  { label: 'Story-driven (no names)', text: 'Tell a 30-second case story (no names). Mid-video pivot to the lesson. Close with the Forensic Diagnostic offer ($2,500, applied toward engagement).' },
+  { label: 'Contrarian take', text: 'Disagree with a piece of conventional wisdom in scene 1. Defend it with 3 sharp scenes. Close with one blunt question.' },
+  { label: 'Numbered list (3-5)', text: 'Structure as a numbered list of 3-5 leak points. One sentence per scene. Close with "Which one is bleeding you right now?"' },
+  { label: 'Founder-to-founder', text: 'Founder-to-founder voice. Blunt. No buzzwords. Cite real numbers. End with "What\'s leaking in yours?"' },
+  { label: 'Demo / walkthrough', text: 'Walk through one specific leak with on-screen captions naming the metric. Close with the Forensic Diagnostic.' },
+];
+
+const ALL_TOPICS_FLAT = Object.values(PREMADE_TOPICS).flat();
+const pickRand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 function adminInvoke(action: string, body: Record<string, unknown> = {}) {
   const token = getAdminToken();
   return supabase.functions.invoke('creation-studio', {
