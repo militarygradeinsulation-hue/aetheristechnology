@@ -547,7 +547,7 @@ const AdminDashboard: React.FC = () => {
               {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
                 const active = activeTab === tab;
                 return (
-                  <button
+                  <Button
                     key={tab}
                     id={`admin-tab-btn-${tab}`}
                     type="button"
@@ -556,11 +556,16 @@ const AdminDashboard: React.FC = () => {
                       ensureTabData(tab);
                       if (tab !== 'tools') setActiveTool(null);
                     }}
-                    className={`premium-pill-btn whitespace-nowrap ${active ? 'active' : ''}`}
+                    variant={active ? 'default' : 'outline'}
+                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${
+                      active
+                        ? 'bg-amber text-background hover:bg-amber/90 border-amber'
+                        : 'border-amber/40 text-amber hover:bg-amber/10 hover:text-amber'
+                    }`}
                   >
-                    <Icon className="w-3.5 h-3.5 mr-1.5" />
+                    <Icon className="w-4 h-4" />
                     <span>{label}</span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
