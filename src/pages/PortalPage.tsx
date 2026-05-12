@@ -64,6 +64,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
+import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news';
 type ToolKey =
