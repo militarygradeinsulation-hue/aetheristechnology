@@ -1079,19 +1079,12 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
         </div>
 
         <div className="p-6 space-y-5">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-amber mb-2">Custom Post Image (any style)</div>
-            <PostImageGenerator
-              prompt={`${post.hook}\n\n${post.caption?.slice(0, 400) || ''}`}
-              editablePrompt
-              existingImageUrl={post.thumbnail_url || ''}
-              onImageGenerated={(url) => onUpdate(post.id, { thumbnail_url: url, thumbnail_status: 'ready' })}
-            />
-            <p className="text-[11px] text-muted-foreground mt-1.5">
-              Free prompt — generate any image you want. This replaces the thumbnail. The headshot-based version is below if you prefer that.
-            </p>
-          </div>
-          <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
+          <UnifiedImageStudio
+            post={post}
+            headshots={headshots}
+            onUpdate={onUpdate}
+            onGenerateThumbnail={onGenerateThumbnail}
+          />
           <Field label="Topic Angle">
             {editing
               ? <Textarea rows={2} value={draft.topic_angle} onChange={(e) => setDraft({ ...draft, topic_angle: e.target.value })} />
