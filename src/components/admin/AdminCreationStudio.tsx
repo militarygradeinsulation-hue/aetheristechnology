@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Sparkles, Mic, Film, Upload, X, Download, Play, RefreshCw, Save } from 'lucide-react';
+import { Loader2, Sparkles, Mic, Film, Upload, X, Download, Play, RefreshCw, Save, Trash2, Library } from 'lucide-react';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { listAdminLibrary, deleteFromAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
 
 // Auto-pull every image bundled in src/assets
 const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG}', {
@@ -220,6 +221,30 @@ export const AdminCreationStudio: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
   const [generatingSceneIdx, setGeneratingSceneIdx] = useState<number | null>(null);
+
+  // ===== Video library (auto-saved past renders) =====
+  const [videoLibrary, setVideoLibrary] = useState<AdminLibraryItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
+  const [libDeletingId, setLibDeletingId] = useState<string | null>(null);
+  const loadVideoLibrary = async () => {
+    setLibLoading(true);
+    try {
+      const items = await listAdminLibrary();
+      setVideoLibrary(items.filter(i => i.tool_type === 'video'));
+    } catch (e) {
+      console.error('[CreationStudio] load library failed', e);
+    } finally { setLibLoading(false); }
+  };
+  useEffect(() => { loadVideoLibrary(); }, []);
+  const deleteLibraryVideo = async (id: string) => {
+    if (!window.confirm('Delete this video from your library? This cannot be undone.')) return;
+    setLibDeletingId(id);
+    const prev = videoLibrary;
+    setVideoLibrary(p => p.filter(v => v.id !== id));
+    try { await deleteFromAdminLibrary(id); toast({ title: 'Removed from library' }); }
+    catch (e) { setVideoLibrary(prev); toast({ title: 'Delete failed', description: (e as Error).message, variant: 'destructive' }); }
+    finally { setLibDeletingId(null); }
+  };
 
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
@@ -599,6 +624,7 @@ export const AdminCreationStudio: React.FC = () => {
           file_url: publicUrl,
         });
         toast({ title: 'Saved to Library', description: 'Find it any time in your Library.' });
+        loadVideoLibrary();
       } catch (saveErr) {
         console.error('[CreationStudio] save to library failed', saveErr);
         toast({
@@ -1075,6 +1101,65 @@ export const AdminCreationStudio: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Video Library — every video you've made, auto-saved */}
+      <div className="glass p-6 rounded-xl">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <h3 className="font-bold font-display text-lg flex items-center gap-2">
+            <Library className="w-5 h-5 text-amber" /> Video Library
+            <span className="text-xs text-muted-foreground font-normal">({videoLibrary.length})</span>
+          </h3>
+          <Button size="sm" variant="outline" onClick={loadVideoLibrary} disabled={libLoading}>
+            {libLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+            Refresh
+          </Button>
+        </div>
+        {libLoading && videoLibrary.length === 0 ? (
+          <div className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>
+        ) : videoLibrary.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            No videos yet. Render one above and it'll auto-save here.
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {videoLibrary.map(v => {
+              const url = v.file_url || (v.output_data as any)?.video_url || '';
+              const ext = (v.output_data as any)?.ext || 'mp4';
+              const sizeMb = (v.output_data as any)?.size_mb;
+              return (
+                <div key={v.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 flex flex-col gap-2">
+                  {url ? (
+                    <video src={url} controls preload="metadata" className="w-full aspect-video rounded bg-black" />
+                  ) : (
+                    <div className="w-full aspect-video rounded bg-black/40 flex items-center justify-center text-xs text-muted-foreground">
+                      No file
+                    </div>
+                  )}
+                  <div className="text-xs font-bold leading-tight line-clamp-2">{v.title || 'Untitled video'}</div>
+                  <div className="text-[10px] text-muted-foreground font-mono">
+                    {new Date(v.created_at).toLocaleString()}{sizeMb ? ` · ${sizeMb} MB` : ''}
+                  </div>
+                  <div className="flex gap-2 mt-auto">
+                    {url && (
+                      <a href={url} download={`aetheris-${v.id}.${ext}`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full h-8">
+                          <Download className="w-3 h-3 mr-1" /> Download
+                        </Button>
+                      </a>
+                    )}
+                    <Button size="sm" variant="outline"
+                      onClick={() => deleteLibraryVideo(v.id)}
+                      disabled={libDeletingId === v.id}
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10 h-8 px-2">
+                      {libDeletingId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
