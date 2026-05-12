@@ -288,8 +288,19 @@ const CareersTestPage = () => {
                   {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words)</span></Label>
-                  <Textarea rows={8} maxLength={4000} value={appNotes} onChange={e => setAppNotes(e.target.value)} placeholder="Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected." />
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
+                  <Textarea
+                    rows={8}
+                    maxLength={4000}
+                    value={appNotes}
+                    onChange={e => setAppNotes(e.target.value)}
+                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
+                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
+                    onContextMenu={e => e.preventDefault()}
+                    autoComplete="off"
+                    spellCheck={true}
+                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
+                  />
                   <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
                     {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
                   </p>
