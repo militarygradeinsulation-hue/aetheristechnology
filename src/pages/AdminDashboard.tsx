@@ -22,6 +22,7 @@ import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
@@ -524,7 +525,8 @@ const AdminDashboard: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+        <OperatorIdentityBar />
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <CustomViewSelector
