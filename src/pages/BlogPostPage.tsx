@@ -241,7 +241,7 @@ const BlogPostPage = () => {
                       <span className="hidden sm:inline">{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
                     </button>
                     <ReadAloudButton
-                      text={[post.title, post.summary || '', (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()].filter(Boolean).join('. ')}
+                      text={[post.title, post.excerpt || '', (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()].filter(Boolean).join('. ')}
                       label="Listen"
                       className="shrink-0"
                     />
