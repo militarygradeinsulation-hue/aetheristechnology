@@ -166,3 +166,6 @@ verify_jwt = false
 
 [functions.portal-mailbox]
 verify_jwt = false
+
+[functions.creation-studio]
+verify_jwt = false
