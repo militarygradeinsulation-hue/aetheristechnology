@@ -489,7 +489,7 @@ export const AdminCreationStudio: React.FC = () => {
         <div className="glass p-6 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold font-display text-lg">{plan.title}</h3>
-            <Button onClick={renderVideo} disabled={rendering} className="bg-amber text-charcoal hover:bg-amber/90">
+            <Button onClick={() => renderVideo()} disabled={rendering} className="bg-amber text-charcoal hover:bg-amber/90">
               {rendering ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
               {rendering ? `Rendering ${progress}%` : 'Generate Voice + Render Video'}
             </Button>
