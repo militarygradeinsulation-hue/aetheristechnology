@@ -535,13 +535,127 @@ export const AdminCreationStudio: React.FC = () => {
           </div>
         </div>
 
+        {/* Premade ideation: titles, topics, prompt recipes */}
+        <div className="mt-5 space-y-4 rounded-lg border border-amber/20 bg-background/30 p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Idea Mixer — pick & combine</div>
+            <button
+              type="button"
+              onClick={cycleAll}
+              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" /> Surprise me
+            </button>
+          </div>
+
+          {/* Titles */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Titles</div>
+            <div className="flex flex-wrap gap-1.5">
+              {PREMADE_TITLES.map((t) => {
+                const on = pickedTitle === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      const next = on ? '' : t;
+                      setPickedTitle(next);
+                      applyComposed({ title: next });
+                    }}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{t}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Topics */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics — click to combine</div>
+              {pickedTopics.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
+                  className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
+                >Clear ({pickedTopics.length})</button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1 mb-2">
+              {['All', ...Object.keys(PREMADE_TOPICS)].map((cat) => {
+                const on = topicCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setTopicCategory(cat)}
+                    className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
+                      on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                    }`}
+                  >{cat}</button>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              {(topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || [])).map((t) => {
+                const on = pickedTopics.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTopic(t)}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{t}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Prompt recipes */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Prompt recipes — pick a structure</div>
+            <div className="flex flex-wrap gap-1.5">
+              {PREMADE_PROMPTS.map((p) => {
+                const on = pickedRecipe === p.text;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => {
+                      const next = on ? '' : p.text;
+                      setPickedRecipe(next);
+                      applyComposed({ recipe: next });
+                    }}
+                    title={p.text}
+                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >{p.label}</button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="mt-4">
-          <Label>Prompt — what's the video about?</Label>
+          <div className="flex items-center justify-between">
+            <Label>Prompt — what's the video about?</Label>
+            <button
+              type="button"
+              onClick={() => { setPickedTitle(''); setPickedTopics([]); setPickedRecipe(''); setPrompt(''); }}
+              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber"
+            >Clear all</button>
+          </div>
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            rows={4}
-            placeholder='e.g. "Punchy 30-second LinkedIn post about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals — pitch the 21-Day Revenue Diagnostic."'
+            rows={6}
+            placeholder='Pick from the Idea Mixer above, or write your own. e.g. "Punchy 30-second LinkedIn video about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals — pitch the Forensic Diagnostic."'
             className="mt-1"
           />
         </div>
