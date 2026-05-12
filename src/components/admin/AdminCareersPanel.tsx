@@ -57,6 +57,7 @@ interface Application {
   ai_summary?: string | null;
   ai_strengths?: string[] | null;
   ai_concerns?: string[] | null;
+  ai_section_scores?: Record<string, { rating: number; reason: string }> | null;
   ai_analyzed_at?: string | null;
 }
 
