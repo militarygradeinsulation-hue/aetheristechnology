@@ -179,6 +179,24 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
     if (viewItem?.id === updated.id) setViewItem(updated);
   };
 
+  const handleReschedule = async (item: AdminLibraryItem, newDate: string) => {
+    if (!newDate) return;
+    const oldKey = dateKey(new Date(item.created_at));
+    if (newDate === oldKey) return;
+    try {
+      const created_at = new Date(`${newDate}T12:00:00`).toISOString();
+      const updated = await rescheduleAdminLibraryItem(item.id, created_at);
+      setItems(prev => prev.map(i => i.id === item.id ? updated : i));
+      setSelectedDay(newDate);
+      toast({
+        title: 'Moved',
+        description: new Date(`${newDate}T12:00:00`).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' }),
+      });
+    } catch (e: any) {
+      toast({ title: 'Move failed', description: e.message, variant: 'destructive' });
+    }
+  };
+
   const renderItemCard = (item: AdminLibraryItem) => {
     const out = item.output_data as Record<string, any>;
     const existingImg = out?._generated_image_url as string | undefined;
