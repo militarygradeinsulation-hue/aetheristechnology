@@ -309,7 +309,20 @@ serve(async (req) => {
       const fromName = mailbox.code; // simple display fallback
       const fromHeader = `<${addr}>`;
       const sigBlock = mailbox.signature ? `\n\n--\n${mailbox.signature}` : "";
-      const finalText = `${bodyText}${sigBlock}`;
+
+      // Sign attachment URLs (7-day expiry) so recipients can download them
+      const signedAtts: Array<{ name: string; size: number; mime: string; storage_path: string; signed_url: string }> = [];
+      for (const a of attachments) {
+        const { data: signed } = await sb.storage
+          .from("rep-email-attachments")
+          .createSignedUrl(a.storage_path, 60 * 60 * 24 * 7);
+        signedAtts.push({ ...a, signed_url: signed?.signedUrl || "" });
+      }
+
+      const attachmentTextBlock = signedAtts.length
+        ? `\n\n--\nAttachments:\n${signedAtts.map(a => `• ${a.name} (${Math.round(a.size / 1024)} KB) — ${a.signed_url}`).join("\n")}`
+        : "";
+      const finalText = `${bodyText}${attachmentTextBlock}${sigBlock}`;
       const finalHtml = textToHtml(finalText);
 
       const messageId = `<${crypto.randomUUID()}@${EMAIL_DOMAIN}>`;
@@ -393,6 +406,7 @@ serve(async (req) => {
           in_reply_to: inReplyTo,
           thread_id: threadId || messageId,
           is_read: true,
+          attachments: signedAtts,
         })
         .select()
         .single();
