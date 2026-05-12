@@ -65,9 +65,19 @@ export const AdminNewsPanel: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setLiveOpen(true)}><Radio className="w-3.5 h-3.5 mr-1" />View live feed</Button>
+          <Button variant="outline" size="sm" onClick={() => setLiveOpen(true)}><Radio className="w-3.5 h-3.5 mr-1" />Expand live feed</Button>
           <Button size="sm" onClick={openNew}><Plus className="w-3.5 h-3.5 mr-1" />New dispatch</Button>
         </div>
+      </div>
+
+      {/* Always-on live feed preview */}
+      <div className="glass p-4 rounded-xl">
+        <div className="flex items-center gap-2 mb-3">
+          <Radio className="w-4 h-4 text-amber" />
+          <h3 className="font-display font-semibold text-foreground">Live feed</h3>
+          <span className="text-xs text-muted-foreground font-mono">— exactly what visitors see on /news</span>
+        </div>
+        <NewsFeedPanel />
       </div>
 
       {editor && (
