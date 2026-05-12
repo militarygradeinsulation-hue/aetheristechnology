@@ -836,94 +836,112 @@ export const AdminCareersPanel: React.FC = () => {
             </DialogTitle>
           </DialogHeader>
           {detailAttempt && (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Email</div>
-                  <a href={`mailto:${detailAttempt.candidate_email}`} className="text-amber hover:underline flex items-center gap-1">
-                    <Mail className="w-3 h-3" /> {detailAttempt.candidate_email}
-                  </a>
-                </div>
-                {detailAttempt.candidate_phone && (
+            <div className="space-y-3 text-sm">
+              {/* CONTACT — sky */}
+              <div className="rounded-lg border-l-4 border-sky-500 bg-sky-500/5 p-3">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-sky-400 mb-2">Contact</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Phone</div>
-                    <a href={`tel:${detailAttempt.candidate_phone}`} className="text-amber hover:underline flex items-center gap-1">
-                      <Phone className="w-3 h-3" /> {detailAttempt.candidate_phone}
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Email</div>
+                    <a href={`mailto:${detailAttempt.candidate_email}`} className="text-sky-300 hover:underline flex items-center gap-1">
+                      <Mail className="w-3 h-3" /> {detailAttempt.candidate_email}
                     </a>
                   </div>
-                )}
-                {detailAttempt.share_code && (
+                  {detailAttempt.candidate_phone && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Phone</div>
+                      <a href={`tel:${detailAttempt.candidate_phone}`} className="text-sky-300 hover:underline flex items-center gap-1">
+                        <Phone className="w-3 h-3" /> {detailAttempt.candidate_phone}
+                      </a>
+                    </div>
+                  )}
+                  {detailAttempt.share_code && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Share code</div>
+                      <div className="font-mono">{detailAttempt.share_code}</div>
+                    </div>
+                  )}
                   <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Share code</div>
-                    <div className="font-mono">{detailAttempt.share_code}</div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Started</div>
+                    <div>{fmt(detailAttempt.started_at)}</div>
                   </div>
-                )}
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Started</div>
-                  <div>{fmt(detailAttempt.started_at)}</div>
+                  {detailAttempt.submitted_at && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Submitted</div>
+                      <div>{fmt(detailAttempt.submitted_at)}</div>
+                    </div>
+                  )}
                 </div>
-                {detailAttempt.submitted_at && (
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Submitted</div>
-                    <div>{fmt(detailAttempt.submitted_at)}</div>
-                  </div>
-                )}
               </div>
 
+              {/* CANDIDATE NOTES — amber */}
               {detailAttempt.notes_to_admin && (
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes from candidate</div>
-                  <p className="italic text-foreground/90 bg-secondary/30 rounded p-2">"{detailAttempt.notes_to_admin}"</p>
+                <div className="rounded-lg border-l-4 border-amber bg-amber/10 p-3">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">Notes from candidate</div>
+                  <p className="italic text-foreground/90">"{detailAttempt.notes_to_admin}"</p>
                 </div>
               )}
 
               {matchingApp ? (
-                <div className="border-t border-border/50 pt-3 space-y-2">
-                  <div className="font-semibold text-amber flex items-center gap-2"><FileText className="w-4 h-4" /> Application on file</div>
+                <>
+                  {/* AI SUMMARY — purple */}
                   {matchingApp.ai_summary && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">AI summary</div>
+                    <div className="rounded-lg border-l-4 border-purple-500 bg-purple-500/5 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-purple-300 mb-1 flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> AI Summary
+                      </div>
                       <p className="text-foreground/90">{matchingApp.ai_summary}</p>
                     </div>
                   )}
+
+                  {/* AI FIT SCORE — emerald */}
                   {matchingApp.ai_fit_score != null && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">AI fit score</div>
-                      <Badge variant="outline" className="font-mono">{matchingApp.ai_fit_score}/100</Badge>
+                    <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-500/5 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300 mb-1">AI Fit Score</div>
+                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/100</Badge>
                     </div>
                   )}
+
+                  {/* STRENGTHS — green */}
                   {matchingApp.ai_strengths && matchingApp.ai_strengths.length > 0 && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Strengths</div>
-                      <ul className="list-disc list-inside text-foreground/90">
+                    <div className="rounded-lg border-l-4 border-green-500 bg-green-500/5 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-green-300 mb-1">Strengths</div>
+                      <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
                         {matchingApp.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
                     </div>
                   )}
+
+                  {/* CONCERNS — crimson */}
                   {matchingApp.ai_concerns && matchingApp.ai_concerns.length > 0 && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Concerns</div>
-                      <ul className="list-disc list-inside text-foreground/90">
+                    <div className="rounded-lg border-l-4 border-crimson bg-crimson/10 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-crimson mb-1">Concerns</div>
+                      <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
                         {matchingApp.ai_concerns.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
                     </div>
                   )}
+
+                  {/* CANDIDATE APP NOTES — indigo */}
                   {matchingApp.notes && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Candidate notes</div>
+                    <div className="rounded-lg border-l-4 border-indigo-500 bg-indigo-500/5 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-indigo-300 mb-1">Candidate Application Notes</div>
                       <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.notes}</p>
                     </div>
                   )}
+
+                  {/* ADMIN NOTES — slate */}
                   {matchingApp.admin_notes && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Admin notes</div>
+                    <div className="rounded-lg border-l-4 border-slate-400 bg-slate-400/10 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-300 mb-1">Admin Notes</div>
                       <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.admin_notes}</p>
                     </div>
                   )}
+
                   {matchingApp.resume_filename && (
                     <div className="text-xs text-muted-foreground">Resume: {matchingApp.resume_filename}</div>
                   )}
-                </div>
+                </>
               ) : (
                 <div className="border-t border-border/50 pt-3 text-xs text-muted-foreground italic">
                   No application submitted yet for this candidate.
