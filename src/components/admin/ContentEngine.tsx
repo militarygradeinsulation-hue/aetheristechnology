@@ -496,15 +496,132 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
 // ----------------- Generator View -----------------
 
 function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
-  strategy: Strategy; onGenerate: (n: number) => void; generating: boolean; postsCount: number;
+  strategy: Strategy;
+  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void;
+  generating: boolean;
+  postsCount: number;
 }) {
   const [batchSize, setBatchSize] = useState(12);
+  const [userPrompt, setUserPrompt] = useState('');
+  const [topicInput, setTopicInput] = useState('');
+  const [topicSeeds, setTopicSeeds] = useState<string[]>([]);
+  const [blogs, setBlogs] = useState<{ id: string; title: string }[]>([]);
+  const [playbooks, setPlaybooks] = useState<{ id: string; title: string }[]>([]);
+  const [blogIds, setBlogIds] = useState<string[]>([]);
+  const [playbookIds, setPlaybookIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: b }, { data: p }] = await Promise.all([
+        supabase.from('blog_posts').select('id, title').eq('is_published', true).order('published_at', { ascending: false }).limit(80),
+        supabase.from('playbooks').select('id, title').order('created_at', { ascending: false }).limit(80),
+      ]);
+      setBlogs(b || []);
+      setPlaybooks(p || []);
+    })();
+  }, []);
+
+  const toggle = (id: string, set: (v: string[]) => void, current: string[]) => {
+    set(current.includes(id) ? current.filter(x => x !== id) : [...current, id]);
+  };
+
+  const addTopic = () => {
+    const t = topicInput.trim();
+    if (!t) return;
+    if (topicSeeds.includes(t)) { setTopicInput(''); return; }
+    setTopicSeeds([...topicSeeds, t]);
+    setTopicInput('');
+  };
+
+  const fire = () => onGenerate(batchSize, {
+    userPrompt: userPrompt.trim() || undefined,
+    blogIds: blogIds.length ? blogIds : undefined,
+    playbookIds: playbookIds.length ? playbookIds : undefined,
+    topicSeeds: topicSeeds.length ? topicSeeds : undefined,
+  });
+
+  const hasDirection = !!(userPrompt.trim() || topicSeeds.length || blogIds.length || playbookIds.length);
+
   return (
     <div className="max-w-3xl space-y-5">
       <div>
         <h2 className="font-display text-3xl font-bold mb-1">Content Generator</h2>
-        <p className="text-muted-foreground text-sm">Each batch creates posts respecting your format mix and posting schedule.</p>
+        <p className="text-muted-foreground text-sm">
+          Tell the engine what you want, mix in blogs/playbooks/topics, or just hit generate to use your strategy defaults.
+        </p>
       </div>
+
+      <Card className="p-5 glass border-border space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Your Prompt</div>
+            {userPrompt && (
+              <button onClick={() => setUserPrompt('')} className="text-[10px] text-muted-foreground hover:text-crimson uppercase tracking-wider">Clear</button>
+            )}
+          </div>
+          <Textarea
+            rows={4}
+            placeholder="e.g. Focus this batch on stuck deals + slow follow-up. Hammer the dollar figures. Use the new $7M shop story as a recurring example."
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1.5">Free-text direction. Highest priority — every post in the batch will obey this.</p>
+        </div>
+
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">Topic Seeds</div>
+          <div className="flex gap-2 mb-2">
+            <Input
+              value={topicInput}
+              onChange={(e) => setTopicInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTopic(); } }}
+              placeholder="e.g. ghosted proposals over 30 days"
+            />
+            <Button type="button" variant="outline" onClick={addTopic}>Add</Button>
+          </div>
+          {topicSeeds.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {topicSeeds.map((t) => (
+                <button key={t} onClick={() => setTopicSeeds(topicSeeds.filter(x => x !== t))}
+                  className="text-[11px] bg-amber/10 text-amber border border-amber/30 rounded-full px-2.5 py-1 hover:bg-amber/20">
+                  {t} <span className="ml-1 opacity-60">×</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+              Blogs <span className="text-amber">({blogIds.length})</span>
+            </div>
+            <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-background/40">
+              {blogs.length === 0 && <div className="p-3 text-xs text-muted-foreground">No published blogs.</div>}
+              {blogs.map(b => (
+                <label key={b.id} className="flex items-start gap-2 p-2 hover:bg-card/40 cursor-pointer text-xs border-b border-border/50 last:border-0">
+                  <input type="checkbox" checked={blogIds.includes(b.id)} onChange={() => toggle(b.id, setBlogIds, blogIds)} className="mt-0.5" />
+                  <span className="text-foreground/90 line-clamp-2">{b.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+              Playbooks <span className="text-amber">({playbookIds.length})</span>
+            </div>
+            <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-background/40">
+              {playbooks.length === 0 && <div className="p-3 text-xs text-muted-foreground">No playbooks.</div>}
+              {playbooks.map(p => (
+                <label key={p.id} className="flex items-start gap-2 p-2 hover:bg-card/40 cursor-pointer text-xs border-b border-border/50 last:border-0">
+                  <input type="checkbox" checked={playbookIds.includes(p.id)} onChange={() => toggle(p.id, setPlaybookIds, playbookIds)} className="mt-0.5" />
+                  <span className="text-foreground/90 line-clamp-2">{p.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <Card className="p-5 glass border-border">
         <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-3">Current Strategy</div>
@@ -546,12 +663,12 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
           <div className="font-display text-2xl font-bold text-amber w-12 text-right">{batchSize}</div>
         </div>
         <Button
-          onClick={() => onGenerate(batchSize)}
+          onClick={fire}
           disabled={generating}
           className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
         >
           {generating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-          Generate {batchSize} Posts
+          Generate {batchSize} Posts {hasDirection ? 'with your direction' : ''}
         </Button>
       </Card>
     </div>
