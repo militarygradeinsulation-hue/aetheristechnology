@@ -543,25 +543,24 @@ const AdminDashboard: React.FC = () => {
 
         {layout === 'tabs' ? (
           <>
-            <div className="flex gap-1.5 mb-8 flex-wrap">
+            <div className="flex gap-2 mb-8 flex-wrap">
               {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
                 const active = activeTab === tab;
                 return (
-                  <Button
+                  <button
                     key={tab}
                     id={`admin-tab-btn-${tab}`}
-                    variant={active ? 'default' : 'outline'}
-                    size="sm"
+                    type="button"
                     onClick={() => {
                       setActiveTab(tab as typeof activeTab);
                       ensureTabData(tab);
                       if (tab !== 'tools') setActiveTool(null);
                     }}
-                    className={`h-8 ${active ? 'bg-amber text-background hover:bg-amber/90 border-amber' : 'border-border hover:border-amber/50 hover:text-amber'}`}
+                    className={`premium-pill-btn whitespace-nowrap ${active ? 'active' : ''}`}
                   >
                     <Icon className="w-3.5 h-3.5 mr-1.5" />
-                    <span className="text-xs font-medium">{label}</span>
-                  </Button>
+                    <span>{label}</span>
+                  </button>
                 );
               })}
             </div>
