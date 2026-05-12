@@ -329,11 +329,7 @@ export const LeadsBoard: React.FC = () => {
                           {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2 italic">{l.why_fit}</p>}
                     <div className="text-xs text-muted-foreground mt-2 space-y-0.5">
@@ -400,11 +396,7 @@ export const LeadsBoard: React.FC = () => {
                           {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/15 text-amber border border-amber/30 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber-soft" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{l.why_fit}</p>}
                     {l.website && (
