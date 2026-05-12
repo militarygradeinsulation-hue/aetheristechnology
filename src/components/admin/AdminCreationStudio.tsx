@@ -347,10 +347,20 @@ export const AdminCreationStudio: React.FC = () => {
       setVideoUrl(url);
       setVideoExt(mime.includes('mp4') ? 'mp4' : 'webm');
       setProgress(100);
+      setStep(`Done — ${(blob.size / 1024 / 1024).toFixed(1)} MB`);
       toast({ title: 'Video ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB` });
     } catch (e) {
-      toast({ title: 'Render failed', description: (e as Error).message, variant: 'destructive' });
+      const msg = (e as Error).message || 'Render failed';
+      console.error('[CreationStudio] render failed', e);
+      setLastError(msg);
+      setStep('');
+      toast({ title: 'Render failed', description: msg, variant: 'destructive' });
     } finally { setRendering(false); }
+  };
+
+  const generateAll = async () => {
+    const p = await generatePlan();
+    if (p) await renderVideo(p);
   };
 
   const toggleSiteImg = (id: string) => {
