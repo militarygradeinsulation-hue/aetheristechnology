@@ -22,6 +22,7 @@ import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { AdminAssistant } from '@/components/admin/AdminAssistant';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
