@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Sparkles, Mic, Film, Upload, X, Download, Play, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, Mic, Film, Upload, X, Download, Play, RefreshCw, Save } from 'lucide-react';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 // Auto-pull every image bundled in src/assets
 const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG}', {
