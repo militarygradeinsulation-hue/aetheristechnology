@@ -320,9 +320,29 @@ Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicat
 Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
 Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
 
+You MUST rate the candidate 1-10 on each of these six sections (1 = total miss, 5 = average, 10 = exceptional). Be strict — most candidates land 3-6.
+
+SECTIONS:
+1. b2b_sales_experience      — Direct B2B sales role time, deal complexity, sales cycle exposure.
+2. closing_track_record      — Quota attainment, closed-deal numbers, commission history, win rate.
+3. communication_confidence  — Discovery skills, CFO-level conversation comfort, written clarity.
+4. hustle_ownership          — Self-direction, entrepreneurial moves, side businesses, outbound grit.
+5. domain_fit                — Finance / ops / SaaS / consulting / forensics-adjacent background.
+6. resilience_tenure         — Tenure stability (no <6 mo hops), bouncing back from misses, longevity.
+
+The overall fit_score is the SUM of the six section ratings (range 6-60). Do NOT scale to 100. Do not invent the total — sum it.
+
 Output STRICT JSON only — no markdown, no code fences:
 {
-  "fit_score": <integer 0-100>,
+  "section_scores": {
+    "b2b_sales_experience":     { "rating": <1-10>, "reason": "<one sentence>" },
+    "closing_track_record":     { "rating": <1-10>, "reason": "<one sentence>" },
+    "communication_confidence": { "rating": <1-10>, "reason": "<one sentence>" },
+    "hustle_ownership":         { "rating": <1-10>, "reason": "<one sentence>" },
+    "domain_fit":               { "rating": <1-10>, "reason": "<one sentence>" },
+    "resilience_tenure":        { "rating": <1-10>, "reason": "<one sentence>" }
+  },
+  "fit_score": <integer 6-60, must equal sum of all six ratings>,
   "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
   "strengths": ["<bullet>", "<bullet>", "..."],
   "concerns": ["<bullet>", "<bullet>", "..."],
@@ -356,7 +376,27 @@ ${recreated.resumeText.slice(0, 18000)}`;
   let txt = j.choices?.[0]?.message?.content || "{}";
   txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   const parsed = JSON.parse(txt);
-  const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
+
+  // Normalize section scores and recompute fit_score = sum (always trustworthy).
+  const SECTION_KEYS = [
+    "b2b_sales_experience",
+    "closing_track_record",
+    "communication_confidence",
+    "hustle_ownership",
+    "domain_fit",
+    "resilience_tenure",
+  ];
+  const rawSections = (parsed.section_scores && typeof parsed.section_scores === "object") ? parsed.section_scores : {};
+  const sectionScores: Record<string, { rating: number; reason: string }> = {};
+  let total = 0;
+  for (const key of SECTION_KEYS) {
+    const entry = rawSections[key] || {};
+    const rating = Math.max(1, Math.min(10, Math.round(Number(entry.rating) || 0) || 1));
+    const reason = String(entry.reason || "").slice(0, 400);
+    sectionScores[key] = { rating, reason };
+    total += rating;
+  }
+  const fitScore = Math.max(6, Math.min(60, total));
   const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
   const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
   const summary = String(parsed.summary || "").slice(0, 2000) +
@@ -364,13 +404,14 @@ ${recreated.resumeText.slice(0, 18000)}`;
 
   await admin.from("careers_applications").update({
     ai_fit_score: fitScore,
+    ai_section_scores: sectionScores,
     ai_summary: summary,
     ai_strengths: strengths,
     ai_concerns: concerns,
     ai_analyzed_at: new Date().toISOString(),
   }).eq("share_code", app.share_code);
 
-  return { fit_score: fitScore, summary, strengths, concerns, ...recreated };
+  return { fit_score: fitScore, section_scores: sectionScores, summary, strengths, concerns, ...recreated };
 }
 
 function json(body: unknown, status = 200) {
