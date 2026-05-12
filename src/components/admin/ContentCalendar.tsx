@@ -2,9 +2,9 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid, Sparkles, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid, Sparkles, Plus, CalendarClock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, saveToAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, saveToAdminLibrary, rescheduleAdminLibraryItem, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { ContentAI } from './ContentAI';
@@ -22,6 +22,7 @@ const TOOL_LABELS: Record<string, string> = {
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
   day_post: 'Day Post',
+  linkedin_post: 'LinkedIn Post',
 };
 
 const TOOL_COLORS: Record<string, string> = {
@@ -34,6 +35,7 @@ const TOOL_COLORS: Record<string, string> = {
   friction_audit: 'bg-orange-500/80',
   playbook: 'bg-pink-500/80',
   day_post: 'bg-amber',
+  linkedin_post: 'bg-sky-500/80',
 };
 
 function getDaysInMonth(year: number, month: number) {
@@ -177,6 +179,24 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
     if (viewItem?.id === updated.id) setViewItem(updated);
   };
 
+  const handleReschedule = async (item: AdminLibraryItem, newDate: string) => {
+    if (!newDate) return;
+    const oldKey = dateKey(new Date(item.created_at));
+    if (newDate === oldKey) return;
+    try {
+      const created_at = new Date(`${newDate}T12:00:00`).toISOString();
+      const updated = await rescheduleAdminLibraryItem(item.id, created_at);
+      setItems(prev => prev.map(i => i.id === item.id ? updated : i));
+      setSelectedDay(newDate);
+      toast({
+        title: 'Moved',
+        description: new Date(`${newDate}T12:00:00`).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' }),
+      });
+    } catch (e: any) {
+      toast({ title: 'Move failed', description: e.message, variant: 'destructive' });
+    }
+  };
+
   const renderItemCard = (item: AdminLibraryItem) => {
     const out = item.output_data as Record<string, any>;
     const existingImg = out?._generated_image_url as string | undefined;
@@ -200,12 +220,22 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
             import('@/lib/adminLibrary').then(m => m.updateAdminLibraryItem(item.id, { ...out, _generated_image_url: url })).catch(() => {});
           }}
         />
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+        </div>
+        <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/40">
+          <CalendarClock className="w-3 h-3 text-muted-foreground" />
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Move to</span>
+          <Input
+            type="date"
+            defaultValue={dateKey(new Date(item.created_at))}
+            onChange={(e) => handleReschedule(item, e.target.value)}
+            className="h-6 w-auto px-1.5 py-0 text-[10px]"
+          />
         </div>
       </div>
     );
@@ -382,12 +412,23 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
                         <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1" title="Move to date">
+                        <CalendarClock className="w-3 h-3 text-muted-foreground" />
+                        <Input
+                          type="date"
+                          defaultValue={dateKey(new Date(item.created_at))}
+                          onChange={(e) => handleReschedule(item, e.target.value)}
+                          className="h-7 w-[120px] px-1.5 text-[10px]"
+                        />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                      </div>
                     </div>
                   </div>
                 ))

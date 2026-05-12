@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2 } from 'lucide-react';
+import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 const PILLARS = [
   'Revenue Leak Diagnosis',
@@ -103,6 +104,12 @@ export default function LinkedInPostStudio() {
   const [generated, setGenerated] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  const [saving, setSaving] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const generate = async () => {
     if (!topic.trim()) {
@@ -111,6 +118,7 @@ export default function LinkedInPostStudio() {
     }
     setLoading(true);
     setGenerated('');
+    setSavedId(null);
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-studio', {
@@ -139,6 +147,40 @@ export default function LinkedInPostStudio() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
     toast({ title: 'Copied to clipboard' });
+  };
+
+  const saveToCalendar = async () => {
+    if (!generated.trim()) return;
+    setSaving(true);
+    try {
+      const created_at = new Date(`${scheduleDate}T12:00:00`).toISOString();
+      const firstLine = generated.split('\n').map(s => s.trim()).find(Boolean) || 'LinkedIn post';
+      const title = firstLine.slice(0, 90);
+      const saved = await saveToAdminLibrary({
+        tool_type: 'linkedin_post',
+        title,
+        input_data: {
+          topic,
+          pillar: pillar === 'auto' ? null : pillar,
+          postType: postType === 'auto' ? null : postType,
+          creator,
+          extraPrompt,
+          scheduledFor: scheduleDate,
+        },
+        output_data: { body: generated, scheduledFor: scheduleDate },
+        created_at,
+      });
+      setSavedId(saved.id);
+      toast({
+        title: 'Saved to calendar',
+        description: new Date(`${scheduleDate}T12:00:00`).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Save failed';
+      toast({ title: 'Save failed', description: msg, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cycleTopic = () => {
@@ -318,6 +360,39 @@ export default function LinkedInPostStudio() {
             </div>
           ) : (
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{generated}</div>
+          )}
+
+          {generated && !loading && (
+            <div className="mt-4 pt-4 border-t border-border space-y-2">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber flex items-center gap-1.5">
+                <CalendarPlus className="w-3 h-3" /> Save & schedule on calendar
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Pick the date this post should land on. It will appear in the Content Calendar and can be moved later.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => { setScheduleDate(e.target.value); setSavedId(null); }}
+                  className="w-auto h-9 text-xs"
+                />
+                <Button
+                  size="sm"
+                  onClick={saveToCalendar}
+                  disabled={saving || !scheduleDate}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
+                  {saving ? 'Saving…' : savedId ? 'Saved — save again' : 'Save to calendar'}
+                </Button>
+                {savedId && (
+                  <span className="text-[11px] text-amber flex items-center gap-1">
+                    <Check className="w-3 h-3" /> On {new Date(`${scheduleDate}T12:00:00`).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            </div>
           )}
         </Card>
       )}

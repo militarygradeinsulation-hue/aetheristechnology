@@ -70,16 +70,28 @@ serve(async (req) => {
     }
 
     if (action === "update") {
-      const { id, output_data } = body;
-      if (!id || !output_data) {
-        return new Response(JSON.stringify({ error: "id and output_data required" }), {
+      const { id, output_data, created_at, title } = body;
+      if (!id) {
+        return new Response(JSON.stringify({ error: "id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const updateRow: Record<string, unknown> = {};
+      if (output_data !== undefined) updateRow.output_data = output_data;
+      if (typeof title === "string" && title.length) updateRow.title = title;
+      if (created_at && typeof created_at === "string" && !isNaN(Date.parse(created_at))) {
+        updateRow.created_at = created_at;
+      }
+      if (Object.keys(updateRow).length === 0) {
+        return new Response(JSON.stringify({ error: "nothing to update" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const { data, error } = await supabase
         .from("admin_library")
-        .update({ output_data })
+        .update(updateRow)
         .eq("id", id)
         .select()
         .single();

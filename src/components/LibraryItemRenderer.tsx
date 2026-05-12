@@ -1166,6 +1166,18 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
         )}
       </div>
     );
+    case 'linkedin_post': return (
+      <div className="space-y-3">
+        {data.scheduledFor && (
+          <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber bg-amber/10 border border-amber/30 rounded px-2 py-0.5">
+            Scheduled {new Date(`${data.scheduledFor}T12:00:00`).toLocaleDateString()}
+          </span>
+        )}
+        <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed bg-transparent p-0 m-0 border-0">
+          {String(data.body || '')}
+        </pre>
+      </div>
+    );
     default:
       return (
         <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">
