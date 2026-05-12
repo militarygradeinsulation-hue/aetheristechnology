@@ -1,12 +1,16 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid, Sparkles, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, saveToAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { ContentAI } from './ContentAI';
 import { PostImageGenerator } from './PostImageGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { getAdminToken } from '@/lib/adminAuth';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
