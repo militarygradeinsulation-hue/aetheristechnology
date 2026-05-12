@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 
 const ContentCalendarPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -28,6 +29,7 @@ const ContentCalendarPage = () => {
             <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Daily post ideas, hooks, topics, and best times — generated for your industry in minutes.</p>
           </div>
           <ContentCalendarGenerator />
+          <PostFromSourceGenerator />
         </div>
         <Footer />
       </div>
