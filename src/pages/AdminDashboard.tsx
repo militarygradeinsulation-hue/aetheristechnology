@@ -42,6 +42,7 @@ import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
 import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSystemsPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
+import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import NotificationBell from '@/components/admin/NotificationBell';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
