@@ -193,6 +193,25 @@ serve(async (req) => {
       return json({ audioBase64, mime: "audio/mpeg" });
     }
 
+    if (action === "generate_music") {
+      const el = Deno.env.get("ELEVENLABS_API_KEY");
+      if (!el) return json({ error: "ELEVENLABS_API_KEY missing — connect ElevenLabs in Connectors" }, 500);
+      const prompt = (body.prompt as string || "").trim();
+      const ms = Math.max(10000, Math.min(180000, Number(body.durationMs) || 30000));
+      if (!prompt) return json({ error: "prompt required" }, 400);
+      const res = await fetch("https://api.elevenlabs.io/v1/music", {
+        method: "POST",
+        headers: { "xi-api-key": el, "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, music_length_ms: ms }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        return json({ error: `Music ${res.status}: ${t.slice(0, 240)}` }, 502);
+      }
+      const buf = await res.arrayBuffer();
+      return json({ audioBase64: base64Encode(buf), mime: "audio/mpeg" });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("creation-studio error:", e);

@@ -15,9 +15,21 @@ const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG
 }) as Record<string, string>;
 
 type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload' };
-type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number };
+type SceneImageStyle = 'case_file' | 'autopsy_diagram' | 'blueprint' | 'editorial_cartoon' | 'data_macro' | 'noir_object' | 'isometric' | 'free';
+type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle };
 type Plan = { title: string; scenes: Scene[] };
 type Voice = { voice_id: string; name: string; category?: string; preview_url?: string };
+
+const SCENE_STYLE_OPTIONS: { key: SceneImageStyle; label: string; desc: string }[] = [
+  { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction · crimson' },
+  { key: 'autopsy_diagram',   label: 'Autopsy Diagram',   desc: 'Anatomical chart of a broken process' },
+  { key: 'blueprint',         label: 'Blueprint',         desc: 'CRM / pipeline schematic' },
+  { key: 'editorial_cartoon', label: 'Editorial Cartoon', desc: 'Op-ed ink illustration · amber' },
+  { key: 'data_macro',        label: 'Data Macro',        desc: 'CRT terminal close-up · scan lines' },
+  { key: 'noir_object',       label: 'Noir Object',       desc: 'Single object · hard amber light' },
+  { key: 'isometric',         label: 'Isometric',         desc: 'Clean vector · negative space' },
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
+];
 
 const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
   { key: '9:16', w: 1080, h: 1920, label: '9:16 (Reels/Shorts/TikTok)' },
@@ -212,16 +224,18 @@ export const AdminCreationStudio: React.FC = () => {
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
     const scene = plan.scenes[sceneIdx];
-    const promptText = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    const fallback = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    const promptText = (scene.imagePrompt?.trim() || fallback);
+    const style = scene.imageStyle || 'case_file';
     if (!promptText) {
-      toast({ title: 'Add a caption or voiceover first', variant: 'destructive' });
+      toast({ title: 'Add an image prompt, caption, or voiceover first', variant: 'destructive' });
       return;
     }
     setGeneratingSceneIdx(sceneIdx);
     try {
       const token = getAdminToken();
       const { data, error } = await supabase.functions.invoke('generate-content-image', {
-        body: { prompt: promptText, style: 'case_file' },
+        body: { prompt: promptText, style },
         headers: token ? { 'x-admin-token': token } : {},
       });
       if (error) throw error;
@@ -239,6 +253,50 @@ export const AdminCreationStudio: React.FC = () => {
       setGeneratingSceneIdx(null);
     }
   };
+
+  // ===== Background music =====
+  const [musicPrompt, setMusicPrompt] = useState('');
+  const [musicVolume, setMusicVolume] = useState(0.18);
+  const [musicGenerating, setMusicGenerating] = useState(false);
+  const [musicUrl, setMusicUrl] = useState('');
+  const musicBufferRef = useRef<ArrayBuffer | null>(null);
+
+  const MUSIC_PRESETS: { label: string; text: string }[] = [
+    { label: 'Forensic tension',  text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. Investigative thriller. No vocals. Loopable.' },
+    { label: 'Operator hustle',   text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Focused, blunt, founder-energy. No vocals.' },
+    { label: 'Boardroom power',   text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
+    { label: 'Late-night noir',   text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. Late-night detective mood. No vocals.' },
+    { label: 'Documentary slow',  text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. Reflective, serious. No vocals.' },
+    { label: 'Trailer drop',      text: 'Cinematic trailer cue: low rumble, riser, single hard hit at 8s, then sustained tension. No vocals.' },
+  ];
+
+  const generateMusic = async () => {
+    const p = musicPrompt.trim() || MUSIC_PRESETS[0].text;
+    if (!p) return;
+    setMusicGenerating(true);
+    try {
+      // Estimate duration from plan or fallback to durationSec
+      const planSec = plan ? plan.scenes.reduce((a, s) => a + s.durationMs / 1000, 0) : durationSec;
+      const ms = Math.max(10000, Math.min(180000, Math.round(planSec * 1000) + 2000));
+      const { data, error } = await adminInvoke('generate_music', { prompt: p, durationMs: ms });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const blob = base64ToBlob(data.audioBase64, data.mime || 'audio/mpeg');
+      musicBufferRef.current = await blob.arrayBuffer();
+      setMusicUrl(URL.createObjectURL(blob));
+      toast({ title: 'Music ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB · will mix into next render` });
+    } catch (e) {
+      toast({ title: 'Music generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setMusicGenerating(false);
+    }
+  };
+
+  const clearMusic = () => {
+    musicBufferRef.current = null;
+    setMusicUrl('');
+  };
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -414,6 +472,27 @@ export const AdminCreationStudio: React.FC = () => {
         acc += activePlan.scenes[i].durationMs / 1000;
       }
       const totalSec = acc;
+
+      // 6b) Mix background music if present (ducked + faded)
+      if (musicBufferRef.current) {
+        try {
+          const musicBuf = await audioCtx.decodeAudioData(musicBufferRef.current.slice(0));
+          const musicSrc = audioCtx.createBufferSource();
+          musicSrc.buffer = musicBuf;
+          musicSrc.loop = musicBuf.duration < totalSec;
+          const gain = audioCtx.createGain();
+          const v = Math.max(0, Math.min(1, musicVolume));
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(v, startTime + 0.8);
+          gain.gain.setValueAtTime(v, startTime + totalSec - 1.2);
+          gain.gain.linearRampToValueAtTime(0, startTime + totalSec);
+          musicSrc.connect(gain).connect(dest);
+          musicSrc.start(startTime);
+          musicSrc.stop(startTime + totalSec + 0.1);
+        } catch (musicErr) {
+          console.warn('[CreationStudio] music mix failed', musicErr);
+        }
+      }
 
       // 7) Animate canvas. Ken-Burns on each scene + caption.
       const animStart = performance.now();
@@ -833,7 +912,7 @@ export const AdminCreationStudio: React.FC = () => {
                       className="h-7 text-[10px] px-2 border-amber/40 text-amber hover:bg-amber/10"
                       disabled={generatingSceneIdx === i}
                       onClick={() => generateSceneImage(i)}
-                      title="Generate an image from this scene's caption + voiceover"
+                      title="Generate an image using this scene's image prompt + style"
                     >
                       {generatingSceneIdx === i ? (
                         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -864,14 +943,110 @@ export const AdminCreationStudio: React.FC = () => {
                         const next = { ...plan }; next.scenes[i] = { ...s, voiceover: e.target.value };
                         setPlan(next);
                       }}
-                      className="text-sm"
-                      placeholder="Voiceover line (also drives image generation)"
+                      className="text-sm mb-2"
+                      placeholder="Voiceover line (spoken aloud)"
                     />
+                    <div className="rounded-md border border-amber/20 bg-amber/5 p-2 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] uppercase tracking-widest text-amber font-mono flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" /> Image prompt for this scene
+                        </span>
+                        <select
+                          value={s.imageStyle || 'case_file'}
+                          onChange={(e) => {
+                            const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
+                            setPlan(next);
+                          }}
+                          className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
+                        >
+                          {SCENE_STYLE_OPTIONS.map(o => (
+                            <option key={o.key} value={o.key}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <Textarea
+                        value={s.imagePrompt ?? ''}
+                        rows={2}
+                        onChange={(e) => {
+                          const next = { ...plan }; next.scenes[i] = { ...s, imagePrompt: e.target.value };
+                          setPlan(next);
+                        }}
+                        placeholder={`Describe the visual you want. Falls back to caption + voiceover. e.g. "Manila case file open on a desk, redaction bars over a CRM screenshot, hard amber rim light, $187,400 stamped in red."`}
+                        className="text-xs bg-background"
+                      />
+                      <div className="text-[10px] text-muted-foreground">
+                        {SCENE_STYLE_OPTIONS.find(o => o.key === (s.imageStyle || 'case_file'))?.desc}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* Music panel */}
+          <div className="mt-5 rounded-lg border border-amber/30 bg-background/40 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Background music (optional)</div>
+                <div className="text-xs text-muted-foreground">AI-generated original score via ElevenLabs Music — royalty-free, yours to use.</div>
+              </div>
+              {musicUrl && (
+                <button type="button" onClick={clearMusic} className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-destructive">
+                  Remove
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {MUSIC_PRESETS.map(p => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => setMusicPrompt(p.text)}
+                  title={p.text}
+                  className="text-[11px] rounded-full px-2.5 py-1 border bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber transition"
+                >{p.label}</button>
+              ))}
+            </div>
+            <Textarea
+              value={musicPrompt}
+              onChange={(e) => setMusicPrompt(e.target.value)}
+              rows={2}
+              placeholder='Describe the music. e.g. "Slow forensic underscore, dark piano, low cello drone, ticking clock, no vocals, loopable."'
+              className="text-sm"
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={generateMusic}
+                disabled={musicGenerating}
+                className="border-amber/40 text-amber hover:bg-amber/10"
+              >
+                {musicGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
+                {musicUrl ? 'Regenerate music' : 'Generate music'}
+              </Button>
+              <label className="text-[11px] text-muted-foreground flex items-center gap-2">
+                Volume
+                <input
+                  type="range"
+                  min={0}
+                  max={0.6}
+                  step={0.02}
+                  value={musicVolume}
+                  onChange={(e) => setMusicVolume(Number(e.target.value))}
+                  className="w-32"
+                />
+                <span className="font-mono text-amber w-8">{Math.round(musicVolume * 100)}%</span>
+              </label>
+              {musicUrl && <audio src={musicUrl} controls className="h-8 max-w-xs" />}
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              Free music alternatives if you'd rather: <a href="https://pixabay.com/music/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Pixabay Music</a>, <a href="https://www.bensound.com/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Bensound</a>, <a href="https://freemusicarchive.org/" target="_blank" rel="noreferrer" className="text-amber hover:underline">Free Music Archive</a>. Generated music auto-mixes into the next render.
+            </div>
+          </div>
+
           {rendering && (
             <div className="mt-4">
               <div className="h-2 bg-border rounded overflow-hidden">
