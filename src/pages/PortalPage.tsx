@@ -61,6 +61,7 @@ import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
+import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
@@ -442,7 +443,8 @@ const PortalPage: React.FC = () => {
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
-      case 'companycal': return <CompanyCalendarRepView />;
+      case 'companycal': return isPartner ? <AdminCompanyCalendarPanel /> : <CompanyCalendarRepView />;
+      case 'briefing': return <InterviewBriefingPanel />;
       case 'playbook': return <PortalPlaybook />;
       case 'training': return <TrainingPanel repName={profile?.rep_name} />;
       case 'onboarding': return <OnboardingLibrary />;
@@ -518,6 +520,11 @@ const PortalPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2 min-w-0 flex-1 max-w-md">
             <div className="flex-1 min-w-0"><WhosWorkingBar /></div>
+            {isPartner && (
+              <Button asChild variant="outline" size="sm" className="flex-shrink-0 border-amber/40 text-amber hover:bg-amber/10">
+                <Link to="/admin"><Shield className="w-4 h-4 mr-1" /> Admin Console</Link>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground flex-shrink-0">
               <LogOut className="w-4 h-4 mr-1" /> Log out
             </Button>
