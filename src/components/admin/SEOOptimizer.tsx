@@ -134,7 +134,7 @@ export const SEOOptimizer: React.FC = () => {
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
             disabled={running !== null}
@@ -158,6 +158,28 @@ export const SEOOptimizer: React.FC = () => {
           >
             {running === "aeo-blogs" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
             Generate AEO Blog Batch
+          </Button>
+          <Button
+            variant="outline"
+            disabled={running !== null}
+            onClick={async () => {
+              setRunning("expand-short");
+              try {
+                const { data, error } = await supabase.functions.invoke("expand-short-blogs", { body: { threshold: 6000, limit: 10 } });
+                if (error) throw error;
+                toast({
+                  title: "Short blogs expanded",
+                  description: `${data?.expanded ?? 0} expanded · ${data?.failed ?? 0} failed (of ${data?.processed ?? 0}). Re-run to keep going.`,
+                });
+              } catch (e) {
+                toast({ title: "Expand failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+              } finally {
+                setRunning(null);
+              }
+            }}
+          >
+            {running === "expand-short" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Expand Short Blogs
           </Button>
           <Button onClick={() => runOptimization()} disabled={running !== null}>
             {running === "all" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
