@@ -78,24 +78,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           </Link>
 
           <div className="hidden md:flex items-center gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`premium-pill-btn whitespace-nowrap ${
-                  item.tone === 'red'
-                    ? '!text-crimson'
-                    : item.tone === 'yellow'
-                    ? '!text-yellow-400'
-                    : item.special
-                    ? '!text-amber'
-                    : ''
-                }`}
-                onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const base =
+                'whitespace-nowrap px-4 py-2 rounded-md text-sm font-semibold tracking-wide border transition-all duration-200 shadow-sm hover:-translate-y-0.5 active:translate-y-0';
+              const variant =
+                item.tone === 'red'
+                  ? 'bg-crimson/10 text-crimson border-crimson/40 hover:bg-crimson hover:text-white hover:border-crimson hover:shadow-[0_8px_20px_-8px_hsl(var(--crimson)/0.7)]'
+                  : item.tone === 'yellow'
+                  ? 'bg-yellow-400/10 text-yellow-300 border-yellow-400/40 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 hover:shadow-[0_8px_20px_-8px_rgba(250,204,21,0.7)]'
+                  : item.special
+                  ? 'bg-amber/10 text-amber border-amber/40 hover:bg-amber hover:text-black hover:border-amber hover:shadow-[0_8px_20px_-8px_hsl(var(--amber)/0.7)]'
+                  : 'bg-white/5 text-foreground border-white/10 hover:bg-white/10 hover:border-amber/40 hover:text-amber';
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={`${base} ${variant}`}
+                  onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="ml-auto hidden md:block" />
