@@ -360,7 +360,7 @@ export const ContentEngine: React.FC = () => {
 
 function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
-  onSelectPost: (p: Post) => void; onGenerate: (n: number) => void; generating: boolean;
+  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void; generating: boolean;
   onExport: () => void; onClear: () => void; strategy: Strategy;
 }) {
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
