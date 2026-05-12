@@ -118,7 +118,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
       };
       setLocal(next);
       onAppUpdated?.(next);
-      toast({ title: `Fit score: ${data.fit_score}/100` });
+      toast({ title: `Fit score: ${data.fit_score}/60` });
     } catch (e) {
       toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAnalyzing(false); }
