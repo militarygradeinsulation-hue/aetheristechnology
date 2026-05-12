@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PostImageGenerator } from './admin/PostImageGenerator';
 
 type SourceType = 'idea' | 'blog' | 'playbook';
 
@@ -16,7 +17,7 @@ interface GeneratedPost {
   hashtags: string[];
 }
 
-export const PostFromSourceGenerator: React.FC = () => {
+export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
   const [sourceType, setSourceType] = useState<SourceType>('idea');
   const [ideaPrompt, setIdeaPrompt] = useState('');
   const [count, setCount] = useState(3);
