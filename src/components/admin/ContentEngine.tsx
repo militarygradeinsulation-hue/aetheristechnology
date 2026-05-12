@@ -82,28 +82,75 @@ const STATUS_INFO: Record<string, { label: string; cls: string }> = {
   posted:   { label: 'Posted',   cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 };
 
-const PREMADE_TITLES: string[] = [
-  'The 5 silent leaks bleeding 6-figures from your ops',
-  'Why your "best" rep is actually your biggest leak',
-  'The follow-up gap that costs $40k/month (and nobody tracks it)',
-  'Stop calling it a pipeline problem — it\'s a process leak',
-  'How a $7M shop found $1.2M in 14 days without hiring',
-  'The 3 metrics every operator should run weekly (most don\'t)',
-  'Your CRM is lying to you. Here\'s how to prove it.',
-  'Why "we tried automation" usually means "we bought software"',
-  'The ghosted-proposal autopsy: where the deal actually died',
-  'AI won\'t fix a broken process — it\'ll just speed up the bleed',
-  'The case for a forensic diagnostic before any tech stack rebuild',
-  'What I found inside a $30M company\'s revenue ops in 90 minutes',
-  'Owner-operators: the 4 reports your finance lead should be running',
-  'Why discounting is a symptom, not a strategy',
-  'The 14-day audit framework I run on every new engagement',
-  'How to stop your ops team from being a glorified inbox',
-  'Three questions that expose a leaking sales process in 10 minutes',
-  'The retention leak hiding in your onboarding (and how to seal it)',
-  'Quote-to-cash: where most B2B operators lose 8-12% margin',
-  'Why "more leads" is the wrong fix 70% of the time',
-];
+const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
+  'Leak Audit': [
+    'The 5 silent leaks bleeding 6-figures from your ops',
+    'Why your "best" rep is actually your biggest leak',
+    'The follow-up gap that costs $40k/month (and nobody tracks it)',
+    'Stop calling it a pipeline problem — it\'s a process leak',
+    'The ghosted-proposal autopsy: where the deal actually died',
+    'Three questions that expose a leaking sales process in 10 minutes',
+    'The retention leak hiding in your onboarding (and how to seal it)',
+    'Quote-to-cash: where most B2B operators lose 8-12% margin',
+    'The 7 leaks every $5M-$50M business has (and refuses to look at)',
+    'Why "more leads" is the wrong fix 70% of the time',
+    'The Leak Audit™ explained in 90 seconds',
+    'What a leak actually looks like on a P&L (it doesn\'t say "leak")',
+  ],
+  'Forensic Diagnostic': [
+    'How a $7M shop found $1.2M in 14 days without hiring',
+    'What I found inside a $30M company\'s revenue ops in 90 minutes',
+    'The 14-day Forensic Diagnostic framework I run on every engagement',
+    'Why I charge $2,500 flat to look — and why it\'s the cheapest thing you\'ll buy this year',
+    'Inside a real diagnostic: 4 leaks, $480k recovered, no new tools',
+    'The case for a forensic diagnostic before any tech stack rebuild',
+    'Diagnostic vs. consulting call: why one finds money and the other wastes time',
+    'The 3 numbers I ask for before I\'ll take a diagnostic engagement',
+  ],
+  'Operator POV': [
+    'Owner-operators: the 4 reports your finance lead should be running',
+    'The 3 metrics every operator should run weekly (most don\'t)',
+    'How to stop your ops team from being a glorified inbox',
+    'Why discounting is a symptom, not a strategy',
+    'Operator > consultant: what the difference looks like in the field',
+    'The CEO dashboard I rebuild on every engagement (and why)',
+    'When to fire your "rockstar" — the operator\'s checklist',
+    'Stop measuring activity. Start measuring leaks.',
+  ],
+  'AI / Tech': [
+    'AI won\'t fix a broken process — it\'ll just speed up the bleed',
+    'Why "we tried automation" usually means "we bought software"',
+    'Your CRM is lying to you. Here\'s how to prove it.',
+    'The 3-question test before you let AI touch your sales pipeline',
+    'Why most "AI consultants" are just SaaS resellers in a hoodie',
+    'Triple-AI architecture: how I stack models so one keeps the others honest',
+    'The cheapest AI win in any business: dead-lead resurrection',
+    'When AI replaces a hire vs. when it replaces a process',
+  ],
+  'Sales & Pipeline': [
+    'The follow-up SLA that doubled close rate at a $12M services firm',
+    'Stuck-deal triage: the 4 questions that move (or kill) a deal in 1 call',
+    'Why "warm leads" go cold in 72 hours — and the fix takes 20 minutes',
+    'The proposal template I rewrote that closed an extra $310k in Q2',
+    'Discovery calls are leaking deals. Here\'s the script that plugs it.',
+    'Why your CRM stages are lying about your pipeline value',
+  ],
+  'Indianapolis / Local': [
+    'Indianapolis owner-operators: the 3 leaks I see in every shop on Mass Ave',
+    'Why Indy\'s mid-market is leaving $500k+/yr on the table (and not noticing)',
+    'A Forensic Diagnostic for an Indianapolis manufacturer: what we found',
+    'Indianapolis vs. Chicago: why Indy operators get squeezed harder on margin',
+  ],
+  'Trust & Positioning': [
+    'I don\'t do retainers until I find the leak. Here\'s why.',
+    'What a "Business Forensics Operator" actually does (it\'s not consulting)',
+    'Why I refuse to pitch — and what I do instead',
+    'The 3 kinds of clients I turn away (and why you should too)',
+    'How to vet anyone selling you "AI for your business" in 4 questions',
+  ],
+};
+
+const PREMADE_TITLES: string[] = Object.values(PREMADE_TITLE_GROUPS).flat();
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 function ymd(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
