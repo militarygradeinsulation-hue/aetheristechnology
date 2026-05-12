@@ -149,6 +149,40 @@ export default function LinkedInPostStudio() {
     toast({ title: 'Copied to clipboard' });
   };
 
+  const saveToCalendar = async () => {
+    if (!generated.trim()) return;
+    setSaving(true);
+    try {
+      const created_at = new Date(`${scheduleDate}T12:00:00`).toISOString();
+      const firstLine = generated.split('\n').map(s => s.trim()).find(Boolean) || 'LinkedIn post';
+      const title = firstLine.slice(0, 90);
+      const saved = await saveToAdminLibrary({
+        tool_type: 'linkedin_post',
+        title,
+        input_data: {
+          topic,
+          pillar: pillar === 'auto' ? null : pillar,
+          postType: postType === 'auto' ? null : postType,
+          creator,
+          extraPrompt,
+          scheduledFor: scheduleDate,
+        },
+        output_data: { body: generated, scheduledFor: scheduleDate },
+        created_at,
+      });
+      setSavedId(saved.id);
+      toast({
+        title: 'Saved to calendar',
+        description: new Date(`${scheduleDate}T12:00:00`).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Save failed';
+      toast({ title: 'Save failed', description: msg, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const cycleTopic = () => {
     const pool = topicCategory === 'All' ? ALL_TOPICS : (PREMADE_TOPICS[topicCategory] || ALL_TOPICS);
     setTopic(rand(pool));
