@@ -484,7 +484,6 @@ export const AdminCreationStudio: React.FC = () => {
             size_mb: Number(sizeMb),
             aspect,
             scenes: activePlan.scenes,
-            scenes: activePlan.scenes,
           },
           file_url: publicUrl,
         });
