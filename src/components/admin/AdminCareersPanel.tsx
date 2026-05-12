@@ -822,7 +822,7 @@ export const AdminCareersPanel: React.FC = () => {
 
       <AdminCareersTest />
 
-      <Dialog open={!!detailAttempt} onOpenChange={(o) => !o && setDetailAttempt(null)}>
+      <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 flex-wrap">
