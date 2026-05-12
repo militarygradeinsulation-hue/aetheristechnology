@@ -22,6 +22,7 @@ export async function saveToAdminLibrary(args: {
   input_data: unknown;
   output_data: unknown;
   file_url?: string | null;
+  created_at?: string;
 }) {
   const { data, error } = await supabase.functions.invoke("admin-library", {
     body: { action: "save", ...args },

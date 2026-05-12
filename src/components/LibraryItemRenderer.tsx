@@ -1136,6 +1136,36 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
         )}
       </div>
     );
+    case 'day_post': return (
+      <div className="space-y-4">
+        {data.format && (
+          <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber bg-amber/10 border border-amber/30 rounded px-2 py-0.5">
+            {String(data.format).replace(/_/g, ' ')}
+          </span>
+        )}
+        {data.hook && (
+          <p className="text-lg font-display font-bold text-foreground border-l-2 border-amber pl-3">{data.hook}</p>
+        )}
+        {data.body && (
+          <div className="prose prose-invert max-w-none text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-foreground bg-transparent p-0 m-0 border-0 text-sm leading-relaxed">{data.body}</pre>
+          </div>
+        )}
+        {data.cta && (
+          <div className="rounded-lg bg-amber/10 border border-amber/30 p-3 text-sm text-foreground">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-amber block mb-1">CTA</span>
+            {data.cta}
+          </div>
+        )}
+        {Array.isArray(data.hashtags) && data.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {data.hashtags.map((h: string, i: number) => (
+              <span key={i} className="text-[11px] font-mono text-amber/80">#{String(h).replace(/^#/, '')}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
     default:
       return (
         <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">

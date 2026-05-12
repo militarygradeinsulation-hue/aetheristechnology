@@ -1,12 +1,16 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronLeft, ChevronRight, Loader2, Eye, Copy, Download, Trash2, X, MessageSquare, ImageIcon, CalendarDays, List, LayoutGrid, Sparkles, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, saveToAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { ContentAI } from './ContentAI';
 import { PostImageGenerator } from './PostImageGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { getAdminToken } from '@/lib/adminAuth';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -17,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions',
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
+  day_post: 'Day Post',
 };
 
 const TOOL_COLORS: Record<string, string> = {
@@ -28,6 +33,7 @@ const TOOL_COLORS: Record<string, string> = {
   brand_contradictions: 'bg-[hsl(var(--crimson))]/80',
   friction_audit: 'bg-orange-500/80',
   playbook: 'bg-pink-500/80',
+  day_post: 'bg-amber',
 };
 
 function getDaysInMonth(year: number, month: number) {
@@ -60,6 +66,52 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [aiItem, setAiItem] = useState<AdminLibraryItem | null>(null);
+
+  // ── Day-content AI generator state
+  const [genOpen, setGenOpen] = useState(false);
+  const [genPrompt, setGenPrompt] = useState('');
+  const [genFormat, setGenFormat] = useState<'leak_of_week' | 'case_file' | 'diagnostic' | 'field_note' | 'contrarian'>('leak_of_week');
+  const [genLoading, setGenLoading] = useState(false);
+
+  const FORMAT_OPTIONS: { key: typeof genFormat; label: string; desc: string }[] = [
+    { key: 'leak_of_week', label: 'Leak of the Week', desc: 'One blunt operator post about a single leak.' },
+    { key: 'case_file',    label: 'Case File',        desc: 'Tuesday autopsy of one specific leak. Dollar + vertical.' },
+    { key: 'diagnostic',   label: 'Diagnostic',       desc: '3-5 numbered questions for this week.' },
+    { key: 'field_note',   label: 'Field Note',       desc: 'Founder-to-founder observation. Real moment.' },
+    { key: 'contrarian',   label: 'Contrarian Take',  desc: 'Disagree with conventional wisdom.' },
+  ];
+
+  const generateDayContent = async () => {
+    if (!selectedDay) return;
+    setGenLoading(true);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('generate-day-content', {
+        body: { date: selectedDay, prompt: genPrompt.trim(), format: genFormat },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const content = data?.content;
+      if (!content) throw new Error('No content returned');
+      const created_at = new Date(`${selectedDay}T12:00:00`).toISOString();
+      const saved = await saveToAdminLibrary({
+        tool_type: 'day_post',
+        title: content.title || 'Untitled dispatch',
+        input_data: { prompt: genPrompt, format: genFormat, date: selectedDay },
+        output_data: content,
+        created_at,
+      });
+      setItems(prev => [saved, ...prev]);
+      setGenPrompt('');
+      setGenOpen(false);
+      toast({ title: 'Saved to this day', description: content.title });
+    } catch (e: unknown) {
+      toast({ title: 'Generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setGenLoading(false);
+    }
+  };
   
 
   const year = currentDate.getFullYear();
@@ -240,13 +292,73 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
 
               {/* Side panel — items for selected day */}
               {selectedDay && (
-                <div className="w-full lg:w-[340px] space-y-2">
+                <div className="w-full lg:w-[360px] space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold text-foreground font-display">{new Date(selectedDay + 'T12:00:00').toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedDay(null)}><X className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => { setSelectedDay(null); setGenOpen(false); }}><X className="w-4 h-4" /></Button>
                   </div>
+
+                  {/* AI day-content generator */}
+                  <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+                    {!genOpen ? (
+                      <Button
+                        size="sm"
+                        onClick={() => setGenOpen(true)}
+                        className="w-full bg-amber text-background hover:bg-amber/90 font-bold"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 mr-1" /> Generate AI content for this day
+                      </Button>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-amber font-bold flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" /> New post for this day
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { setGenOpen(false); setGenPrompt(''); }}
+                            className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                            disabled={genLoading}
+                          >Cancel</button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {FORMAT_OPTIONS.map(o => {
+                            const on = genFormat === o.key;
+                            return (
+                              <button
+                                key={o.key}
+                                type="button"
+                                onClick={() => setGenFormat(o.key)}
+                                title={o.desc}
+                                className={`text-[10px] rounded px-2 py-1.5 border text-left transition ${on ? 'bg-amber/20 border-amber text-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:border-amber/40 hover:text-amber'}`}
+                              >{o.label}</button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-snug">{FORMAT_OPTIONS.find(o => o.key === genFormat)?.desc}</p>
+                        <Textarea
+                          value={genPrompt}
+                          onChange={(e) => setGenPrompt(e.target.value)}
+                          rows={3}
+                          placeholder='Optional direction. e.g. "Quote-to-cash leak in commercial roofing — cite a $187k example."'
+                          className="text-xs"
+                          disabled={genLoading}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={generateDayContent}
+                          disabled={genLoading}
+                          className="w-full bg-amber text-background hover:bg-amber/90 font-bold"
+                        >
+                          {genLoading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
+                          {genLoading ? 'Generating…' : 'Generate & save to this day'}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
                   {dayItems.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No content saved on this day.</p>
+                    <p className="text-xs text-muted-foreground">No content saved on this day yet.</p>
                   ) : (
                     dayItems.map(item => renderItemCard(item))
                   )}
