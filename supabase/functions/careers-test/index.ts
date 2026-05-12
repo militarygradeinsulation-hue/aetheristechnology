@@ -753,7 +753,7 @@ serve(async (req) => {
       if (!app) return json({ error: "Application not found" }, 404);
       try {
         const result = await analyzeApplicationFit(admin, app, LOVABLE_API_KEY);
-        return json({ ok: true, fit_score: result.fit_score, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
+        return json({ ok: true, fit_score: result.fit_score, section_scores: result.section_scores, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
       } catch (err) {
         const message = err instanceof Error ? err.message : "AI analysis failed";
         if (message.includes("rate limited")) return json({ error: message }, 429);
