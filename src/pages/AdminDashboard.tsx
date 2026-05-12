@@ -408,6 +408,7 @@ const AdminDashboard: React.FC = () => {
   const renderTabBody = (key: string): React.ReactNode => {
     switch (key) {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
+      case 'interviews': return <InterviewsPanel me="admin" />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
       case 'systems': return <AdminForensicsSystemsPanel />;
