@@ -37,19 +37,22 @@ export const PostImageGenerator: React.FC<Props> = ({
   existingImageUrl,
   onImageGenerated,
   compact = false,
+  editablePrompt = false,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
-  const [style, setStyle] = useState<StyleKey>('case_file');
+  const [style, setStyle] = useState<StyleKey>(editablePrompt ? 'free' : 'case_file');
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState(prompt);
 
   const generate = async () => {
     setGenerating(true);
     setStylePickerOpen(false);
     try {
       const token = getAdminToken();
+      const finalPrompt = editablePrompt ? (customPrompt.trim() || prompt) : prompt;
       const { data, error } = await supabase.functions.invoke('generate-content-image', {
-        body: { prompt, library_item_id: libraryItemId, post_index: postIndex, style },
+        body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
         headers: token ? { 'x-admin-token': token } : {},
       });
       if (error) throw error;
