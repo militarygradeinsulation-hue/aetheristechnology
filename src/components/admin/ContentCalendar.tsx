@@ -66,6 +66,52 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [aiItem, setAiItem] = useState<AdminLibraryItem | null>(null);
+
+  // ── Day-content AI generator state
+  const [genOpen, setGenOpen] = useState(false);
+  const [genPrompt, setGenPrompt] = useState('');
+  const [genFormat, setGenFormat] = useState<'leak_of_week' | 'case_file' | 'diagnostic' | 'field_note' | 'contrarian'>('leak_of_week');
+  const [genLoading, setGenLoading] = useState(false);
+
+  const FORMAT_OPTIONS: { key: typeof genFormat; label: string; desc: string }[] = [
+    { key: 'leak_of_week', label: 'Leak of the Week', desc: 'One blunt operator post about a single leak.' },
+    { key: 'case_file',    label: 'Case File',        desc: 'Tuesday autopsy of one specific leak. Dollar + vertical.' },
+    { key: 'diagnostic',   label: 'Diagnostic',       desc: '3-5 numbered questions for this week.' },
+    { key: 'field_note',   label: 'Field Note',       desc: 'Founder-to-founder observation. Real moment.' },
+    { key: 'contrarian',   label: 'Contrarian Take',  desc: 'Disagree with conventional wisdom.' },
+  ];
+
+  const generateDayContent = async () => {
+    if (!selectedDay) return;
+    setGenLoading(true);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('generate-day-content', {
+        body: { date: selectedDay, prompt: genPrompt.trim(), format: genFormat },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const content = data?.content;
+      if (!content) throw new Error('No content returned');
+      const created_at = new Date(`${selectedDay}T12:00:00`).toISOString();
+      const saved = await saveToAdminLibrary({
+        tool_type: 'day_post',
+        title: content.title || 'Untitled dispatch',
+        input_data: { prompt: genPrompt, format: genFormat, date: selectedDay },
+        output_data: content,
+        created_at,
+      });
+      setItems(prev => [saved, ...prev]);
+      setGenPrompt('');
+      setGenOpen(false);
+      toast({ title: 'Saved to this day', description: content.title });
+    } catch (e: unknown) {
+      toast({ title: 'Generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setGenLoading(false);
+    }
+  };
   
 
   const year = currentDate.getFullYear();
