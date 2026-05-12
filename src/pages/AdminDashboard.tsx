@@ -175,6 +175,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'training', label: 'Training', icon: GraduationCap },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'interviews', label: 'Interviews', icon: CalendarClock },
+    { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
