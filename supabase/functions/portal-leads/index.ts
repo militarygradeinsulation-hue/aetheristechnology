@@ -253,7 +253,8 @@ serve(async (req) => {
       }
 
       await logActivity(supabase, claims, "lead_claim", { lead_id: id, business: data.business_name });
-      return jsonResp({ ok: true });
+      const refilled = await topUpRepDrop(supabase, claims.code);
+      return jsonResp({ ok: true, refilled });
     }
 
     // ---------- RELEASE ----------
