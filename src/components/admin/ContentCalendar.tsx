@@ -292,13 +292,73 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
 
               {/* Side panel — items for selected day */}
               {selectedDay && (
-                <div className="w-full lg:w-[340px] space-y-2">
+                <div className="w-full lg:w-[360px] space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold text-foreground font-display">{new Date(selectedDay + 'T12:00:00').toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedDay(null)}><X className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => { setSelectedDay(null); setGenOpen(false); }}><X className="w-4 h-4" /></Button>
                   </div>
+
+                  {/* AI day-content generator */}
+                  <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+                    {!genOpen ? (
+                      <Button
+                        size="sm"
+                        onClick={() => setGenOpen(true)}
+                        className="w-full bg-amber text-background hover:bg-amber/90 font-bold"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 mr-1" /> Generate AI content for this day
+                      </Button>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-amber font-bold flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" /> New post for this day
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { setGenOpen(false); setGenPrompt(''); }}
+                            className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                            disabled={genLoading}
+                          >Cancel</button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {FORMAT_OPTIONS.map(o => {
+                            const on = genFormat === o.key;
+                            return (
+                              <button
+                                key={o.key}
+                                type="button"
+                                onClick={() => setGenFormat(o.key)}
+                                title={o.desc}
+                                className={`text-[10px] rounded px-2 py-1.5 border text-left transition ${on ? 'bg-amber/20 border-amber text-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:border-amber/40 hover:text-amber'}`}
+                              >{o.label}</button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-snug">{FORMAT_OPTIONS.find(o => o.key === genFormat)?.desc}</p>
+                        <Textarea
+                          value={genPrompt}
+                          onChange={(e) => setGenPrompt(e.target.value)}
+                          rows={3}
+                          placeholder='Optional direction. e.g. "Quote-to-cash leak in commercial roofing — cite a $187k example."'
+                          className="text-xs"
+                          disabled={genLoading}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={generateDayContent}
+                          disabled={genLoading}
+                          className="w-full bg-amber text-background hover:bg-amber/90 font-bold"
+                        >
+                          {genLoading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
+                          {genLoading ? 'Generating…' : 'Generate & save to this day'}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
                   {dayItems.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No content saved on this day.</p>
+                    <p className="text-xs text-muted-foreground">No content saved on this day yet.</p>
                   ) : (
                     dayItems.map(item => renderItemCard(item))
                   )}
