@@ -23,6 +23,7 @@ import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
+import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { Mail as MailIcon } from 'lucide-react';
@@ -60,7 +61,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -315,10 +316,16 @@ const PortalPage: React.FC = () => {
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
+    { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
-  const availableTabs = tabs.filter(t => (!t.partnerOnly || isPartner) && (t.id !== 'careers' || careersUnlocked));
+  const sharedWsUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const availableTabs = tabs.filter(t =>
+    (!t.partnerOnly || isPartner)
+    && (t.id !== 'careers' || careersUnlocked)
+    && (t.id !== 'sharedws' || sharedWsUnlocked)
+  );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
     ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
@@ -400,6 +407,7 @@ const PortalPage: React.FC = () => {
       case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
+      case 'sharedws': return <SharedWorkspace me="bradon" />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;

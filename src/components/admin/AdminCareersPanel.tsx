@@ -10,7 +10,7 @@ import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
-  ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote
+  ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 
@@ -279,6 +279,58 @@ export const AdminCareersPanel: React.FC = () => {
       try { await updateApp(shareCode, { admin_notes: value }); }
       catch (e) { toast({ title: 'Notes save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
     }, 700);
+  };
+
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const sendToWorkspace = async (a: Application, opts: { schedule: boolean }) => {
+    setSendingId(a.share_code);
+    try {
+      let scheduledAt: string | null = null;
+      let meetingLink: string | null = null;
+      if (opts.schedule) {
+        const when = window.prompt(`Schedule interview with ${a.candidate_name}\nEnter date/time (e.g. "2026-05-20 14:30"):`, '');
+        if (!when) { setSendingId(null); return; }
+        const dt = new Date(when);
+        if (isNaN(+dt)) { toast({ title: 'Invalid date', variant: 'destructive' }); setSendingId(null); return; }
+        scheduledAt = dt.toISOString();
+        meetingLink = window.prompt('Meeting link (optional):', '') || null;
+      }
+      const { data: ins, error } = await supabase.from('shared_interviews').insert({
+        candidate_name: a.candidate_name,
+        candidate_email: a.candidate_email,
+        candidate_phone: a.candidate_phone,
+        share_code: a.share_code,
+        resume_path: a.resume_path,
+        resume_filename: a.resume_filename,
+        ai_fit_score: a.ai_fit_score,
+        ai_summary: a.ai_summary,
+        ai_strengths: a.ai_strengths as any,
+        ai_concerns: a.ai_concerns as any,
+        notes: a.admin_notes || a.notes,
+        scheduled_at: scheduledAt,
+        meeting_link: meetingLink,
+        status: scheduledAt ? 'scheduled' : 'pending',
+        source: 'careers',
+        created_by: 'admin',
+      }).select('id').single();
+      if (error) throw error;
+      if (scheduledAt) {
+        const { data: t } = await supabase.from('shared_tasks').insert({
+          title: `Interview: ${a.candidate_name}`,
+          description: [meetingLink ? `Link: ${meetingLink}` : null, a.candidate_email, a.admin_notes || a.notes].filter(Boolean).join('\n'),
+          owner: 'admin', assignee: 'admin',
+          priority: 'high', bucket: 'today', due_at: scheduledAt,
+        }).select('id').single();
+        if (t?.id) await supabase.from('shared_interviews').update({ task_id: (t as any).id }).eq('id', (ins as any).id);
+      }
+      try { await updateApp(a.share_code, { stage: 'interview' }); } catch {}
+      setApplications(prev => prev.map(x => x.share_code === a.share_code ? { ...x, stage: 'interview' } : x));
+      toast({ title: 'Sent to Shared Workspace', description: scheduledAt ? 'Interview scheduled and added to calendar.' : 'Open the Workspace → Interviews tab to schedule.' });
+    } catch (e) {
+      toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSendingId(null);
+    }
   };
 
   const applyPreset = (preset: 'top' | 'passedNew' | 'pending' | 'rejected' | 'reset') => {
@@ -579,6 +631,19 @@ export const AdminCareersPanel: React.FC = () => {
                           className={a.contacted ? '' : 'bg-blue-500 text-white hover:bg-blue-500/90'}>
                           {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
                           {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
+                        </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => sendToWorkspace(a, { schedule: false })}
+                          disabled={sendingId === a.share_code}
+                          className="border-amber/40 text-amber hover:bg-amber/10">
+                          {sendingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                          Send to Workspace
+                        </Button>
+                        <Button size="sm"
+                          onClick={() => sendToWorkspace(a, { schedule: true })}
+                          disabled={sendingId === a.share_code}
+                          className="bg-amber text-background hover:bg-amber/90">
+                          <CalendarCheck className="w-3 h-3 mr-1" /> Schedule interview
                         </Button>
                       </div>
                     </div>
