@@ -345,6 +345,7 @@ const PortalPage: React.FC = () => {
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'inbox', label: 'Inbox', icon: <MailIcon className="w-4 h-4" />, iconCmp: MailIcon },
+    { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
