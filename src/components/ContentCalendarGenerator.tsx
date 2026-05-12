@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { PostImageGenerator } from './admin/PostImageGenerator';
 
 const PHASES = [
   { label: 'Analyzing your industry...', target: 25 },
