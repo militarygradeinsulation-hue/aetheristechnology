@@ -443,7 +443,8 @@ const PortalPage: React.FC = () => {
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
-      case 'companycal': return <CompanyCalendarRepView />;
+      case 'companycal': return isPartner ? <AdminCompanyCalendarPanel /> : <CompanyCalendarRepView />;
+      case 'briefing': return <InterviewBriefingPanel />;
       case 'playbook': return <PortalPlaybook />;
       case 'training': return <TrainingPanel repName={profile?.rep_name} />;
       case 'onboarding': return <OnboardingLibrary />;
