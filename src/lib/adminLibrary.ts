@@ -50,6 +50,15 @@ export async function updateAdminLibraryItem(id: string, output_data: unknown): 
   return data?.item as AdminLibraryItem;
 }
 
+export async function rescheduleAdminLibraryItem(id: string, created_at: string): Promise<AdminLibraryItem> {
+  const { data, error } = await supabase.functions.invoke("admin-library", {
+    body: { action: "update", id, created_at },
+    headers: adminHeaders(),
+  });
+  if (error) throw error;
+  return data?.item as AdminLibraryItem;
+}
+
 export async function deleteFromAdminLibrary(id: string) {
   const { error } = await supabase.functions.invoke("admin-library", {
     body: { action: "delete", id },
