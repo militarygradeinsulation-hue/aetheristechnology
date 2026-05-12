@@ -147,7 +147,7 @@ export const AdminCareersPanel: React.FC = () => {
       detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
       detailAttempt.notes_to_admin ? `Candidate note: "${detailAttempt.notes_to_admin}"` : '',
       matchingApp?.ai_summary ? `AI summary: ${matchingApp.ai_summary}` : '',
-      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/100` : '',
+      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/60` : '',
       shareNote ? `\nNotes:\n${shareNote}` : '',
     ].filter(Boolean);
     return lines.join('\n');
