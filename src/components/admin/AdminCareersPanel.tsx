@@ -692,7 +692,7 @@ export const AdminCareersPanel: React.FC = () => {
                                 className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : n >= 2 ? 'border-blue-400/50 text-blue-300' : 'text-muted-foreground'}`}
                                 title={`${n} test attempt${n === 1 ? '' : 's'} from this email`}
                               >
-                                <RefreshCcw className="w-3 h-3" />
+                                <RefreshCw className="w-3 h-3" />
                                 {n} attempt{n === 1 ? '' : 's'}
                               </Badge>
                             ) : null;
