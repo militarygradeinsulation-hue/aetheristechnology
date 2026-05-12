@@ -8,9 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
@@ -35,6 +36,53 @@ function nextBusinessMorningISO(): string {
 const mailHandler = (email: string) => (e: React.MouseEvent) => {
   e.preventDefault();
   openRepMail(email);
+};
+
+function scoreTier(score: number): { label: string; tone: string; advice: string } {
+  if (score >= 80) return { label: 'HOT — call today', tone: 'text-emerald-400', advice: 'Top-tier fit. Phone first, email second. These close fastest.' };
+  if (score >= 60) return { label: 'WARM — reach this week', tone: 'text-amber', advice: 'Strong fit. Personalized email + LinkedIn touch. Follow up in 48h.' };
+  if (score >= 40) return { label: 'WORTH A SHOT', tone: 'text-amber/70', advice: 'Decent fit. Use a templated outreach. Don\'t over-invest until they reply.' };
+  return { label: 'LOW PRIORITY', tone: 'text-muted-foreground', advice: 'Weak signal. Only work if your queue is empty. Consider skipping back to pool.' };
+}
+
+const ScoreBadge: React.FC<{ lead: RepLead; tone?: 'amber' | 'amber-soft' }> = ({ lead, tone = 'amber' }) => {
+  if (typeof lead.score !== 'number') return null;
+  const t = scoreTier(lead.score);
+  const cls = tone === 'amber'
+    ? 'bg-amber/20 text-amber border-amber/40'
+    : 'bg-amber/15 text-amber border-amber/30';
+  return (
+    <Popover>
+      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className={`text-xs font-mono px-2 py-0.5 rounded border flex-shrink-0 inline-flex items-center gap-1 hover:brightness-125 ${cls}`}
+          aria-label={`Lead score ${lead.score}. Click to learn what this means.`}
+        >
+          {lead.score}
+          <Info className="w-3 h-3 opacity-70" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 text-xs" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Lead Score</span>
+            <span className={`font-bold ${t.tone}`}>{lead.score}/100 · {t.label}</span>
+          </div>
+          <p className="text-foreground/90 leading-relaxed">{t.advice}</p>
+          <div className="border-t border-border/50 pt-2 text-muted-foreground leading-relaxed">
+            Score combines: industry fit, location (Indianapolis weighting), website signals, contact completeness, and freshness. Higher = more likely to convert.
+          </div>
+          {lead.why_fit && (
+            <div className="border-t border-border/50 pt-2">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Why this lead</div>
+              <p className="italic text-foreground/80">{lead.why_fit}</p>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 };
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
@@ -281,11 +329,7 @@ export const LeadsBoard: React.FC = () => {
                           {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2 italic">{l.why_fit}</p>}
                     <div className="text-xs text-muted-foreground mt-2 space-y-0.5">
@@ -352,11 +396,7 @@ export const LeadsBoard: React.FC = () => {
                           {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/15 text-amber border border-amber/30 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber-soft" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{l.why_fit}</p>}
                     {l.website && (
