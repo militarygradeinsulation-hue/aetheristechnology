@@ -182,7 +182,8 @@ serve(async (req) => {
         .eq("id", id).eq("assigned_to_code", claims.code).is("claimed_by_code", null);
       if (error) throw error;
       await logActivity(supabase, claims, "lead_skip_drip", { lead_id: id });
-      return jsonResp({ ok: true });
+      const refilled = await topUpRepDrop(supabase, claims.code);
+      return jsonResp({ ok: true, refilled });
     }
 
     // ---------- CLAIM ----------
