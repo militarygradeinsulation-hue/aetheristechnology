@@ -1,40 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { FORENSIC_BLUEPRINT_COMPACT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-// Weekly rotation locked to the Five-Format Forensic Architecture
-// Sun=0 ... Sat=6
-const FORMAT_BY_DOW = [
-  "Case File",            // Sun
-  "Case File",            // Mon
-  "Operator's Journal",   // Tue
-  "Leak of the Week",     // Wed
-  "Dead Simple Diagnostic", // Thu
-  "Contrarian",           // Fri
-  "Operator's Journal",   // Sat
-];
-
-const FORMAT_SPECS: Record<string, string> = {
-  "Case File": `STRUCTURE: CASE ID (e.g. "CASE #0419-B") · STATUS: ACTIVE · THE FINDING (one-line diagnosis) · THE EVIDENCE (2-3 specific signals) · THE MATH (dollarized monthly leak) · THE FIX (teased, not given) · THE LESSON (one sentence). Caption is the post body itself, not a summary.`,
-  "Leak of the Week": `STRUCTURE: Name the leak pattern (give it a brand-able term). Define it in one sentence. List 3 signs you have it. Tell them how to spot it in their own ops. DO NOT give the fix.`,
-  "Dead Simple Diagnostic": `STRUCTURE: ONE 60-second test the reader can run right now. THE TEST (steps) · THE THRESHOLD (the number that means trouble) · WHAT IT MEANS (the diagnosis). No fluff.`,
-  "Operator's Journal": `STRUCTURE: 3-8 short lines. No template. No CTA. No hashtags beyond 1-2 max. Field notes from the operator's week. Personal, unpolished, specific. Example openings: "Walked into a $7M shop today.", "Closed a file this morning.", "Got asked the same question for the 4th time this month."`,
-  "Contrarian": `STRUCTURE: THE CLAIM (the popular belief) · THE EVIDENCE (why people believe it) · THE COUNTER (the data/pattern that breaks it) · THE POSITION (what to do instead). Defensible dissent — not rage-bait.`,
-};
-
-const HOOK_FORMULAS_LIST = `
-HOOK FORMULAS (rotate — never use the same formula twice in 7 days):
-1. ABOUT ME — "I spent [time] inside [N] CRMs. Here's the leak nobody names."
-2. IF I — "If I opened your pipeline right now, the first thing I'd find is ___."
-3. TO YOU — "To the operator running [role] without [specific report]: this is for you."
-4. CAN YOU? — "Can your CRM tell you which deals went silent in the last 14 days? Mine can. Yours probably can't."
-5. HE/SHE DID — "She ran a $4M shop with 312 'open' deals. 71 of them had been dead for 90+ days."
-`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -58,73 +28,65 @@ serve(async (req) => {
       });
     }
 
-    // Build the day-by-day format schedule starting from "today" so the
-    // calendar lines up with the user's actual posting week.
-    const today = new Date();
-    const startDow = today.getDay();
-    const schedule = Array.from({ length: 30 }, (_, i) => {
-      const dow = (startDow + i) % 7;
-      return {
-        day: i + 1,
-        dow,
-        format: FORMAT_BY_DOW[dow],
-      };
-    });
+    const prompt = `You write LinkedIn posts in the dominant 2026 short-line / one-sentence-per-line style. Mobile-first. Massive whitespace. Every sentence on its own line.
 
-    const scheduleTable = schedule
-      .map((s) => `Day ${s.day} (${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][s.dow]}) → ${s.format}`)
-      .join("\n");
-
-    const prompt = `You are the content operator for Aetheris — a Business Forensics firm that finds revenue leaks inside HubSpot and other CRMs. You are NOT a marketing influencer. You are NOT a SaaS copywriter. You are an operator who has walked into hundreds of broken CRMs and named what's bleeding.
-
-${FORENSIC_BLUEPRINT_COMPACT}
-
-INDUSTRY FOCUS: ${industry}
-GOALS: ${goals || "Generate qualified leads for the free Leak Audit, then convert into the $2,500 Forensic Diagnostic."}
-PLATFORMS: ${platforms || "LinkedIn primary; cross-post to Facebook"}
+INDUSTRY: ${industry}
+GOALS: ${goals || "Lead generation and authority building"}
+PLATFORMS: ${platforms || "LinkedIn primary"}
 
 ═══════════════════════════════════════════════════════════
-LOCKED 30-DAY FORMAT SCHEDULE (do not deviate)
+VOICE — diagnostic, operator, contrarian (never influencer/copy-bro)
 ═══════════════════════════════════════════════════════════
-${scheduleTable}
+Lead with a correction, contradiction, or hidden truth.
+Name the real mechanism.
+Translate it into business language.
+Show the consequence.
+End with a sharp memorable line or one direct question.
+
+Modes to rotate: Diagnostic (explain hidden failure), Translation (turn story into operating lesson), Permission (validate the reader, frame pain as evidence of progress). Combine two when it lands harder.
 
 ═══════════════════════════════════════════════════════════
-FORMAT SPECS — each post MUST follow the structure for its assigned format
+VISUAL FORMATTING — non-negotiable
 ═══════════════════════════════════════════════════════════
-${Object.entries(FORMAT_SPECS).map(([k, v]) => `▸ ${k}\n  ${v}`).join("\n\n")}
-
-${HOOK_FORMULAS_LIST}
-
-═══════════════════════════════════════════════════════════
-ANTI-REPETITION RULES (this is why the last calendar failed)
-═══════════════════════════════════════════════════════════
-HARD BANS — these phrases may appear ZERO times across 30 days:
-  ✗ "If you use HubSpot, this is probably you"
-  ✗ "Your HubSpot is hiding money"
-  ✗ "I'll bet $1,000"
-  ✗ "Open your HubSpot right now"
-  ✗ "Stop blaming your sales team"
-  ✗ "Most HubSpot admins don't realize"
-  ✗ "The most expensive setting"
-  ✗ Any hook that starts with "If you...", "Most...", "Stop..." more than ONCE in the month
-  ✗ The word "HubSpot" in the FIRST 5 WORDS of more than 6 hooks total
-  ✗ Emojis. Anywhere. Ever.
-  ✗ "Game-changer", "leverage", "unlock", "synergy", "in today's...", "in the age of AI"
-
-VARIETY MANDATES:
-  ✓ At least 6 hooks must open with a NUMBER ("$1.4M sat...", "312 contacts...", "47 hours...")
-  ✓ At least 5 hooks must open with a CHARACTER ("She ran...", "He opened...", "The CRO told me...")
-  ✓ At least 4 hooks must be a QUESTION the reader has to answer in their head
-  ✓ At least 3 hooks must use NEGATIVE FRAMING ("not...", "you're not losing leads — you're losing...")
-  ✓ Topics rotate across: stalled deals, dead MQLs, owner overload, dirty data, ghosted quotes, lifecycle misuse, attribution lies, forecast fiction, slow follow-up, missing contact info, no-owner records, closed-lost reactivation, workflow drift, sequence fatigue, deal-stage decay, property bloat, source attribution, lead scoring, pipeline velocity, win-rate by stage, time-in-stage, rep ramp, manager dashboards, deal review cadence, quota math.
-  ✓ NO topic may repeat within a 7-day window.
+✓ One sentence per line. Sometimes two short lines. Never a paragraph wall.
+✓ Blank line between every 1–2 sentences. Whitespace is the design.
+✓ Bold hook: 3–8 words, often with a specific number. First 1–2 lines must force the "see more" click.
+✓ Bullets use emoji markers sparingly: 👉 ✅ 1️⃣ 💡 ↳ 🔴 🟡 🟢 (pick ONE marker style per post, don't mix).
+✓ Use 2–3 emojis max for emphasis across the whole post. Never decorative.
+✓ "Staircase" or numbered lists welcome for evidence/steps.
+✓ Numbers in digits. Currency explicit. Time frames specific.
 
 ═══════════════════════════════════════════════════════════
-CTA RULES
+THE 2-1-3 STRUCTURE (use as the default skeleton)
 ═══════════════════════════════════════════════════════════
-  • Case File / Leak of the Week / Diagnostic / Contrarian → end with: "Run the 14-Point Leak Audit."
-  • Operator's Journal → NO CTA. NO LINK. Just the field note.
-  • One door only. Never offer alternatives.
+1. Bold hook (3–8 words, often a number, contrarian or diagnostic)
+2. Short context line (1–2 lines max)
+3. [whitespace]
+4. Short story / evidence (3–5 single-sentence lines)
+5. [whitespace]
+6. Hard truth — the mechanism nobody names (1–2 lines)
+7. [whitespace]
+8. Single-line CTA or question
+
+═══════════════════════════════════════════════════════════
+HARD BANS
+═══════════════════════════════════════════════════════════
+✗ Em dashes ( — ). Use periods or line breaks instead.
+✗ Dense paragraphs. Walls of text.
+✗ "Great post", "I agree", "In today's…", "In the age of AI", "game-changer", "leverage", "unlock", "synergy", "rockstar", "ninja"
+✗ Generic openers: "Most people…", "If you…", "Stop…" used more than ONCE in 30 days
+✗ AI tells. No "As an AI…" No "In conclusion…"
+✗ Vague numbers. "Millions" is banned. "$1.4M/year" is required.
+
+═══════════════════════════════════════════════════════════
+HOOK VARIETY (rotate across 30 days — never repeat formula in same week)
+═══════════════════════════════════════════════════════════
+• Number opener: "$1.4M sat dead in his pipeline."
+• Character opener: "She ran a $4M shop with 312 'open' deals."
+• Contrarian claim: "Hiring isn't your problem."
+• Diagnostic question: "Can your team name the leak?"
+• Hidden truth: "What looks like growth is fragility wearing makeup."
+• Reframe: "That's not a marketing problem. That's a clarity problem."
 
 ═══════════════════════════════════════════════════════════
 OUTPUT JSON SCHEMA
@@ -133,17 +95,15 @@ OUTPUT JSON SCHEMA
   "days": [
     {
       "day": 1,
-      "format": "Case File" | "Leak of the Week" | "Dead Simple Diagnostic" | "Operator's Journal" | "Contrarian",
-      "topic": "specific leak/pattern this post diagnoses (NOT generic — name the exact dysfunction)",
-      "hookFormula": "ABOUT ME | IF I | TO YOU | CAN YOU | HE-SHE DID | NUMBER | CHARACTER | QUESTION | NEGATIVE",
-      "hook": "the actual opening line (1 sentence, scroll-stopping, follows formula)",
-      "platform": "LinkedIn" | "Facebook" | "Instagram",
-      "contentType": "post" | "carousel" | "video" | "poll",
+      "topic": "specific angle this post diagnoses (be concrete)",
+      "hook": "the bold opening line (3–8 words, scroll-stopping)",
+      "platform": "LinkedIn",
+      "contentType": "post" | "carousel" | "poll",
       "bestTime": "9:00 AM EST",
-      "caption": "the FULL post body — written in the assigned format's structure. Use line breaks. 60-180 words for short formats, up to 220 for Case File. Operator's Journal stays 40-90 words.",
-      "hashtags": ["3-5 tags, ZERO for Operator's Journal beyond 0-1"]
+      "caption": "the FULL post body in short-line format. EVERY sentence on its own line. Blank line between 1-2 sentence groups. Use \\n for line breaks and \\n\\n for whitespace. 80–180 words. Follow the 2-1-3 structure unless format is carousel.",
+      "hashtags": ["3-5 specific tags, lowercase, no fluff"]
     }
-    // ... 30 entries, one per day, in the EXACT format order from the schedule above
+    // 30 entries total
   ]
 }
 
@@ -161,7 +121,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
           {
             role: "system",
             content:
-              "You are an operator-voice content strategist. You enforce the Forensic Content Blueprint. You never repeat hook patterns. You never write like a SaaS marketer. Return only valid JSON, no markdown fences.",
+              "You write LinkedIn posts in the 2026 short-line / one-sentence-per-line style. Diagnostic operator voice. Massive whitespace. No em dashes. No copy-bro language. Return only valid JSON, no markdown fences.",
           },
           { role: "user", content: prompt },
         ],
@@ -191,13 +151,13 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       result = JSON.parse(cleaned);
     }
 
-    // Server-side enforcement: stamp the locked format onto each day so the UI
-    // can't drift even if the model re-orders things.
+    // Strip em dashes server-side as a safety net
     if (Array.isArray(result?.days)) {
       result.days = result.days.map((d: any, i: number) => ({
         ...d,
         day: i + 1,
-        format: schedule[i]?.format ?? d.format,
+        hook: typeof d.hook === "string" ? d.hook.replace(/—/g, ".").replace(/–/g, ".") : d.hook,
+        caption: typeof d.caption === "string" ? d.caption.replace(/—/g, ".").replace(/–/g, ".") : d.caption,
       }));
     }
 

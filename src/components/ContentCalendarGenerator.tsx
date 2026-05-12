@@ -154,8 +154,8 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                         <span className="text-xs text-muted-foreground">{day.contentType} · {day.bestTime}</span>
                       </div>
                       <h4 className="text-sm font-bold text-foreground mb-1">{day.topic}</h4>
-                      <p className="text-sm text-amber font-semibold mb-1">"{day.hook}"</p>
-                      <p className="text-xs text-muted-foreground">{day.caption}</p>
+                      <p className="text-sm text-amber font-semibold mb-2">{day.hook}</p>
+                      <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">{day.caption}</p>
                       {day.hashtags?.length > 0 && (
                         <p className="text-xs text-primary mt-1">{day.hashtags.map((h: string) => `#${h.replace('#', '')}`).join(' ')}</p>
                       )}
