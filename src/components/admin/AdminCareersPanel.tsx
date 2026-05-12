@@ -816,6 +816,13 @@ export const AdminCareersPanel: React.FC = () => {
                           className="bg-amber text-background hover:bg-amber/90">
                           <CalendarCheck className="w-3 h-3 mr-1" /> Schedule interview
                         </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => deleteApplication(a)}
+                          disabled={deletingId === a.share_code}
+                          className="border-destructive/40 text-destructive hover:bg-destructive/10">
+                          {deletingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                          Delete
+                        </Button>
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-border/40 flex flex-wrap gap-2 items-center">
