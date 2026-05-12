@@ -224,16 +224,18 @@ export const AdminCreationStudio: React.FC = () => {
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
     const scene = plan.scenes[sceneIdx];
-    const promptText = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    const fallback = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    const promptText = (scene.imagePrompt?.trim() || fallback);
+    const style = scene.imageStyle || 'case_file';
     if (!promptText) {
-      toast({ title: 'Add a caption or voiceover first', variant: 'destructive' });
+      toast({ title: 'Add an image prompt, caption, or voiceover first', variant: 'destructive' });
       return;
     }
     setGeneratingSceneIdx(sceneIdx);
     try {
       const token = getAdminToken();
       const { data, error } = await supabase.functions.invoke('generate-content-image', {
-        body: { prompt: promptText, style: 'case_file' },
+        body: { prompt: promptText, style },
         headers: token ? { 'x-admin-token': token } : {},
       });
       if (error) throw error;
@@ -251,6 +253,50 @@ export const AdminCreationStudio: React.FC = () => {
       setGeneratingSceneIdx(null);
     }
   };
+
+  // ===== Background music =====
+  const [musicPrompt, setMusicPrompt] = useState('');
+  const [musicVolume, setMusicVolume] = useState(0.18);
+  const [musicGenerating, setMusicGenerating] = useState(false);
+  const [musicUrl, setMusicUrl] = useState('');
+  const musicBufferRef = useRef<ArrayBuffer | null>(null);
+
+  const MUSIC_PRESETS: { label: string; text: string }[] = [
+    { label: 'Forensic tension',  text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. Investigative thriller. No vocals. Loopable.' },
+    { label: 'Operator hustle',   text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Focused, blunt, founder-energy. No vocals.' },
+    { label: 'Boardroom power',   text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
+    { label: 'Late-night noir',   text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. Late-night detective mood. No vocals.' },
+    { label: 'Documentary slow',  text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. Reflective, serious. No vocals.' },
+    { label: 'Trailer drop',      text: 'Cinematic trailer cue: low rumble, riser, single hard hit at 8s, then sustained tension. No vocals.' },
+  ];
+
+  const generateMusic = async () => {
+    const p = musicPrompt.trim() || MUSIC_PRESETS[0].text;
+    if (!p) return;
+    setMusicGenerating(true);
+    try {
+      // Estimate duration from plan or fallback to durationSec
+      const planSec = plan ? plan.scenes.reduce((a, s) => a + s.durationMs / 1000, 0) : durationSec;
+      const ms = Math.max(10000, Math.min(180000, Math.round(planSec * 1000) + 2000));
+      const { data, error } = await adminInvoke('generate_music', { prompt: p, durationMs: ms });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const blob = base64ToBlob(data.audioBase64, data.mime || 'audio/mpeg');
+      musicBufferRef.current = await blob.arrayBuffer();
+      setMusicUrl(URL.createObjectURL(blob));
+      toast({ title: 'Music ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB · will mix into next render` });
+    } catch (e) {
+      toast({ title: 'Music generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setMusicGenerating(false);
+    }
+  };
+
+  const clearMusic = () => {
+    musicBufferRef.current = null;
+    setMusicUrl('');
+  };
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
