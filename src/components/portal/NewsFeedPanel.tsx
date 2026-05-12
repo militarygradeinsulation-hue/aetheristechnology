@@ -8,6 +8,7 @@ import { Newspaper, Loader2, ArrowLeft, RefreshCw, ExternalLink, X, Sparkles } f
 import { formatDistanceToNow } from 'date-fns';
 import { listNews, type NewsPost } from '@/lib/newsFeed';
 import { useToast } from '@/hooks/use-toast';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 interface IndustryItem {
   id: string;
