@@ -476,13 +476,14 @@ export const AdminCreationStudio: React.FC = () => {
         await saveToolRun({
           tool_type: 'video',
           title: activePlan.title || `Video — ${new Date().toLocaleString()}`,
-          input_data: { prompt, aspect: aspect.key, scenes: activePlan.scenes.length },
+          input_data: { prompt, aspect, scenes: activePlan.scenes.length },
           output_data: {
             title: activePlan.title,
             video_url: publicUrl,
             ext,
             size_mb: Number(sizeMb),
-            aspect: aspect.key,
+            aspect,
+            scenes: activePlan.scenes,
             scenes: activePlan.scenes,
           },
           file_url: publicUrl,
