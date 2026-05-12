@@ -603,8 +603,8 @@ export const AdminCareersPanel: React.FC = () => {
             {tab === 'apps' && (
               <>
                 <label className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Min fit</span>
-                  <Input type="number" min={0} max={100} value={minFitScore}
+                  <span className="text-muted-foreground">Min fit /60</span>
+                  <Input type="number" min={0} max={60} value={minFitScore}
                     onChange={e => setMinFitScore(e.target.value)}
                     placeholder="0" className="h-7 w-16" />
                 </label>
