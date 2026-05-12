@@ -12,18 +12,21 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Check, Calendar as CalendarIcon, Layout, Filter, Clock,
   Paperclip, MessageSquare, Download, FileText, RefreshCw, Loader2, User as UserIcon,
+  Users as UsersIcon,
 } from "lucide-react";
 import {
   PERSONS, Person, personLabel, SharedTask, SharedNote, SharedFile,
   TaskStatus, TaskPriority, TaskBucket, fileUrl, uploadFile,
 } from "@/lib/sharedWorkspace";
+import { InterviewsPanel } from "./InterviewsPanel";
 
-type ViewKind = "filter" | "kanban" | "calendar" | "timeline";
+type ViewKind = "filter" | "kanban" | "calendar" | "timeline" | "interviews";
 const VIEW_LABELS: Record<ViewKind, string> = {
   filter: "My / Their / Shared",
   kanban: "Kanban",
   calendar: "Calendar",
   timeline: "Timeline",
+  interviews: "Interviews",
 };
 
 interface Props {
