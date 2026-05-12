@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Newspaper, Plus, Trash2, Pencil, Eye, EyeOff, Loader2, X, ExternalLink } from "lucide-react";
+import { Newspaper, Plus, Trash2, Pencil, Eye, EyeOff, Loader2, X, Radio } from "lucide-react";
 import { format } from "date-fns";
+import { NewsFeedPanel } from "@/components/portal/NewsFeedPanel";
 
 const empty: Partial<NewsPost> = { title: "", summary: "", body: "", category: "", cover_image_url: "", tags: [], author_name: "Aetheris Operator", published: true };
 
