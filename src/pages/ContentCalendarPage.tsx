@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 
 const ContentCalendarPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
