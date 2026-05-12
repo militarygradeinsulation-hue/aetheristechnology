@@ -118,6 +118,7 @@ export default function LinkedInPostStudio() {
     }
     setLoading(true);
     setGenerated('');
+    setSavedId(null);
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-studio', {
