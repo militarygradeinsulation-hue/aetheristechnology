@@ -81,6 +81,25 @@ export const AdminCareersPanel: React.FC = () => {
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
   const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
   const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('aetheris_saved_candidates') || '[]')); }
+    catch { return new Set(); }
+  });
+  const persistSaved = (s: Set<string>) => {
+    setSavedIds(new Set(s));
+    localStorage.setItem('aetheris_saved_candidates', JSON.stringify(Array.from(s)));
+  };
+  const toggleSaved = (id: string) => {
+    const next = new Set(savedIds);
+    if (next.has(id)) { next.delete(id); toast({ title: 'Removed from saved' }); }
+    else { next.add(id); toast({ title: 'Saved candidate ★' }); }
+    persistSaved(next);
+  };
+  const [calDate, setCalDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [calTime, setCalTime] = useState<string>('10:00');
+  const [calBusy, setCalBusy] = useState(false);
+  const [shareNote, setShareNote] = useState<string>('');
+
   const matchingApp = useMemo(
     () => detailAttempt
       ? applications.find(app =>
@@ -90,6 +109,61 @@ export const AdminCareersPanel: React.FC = () => {
       : null,
     [detailAttempt, applications]
   );
+
+  const moveToCalendar = async () => {
+    if (!detailAttempt) return;
+    setCalBusy(true);
+    try {
+      const who = detailAttempt.candidate_name || detailAttempt.candidate_email;
+      const body = [
+        `Candidate: ${who}`,
+        `Email: ${detailAttempt.candidate_email}`,
+        detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+        detailAttempt.score_pct != null ? `Test score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+        `Interview time: ${calTime}`,
+        detailAttempt.notes_to_admin ? `Notes from candidate: ${detailAttempt.notes_to_admin}` : '',
+      ].filter(Boolean).join('\n');
+      await upsertCompanyEntry({
+        date: calDate,
+        kind: 'event',
+        title: `Interview ${calTime} — ${who}`,
+        body,
+        pinned: true,
+      });
+      toast({ title: 'Added to Company Calendar', description: `${calDate} at ${calTime}` });
+    } catch (e) {
+      toast({ title: 'Failed to add to calendar', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setCalBusy(false); }
+  };
+
+  const buildShareText = () => {
+    if (!detailAttempt) return '';
+    const lines = [
+      `Candidate: ${detailAttempt.candidate_name || '—'}`,
+      `Email: ${detailAttempt.candidate_email}`,
+      detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+      detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+      detailAttempt.notes_to_admin ? `Candidate note: "${detailAttempt.notes_to_admin}"` : '',
+      matchingApp?.ai_summary ? `AI summary: ${matchingApp.ai_summary}` : '',
+      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/100` : '',
+      shareNote ? `\nNotes:\n${shareNote}` : '',
+    ].filter(Boolean);
+    return lines.join('\n');
+  };
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      toast({ title: 'Copied to clipboard' });
+    } catch {
+      toast({ title: 'Copy failed', variant: 'destructive' });
+    }
+  };
+
+  const emailShare = () => {
+    const subject = `Candidate: ${detailAttempt?.candidate_name || detailAttempt?.candidate_email || ''}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildShareText())}`;
+  };
 
   const load = async () => {
     setLoading(true);
