@@ -65,7 +65,7 @@ export const AdminNewsPanel: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild><a href="/news" target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3.5 h-3.5 mr-1" />View live feed</a></Button>
+          <Button variant="outline" size="sm" onClick={() => setLiveOpen(true)}><Radio className="w-3.5 h-3.5 mr-1" />View live feed</Button>
           <Button size="sm" onClick={openNew}><Plus className="w-3.5 h-3.5 mr-1" />New dispatch</Button>
         </div>
       </div>
