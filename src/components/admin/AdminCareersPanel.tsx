@@ -632,6 +632,19 @@ export const AdminCareersPanel: React.FC = () => {
                           {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
                           {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
                         </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => sendToWorkspace(a, { schedule: false })}
+                          disabled={sendingId === a.share_code}
+                          className="border-amber/40 text-amber hover:bg-amber/10">
+                          {sendingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                          Send to Workspace
+                        </Button>
+                        <Button size="sm"
+                          onClick={() => sendToWorkspace(a, { schedule: true })}
+                          disabled={sendingId === a.share_code}
+                          className="bg-amber text-background hover:bg-amber/90">
+                          <CalendarCheck className="w-3 h-3 mr-1" /> Schedule interview
+                        </Button>
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-border/40 flex flex-wrap gap-2 items-center">
