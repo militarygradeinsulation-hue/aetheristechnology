@@ -624,6 +624,7 @@ export const AdminCreationStudio: React.FC = () => {
           file_url: publicUrl,
         });
         toast({ title: 'Saved to Library', description: 'Find it any time in your Library.' });
+        loadVideoLibrary();
       } catch (saveErr) {
         console.error('[CreationStudio] save to library failed', saveErr);
         toast({
