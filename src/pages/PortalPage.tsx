@@ -411,6 +411,7 @@ const PortalPage: React.FC = () => {
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
       case 'sharedws': return <SharedWorkspace me="bradon" />;
+      case 'interviews': return <InterviewsPanel me="bradon" />;
       case 'art': return <RepImageStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
