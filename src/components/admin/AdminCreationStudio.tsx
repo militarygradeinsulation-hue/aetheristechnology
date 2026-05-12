@@ -147,22 +147,43 @@ export const AdminCreationStudio: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const generatePlan = async () => {
-    if (!prompt.trim()) { toast({ title: 'Add a prompt first', variant: 'destructive' }); return; }
-    if (allAvailable.length === 0) { toast({ title: 'Pick or upload at least one image', variant: 'destructive' }); return; }
-    setPlanning(true); setPlan(null); setVideoUrl('');
+  const generatePlan = async (): Promise<Plan | null> => {
+    setLastError('');
+    if (!prompt.trim()) {
+      const m = 'Add a prompt first';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return null;
+    }
+    if (allAvailable.length === 0) {
+      const m = 'Pick or upload at least one image';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return null;
+    }
+    setPlanning(true); setPlan(null); setVideoUrl(''); setStep('Asking AI for scene plan…');
     try {
+      console.log('[CreationStudio] plan_video request', { prompt, durationSec, aspect, imageCount: allAvailable.length });
       const { data, error } = await adminInvoke('plan_video', {
         prompt,
         durationSec,
         aspect,
-        images: allAvailable.map(i => ({ id: i.id, url: i.url, label: i.label })),
+        images: allAvailable.map(i => ({ id: i.id, label: i.label })),
       });
+      console.log('[CreationStudio] plan_video response', { data, error });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      if (!data?.plan) throw new Error('Empty response from server');
       setPlan(data.plan);
+      setStep('Plan ready — review or render.');
+      return data.plan as Plan;
     } catch (e) {
-      toast({ title: 'Plan failed', description: (e as Error).message, variant: 'destructive' });
+      const msg = (e as Error).message || 'Plan failed';
+      console.error('[CreationStudio] plan failed', e);
+      setLastError(msg);
+      setStep('');
+      toast({ title: 'Plan failed', description: msg, variant: 'destructive' });
+      return null;
     } finally { setPlanning(false); }
   };
 
