@@ -260,6 +260,21 @@ serve(async (req) => {
       const bodyText = String(body.body_text || "").slice(0, 100000);
       const inReplyTo = body.in_reply_to ? String(body.in_reply_to) : null;
       const threadId = body.thread_id ? String(body.thread_id) : null;
+      // Validate attachments (rep-email-attachments bucket; uploaded client-side before send)
+      const rawAtts = Array.isArray(body.attachments) ? body.attachments : [];
+      const attachments = rawAtts
+        .filter((a: any) => a && typeof a.storage_path === "string" && typeof a.name === "string")
+        .slice(0, 10)
+        .map((a: any) => ({
+          name: String(a.name).slice(0, 200),
+          size: Number(a.size) || 0,
+          mime: String(a.mime || "application/octet-stream").slice(0, 100),
+          storage_path: String(a.storage_path),
+        }));
+      const totalAttBytes = attachments.reduce((s: number, a: any) => s + (a.size || 0), 0);
+      if (totalAttBytes > 25 * 1024 * 1024) {
+        return json(400, { error: "Attachments exceed 25MB total" });
+      }
 
       if (to.length === 0) return json(400, { error: "At least one recipient required" });
       for (const a of [...to, ...cc, ...bcc]) {
