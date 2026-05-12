@@ -580,6 +580,7 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
   const [playbooks, setPlaybooks] = useState<{ id: string; title: string }[]>([]);
   const [blogIds, setBlogIds] = useState<string[]>([]);
   const [playbookIds, setPlaybookIds] = useState<string[]>([]);
+  const [titleCategory, setTitleCategory] = useState<string>('All');
 
   useEffect(() => {
     (async () => {
