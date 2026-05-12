@@ -616,7 +616,13 @@ const NewsPage = () => {
                   {activeItem.published_at && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{formatDistanceToNow(new Date(activeItem.published_at), { addSuffix: true })}</span>}
                   {activeItem.author && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· {activeItem.author}</span>}
                 </div>
-                <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">{activeItem.title}</h2>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight flex-1">{activeItem.title}</h2>
+                  <ReadAloudButton
+                    text={[activeItem.title, activeItem.summary || '', ...(articleBlocks?.map(b => b.text) || [])].filter(Boolean).join('. ')}
+                    label="Listen"
+                  />
+                </div>
                 {activeItem.summary && (
                   <p className="text-muted-foreground mt-4 leading-relaxed text-base italic border-l-2 border-amber/40 pl-4">{activeItem.summary}</p>
                 )}
