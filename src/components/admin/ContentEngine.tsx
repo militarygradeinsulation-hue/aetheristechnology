@@ -781,16 +781,53 @@ function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrate
         <div className={`text-xs mb-3 ${totalMix === 100 ? 'text-emerald-500' : 'text-amber'}`}>
           Total: {totalMix}% {totalMix === 100 ? '✓' : '(should equal 100)'}
         </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            if (!keys.length) return;
+            const even = Math.floor(100 / keys.length / 5) * 5;
+            const next: Record<string, number> = {};
+            keys.forEach((k, i) => { next[k] = i === 0 ? 100 - even * (keys.length - 1) : even; });
+            update('format_mix', next);
+          }}>Even split</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            const total = totalMix || 1;
+            const next: Record<string, number> = {};
+            let running = 0;
+            keys.forEach((k, i) => {
+              if (i === keys.length - 1) next[k] = 100 - running;
+              else { const v = Math.round((strategy.format_mix[k] / total) * 100 / 5) * 5; next[k] = v; running += v; }
+            });
+            update('format_mix', next);
+          }}>Normalize to 100%</Button>
+        </div>
         {Object.entries(strategy.format_mix).map(([k, pct]) => {
           const fmt = FORMAT_INFO[k];
           if (!fmt) return null;
+          const bump = (delta: number) => updateMix(k, Math.max(0, Math.min(100, pct + delta)));
           return (
             <div key={k} className="mb-4">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className={`font-bold ${fmt.text}`}>{fmt.name}</span>
-                <span className="text-muted-foreground">{pct}%</span>
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <span className={`font-bold text-xs ${fmt.text}`}>{fmt.name}</span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(-5)}>−</Button>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={pct}
+                    onChange={(e) => updateMix(k, Math.max(0, Math.min(100, parseInt(e.target.value || '0', 10))))}
+                    className="h-7 w-16 text-center text-xs"
+                  />
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(5)}>+</Button>
+                  <span className="text-[10px] text-muted-foreground w-6">%</span>
+                </div>
               </div>
-              <Slider min={0} max={100} step={5} value={[pct]} onValueChange={(v) => updateMix(k, v[0])} />
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full ${fmt.bar} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1.5">{fmt.description}</p>
             </div>
           );
