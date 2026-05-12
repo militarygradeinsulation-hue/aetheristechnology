@@ -193,6 +193,19 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  async function handleClearCalendar() {
+    const previous = posts;
+    setPosts([]);
+    setSelectedPost(null);
+    try {
+      await call('clear_posts');
+      toast({ title: 'Calendar cleared', description: 'All saved Content Engine posts were removed.' });
+    } catch (e) {
+      setPosts(previous);
+      toast({ title: 'Clear failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
   async function handleDuplicate(id: string) {
     try {
       const res = await call('duplicate_post', { id });
@@ -314,6 +327,7 @@ export const ContentEngine: React.FC = () => {
           onGenerate={handleGenerate}
           generating={generating}
           onExport={exportTSV}
+          onClear={handleClearCalendar}
           strategy={strategy}
         />
       )}
