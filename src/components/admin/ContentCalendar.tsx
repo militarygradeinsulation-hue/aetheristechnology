@@ -220,12 +220,22 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
             import('@/lib/adminLibrary').then(m => m.updateAdminLibraryItem(item.id, { ...out, _generated_image_url: url })).catch(() => {});
           }}
         />
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewItem(item)}><Eye className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadLibraryItemAsPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAiItem(item)} title="Edit with AI"><MessageSquare className="w-3.5 h-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+        </div>
+        <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/40">
+          <CalendarClock className="w-3 h-3 text-muted-foreground" />
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Move to</span>
+          <Input
+            type="date"
+            defaultValue={dateKey(new Date(item.created_at))}
+            onChange={(e) => handleReschedule(item, e.target.value)}
+            className="h-6 w-auto px-1.5 py-0 text-[10px]"
+          />
         </div>
       </div>
     );
