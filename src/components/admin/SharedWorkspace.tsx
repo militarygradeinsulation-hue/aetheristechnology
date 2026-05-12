@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Check, Calendar as CalendarIcon, Layout, Filter, Clock,
   Paperclip, MessageSquare, Download, FileText, RefreshCw, Loader2, User as UserIcon,
-  Users as UsersIcon,
+  Users as UsersIcon, Pencil, Save as SaveIcon, X as XIcon,
 } from "lucide-react";
 import {
   PERSONS, Person, personLabel, SharedTask, SharedNote, SharedFile,
@@ -55,6 +55,10 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   });
   const [noteBody, setNoteBody] = useState("");
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [editTaskId, setEditTaskId] = useState<string | null>(null);
+  const [editTaskDraft, setEditTaskDraft] = useState<Partial<SharedTask>>({});
+  const [editNoteId, setEditNoteId] = useState<string | null>(null);
+  const [editNoteBody, setEditNoteBody] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const them: Person = me === "admin" ? "bradon" : "admin";
@@ -135,6 +139,46 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
     else load();
   };
 
+  const openEditTask = (t: SharedTask) => {
+    setEditTaskId(t.id);
+    setEditTaskDraft({
+      title: t.title, description: t.description, assignee: t.assignee,
+      priority: t.priority, bucket: t.bucket, status: t.status,
+      due_at: t.due_at,
+    });
+  };
+  const saveEditTask = async () => {
+    if (!editTaskId) return;
+    const patch: any = { ...editTaskDraft };
+    if (patch.due_at === "") patch.due_at = null;
+    const { error } = await supabase.from("shared_tasks").update(patch).eq("id", editTaskId);
+    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Task updated" });
+    setEditTaskId(null); setEditTaskDraft({}); load();
+  };
+
+  const startEditNote = (n: SharedNote) => { setEditNoteId(n.id); setEditNoteBody(n.body); };
+  const saveEditNote = async () => {
+    if (!editNoteId || !editNoteBody.trim()) return;
+    const { error } = await supabase.from("shared_notes").update({ body: editNoteBody.trim() }).eq("id", editNoteId);
+    if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
+    setEditNoteId(null); setEditNoteBody(""); load();
+  };
+  const deleteNote = async (id: string) => {
+    if (!confirm("Delete this note?")) return;
+    const { error } = await supabase.from("shared_notes").delete().eq("id", id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else load();
+  };
+
+  const deleteFile = async (f: SharedFile) => {
+    if (!confirm(`Delete "${f.filename}"?`)) return;
+    await supabase.storage.from("workspace-files").remove([f.storage_path]);
+    const { error } = await supabase.from("shared_files").delete().eq("id", f.id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else { toast({ title: "File deleted" }); load(); }
+  };
+
   const addNote = async () => {
     if (!noteBody.trim()) return;
     const { error } = await supabase.from("shared_notes").insert({
@@ -193,10 +237,13 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setActiveTaskId(task.id)} title="Open">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEditTask(task)} title="Edit">
+              <Pencil className="w-3 h-3" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setActiveTaskId(task.id)} title="Notes & files">
               <MessageSquare className="w-3 h-3" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteTask(task.id)}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteTask(task.id)} title="Delete">
               <Trash2 className="w-3 h-3 text-red-400" />
             </Button>
           </div>
@@ -435,15 +482,43 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             </div>
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
               {taskNotes.length === 0 && <p className="text-xs text-muted-foreground py-4 text-center">No notes yet.</p>}
-              {taskNotes.map(n => (
-                <div key={n.id} className="p-2 rounded bg-secondary/30 text-xs">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="text-[9px]">{personLabel(n.author).split(" ")[0]}</Badge>
-                    <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+              {taskNotes.map(n => {
+                const isEditing = editNoteId === n.id;
+                const mine = n.author === me;
+                return (
+                  <div key={n.id} className="p-2 rounded bg-secondary/30 text-xs group">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-[9px]">{personLabel(n.author).split(" ")[0]}</Badge>
+                      <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+                      {mine && !isEditing && (
+                        <div className="ml-auto flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => startEditNote(n)} title="Edit">
+                            <Pencil className="w-2.5 h-2.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => deleteNote(n.id)} title="Delete">
+                            <Trash2 className="w-2.5 h-2.5 text-red-400" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {isEditing ? (
+                      <div className="space-y-1">
+                        <Textarea value={editNoteBody} onChange={e => setEditNoteBody(e.target.value)} rows={2} className="text-xs" />
+                        <div className="flex gap-1 justify-end">
+                          <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setEditNoteId(null); setEditNoteBody(""); }}>
+                            <XIcon className="w-3 h-3 mr-1" />Cancel
+                          </Button>
+                          <Button size="sm" className="h-6 text-xs bg-amber text-background hover:bg-amber/90" onClick={saveEditNote}>
+                            <SaveIcon className="w-3 h-3 mr-1" />Save
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{n.body}</p>
+                    )}
                   </div>
-                  <p className="whitespace-pre-wrap">{n.body}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -487,6 +562,9 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
                       <a href={url} target="_blank" rel="noopener noreferrer" download={f.filename}>
                         <Button variant="ghost" size="icon" className="h-6 w-6"><Download className="w-3 h-3" /></Button>
                       </a>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteFile(f)} title="Delete">
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </Button>
                     </div>
                   </div>
                 );
@@ -591,6 +669,86 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit task dialog */}
+      <Dialog open={!!editTaskId} onOpenChange={(o) => { if (!o) { setEditTaskId(null); setEditTaskDraft({}); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-amber" /> Edit task
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Title</Label>
+              <Input value={editTaskDraft.title || ""} onChange={e => setEditTaskDraft(s => ({ ...s, title: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="text-xs">Description</Label>
+              <Textarea value={editTaskDraft.description || ""} onChange={e => setEditTaskDraft(s => ({ ...s, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Assignee</Label>
+                <Select value={editTaskDraft.assignee as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, assignee: v as Person }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{PERSONS.map(p => <SelectItem key={p} value={p}>{personLabel(p)}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Status</Label>
+                <Select value={editTaskDraft.status as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, status: v as TaskStatus }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">Todo</SelectItem>
+                    <SelectItem value="doing">Doing</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Priority</Label>
+                <Select value={editTaskDraft.priority as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, priority: v as TaskPriority }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(["low","normal","high","urgent"] as TaskPriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Bucket</Label>
+                <Select value={editTaskDraft.bucket as string} onValueChange={v => setEditTaskDraft(s => ({ ...s, bucket: v as TaskBucket }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="later">Later</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Due</Label>
+              <Input
+                type="datetime-local"
+                value={editTaskDraft.due_at ? new Date(editTaskDraft.due_at).toISOString().slice(0,16) : ""}
+                onChange={e => setEditTaskDraft(s => ({ ...s, due_at: e.target.value ? new Date(e.target.value).toISOString() : null }))}
+              />
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button variant="outline" className="text-red-400" onClick={() => { if (editTaskId) { deleteTask(editTaskId); setEditTaskId(null); } }}>
+                <Trash2 className="w-4 h-4 mr-1" /> Delete
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={() => { setEditTaskId(null); setEditTaskDraft({}); }}>Cancel</Button>
+                <Button className="bg-amber text-background hover:bg-amber/90" onClick={saveEditTask}>
+                  <SaveIcon className="w-4 h-4 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
