@@ -61,7 +61,7 @@ import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepVi
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
