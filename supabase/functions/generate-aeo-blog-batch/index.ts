@@ -312,17 +312,7 @@ You are an Operator, not a consultant. You find where businesses bleed and you s
 Reference the Forensic Diagnostic ($2,500, applied toward engagement), The Leak Audit™ (7-step methodology), and Indianapolis HQ where naturally relevant — but never as a sales pitch. Position Aetheris as the operator who finds the leaks, not another consultant who writes decks.
 
 ## OUTPUT FORMAT
-Return ONLY valid JSON with these exact fields (no markdown wrapper, no explanation):
-{
-  "title": "string (use the exact title provided)",
-  "content": "string (full markdown article)"
-}
-
-CRITICAL JSON ESCAPING:
-- Escape all newlines inside string values as \\n
-- Escape all double quotes inside string values as \\"
-- Escape all backslashes as \\\\
-- Do NOT include literal newlines inside JSON string values`;
+Return ONLY the full markdown article. Do NOT wrap in JSON. Do NOT add commentary, headers, code fences, or YAML frontmatter. Start directly with the H1 line "# <title>" and end with the punch closing.`;
 
 async function generatePost(topic: BlogTopic, apiKey: string): Promise<{ title: string; content: string }> {
   const userPrompt = `Write the blog post for: "${topic.title}"
@@ -336,7 +326,11 @@ ${topic.tldr}
 REQUIRED OUTLINE (follow exactly):
 ${topic.outline}
 
-Return ONLY the JSON object as specified.`;
+Hard requirements:
+- Minimum 2,800 words. Aim for 3,200.
+- Every section in the outline must appear, in order, with all subsections.
+- At least 2 markdown tables and one 5-question FAQ section.
+- Return ONLY the raw markdown article — no JSON, no code fences, no preface.`;
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -350,7 +344,7 @@ Return ONLY the JSON object as specified.`;
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt },
       ],
-      response_format: { type: "json_object" },
+      max_tokens: 16000,
     }),
   });
 
@@ -361,18 +355,17 @@ Return ONLY the JSON object as specified.`;
 
   const data = await res.json();
   const raw = data?.choices?.[0]?.message?.content;
-  if (!raw) throw new Error("AI response missing content");
+  if (!raw || typeof raw !== "string") throw new Error("AI response missing content");
 
-  let parsed: { title?: string; content?: string };
-  try {
-    parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-  } catch (e) {
-    throw new Error(`Failed to parse AI JSON: ${e instanceof Error ? e.message : String(e)}`);
+  // Strip optional code fences if model wrapped despite instructions
+  let content = raw.trim();
+  const fence = content.match(/^```(?:markdown|md)?\s*([\s\S]*?)```\s*$/i);
+  if (fence) content = fence[1].trim();
+
+  if (content.length < 6000) {
+    throw new Error(`AI returned insufficient content (length: ${content.length})`);
   }
-  if (!parsed.content || parsed.content.length < 1500) {
-    throw new Error(`AI returned insufficient content (length: ${parsed.content?.length ?? 0})`);
-  }
-  return { title: parsed.title || topic.title, content: parsed.content };
+  return { title: topic.title, content };
 }
 
 serve(async (req) => {
