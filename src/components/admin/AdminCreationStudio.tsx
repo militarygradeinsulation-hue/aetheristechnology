@@ -15,9 +15,21 @@ const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG
 }) as Record<string, string>;
 
 type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload' };
-type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number };
+type SceneImageStyle = 'case_file' | 'autopsy_diagram' | 'blueprint' | 'editorial_cartoon' | 'data_macro' | 'noir_object' | 'isometric' | 'free';
+type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle };
 type Plan = { title: string; scenes: Scene[] };
 type Voice = { voice_id: string; name: string; category?: string; preview_url?: string };
+
+const SCENE_STYLE_OPTIONS: { key: SceneImageStyle; label: string; desc: string }[] = [
+  { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction · crimson' },
+  { key: 'autopsy_diagram',   label: 'Autopsy Diagram',   desc: 'Anatomical chart of a broken process' },
+  { key: 'blueprint',         label: 'Blueprint',         desc: 'CRM / pipeline schematic' },
+  { key: 'editorial_cartoon', label: 'Editorial Cartoon', desc: 'Op-ed ink illustration · amber' },
+  { key: 'data_macro',        label: 'Data Macro',        desc: 'CRT terminal close-up · scan lines' },
+  { key: 'noir_object',       label: 'Noir Object',       desc: 'Single object · hard amber light' },
+  { key: 'isometric',         label: 'Isometric',         desc: 'Clean vector · negative space' },
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
+];
 
 const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
   { key: '9:16', w: 1080, h: 1920, label: '9:16 (Reels/Shorts/TikTok)' },
