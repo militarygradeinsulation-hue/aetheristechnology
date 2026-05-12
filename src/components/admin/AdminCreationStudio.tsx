@@ -207,6 +207,38 @@ export const AdminCreationStudio: React.FC = () => {
   const [lastError, setLastError] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoExt, setVideoExt] = useState<'mp4' | 'webm'>('webm');
+  const [generatingSceneIdx, setGeneratingSceneIdx] = useState<number | null>(null);
+
+  const generateSceneImage = async (sceneIdx: number) => {
+    if (!plan) return;
+    const scene = plan.scenes[sceneIdx];
+    const promptText = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    if (!promptText) {
+      toast({ title: 'Add a caption or voiceover first', variant: 'destructive' });
+      return;
+    }
+    setGeneratingSceneIdx(sceneIdx);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('generate-content-image', {
+        body: { prompt: promptText, style: 'case_file' },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const url = data.image_url as string;
+      const id = `gen-${Date.now()}-${sceneIdx}`;
+      const newImg: AssetImage = { id, url, label: `Scene ${sceneIdx + 1}: ${scene.caption || 'Generated'}`, source: 'upload' };
+      setUploads(prev => [...prev, newImg]);
+      const next = { ...plan, scenes: plan.scenes.map((s, i) => i === sceneIdx ? { ...s, imageId: id } : s) };
+      setPlan(next);
+      toast({ title: `Scene ${sceneIdx + 1} image generated` });
+    } catch (e) {
+      toast({ title: 'Image generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setGeneratingSceneIdx(null);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
