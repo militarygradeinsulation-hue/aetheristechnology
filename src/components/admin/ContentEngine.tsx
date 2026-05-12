@@ -193,6 +193,19 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  async function handleClearCalendar() {
+    const previous = posts;
+    setPosts([]);
+    setSelectedPost(null);
+    try {
+      await call('clear_posts');
+      toast({ title: 'Calendar cleared', description: 'All saved Content Engine posts were removed.' });
+    } catch (e) {
+      setPosts(previous);
+      toast({ title: 'Clear failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
   async function handleDuplicate(id: string) {
     try {
       const res = await call('duplicate_post', { id });
@@ -314,6 +327,7 @@ export const ContentEngine: React.FC = () => {
           onGenerate={handleGenerate}
           generating={generating}
           onExport={exportTSV}
+          onClear={handleClearCalendar}
           strategy={strategy}
         />
       )}
@@ -344,10 +358,10 @@ export const ContentEngine: React.FC = () => {
 
 // ----------------- Calendar View -----------------
 
-function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, strategy }: {
+function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
   onSelectPost: (p: Post) => void; onGenerate: (n: number) => void; generating: boolean;
-  onExport: () => void; strategy: Strategy;
+  onExport: () => void; onClear: () => void; strategy: Strategy;
 }) {
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   const firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
@@ -382,9 +396,14 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
         </div>
         <div className="flex gap-2">
           {posts.length > 0 && (
-            <Button variant="outline" size="sm" onClick={onExport}>
-              <Download className="w-3.5 h-3.5 mr-1.5" /> Export
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={onExport}>
+                <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={onClear} className="border-crimson/40 text-crimson hover:bg-crimson/10">
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Clear Calendar
+              </Button>
+            </>
           )}
           <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90">
             {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}

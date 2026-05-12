@@ -264,6 +264,16 @@ serve(async (req) => {
       return json({ success: true });
     }
 
+    // ---- clear all scheduled posts ----
+    if (action === "clear_posts") {
+      const { error } = await supabase
+        .from("content_engine_posts")
+        .delete()
+        .not("id", "is", null);
+      if (error) throw error;
+      return json({ success: true });
+    }
+
     // ---- duplicate post +7d ----
     if (action === "duplicate_post") {
       const { id } = body;
