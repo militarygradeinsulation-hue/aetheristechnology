@@ -187,10 +187,18 @@ export const AdminCreationStudio: React.FC = () => {
     } finally { setPlanning(false); }
   };
 
-  const renderVideo = async () => {
-    if (!plan) return;
-    if (!voiceId) { toast({ title: 'Pick a voice first', variant: 'destructive' }); return; }
+  const renderVideo = async (overridePlan?: Plan) => {
+    const activePlan = overridePlan || plan;
+    if (!activePlan) return;
+    if (!voiceId) {
+      const m = 'Pick a voice first (Reload voices if empty)';
+      setLastError(m);
+      toast({ title: m, variant: 'destructive' });
+      return;
+    }
+    setLastError('');
     setRendering(true); setProgress(0); setVideoUrl('');
+    setStep('Generating voiceover…');
 
     try {
       // 1) Get TTS for each scene (sequential to avoid rate limits)
