@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 import { upsertCompanyEntry } from '@/lib/companyCalendar';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 interface Attempt {
   id: string;
@@ -877,7 +878,10 @@ export const AdminCareersPanel: React.FC = () => {
               {/* CANDIDATE NOTES — amber */}
               {detailAttempt.notes_to_admin && (
                 <div className="rounded-lg border-l-4 border-amber bg-amber/10 p-3">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">Notes from candidate</div>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber">Notes from candidate</div>
+                    <ReadAloudButton text={`Notes from candidate. ${detailAttempt.notes_to_admin}`} variant="ghost" />
+                  </div>
                   <p className="italic text-foreground/90">"{detailAttempt.notes_to_admin}"</p>
                 </div>
               )}
@@ -887,8 +891,11 @@ export const AdminCareersPanel: React.FC = () => {
                   {/* AI SUMMARY — purple */}
                   {matchingApp.ai_summary && (
                     <div className="rounded-lg border-l-4 border-purple-500 bg-purple-500/5 p-3">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-purple-300 mb-1 flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> AI Summary
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-purple-300 flex items-center gap-1">
+                          <FileText className="w-3 h-3" /> AI Summary
+                        </div>
+                        <ReadAloudButton text={`AI summary. ${matchingApp.ai_summary}`} variant="ghost" />
                       </div>
                       <p className="text-foreground/90">{matchingApp.ai_summary}</p>
                     </div>
@@ -905,7 +912,10 @@ export const AdminCareersPanel: React.FC = () => {
                   {/* STRENGTHS — green */}
                   {matchingApp.ai_strengths && matchingApp.ai_strengths.length > 0 && (
                     <div className="rounded-lg border-l-4 border-green-500 bg-green-500/5 p-3">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-green-300 mb-1">Strengths</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-green-300">Strengths</div>
+                        <ReadAloudButton text={`Strengths. ${matchingApp.ai_strengths.join('. ')}`} variant="ghost" />
+                      </div>
                       <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
                         {matchingApp.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
@@ -915,7 +925,10 @@ export const AdminCareersPanel: React.FC = () => {
                   {/* CONCERNS — crimson */}
                   {matchingApp.ai_concerns && matchingApp.ai_concerns.length > 0 && (
                     <div className="rounded-lg border-l-4 border-crimson bg-crimson/10 p-3">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-crimson mb-1">Concerns</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-crimson">Concerns</div>
+                        <ReadAloudButton text={`Concerns. ${matchingApp.ai_concerns.join('. ')}`} variant="ghost" />
+                      </div>
                       <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
                         {matchingApp.ai_concerns.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
@@ -925,7 +938,10 @@ export const AdminCareersPanel: React.FC = () => {
                   {/* CANDIDATE APP NOTES — indigo */}
                   {matchingApp.notes && (
                     <div className="rounded-lg border-l-4 border-indigo-500 bg-indigo-500/5 p-3">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-indigo-300 mb-1">Candidate Application Notes</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-indigo-300">Candidate Application Notes</div>
+                        <ReadAloudButton text={`Candidate application notes. ${matchingApp.notes}`} variant="ghost" />
+                      </div>
                       <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.notes}</p>
                     </div>
                   )}
@@ -933,7 +949,10 @@ export const AdminCareersPanel: React.FC = () => {
                   {/* ADMIN NOTES — slate */}
                   {matchingApp.admin_notes && (
                     <div className="rounded-lg border-l-4 border-slate-400 bg-slate-400/10 p-3">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-300 mb-1">Admin Notes</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-slate-300">Admin Notes</div>
+                        <ReadAloudButton text={`Admin notes. ${matchingApp.admin_notes}`} variant="ghost" />
+                      </div>
                       <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.admin_notes}</p>
                     </div>
                   )}

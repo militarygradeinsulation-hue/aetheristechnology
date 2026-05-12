@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -279,11 +280,17 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         {/* TIP OF THE DAY */}
         {visible.tip && briefing.tip?.headline && (
           <section className="rounded-lg border border-amber/30 bg-amber/5 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-amber" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
-                Tip of the Day{briefing.tip.tag ? ` · ${briefing.tip.tag}` : ""}
-              </p>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-amber" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+                  Tip of the Day{briefing.tip.tag ? ` · ${briefing.tip.tag}` : ""}
+                </p>
+              </div>
+              <ReadAloudButton
+                text={`Tip of the day. ${briefing.tip.headline}. ${briefing.tip.body || ''}`}
+                variant="ghost"
+              />
             </div>
             <h3 className="font-display text-lg font-semibold text-foreground">{briefing.tip.headline}</h3>
             <p className="text-sm text-muted-foreground mt-2">{briefing.tip.body}</p>

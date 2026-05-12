@@ -8,6 +8,7 @@ import { Newspaper, Loader2, ArrowLeft, RefreshCw, ExternalLink, X, Sparkles } f
 import { formatDistanceToNow } from 'date-fns';
 import { listNews, type NewsPost } from '@/lib/newsFeed';
 import { useToast } from '@/hooks/use-toast';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 interface IndustryItem {
   id: string;
@@ -270,7 +271,13 @@ export const NewsFeedPanel: React.FC = () => {
                 <Badge className="bg-amber/10 text-amber border border-amber/30 font-mono text-[10px] uppercase">{active.category}</Badge>
                 {active.published_at && <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{formatDistanceToNow(new Date(active.published_at), { addSuffix: true })}</span>}
               </div>
-              <h2 className="font-display text-2xl font-semibold text-foreground leading-tight">{active.title}</h2>
+              <div className="flex items-start justify-between gap-2">
+                <h2 className="font-display text-2xl font-semibold text-foreground leading-tight flex-1">{active.title}</h2>
+                <ReadAloudButton
+                  text={[active.title, active.summary || '', ...(articleBlocks?.map(b => b.text) || [])].filter(Boolean).join('. ')}
+                  label="Listen"
+                />
+              </div>
               {active.summary && <p className="text-muted-foreground">{active.summary}</p>}
 
               {articleLoading && (
