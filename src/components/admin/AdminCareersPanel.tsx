@@ -78,6 +78,16 @@ export const AdminCareersPanel: React.FC = () => {
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
   const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
+  const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
+  const matchingApp = useMemo(
+    () => detailAttempt
+      ? applications.find(app =>
+          app.candidate_email.toLowerCase() === detailAttempt.candidate_email.toLowerCase()
+          || (detailAttempt.share_code && app.share_code === detailAttempt.share_code)
+        ) || null
+      : null,
+    [detailAttempt, applications]
+  );
 
   const load = async () => {
     setLoading(true);
@@ -687,11 +697,16 @@ export const AdminCareersPanel: React.FC = () => {
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
                 (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
-                  <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setDetailAttempt(a)}
+                    className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
+                  >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                          <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || '—'}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
                             <Badge variant="outline" className="font-mono">
@@ -702,15 +717,15 @@ export const AdminCareersPanel: React.FC = () => {
                           {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
-                          {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
+                          <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
+                          {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
                           <span>Started {fmt(a.started_at)}</span>
                           {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
                         </div>
                         {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
