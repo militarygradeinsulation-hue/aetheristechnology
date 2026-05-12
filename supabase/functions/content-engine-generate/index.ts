@@ -400,12 +400,16 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       const plan = await callAI(PLAN_MODEL, systemPrompt(strategy as Strategy), planUserPrompt, PLAN_TOOL);
       if (!plan?.slots?.length) throw new Error("Planner returned no slots");
 
+      const scriptDirection = directionBlock
+        ? `\n\n--- OPERATOR DIRECTION & SOURCE MATERIAL ---\n${directionBlock}\n\nUse this material to ground the script in real specifics — pull numbers, phrases, and angles from it where possible.`
+        : "";
+
       const scriptResults = await Promise.all(plan.slots.map(async (planSlot: any, i: number) => {
         try {
           const r = await callAI(
             SCRIPT_MODEL,
             systemPrompt(strategy as Strategy),
-            scriptUserPrompt(strategy as Strategy, planSlot),
+            scriptUserPrompt(strategy as Strategy, planSlot) + scriptDirection,
             SCRIPT_TOOL,
           );
           return { ok: true, planSlot, script: r, i };
