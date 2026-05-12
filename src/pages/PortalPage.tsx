@@ -25,6 +25,8 @@ import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
+import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
+import { BookOpen } from 'lucide-react';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { Mail as MailIcon } from 'lucide-react';
