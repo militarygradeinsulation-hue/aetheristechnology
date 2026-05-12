@@ -12,7 +12,7 @@ import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
   ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
-  Star, CalendarPlus, Share2, Copy,
+  Star, CalendarPlus, Share2, Copy, Trash2,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 import { upsertCompanyEntry } from '@/lib/companyCalendar';
@@ -391,6 +391,31 @@ export const AdminCareersPanel: React.FC = () => {
       try { await updateApp(shareCode, { admin_notes: value }); }
       catch (e) { toast({ title: 'Notes save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
     }, 700);
+  };
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const deleteApplication = async (a: Application) => {
+    const ok = window.confirm(`Delete applicant "${a.candidate_name}" (${a.share_code})? This removes their application and attempts. This cannot be undone.`);
+    if (!ok) return;
+    setDeletingId(a.share_code);
+    const prev = applications;
+    setApplications(p => p.filter(x => x.share_code !== a.share_code));
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'admin_delete_application', share_code: a.share_code },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      // also drop matching attempts from local list
+      setAttempts(prevA => prevA.filter(at => at.share_code !== a.share_code));
+      toast({ title: 'Applicant deleted' });
+    } catch (e) {
+      setApplications(prev);
+      toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setDeletingId(null); }
   };
 
   const [sendingId, setSendingId] = useState<string | null>(null);
@@ -790,6 +815,13 @@ export const AdminCareersPanel: React.FC = () => {
                           disabled={sendingId === a.share_code}
                           className="bg-amber text-background hover:bg-amber/90">
                           <CalendarCheck className="w-3 h-3 mr-1" /> Schedule interview
+                        </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => deleteApplication(a)}
+                          disabled={deletingId === a.share_code}
+                          className="border-destructive/40 text-destructive hover:bg-destructive/10">
+                          {deletingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                          Delete
                         </Button>
                       </div>
                     </div>
