@@ -970,6 +970,7 @@ export type Database = {
           ai_analyzed_at: string | null
           ai_concerns: Json | null
           ai_fit_score: number | null
+          ai_section_scores: Json | null
           ai_strengths: Json | null
           ai_summary: string | null
           attempt_id: string | null
@@ -999,6 +1000,7 @@ export type Database = {
           ai_analyzed_at?: string | null
           ai_concerns?: Json | null
           ai_fit_score?: number | null
+          ai_section_scores?: Json | null
           ai_strengths?: Json | null
           ai_summary?: string | null
           attempt_id?: string | null
@@ -1028,6 +1030,7 @@ export type Database = {
           ai_analyzed_at?: string | null
           ai_concerns?: Json | null
           ai_fit_score?: number | null
+          ai_section_scores?: Json | null
           ai_strengths?: Json | null
           ai_summary?: string | null
           attempt_id?: string | null

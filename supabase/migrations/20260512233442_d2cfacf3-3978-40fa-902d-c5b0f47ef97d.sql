@@ -1,0 +1,1 @@
+ALTER TABLE public.careers_applications ADD COLUMN IF NOT EXISTS ai_section_scores jsonb;
