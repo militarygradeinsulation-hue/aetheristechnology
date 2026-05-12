@@ -154,6 +154,7 @@ const PortalPage: React.FC = () => {
   // Per-rep widget order + pinned set for full board customization.
   const ORDER_KEY = `${ns}.widgetOrder.v1`;
   const PINNED_KEY = `${ns}.widgetPinned.v1`;
+  const TAB_ORDER_KEY = `${ns}.tabOrder.v1`;
   const [widgetOrder, setWidgetOrderState] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem(ORDER_KEY) || '[]'); } catch { return []; }
   });
@@ -171,10 +172,29 @@ const PortalPage: React.FC = () => {
       return next;
     });
   };
+  const [tabOrder, setTabOrderState] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(TAB_ORDER_KEY) || '[]'); } catch { return []; }
+  });
+  const persistTabOrder = (next: string[]) => {
+    setTabOrderState(next);
+    try { localStorage.setItem(TAB_ORDER_KEY, JSON.stringify(next)); } catch {}
+  };
+  const [tabDragId, setTabDragId] = useState<string | null>(null);
+  const reorderTabs = (sourceId: string, targetId: string, currentIds: string[]) => {
+    if (sourceId === targetId) return;
+    const base = tabOrder.length > 0
+      ? [...tabOrder.filter(id => currentIds.includes(id)), ...currentIds.filter(id => !tabOrder.includes(id))]
+      : currentIds.slice();
+    const from = base.indexOf(sourceId);
+    const to = base.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    base.splice(from, 1);
+    base.splice(to, 0, sourceId);
+    persistTabOrder(base);
+  };
   const [dragId, setDragId] = useState<string | null>(null);
   const reorderWidgets = (sourceId: string, targetId: string) => {
     if (sourceId === targetId) return;
-    // Build current sorted order based on existing logic, then move source before target.
     const current = sortedWidgetsRef.current.slice();
     const from = current.indexOf(sourceId);
     const to = current.indexOf(targetId);
