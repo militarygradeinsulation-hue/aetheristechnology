@@ -167,6 +167,15 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                       </Button>
                     )}
                   </div>
+                  {visible && adminMode && (
+                    <div className="mt-4">
+                      <PostImageGenerator
+                        prompt={`${day.topic}. ${day.hook}. ${day.caption}`}
+                        editablePrompt
+                        onImageGenerated={() => {}}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
