@@ -237,8 +237,15 @@ const PortalPage: React.FC = () => {
   }, [profile]);
 
   useEffect(() => {
-    if (hasValidPortalSession() && !profile) setProfile(getPortalProfile());
-  }, [profile]);
+    if (hasValidPortalSession() && !profile) {
+      const p = getPortalProfile();
+      setProfile(p);
+      // Partner sessions land on the Admin Console by default.
+      if (p?.role === 'partner' && hasValidAdminToken()) {
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [profile, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,6 +262,28 @@ const PortalPage: React.FC = () => {
       // Fire-and-forget activity log; runs after token is in localStorage
       setTimeout(() => logPortalActivity('login'), 0);
       toast({ title: `Welcome${data.profile.rep_name ? `, ${data.profile.rep_name}` : ''}` });
+
+      // Partners auto-promote to the Admin Console using their code as PIN.
+      if (data.profile.role === 'partner') {
+        try {
+          const { data: adm } = await supabase.functions.invoke('admin-pin-login', {
+            body: { pin: code.trim() },
+          });
+          if (adm?.ok && adm?.token) {
+            const { setAdminToken } = await import('@/lib/adminAuth');
+            setAdminToken(adm.token);
+            if (adm.tokenHash) {
+              try {
+                await supabase.auth.verifyOtp({ token_hash: adm.tokenHash, type: 'magiclink' });
+              } catch { /* noop */ }
+            }
+            navigate('/admin', { replace: true });
+            return;
+          }
+        } catch (e) {
+          console.warn('Partner admin auto-login failed:', e);
+        }
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed.';
       toast({ title: 'Login failed', description: msg, variant: 'destructive' });
