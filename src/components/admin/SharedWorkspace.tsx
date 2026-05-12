@@ -562,6 +562,9 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
                       <a href={url} target="_blank" rel="noopener noreferrer" download={f.filename}>
                         <Button variant="ghost" size="icon" className="h-6 w-6"><Download className="w-3 h-3" /></Button>
                       </a>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteFile(f)} title="Delete">
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </Button>
                     </div>
                   </div>
                 );
