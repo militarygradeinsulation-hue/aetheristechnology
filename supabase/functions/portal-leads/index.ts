@@ -40,6 +40,63 @@ function guessWebsiteFromEmail(email: string): string | null {
   return `https://${domain}`;
 }
 
+// Auto-top-up this rep's drop to the daily quota. Always keeps "Today's Drop" full.
+async function topUpRepDrop(supabase: any, repCode: string): Promise<number> {
+  try {
+    const { data: settings } = await supabase.from("lead_drip_settings").select("*").maybeSingle();
+    if (!settings || settings.enabled === false) return 0;
+    const dailyPerRep = Math.max(1, Math.min(100, settings.daily_per_rep ?? 10));
+    const holdHours = Math.max(1, Math.min(168, settings.hold_hours ?? 24));
+
+    // Sweep this rep's expired holds
+    await supabase.from("rep_leads")
+      .update({ assigned_to_code: null, assigned_at: null, assignment_expires_at: null })
+      .eq("assigned_to_code", repCode)
+      .lt("assignment_expires_at", new Date().toISOString())
+      .is("claimed_by_code", null);
+
+    // Don't top up if rep is at active cap
+    const { count: activeClaimed } = await supabase.from("rep_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("claimed_by_code", repCode)
+      .not("status", "in", "(won,lost,dead)");
+    if ((activeClaimed ?? 0) >= MAX_ACTIVE_CLAIMED) return 0;
+
+    const { count: openDrip } = await supabase.from("rep_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("assigned_to_code", repCode)
+      .is("claimed_by_code", null)
+      .gt("assignment_expires_at", new Date().toISOString());
+    const needed = dailyPerRep - (openDrip ?? 0);
+    if (needed <= 0) return 0;
+
+    const { data: candidates } = await supabase.from("rep_leads")
+      .select("id")
+      .is("claimed_by_code", null)
+      .is("assigned_to_code", null)
+      .order("score", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(needed);
+    if (!candidates || candidates.length === 0) return 0;
+
+    const expiresAt = new Date(Date.now() + holdHours * 3600_000).toISOString();
+    const { data: assigned } = await supabase.from("rep_leads")
+      .update({
+        assigned_to_code: repCode,
+        assigned_at: new Date().toISOString(),
+        assignment_expires_at: expiresAt,
+      })
+      .in("id", candidates.map((c: any) => c.id))
+      .is("claimed_by_code", null)
+      .is("assigned_to_code", null)
+      .select("id");
+    return assigned?.length || 0;
+  } catch (e) {
+    console.error("topUpRepDrop error:", e);
+    return 0;
+  }
+}
+
 async function logActivity(supabase: any, claims: PortalClaims, event: string, meta: Record<string, unknown> = {}) {
   try {
     const { data: rep } = await supabase.from("rep_codes").select("rep_name").eq("code", claims.code).maybeSingle();
