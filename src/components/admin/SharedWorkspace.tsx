@@ -482,15 +482,43 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
             </div>
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
               {taskNotes.length === 0 && <p className="text-xs text-muted-foreground py-4 text-center">No notes yet.</p>}
-              {taskNotes.map(n => (
-                <div key={n.id} className="p-2 rounded bg-secondary/30 text-xs">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="text-[9px]">{personLabel(n.author).split(" ")[0]}</Badge>
-                    <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+              {taskNotes.map(n => {
+                const isEditing = editNoteId === n.id;
+                const mine = n.author === me;
+                return (
+                  <div key={n.id} className="p-2 rounded bg-secondary/30 text-xs group">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-[9px]">{personLabel(n.author).split(" ")[0]}</Badge>
+                      <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+                      {mine && !isEditing && (
+                        <div className="ml-auto flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => startEditNote(n)} title="Edit">
+                            <Pencil className="w-2.5 h-2.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => deleteNote(n.id)} title="Delete">
+                            <Trash2 className="w-2.5 h-2.5 text-red-400" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {isEditing ? (
+                      <div className="space-y-1">
+                        <Textarea value={editNoteBody} onChange={e => setEditNoteBody(e.target.value)} rows={2} className="text-xs" />
+                        <div className="flex gap-1 justify-end">
+                          <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setEditNoteId(null); setEditNoteBody(""); }}>
+                            <XIcon className="w-3 h-3 mr-1" />Cancel
+                          </Button>
+                          <Button size="sm" className="h-6 text-xs bg-amber text-background hover:bg-amber/90" onClick={saveEditNote}>
+                            <SaveIcon className="w-3 h-3 mr-1" />Save
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{n.body}</p>
+                    )}
                   </div>
-                  <p className="whitespace-pre-wrap">{n.body}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
