@@ -299,6 +299,9 @@ const PortalPage: React.FC = () => {
     navigate('/portal');
   };
 
+  // Hooks must run unconditionally — call before any early return.
+  const { unread: unreadChat } = useUnreadTeamMessages(profile?.code || '', !!profile && tab === 'team');
+
   // ============ LOGIN VIEW ============
   if (!profile) {
     return (
@@ -349,8 +352,6 @@ const PortalPage: React.FC = () => {
   const isPartner = profile.role === 'partner';
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
-
-  const { unread: unreadChat } = useUnreadTeamMessages(profile.code, tab === 'team');
 
   // Toast pop when a new chat arrives while not viewing chat
   useEffect(() => {
