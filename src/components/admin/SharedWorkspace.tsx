@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Check, Calendar as CalendarIcon, Layout, Filter, Clock,
   Paperclip, MessageSquare, Download, FileText, RefreshCw, Loader2, User as UserIcon,
-  Users as UsersIcon,
+  Users as UsersIcon, Pencil, Save as SaveIcon, X as XIcon,
 } from "lucide-react";
 import {
   PERSONS, Person, personLabel, SharedTask, SharedNote, SharedFile,
