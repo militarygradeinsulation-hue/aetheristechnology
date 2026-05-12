@@ -112,8 +112,21 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
-    try { const raw = localStorage.getItem(VISIBLE_KEY); if (raw) return JSON.parse(raw); } catch {}
+    try {
+      const raw = localStorage.getItem(VISIBLE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const merged = [...parsed];
+          for (const k of PORTAL_ALWAYS_INCLUDE_NEW) {
+            if (!merged.includes(k)) merged.push(k);
+          }
+          return merged;
+        }
+      }
+    } catch {}
     return [];
   });
   const setVisibleTabs = (t: string[]) => {
