@@ -29,6 +29,7 @@ const ContentCalendarPage = () => {
             <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Daily post ideas, hooks, topics, and best times — generated for your industry in minutes.</p>
           </div>
           <ContentCalendarGenerator />
+          <PostFromSourceGenerator />
         </div>
         <Footer />
       </div>
