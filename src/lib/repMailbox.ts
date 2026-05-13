@@ -113,7 +113,7 @@ export const repMailbox = {
   }) {
     return (await call("save_draft", payload)).message as RepEmailMessage;
   },
-  async updateSettings(patch: Partial<Pick<RepMailbox, "signature" | "forwarding_to" | "auto_reply_enabled" | "auto_reply_body">>) {
+  async updateSettings(patch: Partial<Pick<RepMailbox, "signature" | "forwarding_to" | "personal_email" | "forward_inbound" | "mask_outbound" | "auto_reply_enabled" | "auto_reply_body">>) {
     return (await call("update_settings", patch)).mailbox as RepMailbox;
   },
 };
