@@ -255,7 +255,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
                   </Button>
                   <Button asChild size="sm" variant="outline">
                     <a href={blog.share_url} target="_blank" rel="noreferrer">
-                      Open blog <ExternalLink className="w-3 h-3 ml-1" />
+                      Open {blog.kind === "playbook" ? "playbook" : "blog"} <ExternalLink className="w-3 h-3 ml-1" />
                     </a>
                   </Button>
                   <Button asChild size="sm" className="bg-amber text-background hover:bg-amber/90">
