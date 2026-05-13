@@ -41,13 +41,33 @@ serve(async (req) => {
       return json({ images: data || [] });
     }
 
-    if (action === "delete") {
+    if (action === "list_all") {
+      // Combined library: admin-side images + every rep portal image, newest first.
+      const [adminRes, repRes] = await Promise.all([
+        supabase.from("admin_image_studio").select("*").order("created_at", { ascending: false }).limit(300),
+        supabase.from("rep_image_studio").select("*").order("created_at", { ascending: false }).limit(300),
+      ]);
+      if (adminRes.error) throw adminRes.error;
+      if (repRes.error) throw repRes.error;
+      const adminItems = (adminRes.data || []).map((r: any) => ({ ...r, source_table: "admin_image_studio", owner_label: "Admin" }));
+      const repItems = (repRes.data || []).map((r: any) => ({ ...r, source_table: "rep_image_studio", owner_label: r.rep_code ? `Rep ${r.rep_code}` : "Rep" }));
+      const merged = [...adminItems, ...repItems].sort(
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return json({ images: merged });
+    }
+
+    if (action === "delete" || action === "delete_any") {
       const id = body.id as string;
-      const { data: row } = await supabase.from("admin_image_studio").select("storage_path").eq("id", id).maybeSingle();
+      const sourceTable = (body.source_table as string) || "admin_image_studio";
+      if (sourceTable !== "admin_image_studio" && sourceTable !== "rep_image_studio") {
+        return json({ error: "invalid source_table" }, 400);
+      }
+      const { data: row } = await supabase.from(sourceTable).select("storage_path").eq("id", id).maybeSingle();
       if (row?.storage_path) {
         await supabase.storage.from(BUCKET).remove([row.storage_path]);
       }
-      const { error } = await supabase.from("admin_image_studio").delete().eq("id", id);
+      const { error } = await supabase.from(sourceTable).delete().eq("id", id);
       if (error) throw error;
       return json({ ok: true });
     }
