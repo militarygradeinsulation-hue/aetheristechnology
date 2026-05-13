@@ -339,60 +339,87 @@ const DiagnosticPage: React.FC = () => {
               <p className="text-sm text-foreground/75 mb-5">
                 When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business — the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {TOOL_BUNDLE.map((t) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {TOOL_BUNDLE.map((t, idx) => {
                   const Icon = t.icon;
                   const isOpen = openTool === t.name;
                   return (
                     <div
                       key={t.name}
-                      className={`premium-tile rounded-sm transition-colors ${
-                        isOpen ? 'border-amber/60 md:col-span-2 lg:col-span-3' : 'border-border/60 hover:border-amber/40'
+                      className={`premium-tile rounded-md transition-all duration-500 ${
+                        isOpen
+                          ? 'border-amber/70 md:col-span-2 lg:col-span-3 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
+                          : 'border-border/60 hover:border-amber/50'
                       }`}
                     >
                       <button
                         type="button"
                         onClick={() => setOpenTool(isOpen ? null : t.name)}
                         aria-expanded={isOpen}
-                        className="w-full text-left p-3.5"
+                        className="w-full text-left p-4 group"
                       >
-                        <div className="flex items-start gap-2.5 mb-1.5">
-                          <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-4 h-4 text-amber" />
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 transition-all ${
+                            isOpen
+                              ? 'bg-amber/20 ring-1 ring-amber/50 shadow-[0_0_18px_-2px_hsl(var(--amber-glow)/0.55)]'
+                              : 'bg-amber/10 group-hover:bg-amber/20'
+                          }`}>
+                            <Icon className="w-5 h-5 text-amber" />
                           </div>
-                          <div className="flex-1 font-bold text-foreground text-sm leading-tight">{t.name}</div>
-                          <ChevronDown className={`w-4 h-4 text-amber shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-0.5">
+                              Tool {String(idx + 1).padStart(2, '0')} / 09
+                            </div>
+                            <div className="font-bold text-foreground text-sm leading-tight">{t.name}</div>
+                          </div>
+                          <div className={`w-7 h-7 rounded-full border border-amber/40 flex items-center justify-center shrink-0 transition-all ${
+                            isOpen ? 'bg-amber text-primary-foreground rotate-180' : 'text-amber group-hover:bg-amber/10'
+                          }`}>
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
                         </div>
-                        <p className="text-xs text-foreground/65 leading-snug pl-9">
+                        <p className="text-xs text-foreground/70 leading-snug pl-[3.25rem]">
                           <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
                           {t.finds}
                         </p>
+                        {!isOpen && (
+                          <div className="pl-[3.25rem] mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 group-hover:text-amber/80 transition-colors">
+                            Click to open the case file →
+                          </div>
+                        )}
                       </button>
                       {isOpen && (
-                        <div className="px-3.5 pb-4 pt-1 border-t border-border/40 mt-1 space-y-3">
-                          <div className="grid md:grid-cols-3 gap-3 pt-3">
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">Inputs we need</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.inputs.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">How the operator runs it</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.process.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">What you get back</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.deliverables.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
+                        <div className="px-4 pb-5 pt-0 animate-fade-in">
+                          <div className="h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent mb-5" />
+                          <div className="grid md:grid-cols-3 gap-3">
+                            {[
+                              { label: '01 · Inputs we need', items: t.inputs, accent: 'amber' },
+                              { label: '02 · How the operator runs it', items: t.process, accent: 'amber' },
+                              { label: '03 · What you get back', items: t.deliverables, accent: 'amber' },
+                            ].map((col) => (
+                              <div key={col.label} className="rounded-md border border-amber/20 bg-background/40 p-4 hover:border-amber/40 transition-colors">
+                                <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2.5 pb-2 border-b border-amber/15">
+                                  {col.label}
+                                </div>
+                                <ul className="space-y-2 text-xs text-foreground/85 leading-relaxed">
+                                  {col.items.map((x) => (
+                                    <li key={x} className="flex gap-2">
+                                      <span className="text-amber/60 shrink-0">▸</span>
+                                      <span>{x}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
                           </div>
-                          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3">
-                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">Real leak we caught</div>
-                            <p className="text-xs text-foreground/85 italic">{t.exampleLeak}</p>
+                          <div className="mt-4 rounded-md border border-crimson/40 bg-crimson/5 p-4 relative overflow-hidden">
+                            <div className="absolute top-2 right-3 font-case text-[8px] uppercase tracking-widest text-crimson/60">
+                              Case file · Verified
+                            </div>
+                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                              Real leak we caught
+                            </div>
+                            <p className="text-sm text-foreground/90 italic leading-relaxed">"{t.exampleLeak}"</p>
                           </div>
                         </div>
                       )}
