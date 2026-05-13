@@ -567,14 +567,68 @@ const PortalPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={tabSearch}
+                onChange={(e) => { setTabSearch(e.target.value); setTabSearchOpen(true); }}
+                onFocus={() => setTabSearchOpen(true)}
+                onBlur={() => setTimeout(() => setTabSearchOpen(false), 150)}
+                onKeyDown={(e) => {
+                  const results = tabSearch.trim()
+                    ? availableTabs.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
+                    : [];
+                  if (e.key === 'Enter' && results[0]) {
+                    setTab(results[0].id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                    if (layout !== 'tabs') setLayout('tabs');
+                  }
+                  if (e.key === 'Escape') { setTabSearch(''); setTabSearchOpen(false); }
+                }}
+                placeholder="Search tabs…"
+                className="pl-8 pr-8 h-9 w-56"
+              />
+              {tabSearch && (
+                <button
+                  onClick={() => { setTabSearch(''); setTabSearchOpen(false); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+              {tabSearchOpen && tabSearch && (() => {
+                const results = availableTabs.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()));
+                return results.length > 0 ? (
+                  <div className="absolute right-0 mt-1 w-64 max-h-80 overflow-y-auto rounded-md border border-border bg-popover shadow-lg z-50">
+                    {results.map(t => (
+                      <button
+                        key={t.id}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setTab(t.id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                          if (layout !== 'tabs') setLayout('tabs');
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="absolute right-0 mt-1 w-64 rounded-md border border-border bg-popover shadow-lg z-50 px-3 py-2 text-sm text-muted-foreground">
+                    No matching tabs
+                  </div>
+                );
+              })()}
+            </div>
             <RepClockWidget compact />
             <Button variant="outline" size="sm" onClick={() => { setTab('sprint'); setActiveTool(null); }} className="gap-1.5 border-amber/40 text-amber hover:bg-amber/10">
               <Rocket className="w-4 h-4" /> <span className="hidden sm:inline">90-Day Sprint</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => { setTab('coach'); setActiveTool(null); }} className="gap-1.5 hidden sm:inline-flex">
+            <Button variant="outline" size="sm" onClick={() => { setTab('coach'); setActiveTool(null); }} className="gap-1.5 hidden sm:inline-flex border-amber/40 text-amber hover:bg-amber/10">
               <MessageSquareCode className="w-4 h-4" /> Coach
             </Button>
-            <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex">
+            <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex border-amber/40 text-amber hover:bg-amber/10">
               <Users className="w-4 h-4" /> Leads
             </Button>
             {isPartner && (
