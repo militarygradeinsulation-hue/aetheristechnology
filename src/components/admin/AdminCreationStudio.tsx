@@ -1045,26 +1045,39 @@ export const AdminCreationStudio: React.FC = () => {
 
           {/* Prompt recipes */}
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Prompt recipes — pick a structure</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+              Prompt recipes — pick a structure {aiRecipes.length > 0 && <span className="text-amber/70">· +{aiRecipes.length} fresh</span>}
+            </div>
             <div className="flex flex-wrap gap-1.5">
-              {PREMADE_PROMPTS.map((p) => {
-                const on = pickedRecipe === p.text;
-                return (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => {
-                      const next = on ? '' : p.text;
-                      setPickedRecipe(next);
-                      applyComposed({ recipe: next });
-                    }}
-                    title={p.text}
-                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
-                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
-                    }`}
-                  >{p.label}</button>
-                );
-              })}
+              {(() => {
+                const seenLabels = new Set<string>();
+                const merged = [...aiRecipes, ...PREMADE_PROMPTS].filter(p => {
+                  if (seenLabels.has(p.label)) return false; seenLabels.add(p.label); return true;
+                });
+                return merged.map((p) => {
+                  const on = pickedRecipe === p.text;
+                  const isAi = aiRecipes.some(r => r.label === p.label);
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => {
+                        const next = on ? '' : p.text;
+                        setPickedRecipe(next);
+                        applyComposed({ recipe: next });
+                      }}
+                      title={p.text}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                        on
+                          ? 'bg-amber/15 border-amber text-amber'
+                          : isAi
+                          ? 'bg-amber/5 border-amber/40 text-foreground/90 hover:border-amber hover:text-amber'
+                          : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                      }`}
+                    >{isAi ? <span className="mr-1 opacity-80">✨</span> : null}{p.label}</button>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
