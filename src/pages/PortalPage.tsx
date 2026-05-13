@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
+  X,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { RepImageStudio } from '@/components/portal/RepImageStudio';
@@ -110,6 +111,8 @@ const PortalPage: React.FC = () => {
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [tabSearch, setTabSearch] = useState('');
+  const [tabSearchOpen, setTabSearchOpen] = useState(false);
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
   const ns = `portal.${profile?.code || 'anon'}`;
@@ -564,14 +567,68 @@ const PortalPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={tabSearch}
+                onChange={(e) => { setTabSearch(e.target.value); setTabSearchOpen(true); }}
+                onFocus={() => setTabSearchOpen(true)}
+                onBlur={() => setTimeout(() => setTabSearchOpen(false), 150)}
+                onKeyDown={(e) => {
+                  const results = tabSearch.trim()
+                    ? availableTabs.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
+                    : [];
+                  if (e.key === 'Enter' && results[0]) {
+                    setTab(results[0].id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                    if (layout !== 'tabs') setLayout('tabs');
+                  }
+                  if (e.key === 'Escape') { setTabSearch(''); setTabSearchOpen(false); }
+                }}
+                placeholder="Search tabs…"
+                className="pl-8 pr-8 h-9 w-56"
+              />
+              {tabSearch && (
+                <button
+                  onClick={() => { setTabSearch(''); setTabSearchOpen(false); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+              {tabSearchOpen && tabSearch && (() => {
+                const results = availableTabs.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()));
+                return results.length > 0 ? (
+                  <div className="absolute right-0 mt-1 w-64 max-h-80 overflow-y-auto rounded-md border border-border bg-popover shadow-lg z-50">
+                    {results.map(t => (
+                      <button
+                        key={t.id}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setTab(t.id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                          if (layout !== 'tabs') setLayout('tabs');
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="absolute right-0 mt-1 w-64 rounded-md border border-border bg-popover shadow-lg z-50 px-3 py-2 text-sm text-muted-foreground">
+                    No matching tabs
+                  </div>
+                );
+              })()}
+            </div>
             <RepClockWidget compact />
             <Button variant="outline" size="sm" onClick={() => { setTab('sprint'); setActiveTool(null); }} className="gap-1.5 border-amber/40 text-amber hover:bg-amber/10">
               <Rocket className="w-4 h-4" /> <span className="hidden sm:inline">90-Day Sprint</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => { setTab('coach'); setActiveTool(null); }} className="gap-1.5 hidden sm:inline-flex">
+            <Button variant="outline" size="sm" onClick={() => { setTab('coach'); setActiveTool(null); }} className="gap-1.5 hidden sm:inline-flex border-amber/40 text-amber hover:bg-amber/10">
               <MessageSquareCode className="w-4 h-4" /> Coach
             </Button>
-            <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex">
+            <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex border-amber/40 text-amber hover:bg-amber/10">
               <Users className="w-4 h-4" /> Leads
             </Button>
             {isPartner && (
@@ -585,47 +642,41 @@ const PortalPage: React.FC = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 pb-2"><WhosWorkingBar /></div>
-        {/* Tab nav (only in 'tabs' layout) */}
+        {/* Tab nav (only in 'tabs' layout) — admin-style amber pill buttons */}
         {layout === 'tabs' && (
-          <div className="relative max-w-7xl mx-auto">
-            <button
-              type="button"
-              aria-label="Scroll tabs left"
-              onClick={() => document.getElementById('portal-tab-nav')?.scrollBy({ left: -240, behavior: 'smooth' })}
-              className="absolute left-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-r from-card/90 via-card/60 to-transparent text-muted-foreground hover:text-amber"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <nav id="portal-tab-nav" className="px-10 flex gap-1 overflow-x-auto scroll-smooth scrollbar-thin">
-              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    setTab(t.id);
-                    setActiveTool(null);
-                    logPortalActivity('tab_view', { tab: t.id });
-                  }}
-                  className={`relative flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${
-                    tab === t.id ? 'border-amber text-amber' : 'border-transparent text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {t.icon}{t.label}
-                  {t.badge && t.badge > 0 ? (
-                    <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
-                      {t.badge > 99 ? '99+' : t.badge}
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </nav>
-            <button
-              type="button"
-              aria-label="Scroll tabs right"
-              onClick={() => document.getElementById('portal-tab-nav')?.scrollBy({ left: 240, behavior: 'smooth' })}
-              className="absolute right-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-l from-card/90 via-card/60 to-transparent text-muted-foreground hover:text-amber rotate-180"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
+          <div className="max-w-7xl mx-auto px-4 pb-3 pt-1">
+            <div className="flex gap-2 flex-wrap">
+              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+                const active = tab === t.id;
+                const Icon = t.iconCmp;
+                return (
+                  <Button
+                    key={t.id}
+                    id={`portal-tab-btn-${t.id}`}
+                    type="button"
+                    onClick={() => {
+                      setTab(t.id);
+                      setActiveTool(null);
+                      logPortalActivity('tab_view', { tab: t.id });
+                    }}
+                    variant={active ? 'default' : 'outline'}
+                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${
+                      active
+                        ? 'bg-amber text-background hover:bg-amber/90 border-amber'
+                        : 'border-amber/40 text-amber hover:bg-amber/10 hover:text-amber'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{t.label}</span>
+                    {t.badge && t.badge > 0 ? (
+                      <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
+                        {t.badge > 99 ? '99+' : t.badge}
+                      </span>
+                    ) : null}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         )}
       </header>
