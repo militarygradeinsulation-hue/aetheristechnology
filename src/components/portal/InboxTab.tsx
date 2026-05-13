@@ -14,9 +14,10 @@ import { repMailbox, type RepEmailMessage, type RepMailbox } from "@/lib/repMail
 import {
   Loader2, Mail, Pencil, Inbox as InboxIcon, Send, FileText, Trash2,
   Star, Reply, Forward, Search, Settings, RefreshCcw, Paperclip, X,
-  Link2, Link2Off, CheckCircle2,
+  Link2, Link2Off, CheckCircle2, Target, MessageCircle,
 } from "lucide-react";
 import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
+import { portalLeads, type RepLead } from "@/lib/portalLeads";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
 
@@ -29,7 +30,7 @@ export const InboxTab: React.FC = () => {
   const [selected, setSelected] = useState<RepEmailMessage | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
+  const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null; lead?: RepLead | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [outlook, setOutlook] = useState<OutlookStatus | null>(null);
   const [outlookBusy, setOutlookBusy] = useState(false);
@@ -215,6 +216,7 @@ export const InboxTab: React.FC = () => {
           )}
           <Button size="sm" variant="outline" onClick={() => refresh()}><RefreshCcw className="w-3 h-3 mr-1" /> Refresh</Button>
           <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)}><Settings className="w-3 h-3 mr-1" /> Settings</Button>
+          <LeadFinderButton onPick={(lead) => setComposing({ to: lead.email || "", subject: lead.business_name ? `Quick note re: ${lead.business_name}` : "", lead })} />
           <Button size="sm" onClick={() => setComposing({})}><Pencil className="w-3 h-3 mr-1" /> Compose</Button>
         </div>
       </div>
@@ -384,7 +386,7 @@ const MessageView: React.FC<{
 };
 
 const ComposeDialog: React.FC<{
-  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
+  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null; lead?: RepLead | null };
   mailbox: RepMailbox;
   onClose: () => void;
   onSent: () => void;
@@ -401,6 +403,10 @@ const ComposeDialog: React.FC<{
   const [attachments, setAttachments] = useState<Array<{ name: string; size: number; mime: string; storage_path: string }>>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [linkedLead, setLinkedLead] = useState<RepLead | null>(initial.lead || null);
+  const [sentSuccess, setSentSuccess] = useState(false);
+  const [logNotes, setLogNotes] = useState("");
+  const [logging, setLogging] = useState(false);
 
   const parseAddrs = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
 
@@ -448,10 +454,37 @@ const ComposeDialog: React.FC<{
       if (draftId) {
         try { await repMailbox.deleteForever(draftId); } catch { /* non-fatal */ }
       }
-      onSent();
+      // If linked to a lead, show the log panel; else close immediately.
+      if (linkedLead) {
+        setSentSuccess(true);
+        toast({ title: "Sent — log it against the lead?" });
+      } else {
+        onSent();
+      }
     } catch (e: any) {
       toast({ title: "Send failed", description: e.message, variant: "destructive" });
     } finally { setSending(false); }
+  };
+
+  const logAgainstLead = async (kind: "sent" | "replied") => {
+    if (!linkedLead) return;
+    setLogging(true);
+    try {
+      const stamp = new Date().toLocaleString();
+      const prevNotes = linkedLead.notes || "";
+      const tag = kind === "sent" ? "SENT" : "RECEIVED REPLY";
+      const composedNote = `[${stamp}] ${tag} — "${subject}"${logNotes ? `\n${logNotes}` : ""}`;
+      const fullNotes = prevNotes ? `${composedNote}\n\n${prevNotes}` : composedNote;
+      await portalLeads.updateStatus(linkedLead.id, {
+        notes: fullNotes,
+        touch: true,
+        status: kind === "replied" ? "replied" : "outreach",
+      });
+      toast({ title: kind === "replied" ? "Logged as replied" : "Logged as sent" });
+      onSent();
+    } catch (e: any) {
+      toast({ title: "Couldn't log to lead", description: e.message, variant: "destructive" });
+    } finally { setLogging(false); }
   };
 
   const saveDraft = async () => {
@@ -476,53 +509,105 @@ const ComposeDialog: React.FC<{
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>New message</DialogTitle>
+          <DialogTitle>{sentSuccess ? "Sent — log this against the lead?" : "New message"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground">From <span className="font-mono">{mailbox.address}</span></div>
-          <Input placeholder="To (comma-separated)" value={to} onChange={(e) => setTo(e.target.value)} />
-          <Input placeholder="Cc (optional)" value={cc} onChange={(e) => setCc(e.target.value)} />
-          <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {attachments.map((a, i) => (
-                <div key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 border rounded bg-muted">
-                  <Paperclip className="w-3 h-3" />
-                  <span>{a.name}</span>
-                  <span className="text-muted-foreground">({Math.round(a.size / 1024)} KB)</span>
-                  <button type="button" onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-muted-foreground hover:text-destructive">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+
+        {linkedLead && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-amber/40 bg-amber/5 px-3 py-2 text-xs">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-amber">
+                <Target className="w-3 h-3" /> Linked lead
+              </div>
+              <div className="truncate font-semibold text-foreground">{linkedLead.business_name || linkedLead.email}</div>
+              <div className="truncate text-muted-foreground">{[linkedLead.contact_name, linkedLead.email].filter(Boolean).join(" · ")}</div>
             </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-          {mailbox.signature && (
-            <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
-          )}
-        </div>
+            {!sentSuccess && (
+              <Button size="sm" variant="ghost" onClick={() => setLinkedLead(null)} className="h-6 w-6 p-0">
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!sentSuccess ? (
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground">From <span className="font-mono">{mailbox.address}</span></div>
+            <Input placeholder="To (comma-separated)" value={to} onChange={(e) => setTo(e.target.value)} />
+            <Input placeholder="Cc (optional)" value={cc} onChange={(e) => setCc(e.target.value)} />
+            <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+            <Textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {attachments.map((a, i) => (
+                  <div key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 border rounded bg-muted">
+                    <Paperclip className="w-3 h-3" />
+                    <span>{a.name}</span>
+                    <span className="text-muted-foreground">({Math.round(a.size / 1024)} KB)</span>
+                    <button type="button" onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-muted-foreground hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            {mailbox.signature && (
+              <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Add a quick note about what you said and check whether this counts as a fresh outreach or a reply you received.
+            </p>
+            <div>
+              <Label className="text-xs">Notes (saved to the lead's history)</Label>
+              <Textarea
+                rows={4}
+                value={logNotes}
+                onChange={(e) => setLogNotes(e.target.value)}
+                placeholder="What did you pitch? Any objections? Next step?"
+              />
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || sending}>
-            {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Paperclip className="w-4 h-4 mr-2" />}
-            Attach
-          </Button>
-          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending || uploading}>
-            {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-            Save draft
-          </Button>
-          <Button onClick={send} disabled={sending || savingDraft || uploading}>
-            {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-            Send
-          </Button>
+          {!sentSuccess ? (
+            <>
+              <Button variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || sending}>
+                {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Paperclip className="w-4 h-4 mr-2" />}
+                Attach
+              </Button>
+              <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending || uploading}>
+                {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                Save draft
+              </Button>
+              <Button onClick={send} disabled={sending || savingDraft || uploading}>
+                {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Send
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={onSent} disabled={logging}>Skip</Button>
+              <Button variant="outline" onClick={() => logAgainstLead("replied")} disabled={logging}>
+                {logging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageCircle className="w-4 h-4 mr-2" />}
+                Log as Received Reply
+              </Button>
+              <Button onClick={() => logAgainstLead("sent")} disabled={logging}>
+                {logging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                Log as Sent (touch +1)
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -654,3 +739,81 @@ function sanitizeHtml(html: string): string {
     .replace(/ on[a-z]+='[^']*'/gi, "")
     .replace(/javascript:/gi, "");
 }
+
+const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPick }) => {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [leads, setLeads] = useState<RepLead[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    portalLeads.list("mine")
+      .then((r) => setLeads(r.leads || []))
+      .catch((e) => toast({ title: "Couldn't load leads", description: e.message, variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, [open, toast]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const withEmail = leads.filter((l) => !!l.email);
+    if (!q) return withEmail.slice(0, 50);
+    return withEmail.filter((l) => {
+      const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location]
+        .filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(q);
+    }).slice(0, 50);
+  }, [leads, query]);
+
+  return (
+    <>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <Target className="w-3 h-3 mr-1" /> Find lead
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Email a lead</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                autoFocus
+                className="pl-7"
+                placeholder="Search business, contact, email…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto divide-y border rounded-md">
+              {loading ? (
+                <div className="p-6 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></div>
+              ) : filtered.length === 0 ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  {leads.length === 0 ? "No claimed leads yet." : "No matches."}
+                </div>
+              ) : (
+                filtered.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => { onPick(l); setOpen(false); setQuery(""); }}
+                    className="w-full text-left px-3 py-2 hover:bg-muted/50 transition"
+                  >
+                    <div className="text-sm font-semibold truncate">{l.business_name || l.email}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {[l.contact_name, l.email, l.industry, l.location].filter(Boolean).join(" · ")}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Picking a lead opens a pre-filled compose. After you hit Send, you can log the touch + notes against the lead in one click.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
