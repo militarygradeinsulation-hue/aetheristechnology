@@ -55,10 +55,12 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.85} density={0.7} />
       <Link
         to="/"
-        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
+      >
       >
         <ArrowLeft className="w-4 h-4" /> Back to website
       </Link>
