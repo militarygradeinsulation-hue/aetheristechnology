@@ -169,3 +169,12 @@ verify_jwt = false
 
 [functions.creation-studio]
 verify_jwt = false
+
+[functions.outlook-oauth-start]
+verify_jwt = false
+
+[functions.outlook-oauth-callback]
+verify_jwt = false
+
+[functions.outlook-status]
+verify_jwt = false

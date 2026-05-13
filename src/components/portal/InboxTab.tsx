@@ -14,7 +14,9 @@ import { repMailbox, type RepEmailMessage, type RepMailbox } from "@/lib/repMail
 import {
   Loader2, Mail, Pencil, Inbox as InboxIcon, Send, FileText, Trash2,
   Star, Reply, Forward, Search, Settings, RefreshCcw, Paperclip, X,
+  Link2, Link2Off, CheckCircle2,
 } from "lucide-react";
+import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
 
@@ -29,6 +31,60 @@ export const InboxTab: React.FC = () => {
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [outlook, setOutlook] = useState<OutlookStatus | null>(null);
+  const [outlookBusy, setOutlookBusy] = useState(false);
+
+  const refreshOutlook = async () => {
+    try { setOutlook(await outlookConnect.getStatus()); }
+    catch (e: any) { console.warn("outlook status", e?.message); }
+  };
+
+  useEffect(() => { refreshOutlook(); }, []);
+
+  // If the OAuth popup posts back, refresh status
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e?.data?.type === "outlook_oauth") {
+        refreshOutlook();
+        if (e.data.ok) toast({ title: "Outlook connected" });
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const connectOutlook = async () => {
+    setOutlookBusy(true);
+    try {
+      const url = await outlookConnect.getAuthUrl();
+      const w = window.open(url, "outlook_oauth", "width=520,height=720");
+      if (!w) {
+        // popup blocked — fall back to full redirect
+        window.location.href = url;
+      }
+    } catch (e: any) {
+      toast({
+        title: "Couldn't start Outlook connection",
+        description: e.message?.includes("MS_OAUTH_CLIENT_ID")
+          ? "Microsoft OAuth isn't fully configured yet. Ask the admin to add the Microsoft app credentials."
+          : e.message,
+        variant: "destructive",
+      });
+    } finally { setOutlookBusy(false); }
+  };
+
+  const disconnectOutlook = async () => {
+    if (!confirm("Disconnect your Outlook account from this portal?")) return;
+    setOutlookBusy(true);
+    try {
+      await outlookConnect.disconnect();
+      await refreshOutlook();
+      toast({ title: "Outlook disconnected" });
+    } catch (e: any) {
+      toast({ title: "Disconnect failed", description: e.message, variant: "destructive" });
+    } finally { setOutlookBusy(false); }
+  };
 
   const refresh = async (preserveSelected = false) => {
     setLoading(true);
@@ -111,9 +167,22 @@ export const InboxTab: React.FC = () => {
     <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
-        <div>
+        <div className="space-y-1">
           <div className="text-xs text-muted-foreground uppercase tracking-wide">Your address</div>
-          <div className="font-mono text-base">{mailbox.address}</div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-base">{mailbox.address}</span>
+            {outlook?.connected ? (
+              <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 bg-emerald-500/10 gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Outlook: {outlook.outlook_email || "connected"}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground gap-1">
+                <Link2Off className="w-3 h-3" />
+                Outlook not connected
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
@@ -126,6 +195,24 @@ export const InboxTab: React.FC = () => {
               onKeyDown={(e) => e.key === "Enter" && refresh()}
             />
           </div>
+          {outlook?.connected ? (
+            <Button size="sm" variant="outline" onClick={disconnectOutlook} disabled={outlookBusy}>
+              {outlookBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2Off className="w-3 h-3 mr-1" />}
+              Disconnect Outlook
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+              onClick={connectOutlook}
+              disabled={outlookBusy || (outlook ? !outlook.configured : false)}
+              title={outlook && !outlook.configured ? "Microsoft OAuth not configured by admin yet" : undefined}
+            >
+              {outlookBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2 className="w-3 h-3 mr-1" />}
+              Connect Outlook
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={() => refresh()}><RefreshCcw className="w-3 h-3 mr-1" /> Refresh</Button>
           <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)}><Settings className="w-3 h-3 mr-1" /> Settings</Button>
           <Button size="sm" onClick={() => setComposing({})}><Pencil className="w-3 h-3 mr-1" /> Compose</Button>
