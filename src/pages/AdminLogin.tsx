@@ -61,7 +61,6 @@ const AdminLogin: React.FC = () => {
         to="/"
         className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
       >
-      >
         <ArrowLeft className="w-4 h-4" /> Back to website
       </Link>
       <div className="glass p-8 rounded-2xl max-w-sm w-full">
