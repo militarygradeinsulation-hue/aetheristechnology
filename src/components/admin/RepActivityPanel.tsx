@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { openRepMail } from '@/lib/repMail';
 
 interface LeadRow {
   id: string;
@@ -186,7 +187,17 @@ export const RepActivityPanel: React.FC = () => {
                                     <tr key={l.id} className="border-b border-border/20">
                                       <td className="py-1.5 px-2 font-medium">{l.business_name || '—'}</td>
                                       <td className="py-1.5 px-2">{l.contact_name || '—'}</td>
-                                      <td className="py-1.5 px-2">{l.email || '—'}</td>
+                                      <td className="py-1.5 px-2">
+                                        {l.email ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => openRepMail(l.email!)}
+                                            className="hover:text-amber hover:underline text-left"
+                                          >
+                                            {l.email}
+                                          </button>
+                                        ) : '—'}
+                                      </td>
                                       <td className="py-1.5 px-2">{l.phone || '—'}</td>
                                       <td className="py-1.5 px-2">{l.industry || '—'}</td>
                                       <td className="py-1.5 px-2">{l.location || '—'}</td>
