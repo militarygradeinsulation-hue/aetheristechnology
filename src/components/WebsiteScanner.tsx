@@ -433,7 +433,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <FileDown className="w-3.5 h-3.5" />
-                  Download Preview PDF
+                  {isUnlocked ? 'Download Full Report PDF' : 'Download Preview PDF'}
                 </button>
               </div>
 
