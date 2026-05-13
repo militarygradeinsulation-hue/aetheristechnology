@@ -898,19 +898,35 @@ export const AdminCreationStudio: React.FC = () => {
 
           {/* Topics */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics — click to combine</div>
-              {pickedTopics.length > 0 && (
-                <button
+              <div className="flex items-center gap-2">
+                <Button
                   type="button"
-                  onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
-                  className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
-                >Clear ({pickedTopics.length})</button>
-              )}
+                  size="sm"
+                  variant="outline"
+                  className="h-6 px-2 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                  onClick={refreshAiTopics}
+                  disabled={aiTopicsLoading}
+                  title={`Generate fresh topic ideas with AI for "${topicCategory}"`}
+                >
+                  {aiTopicsLoading
+                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Thinking…</>
+                    : <><Sparkles className="w-3 h-3 mr-1" /> ✨ AI refresh</>}
+                </Button>
+                {pickedTopics.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
+                    className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
+                  >Clear ({pickedTopics.length})</button>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap gap-1 mb-2">
               {['All', ...Object.keys(PREMADE_TOPICS)].map((cat) => {
                 const on = topicCategory === cat;
+                const aiCount = (aiTopics[cat] || []).length;
                 return (
                   <button
                     key={cat}
@@ -919,24 +935,41 @@ export const AdminCreationStudio: React.FC = () => {
                     className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
                       on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
                     }`}
-                  >{cat}</button>
+                  >{cat}{aiCount > 0 && <span className="ml-1 opacity-70">+{aiCount}</span>}</button>
                 );
               })}
             </div>
-            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-              {(topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || [])).map((t) => {
-                const on = pickedTopics.includes(t);
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => toggleTopic(t)}
-                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
-                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
-                    }`}
-                  >{t}</button>
-                );
-              })}
+            <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto">
+              {(() => {
+                const baseTopics = topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || []);
+                const aiForCat = aiTopics[topicCategory] || [];
+                const aiAll = topicCategory === 'All'
+                  ? Object.values(aiTopics).flat()
+                  : aiForCat;
+                // De-dupe while keeping AI ones first so they're discoverable.
+                const seen = new Set<string>();
+                const merged = [...aiAll, ...baseTopics].filter(t => {
+                  if (seen.has(t)) return false; seen.add(t); return true;
+                });
+                return merged.map((t) => {
+                  const on = pickedTopics.includes(t);
+                  const isAi = aiAll.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTopic(t)}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                        on
+                          ? 'bg-amber/15 border-amber text-amber'
+                          : isAi
+                          ? 'bg-amber/5 border-amber/40 text-foreground/90 hover:border-amber hover:text-amber'
+                          : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                      }`}
+                    >{isAi ? <span className="mr-1 opacity-80">✨</span> : null}{t}</button>
+                  );
+                });
+              })()}
             </div>
           </div>
 
