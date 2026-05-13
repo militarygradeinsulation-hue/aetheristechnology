@@ -795,21 +795,40 @@ const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPic
                 </div>
               ) : (
                 filtered.map((l) => (
-                  <button
+                  <div
                     key={l.id}
-                    onClick={() => { onPick(l); setOpen(false); setQuery(""); }}
-                    className="w-full text-left px-3 py-2 hover:bg-muted/50 transition"
+                    className="px-3 py-2 hover:bg-muted/50 transition flex items-center gap-2"
                   >
-                    <div className="text-sm font-semibold truncate">{l.business_name || l.email}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {[l.contact_name, l.email, l.industry, l.location].filter(Boolean).join(" · ")}
-                    </div>
-                  </button>
+                    <button
+                      onClick={() => { onPick(l); setOpen(false); setQuery(""); }}
+                      className="flex-1 min-w-0 text-left"
+                    >
+                      <div className="text-sm font-semibold truncate">{l.business_name || l.email}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {[l.contact_name, l.industry, l.location].filter(Boolean).join(" · ")}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!l.email) return;
+                        openRepMail(l.email, {
+                          subject: l.business_name ? `Quick note re: ${l.business_name}` : "",
+                        });
+                        setOpen(false);
+                        setQuery("");
+                      }}
+                      className="text-xs text-amber hover:underline truncate max-w-[180px]"
+                      title="Open in your email client"
+                    >
+                      {l.email}
+                    </button>
+                  </div>
                 ))
               )}
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Picking a lead opens a pre-filled compose. After you hit Send, you can log the touch + notes against the lead in one click.
+              Click the row to compose in-app · click the email to open it in your Outlook/default mail.
             </p>
           </div>
         </DialogContent>
