@@ -13,19 +13,22 @@ import {
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
-  KIND_META, COMPANY_CAL_BUCKET,
+  KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
+  type CompanyCalendarCategory,
 } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
+const CATEGORIES = Object.keys(CATEGORY_META) as CompanyCalendarCategory[];
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 interface DraftEntry {
   id?: string;
   date: string;
   kind: CompanyCalendarKind;
+  category: CompanyCalendarCategory;
   title: string;
   body: string;
   pinned: boolean;
@@ -34,7 +37,7 @@ interface DraftEntry {
 }
 
 const emptyDraft = (): DraftEntry => ({
-  date: todayISO(), kind: "goal", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
+  date: todayISO(), kind: "goal", category: "manual", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
 });
 
 export const AdminCompanyCalendarPanel: React.FC = () => {
