@@ -509,53 +509,105 @@ const ComposeDialog: React.FC<{
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>New message</DialogTitle>
+          <DialogTitle>{sentSuccess ? "Sent — log this against the lead?" : "New message"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground">From <span className="font-mono">{mailbox.address}</span></div>
-          <Input placeholder="To (comma-separated)" value={to} onChange={(e) => setTo(e.target.value)} />
-          <Input placeholder="Cc (optional)" value={cc} onChange={(e) => setCc(e.target.value)} />
-          <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {attachments.map((a, i) => (
-                <div key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 border rounded bg-muted">
-                  <Paperclip className="w-3 h-3" />
-                  <span>{a.name}</span>
-                  <span className="text-muted-foreground">({Math.round(a.size / 1024)} KB)</span>
-                  <button type="button" onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-muted-foreground hover:text-destructive">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+
+        {linkedLead && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-amber/40 bg-amber/5 px-3 py-2 text-xs">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-amber">
+                <Target className="w-3 h-3" /> Linked lead
+              </div>
+              <div className="truncate font-semibold text-foreground">{linkedLead.business_name || linkedLead.email}</div>
+              <div className="truncate text-muted-foreground">{[linkedLead.contact_name, linkedLead.email].filter(Boolean).join(" · ")}</div>
             </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-          {mailbox.signature && (
-            <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
-          )}
-        </div>
+            {!sentSuccess && (
+              <Button size="sm" variant="ghost" onClick={() => setLinkedLead(null)} className="h-6 w-6 p-0">
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!sentSuccess ? (
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground">From <span className="font-mono">{mailbox.address}</span></div>
+            <Input placeholder="To (comma-separated)" value={to} onChange={(e) => setTo(e.target.value)} />
+            <Input placeholder="Cc (optional)" value={cc} onChange={(e) => setCc(e.target.value)} />
+            <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+            <Textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {attachments.map((a, i) => (
+                  <div key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 border rounded bg-muted">
+                    <Paperclip className="w-3 h-3" />
+                    <span>{a.name}</span>
+                    <span className="text-muted-foreground">({Math.round(a.size / 1024)} KB)</span>
+                    <button type="button" onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-muted-foreground hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            {mailbox.signature && (
+              <div className="text-xs text-muted-foreground">Your signature will be appended automatically.</div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Add a quick note about what you said and check whether this counts as a fresh outreach or a reply you received.
+            </p>
+            <div>
+              <Label className="text-xs">Notes (saved to the lead's history)</Label>
+              <Textarea
+                rows={4}
+                value={logNotes}
+                onChange={(e) => setLogNotes(e.target.value)}
+                placeholder="What did you pitch? Any objections? Next step?"
+              />
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || sending}>
-            {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Paperclip className="w-4 h-4 mr-2" />}
-            Attach
-          </Button>
-          <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending || uploading}>
-            {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-            Save draft
-          </Button>
-          <Button onClick={send} disabled={sending || savingDraft || uploading}>
-            {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-            Send
-          </Button>
+          {!sentSuccess ? (
+            <>
+              <Button variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading || sending}>
+                {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Paperclip className="w-4 h-4 mr-2" />}
+                Attach
+              </Button>
+              <Button variant="outline" onClick={saveDraft} disabled={savingDraft || sending || uploading}>
+                {savingDraft ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                Save draft
+              </Button>
+              <Button onClick={send} disabled={sending || savingDraft || uploading}>
+                {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Send
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={onSent} disabled={logging}>Skip</Button>
+              <Button variant="outline" onClick={() => logAgainstLead("replied")} disabled={logging}>
+                {logging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageCircle className="w-4 h-4 mr-2" />}
+                Log as Received Reply
+              </Button>
+              <Button onClick={() => logAgainstLead("sent")} disabled={logging}>
+                {logging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                Log as Sent (touch +1)
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
