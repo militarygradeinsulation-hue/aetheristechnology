@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 
 const INCLUDES = [
   '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
@@ -29,6 +30,9 @@ interface ToolItem {
   process: string[];
   deliverables: string[];
   exampleLeak: string;
+  standalonePrice: string;
+  standaloneDetail: string;
+  priceId: string;
 }
 
 const TOOL_BUNDLE: ToolItem[] = [
@@ -40,6 +44,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Crawl pages for schema, meta, alt text, Core Web Vitals', 'Score AI-readability (how LLMs parse and quote your site)', 'Compare local/GEO presence vs. competitors'],
     deliverables: ['Page-by-page scorecard with red/amber/green flags', 'Prioritized fix list with effort vs. revenue impact', 'GEO + schema patch recommendations'],
     exampleLeak: '$240K/yr in inbound leads lost because product pages had no schema and were invisible to ChatGPT and Perplexity searches.',
+    standalonePrice: '$149',
+    standaloneDetail: 'one-time · digital footprint snapshot',
+    priceId: 'digital_snapshot_once',
   },
   {
     icon: Database,
@@ -49,6 +56,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['De-duplicate contacts and companies', 'Flag deals stalled >30/60/90 days at each stage', 'Audit stage definitions against actual rep behavior'],
     deliverables: ['Cleaned contact + deal database returned to you', 'Stalled-deal report by rep, stage, and dollar value', 'Rewritten stage exit criteria'],
     exampleLeak: '$1.1M in pipeline marked "Proposal Sent" that had no follow-up activity in 60+ days — quietly dying in the CRM.',
+    standalonePrice: '$79',
+    standaloneDetail: 'one-time · CRM health check',
+    priceId: 'crm_health_check_once',
   },
   {
     icon: ShieldAlert,
@@ -58,6 +68,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Extract positioning claims, value props, and proof points from each asset', 'Map contradictions in language, pricing posture, and ICP', 'Score buyer-confusion risk on each touchpoint'],
     deliverables: ['Contradiction matrix (asset × claim × conflict)', 'Single-source-of-truth message rewrite', 'Sales-deck red-line for the highest-leverage 3 slides'],
     exampleLeak: 'Homepage said "enterprise-grade." Deck said "made for SMB." Proposal quoted enterprise pricing. Buyers walked.',
+    standalonePrice: '$119',
+    standaloneDetail: 'one-time · contradiction matrix',
+    priceId: 'brand_contradiction_finder_once',
   },
   {
     icon: MessagesSquare,
@@ -67,6 +80,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Flag jargon, hedging language, and fear-words', 'Cross-reference site copy against actual buyer objections', 'Score each page for clarity, specificity, and momentum'],
     deliverables: ['Word-by-word red-line of priority pages', 'Replacement vocabulary tied to buyer language', 'CTA copy rewrites with predicted lift'],
     exampleLeak: 'The word "solutions" appeared 47 times on the homepage. Buyers couldn\'t tell what was actually being sold.',
+    standalonePrice: '$79',
+    standaloneDetail: 'one-time · vocabulary red-line',
+    priceId: 'friction_vocabulary_audit_once',
   },
   {
     icon: FileSearch,
@@ -76,6 +92,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Generate the 12 questions a sharp CFO/board member will ask', 'Stress-test your existing answers against operator benchmarks', 'Identify the data you don\'t yet track'],
     deliverables: ['12-question briefing doc with model answers', 'Gap list of metrics you should be tracking but aren\'t', 'KPI dashboard spec for your finance team'],
     exampleLeak: 'CEO couldn\'t answer "what\'s your CAC by channel?" in a board meeting. Lost a $2M follow-on raise.',
+    standalonePrice: '$99',
+    standaloneDetail: 'one-time · CFO briefing doc',
+    priceId: 'strategic_question_engine_once',
   },
   {
     icon: ListChecks,
@@ -85,6 +104,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Structured interview across 4 functional pillars', 'Operator scoring against industry benchmarks', 'Triangulation of leadership answers vs. actual data'],
     deliverables: ['Pillar-by-pillar scorecard (0–100 per area)', 'Top 5 leverage points ranked by ROI', 'Quick-win list executable inside 30 days'],
     exampleLeak: 'Marketing scored 82/100 for activity, 19/100 for attribution. They were spending $40K/mo with no idea what worked.',
+    standalonePrice: '$349',
+    standaloneDetail: 'one-time · operator scorecard',
+    priceId: 'scan_strategy_blueprint_once',
   },
   {
     icon: Mic2,
@@ -94,6 +116,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Pattern-match stalled deals to objection clusters', 'Write outbound + follow-up sequences per persona', 'Build talk-tracks for the 3 most common objections'],
     deliverables: ['7-touch outbound cadence (email + LinkedIn + call)', '5-touch post-quote follow-up sequence', 'Objection-handling cheat sheet for the sales team'],
     exampleLeak: 'Reps stopped following up after touch 2. The data says 80% of closed deals took 5–9 touches. We rebuilt the cadence.',
+    standalonePrice: '$59',
+    standaloneDetail: 'one-time · scripts + cadence',
+    priceId: 'sales_script_pack_once',
   },
   {
     icon: CalendarRange,
@@ -103,6 +128,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Cluster diagnostic findings into 4–6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
     deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer or agency'],
     exampleLeak: 'Founder posted twice a quarter, randomly. We turned the diagnostic into 90 days of content that pre-sold the next engagement.',
+    standalonePrice: '$39',
+    standaloneDetail: 'one-time · 90-day calendar',
+    priceId: 'content_calendar_once',
   },
   {
     icon: Search,
@@ -112,6 +140,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Query ChatGPT, Perplexity, Claude, and Google AI Overviews live', 'Score visibility, accuracy, and sentiment per prompt', 'Identify the source pages each AI is pulling from'],
     deliverables: ['Side-by-side AI visibility report (you vs. competitors)', 'Prompt-by-prompt remediation list', 'GEO content brief for the 5 highest-value prompts'],
     exampleLeak: 'ChatGPT recommended a competitor 9 out of 10 times for their core service category. We knew exactly which 3 pages to fix.',
+    standalonePrice: '$59',
+    standaloneDetail: 'one-time · AI visibility report',
+    priceId: 'scan_full_report_once',
   },
 ];
 
@@ -124,6 +155,7 @@ const NOT_INCLUDED = [
 const DiagnosticPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
   const [openTool, setOpenTool] = useState<string | null>(null);
+  const [buyTool, setBuyTool] = useState<ToolItem | null>(null);
   return (
     <div className="relative min-h-screen">
       <SEOHead
@@ -421,6 +453,24 @@ const DiagnosticPage: React.FC = () => {
                             </div>
                             <p className="text-sm text-foreground/90 italic leading-relaxed">"{t.exampleLeak}"</p>
                           </div>
+                          <div className="mt-4 rounded-md border border-amber/40 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
+                                Just want this one tool?
+                              </div>
+                              <div className="flex items-baseline gap-2">
+                                <span className="font-forensic text-2xl font-bold text-foreground">{t.standalonePrice}</span>
+                                <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">{t.standaloneDetail}</span>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setBuyTool(t); }}
+                              className="bg-amber hover:bg-amber/90 text-background font-bold whitespace-nowrap"
+                            >
+                              Buy {t.standalonePrice} <ArrowRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -455,6 +505,28 @@ const DiagnosticPage: React.FC = () => {
         <Footer />
       </div>
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      {buyTool && (
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setBuyTool(null)}>
+          <div className="bg-background rounded-md max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative border border-amber/40" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setBuyTool(null)}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">À la carte purchase</div>
+            <h3 className="font-forensic text-xl font-bold text-foreground mb-1">{buyTool.name}</h3>
+            <p className="text-xs text-muted-foreground mb-5">{buyTool.standalonePrice} · {buyTool.standaloneDetail}</p>
+            <StripeEmbeddedCheckout
+              priceId={buyTool.priceId}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=tool_purchase`}
+              metadata={{ tool_type: buyTool.priceId, source: 'diagnostic_tool_suite' }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
