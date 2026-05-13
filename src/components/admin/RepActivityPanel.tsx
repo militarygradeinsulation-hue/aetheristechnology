@@ -190,7 +190,7 @@ export const RepActivityPanel: React.FC = () => {
                                       <td className="py-1.5 px-2">
                                         {l.email ? (
                                           <a
-                                            href={`mailto:${l.email}`}
+                                            href="#" onClick={(e)=>{e.preventDefault(); l.email && openRepMail(l.email);}}
                                             className="hover:text-amber hover:underline text-left"
                                           >
                                             {l.email}
