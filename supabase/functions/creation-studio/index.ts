@@ -255,6 +255,76 @@ Return ONLY a JSON object: { "topics": ["...", "...", ...] }. No prose.`;
       return json({ topics });
     }
 
+    if (action === "generate_ideas") {
+      // Returns fresh titles + topics + recipes in one shot for the Idea Mixer.
+      const key = Deno.env.get("LOVABLE_API_KEY");
+      if (!key) return json({ error: "LOVABLE_API_KEY missing" }, 500);
+      const excludeTitles = Array.isArray(body.excludeTitles) ? (body.excludeTitles as string[]).slice(0, 60) : [];
+      const excludeTopics = Array.isArray(body.excludeTopics) ? (body.excludeTopics as string[]).slice(0, 80) : [];
+      const excludeRecipes = Array.isArray(body.excludeRecipes) ? (body.excludeRecipes as string[]).slice(0, 40) : [];
+
+      const sys = `You are the Aetheris Business Forensics Operator. You generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
+
+      const user = `Generate fresh ideas for an Idea Mixer used to compose 30-90s vertical videos.
+
+Return ONLY a JSON object with this exact shape:
+{
+  "titles": ["...", "...", ...],   // 8 punchy video TITLES, 3-7 words each, headline case, no period
+  "topics": ["...", "...", ...],   // 10 specific TOPIC IDEAS, ONE SENTENCE each, ideally with a number/dollar figure
+  "recipes": [ { "label": "...", "text": "..." }, ... ]  // 5 PROMPT RECIPES, label is 2-4 words, text is a 1-2 sentence structural template (e.g. "Cold open with a leak stat. Name the failure pattern. Show the operator fix. CTA to /diagnostic.")
+}
+
+Avoid duplicating any of these existing items.
+
+Existing titles to avoid:
+${excludeTitles.map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+
+Existing topics to avoid:
+${excludeTopics.slice(0, 40).map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+
+Existing recipe labels to avoid:
+${excludeRecipes.map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+
+No prose. JSON only.`;
+
+      const aiRes = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: sys },
+            { role: "user", content: user },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (!aiRes.ok) {
+        const t = await aiRes.text();
+        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
+        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
+        return json({ error: `AI gateway: ${t.slice(0, 240)}` }, 502);
+      }
+      const aiData = await aiRes.json();
+      const content = aiData.choices?.[0]?.message?.content || "{}";
+      let parsed: { titles?: string[]; topics?: string[]; recipes?: { label?: string; text?: string }[] } = {};
+      try { parsed = JSON.parse(content); } catch { parsed = {}; }
+
+      const cleanStr = (s: unknown) => (typeof s === "string" ? s.trim().replace(/^["'-]+|["']+$/g, "") : "");
+
+      const titles = (parsed.titles || [])
+        .map(cleanStr)
+        .filter((t) => t.length > 3 && t.length < 80 && !excludeTitles.includes(t));
+      const topics = (parsed.topics || [])
+        .map(cleanStr)
+        .filter((t) => t.length > 8 && t.length < 240 && !excludeTopics.includes(t));
+      const recipes = (parsed.recipes || [])
+        .map((r) => ({ label: cleanStr(r?.label), text: cleanStr(r?.text) }))
+        .filter((r) => r.label.length > 1 && r.text.length > 10 && !excludeRecipes.includes(r.label));
+
+      return json({ titles, topics, recipes });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("creation-studio error:", e);
