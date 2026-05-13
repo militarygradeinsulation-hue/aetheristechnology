@@ -111,6 +111,12 @@ export const LeadsBoard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
+  // My Leads organize controls
+  const [mineGroupBy, setMineGroupBy] = useState<'stage' | 'industry' | 'score' | 'contact'>('stage');
+  const [mineSort, setMineSort] = useState<'score' | 'recent' | 'oldest' | 'touches'>('score');
+  const [mineSearch, setMineSearch] = useState('');
+  const [mineMinScore, setMineMinScore] = useState('');
+  const [mineContactState, setMineContactState] = useState<'all' | 'contacted' | 'not_contacted' | 'connected'>('all');
   const [bulkScanning, setBulkScanning] = useState(false);
   const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
