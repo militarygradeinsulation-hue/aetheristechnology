@@ -31,6 +31,60 @@ export const InboxTab: React.FC = () => {
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [outlook, setOutlook] = useState<OutlookStatus | null>(null);
+  const [outlookBusy, setOutlookBusy] = useState(false);
+
+  const refreshOutlook = async () => {
+    try { setOutlook(await outlookConnect.getStatus()); }
+    catch (e: any) { console.warn("outlook status", e?.message); }
+  };
+
+  useEffect(() => { refreshOutlook(); }, []);
+
+  // If the OAuth popup posts back, refresh status
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e?.data?.type === "outlook_oauth") {
+        refreshOutlook();
+        if (e.data.ok) toast({ title: "Outlook connected" });
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const connectOutlook = async () => {
+    setOutlookBusy(true);
+    try {
+      const url = await outlookConnect.getAuthUrl();
+      const w = window.open(url, "outlook_oauth", "width=520,height=720");
+      if (!w) {
+        // popup blocked — fall back to full redirect
+        window.location.href = url;
+      }
+    } catch (e: any) {
+      toast({
+        title: "Couldn't start Outlook connection",
+        description: e.message?.includes("MS_OAUTH_CLIENT_ID")
+          ? "Microsoft OAuth isn't fully configured yet. Ask the admin to add the Microsoft app credentials."
+          : e.message,
+        variant: "destructive",
+      });
+    } finally { setOutlookBusy(false); }
+  };
+
+  const disconnectOutlook = async () => {
+    if (!confirm("Disconnect your Outlook account from this portal?")) return;
+    setOutlookBusy(true);
+    try {
+      await outlookConnect.disconnect();
+      await refreshOutlook();
+      toast({ title: "Outlook disconnected" });
+    } catch (e: any) {
+      toast({ title: "Disconnect failed", description: e.message, variant: "destructive" });
+    } finally { setOutlookBusy(false); }
+  };
 
   const refresh = async (preserveSelected = false) => {
     setLoading(true);
