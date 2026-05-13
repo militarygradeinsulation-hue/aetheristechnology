@@ -826,7 +826,7 @@ const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPic
                         setOpen(false);
                         setQuery("");
                       }}
-                      className="text-xs text-amber hover:underline truncate max-w-[180px]"
+                      className="text-xs text-amber hover:underline truncate max-w-[320px] shrink-0"
                       title="Open in your email client"
                     >
                       {l.email}
