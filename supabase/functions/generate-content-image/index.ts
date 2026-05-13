@@ -166,6 +166,20 @@ COMPOSITION RULES:
     const publicUrl = urlData.publicUrl;
     console.log("Image uploaded:", publicUrl);
 
+    // Best-effort: log to shared admin image library so it shows in the Video Creator's Image Library
+    try {
+      await supabase.from("admin_image_studio").insert({
+        prompt: typeof prompt === "string" ? prompt.slice(0, 2000) : "",
+        url: publicUrl,
+        storage_path: storagePath,
+        source: "generated",
+        model: "google/gemini-3.1-flash-image-preview",
+        metadata: { from: "generate-content-image", library_item_id: library_item_id ?? null, post_index: post_index ?? null, style: style ?? null },
+      });
+    } catch (logErr) {
+      console.warn("admin_image_studio log failed (non-fatal)", logErr);
+    }
+
     return new Response(JSON.stringify({ image_url: publicUrl, storage_path: storagePath }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
