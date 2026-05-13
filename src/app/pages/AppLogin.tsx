@@ -35,7 +35,7 @@ const AppLogin = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
-      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.85} density={0.7} />
+      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
       <div className="w-full max-w-md relative z-10">
         <div className="flex items-center gap-2 justify-center mb-8">
           <Activity className="h-6 w-6 text-primary" />
