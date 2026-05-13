@@ -189,18 +189,40 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <CardTitle className="font-display flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-amber" /> {monthLabel}
+              <CalendarIcon className="w-5 h-5 text-amber" />
+              {view === "month"
+                ? monthLabel
+                : dayCursor.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             </CardTitle>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}>
+            <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex rounded border border-border overflow-hidden mr-1">
+                <button
+                  onClick={() => setView("month")}
+                  className={`text-xs px-2.5 py-1 ${view === "month" ? "bg-amber text-background" : "bg-card text-muted-foreground hover:text-foreground"}`}
+                >Month</button>
+                <button
+                  onClick={() => { setView("day"); setDayCursor(new Date()); }}
+                  className={`text-xs px-2.5 py-1 ${view === "day" ? "bg-amber text-background" : "bg-card text-muted-foreground hover:text-foreground"}`}
+                >Day</button>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => {
+                if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
+                else setDayCursor(addDays(dayCursor, -1));
+              }}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>Today</Button>
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}>
+              <Button variant="outline" size="sm" onClick={() => {
+                const now = new Date();
+                if (view === "month") setCursor(now); else setDayCursor(now);
+              }}>Today</Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
+                else setDayCursor(addDays(dayCursor, 1));
+              }}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
-              <Button size="sm" className="bg-amber text-background hover:bg-amber/90 ml-2" onClick={() => openCreate(new Date())}>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90 ml-2" onClick={() => openCreate(view === "day" ? dayCursor : new Date())}>
                 <Plus className="w-4 h-4 mr-1" /> New
               </Button>
             </div>
