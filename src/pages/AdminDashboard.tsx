@@ -29,6 +29,7 @@ import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
 import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
 import { AdminCareersTest } from '@/components/admin/AdminCareersTest';
 import { AdminCareersPanel } from '@/components/admin/AdminCareersPanel';
+import AdminHiresOnboardingPanel from '@/components/admin/AdminHiresOnboardingPanel';
 import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
 import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
 import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
@@ -151,6 +152,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'insights', label: 'AI Insights', icon: Brain },
     { key: 'events', label: 'Campaign', icon: Megaphone },
     { key: 'careers', label: 'Careers', icon: Briefcase },
+    { key: 'hires', label: 'Hires & Onboarding', icon: UserPlus },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
@@ -441,6 +443,7 @@ const AdminDashboard: React.FC = () => {
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;
       case 'careers': return <AdminCareersPanel />;
+      case 'hires': return <AdminHiresOnboardingPanel />;
       case 'mailboxes': return <AdminMailboxesPanel />;
       case 'seo': return <SEOOptimizer />;
       case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
