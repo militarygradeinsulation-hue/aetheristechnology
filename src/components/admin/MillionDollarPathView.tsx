@@ -50,7 +50,7 @@ export const MillionDollarPathView: React.FC = () => {
         title: `🎯 $1M in 90 Days — Sprint Begins`,
         body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${retainers} Retainers (mo1) + ${recurringMonths} recurring retainer-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
         pinned: true,
-        color: "#F2A623",
+        color: "cat:kickoff_90day",
         ai_plan: {
           summary: "$1M in 90 days operator sprint kickoff.",
           tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.retainersToClose} closes needed`],
