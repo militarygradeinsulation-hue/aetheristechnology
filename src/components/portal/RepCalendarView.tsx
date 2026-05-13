@@ -53,6 +53,8 @@ interface Props {
 export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) => {
   const { toast } = useToast();
   const [cursor, setCursor] = useState(() => new Date());
+  const [view, setView] = useState<"month" | "day">("month");
+  const [dayCursor, setDayCursor] = useState<Date>(() => new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [activeLeads, setActiveLeads] = useState<LeadSummary[]>([]);
   const [leadsById, setLeadsById] = useState<Record<string, LeadSummary>>({});
