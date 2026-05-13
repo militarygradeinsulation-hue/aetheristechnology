@@ -6,7 +6,7 @@ import {
   List, LayoutGrid, CalendarRange, Lock, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listCompanyCalendar, KIND_META, type CompanyCalendarEntry } from "@/lib/companyCalendar";
+import { listCompanyCalendar, KIND_META, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
