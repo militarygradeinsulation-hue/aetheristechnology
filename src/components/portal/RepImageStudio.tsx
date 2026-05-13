@@ -37,6 +37,7 @@ export const RepImageStudio: React.FC = () => {
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
 
   const invoke = async (body: Record<string, unknown>) => {
     const token = getPortalToken();
@@ -140,11 +141,33 @@ export const RepImageStudio: React.FC = () => {
       <div className="glass p-6 rounded-xl space-y-4">
         <div className="flex items-center gap-2">
           <Wand2 className="w-5 h-5 text-amber" />
-          <h2 className="text-xl font-bold text-foreground font-display">Art Studio</h2>
+          <h2 className="text-xl font-bold text-foreground font-display">Personal Creation Studio</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Generate on-brand images and infographics to send your leads. Anything you make is saved here — download or copy a link to share.
+          Generate on-brand images and infographics to send your leads. Upload a photo of yourself to use as a base for personalized graphics, headshots, or pitch visuals — anything you make is saved here.
         </p>
+
+        {/* Upload Your Photo CTA */}
+        <div className="rounded-lg border border-amber/30 bg-amber/[0.04] p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-2 text-sm flex-1">
+            <ImageIcon className="w-4 h-4 text-amber shrink-0" />
+            <span className="text-foreground font-medium">Upload a photo of yourself</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">— use it as a base for branded portraits, social posts, or LinkedIn graphics</span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => portraitRef.current?.click()}
+            className="border-amber/40 text-amber hover:bg-amber/10"
+          >
+            <Upload className="w-3.5 h-3.5 mr-1" /> Upload Your Photo
+          </Button>
+          <input
+            ref={portraitRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); }}
+          />
+        </div>
 
         {editTarget && (
           <div className="flex items-center gap-3 p-3 rounded-md border border-amber/30 bg-amber/5">

@@ -148,6 +148,7 @@ const Row: React.FC<{ icon: React.ReactNode; label: string; value: string; accen
 
 export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) => {
   const showFullSplit = audience !== 'rep';
+  const [months, setMonths] = React.useState(12);
 
   return (
     <div className="space-y-5">
@@ -166,6 +167,22 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           </p>
         </CardHeader>
         <CardContent>
+          {/* Months projection slider — applies to recurring math + combined-deal example */}
+          <div className="mb-5 rounded-lg border border-amber/30 bg-background/40 p-4">
+            <label className="text-[10px] text-muted-foreground block mb-2 font-mono uppercase tracking-wider">
+              Project recurring revenue over: <span className="text-amber font-bold">{months} {months === 1 ? 'month' : 'months'}</span>
+            </label>
+            <input
+              type="range" min={1} max={36} step={1}
+              value={months}
+              onChange={(e) => setMonths(Number(e.target.value))}
+              className="w-full accent-amber"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-1 font-mono">
+              <span>1 mo</span><span>12 mo</span><span>24 mo</span><span>36 mo</span>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FLAGSHIPS.map((f) => (
               <div key={f.key} className="rounded-lg border border-amber/30 bg-background/40 p-5">
@@ -221,7 +238,22 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
                       <span className="text-amber font-bold">{fmtUsd(f.split.rep * 3)}</span> rep over 3-month minimum
                     </div>
                     <div className="text-sm text-foreground">
-                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * 12)}</span> rep if client stays a full year
+                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * months)}</span> rep over {months} {months === 1 ? 'month' : 'months'}
+                      {showFullSplit && (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          · partner {fmtUsd(f.split.partner * months)} · co {fmtUsd(f.split.company * months)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {!f.recurring && (
+                  <div className="mt-4 rounded-md border border-amber/30 bg-amber/10 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-amber">
+                      <Calendar className="w-3 h-3" /> Stacked over {months} {months === 1 ? 'month' : 'months'}
+                    </div>
+                    <div className="text-sm text-foreground">
+                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * months)}</span> rep if you close 1/mo for {months} {months === 1 ? 'month' : 'months'}
                     </div>
                   </div>
                 )}
@@ -232,30 +264,30 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           {/* Combined-deal example */}
           <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
             <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Full-stack close — what one client is worth in 12 months
+              <TrendingUp className="w-3.5 h-3.5" /> Full-stack close — what one client is worth in {months} {months === 1 ? 'month' : 'months'}
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Diagnostic ($18,000 one-time) + Retainer ($15,000/mo × 12 months) ={' '}
-              <span className="text-foreground font-semibold">$198,000 in client revenue</span>.
+              Diagnostic ({fmtUsd(FLAGSHIPS[0].priceCents)} one-time) + Retainer ({fmtUsd(FLAGSHIPS[1].priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
+              <span className="text-foreground font-semibold">{fmtUsd(FLAGSHIPS[0].priceCents + FLAGSHIPS[1].priceCents * months)} in client revenue</span>.
             </p>
             {showFullSplit ? (
               <div className="grid sm:grid-cols-3 gap-3">
                 <div className="rounded-md border border-border/50 bg-background/60 p-3">
                   <div className="text-[10px] font-mono uppercase text-muted-foreground">Company</div>
                   <div className="text-xl font-bold text-foreground">
-                    {fmtUsd(FLAGSHIPS[0].split.company + FLAGSHIPS[1].split.company * 12)}
+                    {fmtUsd(FLAGSHIPS[0].split.company + FLAGSHIPS[1].split.company * months)}
                   </div>
                 </div>
                 <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                   <div className="text-[10px] font-mono uppercase text-muted-foreground">Rep</div>
                   <div className="text-xl font-bold text-amber">
-                    {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * 12)}
+                    {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * months)}
                   </div>
                 </div>
                 <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                   <div className="text-[10px] font-mono uppercase text-muted-foreground">Partner</div>
                   <div className="text-xl font-bold text-amber">
-                    {fmtUsd(FLAGSHIPS[0].split.partner + FLAGSHIPS[1].split.partner * 12)}
+                    {fmtUsd(FLAGSHIPS[0].split.partner + FLAGSHIPS[1].split.partner * months)}
                   </div>
                 </div>
               </div>
@@ -263,10 +295,10 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
               <div className="rounded-md border border-amber/40 bg-amber/10 p-4 text-center">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">You take home</div>
                 <div className="text-4xl font-bold text-amber leading-tight">
-                  {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * 12)}
+                  {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * months)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  per full-stack client over their first 12 months
+                  per full-stack client over {months} {months === 1 ? 'month' : 'months'}
                 </div>
               </div>
             )}
