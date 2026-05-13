@@ -1042,7 +1042,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 <>
                   {lead.contact_name && <span> · </span>}
                   <a
-                    href="#" onClick={(e)=>{e.preventDefault();lead.emailhref={`mailto:${lead.email}`}href={`mailto:${lead.email}`}openRepMail(lead.email);}}
+                    href="#" onClick={(e)=>{e.preventDefault();e.stopPropagation();if(lead.email)openRepMail(lead.email);}}
                     className="hover:text-amber hover:underline"
                   >
                     {lead.email}
