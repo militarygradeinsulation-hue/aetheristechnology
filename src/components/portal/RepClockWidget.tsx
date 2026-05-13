@@ -5,7 +5,7 @@ import { Clock, Play, Square, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { portalTimeclock, formatDuration, type TimeEntry } from "@/lib/portalTimeclock";
 
-export const RepClockWidget: React.FC = () => {
+export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const [open, setOpen] = useState<TimeEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
