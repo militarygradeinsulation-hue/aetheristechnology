@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -740,7 +741,7 @@ export const AdminCareersPanel: React.FC = () => {
                           )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
+                          <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(a.candidate_email);}} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
                           {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
                           <span>Applied {fmt(a.created_at)}</span>
                         </div>
@@ -946,7 +947,7 @@ export const AdminCareersPanel: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <div className="text-xs text-muted-foreground uppercase tracking-wide">Email</div>
-                    <a href={`mailto:${detailAttempt.candidate_email}`} className="text-sky-300 hover:underline flex items-center gap-1">
+                    <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(detailAttempt.candidate_email);}} className="text-sky-300 hover:underline flex items-center gap-1">
                       <Mail className="w-3 h-3" /> {detailAttempt.candidate_email}
                     </a>
                   </div>

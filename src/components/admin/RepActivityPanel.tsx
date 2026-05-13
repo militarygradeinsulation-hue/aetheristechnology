@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
