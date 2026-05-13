@@ -115,7 +115,7 @@ export const MillionDollarPathView: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="grid md:grid-cols-3 gap-3">
-          <RoleCard role="Aaron (Operator)" tone="amber" lines={[
+          <RoleCard role="Joseph (Operator)" tone="amber" lines={[
             "2 standups/day (8am + 4pm, ≤10 min)",
             "10 partnership outreaches/week",
             "Personally close every deal >$25k",
@@ -203,7 +203,7 @@ export const MillionDollarPathView: React.FC = () => {
           <TriggerCard when="End of Week 7 < $400k" then="Emergency offer-mix call. Discount Diagnostic to $14k for 14 days OR add a $9k self-serve tier." />
           <TriggerCard when="Any rep <$0 closed by Day 30" then="Move them to Team-2 SDR-only role or terminate. Don't carry dead weight 90 days." />
           <TriggerCard when="MRR not building by Week 8" then="Bundle Diagnostic+3-month retainer for $39k flat. Force the recurring conversion." />
-          <TriggerCard when="Pipeline <$300k by Week 5" then="Aaron pauses operator work for 5 days, runs outbound himself. Lead from the front." />
+          <TriggerCard when="Pipeline <$300k by Week 5" then="Joseph pauses operator work for 5 days, runs outbound himself. Lead from the front." />
           <TriggerCard when="Churn risk on any retainer" then="Brandon does a save call same week. Discount mo+1 by 20% to retain. Never let one cancel quietly." />
         </CardContent>
       </Card>
