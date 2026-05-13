@@ -166,7 +166,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FLAGSHIPS.map((f) => (
               <div key={f.key} className="rounded-lg border border-amber/30 bg-background/40 p-5">
                 <div className="flex items-start justify-between gap-2 mb-1">
