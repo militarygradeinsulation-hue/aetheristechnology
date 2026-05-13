@@ -188,13 +188,12 @@ export const RepActivityPanel: React.FC = () => {
                                       <td className="py-1.5 px-2">{l.contact_name || '—'}</td>
                                       <td className="py-1.5 px-2">
                                         {l.email ? (
-                                          <button
-                                            type="button"
-                                            onClick={() => openRepMail(l.email!)}
+                                          <a
+                                            href={`mailto:${l.email}`}
                                             className="hover:text-amber hover:underline text-left"
                                           >
                                             {l.email}
-                                          </button>
+                                          </a>
                                         ) : '—'}
                                       </td>
                                       <td className="py-1.5 px-2">{l.phone || '—'}</td>

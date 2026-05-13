@@ -815,21 +815,16 @@ const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPic
                         {[l.contact_name, l.industry, l.location].filter(Boolean).join(" · ")}
                       </div>
                     </button>
-                    <button
+                    <a
+                      href={`mailto:${l.email}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!l.email) return;
-                        openRepMail(l.email, {
-                          subject: l.business_name ? `Quick note re: ${l.business_name}` : "",
-                        });
-                        setOpen(false);
-                        setQuery("");
                       }}
                       className="text-xs text-amber hover:underline truncate max-w-[320px] shrink-0"
                       title="Open in your email client"
                     >
                       {l.email}
-                    </button>
+                    </a>
                   </div>
                 ))
               )}
