@@ -20,8 +20,9 @@ import {
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { openRepMail } from '@/lib/repMail';
 import { createCalendarEvent } from '@/lib/portalCalendar';
+
+function nextBusinessMorningISO(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   // skip Sat (6) → Mon, Sun (0) → Mon
@@ -30,11 +31,6 @@ import { createCalendarEvent } from '@/lib/portalCalendar';
   d.setHours(9, 0, 0, 0);
   return d.toISOString();
 }
-
-const mailHandler = (email: string) => (e: React.MouseEvent) => {
-  e.preventDefault();
-  openRepMail(email);
-};
 
 function scoreTier(score: number): { label: string; tone: string; advice: string } {
   if (score >= 80) return { label: 'HOT — call today', tone: 'text-emerald-400', advice: 'Top-tier fit. Phone first, email second. These close fastest.' };
