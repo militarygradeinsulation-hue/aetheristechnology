@@ -88,20 +88,31 @@ Deno.serve(async (req) => {
     const pinToken = await signToken(exp, SUPABASE_SERVICE_ROLE_KEY);
 
     // 2. Magic-link token_hash for a real Supabase Auth session.
+    // Race against a short timeout — Supabase auth admin endpoints
+    // (listUsers + generateLink) can take 10s+ under load and were
+    // making PIN login feel broken. The admin UI works without this
+    // (admin-data edge function uses the pin-token), so we treat the
+    // session bootstrap as best-effort.
     let tokenHash: string | null = null;
-    try {
+    const bootstrap = (async () => {
       await ensureAdminUser(admin);
       const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
         type: "magiclink",
         email: ADMIN_EMAIL,
       });
       if (linkErr) throw linkErr;
-      // Supabase returns `properties.hashed_token` for magic links.
-      tokenHash = (linkData?.properties as any)?.hashed_token || null;
+      return (linkData?.properties as any)?.hashed_token || null;
+    })();
+    try {
+      tokenHash = await Promise.race<string | null>([
+        bootstrap,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+      ]);
     } catch (sessionErr) {
-      // Log but do not block PIN login — the dashboard can still call admin-data.
       console.error("admin-pin-login session-issue error:", sessionErr);
     }
+    // Don't await leftover bootstrap — let it finish in the background.
+    bootstrap.catch((e) => console.error("admin-pin-login bg bootstrap error:", e));
 
     return new Response(
       JSON.stringify({ ok: true, token: pinToken, tokenHash, email: ADMIN_EMAIL }),
