@@ -3,6 +3,7 @@ import { ChevronLeft, Mail, Phone, Building2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMoney, type CrmContact, type CrmDataset } from "@/lib/crm";
 import { InteractionTimeline } from "./InteractionTimeline";
+import { openRepMail } from "@/lib/repMail";
 
 interface Props {
   contact: CrmContact;
