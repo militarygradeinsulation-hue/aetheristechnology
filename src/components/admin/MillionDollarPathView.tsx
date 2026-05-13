@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Target, TrendingUp, Phone, Calendar, FileText, DollarSign, Users, AlertTriangle, CheckCircle2, Flame, Sparkles } from "lucide-react";
-import { buildScenario, buildWeeks, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
+import { buildScenario, buildWeeks, buildDailyGoals, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
 import { OfferStackSection, TargetMarketSection, OutreachSection, SalesProcessSection, TrainingMatrixSection, KpiScoreboardSection } from "@/components/admin/WarPlanSections";
 import { upsertCompanyEntry } from "@/lib/companyCalendar";
 import { toast } from "@/hooks/use-toast";
