@@ -140,7 +140,14 @@ export const MillionDollarPathView: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* WEEKLY WALK-THROUGH */}
+      {/* WAR PLAN — Operational Sections (offers, ICP, scripts, sales, training) */}
+      <OfferStackSection />
+      <TargetMarketSection />
+      <OutreachSection />
+      <SalesProcessSection />
+      <TrainingMatrixSection />
+
+
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
