@@ -18,11 +18,12 @@ const FREE_EMAIL_DOMAINS = new Set([
 ]);
 
 // Email 1 is ALWAYS this exact template. No AI personalization.
-const EMAIL_1_SUBJECT = "Saw this and thought of you";
-const EMAIL_1_BODY_HTML = `<p>Most business owners don't realize how much revenue they lose to broken follow-up and invisible brand leaks.</p>
-<p>I put together a short walkthrough showing exactly what I mean:</p>
-<p><a href="https://vimeo.com/1185340441?fl=pl&fe=sh">https://vimeo.com/1185340441?fl=pl&fe=sh</a></p>
-<p>Worth a look if you're curious.</p>
+const EMAIL_1_SUBJECT = "Can I use it on you? You may like it.";
+const EMAIL_1_BODY_HTML = `<p>Obviously I'm talking about our proprietary secret system.</p>
+<p>Every other AI shop sells you tools.</p>
+<p>We use ours on you. Permission of course..</p>
+<p>Watch with popcorn. Netflix and learn.. You've never seen this before...</p>
+<p><a href="https://businessforensics.tech/diagnostic">https://businessforensics.tech/diagnostic</a></p>
 <p>Joseph<br>
 <a href="https://aetheris.technology/">aetheris.technology</a></p>`;
 
