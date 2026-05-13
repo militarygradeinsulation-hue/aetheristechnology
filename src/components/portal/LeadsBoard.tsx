@@ -197,6 +197,73 @@ export const LeadsBoard: React.FC = () => {
     return g;
   }, [mine]);
 
+  // Filter + sort + group "My Leads" by the rep's chosen organization mode
+  const mineGroups = useMemo(() => {
+    const q = mineSearch.trim().toLowerCase();
+    const minScore = mineMinScore ? Number(mineMinScore) : 0;
+    const CONTACTED_STATUSES: LeadStatus[] = ['outreach','touched','replied','meeting','won','lost'];
+    const CONNECTED_STATUSES: LeadStatus[] = ['replied','meeting','won'];
+    const filtered = mine.filter(l => {
+      if (minScore && (l.score ?? 0) < minScore) return false;
+      if (mineContactState === 'contacted' && !CONTACTED_STATUSES.includes(l.status) && (l.touch_count ?? 0) === 0) return false;
+      if (mineContactState === 'not_contacted' && (CONTACTED_STATUSES.includes(l.status) || (l.touch_count ?? 0) > 0)) return false;
+      if (mineContactState === 'connected' && !CONNECTED_STATUSES.includes(l.status)) return false;
+      if (!q) return true;
+      const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location, l.notes]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+    const sorted = [...filtered].sort((a, b) => {
+      if (mineSort === 'score') return (b.score ?? 0) - (a.score ?? 0);
+      if (mineSort === 'touches') return (b.touch_count ?? 0) - (a.touch_count ?? 0);
+      const at = (x: RepLead) => new Date(x.last_touched_at || x.created_at).getTime();
+      return mineSort === 'recent' ? at(b) - at(a) : at(a) - at(b);
+    });
+
+    type Group = { key: string; label: string; color: string; items: RepLead[] };
+    const groups: Group[] = [];
+    const push = (key: string, label: string, color: string, items: RepLead[]) => {
+      if (items.length) groups.push({ key, label, color, items });
+    };
+
+    if (mineGroupBy === 'stage') {
+      STATUSES.forEach(s => push(s, STATUS_LABEL[s], STATUS_COLOR[s], sorted.filter(l => l.status === s)));
+    } else if (mineGroupBy === 'industry') {
+      const map = new Map<string, RepLead[]>();
+      sorted.forEach(l => {
+        const k = l.industry?.trim() || 'Unspecified';
+        if (!map.has(k)) map.set(k, []);
+        map.get(k)!.push(l);
+      });
+      [...map.entries()].sort((a, b) => b[1].length - a[1].length)
+        .forEach(([k, items]) => push(k, k, 'bg-amber/15 text-amber border-amber/30', items));
+    } else if (mineGroupBy === 'score') {
+      const buckets: Array<[string, string, string, (n: number) => boolean]> = [
+        ['hot', 'HOT (80+)', 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', n => n >= 80],
+        ['warm', 'WARM (60–79)', 'bg-amber/15 text-amber border-amber/40', n => n >= 60 && n < 80],
+        ['shot', 'WORTH A SHOT (40–59)', 'bg-amber/10 text-amber/80 border-amber/20', n => n >= 40 && n < 60],
+        ['low', 'LOW PRIORITY (<40)', 'bg-muted text-muted-foreground border-border', n => n < 40],
+      ];
+      buckets.forEach(([k, label, color, test]) =>
+        push(k, label, color, sorted.filter(l => test(l.score ?? 0))));
+    } else {
+      push('not_contacted', 'NOT CONTACTED YET',
+        'bg-blue-500/15 text-blue-400 border-blue-500/30',
+        sorted.filter(l => (l.touch_count ?? 0) === 0 && !CONTACTED_STATUSES.includes(l.status)));
+      push('contacted', 'CONTACTED — NO REPLY',
+        'bg-amber/15 text-amber border-amber/30',
+        sorted.filter(l => ((l.touch_count ?? 0) > 0 || ['outreach','touched'].includes(l.status))
+          && !CONNECTED_STATUSES.includes(l.status) && l.status !== 'lost' && l.status !== 'dead'));
+      push('connected', 'CONNECTED / IN MOTION',
+        'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+        sorted.filter(l => CONNECTED_STATUSES.includes(l.status)));
+      push('closed', 'CLOSED / DEAD',
+        'bg-muted text-muted-foreground border-border',
+        sorted.filter(l => l.status === 'lost' || l.status === 'dead'));
+    }
+    return { groups, totalShown: filtered.length };
+  }, [mine, mineGroupBy, mineSort, mineSearch, mineMinScore, mineContactState]);
+
   const scanCandidates = useMemo(
     () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
     [mine]
