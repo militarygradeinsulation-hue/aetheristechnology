@@ -351,12 +351,29 @@ export const AdminCreationStudio: React.FC = () => {
   const musicBufferRef = useRef<ArrayBuffer | null>(null);
 
   const MUSIC_PRESETS: { label: string; text: string }[] = [
-    { label: 'Forensic tension',  text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. Investigative thriller. No vocals. Loopable.' },
-    { label: 'Operator hustle',   text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Focused, blunt, founder-energy. No vocals.' },
-    { label: 'Boardroom power',   text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
-    { label: 'Late-night noir',   text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. Late-night detective mood. No vocals.' },
-    { label: 'Documentary slow',  text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. Reflective, serious. No vocals.' },
-    { label: 'Trailer drop',      text: 'Cinematic trailer cue: low rumble, riser, single hard hit at 8s, then sustained tension. No vocals.' },
+    { label: 'Forensic tension',     text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. Investigative thriller. No vocals. Loopable.' },
+    { label: 'Operator hustle',      text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Focused, blunt, founder-energy. No vocals.' },
+    { label: 'Boardroom power',      text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
+    { label: 'Late-night noir',      text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. Late-night detective mood. No vocals.' },
+    { label: 'Documentary slow',     text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. Reflective, serious. No vocals.' },
+    { label: 'Trailer drop',         text: 'Cinematic trailer cue: low rumble, riser, single hard hit at 8s, then sustained tension. No vocals.' },
+    { label: 'Heist clock',          text: 'Pulsing electronic heist score. Tight kick, ticking hi-hats, plucked synth ostinato, rising bass arp. Tense countdown energy. No vocals. Loopable.' },
+    { label: 'Investigation lo-fi',  text: 'Detective lo-fi underscore. Brushed drums, upright bass, muted trumpet stabs, vinyl crackle. Smoky after-hours mood. No vocals.' },
+    { label: 'Crime scene ambient',  text: 'Dark cinematic ambient. Sub drones, distant evidence-bag rustle, single piano notes, faint police radio static. Eerie, forensic. No vocals.' },
+    { label: 'Money on the line',    text: 'High-stakes finance trailer. Driving 16th-note strings, anvil hits, brass swells, war-room urgency. No vocals.' },
+    { label: 'Slow burn build',      text: 'Eight-bar slow-burn build. Sparse start with cello and piano, layering strings and percussion until a single decisive snare hit. Dramatic. No vocals.' },
+    { label: 'Founder grind',        text: 'Energetic deep-focus instrumental. Driving four-on-the-floor kick, warm analog bass, motivational synth lead. Builder energy. No vocals.' },
+    { label: 'Closer confidence',    text: 'Smooth confident neo-soul instrumental. Wurlitzer chords, finger-snap groove, smoky sax pads. Closer-walking-into-the-room energy. No vocals.' },
+    { label: 'Whistleblower',        text: 'Sparse documentary thriller score. Lone whistled motif, soft piano, low pulsing bass, subtle tape hiss. Investigative, ominous. No vocals.' },
+    { label: 'Boardroom power 2.0',  text: 'Modern corporate cinematic with hybrid orchestra. Tight strings, taiko hits, brass risers, decisive resolution. No vocals.' },
+    { label: 'Underground hustle',   text: 'Dark trap-influenced instrumental. 808 sub, crisp hi-hat rolls, minor-key piano, gritty atmosphere. Operator-on-the-move energy. No vocals.' },
+    { label: 'Cinematic newsroom',   text: 'Driving newsroom score. Sequenced piano, marcato strings, light percussion, urgent forward motion. Investigative journalism vibe. No vocals.' },
+    { label: 'Dossier reveal',       text: 'Slow reveal cue. Reversed cymbal swells, low piano, evolving pad, single sub drop at the end. Mystery uncovered. No vocals.' },
+    { label: 'Quiet authority',      text: 'Minimal piano-led score. Felt piano, sustained strings, soft clock tick, restrained tension. Calm-but-serious operator tone. No vocals. Loopable.' },
+    { label: 'Pipeline pressure',    text: 'Mid-tempo electronic underscore. Pulsing arpeggio, punchy snare, bass groove, building synth stack. Sales-pipeline pressure mood. No vocals.' },
+    { label: 'Forensic minimal',     text: 'Ultra-minimal soundscape. Single sustained drone, occasional metallic clink, distant breath. Stark, clinical, evidence-locker feel. No vocals. Loopable.' },
+    { label: 'Hopeful resolve',      text: 'Warm cinematic resolve. Major-key piano, lifting strings, soft acoustic guitar, gentle percussion. After-the-leak-is-fixed mood. No vocals.' },
+    { label: 'Hard truth (no music)', text: 'Almost no music. Faint room tone, single low piano note every 8 seconds, subtle paper rustle. Lets the voiceover hit hard. No vocals.' },
   ];
 
   const generateMusic = async () => {
@@ -1077,22 +1094,46 @@ export const AdminCreationStudio: React.FC = () => {
                       placeholder="Voiceover line (spoken aloud)"
                     />
                     <div className="rounded-md border border-amber/20 bg-amber/5 p-2 space-y-1.5">
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <span className="text-[10px] uppercase tracking-widest text-amber font-mono flex items-center gap-1">
                           <Sparkles className="w-3 h-3" /> Image prompt for this scene
                         </span>
-                        <select
-                          value={s.imageStyle || 'case_file'}
-                          onChange={(e) => {
-                            const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
-                            setPlan(next);
-                          }}
-                          className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
-                        >
-                          {SCENE_STYLE_OPTIONS.map(o => (
-                            <option key={o.key} value={o.key}>{o.label}</option>
-                          ))}
-                        </select>
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                            disabled={!s.caption?.trim()}
+                            title="Copy this scene's title/caption into the image prompt"
+                            onClick={() => {
+                              const next = { ...plan };
+                              const existing = (s.imagePrompt ?? '').trim();
+                              const title = (s.caption || '').trim();
+                              if (!title) return;
+                              next.scenes[i] = {
+                                ...s,
+                                imagePrompt: existing ? `${title} — ${existing}` : title,
+                              };
+                              setPlan(next);
+                              toast({ title: 'Title pasted into image prompt' });
+                            }}
+                          >
+                            ⤵ Use scene title
+                          </Button>
+                          <select
+                            value={s.imageStyle || 'case_file'}
+                            onChange={(e) => {
+                              const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
+                              setPlan(next);
+                            }}
+                            className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
+                          >
+                            {SCENE_STYLE_OPTIONS.map(o => (
+                              <option key={o.key} value={o.key}>{o.label}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <Textarea
                         value={s.imagePrompt ?? ''}
