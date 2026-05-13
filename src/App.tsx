@@ -91,7 +91,14 @@ const App = () => (
             {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route
+              path="/admin"
+              element={
+                <AuthProvider>
+                  <AdminDashboard />
+                </AuthProvider>
+              }
+            />
             {/* Revenue Recovery Engine — isolated SaaS area */}
             <Route path="/app/*" element={<AppRouter />} />
             {/* All other routes use the shared AuthProvider */}
