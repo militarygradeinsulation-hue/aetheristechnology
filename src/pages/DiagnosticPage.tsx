@@ -44,6 +44,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Crawl pages for schema, meta, alt text, Core Web Vitals', 'Score AI-readability (how LLMs parse and quote your site)', 'Compare local/GEO presence vs. competitors'],
     deliverables: ['Page-by-page scorecard with red/amber/green flags', 'Prioritized fix list with effort vs. revenue impact', 'GEO + schema patch recommendations'],
     exampleLeak: '$240K/yr in inbound leads lost because product pages had no schema and were invisible to ChatGPT and Perplexity searches.',
+    standalonePrice: '$149',
+    standaloneDetail: 'one-time · digital footprint snapshot',
+    priceId: 'digital_snapshot_once',
   },
   {
     icon: Database,
