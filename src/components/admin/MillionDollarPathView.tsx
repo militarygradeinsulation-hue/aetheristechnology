@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Target, TrendingUp, Phone, Calendar, FileText, DollarSign, Users, AlertTriangle, CheckCircle2, Flame, Sparkles } from "lucide-react";
 import { buildScenario, buildWeeks, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
 import { OfferStackSection, TargetMarketSection, OutreachSection, SalesProcessSection, TrainingMatrixSection, KpiScoreboardSection } from "@/components/admin/WarPlanSections";
+import { upsertCompanyEntry } from "@/lib/companyCalendar";
+import { toast } from "@/hooks/use-toast";
+import { CalendarPlus, Loader2 } from "lucide-react";
 
 const fmt = (cents: number) => `$${Math.round(cents / 100).toLocaleString()}`;
 const fmtBig = (cents: number) => `$${(cents / 100_000).toFixed(0)}k`;
