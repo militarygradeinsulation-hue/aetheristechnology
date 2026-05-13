@@ -517,20 +517,93 @@ export const LeadsBoard: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Organize controls */}
+            {mine.length > 0 && (
+              <div className="rounded-lg border border-border/50 bg-card/30 p-3 space-y-3">
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="flex-1 min-w-[180px]">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Search</Label>
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input className="pl-7 h-9" placeholder="Name, email, industry…"
+                        value={mineSearch} onChange={e => setMineSearch(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Group by</Label>
+                    <select
+                      value={mineGroupBy}
+                      onChange={e => setMineGroupBy(e.target.value as typeof mineGroupBy)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="stage">Outreach stage</option>
+                      <option value="contact">Contacted vs not</option>
+                      <option value="score">Score tier</option>
+                      <option value="industry">Vertical / industry</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Sort</Label>
+                    <select
+                      value={mineSort}
+                      onChange={e => setMineSort(e.target.value as typeof mineSort)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="score">Score (high → low)</option>
+                      <option value="recent">Most recent activity</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="touches">Most touches</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Contact state</Label>
+                    <select
+                      value={mineContactState}
+                      onChange={e => setMineContactState(e.target.value as typeof mineContactState)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="all">All</option>
+                      <option value="not_contacted">Not contacted</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="connected">Connected (replied+)</option>
+                    </select>
+                  </div>
+                  <div className="w-28">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Min score</Label>
+                    <Input className="h-9" type="number" placeholder="0"
+                      value={mineMinScore} onChange={e => setMineMinScore(e.target.value)} />
+                  </div>
+                  {(mineSearch || mineMinScore || mineContactState !== 'all' || mineGroupBy !== 'stage' || mineSort !== 'score') && (
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      setMineSearch(''); setMineMinScore(''); setMineContactState('all');
+                      setMineGroupBy('stage'); setMineSort('score');
+                    }}>Reset</Button>
+                  )}
+                </div>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  Showing <span className="text-amber">{mineGroups.totalShown}</span> of {mine.length} leads
+                </p>
+              </div>
+            )}
+
             {loading && mine.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
             ) : mine.length === 0 ? (
               <p className="py-12 text-center text-muted-foreground text-sm">
                 No claimed leads yet. Pull some from the Lead Pool or upload your own.
               </p>
+            ) : mineGroups.groups.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground text-sm">
+                No leads match your current filters.
+              </p>
             ) : (
-              STATUSES.map(s => grouped[s].length > 0 && (
-                <div key={s}>
-                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLOR[s]} mb-2`}>
-                    {STATUS_LABEL[s]} · {grouped[s].length}
+              mineGroups.groups.map(g => (
+                <div key={g.key}>
+                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${g.color} mb-2`}>
+                    {g.label} · {g.items.length}
                   </p>
                   <div className="space-y-2">
-                    {grouped[s].map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
+                    {g.items.map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
                   </div>
                 </div>
               ))
