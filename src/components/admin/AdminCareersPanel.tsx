@@ -140,6 +140,7 @@ export const AdminCareersPanel: React.FC = () => {
         title: `Interview ${calTime} — ${who}`,
         body,
         pinned: true,
+        color: 'cat:interview',
       });
       toast({ title: 'Added to Company Calendar', description: `${calDate} at ${calTime}` });
     } catch (e) {
