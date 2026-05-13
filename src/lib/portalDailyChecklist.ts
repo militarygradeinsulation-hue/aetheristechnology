@@ -7,13 +7,16 @@ export interface DailyChecklistState {
   blog_posted: boolean;
 }
 export interface DailyBlogPayload {
+  kind: "blog" | "playbook";
   title: string;
-  slug: string;
-  excerpt: string;
+  slug: string | null;
+  excerpt: string | null;
   tags: string[];
   featured_image: string | null;
   share_url: string;
   share_snippet: string;
+  published_at: string | null;
+  is_today: boolean;
 }
 export interface DailyChecklistResponse {
   date: string;
