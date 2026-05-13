@@ -241,8 +241,16 @@ const PortalPage: React.FC = () => {
     if (hasValidPortalSession() && !profile) {
       const p = getPortalProfile();
       setProfile(p);
-      // Partner sessions land on the Admin Console by default.
-      if (p?.role === 'partner' && hasValidAdminToken()) {
+      // Partner sessions normally land on the Admin Console — but NOT when
+      // we're inside the admin dashboard's "Company Portal — Live Preview"
+      // iframe. Otherwise /portal redirects to /admin, which embeds /portal
+      // again, recursing forever (the stacked "Company Portal" widgets the
+      // user was seeing).
+      const inAdminPreviewIframe =
+        typeof window !== 'undefined' &&
+        (new URLSearchParams(window.location.search).get('adminPreview') === '1' ||
+          window.top !== window.self);
+      if (p?.role === 'partner' && hasValidAdminToken() && !inAdminPreviewIframe) {
         navigate('/admin', { replace: true });
       }
     }
