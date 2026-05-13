@@ -1,5 +1,6 @@
-// Builds a compose-email URL based on the rep's saved email provider preference.
+// Builds a compose-email URL based on the rep's (or admin's) saved email provider preference.
 import { getRepSettings } from '@/lib/portalWorkspace';
+import { getPortalToken } from '@/lib/portalAuth';
 
 export type EmailProvider = 'default' | 'gmail' | 'outlook' | 'yahoo';
 
@@ -9,21 +10,45 @@ export interface RepMailPrefs {
   signature?: string;
 }
 
+const ADMIN_PREFS_KEY = 'aetheris_admin_mail_prefs';
+
+export function getAdminMailPrefs(): RepMailPrefs {
+  try {
+    const raw = localStorage.getItem(ADMIN_PREFS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { email_provider: 'default' };
+}
+
+export function saveAdminMailPrefs(prefs: RepMailPrefs) {
+  try {
+    localStorage.setItem(ADMIN_PREFS_KEY, JSON.stringify(prefs));
+    cached = prefs;
+  } catch {}
+}
+
 let cached: RepMailPrefs | null = null;
+
+export function clearMailPrefsCache() { cached = null; }
 
 export async function loadRepMailPrefs(force = false): Promise<RepMailPrefs> {
   if (cached && !force) return cached;
-  try {
-    const s = await getRepSettings();
-    const d = (s?.defaults || {}) as Record<string, string>;
-    cached = {
-      sender_email: d.sender_email || '',
-      email_provider: (d.email_provider as EmailProvider) || 'default',
-      signature: d.signature || '',
-    };
-  } catch {
-    cached = { email_provider: 'default' };
+  // If signed into the rep portal, use rep settings; otherwise fall back to admin localStorage prefs.
+  if (getPortalToken()) {
+    try {
+      const s = await getRepSettings();
+      const d = (s?.defaults || {}) as Record<string, string>;
+      cached = {
+        sender_email: d.sender_email || '',
+        email_provider: (d.email_provider as EmailProvider) || 'default',
+        signature: d.signature || '',
+      };
+      return cached;
+    } catch {
+      // fall through to admin prefs
+    }
   }
+  cached = getAdminMailPrefs();
   return cached;
 }
 

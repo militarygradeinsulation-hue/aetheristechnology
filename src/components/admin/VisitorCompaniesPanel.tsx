@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -126,7 +127,7 @@ export const VisitorCompaniesPanel: React.FC = () => {
                   </div>
                 )}
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-2">
-                  {v.person_email && <a href={`mailto:${v.person_email}`} className="hover:text-amber">{v.person_email}</a>}
+                  {v.person_email && <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(v.person_email);}} className="hover:text-amber">{v.person_email}</a>}
                   {v.person_linkedin_url && (
                     <a href={v.person_linkedin_url} target="_blank" rel="noreferrer" className="text-amber hover:underline flex items-center gap-1">
                       LinkedIn <ExternalLink className="w-3 h-3" />

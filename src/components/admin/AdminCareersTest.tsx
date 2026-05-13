@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,7 +62,7 @@ export const AdminCareersTest: React.FC = () => {
               <Badge variant="outline" className="font-mono">{at.score_pct}% ({at.correct_count}/{at.total_count})</Badge>
             </div>
             <div className="grid sm:grid-cols-2 gap-2 text-sm">
-              {at.candidate_email && <div className="flex items-center gap-2"><Mail className="w-3 h-3 text-muted-foreground" /> <a href={`mailto:${at.candidate_email}`} className="text-amber hover:underline">{at.candidate_email}</a></div>}
+              {at.candidate_email && <div className="flex items-center gap-2"><Mail className="w-3 h-3 text-muted-foreground" /> <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(at.candidate_email);}} className="text-amber hover:underline">{at.candidate_email}</a></div>}
               {at.candidate_phone && <div className="flex items-center gap-2"><Phone className="w-3 h-3 text-muted-foreground" /> {at.candidate_phone}</div>}
               <div className="text-xs text-muted-foreground">Started: {new Date(at.started_at).toLocaleString()}</div>
               {at.submitted_at && <div className="text-xs text-muted-foreground">Submitted: {new Date(at.submitted_at).toLocaleString()}</div>}

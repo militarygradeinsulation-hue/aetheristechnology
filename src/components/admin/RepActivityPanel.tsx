@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
@@ -189,7 +190,7 @@ export const RepActivityPanel: React.FC = () => {
                                       <td className="py-1.5 px-2">
                                         {l.email ? (
                                           <a
-                                            href={`mailto:${l.email}`}
+                                            href="#" onClick={(e)=>{e.preventDefault(); l.email && openRepMail(l.email);}}
                                             className="hover:text-amber hover:underline text-left"
                                           >
                                             {l.email}

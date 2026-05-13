@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { openRepMail } from '@/lib/repMail';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -236,7 +237,7 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
                       {i.source === "careers" && <Badge variant="outline" className="text-[10px]">From Careers</Badge>}
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                      {i.candidate_email && <a href={`mailto:${i.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" />{i.candidate_email}</a>}
+                      {i.candidate_email && <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(i.candidate_email);}} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" />{i.candidate_email}</a>}
                       {i.candidate_phone && <a href={`tel:${i.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" />{i.candidate_phone}</a>}
                       {i.scheduled_at && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(i.scheduled_at).toLocaleString()}</span>}
                       {i.meeting_link && <a href={i.meeting_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-amber"><Video className="w-3 h-3" />Link <ExternalLink className="w-3 h-3" /></a>}
