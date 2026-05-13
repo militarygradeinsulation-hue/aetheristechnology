@@ -496,6 +496,7 @@ const PortalPage: React.FC = () => {
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
+      case 'sprint': return <Sprint90View />;
       case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
