@@ -31,10 +31,23 @@ serve(async (req) => {
     const { action } = body;
 
     if (action === "dashboard") {
+      // Hard-cap both queries — site_events grows fast and an unbounded
+      // SELECT was hitting Postgres statement_timeout (57014) and bubbling
+      // up to the client as a 500 / blank screen.
       const [subRes, evtRes] = await Promise.all([
-        supabase.from("contact_submissions").select("*").order("created_at", { ascending: false }),
-        supabase.from("site_events").select("*").order("created_at", { ascending: false }).limit(1000),
+        supabase
+          .from("contact_submissions")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(500),
+        supabase
+          .from("site_events")
+          .select("id,event_type,event_data,session_id,user_agent,created_at")
+          .order("created_at", { ascending: false })
+          .limit(1000),
       ]);
+      if (subRes.error) console.error("dashboard submissions error:", subRes.error);
+      if (evtRes.error) console.error("dashboard events error:", evtRes.error);
       return new Response(
         JSON.stringify({ submissions: subRes.data || [], events: evtRes.data || [] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
