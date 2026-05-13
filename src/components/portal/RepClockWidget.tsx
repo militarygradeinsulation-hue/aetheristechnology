@@ -5,7 +5,7 @@ import { Clock, Play, Square, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { portalTimeclock, formatDuration, type TimeEntry } from "@/lib/portalTimeclock";
 
-export const RepClockWidget: React.FC = () => {
+export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const [open, setOpen] = useState<TimeEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -68,6 +68,43 @@ export const RepClockWidget: React.FC = () => {
       setActing(false);
     }
   };
+
+  if (compact) {
+    if (loading) {
+      return (
+        <Button size="sm" variant="outline" disabled className="gap-1.5">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Clock
+        </Button>
+      );
+    }
+    if (open) {
+      return (
+        <Button
+          onClick={handleOut}
+          disabled={acting}
+          size="sm"
+          variant="destructive"
+          className="gap-1.5 font-mono"
+          data-tick={tick}
+          title={`On the clock since ${new Date(open.clock_in_at).toLocaleTimeString()}`}
+        >
+          {acting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />}
+          {formatDuration(elapsed)}
+        </Button>
+      );
+    }
+    return (
+      <Button
+        onClick={handleIn}
+        disabled={acting}
+        size="sm"
+        className="gap-1.5 bg-amber hover:bg-amber/90 text-background font-bold"
+      >
+        {acting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+        Clock In
+      </Button>
+    );
+  }
 
   return (
     <Card>

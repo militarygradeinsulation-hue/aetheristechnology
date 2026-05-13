@@ -39,7 +39,8 @@ import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
-import { CalendarDays } from 'lucide-react';
+import { Sprint90View } from '@/components/portal/Sprint90View';
+import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
@@ -66,7 +67,7 @@ import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/componen
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news' | 'sprint';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -115,7 +116,7 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news']; // newly added tabs auto-show
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
@@ -392,6 +393,7 @@ const PortalPage: React.FC = () => {
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
+    { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -417,7 +419,7 @@ const PortalPage: React.FC = () => {
       case 'overview':
         return (
           <div className="space-y-6">
-            <DailyHustleCard />
+            <DailyHustleCard onViewSprint={() => { setTab('sprint'); setActiveTool(null); }} />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="w-4 h-4" /> Total Sales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Commission Earned</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent></Card>
@@ -494,6 +496,7 @@ const PortalPage: React.FC = () => {
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
+      case 'sprint': return <Sprint90View />;
       case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
@@ -542,7 +545,7 @@ const PortalPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/40 backdrop-blur sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded bg-amber/20 flex items-center justify-center flex-shrink-0">
               {isPartner ? <Building2 className="w-4 h-4 text-amber" /> : <Shield className="w-4 h-4 text-amber" />}
@@ -555,19 +558,33 @@ const PortalPage: React.FC = () => {
                 {profile.rep_name || profile.code}
               </p>
             </div>
+            <div className="hidden md:block ml-2 px-2 py-0.5 rounded border border-border/40 bg-background/40">
+              <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Code</p>
+              <p className="font-mono text-xs text-amber font-bold leading-tight">{profile.code}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 min-w-0 flex-1 max-w-md">
-            <div className="flex-1 min-w-0"><WhosWorkingBar /></div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <RepClockWidget compact />
+            <Button variant="outline" size="sm" onClick={() => { setTab('sprint'); setActiveTool(null); }} className="gap-1.5 border-amber/40 text-amber hover:bg-amber/10">
+              <Rocket className="w-4 h-4" /> <span className="hidden sm:inline">90-Day Sprint</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => { setTab('coach'); setActiveTool(null); }} className="gap-1.5 hidden sm:inline-flex">
+              <MessageSquareCode className="w-4 h-4" /> Coach
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex">
+              <Users className="w-4 h-4" /> Leads
+            </Button>
             {isPartner && (
-              <Button asChild variant="outline" size="sm" className="flex-shrink-0 border-amber/40 text-amber hover:bg-amber/10">
-                <Link to="/admin"><Shield className="w-4 h-4 mr-1" /> Admin Console</Link>
+              <Button asChild variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10">
+                <Link to="/admin"><Shield className="w-4 h-4 mr-1" /> Admin</Link>
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground flex-shrink-0">
-              <LogOut className="w-4 h-4 mr-1" /> Log out
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
+              <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Log out</span>
             </Button>
           </div>
         </div>
+        <div className="max-w-7xl mx-auto px-4 pb-2"><WhosWorkingBar /></div>
         {/* Tab nav (only in 'tabs' layout) */}
         {layout === 'tabs' && (
           <div className="relative max-w-7xl mx-auto">
@@ -614,7 +631,6 @@ const PortalPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <RepClockWidget />
         <OperatorIdentityBar />
         {/* View selector */}
         <div className="flex items-center justify-between gap-3 flex-wrap">

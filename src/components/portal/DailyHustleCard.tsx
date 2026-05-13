@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Bell, Users, FileText, ExternalLink, Copy, Check, Loader2, Flame, Minus, Plus } from "lucide-react";
+import { Bell, Users, FileText, ExternalLink, Copy, Check, Loader2, Flame, Minus, Plus, Rocket, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPortalToken } from "@/lib/portalAuth";
 import {
@@ -10,10 +10,11 @@ import {
   updateDailyChecklist,
   type DailyChecklistResponse,
 } from "@/lib/portalDailyChecklist";
+import { getCurrentSprintDay, getTodaySprintGoal } from "./Sprint90View";
 
 const CONN_TARGET = 10;
 
-export const DailyHustleCard: React.FC = () => {
+export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onViewSprint }) => {
   const { toast } = useToast();
   const [state, setState] = useState<DailyChecklistResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +89,37 @@ export const DailyHustleCard: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {(() => {
+          const sprint = getCurrentSprintDay(new Date());
+          const today = getTodaySprintGoal(new Date());
+          if (!today) return null;
+          return (
+            <div className="rounded-lg border border-amber/40 bg-amber/5 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Rocket className="w-4 h-4 text-amber" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+                    Day {sprint.day}/{sprint.total} · Wk {sprint.week} · {today.motion}
+                  </span>
+                </div>
+                {onViewSprint && (
+                  <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10" onClick={onViewSprint}>
+                    View 90-Day Sprint <ExternalLink className="w-3 h-3 ml-1" />
+                  </Button>
+                )}
+              </div>
+              <ul className="space-y-1 text-xs text-foreground">
+                {today.focus.slice(0, 3).map((f, i) => (
+                  <li key={i} className="flex gap-2"><span className="text-amber">•</span><span>{f}</span></li>
+                ))}
+              </ul>
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                <Target className="w-3 h-3" />
+                <span>{today.kpis.join(' · ')}</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* TASK 1 — notifications + repost */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
