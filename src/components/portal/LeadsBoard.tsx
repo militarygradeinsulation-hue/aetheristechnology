@@ -1042,7 +1042,26 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || '—'}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {[lead.contact_name, lead.email, lead.phone].filter(Boolean).join(' · ') || lead.industry || '—'}
+              {lead.contact_name && <span>{lead.contact_name}</span>}
+              {lead.email && (
+                <>
+                  {lead.contact_name && <span> · </span>}
+                  <button
+                    type="button"
+                    onClick={mailHandler(lead.email)}
+                    className="hover:text-amber hover:underline"
+                  >
+                    {lead.email}
+                  </button>
+                </>
+              )}
+              {lead.phone && (
+                <>
+                  {(lead.contact_name || lead.email) && <span> · </span>}
+                  <span>{lead.phone}</span>
+                </>
+              )}
+              {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || '—')}
             </p>
           </div>
           <div className="text-right text-xs text-muted-foreground flex-shrink-0">
@@ -1067,7 +1086,15 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         <ErrorBoundary label="LeadRow">
         <div className="border-t border-border/50 p-3 space-y-3">
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
-            {lead.email && <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" /> {lead.email}</span>}
+            {lead.email && (
+              <button
+                type="button"
+                onClick={mailHandler(lead.email)}
+                className="inline-flex items-center gap-1 hover:text-amber hover:underline"
+              >
+                <Mail className="w-3 h-3" /> {lead.email}
+              </button>
+            )}
             {lead.phone && <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3" /> {lead.phone}</span>}
             {lead.website && (
               <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer"
