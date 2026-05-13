@@ -209,6 +209,10 @@ export const AdminCreationStudio: React.FC = () => {
   // AI-generated extra topics, keyed by category ('All' or one of PREMADE_TOPICS keys)
   const [aiTopics, setAiTopics] = useState<Record<string, string[]>>({});
   const [aiTopicsLoading, setAiTopicsLoading] = useState(false);
+  // AI-generated extra titles + recipes for the Idea Mixer (regenerable).
+  const [aiTitles, setAiTitles] = useState<string[]>([]);
+  const [aiRecipes, setAiRecipes] = useState<{ label: string; text: string }[]>([]);
+  const [aiIdeasLoading, setAiIdeasLoading] = useState(false);
 
   const refreshAiTopics = async () => {
     setAiTopicsLoading(true);
@@ -238,6 +242,44 @@ export const AdminCreationStudio: React.FC = () => {
       toast({ title: 'AI refresh failed', description: (e as Error).message, variant: 'destructive' });
     } finally {
       setAiTopicsLoading(false);
+    }
+  };
+
+  const refreshAllIdeas = async () => {
+    setAiIdeasLoading(true);
+    try {
+      const existingTopicsAll = [...ALL_TOPICS_FLAT, ...Object.values(aiTopics).flat()];
+      const { data, error } = await adminInvoke('generate_ideas', {
+        excludeTitles: [...PREMADE_TITLES, ...aiTitles],
+        excludeTopics: existingTopicsAll,
+        excludeRecipes: [...PREMADE_PROMPTS.map(p => p.label), ...aiRecipes.map(r => r.label)],
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const newTitles: string[] = data?.titles || [];
+      const newTopics: string[] = data?.topics || [];
+      const newRecipes: { label: string; text: string }[] = data?.recipes || [];
+      if (newTitles.length) setAiTitles(prev => [...newTitles, ...prev].slice(0, 40));
+      if (newRecipes.length) setAiRecipes(prev => [...newRecipes, ...prev].slice(0, 30));
+      if (newTopics.length) {
+        setAiTopics(prev => ({
+          ...prev,
+          All: [...newTopics, ...(prev.All || [])].slice(0, 60),
+        }));
+      }
+      const total = newTitles.length + newTopics.length + newRecipes.length;
+      if (!total) {
+        toast({ title: 'No new ideas returned', description: 'Try again.', variant: 'destructive' });
+      } else {
+        toast({
+          title: `Refreshed ${total} new ideas`,
+          description: `${newTitles.length} titles · ${newTopics.length} topics · ${newRecipes.length} recipes`,
+        });
+      }
+    } catch (e) {
+      toast({ title: 'Idea refresh failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAiIdeasLoading(false);
     }
   };
 
@@ -861,38 +903,66 @@ export const AdminCreationStudio: React.FC = () => {
 
         {/* Premade ideation: titles, topics, prompt recipes */}
         <div className="mt-5 space-y-4 rounded-lg border border-amber/20 bg-background/30 p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Idea Mixer — pick & combine</div>
-            <button
-              type="button"
-              onClick={cycleAll}
-              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1"
-            >
-              <Sparkles className="w-3 h-3" /> Surprise me
-            </button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 px-2.5 text-[10px] border-amber/50 text-amber hover:bg-amber/10"
+                onClick={refreshAllIdeas}
+                disabled={aiIdeasLoading}
+                title="Generate brand-new titles, topics, and recipes with AI"
+              >
+                {aiIdeasLoading
+                  ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Regenerating…</>
+                  : <><Sparkles className="w-3 h-3 mr-1" /> ✨ Regenerate ideas</>}
+              </Button>
+              <button
+                type="button"
+                onClick={cycleAll}
+                className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1"
+              >
+                <Sparkles className="w-3 h-3" /> Surprise me
+              </button>
+            </div>
           </div>
 
           {/* Titles */}
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Titles</div>
-            <div className="flex flex-wrap gap-1.5">
-              {PREMADE_TITLES.map((t) => {
-                const on = pickedTitle === t;
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => {
-                      const next = on ? '' : t;
-                      setPickedTitle(next);
-                      applyComposed({ title: next });
-                    }}
-                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
-                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
-                    }`}
-                  >{t}</button>
-                );
-              })}
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+              Titles {aiTitles.length > 0 && <span className="text-amber/70">· +{aiTitles.length} fresh</span>}
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              {(() => {
+                const seen = new Set<string>();
+                const merged = [...aiTitles, ...PREMADE_TITLES].filter(t => {
+                  if (seen.has(t)) return false; seen.add(t); return true;
+                });
+                return merged.map((t) => {
+                  const on = pickedTitle === t;
+                  const isAi = aiTitles.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        const next = on ? '' : t;
+                        setPickedTitle(next);
+                        applyComposed({ title: next });
+                      }}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                        on
+                          ? 'bg-amber/15 border-amber text-amber'
+                          : isAi
+                          ? 'bg-amber/5 border-amber/40 text-foreground/90 hover:border-amber hover:text-amber'
+                          : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                      }`}
+                    >{isAi ? <span className="mr-1 opacity-80">✨</span> : null}{t}</button>
+                  );
+                });
+              })()}
             </div>
           </div>
 
@@ -975,26 +1045,39 @@ export const AdminCreationStudio: React.FC = () => {
 
           {/* Prompt recipes */}
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Prompt recipes — pick a structure</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+              Prompt recipes — pick a structure {aiRecipes.length > 0 && <span className="text-amber/70">· +{aiRecipes.length} fresh</span>}
+            </div>
             <div className="flex flex-wrap gap-1.5">
-              {PREMADE_PROMPTS.map((p) => {
-                const on = pickedRecipe === p.text;
-                return (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => {
-                      const next = on ? '' : p.text;
-                      setPickedRecipe(next);
-                      applyComposed({ recipe: next });
-                    }}
-                    title={p.text}
-                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
-                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
-                    }`}
-                  >{p.label}</button>
-                );
-              })}
+              {(() => {
+                const seenLabels = new Set<string>();
+                const merged = [...aiRecipes, ...PREMADE_PROMPTS].filter(p => {
+                  if (seenLabels.has(p.label)) return false; seenLabels.add(p.label); return true;
+                });
+                return merged.map((p) => {
+                  const on = pickedRecipe === p.text;
+                  const isAi = aiRecipes.some(r => r.label === p.label);
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => {
+                        const next = on ? '' : p.text;
+                        setPickedRecipe(next);
+                        applyComposed({ recipe: next });
+                      }}
+                      title={p.text}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                        on
+                          ? 'bg-amber/15 border-amber text-amber'
+                          : isAi
+                          ? 'bg-amber/5 border-amber/40 text-foreground/90 hover:border-amber hover:text-amber'
+                          : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                      }`}
+                    >{isAi ? <span className="mr-1 opacity-80">✨</span> : null}{p.label}</button>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
