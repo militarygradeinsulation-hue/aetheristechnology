@@ -64,7 +64,7 @@ serve(async (req) => {
     if (action === "list") {
       const { data, error } = await sb
         .from("rep_codes")
-        .select("id, code, rep_name, rep_email, commission_rate, is_active, role, total_sales_cents, total_commission_cents, created_at")
+        .select("id, code, rep_name, rep_email, commission_rate, is_active, role, total_sales_cents, total_commission_cents, created_at, team_name")
         .order("rep_name", { ascending: true });
       if (error) throw error;
       return json(200, { reps: data || [] });
