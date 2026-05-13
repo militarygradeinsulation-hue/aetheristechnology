@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Target, TrendingUp, Phone, Calendar, FileText, DollarSign, Users, AlertTriangle, CheckCircle2, Flame, Sparkles } from "lucide-react";
-import { buildScenario, buildWeeks, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
+import { buildScenario, buildWeeks, buildDailyGoals, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
 import { OfferStackSection, TargetMarketSection, OutreachSection, SalesProcessSection, TrainingMatrixSection, KpiScoreboardSection } from "@/components/admin/WarPlanSections";
 import { upsertCompanyEntry } from "@/lib/companyCalendar";
 import { toast } from "@/hooks/use-toast";
@@ -94,10 +94,42 @@ export const MillionDollarPathView: React.FC = () => {
       } catch { failed++; }
     }
 
+    // Daily goals — Mon–Fri for all 13 weeks (~65 working days)
+    const dailyGoals = buildDailyGoals(new Date(`${startDate}T12:00:00`), { scenario });
+    for (const g of dailyGoals) {
+      const date = g.date.toISOString().slice(0, 10);
+      const body = [
+        `${g.motion} · Day ${g.dayNumber}/65 · Week ${g.weekNumber} (${g.phase})`,
+        ``,
+        `Today's focus:`,
+        ...g.focus.map(f => `• ${f}`),
+        ``,
+        `KPIs:`,
+        ...g.kpis.map(k => `• ${k}`),
+        ``,
+        `Exit criteria: ${g.exitCriteria}`,
+      ].join("\n");
+      try {
+        await upsertCompanyEntry({
+          date,
+          kind: "goal",
+          title: g.title,
+          body,
+          color: "cat:kickoff_90day",
+          ai_plan: {
+            summary: `${g.motion} — ${g.phase} phase, week ${g.weekNumber} of 13.`,
+            tactics: g.focus,
+            kpis: g.kpis,
+          },
+        });
+        ok++;
+      } catch { failed++; }
+    }
+
     setPushing(false);
     toast({
       title: failed === 0 ? "Pushed to Company Calendar" : "Pushed with some errors",
-      description: `${ok} entries created${failed ? `, ${failed} failed` : ""}. Sprint kickoff + 13 weekly milestones, anchored to Monday ${start.toISOString().slice(0,10)}.`,
+      description: `${ok} entries created${failed ? `, ${failed} failed` : ""}. Kickoff + 13 weekly milestones + ${dailyGoals.length} daily goals, anchored to Monday ${start.toISOString().slice(0,10)}.`,
       variant: failed === 0 ? "default" : "destructive",
     });
   };
@@ -139,7 +171,7 @@ export const MillionDollarPathView: React.FC = () => {
             <CalendarPlus className="w-5 h-5 text-amber shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-foreground">Push the 90-day plan to the Company Calendar</div>
-              <div className="text-xs text-muted-foreground">Drops the kickoff goal + all 13 weekly milestones (focus list, targets, exit criteria) onto everyone's calendar so the whole team stays on track.</div>
+              <div className="text-xs text-muted-foreground">Drops the kickoff goal, all 13 weekly milestones, <strong>and a daily goal for every Mon–Fri</strong> (~65 working days) — Pipeline Mondays, Discovery Tuesdays, Proposal Wednesdays, Close Thursdays, Friday Wins — onto everyone's calendar.</div>
             </div>
             <div className="flex items-center gap-2">
               <Input
