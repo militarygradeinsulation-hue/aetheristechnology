@@ -235,6 +235,8 @@ export const MillionDollarPathView: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <KpiScoreboardSection />
     </div>
   );
 };
