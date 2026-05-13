@@ -505,6 +505,28 @@ const DiagnosticPage: React.FC = () => {
         <Footer />
       </div>
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      {buyTool && (
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setBuyTool(null)}>
+          <div className="bg-background rounded-md max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative border border-amber/40" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setBuyTool(null)}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">À la carte purchase</div>
+            <h3 className="font-forensic text-xl font-bold text-foreground mb-1">{buyTool.name}</h3>
+            <p className="text-xs text-muted-foreground mb-5">{buyTool.standalonePrice} · {buyTool.standaloneDetail}</p>
+            <StripeEmbeddedCheckout
+              priceId={buyTool.priceId}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=tool_purchase`}
+              metadata={{ tool_type: buyTool.priceId, source: 'diagnostic_tool_suite' }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
