@@ -259,14 +259,25 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           </DialogHeader>
           {openDraft && (
             <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Date</Label>
                   <Input type="date" value={openDraft.date}
                          onChange={e => setOpenDraft({ ...openDraft, date: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-xs">Kind</Label>
+                  <Label className="text-xs flex items-center gap-2">
+                    Category (color)
+                    <span className={`inline-block w-3 h-3 rounded ${CATEGORY_META[openDraft.category].swatch}`} />
+                  </Label>
+                  <select value={openDraft.category}
+                          onChange={e => setOpenDraft({ ...openDraft, category: e.target.value as CompanyCalendarCategory })}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_META[c].icon} {CATEGORY_META[c].label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Kind (semantic)</Label>
                   <select value={openDraft.kind}
                           onChange={e => setOpenDraft({ ...openDraft, kind: e.target.value as CompanyCalendarKind })}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
