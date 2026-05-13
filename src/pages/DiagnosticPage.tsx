@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 
 const INCLUDES = [
   '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
