@@ -30,6 +30,77 @@ export const MillionDollarPathView: React.FC = () => {
   const scenario = useMemo(() => buildScenario({ diagnostics, retainers, recurringMonths }),
     [diagnostics, retainers, recurringMonths]);
   const weeks = useMemo(() => buildWeeks(), []);
+  const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [pushing, setPushing] = useState(false);
+
+  const pushToCalendar = async () => {
+    setPushing(true);
+    let ok = 0; let failed = 0;
+    const start = new Date(`${startDate}T12:00:00`);
+    // Anchor to the Monday of the start week
+    const dow = start.getDay(); // 0 Sun..6 Sat
+    const mondayOffset = dow === 0 ? -6 : 1 - dow;
+    start.setDate(start.getDate() + mondayOffset);
+
+    // Goal anchor
+    try {
+      await upsertCompanyEntry({
+        date: startDate,
+        kind: "goal",
+        title: `🎯 $1M in 90 Days — Sprint Begins`,
+        body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${retainers} Retainers (mo1) + ${recurringMonths} recurring retainer-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
+        pinned: true,
+        color: "#F2A623",
+        ai_plan: {
+          summary: "$1M in 90 days operator sprint kickoff.",
+          tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.retainersToClose} closes needed`],
+          kpis: [`$${(MDP_GOAL_CENTS/100000).toFixed(0)}k gross`, `${scenario.diagnosticsToClose} Diagnostics closed`, `${scenario.retainersToClose} Retainers closed`],
+        },
+      });
+      ok++;
+    } catch { failed++; }
+
+    // Weekly entries on Monday of each week
+    for (const w of weeks) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + (w.week - 1) * 7);
+      const date = d.toISOString().slice(0, 10);
+      const phaseEmoji = w.phase === "Foundation" ? "🧱" : w.phase === "Acceleration" ? "🚀" : "💎";
+      const kind = w.phase === "Acceleration" ? "push" : "goal";
+      const body = [
+        `Phase: ${w.phase} · Theme: ${w.theme}`,
+        `Cumulative target by end of week: $${Math.round(w.revenueTarget/100).toLocaleString()}`,
+        `Targets: ${w.newMeetings} new meetings · ${w.newCloses} new closes · ${w.hires} reps on the bench`,
+        ``,
+        `Focus:`,
+        ...w.focus.map(f => `• ${f}`),
+        ``,
+        `Exit criteria: ${w.exitCriteria}`,
+      ].join("\n");
+      try {
+        await upsertCompanyEntry({
+          date,
+          kind: kind as never,
+          title: `${phaseEmoji} Week ${w.week} · ${w.theme}`,
+          body,
+          color: w.phase === "Foundation" ? "#F2A623" : w.phase === "Acceleration" ? "#DC2626" : "#10B981",
+          ai_plan: {
+            summary: `Week ${w.week} of $1M sprint — ${w.phase}.`,
+            tactics: w.focus,
+            kpis: [`$${Math.round(w.revenueTarget/100).toLocaleString()} cumulative`, `${w.newMeetings} new meetings`, `${w.newCloses} new closes`],
+          },
+        });
+        ok++;
+      } catch { failed++; }
+    }
+
+    setPushing(false);
+    toast({
+      title: failed === 0 ? "Pushed to Company Calendar" : "Pushed with some errors",
+      description: `${ok} entries created${failed ? `, ${failed} failed` : ""}. Sprint kickoff + 13 weekly milestones, anchored to Monday ${start.toISOString().slice(0,10)}.`,
+      variant: failed === 0 ? "default" : "destructive",
+    });
+  };
   const onPace = scenario.grossRevenue >= MDP_GOAL_CENTS;
 
   // Today’s position in the 90 days (rough — uses week 1 as anchor of NOW)
