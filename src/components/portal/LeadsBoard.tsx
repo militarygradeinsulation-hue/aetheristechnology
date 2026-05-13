@@ -111,6 +111,12 @@ export const LeadsBoard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
+  // My Leads organize controls
+  const [mineGroupBy, setMineGroupBy] = useState<'stage' | 'industry' | 'score' | 'contact'>('stage');
+  const [mineSort, setMineSort] = useState<'score' | 'recent' | 'oldest' | 'touches'>('score');
+  const [mineSearch, setMineSearch] = useState('');
+  const [mineMinScore, setMineMinScore] = useState('');
+  const [mineContactState, setMineContactState] = useState<'all' | 'contacted' | 'not_contacted' | 'connected'>('all');
   const [bulkScanning, setBulkScanning] = useState(false);
   const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
@@ -190,6 +196,73 @@ export const LeadsBoard: React.FC = () => {
     mine.forEach(l => g[l.status].push(l));
     return g;
   }, [mine]);
+
+  // Filter + sort + group "My Leads" by the rep's chosen organization mode
+  const mineGroups = useMemo(() => {
+    const q = mineSearch.trim().toLowerCase();
+    const minScore = mineMinScore ? Number(mineMinScore) : 0;
+    const CONTACTED_STATUSES: LeadStatus[] = ['outreach','touched','replied','meeting','won','lost'];
+    const CONNECTED_STATUSES: LeadStatus[] = ['replied','meeting','won'];
+    const filtered = mine.filter(l => {
+      if (minScore && (l.score ?? 0) < minScore) return false;
+      if (mineContactState === 'contacted' && !CONTACTED_STATUSES.includes(l.status) && (l.touch_count ?? 0) === 0) return false;
+      if (mineContactState === 'not_contacted' && (CONTACTED_STATUSES.includes(l.status) || (l.touch_count ?? 0) > 0)) return false;
+      if (mineContactState === 'connected' && !CONNECTED_STATUSES.includes(l.status)) return false;
+      if (!q) return true;
+      const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location, l.notes]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+    const sorted = [...filtered].sort((a, b) => {
+      if (mineSort === 'score') return (b.score ?? 0) - (a.score ?? 0);
+      if (mineSort === 'touches') return (b.touch_count ?? 0) - (a.touch_count ?? 0);
+      const at = (x: RepLead) => new Date(x.last_touched_at || x.created_at).getTime();
+      return mineSort === 'recent' ? at(b) - at(a) : at(a) - at(b);
+    });
+
+    type Group = { key: string; label: string; color: string; items: RepLead[] };
+    const groups: Group[] = [];
+    const push = (key: string, label: string, color: string, items: RepLead[]) => {
+      if (items.length) groups.push({ key, label, color, items });
+    };
+
+    if (mineGroupBy === 'stage') {
+      STATUSES.forEach(s => push(s, STATUS_LABEL[s], STATUS_COLOR[s], sorted.filter(l => l.status === s)));
+    } else if (mineGroupBy === 'industry') {
+      const map = new Map<string, RepLead[]>();
+      sorted.forEach(l => {
+        const k = l.industry?.trim() || 'Unspecified';
+        if (!map.has(k)) map.set(k, []);
+        map.get(k)!.push(l);
+      });
+      [...map.entries()].sort((a, b) => b[1].length - a[1].length)
+        .forEach(([k, items]) => push(k, k, 'bg-amber/15 text-amber border-amber/30', items));
+    } else if (mineGroupBy === 'score') {
+      const buckets: Array<[string, string, string, (n: number) => boolean]> = [
+        ['hot', 'HOT (80+)', 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', n => n >= 80],
+        ['warm', 'WARM (60–79)', 'bg-amber/15 text-amber border-amber/40', n => n >= 60 && n < 80],
+        ['shot', 'WORTH A SHOT (40–59)', 'bg-amber/10 text-amber/80 border-amber/20', n => n >= 40 && n < 60],
+        ['low', 'LOW PRIORITY (<40)', 'bg-muted text-muted-foreground border-border', n => n < 40],
+      ];
+      buckets.forEach(([k, label, color, test]) =>
+        push(k, label, color, sorted.filter(l => test(l.score ?? 0))));
+    } else {
+      push('not_contacted', 'NOT CONTACTED YET',
+        'bg-blue-500/15 text-blue-400 border-blue-500/30',
+        sorted.filter(l => (l.touch_count ?? 0) === 0 && !CONTACTED_STATUSES.includes(l.status)));
+      push('contacted', 'CONTACTED — NO REPLY',
+        'bg-amber/15 text-amber border-amber/30',
+        sorted.filter(l => ((l.touch_count ?? 0) > 0 || ['outreach','touched'].includes(l.status))
+          && !CONNECTED_STATUSES.includes(l.status) && l.status !== 'lost' && l.status !== 'dead'));
+      push('connected', 'CONNECTED / IN MOTION',
+        'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+        sorted.filter(l => CONNECTED_STATUSES.includes(l.status)));
+      push('closed', 'CLOSED / DEAD',
+        'bg-muted text-muted-foreground border-border',
+        sorted.filter(l => l.status === 'lost' || l.status === 'dead'));
+    }
+    return { groups, totalShown: filtered.length };
+  }, [mine, mineGroupBy, mineSort, mineSearch, mineMinScore, mineContactState]);
 
   const scanCandidates = useMemo(
     () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
@@ -444,20 +517,93 @@ export const LeadsBoard: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Organize controls */}
+            {mine.length > 0 && (
+              <div className="rounded-lg border border-border/50 bg-card/30 p-3 space-y-3">
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="flex-1 min-w-[180px]">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Search</Label>
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input className="pl-7 h-9" placeholder="Name, email, industry…"
+                        value={mineSearch} onChange={e => setMineSearch(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Group by</Label>
+                    <select
+                      value={mineGroupBy}
+                      onChange={e => setMineGroupBy(e.target.value as typeof mineGroupBy)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="stage">Outreach stage</option>
+                      <option value="contact">Contacted vs not</option>
+                      <option value="score">Score tier</option>
+                      <option value="industry">Vertical / industry</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Sort</Label>
+                    <select
+                      value={mineSort}
+                      onChange={e => setMineSort(e.target.value as typeof mineSort)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="score">Score (high → low)</option>
+                      <option value="recent">Most recent activity</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="touches">Most touches</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Contact state</Label>
+                    <select
+                      value={mineContactState}
+                      onChange={e => setMineContactState(e.target.value as typeof mineContactState)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="all">All</option>
+                      <option value="not_contacted">Not contacted</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="connected">Connected (replied+)</option>
+                    </select>
+                  </div>
+                  <div className="w-28">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Min score</Label>
+                    <Input className="h-9" type="number" placeholder="0"
+                      value={mineMinScore} onChange={e => setMineMinScore(e.target.value)} />
+                  </div>
+                  {(mineSearch || mineMinScore || mineContactState !== 'all' || mineGroupBy !== 'stage' || mineSort !== 'score') && (
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      setMineSearch(''); setMineMinScore(''); setMineContactState('all');
+                      setMineGroupBy('stage'); setMineSort('score');
+                    }}>Reset</Button>
+                  )}
+                </div>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  Showing <span className="text-amber">{mineGroups.totalShown}</span> of {mine.length} leads
+                </p>
+              </div>
+            )}
+
             {loading && mine.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
             ) : mine.length === 0 ? (
               <p className="py-12 text-center text-muted-foreground text-sm">
                 No claimed leads yet. Pull some from the Lead Pool or upload your own.
               </p>
+            ) : mineGroups.groups.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground text-sm">
+                No leads match your current filters.
+              </p>
             ) : (
-              STATUSES.map(s => grouped[s].length > 0 && (
-                <div key={s}>
-                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLOR[s]} mb-2`}>
-                    {STATUS_LABEL[s]} · {grouped[s].length}
+              mineGroups.groups.map(g => (
+                <div key={g.key}>
+                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${g.color} mb-2`}>
+                    {g.label} · {g.items.length}
                   </p>
                   <div className="space-y-2">
-                    {grouped[s].map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
+                    {g.items.map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
                   </div>
                 </div>
               ))
