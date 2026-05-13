@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
-import { FileText, CheckCircle2, Loader2, PenLine } from 'lucide-react';
+import { FileText, CheckCircle2, Loader2, PenLine, Download, ShieldCheck } from 'lucide-react';
 
 interface PortalDoc {
   id: string;
@@ -85,6 +85,29 @@ export const PortalDocuments: React.FC = () => {
           Company documents you may be required to read and sign. Your typed signature is legally recorded with your code, IP, and timestamp.
         </p>
       </div>
+
+      <Card className="border-amber/40 bg-amber/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="font-display flex items-center gap-2 text-base">
+            <ShieldCheck className="w-4 h-4 text-amber" /> Joseph Toney — Operator Credentials
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1 font-mono uppercase tracking-wider">
+            Reference · Send to prospects who ask "who are you?"
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <a href="/Aetheris-Credentials.pdf" target="_blank" rel="noopener noreferrer">
+            <Button size="sm" className="bg-amber text-background hover:bg-amber/90">
+              <FileText className="w-3.5 h-3.5 mr-1.5" /> View PDF
+            </Button>
+          </a>
+          <a href="/Aetheris-Credentials.pdf" download>
+            <Button size="sm" variant="outline">
+              <Download className="w-3.5 h-3.5 mr-1.5" /> Download
+            </Button>
+          </a>
+        </CardContent>
+      </Card>
 
       {loading ? (
         <div className="flex items-center justify-center py-12 text-muted-foreground">
