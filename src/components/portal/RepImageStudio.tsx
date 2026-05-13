@@ -37,6 +37,7 @@ export const RepImageStudio: React.FC = () => {
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
 
   const invoke = async (body: Record<string, unknown>) => {
     const token = getPortalToken();
