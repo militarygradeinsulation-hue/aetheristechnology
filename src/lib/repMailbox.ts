@@ -7,6 +7,9 @@ export interface RepMailbox {
   address: string;
   signature: string | null;
   forwarding_to: string | null;
+  personal_email: string | null;
+  forward_inbound: boolean;
+  mask_outbound: boolean;
   auto_reply_enabled: boolean;
   auto_reply_body: string | null;
   is_active: boolean;
