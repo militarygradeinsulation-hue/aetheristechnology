@@ -152,22 +152,42 @@ export const InboxTab: React.FC = () => {
           ) : (
             <div className="overflow-y-auto divide-y">
               {messages.map((m) => (
-                <button
+                <div
                   key={m.id}
-                  onClick={() => openMessage(m)}
-                  className={`w-full text-left px-3 py-2 hover:bg-muted/50 transition ${selected?.id === m.id ? "bg-muted" : ""} ${!m.is_read && folder === "inbox" ? "font-semibold" : ""}`}
+                  className={`group relative flex items-stretch hover:bg-muted/50 transition ${selected?.id === m.id ? "bg-muted" : ""}`}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm truncate">
-                      {folder === "inbox" || folder === "trash"
-                        ? (m.from_name || m.from_address)
-                        : `to ${m.to_addresses.join(", ")}`}
+                  <button
+                    onClick={() => openMessage(m)}
+                    className={`flex-1 text-left px-3 py-2 ${!m.is_read && folder === "inbox" ? "font-semibold" : ""}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-sm truncate">
+                        {folder === "inbox" || folder === "trash"
+                          ? (m.from_name || m.from_address)
+                          : `to ${m.to_addresses.join(", ")}`}
+                      </div>
+                      <div className="text-xs text-muted-foreground whitespace-nowrap">{relTime(m.created_at)}</div>
                     </div>
-                    <div className="text-xs text-muted-foreground whitespace-nowrap">{relTime(m.created_at)}</div>
-                  </div>
-                  <div className="text-sm truncate">{m.subject || "(no subject)"}</div>
-                  <div className="text-xs text-muted-foreground truncate">{(m.body_text || "").slice(0, 100)}</div>
-                </button>
+                    <div className="text-sm truncate">{m.subject || "(no subject)"}</div>
+                    <div className="text-xs text-muted-foreground truncate">{(m.body_text || "").slice(0, 100)}</div>
+                  </button>
+                  {folder === "drafts" && (
+                    <button
+                      type="button"
+                      title="Delete draft"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!confirm("Delete this draft?")) return;
+                        await repMailbox.deleteForever(m.id);
+                        if (selected?.id === m.id) setSelected(null);
+                        refresh();
+                      }}
+                      className="px-3 text-muted-foreground hover:text-crimson opacity-60 group-hover:opacity-100 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           )}

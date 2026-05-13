@@ -53,12 +53,26 @@ const FLAGSHIPS: Flagship[] = [
     split: { company: 800_000, rep: 400_000, partner: 300_000 },
   },
   {
+    key: 'fractional',
+    name: 'Fractional CTO/CMO',
+    blurb: 'Embedded operator across tech + marketing. Recurring monthly. Highest LTV offer.',
+    priceCents: 590_000,
+    recurring: true,
+    cadence: 'per month',
+    included: [
+      'Embedded operator (CTO + CMO scope) on weekly cadence',
+      'Tech, sales, and marketing leak fixes prioritized monthly',
+      'Vendor + tooling oversight, hiring + onboarding for ops roles',
+      'Quarterly board-level scorecard tied to revenue retained',
+    ],
+    split: { company: 295_000, rep: 177_000, partner: 118_000 }, // 50/30/20
+  },
+  {
     key: 'leakaudit',
     name: 'Forensic Diagnostic (Leak Audit)',
     blurb: 'Operator-led leak audit. Entry offer applied toward the 21-Day engagement on upgrade.',
     priceCents: 250_000,
     cadence: 'one-time',
-    // Tiered 50/30/20 — show "tiered" instead of fixed dollars
     included: [
       'Operator review of the free Leak Audit self-scan',
       'Surface-level revenue leak map and next-step recommendation',
@@ -152,7 +166,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FLAGSHIPS.map((f) => (
               <div key={f.key} className="rounded-lg border border-amber/30 bg-background/40 p-5">
                 <div className="flex items-start justify-between gap-2 mb-1">

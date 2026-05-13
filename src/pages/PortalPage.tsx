@@ -418,7 +418,6 @@ const PortalPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <DailyHustleCard />
-            <RepClockWidget />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="w-4 h-4" /> Total Sales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Commission Earned</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent></Card>
@@ -615,6 +614,7 @@ const PortalPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        <RepClockWidget />
         <OperatorIdentityBar />
         {/* View selector */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
