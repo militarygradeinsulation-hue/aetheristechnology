@@ -30,7 +30,7 @@ export const InboxTab: React.FC = () => {
   const [selected, setSelected] = useState<RepEmailMessage | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null } | null>(null);
+  const [composing, setComposing] = useState<{ id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null; lead?: RepLead | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [outlook, setOutlook] = useState<OutlookStatus | null>(null);
   const [outlookBusy, setOutlookBusy] = useState(false);
