@@ -22,7 +22,7 @@ const FIELDS: { key: string; label: string; placeholder: string; type?: 'textare
     { value: 'yahoo', label: 'Yahoo Mail (web)' },
   ], help: "Which inbox opens when you click a lead's email." },
   { key: 'cta_link', label: 'Default CTA link', placeholder: 'https://aetheris.technology/leak-audit' },
-  { key: 'signature', label: 'Email signature', placeholder: 'Joseph T. — aetheris.technology', type: 'textarea' },
+  { key: 'signature', label: 'Email signature', placeholder: 'First Name\nOperator\nAetheris Business Forensics\nhttps://businessforensics.tech/', type: 'textarea' },
 ];
 
 export const WorkspaceSettings: React.FC = () => {
