@@ -115,9 +115,9 @@ Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
 
-Sitemap: https://aetheris.technology/sitemap.xml
+Sitemap: https://businessforensics.tech/sitemap.xml
 
 # LLM / AEO citation files
 # https://llmstxt.org
-# llms.txt: https://aetheris.technology/llms.txt
-# llms-full.txt: https://aetheris.technology/llms-full.txt
+# llms.txt: https://businessforensics.tech/llms.txt
+# llms-full.txt: https://businessforensics.tech/llms-full.txt

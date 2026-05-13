@@ -9,35 +9,45 @@
 - Location: Indianapolis, Indiana, United States
 - Phone: (317) 376-2110
 - Email: aetheris.technology@outlook.com
-- Website: https://aetheris.technology
+- Website: https://businessforensics.tech
 - Service area: United States (HQ Indianapolis, IN — remote + on-site)
-- Specialties: CRM diagnostic and rebuild (HubSpot / Salesforce), sales operations, lead-flow attribution, follow-up cadence design, manufacturing revenue operations
-- Tone: Blunt, operator, credentials-first. Not influencer.
 
-## The two offers (the only two)
-1. **21-Day Revenue Diagnostic — $18,500 fixed fee.** Map every leak in CRM, sales follow-up, and lead flow. Written report with prioritized fixes, ROI projections, and an implementation roadmap. CRM-agnostic — runs on a CSV export of contacts, deals, and activity. HubSpot / Salesforce live integration is an upsell, not a prerequisite.
-   See: https://aetheris.technology/diagnostic
-2. **Implementation Retainer — $15,000 / month.** 3-month minimum. Available only to Diagnostic clients. We execute the prioritized fixes ourselves and re-measure recovery monthly.
-   See: https://aetheris.technology/implementation
+## Pages
+- [Home](/): Revenue systems operator for specialty manufacturers — overview and booking.
+- [21-Day Revenue Diagnostic](/diagnostic): $18,500 fixed-fee diagnostic — what's included, deliverables, timeline.
+- [Implementation Retainer](/implementation): $15K/month execution retainer for Diagnostic clients.
+- [Methodology](/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
+- [Credentials](/credentials): Operator background, certifications, and prior engagements.
+- [Services](/services): Full service catalog and engagement tiers.
+- [Why Aetheris](/why-us): How we differ from agencies and traditional consultancies.
+- [About](/about): Company background and operator bio.
+- [Contact](/contact): Phone, email, and booking links.
+- [Field Notes (Blog)](/blog): Long-form forensic case files and operator essays.
+- [News](/news): Industry analysis and field updates.
+- [Resources](/resources): Free tools, playbooks, and downloadable assets.
+- [Capabilities](/capabilities): AI, automation, and CRM capabilities catalog.
+- [Industries](/industries): Sector coverage overview.
+- [AI for Manufacturing](/ai-for-manufacturing): Sector-specific revenue systems work.
+- [AI for Healthcare](/ai-for-healthcare): Sector-specific page.
+- [AI for Finance](/ai-for-finance): Sector-specific page.
+- [AI for Logistics](/ai-for-logistics): Sector-specific page.
+- [AI for Construction](/ai-for-construction): Sector-specific page.
+- [AI for SaaS](/ai-for-saas): Sector-specific page.
+- [Leak Audit (free self-scan)](/leak-audit): Free 7-step self-scan tool.
+- [Website Gap Scanner](/scan): 30-second AI scan for SEO, CTAs, and conversion gaps.
+- [AI Readiness Assessment](/assessment): 2-minute AI maturity score.
+- [Business Diagnostic Quiz](/business-diagnostic): 20-question operational diagnostic.
+- [AI Implementation Checklist](/ai-checklist): Step-by-step checklist for AI rollout.
+- [Sales Script Generator](/sales-scripts): Operator-grade objection handling.
+- [Content Calendar Generator](/content-calendar): 90 days of authority-building output.
+- [Content Generator](/content-generator): On-demand long-form content.
+- [Follow-Up Plan Generator](/follow-up-plan): Close-the-loop sequences.
+- [Strategic Question Engine](/strategic-questions): Questions your team isn't asking.
+- [Brand Contradictions Finder](/brand-contradictions): Promise vs. delivery audit.
+- [Friction & Vocabulary Audit](/friction-audit): Words on your site that quietly cost deals.
+- [LinkedIn Playbook](/playbook/linkedin): Operator-led LinkedIn growth playbook.
+- [Careers](/careers): Open roles and partnership info.
+- [Terms](/terms): Terms of service.
 
-## Methodology
-Two-page measurement methodology — sent to every prospect before pricing is discussed.
-See: https://aetheris.technology/methodology
-
-How we define a revenue leak, how we baseline (lead-to-contact, deal-stage progression, touch frequency), how we attribute recovered revenue (pre/post measurement of the same metric on the same population), what is in scope and what is out, and what an auditor would need to verify it.
-
-## Credentials
-See: https://aetheris.technology/credentials
-- 20 years building revenue systems for manufacturers
-- Marine Corps veteran
-- Former Director of Strategy, $25M aerospace contract manufacturer with SpaceX accounts
-- Certifications: IBM, Harvard, Google, HubSpot
-- Headquartered Indianapolis, IN. IP held by CTOguy.ai.
-
-## How to engage
-- Book a 15-minute call with the operator: https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst
-- Or call (317) 376-2110
-
-## Long-form content
-- Field Notes (blog): https://aetheris.technology/blog
-- Free self-scan (legacy tool, lower priority): https://aetheris.technology/leak-audit
+## Optional
+- [Free self-scan (legacy)](/leak-audit): Lower-priority self-service tool.

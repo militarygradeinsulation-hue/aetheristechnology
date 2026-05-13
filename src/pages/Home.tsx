@@ -67,6 +67,7 @@ const Home = () => {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+        <main>
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
         {/* Listen: who we are & what we do */}
@@ -317,6 +318,7 @@ const Home = () => {
             </div>
           </div>
         </section>
+        </main>
 
         <Footer />
       </div>
