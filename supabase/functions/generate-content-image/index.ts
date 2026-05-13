@@ -65,14 +65,21 @@ COMPOSITION RULES:
   • No celebrities or recognizable real people unless explicitly described.
   • No on-image headlines or paragraphs of text unless explicitly requested.
   • High quality, sharp focus, well-composed.`
-      : `${STYLES[styleKey]}
+      : `PRIMARY SUBJECT (this is THE thing you must render — not a stylistic suggestion, the literal subject of the image):
+
+>>> ${prompt} <<<
+
+The image MUST be a literal visual depiction of the subject above. Do not substitute a generic placeholder. Do not invent an unrelated scene. The subject sentence drives composition; the rendering style below is HOW you depict it, not WHAT you depict.
+
+RENDERING STYLE — depict the subject above using this visual language:
+${STYLES[styleKey]}
 
 ${BRAND_PALETTE}
 
 COMPOSITION RULES:
-  • Subject of the piece: ${prompt}
+  • The subject above is mandatory. If the subject mentions a CRM, render a CRM. If it mentions a pipeline, render a pipeline. If it mentions a dollar figure, stamp it visibly. If it mentions a manila folder, draw a manila folder.
   • No human faces with recognizable features. No real people. No celebrities.
-  • No on-image headlines, captions, or paragraphs. Tiny mono labels are OK.
+  • No on-image headlines, captions, or paragraphs. Tiny mono labels are OK and encouraged when they reinforce the subject.
   • No logos, no brand marks, no watermarks (we add the Aetheris watermark separately).
   • Premium editorial feel — looks like it was commissioned for The Economist or Bloomberg Businessweek.
   • Aspect ratio square. High contrast. Cinematic.`;
