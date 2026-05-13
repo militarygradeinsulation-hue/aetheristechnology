@@ -2275,6 +2275,107 @@ export type Database = {
         }
         Relationships: []
       }
+      hire_playbook_entries: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          section: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          section: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          section?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hire_team_cadence: {
+        Row: {
+          cadence: string
+          created_at: string
+          day_of_week: number | null
+          id: string
+          notes: string | null
+          push_to_calendar: boolean
+          sort_order: number
+          team_id: string
+          title: string
+        }
+        Insert: {
+          cadence: string
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          notes?: string | null
+          push_to_calendar?: boolean
+          sort_order?: number
+          team_id: string
+          title: string
+        }
+        Update: {
+          cadence?: string
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          notes?: string | null
+          push_to_calendar?: boolean
+          sort_order?: number
+          team_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hire_team_cadence_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "hire_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hire_teams: {
+        Row: {
+          created_at: string
+          description: string | null
+          experience_band: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          experience_band?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          experience_band?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       hygiene_actions: {
         Row: {
           account_id: string
@@ -3612,6 +3713,7 @@ export type Database = {
           rep_email: string | null
           rep_name: string
           role: string
+          team_name: string | null
           total_commission_cents: number
           total_sales_cents: number
           webinar_boost_bps: number
@@ -3625,6 +3727,7 @@ export type Database = {
           rep_email?: string | null
           rep_name?: string
           role?: string
+          team_name?: string | null
           total_commission_cents?: number
           total_sales_cents?: number
           webinar_boost_bps?: number
@@ -3638,6 +3741,7 @@ export type Database = {
           rep_email?: string | null
           rep_name?: string
           role?: string
+          team_name?: string | null
           total_commission_cents?: number
           total_sales_cents?: number
           webinar_boost_bps?: number
