@@ -453,6 +453,24 @@ const DiagnosticPage: React.FC = () => {
                             </div>
                             <p className="text-sm text-foreground/90 italic leading-relaxed">"{t.exampleLeak}"</p>
                           </div>
+                          <div className="mt-4 rounded-md border border-amber/40 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
+                                Just want this one tool?
+                              </div>
+                              <div className="flex items-baseline gap-2">
+                                <span className="font-forensic text-2xl font-bold text-foreground">{t.standalonePrice}</span>
+                                <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">{t.standaloneDetail}</span>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setBuyTool(t); }}
+                              className="bg-amber hover:bg-amber/90 text-background font-bold whitespace-nowrap"
+                            >
+                              Buy {t.standalonePrice} <ArrowRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
