@@ -246,6 +246,69 @@ export const AdminCreationStudio: React.FC = () => {
     finally { setLibDeletingId(null); }
   };
 
+  // ===== Image library (every generated/uploaded image — admin + reps) =====
+  type ImageLibItem = {
+    id: string;
+    prompt: string;
+    url: string;
+    storage_path?: string | null;
+    source: string;
+    model?: string | null;
+    created_at: string;
+    source_table: 'admin_image_studio' | 'rep_image_studio';
+    owner_label: string;
+  };
+  const [imageLibrary, setImageLibrary] = useState<ImageLibItem[]>([]);
+  const [imgLibLoading, setImgLibLoading] = useState(false);
+  const [imgDeletingId, setImgDeletingId] = useState<string | null>(null);
+
+  const loadImageLibrary = async () => {
+    setImgLibLoading(true);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('admin-image-studio', {
+        body: { action: 'list_all' },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setImageLibrary(data.images || []);
+    } catch (e) {
+      console.error('[CreationStudio] load image library failed', e);
+    } finally { setImgLibLoading(false); }
+  };
+  useEffect(() => { loadImageLibrary(); }, []);
+
+  const addLibraryImageToScenes = (img: ImageLibItem) => {
+    const id = `lib:${img.id}`;
+    if (uploads.find(u => u.id === id)) {
+      toast({ title: 'Already added' });
+      return;
+    }
+    setUploads(prev => [...prev, { id, url: img.url, label: img.prompt?.slice(0, 60) || img.owner_label, source: 'upload' }]);
+    toast({ title: 'Added to this video', description: 'Now selectable as a scene image.' });
+  };
+
+  const deleteLibraryImage = async (img: ImageLibItem) => {
+    if (!window.confirm('Delete this image from the shared library? This cannot be undone.')) return;
+    setImgDeletingId(img.id);
+    const prev = imageLibrary;
+    setImageLibrary(p => p.filter(i => i.id !== img.id));
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('admin-image-studio', {
+        body: { action: 'delete_any', id: img.id, source_table: img.source_table },
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Image deleted' });
+    } catch (e) {
+      setImageLibrary(prev);
+      toast({ title: 'Delete failed', description: (e as Error).message, variant: 'destructive' });
+    } finally { setImgDeletingId(null); }
+  };
+
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
     const scene = plan.scenes[sceneIdx];
@@ -272,6 +335,7 @@ export const AdminCreationStudio: React.FC = () => {
       const next = { ...plan, scenes: plan.scenes.map((s, i) => i === sceneIdx ? { ...s, imageId: id } : s) };
       setPlan(next);
       toast({ title: `Scene ${sceneIdx + 1} image generated` });
+      loadImageLibrary();
     } catch (e) {
       toast({ title: 'Image generation failed', description: (e as Error).message, variant: 'destructive' });
     } finally {
