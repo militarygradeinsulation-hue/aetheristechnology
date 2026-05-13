@@ -216,6 +216,7 @@ export const InboxTab: React.FC = () => {
           )}
           <Button size="sm" variant="outline" onClick={() => refresh()}><RefreshCcw className="w-3 h-3 mr-1" /> Refresh</Button>
           <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)}><Settings className="w-3 h-3 mr-1" /> Settings</Button>
+          <LeadFinderButton onPick={(lead) => setComposing({ to: lead.email || "", subject: lead.business_name ? `Quick note re: ${lead.business_name}` : "", lead })} />
           <Button size="sm" onClick={() => setComposing({})}><Pencil className="w-3 h-3 mr-1" /> Compose</Button>
         </div>
       </div>
