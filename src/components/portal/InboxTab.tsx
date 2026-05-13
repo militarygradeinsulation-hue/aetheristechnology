@@ -167,9 +167,22 @@ export const InboxTab: React.FC = () => {
     <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
-        <div>
+        <div className="space-y-1">
           <div className="text-xs text-muted-foreground uppercase tracking-wide">Your address</div>
-          <div className="font-mono text-base">{mailbox.address}</div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-base">{mailbox.address}</span>
+            {outlook?.connected ? (
+              <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 bg-emerald-500/10 gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Outlook: {outlook.outlook_email || "connected"}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground gap-1">
+                <Link2Off className="w-3 h-3" />
+                Outlook not connected
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
@@ -182,6 +195,24 @@ export const InboxTab: React.FC = () => {
               onKeyDown={(e) => e.key === "Enter" && refresh()}
             />
           </div>
+          {outlook?.connected ? (
+            <Button size="sm" variant="outline" onClick={disconnectOutlook} disabled={outlookBusy}>
+              {outlookBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2Off className="w-3 h-3 mr-1" />}
+              Disconnect Outlook
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+              onClick={connectOutlook}
+              disabled={outlookBusy || (outlook ? !outlook.configured : false)}
+              title={outlook && !outlook.configured ? "Microsoft OAuth not configured by admin yet" : undefined}
+            >
+              {outlookBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2 className="w-3 h-3 mr-1" />}
+              Connect Outlook
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={() => refresh()}><RefreshCcw className="w-3 h-3 mr-1" /> Refresh</Button>
           <Button size="sm" variant="outline" onClick={() => setSettingsOpen(true)}><Settings className="w-3 h-3 mr-1" /> Settings</Button>
           <Button size="sm" onClick={() => setComposing({})}><Pencil className="w-3 h-3 mr-1" /> Compose</Button>
