@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
+import { generatePreviewPdf, generateFullReport, type FullReport } from '@/lib/generateScanReport';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
@@ -294,8 +294,13 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
 
   const handleDownloadPreview = () => {
     if (!result) return;
-    generatePreviewPdf(result);
-    trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    if (isUnlocked) {
+      generateFullReport(result);
+      trackEvent('scan_full_downloaded', { url: url.trim(), score: result.score });
+    } else {
+      generatePreviewPdf(result);
+      trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    }
   };
 
   const handleFixClick = (isVisible: boolean) => {
@@ -428,7 +433,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <FileDown className="w-3.5 h-3.5" />
-                  Download Preview PDF
+                  {isUnlocked ? 'Download Full Report PDF' : 'Download Preview PDF'}
                 </button>
               </div>
 

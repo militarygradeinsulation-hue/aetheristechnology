@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
+import { generateFullReport } from '@/lib/generateScanReport';
 
 const copyText = (text: string, setCopiedId: (id: string | null) => void, id: string) => {
   navigator.clipboard.writeText(text);
@@ -847,6 +848,11 @@ const WebsiteScanView = ({ data, copiedId, setCopiedId }: any) => {
         )}
         {grade && <p className="text-2xl font-bold text-amber mb-3">Grade: {grade}</p>}
         {data.executiveSummary && <p className="text-sm text-muted-foreground max-w-2xl mx-auto">{data.executiveSummary}</p>}
+        <div className="mt-4">
+          <Button size="sm" variant="outline" onClick={() => generateFullReport(data)} className="gap-2">
+            <Download className="w-3.5 h-3.5" /> Download Full PDF (matches this view)
+          </Button>
+        </div>
       </div>
 
       {/* Gaps */}
