@@ -760,8 +760,15 @@ const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPic
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const withEmail = leads.filter((l) => !!l.email);
-    if (!q) return withEmail.slice(0, 50);
-    return withEmail.filter((l) => {
+    const sorted = [...withEmail].sort((a, b) =>
+      (a.business_name || a.contact_name || a.email || "").localeCompare(
+        b.business_name || b.contact_name || b.email || "",
+        undefined,
+        { sensitivity: "base" },
+      ),
+    );
+    if (!q) return sorted.slice(0, 50);
+    return sorted.filter((l) => {
       const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location]
         .filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
@@ -774,7 +781,7 @@ const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPic
         <Target className="w-3 h-3 mr-1" /> Find lead
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl w-[95vw]">
           <DialogHeader><DialogTitle>Email a lead</DialogTitle></DialogHeader>
           <div className="space-y-2">
             <div className="relative">
