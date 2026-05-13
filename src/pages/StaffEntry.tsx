@@ -23,7 +23,7 @@ const StaffEntry: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
       <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
       <Link
         to="/"
