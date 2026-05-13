@@ -208,17 +208,26 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
               </div>
               <Button variant="outline" size="sm" onClick={() => {
                 if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
-                else setDayCursor(addDays(dayCursor, -1));
+                else {
+                  const next = addDays(dayCursor, -1);
+                  setDayCursor(next);
+                  setCursor(new Date(next.getFullYear(), next.getMonth(), 1));
+                }
               }}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               <Button variant="outline" size="sm" onClick={() => {
                 const now = new Date();
-                if (view === "month") setCursor(now); else setDayCursor(now);
+                setDayCursor(now);
+                setCursor(new Date(now.getFullYear(), now.getMonth(), 1));
               }}>Today</Button>
               <Button variant="outline" size="sm" onClick={() => {
                 if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
-                else setDayCursor(addDays(dayCursor, 1));
+                else {
+                  const next = addDays(dayCursor, 1);
+                  setDayCursor(next);
+                  setCursor(new Date(next.getFullYear(), next.getMonth(), 1));
+                }
               }}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
