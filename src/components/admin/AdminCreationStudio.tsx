@@ -60,36 +60,72 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'The dead-lead pile worth $200k that nobody resurrects.',
     'Quote-to-cash leakage between sales and ops.',
     'Stalled deals nobody triages — the silent revenue killer.',
+    'The 30-day no-touch deal that quietly becomes closed-lost.',
+    'Refund / credit-memo leakage that finance never traces back to ops.',
+    'Discount creep eating 4 points of margin per quarter.',
+    'Renewal leakage: the customers who churned 60 days before anyone noticed.',
+    'Project change orders that never make it onto the invoice.',
+    'The proposal sent on Friday and forgotten by Monday.',
   ],
   'Systems & Ops': [
     'CEO dashboards growth-stage owners refuse to build.',
     'Handoff failures between CRM, quoting, and dispatch.',
     'Why "more reps" is the wrong fix.',
     'Process documentation that actually gets followed.',
+    'The 4 SOPs that prevent 80% of operational leaks.',
+    'Why your tech stack is fine — your handoffs are bleeding.',
+    'How to spot a swivel-chair process in 60 seconds.',
+    'The single weekly meeting that closes 3 leaks at once.',
+    'Why your COO is the most expensive bottleneck on the org chart.',
+    'Operational debt: the silent tax on every growth dollar.',
   ],
   'AI / Practical': [
     'Dead-lead resurrection with AI — the cheapest win.',
     'AI-assisted CRM hygiene for $5M-$50M operators.',
     'Why most AI consultants are SaaS resellers in a hoodie.',
     'Forensic diagnostics powered by your own data.',
+    'AI for owner-operators: 3 use cases that actually pay back in 30 days.',
+    'Why AI on a broken process just makes the leak faster.',
+    'The AI agent that triages stalled deals every Monday at 7am.',
+    'How to audit your CRM with AI in under an hour.',
+    'AI quote-review: the first place to plug margin leaks.',
+    'Stop buying AI tools. Start buying AI outcomes.',
   ],
   'Sales & Pipeline': [
     'Stuck-deal triage — 4 questions that move or kill a deal.',
     'Discovery calls leak deals — here\'s the script that plugs it.',
     'CRM stages lying about pipeline value.',
     'The 72-hour warm-lead decay curve.',
+    'The 5 pipeline metrics owners should run weekly (most run none).',
+    'Why your "qualified" pipeline is 60% fiction.',
+    'The follow-up cadence that doubles connect rates without adding reps.',
+    'Inbound leads dying in your inbox: a forensic walkthrough.',
+    'How to fire a stalled deal without losing the relationship.',
+    'Demo-to-proposal time is your most underrated growth lever.',
   ],
   'Founder POV': [
     'Owner-operators: the 4 weekly reports finance should run.',
     'Discounting is a symptom, not a strategy.',
     'When to fire your "rockstar" — operator\'s checklist.',
     'Stop measuring activity. Start measuring leaks.',
+    'The 90-minute Friday review that prevents Monday surprises.',
+    'Why founder-led sales stops scaling at $7M (and what to do).',
+    'The CEO calendar audit: where your time is actually leaking.',
+    'Hiring a VP of Sales before you fix the process is malpractice.',
+    'The brutal question every owner should ask their #2.',
+    'Cash, conviction, calendar — the three things owners protect at all costs.',
   ],
   'Industry-Specific': [
     'Specialty manufacturers and the trade-show decay curve.',
     'Commercial services: dispatch as a revenue leak.',
     'Construction change-order leakage.',
     'Indianapolis mid-market margin squeeze.',
+    'HVAC and plumbing: the 24-hour callback rule that prints money.',
+    'Specialty distribution: SKU-level margin leaks hiding in plain sight.',
+    'Professional services: utilization vs realization — which is bleeding?',
+    'Field-service techs as a forgotten revenue channel.',
+    'Industrial OEMs: the warranty leak nobody owns.',
+    'B2B SaaS in the Midwest: NRR is your only honest metric.',
   ],
 };
 
@@ -170,6 +206,40 @@ export const AdminCreationStudio: React.FC = () => {
   const [pickedTopics, setPickedTopics] = useState<string[]>([]);
   const [pickedRecipe, setPickedRecipe] = useState<string>('');
   const [topicCategory, setTopicCategory] = useState<string>('All');
+  // AI-generated extra topics, keyed by category ('All' or one of PREMADE_TOPICS keys)
+  const [aiTopics, setAiTopics] = useState<Record<string, string[]>>({});
+  const [aiTopicsLoading, setAiTopicsLoading] = useState(false);
+
+  const refreshAiTopics = async () => {
+    setAiTopicsLoading(true);
+    try {
+      const existingForCat = topicCategory === 'All'
+        ? ALL_TOPICS_FLAT
+        : (PREMADE_TOPICS[topicCategory] || []);
+      const exclude = [...existingForCat, ...(aiTopics[topicCategory] || [])];
+      const { data, error } = await adminInvoke('generate_topics', {
+        category: topicCategory,
+        count: 10,
+        exclude,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const fresh: string[] = (data?.topics || []).filter((t: string) => !exclude.includes(t));
+      if (!fresh.length) {
+        toast({ title: 'No new topics returned', description: 'Try again or switch category.', variant: 'destructive' });
+        return;
+      }
+      setAiTopics(prev => ({
+        ...prev,
+        [topicCategory]: [...fresh, ...(prev[topicCategory] || [])].slice(0, 40),
+      }));
+      toast({ title: `Added ${fresh.length} fresh topics`, description: 'Look for the ✨ chips below.' });
+    } catch (e) {
+      toast({ title: 'AI refresh failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAiTopicsLoading(false);
+    }
+  };
 
   const composePrompt = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
     const t = overrides?.title ?? pickedTitle;
@@ -828,19 +898,35 @@ export const AdminCreationStudio: React.FC = () => {
 
           {/* Topics */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics — click to combine</div>
-              {pickedTopics.length > 0 && (
-                <button
+              <div className="flex items-center gap-2">
+                <Button
                   type="button"
-                  onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
-                  className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
-                >Clear ({pickedTopics.length})</button>
-              )}
+                  size="sm"
+                  variant="outline"
+                  className="h-6 px-2 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                  onClick={refreshAiTopics}
+                  disabled={aiTopicsLoading}
+                  title={`Generate fresh topic ideas with AI for "${topicCategory}"`}
+                >
+                  {aiTopicsLoading
+                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Thinking…</>
+                    : <><Sparkles className="w-3 h-3 mr-1" /> ✨ AI refresh</>}
+                </Button>
+                {pickedTopics.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setPickedTopics([]); applyComposed({ topics: [] }); }}
+                    className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider"
+                  >Clear ({pickedTopics.length})</button>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap gap-1 mb-2">
               {['All', ...Object.keys(PREMADE_TOPICS)].map((cat) => {
                 const on = topicCategory === cat;
+                const aiCount = (aiTopics[cat] || []).length;
                 return (
                   <button
                     key={cat}
@@ -849,24 +935,41 @@ export const AdminCreationStudio: React.FC = () => {
                     className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
                       on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
                     }`}
-                  >{cat}</button>
+                  >{cat}{aiCount > 0 && <span className="ml-1 opacity-70">+{aiCount}</span>}</button>
                 );
               })}
             </div>
-            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-              {(topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || [])).map((t) => {
-                const on = pickedTopics.includes(t);
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => toggleTopic(t)}
-                    className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
-                      on ? 'bg-amber/15 border-amber text-amber' : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
-                    }`}
-                  >{t}</button>
-                );
-              })}
+            <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto">
+              {(() => {
+                const baseTopics = topicCategory === 'All' ? ALL_TOPICS_FLAT : (PREMADE_TOPICS[topicCategory] || []);
+                const aiForCat = aiTopics[topicCategory] || [];
+                const aiAll = topicCategory === 'All'
+                  ? Object.values(aiTopics).flat()
+                  : aiForCat;
+                // De-dupe while keeping AI ones first so they're discoverable.
+                const seen = new Set<string>();
+                const merged = [...aiAll, ...baseTopics].filter(t => {
+                  if (seen.has(t)) return false; seen.add(t); return true;
+                });
+                return merged.map((t) => {
+                  const on = pickedTopics.includes(t);
+                  const isAi = aiAll.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTopic(t)}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                        on
+                          ? 'bg-amber/15 border-amber text-amber'
+                          : isAi
+                          ? 'bg-amber/5 border-amber/40 text-foreground/90 hover:border-amber hover:text-amber'
+                          : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                      }`}
+                    >{isAi ? <span className="mr-1 opacity-80">✨</span> : null}{t}</button>
+                  );
+                });
+              })()}
             </div>
           </div>
 
