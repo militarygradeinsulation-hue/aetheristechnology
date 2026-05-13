@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Target, TrendingUp, Phone, Calendar, FileText, DollarSign, Users, AlertTriangle, CheckCircle2, Flame, Sparkles } from "lucide-react";
 import { buildScenario, buildWeeks, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
+import { OfferStackSection, TargetMarketSection, OutreachSection, SalesProcessSection, TrainingMatrixSection, KpiScoreboardSection } from "@/components/admin/WarPlanSections";
 
 const fmt = (cents: number) => `$${Math.round(cents / 100).toLocaleString()}`;
 const fmtBig = (cents: number) => `$${(cents / 100_000).toFixed(0)}k`;
@@ -139,7 +140,14 @@ export const MillionDollarPathView: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* WEEKLY WALK-THROUGH */}
+      {/* WAR PLAN — Operational Sections (offers, ICP, scripts, sales, training) */}
+      <OfferStackSection />
+      <TargetMarketSection />
+      <OutreachSection />
+      <SalesProcessSection />
+      <TrainingMatrixSection />
+
+
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -227,6 +235,8 @@ export const MillionDollarPathView: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <KpiScoreboardSection />
     </div>
   );
 };
