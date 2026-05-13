@@ -117,10 +117,23 @@ const AdminHiresOnboardingPanel: React.FC = () => {
     } catch (e) { toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }); }
   };
 
-  if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  const lifecycles = useMemo<RepLifecycle[]>(() => reps.map(buildLifecycle).sort((a, b) => a.daysSinceHire - b.daysSinceHire), [reps]);
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="lifecycle" className="space-y-4">
+      <TabsList className="bg-card/60 border border-border/60 flex-wrap h-auto">
+        <TabsTrigger value="lifecycle" className="gap-1.5"><Activity className="w-3.5 h-3.5" /> Lifecycle</TabsTrigger>
+        <TabsTrigger value="roster" className="gap-1.5"><Users className="w-3.5 h-3.5" /> Roster & Teams</TabsTrigger>
+        <TabsTrigger value="cadence" className="gap-1.5"><CalendarPlus className="w-3.5 h-3.5" /> Engagement Cadence</TabsTrigger>
+        <TabsTrigger value="playbook" className="gap-1.5"><BookOpenCheck className="w-3.5 h-3.5" /> Playbook</TabsTrigger>
+        <TabsTrigger value="training" className="gap-1.5"><GraduationCap className="w-3.5 h-3.5" /> New-Rep Training</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="lifecycle" className="space-y-4 mt-0">
+        <LifecycleView lifecycles={lifecycles} playbook={playbook} />
+      </TabsContent>
+
+      <TabsContent value="roster" className="space-y-6 mt-0">
       {/* Hired roster */}
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
