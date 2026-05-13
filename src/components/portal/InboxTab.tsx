@@ -739,3 +739,81 @@ function sanitizeHtml(html: string): string {
     .replace(/ on[a-z]+='[^']*'/gi, "")
     .replace(/javascript:/gi, "");
 }
+
+const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPick }) => {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [leads, setLeads] = useState<RepLead[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    portalLeads.list("mine")
+      .then((r) => setLeads(r.leads || []))
+      .catch((e) => toast({ title: "Couldn't load leads", description: e.message, variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, [open, toast]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const withEmail = leads.filter((l) => !!l.email);
+    if (!q) return withEmail.slice(0, 50);
+    return withEmail.filter((l) => {
+      const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location]
+        .filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(q);
+    }).slice(0, 50);
+  }, [leads, query]);
+
+  return (
+    <>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <Target className="w-3 h-3 mr-1" /> Find lead
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Email a lead</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                autoFocus
+                className="pl-7"
+                placeholder="Search business, contact, email…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto divide-y border rounded-md">
+              {loading ? (
+                <div className="p-6 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></div>
+              ) : filtered.length === 0 ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  {leads.length === 0 ? "No claimed leads yet." : "No matches."}
+                </div>
+              ) : (
+                filtered.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => { onPick(l); setOpen(false); setQuery(""); }}
+                    className="w-full text-left px-3 py-2 hover:bg-muted/50 transition"
+                  >
+                    <div className="text-sm font-semibold truncate">{l.business_name || l.email}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {[l.contact_name, l.email, l.industry, l.location].filter(Boolean).join(" · ")}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Picking a lead opens a pre-filled compose. After you hit Send, you can log the touch + notes against the lead in one click.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
