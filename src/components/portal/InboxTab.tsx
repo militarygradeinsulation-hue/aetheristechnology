@@ -386,7 +386,7 @@ const MessageView: React.FC<{
 };
 
 const ComposeDialog: React.FC<{
-  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null };
+  initial: { id?: string | null; to?: string; cc?: string; subject?: string; body?: string; in_reply_to?: string | null; thread_id?: string | null; lead?: RepLead | null };
   mailbox: RepMailbox;
   onClose: () => void;
   onSent: () => void;
@@ -403,6 +403,10 @@ const ComposeDialog: React.FC<{
   const [attachments, setAttachments] = useState<Array<{ name: string; size: number; mime: string; storage_path: string }>>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [linkedLead, setLinkedLead] = useState<RepLead | null>(initial.lead || null);
+  const [sentSuccess, setSentSuccess] = useState(false);
+  const [logNotes, setLogNotes] = useState("");
+  const [logging, setLogging] = useState(false);
 
   const parseAddrs = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
 
