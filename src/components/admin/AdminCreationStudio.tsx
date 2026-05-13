@@ -206,6 +206,40 @@ export const AdminCreationStudio: React.FC = () => {
   const [pickedTopics, setPickedTopics] = useState<string[]>([]);
   const [pickedRecipe, setPickedRecipe] = useState<string>('');
   const [topicCategory, setTopicCategory] = useState<string>('All');
+  // AI-generated extra topics, keyed by category ('All' or one of PREMADE_TOPICS keys)
+  const [aiTopics, setAiTopics] = useState<Record<string, string[]>>({});
+  const [aiTopicsLoading, setAiTopicsLoading] = useState(false);
+
+  const refreshAiTopics = async () => {
+    setAiTopicsLoading(true);
+    try {
+      const existingForCat = topicCategory === 'All'
+        ? ALL_TOPICS_FLAT
+        : (PREMADE_TOPICS[topicCategory] || []);
+      const exclude = [...existingForCat, ...(aiTopics[topicCategory] || [])];
+      const { data, error } = await adminInvoke('generate_topics', {
+        category: topicCategory,
+        count: 10,
+        exclude,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const fresh: string[] = (data?.topics || []).filter((t: string) => !exclude.includes(t));
+      if (!fresh.length) {
+        toast({ title: 'No new topics returned', description: 'Try again or switch category.', variant: 'destructive' });
+        return;
+      }
+      setAiTopics(prev => ({
+        ...prev,
+        [topicCategory]: [...fresh, ...(prev[topicCategory] || [])].slice(0, 40),
+      }));
+      toast({ title: `Added ${fresh.length} fresh topics`, description: 'Look for the ✨ chips below.' });
+    } catch (e) {
+      toast({ title: 'AI refresh failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAiTopicsLoading(false);
+    }
+  };
 
   const composePrompt = (overrides?: { title?: string; topics?: string[]; recipe?: string }) => {
     const t = overrides?.title ?? pickedTitle;
