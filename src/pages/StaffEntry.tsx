@@ -5,6 +5,7 @@ import { ArrowLeft, Lock, Shield, Users } from 'lucide-react';
 import { clearAdminToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { MatrixRain } from '@/components/MatrixRain';
 
 /**
  * Triple-tap landing page. Forces user to explicitly choose an entry path
@@ -22,15 +23,16 @@ const StaffEntry: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.85} density={0.7} />
       <Link
         to="/"
-        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
       >
         <ArrowLeft className="w-4 h-4" /> Back to website
       </Link>
 
-      <div className="glass p-8 rounded-2xl max-w-md w-full">
+      <div className="glass p-8 rounded-2xl max-w-md w-full relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-amber/20 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-amber" />
