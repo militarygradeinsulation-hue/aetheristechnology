@@ -285,7 +285,9 @@ const AdminHiresOnboardingPanel: React.FC = () => {
           })}
         </CardContent>
       </Card>
+      </TabsContent>
 
+      <TabsContent value="playbook" className="space-y-6 mt-0">
       {/* Engagement playbook */}
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
