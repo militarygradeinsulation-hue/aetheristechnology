@@ -454,10 +454,37 @@ const ComposeDialog: React.FC<{
       if (draftId) {
         try { await repMailbox.deleteForever(draftId); } catch { /* non-fatal */ }
       }
-      onSent();
+      // If linked to a lead, show the log panel; else close immediately.
+      if (linkedLead) {
+        setSentSuccess(true);
+        toast({ title: "Sent — log it against the lead?" });
+      } else {
+        onSent();
+      }
     } catch (e: any) {
       toast({ title: "Send failed", description: e.message, variant: "destructive" });
     } finally { setSending(false); }
+  };
+
+  const logAgainstLead = async (kind: "sent" | "replied") => {
+    if (!linkedLead) return;
+    setLogging(true);
+    try {
+      const stamp = new Date().toLocaleString();
+      const prevNotes = linkedLead.notes || "";
+      const tag = kind === "sent" ? "SENT" : "RECEIVED REPLY";
+      const composedNote = `[${stamp}] ${tag} — "${subject}"${logNotes ? `\n${logNotes}` : ""}`;
+      const fullNotes = prevNotes ? `${composedNote}\n\n${prevNotes}` : composedNote;
+      await portalLeads.updateStatus(linkedLead.id, {
+        notes: fullNotes,
+        touch: true,
+        status: kind === "replied" ? "replied" : "outreach",
+      });
+      toast({ title: kind === "replied" ? "Logged as replied" : "Logged as sent" });
+      onSent();
+    } catch (e: any) {
+      toast({ title: "Couldn't log to lead", description: e.message, variant: "destructive" });
+    } finally { setLogging(false); }
   };
 
   const saveDraft = async () => {
