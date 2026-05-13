@@ -94,10 +94,42 @@ export const MillionDollarPathView: React.FC = () => {
       } catch { failed++; }
     }
 
+    // Daily goals — Mon–Fri for all 13 weeks (~65 working days)
+    const dailyGoals = buildDailyGoals(new Date(`${startDate}T12:00:00`), { scenario });
+    for (const g of dailyGoals) {
+      const date = g.date.toISOString().slice(0, 10);
+      const body = [
+        `${g.motion} · Day ${g.dayNumber}/65 · Week ${g.weekNumber} (${g.phase})`,
+        ``,
+        `Today's focus:`,
+        ...g.focus.map(f => `• ${f}`),
+        ``,
+        `KPIs:`,
+        ...g.kpis.map(k => `• ${k}`),
+        ``,
+        `Exit criteria: ${g.exitCriteria}`,
+      ].join("\n");
+      try {
+        await upsertCompanyEntry({
+          date,
+          kind: "goal",
+          title: g.title,
+          body,
+          color: "cat:kickoff_90day",
+          ai_plan: {
+            summary: `${g.motion} — ${g.phase} phase, week ${g.weekNumber} of 13.`,
+            tactics: g.focus,
+            kpis: g.kpis,
+          },
+        });
+        ok++;
+      } catch { failed++; }
+    }
+
     setPushing(false);
     toast({
       title: failed === 0 ? "Pushed to Company Calendar" : "Pushed with some errors",
-      description: `${ok} entries created${failed ? `, ${failed} failed` : ""}. Sprint kickoff + 13 weekly milestones, anchored to Monday ${start.toISOString().slice(0,10)}.`,
+      description: `${ok} entries created${failed ? `, ${failed} failed` : ""}. Kickoff + 13 weekly milestones + ${dailyGoals.length} daily goals, anchored to Monday ${start.toISOString().slice(0,10)}.`,
       variant: failed === 0 ? "default" : "destructive",
     });
   };
