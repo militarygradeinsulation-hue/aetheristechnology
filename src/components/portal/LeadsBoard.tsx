@@ -22,8 +22,6 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { openRepMail } from '@/lib/repMail';
 import { createCalendarEvent } from '@/lib/portalCalendar';
-
-function nextBusinessMorningISO(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   // skip Sat (6) → Mon, Sun (0) → Mon
