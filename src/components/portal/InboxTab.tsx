@@ -14,7 +14,9 @@ import { repMailbox, type RepEmailMessage, type RepMailbox } from "@/lib/repMail
 import {
   Loader2, Mail, Pencil, Inbox as InboxIcon, Send, FileText, Trash2,
   Star, Reply, Forward, Search, Settings, RefreshCcw, Paperclip, X,
+  Link2, Link2Off, CheckCircle2,
 } from "lucide-react";
+import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
 
