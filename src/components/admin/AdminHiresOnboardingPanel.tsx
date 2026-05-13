@@ -18,7 +18,8 @@ import {
 } from "@/lib/hireTeams";
 import { buildLifecycle, type RepLifecycle } from "@/lib/hireLifecycle";
 import { AdminOnboardingStudio } from "@/components/admin/AdminOnboardingStudio";
-import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2 } from "lucide-react";
+import { MillionDollarPathView } from "@/components/admin/MillionDollarPathView";
+import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2, Flame } from "lucide-react";
 
 const SECTIONS: { key: HirePlaybookEntry["section"]; label: string; icon: any; tone: string }[] = [
   { key: "day_one", label: "Day 1 outreach", icon: MessageCircle, tone: "border-amber/40" },
@@ -120,14 +121,19 @@ const AdminHiresOnboardingPanel: React.FC = () => {
   const lifecycles = useMemo<RepLifecycle[]>(() => reps.map(buildLifecycle).sort((a, b) => a.daysSinceHire - b.daysSinceHire), [reps]);
 
   return (
-    <Tabs defaultValue="lifecycle" className="space-y-4">
+    <Tabs defaultValue="path" className="space-y-4">
       <TabsList className="bg-card/60 border border-border/60 flex-wrap h-auto">
+        <TabsTrigger value="path" className="gap-1.5"><Flame className="w-3.5 h-3.5" /> $1M / 90 Days</TabsTrigger>
         <TabsTrigger value="lifecycle" className="gap-1.5"><Activity className="w-3.5 h-3.5" /> Lifecycle</TabsTrigger>
         <TabsTrigger value="roster" className="gap-1.5"><Users className="w-3.5 h-3.5" /> Roster & Teams</TabsTrigger>
         <TabsTrigger value="cadence" className="gap-1.5"><CalendarPlus className="w-3.5 h-3.5" /> Engagement Cadence</TabsTrigger>
         <TabsTrigger value="playbook" className="gap-1.5"><BookOpenCheck className="w-3.5 h-3.5" /> Playbook</TabsTrigger>
         <TabsTrigger value="training" className="gap-1.5"><GraduationCap className="w-3.5 h-3.5" /> New-Rep Training</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="path" className="space-y-4 mt-0">
+        <MillionDollarPathView />
+      </TabsContent>
 
       <TabsContent value="lifecycle" className="space-y-4 mt-0">
         <LifecycleView lifecycles={lifecycles} playbook={playbook} />
