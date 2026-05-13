@@ -1080,15 +1080,38 @@ const WhatsWrongView = ({ data, copiedId, setCopiedId }: any) => {
 // ────────────────────────────────────────────────────────────────────────────
 const PlaybookView = ({ data, fileUrl }: any) => (
   <div className="text-center py-8">
-    <div className="glass rounded-xl p-8 border border-border">
-      <p className="text-sm text-muted-foreground mb-4">{data.description || data.subtitle || 'Custom playbook generated'}</p>
-      {fileUrl ? (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          <Button className="bg-amber hover:bg-amber/90 text-background font-bold">Download PDF</Button>
-        </a>
-      ) : (
-        <p className="text-xs text-muted-foreground">PDF still generating or unavailable.</p>
+    <div className="glass rounded-xl p-8 border border-border space-y-4">
+      <BookOpen className="w-10 h-10 text-amber mx-auto" />
+      <h4 className="text-lg font-bold text-foreground font-display">{data.title || 'Strategic Playbook'}</h4>
+      <p className="text-sm text-muted-foreground">{data.description || data.subtitle || 'Custom playbook generated'}</p>
+      {data.pillar && (
+        <span className="inline-block text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">{data.pillar}</span>
       )}
+      {Array.isArray(data.tags) && data.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 justify-center">
+          {data.tags.map((t: string) => (
+            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">{t}</span>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2 justify-center pt-2">
+        {fileUrl ? (
+          <>
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Button className="bg-amber hover:bg-amber/90 text-background font-bold gap-2">
+                <BookOpen className="w-4 h-4" /> View PDF
+              </Button>
+            </a>
+            <a href={fileUrl} download>
+              <Button variant="outline" className="gap-2">
+                <Download className="w-4 h-4" /> Download PDF
+              </Button>
+            </a>
+          </>
+        ) : (
+          <p className="text-xs text-muted-foreground">PDF still generating or unavailable.</p>
+        )}
+      </div>
     </div>
   </div>
 );
