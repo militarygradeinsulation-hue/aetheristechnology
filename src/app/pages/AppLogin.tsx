@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { MatrixRain } from "@/components/MatrixRain";
 
 const AppLogin = () => {
   const { signIn, user, loading } = useAuth();
