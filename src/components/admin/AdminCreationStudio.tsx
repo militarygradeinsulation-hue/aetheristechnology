@@ -209,6 +209,10 @@ export const AdminCreationStudio: React.FC = () => {
   // AI-generated extra topics, keyed by category ('All' or one of PREMADE_TOPICS keys)
   const [aiTopics, setAiTopics] = useState<Record<string, string[]>>({});
   const [aiTopicsLoading, setAiTopicsLoading] = useState(false);
+  // AI-generated extra titles + recipes for the Idea Mixer (regenerable).
+  const [aiTitles, setAiTitles] = useState<string[]>([]);
+  const [aiRecipes, setAiRecipes] = useState<{ label: string; text: string }[]>([]);
+  const [aiIdeasLoading, setAiIdeasLoading] = useState(false);
 
   const refreshAiTopics = async () => {
     setAiTopicsLoading(true);
@@ -238,6 +242,44 @@ export const AdminCreationStudio: React.FC = () => {
       toast({ title: 'AI refresh failed', description: (e as Error).message, variant: 'destructive' });
     } finally {
       setAiTopicsLoading(false);
+    }
+  };
+
+  const refreshAllIdeas = async () => {
+    setAiIdeasLoading(true);
+    try {
+      const existingTopicsAll = [...ALL_TOPICS_FLAT, ...Object.values(aiTopics).flat()];
+      const { data, error } = await adminInvoke('generate_ideas', {
+        excludeTitles: [...PREMADE_TITLES, ...aiTitles],
+        excludeTopics: existingTopicsAll,
+        excludeRecipes: [...PREMADE_PROMPTS.map(p => p.label), ...aiRecipes.map(r => r.label)],
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const newTitles: string[] = data?.titles || [];
+      const newTopics: string[] = data?.topics || [];
+      const newRecipes: { label: string; text: string }[] = data?.recipes || [];
+      if (newTitles.length) setAiTitles(prev => [...newTitles, ...prev].slice(0, 40));
+      if (newRecipes.length) setAiRecipes(prev => [...newRecipes, ...prev].slice(0, 30));
+      if (newTopics.length) {
+        setAiTopics(prev => ({
+          ...prev,
+          All: [...newTopics, ...(prev.All || [])].slice(0, 60),
+        }));
+      }
+      const total = newTitles.length + newTopics.length + newRecipes.length;
+      if (!total) {
+        toast({ title: 'No new ideas returned', description: 'Try again.', variant: 'destructive' });
+      } else {
+        toast({
+          title: `Refreshed ${total} new ideas`,
+          description: `${newTitles.length} titles · ${newTopics.length} topics · ${newRecipes.length} recipes`,
+        });
+      }
+    } catch (e) {
+      toast({ title: 'Idea refresh failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAiIdeasLoading(false);
     }
   };
 
