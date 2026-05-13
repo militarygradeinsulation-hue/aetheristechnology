@@ -229,6 +229,31 @@ const Home = () => {
                 </Link>
               </div>
             </div>
+
+            {/* The objection we hear every time */}
+            <RevealOnScroll>
+              <div id="objection" className="mt-10 premium-tile rounded-sm border-l-4 border-l-destructive border-y border-r border-border/60 p-6 md:p-8 bg-card/40">
+                <div className="grid md:grid-cols-[1fr_auto] gap-6 items-center">
+                  <div>
+                    <div className="font-case text-[10px] uppercase tracking-widest text-destructive mb-2">
+                      The objection we hear every time
+                    </div>
+                    <div className="font-forensic text-2xl md:text-3xl font-bold text-destructive italic mb-2">
+                      "That's just too expensive!"
+                    </div>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                      Said by every CFO who hasn't done the math yet.
+                      <span className="text-foreground font-semibold"> Here's the math.</span>
+                    </p>
+                  </div>
+                  <Link to="/why-us#math" className="shrink-0">
+                    <Button size="lg" variant="outline" className="border-amber/60 text-amber hover:bg-amber/10 font-bold">
+                      Show me the math <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 

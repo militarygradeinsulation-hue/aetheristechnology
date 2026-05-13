@@ -1,71 +1,99 @@
-# Restore 4 regressed rep portal features
+# Plan — "Too Expensive" objection + Hires & Onboarding hub
 
-Dean's report is accurate — three of these have measurably regressed in the codebase, and inbox attach was never finished on the compose side. Here's what I'll restore.
+## 1. Home page — "Too Expensive" objection card
 
-## 1. Draggable tabs (browser-tab style)
+Directly under the 21-Day Diagnostic + Implementation Retainer pricing tiles on `Home.tsx`, insert a compact premium-tile callout:
 
-Today `PortalPage.tsx` only supports drag-reorder for the **Widgets** layout (line 597 `draggable={!isPinned}` on widget headers). The **Tabs** layout shows the tab strip with no drag handlers, which is what Dean was using.
+- Eyebrow (case-mono): `The objection we hear every time`
+- Crimson quote: `"That's just too expensive!"`
+- Sub: `Said by every CFO who hasn't done the math yet. Here's the math.`
+- CTA button → `/why-us#math` (existing math/objection content lives on Why Us)
 
-Fix:
-- Add `draggable`, `onDragStart`, `onDragOver`, `onDrop` to each tab pill in the tab strip.
-- Reuse the existing `tabOrder` state + per-rep persistence (already in place for widgets) so order survives reload and is scoped to the rep's code.
-- Same behavior in `AdminDashboard.tsx` tab strip so it works in your admin too.
+This stays above the fold of the pricing section so it works as a quick-reference link any rep can drop into a chat.
 
-## 2. Sales Coach knows the 21-Day Revenue Diagnostic
+## 2. New admin tab — "Hires & Onboarding"
 
-`supabase/functions/rep-assistant/index.ts` still says `14-Day Forensic Diagnostic $2,900`. The earlier fix only updated catalog text — the COACH_PROMPT block (lines 14–62) was missed.
+Inserted between **Careers** and **Company Calendar** in `AdminDashboard.tsx`. New component `AdminHiresOnboardingPanel.tsx` with three sub-sections:
 
-Fix the COACH_PROMPT to anchor on:
-- **21-Day Revenue Diagnostic — $18,500 one-time** (rep cut $5,000)
-- **Implementation Retainer — $15,000/mo, 3-month minimum** (rep cut $4,000/mo)
-- **Forensic Diagnostic / Leak Audit — $2,500** entry offer, applied toward upgrade
-- Update objection handling, free→paid path, and delivery timeline lines to match.
+### a) Hired roster
+- Lists every active `rep_codes` row grouped by team
+- Inline team selector (Team 1 / Team 2 / + new team)
+- "Remove" button → cascades: deletes `rep_codes` row, `rep_mailboxes`, `rep_settings`, `rep_notes`, `rep_library`, and any portal session record. Existing `ON DELETE CASCADE` already removes most; we add an edge function call `revoke-rep-access` to clear `portal_sessions` and `auth.users` row if one exists, so login dies the second they're removed.
 
-Also update PARTNER_ADDENDUM with the fixed-dollar split + bonus structure so Brandon's coach is consistent.
+### b) Teams & engagement schedules
+- Default seeded teams:
+  - **Team 1 — Veterans** (6mo+): weekly leadership sync, monthly strategy deep-dive, quarterly comp review
+  - **Team 2 — New hires** (0–6mo): daily 15-min stand-up week 1, 3x/week coaching weeks 2–4, weekly 1:1 month 2+, training module due every Friday
+- Admins can add a team, edit cadence items, set reminder day-of-week
+- Each cadence item has a "Send to company calendar" toggle that mirrors into existing `companycal` entries
 
-## 3. Inbox compose: attach files
+### c) New-hire engagement playbook
+Static-but-editable reference card with operator-tone tips:
+- Day 1 outreach script (Slack/email template)
+- Week 1 check-in questions ("What blocked you today?")
+- Red-flag signals to escalate
+- Reactivation script if they go quiet 48h+
 
-`InboxTab.tsx` already renders inbound attachments but the compose dialog has no attach UI. The `rep-email-attachments` storage bucket already exists.
+Stored in a new `hire_playbook_entries` table so Brandon and I can edit on the fly.
 
-Fix in compose dialog:
-- Paperclip button → hidden file input (multi-select).
-- Show selected files as removable chips below the body.
-- On send: upload each file to `rep-email-attachments/{repCode}/{uuid}-{filename}`, get signed URLs, pass them as `attachments: [{name, url, size, mime}]` into `repMailbox.send`.
-- Update `portal-mailbox` send handler to forward attachments to the outbound email payload.
-- 10MB per-file, 25MB total cap with toast on overflow.
+## 3. Database changes
 
-## 4. Commission panel — restore fixed-dollar split + bonuses
+```sql
+-- Team field on reps
+ALTER TABLE rep_codes ADD COLUMN team_name text DEFAULT 'Team 2 — New hires';
+CREATE INDEX rep_codes_team_idx ON rep_codes(team_name);
 
-`FlagshipCommissionPanel.tsx` regressed back to the locked **70/15/15** split (line 8). Per project memory and the chat history (msg #2179, #2186), the correct model is:
+-- Teams catalog (so we can rename / add)
+CREATE TABLE hire_teams (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text UNIQUE NOT NULL,
+  description text,
+  experience_band text,
+  sort_order int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
 
-| Offer | Total | Company | Rep | Partner |
-|---|---|---|---|---|
-| 21-Day Revenue Diagnostic | $18,000 | $10,000 | **$5,000** | $3,000 |
-| Implementation Retainer (per month) | $15,000 | $8,000 | **$4,000** | $3,000 |
-| Forensic Diagnostic (Leak Audit) | $2,500 | tiered 50/30/20 | tiered | tiered |
+-- Per-team cadence
+CREATE TABLE hire_team_cadence (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  team_id uuid REFERENCES hire_teams(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  cadence text NOT NULL, -- daily | weekly | monthly | quarterly
+  day_of_week int,       -- 0–6 when weekly
+  notes text,
+  push_to_calendar boolean DEFAULT false,
+  sort_order int DEFAULT 0
+);
 
-Plus the bonus stack Dean is missing (the "new recruit stuff"):
-- **Volume bonus**: +$1,000 / +$2,500 / +$5,000 at 2 / 3 / 5 monthly flagship sales.
-- **Retention bonus**: +$1,000 / +$2,500 / +$5,000 at 3 / 6 / 12 month client extension.
-- **Referral bonus**: $500 onboard + $7,000 first-close + $500/sale override for 12 months.
-
-Fix:
-- Replace the `SPLIT` constant with a `flagshipFixedSplit()` table matching `payments-webhook`.
-- Rewrite the three flagship cards to show fixed-dollar amounts, not percentages.
-- Add a new **Bonus Stack** section under the cards (volume / retention / referral cards).
-- Keep the existing `audience` prop: reps see only their own cut + bonuses they qualify for; partner/admin see the full table.
-- Update the "Full-stack close" math at the bottom: Diagnostic + 12mo Retainer = $18,000 + $180,000 = $198,000 → Rep $5,000 + ($4,000×12) = **$53,000/client/yr**.
-
-## Technical notes (where things live)
-
+-- Engagement playbook entries
+CREATE TABLE hire_playbook_entries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  section text NOT NULL,  -- day_one | week_one | red_flags | reactivation
+  title text NOT NULL,
+  body text NOT NULL,
+  sort_order int DEFAULT 0,
+  updated_at timestamptz DEFAULT now()
+);
 ```
-src/pages/PortalPage.tsx              — tab strip drag handlers
-src/pages/AdminDashboard.tsx          — same drag handlers on admin tab strip
-supabase/functions/rep-assistant/     — COACH_PROMPT + PARTNER_ADDENDUM rewrite
-src/components/portal/InboxTab.tsx    — attach UI in ComposeDialog
-supabase/functions/portal-mailbox/    — accept attachments[] in send payload
-src/lib/repMailbox.ts                 — pass attachments through
-src/components/portal/FlagshipCommissionPanel.tsx — fixed-$ split + bonus stack
-```
 
-No DB migrations needed — the `rep-email-attachments` bucket already exists and commissions math is all client-side display (the webhook side is already correct per memory).
+All three tables get RLS: admin-only via `is_admin(auth.uid())`. Seeded with Team 1 + Team 2 + default cadences + 8 starter playbook entries.
+
+## 4. Cascading login removal
+
+New edge function `revoke-rep-access`:
+- Validates admin JWT
+- Accepts `{ code }`
+- Calls `supabase.auth.admin.deleteUser()` for any auth user matching the rep's email
+- Deletes any rows in `portal_sessions` (if exists) for that code
+- Deletes the `rep_codes` row (cascade handles dependents)
+- Returns `{ revoked: true }`
+
+`ManageRepsPanel` and the new Hires panel both call this instead of the existing `deleteRepCode`, so login dies instantly.
+
+## Files touched
+- `src/pages/Home.tsx` — insert objection callout
+- `src/pages/AdminDashboard.tsx` — register new `hires` tab between Careers and Company Calendar
+- `src/components/admin/AdminHiresOnboardingPanel.tsx` — new
+- `src/lib/hireTeams.ts` — new client lib (CRUD for teams, cadence, playbook, revoke)
+- `supabase/functions/revoke-rep-access/index.ts` — new edge function
+- migration: tables + RLS + seed data

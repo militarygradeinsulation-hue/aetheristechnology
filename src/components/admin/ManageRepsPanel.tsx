@@ -15,6 +15,7 @@ import {
   sendRepTestEmail,
   type RepCodeRow,
 } from "@/lib/repCodes";
+import { revokeRepAccess } from "@/lib/hireTeams";
 
 const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) => {
   const { toast } = useToast();
@@ -145,9 +146,14 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   };
 
   const onDelete = async (id: string, name: string) => {
-    if (!confirm(`Remove ${name}? This deletes their code, notes, library, and settings.`)) return;
-    try { await deleteRepCode(id); toast({ title: "Removed" }); await load(); }
-    catch (e) { toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" }); }
+    const row = rows.find(r => r.id === id);
+    if (!row) return;
+    if (!confirm(`Remove ${name}?\n\nThis instantly revokes their portal LOGIN and deletes their code, mailbox, notes, library, and settings. Cannot be undone.`)) return;
+    try {
+      const res = await revokeRepAccess(row.code);
+      toast({ title: "Removed", description: res.auth_deleted ? "Login deleted. They cannot sign in." : "Rep deleted. No auth user was found." });
+      await load();
+    } catch (e) { toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" }); }
   };
 
   return (
