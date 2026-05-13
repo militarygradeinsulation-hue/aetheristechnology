@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Bell, Users, FileText, ExternalLink, Copy, Check, Loader2, Flame, Minus, Plus } from "lucide-react";
+import { Bell, Users, FileText, ExternalLink, Copy, Check, Loader2, Flame, Minus, Plus, Rocket, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPortalToken } from "@/lib/portalAuth";
 import {
@@ -10,10 +10,11 @@ import {
   updateDailyChecklist,
   type DailyChecklistResponse,
 } from "@/lib/portalDailyChecklist";
+import { getCurrentSprintDay, getTodaySprintGoal } from "./Sprint90View";
 
 const CONN_TARGET = 10;
 
-export const DailyHustleCard: React.FC = () => {
+export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onViewSprint }) => {
   const { toast } = useToast();
   const [state, setState] = useState<DailyChecklistResponse | null>(null);
   const [loading, setLoading] = useState(true);
