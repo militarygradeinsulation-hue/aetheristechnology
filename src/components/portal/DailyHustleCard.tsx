@@ -23,14 +23,48 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
 
   const portalToken = useMemo(() => getPortalToken(), []);
 
-  useEffect(() => {
-    let alive = true;
-    fetchDailyChecklist(portalToken)
-      .then((d) => alive && setState(d))
-      .catch((e) => toast({ title: "Couldn't load daily checklist", description: e.message, variant: "destructive" }))
-      .finally(() => alive && setLoading(false));
-    return () => { alive = false; };
+  const refresh = React.useCallback(async () => {
+    try {
+      const d = await fetchDailyChecklist(portalToken);
+      setState(d);
+    } catch (e) {
+      toast({ title: "Couldn't refresh daily hustle", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   }, [portalToken, toast]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  // Auto-refresh: poll every 5 min + listen for new blog/playbook publishes in realtime
+  useEffect(() => {
+    const interval = setInterval(refresh, 5 * 60 * 1000);
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+    const bump = () => {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(refresh, 1500);
+    };
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      const ch = supabase
+        .channel("daily-hustle-content")
+        .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, bump)
+        .on("postgres_changes", { event: "*", schema: "public", table: "playbooks" }, bump)
+        .subscribe();
+      (window as any).__dailyHustleCh = ch;
+    });
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      if (debounce) clearTimeout(debounce);
+      window.removeEventListener("focus", onFocus);
+      const ch = (window as any).__dailyHustleCh;
+      if (ch) {
+        import("@/integrations/supabase/client").then(({ supabase }) => supabase.removeChannel(ch));
+        delete (window as any).__dailyHustleCh;
+      }
+    };
+  }, [refresh]);
 
   const patch = async (p: Partial<DailyChecklistResponse["checklist"]>) => {
     if (!state) return;
@@ -194,7 +228,14 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <FileText className="w-4 h-4 text-amber" />
-              <span className="font-semibold text-foreground">Post today's blog with your link</span>
+              <span className="font-semibold text-foreground">
+                Post today's {blog?.kind === "playbook" ? "playbook" : "blog"} with your link
+              </span>
+              {blog?.is_today && (
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber border border-amber/40 bg-amber/10 px-1.5 py-0.5 rounded">
+                  New today
+                </span>
+              )}
             </div>
             {blog ? (
               <>
@@ -214,7 +255,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
                   </Button>
                   <Button asChild size="sm" variant="outline">
                     <a href={blog.share_url} target="_blank" rel="noreferrer">
-                      Open blog <ExternalLink className="w-3 h-3 ml-1" />
+                      Open {blog.kind === "playbook" ? "playbook" : "blog"} <ExternalLink className="w-3 h-3 ml-1" />
                     </a>
                   </Button>
                   <Button asChild size="sm" className="bg-amber text-background hover:bg-amber/90">
