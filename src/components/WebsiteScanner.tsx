@@ -294,8 +294,13 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
 
   const handleDownloadPreview = () => {
     if (!result) return;
-    generatePreviewPdf(result);
-    trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    if (isUnlocked) {
+      generateFullReport(result);
+      trackEvent('scan_full_downloaded', { url: url.trim(), score: result.score });
+    } else {
+      generatePreviewPdf(result);
+      trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    }
   };
 
   const handleFixClick = (isVisible: boolean) => {
