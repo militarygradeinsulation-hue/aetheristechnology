@@ -7,6 +7,9 @@ export interface RepMailbox {
   address: string;
   signature: string | null;
   forwarding_to: string | null;
+  personal_email: string | null;
+  forward_inbound: boolean;
+  mask_outbound: boolean;
   auto_reply_enabled: boolean;
   auto_reply_body: string | null;
   is_active: boolean;
@@ -110,7 +113,7 @@ export const repMailbox = {
   }) {
     return (await call("save_draft", payload)).message as RepEmailMessage;
   },
-  async updateSettings(patch: Partial<Pick<RepMailbox, "signature" | "forwarding_to" | "auto_reply_enabled" | "auto_reply_body">>) {
+  async updateSettings(patch: Partial<Pick<RepMailbox, "signature" | "forwarding_to" | "personal_email" | "forward_inbound" | "mask_outbound" | "auto_reply_enabled" | "auto_reply_body">>) {
     return (await call("update_settings", patch)).mailbox as RepMailbox;
   },
 };

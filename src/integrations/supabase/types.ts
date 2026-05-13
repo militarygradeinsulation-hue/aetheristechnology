@@ -4070,11 +4070,14 @@ export type Database = {
           auto_reply_enabled: boolean
           code: string
           created_at: string
+          forward_inbound: boolean
           forwarding_to: string | null
           id: string
           is_active: boolean
           last_inbound_at: string | null
           last_outbound_at: string | null
+          mask_outbound: boolean
+          personal_email: string | null
           signature: string | null
           updated_at: string
         }
@@ -4084,11 +4087,14 @@ export type Database = {
           auto_reply_enabled?: boolean
           code: string
           created_at?: string
+          forward_inbound?: boolean
           forwarding_to?: string | null
           id?: string
           is_active?: boolean
           last_inbound_at?: string | null
           last_outbound_at?: string | null
+          mask_outbound?: boolean
+          personal_email?: string | null
           signature?: string | null
           updated_at?: string
         }
@@ -4098,11 +4104,14 @@ export type Database = {
           auto_reply_enabled?: boolean
           code?: string
           created_at?: string
+          forward_inbound?: boolean
           forwarding_to?: string | null
           id?: string
           is_active?: boolean
           last_inbound_at?: string | null
           last_outbound_at?: string | null
+          mask_outbound?: boolean
+          personal_email?: string | null
           signature?: string | null
           updated_at?: string
         }

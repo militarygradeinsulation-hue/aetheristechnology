@@ -447,6 +447,9 @@ const SettingsDialog: React.FC<{
 }> = ({ mailbox, onClose, onSaved }) => {
   const { toast } = useToast();
   const [signature, setSignature] = useState(mailbox.signature || "");
+  const [personalEmail, setPersonalEmail] = useState(mailbox.personal_email || "");
+  const [forwardInbound, setForwardInbound] = useState(!!mailbox.forward_inbound);
+  const [maskOutbound, setMaskOutbound] = useState(mailbox.mask_outbound !== false);
   const [forwarding, setForwarding] = useState(mailbox.forwarding_to || "");
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(mailbox.auto_reply_enabled);
   const [autoReplyBody, setAutoReplyBody] = useState(mailbox.auto_reply_body || "");
@@ -456,11 +459,15 @@ const SettingsDialog: React.FC<{
     setSaving(true);
     try {
       const m = await repMailbox.updateSettings({
-        signature, forwarding_to: forwarding || null,
+        signature,
+        personal_email: personalEmail || null,
+        forward_inbound: forwardInbound,
+        mask_outbound: maskOutbound,
+        forwarding_to: forwardInbound ? (personalEmail || null) : (forwarding || null),
         auto_reply_enabled: autoReplyEnabled, auto_reply_body: autoReplyBody,
       });
       onSaved(m);
-      toast({ title: "Saved" });
+      toast({ title: "Saved", description: "Your email settings synced to your account." });
       onClose();
     } catch (e: any) {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
@@ -469,17 +476,58 @@ const SettingsDialog: React.FC<{
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>Inbox settings</DialogTitle></DialogHeader>
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+            Your Aetheris inbox: <span className="font-mono text-foreground">{mailbox.address}</span>
+          </div>
+
+          <div>
+            <Label>Your personal / work email</Label>
+            <Input
+              type="email"
+              value={personalEmail}
+              onChange={(e) => setPersonalEmail(e.target.value)}
+              placeholder="you@gmail.com"
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Synced to your rep account. Used as your reply-to and (optionally) inbound forwarding target.
+            </p>
+          </div>
+
+          <div className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
+            <div className="min-w-0">
+              <Label className="text-sm">Forward inbound mail to my personal email</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Every message that hits {mailbox.address} also gets pushed to your personal inbox.
+              </p>
+            </div>
+            <Switch checked={forwardInbound} onCheckedChange={setForwardInbound} disabled={!personalEmail} />
+          </div>
+
+          <div className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
+            <div className="min-w-0">
+              <Label className="text-sm">Mask my work address on outbound</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Outbound mail is sent from {mailbox.address} so leads never see your personal/work address.
+              </p>
+            </div>
+            <Switch checked={maskOutbound} onCheckedChange={setMaskOutbound} />
+          </div>
+
+          {!forwardInbound && (
+            <div>
+              <Label>Forward inbound mail to (optional)</Label>
+              <Input value={forwarding} onChange={(e) => setForwarding(e.target.value)} placeholder="someone-else@gmail.com" />
+            </div>
+          )}
+
           <div>
             <Label>Signature</Label>
             <Textarea rows={3} value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Bradon Roberts · Aetheris" />
           </div>
-          <div>
-            <Label>Forward inbound mail to (optional)</Label>
-            <Input value={forwarding} onChange={(e) => setForwarding(e.target.value)} placeholder="bradon@gmail.com" />
-          </div>
+
           <div className="flex items-center justify-between">
             <Label>Auto-reply</Label>
             <Switch checked={autoReplyEnabled} onCheckedChange={setAutoReplyEnabled} />
