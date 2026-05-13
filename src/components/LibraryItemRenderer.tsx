@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
+import { generateFullReport } from '@/lib/generateScanReport';
 
 const copyText = (text: string, setCopiedId: (id: string | null) => void, id: string) => {
   navigator.clipboard.writeText(text);
