@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
 import { portalLeads, type RepLead } from "@/lib/portalLeads";
-import { openRepMail } from "@/lib/repMail";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
 
