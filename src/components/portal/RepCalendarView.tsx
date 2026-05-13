@@ -482,4 +482,115 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
   );
 };
 
+
+const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
+
+const DayAgenda: React.FC<{
+  date: Date;
+  items: CalendarEvent[];
+  onOpen: (e: CalendarEvent) => void;
+  onAdd: () => void;
+  onToggle: (e: CalendarEvent) => void;
+}> = ({ date, items, onOpen, onAdd, onToggle }) => {
+  const allDay = items.filter((e) => e.all_day);
+  const timed = items.filter((e) => !e.all_day);
+  const byHour = new Map<number, CalendarEvent[]>();
+  for (const e of timed) {
+    const h = new Date(e.start_at).getHours();
+    if (!byHour.has(h)) byHour.set(h, []);
+    byHour.get(h)!.push(e);
+  }
+  const earlyOrLate = timed.filter((e) => {
+    const h = new Date(e.start_at).getHours();
+    return h < HOURS[0] || h > HOURS[HOURS.length - 1];
+  });
+
+  return (
+    <div className="space-y-3">
+      {allDay.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">All day</p>
+          <div className="flex flex-wrap gap-1.5">
+            {allDay.map((e) => {
+              const meta = KIND_META[e.kind];
+              return (
+                <button key={e.id} onClick={() => onOpen(e)}
+                  className={`text-xs px-2 py-1 rounded border ${meta.color} ${e.completed ? "line-through opacity-60" : ""}`}>
+                  <span className="mr-1">{meta.icon}</span>{e.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="rounded border border-border/60 divide-y divide-border/40">
+        {HOURS.map((h) => {
+          const slot = byHour.get(h) || [];
+          const label = new Date(2000, 0, 1, h).toLocaleTimeString([], { hour: "numeric" });
+          return (
+            <div key={h} className="flex gap-3 px-3 py-2 min-h-[52px]">
+              <div className="w-14 text-[11px] font-mono text-muted-foreground pt-0.5">{label}</div>
+              <div className="flex-1 flex flex-col gap-1">
+                {slot.length === 0 ? (
+                  <button onClick={onAdd} className="text-[11px] text-muted-foreground/40 hover:text-amber text-left">
+                    + add
+                  </button>
+                ) : slot.map((e) => {
+                  const meta = KIND_META[e.kind];
+                  return (
+                    <div key={e.id} className={`flex items-start gap-2 px-2 py-1.5 rounded border ${meta.color}`}>
+                      <button onClick={() => onToggle(e)} className="mt-0.5">
+                        {e.completed
+                          ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          : <Circle className="w-4 h-4 opacity-60" />}
+                      </button>
+                      <button onClick={() => onOpen(e)} className="flex-1 text-left">
+                        <div className={`text-sm font-medium ${e.completed ? "line-through opacity-60" : ""}`}>
+                          <span className="mr-1">{meta.icon}</span>{e.title}
+                        </div>
+                        <div className="text-[10px] font-mono text-muted-foreground">
+                          {new Date(e.start_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                          {e.end_at && ` – ${new Date(e.end_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+                          {" · "}{meta.label}
+                        </div>
+                        {e.body && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.body}</div>}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {earlyOrLate.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">Outside 7a–8p</p>
+          <div className="flex flex-col gap-1">
+            {earlyOrLate.map((e) => {
+              const meta = KIND_META[e.kind];
+              return (
+                <button key={e.id} onClick={() => onOpen(e)}
+                  className={`text-left text-xs px-2 py-1 rounded border ${meta.color}`}>
+                  <span className="mr-1">{meta.icon}</span>
+                  <span className="font-mono opacity-70 mr-1">
+                    {new Date(e.start_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                  </span>
+                  {e.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {items.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">Nothing scheduled. Click + New to add an entry.</p>
+      )}
+    </div>
+  );
+};
+
 export default RepCalendarView;
