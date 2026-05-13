@@ -63,7 +63,7 @@ const AdminLogin: React.FC = () => {
       >
         <ArrowLeft className="w-4 h-4" /> Back to website
       </Link>
-      <div className="glass p-8 rounded-2xl max-w-sm w-full">
+      <div className="glass p-8 rounded-2xl max-w-sm w-full relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-amber" />
