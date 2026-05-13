@@ -34,22 +34,29 @@ serve(async (req) => {
       // Hard-cap both queries — site_events grows fast and an unbounded
       // SELECT was hitting Postgres statement_timeout (57014) and bubbling
       // up to the client as a 500 / blank screen.
-      const [subRes, evtRes] = await Promise.all([
-        supabase
-          .from("contact_submissions")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(500),
-        supabase
+      // Run independently so a slow site_events query can't fail the whole response.
+      const subRes = await supabase
+        .from("contact_submissions")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200)
+        .then((r) => r, (e) => ({ data: [], error: e }));
+
+      let events: any[] = [];
+      try {
+        const evtRes = await supabase
           .from("site_events")
-          .select("id,event_type,event_data,session_id,user_agent,created_at")
+          .select("id,event_type,session_id,user_agent,created_at")
           .order("created_at", { ascending: false })
-          .limit(1000),
-      ]);
-      if (subRes.error) console.error("dashboard submissions error:", subRes.error);
-      if (evtRes.error) console.error("dashboard events error:", evtRes.error);
+          .limit(200);
+        if (evtRes.error) console.error("dashboard events error:", evtRes.error);
+        events = evtRes.data || [];
+      } catch (e) {
+        console.error("dashboard events exception:", e);
+      }
+      if ((subRes as any).error) console.error("dashboard submissions error:", (subRes as any).error);
       return new Response(
-        JSON.stringify({ submissions: subRes.data || [], events: evtRes.data || [] }),
+        JSON.stringify({ submissions: (subRes as any).data || [], events }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
