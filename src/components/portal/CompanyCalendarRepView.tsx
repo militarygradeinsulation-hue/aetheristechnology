@@ -184,7 +184,7 @@ const UpcomingSidebar: React.FC<{ entries: CompanyCalendarEntry[]; todayStr: str
         {upcoming.length === 0 ? (
           <p className="text-xs text-muted-foreground italic">Nothing on the schedule.</p>
         ) : upcoming.map(e => {
-          const meta = KIND_META[e.kind];
+          const meta = entryDisplay(e);
           return (
             <button key={e.id} onClick={() => onPick(e)}
               className={`w-full text-left rounded-md border p-2 text-xs ${meta.color} hover:opacity-90 transition`}>
@@ -312,7 +312,7 @@ const MonthView: React.FC<{ entries: CompanyCalendarEntry[]; anchor: Date; today
                 ${inMonth ? "bg-background/40" : "bg-muted/20 opacity-60"}`}>
                 <div className={`font-mono ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}>{d.getDate()}</div>
                 {list.slice(0, 3).map(e => {
-                  const meta = KIND_META[e.kind];
+                  const meta = entryDisplay(e);
                   return (
                     <button key={e.id} onClick={() => onPick(e)}
                       className={`text-left truncate rounded px-1 py-0.5 border ${meta.color} hover:opacity-80`}>
@@ -334,7 +334,7 @@ const MonthView: React.FC<{ entries: CompanyCalendarEntry[]; anchor: Date; today
 
 // ---------- Entry card ----------
 const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalendarEntry) => void; compact?: boolean }> = ({ e, onPick, compact }) => {
-  const meta = KIND_META[e.kind];
+  const meta = entryDisplay(e);
   return (
     <button
       type="button"
@@ -354,7 +354,7 @@ const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalenda
 
 // ---------- Detail dialog ----------
 const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }> = ({ entry, onClose }) => {
-  const meta = KIND_META[entry.kind];
+  const meta = entryDisplay(entry);
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-background border border-border rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
