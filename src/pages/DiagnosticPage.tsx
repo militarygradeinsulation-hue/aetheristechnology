@@ -140,6 +140,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     process: ['Query ChatGPT, Perplexity, Claude, and Google AI Overviews live', 'Score visibility, accuracy, and sentiment per prompt', 'Identify the source pages each AI is pulling from'],
     deliverables: ['Side-by-side AI visibility report (you vs. competitors)', 'Prompt-by-prompt remediation list', 'GEO content brief for the 5 highest-value prompts'],
     exampleLeak: 'ChatGPT recommended a competitor 9 out of 10 times for their core service category. We knew exactly which 3 pages to fix.',
+    standalonePrice: '$59',
+    standaloneDetail: 'one-time · AI visibility report',
+    priceId: 'scan_full_report_once',
   },
 ];
 
