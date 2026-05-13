@@ -13,19 +13,22 @@ import {
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
-  KIND_META, COMPANY_CAL_BUCKET,
+  KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
+  type CompanyCalendarCategory,
 } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
+const CATEGORIES = Object.keys(CATEGORY_META) as CompanyCalendarCategory[];
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 interface DraftEntry {
   id?: string;
   date: string;
   kind: CompanyCalendarKind;
+  category: CompanyCalendarCategory;
   title: string;
   body: string;
   pinned: boolean;
@@ -34,7 +37,7 @@ interface DraftEntry {
 }
 
 const emptyDraft = (): DraftEntry => ({
-  date: todayISO(), kind: "goal", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
+  date: todayISO(), kind: "goal", category: "manual", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
 });
 
 export const AdminCompanyCalendarPanel: React.FC = () => {
@@ -72,7 +75,8 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   const openNew = () => setOpenDraft(emptyDraft());
   const openEdit = (e: CompanyCalendarEntry) => setOpenDraft({
-    id: e.id, date: e.date, kind: e.kind, title: e.title, body: e.body,
+    id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
+    title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
   });
 
@@ -81,7 +85,11 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     if (!openDraft.title.trim()) { toast.error("Title required"); return; }
     setSaving(true);
     try {
-      const saved = await upsertCompanyEntry(openDraft as Partial<CompanyCalendarEntry>);
+      const { category, ...rest } = openDraft;
+      const saved = await upsertCompanyEntry({
+        ...(rest as Partial<CompanyCalendarEntry>),
+        color: categoryToColorToken(category),
+      });
       setEntries(prev => {
         const others = prev.filter(p => p.id !== saved.id);
         return [...others, saved].sort((a, b) => a.date.localeCompare(b.date));
@@ -204,7 +212,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 {list.map(e => {
-                  const meta = KIND_META[e.kind];
+                  const meta = entryDisplay(e);
                   return (
                     <button
                       key={e.id}
@@ -251,14 +259,25 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           </DialogHeader>
           {openDraft && (
             <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Date</Label>
                   <Input type="date" value={openDraft.date}
                          onChange={e => setOpenDraft({ ...openDraft, date: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-xs">Kind</Label>
+                  <Label className="text-xs flex items-center gap-2">
+                    Category (color)
+                    <span className={`inline-block w-3 h-3 rounded ${CATEGORY_META[openDraft.category].swatch}`} />
+                  </Label>
+                  <select value={openDraft.category}
+                          onChange={e => setOpenDraft({ ...openDraft, category: e.target.value as CompanyCalendarCategory })}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_META[c].icon} {CATEGORY_META[c].label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Kind (semantic)</Label>
                   <select value={openDraft.kind}
                           onChange={e => setOpenDraft({ ...openDraft, kind: e.target.value as CompanyCalendarKind })}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">

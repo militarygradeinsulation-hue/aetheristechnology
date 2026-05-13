@@ -72,4 +72,48 @@ export const KIND_META: Record<CompanyCalendarKind, { label: string; icon: strin
   note:     { label: "Note",            icon: "📝", color: "bg-muted text-muted-foreground border-border" },
 };
 
+// ===== Source categories (encoded in entry.color as `cat:<key>`) =====
+// Lets us color entries by *where they came from* (90-day sprint, manual, hire training,
+// webinar, interview, etc.) instead of only by `kind`.
+export type CompanyCalendarCategory =
+  | "kickoff_90day"
+  | "manual"
+  | "hire_training"
+  | "webinar"
+  | "interview"
+  | "sales_push"
+  | "client_event";
+
+export const CATEGORY_META: Record<CompanyCalendarCategory, { label: string; icon: string; color: string; swatch: string }> = {
+  kickoff_90day: { label: "$1M / 90-Day Sprint", icon: "🎯", color: "bg-amber/15 text-amber border-amber/50",                 swatch: "bg-amber" },
+  manual:        { label: "Manual Entry",        icon: "📝", color: "bg-sky-500/15 text-sky-300 border-sky-500/40",            swatch: "bg-sky-500" },
+  hire_training: { label: "New Hire Training",   icon: "🎓", color: "bg-violet-500/15 text-violet-300 border-violet-500/40",   swatch: "bg-violet-500" },
+  webinar:       { label: "Webinar",             icon: "📡", color: "bg-cyan-500/15 text-cyan-300 border-cyan-500/40",         swatch: "bg-cyan-500" },
+  interview:     { label: "Interview",           icon: "🤝", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40", swatch: "bg-emerald-500" },
+  sales_push:    { label: "Sales Push",          icon: "🔥", color: "bg-crimson/15 text-crimson border-crimson/40",            swatch: "bg-crimson" },
+  client_event:  { label: "Client Event",        icon: "📅", color: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/40", swatch: "bg-fuchsia-500" },
+};
+
+const CATEGORY_KEYS = Object.keys(CATEGORY_META) as CompanyCalendarCategory[];
+
+/** Parse the category encoded in entry.color (`cat:<key>`), if any. */
+export function categoryOf(entry: Pick<CompanyCalendarEntry, "color">): CompanyCalendarCategory | null {
+  const c = entry.color;
+  if (!c || !c.startsWith("cat:")) return null;
+  const key = c.slice(4) as CompanyCalendarCategory;
+  return CATEGORY_KEYS.includes(key) ? key : null;
+}
+
+/** Resolve display (label/icon/color classes) for an entry — category wins, else kind. */
+export function entryDisplay(entry: Pick<CompanyCalendarEntry, "color" | "kind">): { label: string; icon: string; color: string } {
+  const cat = categoryOf(entry);
+  if (cat) {
+    const m = CATEGORY_META[cat];
+    return { label: m.label, icon: m.icon, color: m.color };
+  }
+  return KIND_META[entry.kind];
+}
+
+export const categoryToColorToken = (c: CompanyCalendarCategory) => `cat:${c}`;
+
 export const COMPANY_CAL_BUCKET = "workspace-files";
