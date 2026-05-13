@@ -53,8 +53,9 @@ import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
 import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
+import { WebsiteScanner } from '@/components/WebsiteScanner';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner';
 type EventsSubTab = 'campaign' | 'site';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
