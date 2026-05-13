@@ -83,7 +83,7 @@ export const MillionDollarPathView: React.FC = () => {
           kind: kind as never,
           title: `${phaseEmoji} Week ${w.week} · ${w.theme}`,
           body,
-          color: w.phase === "Foundation" ? "#F2A623" : w.phase === "Acceleration" ? "#DC2626" : "#10B981",
+          color: "cat:kickoff_90day",
           ai_plan: {
             summary: `Week ${w.week} of $1M sprint — ${w.phase}.`,
             tactics: w.focus,
