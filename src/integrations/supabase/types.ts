@@ -3273,6 +3273,71 @@ export type Database = {
         }
         Relationships: []
       }
+      outlook_oauth_state: {
+        Row: {
+          created_at: string
+          expires_at: string
+          rep_code: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          rep_code: string
+          state: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          rep_code?: string
+          state?: string
+        }
+        Relationships: []
+      }
+      outlook_oauth_tokens: {
+        Row: {
+          access_token: string
+          connected_at: string
+          expires_at: string
+          id: string
+          outlook_email: string | null
+          refresh_token: string | null
+          rep_code: string
+          scope: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          connected_at?: string
+          expires_at: string
+          id?: string
+          outlook_email?: string | null
+          refresh_token?: string | null
+          rep_code: string
+          scope?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          connected_at?: string
+          expires_at?: string
+          id?: string
+          outlook_email?: string | null
+          refresh_token?: string | null
+          rep_code?: string
+          scope?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outlook_oauth_tokens_rep_code_fkey"
+            columns: ["rep_code"]
+            isOneToOne: true
+            referencedRelation: "rep_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       pattern_results: {
         Row: {
           account_id: string
