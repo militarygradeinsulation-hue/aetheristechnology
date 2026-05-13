@@ -51,17 +51,22 @@ export async function loadRepMailPrefs(force = false): Promise<RepMailPrefs> {
     try {
       const s = await getRepSettings();
       const d = (s?.defaults || {}) as Record<string, string>;
+      const profile = getPortalProfile();
       cached = {
         sender_email: d.sender_email || '',
         email_provider: (d.email_provider as EmailProvider) || 'default',
-        signature: d.signature || '',
+        signature: d.signature?.trim() ? d.signature : buildDefaultSignature(profile?.rep_name),
       };
       return cached;
     } catch {
       // fall through to admin prefs
     }
   }
-  cached = getAdminMailPrefs();
+  const admin = getAdminMailPrefs();
+  if (!admin.signature?.trim()) {
+    admin.signature = buildDefaultSignature(getPortalProfile()?.rep_name);
+  }
+  cached = admin;
   return cached;
 }
 
