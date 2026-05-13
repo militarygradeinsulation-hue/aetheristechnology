@@ -116,7 +116,7 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news']; // newly added tabs auto-show
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
@@ -393,6 +393,7 @@ const PortalPage: React.FC = () => {
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
+    { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -418,7 +419,7 @@ const PortalPage: React.FC = () => {
       case 'overview':
         return (
           <div className="space-y-6">
-            <DailyHustleCard />
+            <DailyHustleCard onViewSprint={() => { setTab('sprint'); setActiveTool(null); }} />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="w-4 h-4" /> Total Sales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Commission Earned</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent></Card>
