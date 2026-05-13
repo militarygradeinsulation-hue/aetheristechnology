@@ -4,7 +4,7 @@ import {
   Copy, Check, Linkedin, Facebook, Megaphone, Phone, Mail, Calendar,
   MessageCircle, AlertTriangle, Search, Globe, TrendingDown, TrendingUp,
   Stethoscope, Sparkles, Target, Users, DollarSign, Briefcase, Lightbulb,
-  ChevronRight, Zap,
+  ChevronRight, Zap, BookOpen, Download,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
