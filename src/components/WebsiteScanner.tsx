@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
+import { generatePreviewPdf, generateFullReport, type FullReport } from '@/lib/generateScanReport';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
