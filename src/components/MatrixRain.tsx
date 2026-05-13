@@ -55,7 +55,7 @@ export const MatrixRain: React.FC<MatrixRainProps> = ({
       }
 
       // Fade trail
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.08)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
       ctx.fillRect(0, 0, w, h);
 
       ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
