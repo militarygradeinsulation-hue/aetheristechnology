@@ -861,6 +861,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
         </Button>
         {activeTool === 'allinone' && <AllInOneGenerator />}
+        {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
         {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
         {activeTool === 'calendar' && (
