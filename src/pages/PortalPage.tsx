@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { RepImageStudio } from '@/components/portal/RepImageStudio';
+import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
 import { FileText, Search } from 'lucide-react';
@@ -20,7 +21,7 @@ import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import { BookOpen, MessageSquare, GraduationCap, Palette } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap, Palette, Film } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
@@ -68,7 +69,7 @@ import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/componen
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news' | 'sprint';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -381,6 +382,7 @@ const PortalPage: React.FC = () => {
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
+    { id: 'video', label: 'Video Studio', icon: <Film className="w-4 h-4" />, iconCmp: Film },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" />, iconCmp: Calculator },
     { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
@@ -496,6 +498,7 @@ const PortalPage: React.FC = () => {
       case 'sharedws': return <SharedWorkspace me="bradon" />;
       case 'interviews': return <InterviewsPanel me="bradon" />;
       case 'art': return <RepImageStudio />;
+      case 'video': return <RepCreationStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
