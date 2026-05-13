@@ -14,7 +14,7 @@ export interface LifecycleStep {
   id: string;
   label: string;
   detail: string;
-  owner: "Aaron" | "Brandon" | "Either";
+  owner: "Joseph" | "Brandon" | "Either";
   done?: boolean;
   scriptKey?: HirePlaybookEntry["section"];
 }
@@ -52,7 +52,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
   switch (stage) {
     case "pre_start":
       return [
-        { id: "ps1", label: "Send welcome text + portal link", owner: "Aaron",
+        { id: "ps1", label: "Send welcome text + portal link", owner: "Joseph",
           detail: `Text ${name}: "Welcome aboard. Your portal is live — log in tonight, watch the 5-min Welcome video, and reply when you're done. Tomorrow we hit the ground running."`,
           scriptKey: "day_one" },
         { id: "ps2", label: "Add to shared calendar + Team thread", owner: "Either",
@@ -62,7 +62,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "day_one":
       return [
-        { id: "d1", label: "30-min kickoff call (live)", owner: "Aaron",
+        { id: "d1", label: "30-min kickoff call (live)", owner: "Joseph",
           detail: "Walk the portal screen-by-screen. Have them open the Leak Audit, run one demo themselves while you watch.", scriptKey: "day_one" },
         { id: "d2", label: "Assign Module 1 + 2 of New-Rep Onboarding", owner: "Either",
           detail: "Open Hires → Training Studio tab. Generate or assign the first two modules. Goal: complete by end of Day 2." },
@@ -71,7 +71,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "first_week":
       return [
-        { id: "w1", label: "Daily 10-min standup (Mon–Fri)", owner: "Aaron",
+        { id: "w1", label: "Daily 10-min standup (Mon–Fri)", owner: "Joseph",
           detail: "Numbers from yesterday, blockers, one win. Hard cap 10 minutes.", scriptKey: "week_one" },
         { id: "w2", label: "Complete onboarding modules 1–5", owner: "Either",
           detail: "Track completion in Training Studio. Gate Week-2 portal features behind it." },
@@ -82,7 +82,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "first_month":
       return [
-        { id: "m1", label: "Weekly 1:1 (30 min, same day each week)", owner: "Aaron",
+        { id: "m1", label: "Weekly 1:1 (30 min, same day each week)", owner: "Joseph",
           detail: "Pipeline review + one growth area. Lock the recurring slot in Cal." },
         { id: "m2", label: "First closed deal coaching", owner: "Brandon",
           detail: "Ride along on every proposal call until first close. Then ride along on every other." },
@@ -94,7 +94,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "ramp":
       return [
-        { id: "r1", label: "Move to bi-weekly 1:1, weekly pipeline", owner: "Aaron",
+        { id: "r1", label: "Move to bi-weekly 1:1, weekly pipeline", owner: "Joseph",
           detail: "They own the agenda now. You ask the questions, they bring the answers." },
         { id: "r2", label: "Set Q-quota + commission tier check", owner: "Brandon",
           detail: "Confirm they understand the 50/30/20 → 60/25/15 ladder and what triggers a tier bump." },
@@ -103,7 +103,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "growth":
       return [
-        { id: "g1", label: "Identify one strength to amplify", owner: "Aaron",
+        { id: "g1", label: "Identify one strength to amplify", owner: "Joseph",
           detail: "Cold open? Discovery? Closes? Pick one and have them teach it on a team call." },
         { id: "g2", label: "Stretch goal: mentor a Team-2 rep", owner: "Brandon",
           detail: "Pair them with a new hire for shadowing. Leadership-track signal." },
@@ -112,7 +112,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "veteran":
       return [
-        { id: "v1", label: "Monthly 1:1 (60 min)", owner: "Aaron",
+        { id: "v1", label: "Monthly 1:1 (60 min)", owner: "Joseph",
           detail: "Career trajectory, comp, what's next. Don't let veterans coast unmanaged." },
         { id: "v2", label: "Reactivation script for any dip", owner: "Either",
           detail: "If KPIs drop 2 weeks in a row, run the reactivation conversation. Don't wait a month.",
