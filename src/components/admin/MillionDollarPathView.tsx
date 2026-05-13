@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Target, TrendingUp, Phone, Calendar, FileText, DollarSign, Users, AlertTriangle, CheckCircle2, Flame, Sparkles } from "lucide-react";
 import { buildScenario, buildWeeks, OFFERS, FUNNEL, MDP_GOAL_CENTS } from "@/lib/millionDollarPath";
+import { OfferStackSection, TargetMarketSection, OutreachSection, SalesProcessSection, TrainingMatrixSection, KpiScoreboardSection } from "@/components/admin/WarPlanSections";
 
 const fmt = (cents: number) => `$${Math.round(cents / 100).toLocaleString()}`;
 const fmtBig = (cents: number) => `$${(cents / 100_000).toFixed(0)}k`;
