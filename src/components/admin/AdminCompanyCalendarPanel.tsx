@@ -75,7 +75,8 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   const openNew = () => setOpenDraft(emptyDraft());
   const openEdit = (e: CompanyCalendarEntry) => setOpenDraft({
-    id: e.id, date: e.date, kind: e.kind, title: e.title, body: e.body,
+    id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
+    title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
   });
 
@@ -84,7 +85,11 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     if (!openDraft.title.trim()) { toast.error("Title required"); return; }
     setSaving(true);
     try {
-      const saved = await upsertCompanyEntry(openDraft as Partial<CompanyCalendarEntry>);
+      const { category, ...rest } = openDraft;
+      const saved = await upsertCompanyEntry({
+        ...(rest as Partial<CompanyCalendarEntry>),
+        color: categoryToColorToken(category),
+      });
       setEntries(prev => {
         const others = prev.filter(p => p.id !== saved.id);
         return [...others, saved].sort((a, b) => a.date.localeCompare(b.date));
