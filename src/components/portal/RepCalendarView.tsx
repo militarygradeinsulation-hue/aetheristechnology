@@ -53,6 +53,8 @@ interface Props {
 export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) => {
   const { toast } = useToast();
   const [cursor, setCursor] = useState(() => new Date());
+  const [view, setView] = useState<"month" | "day">("month");
+  const [dayCursor, setDayCursor] = useState<Date>(() => new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [activeLeads, setActiveLeads] = useState<LeadSummary[]>([]);
   const [leadsById, setLeadsById] = useState<Record<string, LeadSummary>>({});
@@ -187,79 +189,117 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <CardTitle className="font-display flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-amber" /> {monthLabel}
+              <CalendarIcon className="w-5 h-5 text-amber" />
+              {view === "month"
+                ? monthLabel
+                : dayCursor.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             </CardTitle>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}>
+            <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex rounded border border-border overflow-hidden mr-1">
+                <button
+                  onClick={() => setView("month")}
+                  className={`text-xs px-2.5 py-1 ${view === "month" ? "bg-amber text-background" : "bg-card text-muted-foreground hover:text-foreground"}`}
+                >Month</button>
+                <button
+                  onClick={() => { setView("day"); setDayCursor(new Date()); }}
+                  className={`text-xs px-2.5 py-1 ${view === "day" ? "bg-amber text-background" : "bg-card text-muted-foreground hover:text-foreground"}`}
+                >Day</button>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => {
+                if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
+                else setDayCursor(addDays(dayCursor, -1));
+              }}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>Today</Button>
-              <Button variant="outline" size="sm" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}>
+              <Button variant="outline" size="sm" onClick={() => {
+                const now = new Date();
+                if (view === "month") setCursor(now); else setDayCursor(now);
+              }}>Today</Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                if (view === "month") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
+                else setDayCursor(addDays(dayCursor, 1));
+              }}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
-              <Button size="sm" className="bg-amber text-background hover:bg-amber/90 ml-2" onClick={() => openCreate(new Date())}>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90 ml-2" onClick={() => openCreate(view === "day" ? dayCursor : new Date())}>
                 <Plus className="w-4 h-4 mr-1" /> New
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-px text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-mono">
-            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-              <div key={d} className="px-2 py-1">{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-px bg-border/40 rounded overflow-hidden">
-            {days.map((d) => {
-              const inMonth = d.getMonth() === monthStart.getMonth();
-              const isToday = isSameDay(d, today);
-              const items = eventsByDay.get(ymd(d)) || [];
-              return (
-                <div
-                  key={d.toISOString()}
-                  className={`bg-background min-h-[110px] p-1.5 flex flex-col gap-1 ${
-                    inMonth ? "" : "opacity-40"
-                  } ${isToday ? "ring-1 ring-inset ring-amber" : ""}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-mono ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}>
-                      {d.getDate()}
-                    </span>
-                    <button
-                      onClick={() => openCreate(d)}
-                      className="text-muted-foreground hover:text-amber opacity-0 group-hover:opacity-100"
-                      aria-label="Add"
+          {view === "month" ? (
+            <>
+              <div className="grid grid-cols-7 gap-px text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-mono">
+                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                  <div key={d} className="px-2 py-1">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-px bg-border/40 rounded overflow-hidden">
+                {days.map((d) => {
+                  const inMonth = d.getMonth() === monthStart.getMonth();
+                  const isToday = isSameDay(d, today);
+                  const items = eventsByDay.get(ymd(d)) || [];
+                  return (
+                    <div
+                      key={d.toISOString()}
+                      onDoubleClick={() => { setDayCursor(d); setView("day"); }}
+                      className={`bg-background min-h-[110px] p-1.5 flex flex-col gap-1 cursor-pointer ${
+                        inMonth ? "" : "opacity-40"
+                      } ${isToday ? "ring-1 ring-inset ring-amber" : ""}`}
                     >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-0.5 overflow-hidden">
-                    {items.slice(0, 4).map((e) => {
-                      const meta = KIND_META[e.kind];
-                      return (
+                      <div className="flex items-center justify-between">
                         <button
-                          key={e.id}
-                          onClick={() => openEdit(e)}
-                          className={`text-left text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate ${meta.color} ${
-                            e.completed ? "line-through opacity-60" : ""
-                          }`}
-                          title={`${meta.label} · ${fmtTime(e.start_at)} — ${e.title}`}
+                          onClick={() => { setDayCursor(d); setView("day"); }}
+                          className={`text-xs font-mono hover:text-amber ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}
                         >
-                          <span className="mr-0.5">{meta.icon}</span>
-                          {!e.all_day && <span className="opacity-70 mr-1">{fmtTime(e.start_at)}</span>}
-                          {e.title}
+                          {d.getDate()}
                         </button>
-                      );
-                    })}
-                    {items.length > 4 && (
-                      <span className="text-[10px] text-muted-foreground px-1">+{items.length - 4} more</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                        <button
+                          onClick={() => openCreate(d)}
+                          className="text-muted-foreground hover:text-amber"
+                          aria-label="Add"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-0.5 overflow-hidden">
+                        {items.slice(0, 4).map((e) => {
+                          const meta = KIND_META[e.kind];
+                          return (
+                            <button
+                              key={e.id}
+                              onClick={() => openEdit(e)}
+                              className={`text-left text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate ${meta.color} ${
+                                e.completed ? "line-through opacity-60" : ""
+                              }`}
+                              title={`${meta.label} · ${fmtTime(e.start_at)} — ${e.title}`}
+                            >
+                              <span className="mr-0.5">{meta.icon}</span>
+                              {!e.all_day && <span className="opacity-70 mr-1">{fmtTime(e.start_at)}</span>}
+                              {e.title}
+                            </button>
+                          );
+                        })}
+                        {items.length > 4 && (
+                          <span className="text-[10px] text-muted-foreground px-1">+{items.length - 4} more</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <DayAgenda
+              date={dayCursor}
+              items={(eventsByDay.get(ymd(dayCursor)) || []).slice().sort((a, b) => +new Date(a.start_at) - +new Date(b.start_at))}
+              onOpen={openEdit}
+              onAdd={() => openCreate(dayCursor)}
+              onToggle={toggleComplete}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -438,6 +478,117 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+
+const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
+
+const DayAgenda: React.FC<{
+  date: Date;
+  items: CalendarEvent[];
+  onOpen: (e: CalendarEvent) => void;
+  onAdd: () => void;
+  onToggle: (e: CalendarEvent) => void;
+}> = ({ date, items, onOpen, onAdd, onToggle }) => {
+  const allDay = items.filter((e) => e.all_day);
+  const timed = items.filter((e) => !e.all_day);
+  const byHour = new Map<number, CalendarEvent[]>();
+  for (const e of timed) {
+    const h = new Date(e.start_at).getHours();
+    if (!byHour.has(h)) byHour.set(h, []);
+    byHour.get(h)!.push(e);
+  }
+  const earlyOrLate = timed.filter((e) => {
+    const h = new Date(e.start_at).getHours();
+    return h < HOURS[0] || h > HOURS[HOURS.length - 1];
+  });
+
+  return (
+    <div className="space-y-3">
+      {allDay.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">All day</p>
+          <div className="flex flex-wrap gap-1.5">
+            {allDay.map((e) => {
+              const meta = KIND_META[e.kind];
+              return (
+                <button key={e.id} onClick={() => onOpen(e)}
+                  className={`text-xs px-2 py-1 rounded border ${meta.color} ${e.completed ? "line-through opacity-60" : ""}`}>
+                  <span className="mr-1">{meta.icon}</span>{e.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="rounded border border-border/60 divide-y divide-border/40">
+        {HOURS.map((h) => {
+          const slot = byHour.get(h) || [];
+          const label = new Date(2000, 0, 1, h).toLocaleTimeString([], { hour: "numeric" });
+          return (
+            <div key={h} className="flex gap-3 px-3 py-2 min-h-[52px]">
+              <div className="w-14 text-[11px] font-mono text-muted-foreground pt-0.5">{label}</div>
+              <div className="flex-1 flex flex-col gap-1">
+                {slot.length === 0 ? (
+                  <button onClick={onAdd} className="text-[11px] text-muted-foreground/40 hover:text-amber text-left">
+                    + add
+                  </button>
+                ) : slot.map((e) => {
+                  const meta = KIND_META[e.kind];
+                  return (
+                    <div key={e.id} className={`flex items-start gap-2 px-2 py-1.5 rounded border ${meta.color}`}>
+                      <button onClick={() => onToggle(e)} className="mt-0.5">
+                        {e.completed
+                          ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          : <Circle className="w-4 h-4 opacity-60" />}
+                      </button>
+                      <button onClick={() => onOpen(e)} className="flex-1 text-left">
+                        <div className={`text-sm font-medium ${e.completed ? "line-through opacity-60" : ""}`}>
+                          <span className="mr-1">{meta.icon}</span>{e.title}
+                        </div>
+                        <div className="text-[10px] font-mono text-muted-foreground">
+                          {new Date(e.start_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                          {e.end_at && ` – ${new Date(e.end_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+                          {" · "}{meta.label}
+                        </div>
+                        {e.body && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.body}</div>}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {earlyOrLate.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">Outside 7a–8p</p>
+          <div className="flex flex-col gap-1">
+            {earlyOrLate.map((e) => {
+              const meta = KIND_META[e.kind];
+              return (
+                <button key={e.id} onClick={() => onOpen(e)}
+                  className={`text-left text-xs px-2 py-1 rounded border ${meta.color}`}>
+                  <span className="mr-1">{meta.icon}</span>
+                  <span className="font-mono opacity-70 mr-1">
+                    {new Date(e.start_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                  </span>
+                  {e.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {items.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">Nothing scheduled. Click + New to add an entry.</p>
+      )}
     </div>
   );
 };
