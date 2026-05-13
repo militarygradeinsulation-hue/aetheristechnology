@@ -228,7 +228,14 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <FileText className="w-4 h-4 text-amber" />
-              <span className="font-semibold text-foreground">Post today's blog with your link</span>
+              <span className="font-semibold text-foreground">
+                Post today's {blog?.kind === "playbook" ? "playbook" : "blog"} with your link
+              </span>
+              {blog?.is_today && (
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber border border-amber/40 bg-amber/10 px-1.5 py-0.5 rounded">
+                  New today
+                </span>
+              )}
             </div>
             {blog ? (
               <>
