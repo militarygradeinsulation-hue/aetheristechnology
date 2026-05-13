@@ -30,6 +30,9 @@ interface ToolItem {
   process: string[];
   deliverables: string[];
   exampleLeak: string;
+  standalonePrice: string;
+  standaloneDetail: string;
+  priceId: string;
 }
 
 const TOOL_BUNDLE: ToolItem[] = [
