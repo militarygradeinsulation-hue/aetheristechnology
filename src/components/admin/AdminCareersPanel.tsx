@@ -599,7 +599,7 @@ export const AdminCareersPanel: React.FC = () => {
               onClick={() => analyzeAllPassed(true)} disabled={!!bulkAnalyze}>
               {bulkAnalyze
                 ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing {bulkAnalyze.done}/{bulkAnalyze.total}</>
-                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all passed resumes</>}
+                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all applicant resumes</>}
             </Button>
             {applications.some(a => a.ai_fit_score != null) && !bulkAnalyze && (
               <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground"
