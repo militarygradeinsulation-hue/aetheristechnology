@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { adminMailboxes, type AdminMailboxRow } from "@/lib/adminMailboxes";
+import { getAdminMailPrefs, saveAdminMailPrefs, type EmailProvider } from "@/lib/repMail";
 import { Loader2, Mail, Plus, Wand2, Trash2, Settings2 } from "lucide-react";
 
 export const AdminMailboxesPanel: React.FC = () => {
