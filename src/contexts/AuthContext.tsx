@@ -128,8 +128,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+const noopAuth: AuthContextType = {
+  user: null,
+  session: null,
+  loading: false,
+  signUp: async () => { throw new Error('Auth not available'); },
+  signIn: async () => { throw new Error('Auth not available'); },
+  signInWithGoogle: async () => { throw new Error('Auth not available'); },
+  signOut: async () => { throw new Error('Auth not available'); },
+  resetPassword: async () => { throw new Error('Auth not available'); },
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
+  return context ?? noopAuth;
 };
