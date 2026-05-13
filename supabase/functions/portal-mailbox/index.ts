@@ -192,6 +192,13 @@ serve(async (req) => {
         if (f && !isValidEmail(f)) return json(400, { error: "Invalid forwarding address" });
         patch.forwarding_to = f;
       }
+      if ("personal_email" in body) {
+        const p = body.personal_email ? String(body.personal_email).trim().toLowerCase() : null;
+        if (p && !isValidEmail(p)) return json(400, { error: "Invalid personal email" });
+        patch.personal_email = p;
+      }
+      if (typeof body.forward_inbound === "boolean") patch.forward_inbound = body.forward_inbound;
+      if (typeof body.mask_outbound === "boolean") patch.mask_outbound = body.mask_outbound;
       if (typeof body.auto_reply_enabled === "boolean") patch.auto_reply_enabled = body.auto_reply_enabled;
       if (typeof body.auto_reply_body === "string") patch.auto_reply_body = body.auto_reply_body.slice(0, 2000);
       const { data, error } = await sb
