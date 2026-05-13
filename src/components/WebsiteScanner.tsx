@@ -153,16 +153,34 @@ const ScanProgressBar = ({ phase }: { phase: number }) => {
   );
 };
 
+const parseCost = (raw: string): number => {
+  if (!raw) return 0;
+  const s = raw.toLowerCase().replace(/,/g, '');
+  // Match the FIRST number in the string (handles ranges like "$50k-$120k")
+  const m = s.match(/(\d+(?:\.\d+)?)\s*([kmb])?/);
+  if (!m) return 0;
+  let n = parseFloat(m[1]);
+  const suffix = m[2];
+  if (suffix === 'k') n *= 1_000;
+  else if (suffix === 'm') n *= 1_000_000;
+  else if (suffix === 'b') n *= 1_000_000_000;
+  return n;
+};
+
+// Realistic per-gap cap for SMB website leaks
+const PER_GAP_CAP = 500_000;
+const TOTAL_CAP = 2_500_000;
+
 const RevenueBanner = ({ gaps }: { gaps: Gap[] }) => {
   const costs = gaps
     .map(g => g.annualCost)
     .filter(Boolean)
-    .map(c => parseInt(c!.replace(/[^0-9]/g, ''), 10))
-    .filter(n => !isNaN(n));
+    .map(c => Math.min(parseCost(c!), PER_GAP_CAP))
+    .filter(n => n > 0);
   if (costs.length === 0) return null;
-  const total = costs.reduce((a, b) => a + b, 0);
-  const low = Math.round(total * 0.8);
-  const high = Math.round(total * 1.3);
+  const total = Math.min(costs.reduce((a, b) => a + b, 0), TOTAL_CAP);
+  const low = Math.round(total * 0.7);
+  const high = Math.round(total * 1.2);
   const fmt = (n: number) => '$' + n.toLocaleString();
 
   return (
