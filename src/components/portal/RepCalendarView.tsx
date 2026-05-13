@@ -229,61 +229,77 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-px text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-mono">
-            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-              <div key={d} className="px-2 py-1">{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-px bg-border/40 rounded overflow-hidden">
-            {days.map((d) => {
-              const inMonth = d.getMonth() === monthStart.getMonth();
-              const isToday = isSameDay(d, today);
-              const items = eventsByDay.get(ymd(d)) || [];
-              return (
-                <div
-                  key={d.toISOString()}
-                  className={`bg-background min-h-[110px] p-1.5 flex flex-col gap-1 ${
-                    inMonth ? "" : "opacity-40"
-                  } ${isToday ? "ring-1 ring-inset ring-amber" : ""}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-mono ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}>
-                      {d.getDate()}
-                    </span>
-                    <button
-                      onClick={() => openCreate(d)}
-                      className="text-muted-foreground hover:text-amber opacity-0 group-hover:opacity-100"
-                      aria-label="Add"
+          {view === "month" ? (
+            <>
+              <div className="grid grid-cols-7 gap-px text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-mono">
+                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                  <div key={d} className="px-2 py-1">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-px bg-border/40 rounded overflow-hidden">
+                {days.map((d) => {
+                  const inMonth = d.getMonth() === monthStart.getMonth();
+                  const isToday = isSameDay(d, today);
+                  const items = eventsByDay.get(ymd(d)) || [];
+                  return (
+                    <div
+                      key={d.toISOString()}
+                      onDoubleClick={() => { setDayCursor(d); setView("day"); }}
+                      className={`bg-background min-h-[110px] p-1.5 flex flex-col gap-1 cursor-pointer ${
+                        inMonth ? "" : "opacity-40"
+                      } ${isToday ? "ring-1 ring-inset ring-amber" : ""}`}
                     >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-0.5 overflow-hidden">
-                    {items.slice(0, 4).map((e) => {
-                      const meta = KIND_META[e.kind];
-                      return (
+                      <div className="flex items-center justify-between">
                         <button
-                          key={e.id}
-                          onClick={() => openEdit(e)}
-                          className={`text-left text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate ${meta.color} ${
-                            e.completed ? "line-through opacity-60" : ""
-                          }`}
-                          title={`${meta.label} · ${fmtTime(e.start_at)} — ${e.title}`}
+                          onClick={() => { setDayCursor(d); setView("day"); }}
+                          className={`text-xs font-mono hover:text-amber ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}
                         >
-                          <span className="mr-0.5">{meta.icon}</span>
-                          {!e.all_day && <span className="opacity-70 mr-1">{fmtTime(e.start_at)}</span>}
-                          {e.title}
+                          {d.getDate()}
                         </button>
-                      );
-                    })}
-                    {items.length > 4 && (
-                      <span className="text-[10px] text-muted-foreground px-1">+{items.length - 4} more</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                        <button
+                          onClick={() => openCreate(d)}
+                          className="text-muted-foreground hover:text-amber"
+                          aria-label="Add"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-0.5 overflow-hidden">
+                        {items.slice(0, 4).map((e) => {
+                          const meta = KIND_META[e.kind];
+                          return (
+                            <button
+                              key={e.id}
+                              onClick={() => openEdit(e)}
+                              className={`text-left text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate ${meta.color} ${
+                                e.completed ? "line-through opacity-60" : ""
+                              }`}
+                              title={`${meta.label} · ${fmtTime(e.start_at)} — ${e.title}`}
+                            >
+                              <span className="mr-0.5">{meta.icon}</span>
+                              {!e.all_day && <span className="opacity-70 mr-1">{fmtTime(e.start_at)}</span>}
+                              {e.title}
+                            </button>
+                          );
+                        })}
+                        {items.length > 4 && (
+                          <span className="text-[10px] text-muted-foreground px-1">+{items.length - 4} more</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <DayAgenda
+              date={dayCursor}
+              items={(eventsByDay.get(ymd(dayCursor)) || []).slice().sort((a, b) => +new Date(a.start_at) - +new Date(b.start_at))}
+              onOpen={openEdit}
+              onAdd={() => openCreate(dayCursor)}
+              onToggle={toggleComplete}
+            />
+          )}
         </CardContent>
       </Card>
 
