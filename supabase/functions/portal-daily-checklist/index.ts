@@ -71,16 +71,81 @@ serve(async (req) => {
           .eq("rep_code", repCode).eq("for_date", today).maybeSingle()
       : { data: null };
 
-    // Today's blog: latest published post
-    const { data: blog } = await admin.from("blog_posts")
-      .select("id, title, slug, excerpt, tags, featured_image, published_at")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
+    // Today's content: pick the most recent blog OR playbook (whichever is newest).
+    // Today = anything published in the last 36h so the post stays fresh through evening.
+    const sinceISO = new Date(Date.now() - 36 * 3600 * 1000).toISOString();
+
+    const [{ data: latestBlog }, { data: todayBlog }, { data: latestPlaybook }, { data: todayPlaybook }] =
+      await Promise.all([
+        admin.from("blog_posts")
+          .select("id, title, slug, excerpt, tags, featured_image, published_at")
+          .eq("is_published", true)
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle(),
+        admin.from("blog_posts")
+          .select("id, title, slug, excerpt, tags, featured_image, published_at")
+          .eq("is_published", true)
+          .gte("published_at", sinceISO)
+          .order("published_at", { ascending: false })
+          .limit(1).maybeSingle(),
+        admin.from("playbooks")
+          .select("id, title, subtitle, description, tags, file_url, published_at")
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle(),
+        admin.from("playbooks")
+          .select("id, title, subtitle, description, tags, file_url, published_at")
+          .gte("published_at", sinceISO)
+          .order("published_at", { ascending: false })
+          .limit(1).maybeSingle(),
+      ]);
+
+    // Prefer something published today (blog beats playbook on tie). Fall back to latest ever.
+    const blogPick = todayBlog || latestBlog;
+    const pbPick = todayPlaybook || latestPlaybook;
+    let kind: "blog" | "playbook" = "blog";
+    let content:
+      | { title: string; excerpt: string | null; tags: string[]; featured_image: string | null; published_at: string | null; share_url: string }
+      | null = null;
+
+    const refCode = repCode === "ADMIN" ? "" : repCode;
+    const refSuffix = refCode ? `?ref=${refCode}` : "";
+
+    const blogIsToday = !!todayBlog;
+    const pbIsToday = !!todayPlaybook;
+    if (pbIsToday && (!blogIsToday ||
+        new Date(todayPlaybook!.published_at!).getTime() > new Date(todayBlog!.published_at!).getTime())) {
+      kind = "playbook";
+      content = pbPick && {
+        title: pbPick.title,
+        excerpt: pbPick.subtitle || pbPick.description || null,
+        tags: pbPick.tags || [],
+        featured_image: null,
+        published_at: pbPick.published_at,
+        share_url: `${SITE_URL}/playbooks${refSuffix}`,
+      };
+    } else if (blogPick) {
+      kind = "blog";
+      content = {
+        title: blogPick.title,
+        excerpt: blogPick.excerpt,
+        tags: blogPick.tags || [],
+        featured_image: blogPick.featured_image,
+        published_at: blogPick.published_at,
+        share_url: `${SITE_URL}/blog/${blogPick.slug}${refSuffix}`,
+      };
+    } else if (pbPick) {
+      kind = "playbook";
+      content = {
+        title: pbPick.title,
+        excerpt: pbPick.subtitle || pbPick.description || null,
+        tags: pbPick.tags || [],
+        featured_image: null,
+        published_at: pbPick.published_at,
+        share_url: `${SITE_URL}/playbooks${refSuffix}`,
+      };
+    }
 
     // Latest pulled LinkedIn post from main account (for the "repost" CTA).
-    // Falls back to company page link if none exist yet.
     const { data: latestMainPost } = await admin.from("linkedin_post_queue")
       .select("linkedin_post_id, posted_at, content")
       .eq("status", "posted")
@@ -89,22 +154,21 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const refCode = repCode === "ADMIN" ? "" : repCode;
-    const refSuffix = refCode ? `?ref=${refCode}` : "";
-    const blogUrl = blog ? `${SITE_URL}/blog/${blog.slug}${refSuffix}` : null;
-
-    const shareSnippet = blog
+    const shareSnippet = content
       ? [
-          blog.title,
+          content.title,
           "",
-          blog.excerpt,
+          content.excerpt || "",
           "",
-          "Run the free 14-Point Leak Audit on your business — takes 90 seconds:",
-          blogUrl,
+          kind === "playbook"
+            ? "Grab the free playbook (and run the 14-Point Leak Audit on your business — 90 seconds):"
+            : "Run the free 14-Point Leak Audit on your business — takes 90 seconds:",
+          content.share_url,
           "",
           "#BusinessForensics #LeakAudit #Indianapolis",
-        ].join("\n")
+        ].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n")
       : null;
+
 
     let mainPostUrl = MAIN_LINKEDIN;
     if (latestMainPost?.linkedin_post_id) {
