@@ -134,6 +134,27 @@ export const MillionDollarPathView: React.FC = () => {
             </div>
           </div>
         </CardHeader>
+        <CardContent className="pt-0">
+          <div className="rounded-md border border-amber/30 bg-background/40 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+            <CalendarPlus className="w-5 h-5 text-amber shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-foreground">Push the 90-day plan to the Company Calendar</div>
+              <div className="text-xs text-muted-foreground">Drops the kickoff goal + all 13 weekly milestones (focus list, targets, exit criteria) onto everyone's calendar so the whole team stays on track.</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-9 w-[150px] bg-background/60 border-border/60 text-xs"
+              />
+              <Button onClick={pushToCalendar} disabled={pushing} size="sm" className="bg-amber hover:bg-amber/90 text-background font-bold whitespace-nowrap">
+                {pushing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarPlus className="w-4 h-4" />}
+                <span className="ml-1.5">{pushing ? "Pushing…" : "Push to Calendar"}</span>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* MATH MODEL */}
