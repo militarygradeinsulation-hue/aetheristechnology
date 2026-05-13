@@ -238,7 +238,22 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
                       <span className="text-amber font-bold">{fmtUsd(f.split.rep * 3)}</span> rep over 3-month minimum
                     </div>
                     <div className="text-sm text-foreground">
-                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * 12)}</span> rep if client stays a full year
+                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * months)}</span> rep over {months} {months === 1 ? 'month' : 'months'}
+                      {showFullSplit && (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          · partner {fmtUsd(f.split.partner * months)} · co {fmtUsd(f.split.company * months)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {!f.recurring && (
+                  <div className="mt-4 rounded-md border border-amber/30 bg-amber/10 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-amber">
+                      <Calendar className="w-3 h-3" /> Stacked over {months} {months === 1 ? 'month' : 'months'}
+                    </div>
+                    <div className="text-sm text-foreground">
+                      <span className="text-amber font-bold">{fmtUsd(f.split.rep * months)}</span> rep if you close 1/mo for {months} {months === 1 ? 'month' : 'months'}
                     </div>
                   </div>
                 )}
