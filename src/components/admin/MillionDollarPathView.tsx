@@ -171,7 +171,7 @@ export const MillionDollarPathView: React.FC = () => {
             <CalendarPlus className="w-5 h-5 text-amber shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-foreground">Push the 90-day plan to the Company Calendar</div>
-              <div className="text-xs text-muted-foreground">Drops the kickoff goal + all 13 weekly milestones (focus list, targets, exit criteria) onto everyone's calendar so the whole team stays on track.</div>
+              <div className="text-xs text-muted-foreground">Drops the kickoff goal, all 13 weekly milestones, <strong>and a daily goal for every Mon–Fri</strong> (~65 working days) — Pipeline Mondays, Discovery Tuesdays, Proposal Wednesdays, Close Thursdays, Friday Wins — onto everyone's calendar.</div>
             </div>
             <div className="flex items-center gap-2">
               <Input
