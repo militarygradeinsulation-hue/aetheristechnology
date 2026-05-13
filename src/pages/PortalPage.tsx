@@ -39,7 +39,8 @@ import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
-import { CalendarDays } from 'lucide-react';
+import { Sprint90View } from '@/components/portal/Sprint90View';
+import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
@@ -66,7 +67,7 @@ import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/componen
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'careers' | 'inbox' | 'news' | 'sprint';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
