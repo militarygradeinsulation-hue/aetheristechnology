@@ -12,6 +12,7 @@ export interface RepCodeRow {
   total_sales_cents: number;
   total_commission_cents: number;
   created_at: string;
+  team_name?: string | null;
 }
 
 function headers(): Record<string, string> {
