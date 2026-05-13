@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { listRepCodes, type RepCodeRow } from "@/lib/repCodes";
 import {
@@ -14,7 +16,9 @@ import {
   setRepTeam, revokeRepAccess,
   type HireTeam, type HireTeamCadence, type HirePlaybookEntry,
 } from "@/lib/hireTeams";
-import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat } from "lucide-react";
+import { buildLifecycle, type RepLifecycle } from "@/lib/hireLifecycle";
+import { AdminOnboardingStudio } from "@/components/admin/AdminOnboardingStudio";
+import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2 } from "lucide-react";
 
 const SECTIONS: { key: HirePlaybookEntry["section"]; label: string; icon: any; tone: string }[] = [
   { key: "day_one", label: "Day 1 outreach", icon: MessageCircle, tone: "border-amber/40" },
