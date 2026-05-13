@@ -220,7 +220,9 @@ const AdminHiresOnboardingPanel: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      </TabsContent>
 
+      <TabsContent value="cadence" className="space-y-6 mt-0">
       {/* Cadence per team */}
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
