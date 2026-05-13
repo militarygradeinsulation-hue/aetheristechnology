@@ -148,6 +148,7 @@ const Row: React.FC<{ icon: React.ReactNode; label: string; value: string; accen
 
 export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) => {
   const showFullSplit = audience !== 'rep';
+  const [months, setMonths] = React.useState(12);
 
   return (
     <div className="space-y-5">
