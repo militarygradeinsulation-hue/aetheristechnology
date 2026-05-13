@@ -1094,22 +1094,46 @@ export const AdminCreationStudio: React.FC = () => {
                       placeholder="Voiceover line (spoken aloud)"
                     />
                     <div className="rounded-md border border-amber/20 bg-amber/5 p-2 space-y-1.5">
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <span className="text-[10px] uppercase tracking-widest text-amber font-mono flex items-center gap-1">
                           <Sparkles className="w-3 h-3" /> Image prompt for this scene
                         </span>
-                        <select
-                          value={s.imageStyle || 'case_file'}
-                          onChange={(e) => {
-                            const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
-                            setPlan(next);
-                          }}
-                          className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
-                        >
-                          {SCENE_STYLE_OPTIONS.map(o => (
-                            <option key={o.key} value={o.key}>{o.label}</option>
-                          ))}
-                        </select>
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                            disabled={!s.caption?.trim()}
+                            title="Copy this scene's title/caption into the image prompt"
+                            onClick={() => {
+                              const next = { ...plan };
+                              const existing = (s.imagePrompt ?? '').trim();
+                              const title = (s.caption || '').trim();
+                              if (!title) return;
+                              next.scenes[i] = {
+                                ...s,
+                                imagePrompt: existing ? `${title} — ${existing}` : title,
+                              };
+                              setPlan(next);
+                              toast({ title: 'Title pasted into image prompt' });
+                            }}
+                          >
+                            ⤵ Use scene title
+                          </Button>
+                          <select
+                            value={s.imageStyle || 'case_file'}
+                            onChange={(e) => {
+                              const next = { ...plan }; next.scenes[i] = { ...s, imageStyle: e.target.value as SceneImageStyle };
+                              setPlan(next);
+                            }}
+                            className="h-6 rounded border border-border bg-background px-1.5 text-[10px] font-mono uppercase"
+                          >
+                            {SCENE_STYLE_OPTIONS.map(o => (
+                              <option key={o.key} value={o.key}>{o.label}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <Textarea
                         value={s.imagePrompt ?? ''}
