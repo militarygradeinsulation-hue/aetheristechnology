@@ -498,6 +498,7 @@ const PortalPage: React.FC = () => {
       case 'sharedws': return <SharedWorkspace me="bradon" />;
       case 'interviews': return <InterviewsPanel me="bradon" />;
       case 'art': return <RepImageStudio />;
+      case 'video': return <RepCreationStudio />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
