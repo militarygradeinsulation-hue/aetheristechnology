@@ -325,6 +325,105 @@ const AdminHiresOnboardingPanel: React.FC = () => {
           })}
         </CardContent>
       </Card>
+      </TabsContent>
+
+      <TabsContent value="training" className="mt-0">
+        <Card className="bg-card/60 border-border/60">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <GraduationCap className="w-4 h-4 text-amber" /> New-Rep Onboarding Studio
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Generate, edit, and assign the full onboarding curriculum. Pulls from the same library powering the Rep portal.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <AdminOnboardingStudio />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+const LifecycleView: React.FC<{ lifecycles: RepLifecycle[]; playbook: HirePlaybookEntry[] }> = ({ lifecycles, playbook }) => {
+  const { toast } = useToast();
+  const [doneIds, setDoneIds] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem("hires.lifecycle.done") || "{}"); } catch { return {}; }
+  });
+  const toggle = (k: string) => setDoneIds(s => {
+    const next = { ...s, [k]: !s[k] };
+    localStorage.setItem("hires.lifecycle.done", JSON.stringify(next));
+    return next;
+  });
+  const copy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: "Copied" }); };
+  const findScript = (key?: HirePlaybookEntry["section"]) =>
+    key ? playbook.filter(p => p.section === key).slice(0, 1)[0] : undefined;
+
+  if (lifecycles.length === 0) {
+    return <Card className="bg-card/60 border-border/60"><CardContent className="p-6 text-sm text-muted-foreground">No active reps yet.</CardContent></Card>;
+  }
+  return (
+    <div className="space-y-4">
+      {lifecycles.map(lc => {
+        const healthTone = lc.health === "red" ? "border-destructive/60 bg-destructive/5"
+          : lc.health === "yellow" ? "border-amber/50 bg-amber/5"
+          : "border-emerald-500/40 bg-emerald-500/5";
+        const dot = lc.health === "red" ? "bg-destructive" : lc.health === "yellow" ? "bg-amber" : "bg-emerald-500";
+        return (
+          <Card key={lc.rep.id} className={`bg-card/60 border ${healthTone}`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`w-2 h-2 rounded-full ${dot}`} />
+                    <CardTitle className="text-base">{lc.rep.rep_name}</CardTitle>
+                    <Badge variant="outline" className="text-[10px] uppercase font-mono">{lc.rep.team_name || "Unassigned"}</Badge>
+                    <Badge variant="outline" className="text-[10px] font-mono">Day {lc.daysSinceHire}</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{lc.healthReason}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] uppercase tracking-wide text-amber font-mono">{lc.stageLabel}</div>
+                  <Progress value={lc.progressPct} className="w-40 h-1.5 mt-1" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {lc.nextSteps.map(step => {
+                const k = `${lc.rep.id}:${step.id}`;
+                const done = !!doneIds[k];
+                const script = findScript(step.scriptKey);
+                return (
+                  <div key={step.id} className={`rounded border border-border/40 p-3 ${done ? "opacity-60 bg-muted/20" : "bg-background/60"}`}>
+                    <div className="flex items-start gap-2">
+                      <button onClick={() => toggle(k)} className={`mt-0.5 w-4 h-4 rounded border ${done ? "bg-emerald-500 border-emerald-500" : "border-muted-foreground"} flex items-center justify-center shrink-0`}>
+                        {done && <CheckCircle2 className="w-3 h-3 text-background" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className={`text-sm font-medium ${done ? "line-through" : ""}`}>{step.label}</div>
+                          <Badge variant="outline" className="text-[9px] uppercase font-mono">{step.owner}</Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{step.detail}</div>
+                        {script && (
+                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <div className="text-[10px] uppercase tracking-wide text-amber font-mono">Script · {script.title}</div>
+                              <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={() => copy(script.body)}><Copy className="w-3 h-3 mr-1" />Copy</Button>
+                            </div>
+                            <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap font-sans">{script.body}</pre>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 };
