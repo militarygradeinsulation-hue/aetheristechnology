@@ -226,3 +226,157 @@ export function buildWeeks(): WeekPlan[] {
       exitCriteria: "$1,000,000+ collected. Plan the next 90 with 2026 in mind." },
   ];
 }
+
+// =====================================================
+// Daily goals — granular day-by-day breakdown of the 90 days.
+// Mon–Fri only (≈65 working days). Each day inherits its week's phase + theme,
+// plus a weekday-specific operating motion so the team always knows the
+// single most important thing to do today.
+// =====================================================
+
+export interface DailyGoal {
+  date: Date;
+  dayNumber: number;        // 1..N working day in the sprint
+  weekNumber: number;       // 1..13
+  phase: WeekPlan["phase"];
+  weekday: "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
+  motion: string;           // weekday motion title (e.g. "Pipeline Monday")
+  title: string;            // formatted entry title
+  focus: string[];          // 3-4 concrete tasks for the day
+  kpis: string[];           // measurable targets for the day
+  exitCriteria: string;     // how the day is judged
+}
+
+const WEEKDAY_MOTION: Record<"Mon" | "Tue" | "Wed" | "Thu" | "Fri", { motion: string; emoji: string; tasks: (ctx: DailyContext) => string[]; kpis: (ctx: DailyContext) => string[]; exit: (ctx: DailyContext) => string; }> = {
+  Mon: {
+    motion: "Pipeline Monday",
+    emoji: "📞",
+    tasks: (c) => [
+      `Refill the top of funnel — every rep adds 25 fresh prospects to their list`,
+      `8am standup: read the week's theme aloud → "${c.theme}"`,
+      `Outbound floor: ${c.outboundPerDayPerRep}/rep (call + LinkedIn + email triple-tap)`,
+      c.weekNumber >= 4 ? `Brandon: shadow at least one rep's morning block` : `Joseph: walk every rep through this week's target accounts`,
+    ],
+    kpis: (c) => [`${c.outboundPerDayPerRep}/rep outbound`, `≥${Math.max(2, Math.ceil(c.meetingsPerDay * 0.6))} new meetings booked`, `0 reps under floor`],
+    exit: () => "Every rep clocked in, hit outbound floor, and updated their lead board same-day.",
+  },
+  Tue: {
+    motion: "Discovery Tuesday",
+    emoji: "🎯",
+    tasks: (c) => [
+      `Run discovery calls — target ${Math.ceil(c.meetingsPerDay)} across the team`,
+      `Use the Forensic Diagnostic frame on every call (no pitch — find the leak)`,
+      `Reps: log full call notes in portal before EOD — no exceptions`,
+      `Brandon: review yesterday's call recordings, score on rubric`,
+    ],
+    kpis: (c) => [`${Math.ceil(c.meetingsPerDay)} discovery calls run`, `${c.outboundPerDayPerRep}/rep outbound continued`, `100% calls logged same-day`],
+    exit: () => "Discovery calls completed, notes logged, next-step booked on every live opportunity.",
+  },
+  Wed: {
+    motion: "Proposal Wednesday",
+    emoji: "📄",
+    tasks: (c) => [
+      `Send every proposal owed from Mon/Tue discovery calls`,
+      `Joseph: personally review any proposal >$25k before it goes out`,
+      `Reps: 2nd-touch every prospect who ghosted last week`,
+      `Brandon: enforce CRM hygiene — no proposal without full deal record`,
+    ],
+    kpis: (c) => [`${Math.max(2, Math.ceil(c.meetingsPerDay * 0.5))} proposals sent`, `${c.outboundPerDayPerRep}/rep outbound continued`, `0 proposals stuck >48h without send`],
+    exit: () => "Every owed proposal is in the prospect's inbox with a scheduled close call.",
+  },
+  Thu: {
+    motion: "Close Thursday",
+    emoji: "💰",
+    tasks: (c) => [
+      `Run close calls on every proposal sent this week`,
+      `Brandon: ride along on every >$10k close attempt`,
+      `Reps: ask for the close on every live conversation — no soft asks`,
+      c.phase === "Compounding" ? `Joseph: personally call every undecided $25k+ prospect` : `Joseph: 5 partnership outreaches before noon`,
+    ],
+    kpis: (c) => [`${Math.max(1, Math.ceil(c.weekCloses / 5))} closes today`, `100% proposals followed up`, `≥1 paid Diagnostic in the bank`],
+    exit: () => "Closes booked or scheduled. Every active proposal has a yes/no/by-when on the record.",
+  },
+  Fri: {
+    motion: "Friday Wins",
+    emoji: "🏆",
+    tasks: (c) => [
+      `Final closes of the week — every aging proposal gets a yes/no answer`,
+      `Pay out commissions same-day on every closed-won (culture signal)`,
+      `Reps: post their week's wins to the team channel + closes wall`,
+      `Joseph + Brandon: 30-min Friday debrief — what worked, what scales next week`,
+    ],
+    kpis: (c) => [`Hit weekly target: $${Math.round(c.weekRevenueTarget / 100).toLocaleString()} cumulative`, `${c.weekCloses} closes for the week`, `Commissions paid same-day`],
+    exit: (c) => `Week ${c.weekNumber} cumulative ≥ $${Math.round(c.weekRevenueTarget / 100).toLocaleString()}. Debrief published. Monday's target list locked.`,
+  },
+};
+
+interface DailyContext {
+  weekNumber: number;
+  phase: WeekPlan["phase"];
+  theme: string;
+  weekRevenueTarget: number;
+  weekCloses: number;
+  meetingsPerDay: number;
+  outboundPerDayPerRep: number;
+}
+
+const WEEKDAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+/**
+ * Build daily goals for the full 90-day sprint, anchored to the Monday of `start`.
+ * Returns one entry per weekday (Mon–Fri) for 13 weeks.
+ */
+export function buildDailyGoals(start: Date, opts?: {
+  scenario?: MdpScenario;
+  outboundFloorPerRep?: number;   // default 40
+  reps?: number;                   // default 6 (used to derive per-rep load)
+}): DailyGoal[] {
+  const weeks = buildWeeks();
+  const scenario = opts?.scenario ?? buildScenario();
+  const reps = Math.max(1, opts?.reps ?? 6);
+  const floor = opts?.outboundFloorPerRep ?? Math.max(40, Math.ceil(scenario.outboundPerDay / reps));
+
+  // Anchor to the Monday of the chosen start week.
+  const anchor = new Date(start);
+  anchor.setHours(12, 0, 0, 0);
+  const dow = anchor.getDay(); // 0..6
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  anchor.setDate(anchor.getDate() + mondayOffset);
+
+  const out: DailyGoal[] = [];
+  let workingDay = 0;
+
+  for (const w of weeks) {
+    const ctx: DailyContext = {
+      weekNumber: w.week,
+      phase: w.phase,
+      theme: w.theme,
+      weekRevenueTarget: w.revenueTarget,
+      weekCloses: w.newCloses,
+      meetingsPerDay: w.newMeetings / 5,
+      outboundPerDayPerRep: floor + (w.phase === "Acceleration" ? 20 : w.phase === "Compounding" ? 10 : 0),
+    };
+
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(anchor);
+      date.setDate(date.getDate() + (w.week - 1) * 7 + i);
+      const weekday = WEEKDAY_KEYS[date.getDay()] as DailyGoal["weekday"];
+      const motion = WEEKDAY_MOTION[weekday];
+      if (!motion) continue;
+      workingDay++;
+      out.push({
+        date,
+        dayNumber: workingDay,
+        weekNumber: w.week,
+        phase: w.phase,
+        weekday,
+        motion: motion.motion,
+        title: `${motion.emoji} Day ${workingDay}/65 · ${motion.motion} · Wk ${w.week} (${w.phase})`,
+        focus: motion.tasks(ctx),
+        kpis: motion.kpis(ctx),
+        exitCriteria: motion.exit(ctx),
+      });
+    }
+  }
+  return out;
+}
