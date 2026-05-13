@@ -14,9 +14,10 @@ import { repMailbox, type RepEmailMessage, type RepMailbox } from "@/lib/repMail
 import {
   Loader2, Mail, Pencil, Inbox as InboxIcon, Send, FileText, Trash2,
   Star, Reply, Forward, Search, Settings, RefreshCcw, Paperclip, X,
-  Link2, Link2Off, CheckCircle2,
+  Link2, Link2Off, CheckCircle2, Target, MessageCircle,
 } from "lucide-react";
 import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
+import { portalLeads, type RepLead } from "@/lib/portalLeads";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
 
