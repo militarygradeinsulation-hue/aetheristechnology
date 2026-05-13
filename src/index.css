@@ -96,6 +96,81 @@
     box-shadow: var(--shadow-glow);
   }
 
+  /* ===== Auto-shimmer for all glass card-like elements ===== */
+  .glass.rounded-sm,
+  .glass.rounded-md,
+  .glass.rounded-lg,
+  .glass.rounded-xl,
+  .glass.rounded-2xl,
+  .glass.rounded-3xl,
+  .glass.rounded-full {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .glass.rounded-sm::before,
+  .glass.rounded-md::before,
+  .glass.rounded-lg::before,
+  .glass.rounded-xl::before,
+  .glass.rounded-2xl::before,
+  .glass.rounded-3xl::before,
+  .glass.rounded-full::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      110deg,
+      transparent 0%,
+      hsl(var(--amber-glow) / 0.04) 40%,
+      hsl(var(--amber-glow) / 0.18) 50%,
+      hsl(var(--amber-glow) / 0.04) 60%,
+      transparent 100%
+    );
+    transform: translateX(-150%) skewX(-20deg);
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass.rounded-sm:hover::before,
+  .glass.rounded-md:hover::before,
+  .glass.rounded-lg:hover::before,
+  .glass.rounded-xl:hover::before,
+  .glass.rounded-2xl:hover::before,
+  .glass.rounded-3xl:hover::before,
+  .glass.rounded-full:hover::before {
+    transform: translateX(250%) skewX(-20deg);
+  }
+
+  /* Subtle lift + glow for glass cards without explicit hover-lift */
+  .glass.rounded-sm,
+  .glass.rounded-md,
+  .glass.rounded-lg,
+  .glass.rounded-xl,
+  .glass.rounded-2xl,
+  .glass.rounded-3xl,
+  .glass.rounded-full {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.35s ease,
+                background 0.4s ease;
+    will-change: transform;
+  }
+  .glass.rounded-sm:hover,
+  .glass.rounded-md:hover,
+  .glass.rounded-lg:hover,
+  .glass.rounded-xl:hover,
+  .glass.rounded-2xl:hover,
+  .glass.rounded-3xl:hover,
+  .glass.rounded-full:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--amber-glow) / 0.3);
+    background: hsl(var(--surface-elevated) / 0.78);
+    box-shadow: 0 20px 50px -12px hsl(var(--amber-glow) / 0.2), 0 10px 30px -10px hsl(0 0% 0% / 0.6);
+  }
+
   .glow-text {
     text-shadow: 0 0 20px hsl(var(--amber-glow) / 0.5);
   }
