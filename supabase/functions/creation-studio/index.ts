@@ -212,6 +212,49 @@ serve(async (req) => {
       return json({ audioBase64: base64Encode(buf), mime: "audio/mpeg" });
     }
 
+    if (action === "generate_topics") {
+      const key = Deno.env.get("LOVABLE_API_KEY");
+      if (!key) return json({ error: "LOVABLE_API_KEY missing" }, 500);
+      const category = (body.category as string) || "All";
+      const count = Math.max(4, Math.min(20, Number(body.count) || 10));
+      const exclude = Array.isArray(body.exclude) ? (body.exclude as string[]).slice(0, 80) : [];
+
+      const sys = `You are the Aetheris Business Forensics Operator. Generate sharp, specific short-form video TOPIC IDEAS for a 30-90 second forensic-style B2B video aimed at $5M-$50M owner-operators. Tone: blunt, non-corporate, operator > consultant, forensic > influencer. Each topic must be ONE SENTENCE, concrete, ideally with a number or dollar figure, no clichés, no emojis, no hashtags, no quote marks. Stay on-brand: revenue leaks, CRM hygiene, sales process, follow-up gaps, owner overload, AI-as-leak-finder, Indianapolis mid-market.`;
+
+      const user = `Category: ${category === "All" ? "any of {Revenue Leaks, Systems & Ops, AI / Practical, Sales & Pipeline, Founder POV, Industry-Specific}" : category}.
+Generate ${count} BRAND NEW topic ideas. Avoid duplicating these existing ones:
+${exclude.map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+
+Return ONLY a JSON object: { "topics": ["...", "...", ...] }. No prose.`;
+
+      const aiRes = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: sys },
+            { role: "user", content: user },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (!aiRes.ok) {
+        const t = await aiRes.text();
+        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
+        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
+        return json({ error: `AI gateway: ${t.slice(0, 240)}` }, 502);
+      }
+      const aiData = await aiRes.json();
+      const content = aiData.choices?.[0]?.message?.content || "{}";
+      let parsed: { topics?: string[] } = {};
+      try { parsed = JSON.parse(content); } catch { parsed = {}; }
+      const topics = (parsed.topics || [])
+        .map((t) => (typeof t === "string" ? t.trim().replace(/^["'-]+|["']+$/g, "") : ""))
+        .filter((t) => t.length > 8 && t.length < 240);
+      return json({ topics });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("creation-studio error:", e);
