@@ -212,7 +212,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 {list.map(e => {
-                  const meta = KIND_META[e.kind];
+                  const meta = entryDisplay(e);
                   return (
                     <button
                       key={e.id}
