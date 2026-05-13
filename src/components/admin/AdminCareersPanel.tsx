@@ -311,7 +311,7 @@ export const AdminCareersPanel: React.FC = () => {
   const analyzeAllPassed = async (onlyMissing = true) => {
     const targets = applications.filter(a => a.resume_path && (!onlyMissing || a.ai_fit_score == null));
     if (!targets.length) {
-      toast({ title: onlyMissing ? 'All passed candidates already analyzed' : 'No passed candidates with resumes' });
+      toast({ title: onlyMissing ? 'All applicants with resumes are already analyzed' : 'No applicants with resumes' });
       return;
     }
     setBulkAnalyze({ done: 0, total: targets.length, current: null, recent: [] });
