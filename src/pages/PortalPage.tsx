@@ -111,6 +111,8 @@ const PortalPage: React.FC = () => {
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [tabSearch, setTabSearch] = useState('');
+  const [tabSearchOpen, setTabSearchOpen] = useState(false);
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
   const ns = `portal.${profile?.code || 'anon'}`;
