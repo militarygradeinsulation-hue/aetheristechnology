@@ -854,6 +854,15 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
             </button>
           ))}
         </div>
+
+        <div className="pt-8 mt-4 border-t border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-amber" />
+            <h2 className="text-xl font-bold text-foreground font-display">Tool History</h2>
+            <span className="text-xs text-muted-foreground ml-2">Every saved run — view, download as PDF, or delete</span>
+          </div>
+          <AdminLibrary />
+        </div>
       </>
     ) : (
       <>
@@ -875,6 +884,15 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
         {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
         {activeTool === 'playbook' && <PlaybookCreator />}
+
+        <div className="pt-8 mt-4 border-t border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-amber" />
+            <h3 className="text-lg font-bold text-foreground font-display">Recent Runs</h3>
+            <span className="text-xs text-muted-foreground ml-2">All saved tool runs — filter by type</span>
+          </div>
+          <AdminLibrary />
+        </div>
       </>
     )}
   </div>
