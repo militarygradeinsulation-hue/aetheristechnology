@@ -35,7 +35,7 @@ export const ContactDetail: React.FC<Props> = ({ contact, dataset, onClose }) =>
           </div>
           <div className="text-sm space-y-1">
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-amber">
+              <a href="#" onClick={(e) => { e.preventDefault(); openRepMail(contact.email!); }} className="flex items-center gap-2 text-muted-foreground hover:text-amber">
                 <Mail className="w-4 h-4" /> {contact.email}
               </a>
             )}
