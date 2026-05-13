@@ -19,6 +19,13 @@ export const AdminMailboxesPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminMailboxRow | null>(null);
+  const [adminPrefs, setAdminPrefs] = useState(() => getAdminMailPrefs());
+
+  const updatePref = (patch: Partial<{ email_provider: EmailProvider; sender_email: string }>) => {
+    const next = { ...adminPrefs, ...patch };
+    setAdminPrefs(next);
+    saveAdminMailPrefs(next);
+  };
 
   const refresh = async () => {
     setLoading(true);
