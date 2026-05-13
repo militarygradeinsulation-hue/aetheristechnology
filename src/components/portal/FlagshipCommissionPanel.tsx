@@ -167,6 +167,22 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           </p>
         </CardHeader>
         <CardContent>
+          {/* Months projection slider — applies to recurring math + combined-deal example */}
+          <div className="mb-5 rounded-lg border border-amber/30 bg-background/40 p-4">
+            <label className="text-[10px] text-muted-foreground block mb-2 font-mono uppercase tracking-wider">
+              Project recurring revenue over: <span className="text-amber font-bold">{months} {months === 1 ? 'month' : 'months'}</span>
+            </label>
+            <input
+              type="range" min={1} max={36} step={1}
+              value={months}
+              onChange={(e) => setMonths(Number(e.target.value))}
+              className="w-full accent-amber"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-1 font-mono">
+              <span>1 mo</span><span>12 mo</span><span>24 mo</span><span>36 mo</span>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FLAGSHIPS.map((f) => (
               <div key={f.key} className="rounded-lg border border-amber/30 bg-background/40 p-5">
