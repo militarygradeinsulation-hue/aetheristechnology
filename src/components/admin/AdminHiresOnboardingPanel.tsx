@@ -36,8 +36,8 @@ const AdminHiresOnboardingPanel: React.FC = () => {
   const [newCadence, setNewCadence] = useState<Record<string, { title: string; cadence: string; day_of_week: string; notes: string }>>({});
   const [newEntry, setNewEntry] = useState<Record<string, { title: string; body: string }>>({});
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const [r, t, c, p] = await Promise.all([listRepCodes(), listTeams(), listCadence(), listPlaybook()]);
       setReps(r); setTeams(t); setCadence(c); setPlaybook(p);
@@ -58,8 +58,16 @@ const AdminHiresOnboardingPanel: React.FC = () => {
   }, [reps]);
 
   const onAssignTeam = async (rep: RepCodeRow, teamName: string) => {
-    try { await setRepTeam(rep.id, teamName); await load(); }
-    catch (e) { toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }); }
+    // Optimistic update — no full reload, no "Loading…" flash
+    setReps(prev => prev.map(r => r.id === rep.id ? ({ ...r, team_name: teamName } as any) : r));
+    try {
+      await setRepTeam(rep.id, teamName);
+      void load({ silent: true });
+    } catch (e) {
+      // Revert on failure
+      setReps(prev => prev.map(r => r.id === rep.id ? rep : r));
+      toast({ title: "Failed to assign team", description: (e as Error).message, variant: "destructive" });
+    }
   };
 
   const onRevoke = async (rep: RepCodeRow) => {
