@@ -129,6 +129,19 @@ export const CompanyCalendarRepView: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Color legend */}
+          <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-x-3 gap-y-1.5">
+            {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map(k => {
+              const m = CATEGORY_META[k];
+              return (
+                <div key={k} className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  <span className={`inline-block w-2.5 h-2.5 rounded ${m.swatch}`} />
+                  <span>{m.icon} {m.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </CardHeader>
       </Card>
 
