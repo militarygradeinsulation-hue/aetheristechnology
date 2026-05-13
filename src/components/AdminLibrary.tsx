@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search } from 'lucide-react';
+import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
@@ -121,17 +121,31 @@ export const AdminLibrary: React.FC = () => {
       ) : (
         <div className="space-y-2">
           {filtered.map(item => (
-            <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4">
-              <div className="flex-1 min-w-0">
+            <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4 group hover:border-amber/30 transition-colors">
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="text-[10px] font-bold uppercase text-amber bg-amber/10 px-2 py-0.5 rounded">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
                   {item.file_url && <span className="text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">PDF</span>}
                   <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString()}</span>
                 </div>
-                <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
+                <p className="text-sm font-bold text-foreground truncate group-hover:text-amber transition-colors">{item.title}</p>
+                {item.tool_type === 'playbook' && item.file_url && (
+                  <p className="text-xs text-muted-foreground mt-1">Click to view · PDF available</p>
+                )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                {item.tool_type === 'playbook' && item.file_url ? (
+                  <>
+                    <a href={item.file_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm" className="text-xs h-8">
+                        <BookOpen className="w-3.5 h-3.5 mr-1" /> View PDF
+                      </Button>
+                    </a>
+                    <Button variant="ghost" size="icon" title="View details" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                  </>
+                ) : (
+                  <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                )}
                 <Button variant="ghost" size="icon" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-4 h-4" /></Button>
                 {item.file_url && (
