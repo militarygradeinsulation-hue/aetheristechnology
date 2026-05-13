@@ -1,6 +1,19 @@
 // Builds a compose-email URL based on the rep's (or admin's) saved email provider preference.
 import { getRepSettings } from '@/lib/portalWorkspace';
-import { getPortalToken } from '@/lib/portalAuth';
+import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
+
+const LOGO_URL = 'https://businessforensics.tech/aetheris-logo.png';
+
+export function buildDefaultSignature(fullName?: string | null): string {
+  const first = (fullName || '').trim().split(/\s+/)[0] || '';
+  return [
+    first,
+    'Operator',
+    'Aetheris Business Forensics',
+    'https://businessforensics.tech/',
+    LOGO_URL,
+  ].filter(Boolean).join('\n');
+}
 
 export type EmailProvider = 'default' | 'gmail' | 'outlook' | 'yahoo';
 
