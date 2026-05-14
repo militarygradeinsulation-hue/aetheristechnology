@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -168,11 +169,16 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                     )}
                   </div>
                   {visible && adminMode && (
-                    <div className="mt-4">
+                    <div className="mt-4 space-y-2">
                       <PostImageGenerator
                         prompt={`${day.topic}. ${day.hook}. ${day.caption}`}
                         editablePrompt
                         onImageGenerated={() => {}}
+                      />
+                      <ScheduleSocialButton
+                        content={`${day.hook}\n\n${day.caption}\n\n${(day.hashtags || []).map((h: string) => `#${h.replace('#', '')}`).join(' ')}`}
+                        source={`content_calendar:day_${day.day}`}
+                        className="w-full"
                       />
                     </div>
                   )}

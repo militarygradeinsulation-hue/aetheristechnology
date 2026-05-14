@@ -7,6 +7,7 @@ import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb } from 'l
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { PostImageGenerator } from './admin/PostImageGenerator';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 
 type SourceType = 'idea' | 'blog' | 'playbook';
 
@@ -158,11 +159,16 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adm
                   <p className="text-xs text-primary mt-3">{post.hashtags.map(h => `#${h.replace(/^#/, '')}`).join(' ')}</p>
                 )}
                 {adminMode && (
-                  <div className="mt-4">
+                  <div className="mt-4 space-y-2">
                     <PostImageGenerator
                       prompt={`${post.hook}. ${post.caption}`}
                       editablePrompt
                       onImageGenerated={() => {}}
+                    />
+                    <ScheduleSocialButton
+                      content={`${post.hook}\n\n${post.caption}\n\n${(post.hashtags || []).map(h => `#${h.replace(/^#/, '')}`).join(' ')}`}
+                      source="post_from_source"
+                      className="w-full"
                     />
                   </div>
                 )}
