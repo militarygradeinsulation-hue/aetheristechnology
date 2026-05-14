@@ -441,6 +441,109 @@ export const RepCreationStudio: React.FC = () => {
           ))}
         </div>
 
+        {/* Title (subject) picker */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-foreground uppercase tracking-wide">Subject / Title</div>
+            <Button variant="ghost" size="sm" onClick={refreshIdeas} disabled={ideasLoading}>
+              {ideasLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+              Fresh ideas
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+            {allTitles.map((t) => {
+              const sel = pickedTitle === t;
+              const isAi = aiTitles.includes(t);
+              return (
+                <button key={t} type="button" onClick={() => applyTitle(t)}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                    sel
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}>
+                  {isAi && '✨ '}{t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Topic picker */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-foreground uppercase tracking-wide">
+              Topics {pickedTopics.length > 0 && <span className="text-amber">· {pickedTopics.length} selected</span>}
+            </div>
+            <div className="flex gap-1">
+              {(pickedTitle || pickedTopics.length > 0) && (
+                <Button variant="ghost" size="sm" onClick={clearIdeation}>Clear</Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={refreshTopics} disabled={topicsLoading}>
+                {topicsLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                More topics
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+            {allTopics.map((t) => {
+              const sel = pickedTopics.includes(t);
+              const isAi = aiTopics.includes(t);
+              return (
+                <button key={t} type="button" onClick={() => toggleTopic(t)}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition text-left ${
+                    sel
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}>
+                  {isAi && '✨ '}{t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Music panel */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-foreground uppercase tracking-wide">
+              <Music className="w-3.5 h-3.5 text-amber" /> Background music
+              {musicUrl && <span className="text-amber normal-case">· ready to mix</span>}
+            </div>
+            {musicUrl && (
+              <Button variant="ghost" size="sm" onClick={clearMusic}><X className="w-3 h-3 mr-1" /> Remove</Button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {MUSIC_PRESETS.map((p) => (
+              <button key={p.label} type="button" onClick={() => setMusicPrompt(p.text)}
+                className="text-[11px] px-2.5 py-1 rounded-full border border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50 transition">
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <Textarea
+            placeholder="Or describe the vibe (e.g., dark cinematic forensic underscore, no vocals)…"
+            value={musicPrompt}
+            onChange={e => setMusicPrompt(e.target.value)}
+            rows={2}
+            className="resize-none text-xs"
+          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button size="sm" onClick={generateMusic} disabled={musicGenerating}>
+              {musicGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Music className="w-3.5 h-3.5 mr-1" />}
+              Generate music
+            </Button>
+            <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              Volume
+              <input type="range" min={0} max={0.5} step={0.01}
+                value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))}
+                className="w-24 accent-amber" />
+              <span className="font-mono text-amber w-8">{Math.round(musicVolume * 100)}%</span>
+            </label>
+            {musicUrl && <audio src={musicUrl} controls className="h-8" />}
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-3 gap-2">
           <select value={voiceId} onChange={e => setVoiceId(e.target.value)}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm">
