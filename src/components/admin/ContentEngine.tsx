@@ -228,9 +228,42 @@ export const ContentEngine: React.FC = () => {
       const res = await call('plan_and_generate', { numPosts, ...(opts || {}) });
       const newPosts = (res.posts || []) as Post[];
       setPosts((prev) => [...prev, ...newPosts].sort((a, b) => (a.scheduled_date + a.scheduled_time).localeCompare(b.scheduled_date + b.scheduled_time)));
-      setGenerationStatus(`✓ Generated ${res.generated} posts${res.failures ? ` (${res.failures} failed)` : ''}`);
+
+      // Snapshot each new post into the cross-tool Admin Library so it's always retrievable.
+      let librarySaved = 0;
+      await Promise.all(newPosts.map(async (p) => {
+        try {
+          const title = (p.hook || p.topic_angle || `${FORMAT_INFO[p.format]?.name || p.format} post`).slice(0, 120);
+          await saveToAdminLibrary({
+            tool_type: 'content_engine_post',
+            title,
+            input_data: {
+              format: p.format,
+              topic_angle: p.topic_angle,
+              target_emotion: p.target_emotion,
+              scheduled_date: p.scheduled_date,
+              scheduled_time: p.scheduled_time,
+              source_post_id: p.id,
+            },
+            output_data: {
+              hook: p.hook,
+              script: p.script,
+              caption: p.caption,
+              hashtags: p.hashtags,
+              format: p.format,
+              status: p.status,
+            },
+            created_at: new Date(`${p.scheduled_date}T${p.scheduled_time || '12:00'}:00`).toISOString(),
+          });
+          librarySaved++;
+        } catch (err) {
+          console.warn('Library snapshot failed for post', p.id, err);
+        }
+      }));
+
+      setGenerationStatus(`✓ Generated ${res.generated} posts${res.failures ? ` (${res.failures} failed)` : ''}${librarySaved ? ` · Saved ${librarySaved} to Library` : ''}`);
       setView('calendar');
-      toast({ title: 'Content generated', description: `${res.generated} posts ready in the calendar.` });
+      toast({ title: 'Content generated', description: `${res.generated} posts ready in the calendar${librarySaved ? ` and saved to the Library.` : '.'}` });
       setTimeout(() => setGenerationStatus(''), 4000);
     } catch (e) {
       const msg = (e as Error).message;
