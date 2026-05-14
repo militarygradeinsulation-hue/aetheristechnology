@@ -167,6 +167,84 @@ serve(async (req) => {
       return json({ audioBase64, mime: "audio/mpeg" });
     }
 
+    if (action === "generate_music") {
+      const el = Deno.env.get("ELEVENLABS_API_KEY");
+      if (!el) return json({ error: "ELEVENLABS_API_KEY missing" }, 500);
+      const prompt = (body.prompt as string || "").trim();
+      const ms = Math.max(10000, Math.min(180000, Number(body.durationMs) || 30000));
+      if (!prompt) return json({ error: "prompt required" }, 400);
+      const res = await fetch("https://api.elevenlabs.io/v1/music", {
+        method: "POST",
+        headers: { "xi-api-key": el, "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, music_length_ms: ms }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        return json({ error: `Music ${res.status}: ${t.slice(0, 240)}` }, 502);
+      }
+      const buf = await res.arrayBuffer();
+      return json({ audioBase64: base64Encode(buf), mime: "audio/mpeg" });
+    }
+
+    if (action === "generate_topics" || action === "generate_ideas") {
+      const key = Deno.env.get("LOVABLE_API_KEY");
+      if (!key) return json({ error: "LOVABLE_API_KEY missing" }, 500);
+
+      const sys = `You are the Aetheris Business Forensics Operator. Generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
+
+      let user = "";
+      if (action === "generate_topics") {
+        const category = (body.category as string) || "All";
+        const count = Math.max(4, Math.min(20, Number(body.count) || 10));
+        const exclude = Array.isArray(body.exclude) ? (body.exclude as string[]).slice(0, 80) : [];
+        user = `Category: ${category === "All" ? "any of {Revenue Leaks, Systems & Ops, AI / Practical, Sales & Pipeline, Founder POV, Industry-Specific}" : category}.
+Generate ${count} BRAND NEW one-sentence topic ideas. Each must be concrete, ideally with a number or dollar figure.
+Avoid duplicating these existing ones:
+${exclude.map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+Return ONLY a JSON object: { "topics": ["...", "..."] }. No prose.`;
+      } else {
+        const excludeTitles = Array.isArray(body.excludeTitles) ? (body.excludeTitles as string[]).slice(0, 60) : [];
+        const excludeTopics = Array.isArray(body.excludeTopics) ? (body.excludeTopics as string[]).slice(0, 80) : [];
+        user = `Generate fresh ideas for a rep video composer.
+Return ONLY a JSON object:
+{
+  "titles": ["...", ...],   // 8 punchy video TITLES, 3-7 words, headline case
+  "topics": ["...", ...]    // 10 specific TOPIC IDEAS, ONE SENTENCE each, with a number/dollar figure
+}
+Avoid duplicates.
+Existing titles to avoid:
+${excludeTitles.map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+Existing topics to avoid:
+${excludeTopics.slice(0, 40).map((e, i) => `${i + 1}. ${e}`).join("\n") || "(none)"}
+JSON only.`;
+      }
+
+      const aiRes = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (!aiRes.ok) {
+        const t = await aiRes.text();
+        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
+        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
+        return json({ error: `AI gateway: ${t.slice(0, 240)}` }, 502);
+      }
+      const aiData = await aiRes.json();
+      const content = aiData.choices?.[0]?.message?.content || "{}";
+      let parsed: { titles?: string[]; topics?: string[] } = {};
+      try { parsed = JSON.parse(content); } catch { parsed = {}; }
+      const clean = (s: unknown) => (typeof s === "string" ? s.trim().replace(/^["'-]+|["']+$/g, "") : "");
+      const titles = (parsed.titles || []).map(clean).filter((t) => t.length > 3 && t.length < 120);
+      const topics = (parsed.topics || []).map(clean).filter((t) => t.length > 8 && t.length < 240);
+      if (action === "generate_topics") return json({ topics });
+      return json({ titles, topics });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("portal-creation-studio error:", e);

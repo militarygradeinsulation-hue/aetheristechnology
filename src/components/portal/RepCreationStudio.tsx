@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check } from 'lucide-react';
+import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check, Music, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
@@ -33,6 +33,39 @@ const PROMPT_STARTERS = [
   '30-second cold-open about the 5 hidden leaks in service businesses. End with the Forensic Diagnostic CTA.',
   'Founder-to-founder story about a $40k revenue leak we found in CRM hygiene.',
   'Hard-truth video: why your sales team is bleeding deals at "proposal sent". 6 scenes.',
+];
+
+const PREMADE_TITLES: string[] = [
+  'Your Business Is Leaking — You Just Can\'t See It',
+  'The $200k Leak Hiding in Your CRM',
+  '7 Steps of The Leak Audit™',
+  'Stop Hiring Reps. Fix the Process.',
+  'The Forensic Diagnostic: $2,500 to Find the Bleed',
+  'Trade-Show Leads Decay in 72 Hours',
+  'The Follow-Up Gap Costing $40k/Month',
+  'AI Won\'t Save a Broken Process',
+];
+
+const PREMADE_TOPICS: string[] = [
+  'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
+  'The dead-lead pile worth $200k that nobody resurrects.',
+  'Quote-to-cash leakage between sales and ops.',
+  'Stalled deals nobody triages — the silent revenue killer.',
+  'Discount creep eating 4 points of margin per quarter.',
+  'CRM stages lying about pipeline value.',
+  'The 72-hour warm-lead decay curve.',
+  'AI-assisted CRM hygiene for $5M-$50M operators.',
+  'Why "more reps" is the wrong fix.',
+  'Discovery calls leak deals — here\'s the script that plugs it.',
+];
+
+const MUSIC_PRESETS: { label: string; text: string }[] = [
+  { label: 'Forensic tension', text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. No vocals. Loopable.' },
+  { label: 'Operator hustle',  text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Founder-energy. No vocals.' },
+  { label: 'Boardroom power',  text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
+  { label: 'Late-night noir',  text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. No vocals.' },
+  { label: 'Documentary slow', text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. No vocals.' },
+  { label: 'Heist clock',      text: 'Pulsing electronic heist score. Tight kick, ticking hi-hats, plucked synth ostinato. No vocals. Loopable.' },
 ];
 
 function base64ToBlob(b64: string, mime: string) {
@@ -76,6 +109,21 @@ export const RepCreationStudio: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState('');
   const [videoExt, setVideoExt] = useState<'mp4'|'webm'>('webm');
+
+  // Ideation
+  const [pickedTitle, setPickedTitle] = useState('');
+  const [pickedTopics, setPickedTopics] = useState<string[]>([]);
+  const [aiTitles, setAiTitles] = useState<string[]>([]);
+  const [aiTopics, setAiTopics] = useState<string[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+  const [topicsLoading, setTopicsLoading] = useState(false);
+
+  // Music
+  const [musicPrompt, setMusicPrompt] = useState('');
+  const [musicVolume, setMusicVolume] = useState(0.18);
+  const [musicGenerating, setMusicGenerating] = useState(false);
+  const [musicUrl, setMusicUrl] = useState('');
+  const musicBufferRef = useRef<ArrayBuffer | null>(null);
 
   const invoke = (action: string, body: Record<string, unknown> = {}) => {
     const token = getPortalToken();
@@ -122,6 +170,90 @@ export const RepCreationStudio: React.FC = () => {
     () => (selectedIds.size > 0 ? images.filter(i => selectedIds.has(i.id)) : images),
     [images, selectedIds],
   );
+
+  const allTitles = useMemo(() => [...aiTitles, ...PREMADE_TITLES], [aiTitles]);
+  const allTopics = useMemo(() => [...aiTopics, ...PREMADE_TOPICS], [aiTopics]);
+
+  const composePrompt = (overrides?: { title?: string; topics?: string[]; base?: string }) => {
+    const t = overrides?.title ?? pickedTitle;
+    const tps = overrides?.topics ?? pickedTopics;
+    const base = (overrides?.base ?? prompt).trim();
+    const parts: string[] = [];
+    if (t) parts.push(`TITLE: ${t}`);
+    if (tps.length) parts.push(`TOPICS:\n- ${tps.join('\n- ')}`);
+    if (base) parts.push(base);
+    return parts.join('\n\n');
+  };
+
+  const applyTitle = (t: string) => {
+    const next = pickedTitle === t ? '' : t;
+    setPickedTitle(next);
+    setPrompt(composePrompt({ title: next }));
+  };
+  const toggleTopic = (t: string) => {
+    const next = pickedTopics.includes(t) ? pickedTopics.filter(x => x !== t) : [...pickedTopics, t];
+    setPickedTopics(next);
+    setPrompt(composePrompt({ topics: next }));
+  };
+  const clearIdeation = () => {
+    setPickedTitle(''); setPickedTopics([]);
+    setPrompt(composePrompt({ title: '', topics: [] }));
+  };
+
+  const refreshTopics = async () => {
+    setTopicsLoading(true);
+    try {
+      const exclude = [...PREMADE_TOPICS, ...aiTopics];
+      const { data, error } = await invoke('generate_topics', { exclude, count: 10 });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const fresh = (data?.topics || []).filter((t: string) => !exclude.includes(t));
+      if (!fresh.length) { toast({ title: 'No new topics', variant: 'destructive' }); return; }
+      setAiTopics(prev => [...fresh, ...prev].slice(0, 30));
+      toast({ title: `Added ${fresh.length} fresh topics` });
+    } catch (e: any) {
+      toast({ title: 'Topic refresh failed', description: e.message, variant: 'destructive' });
+    } finally { setTopicsLoading(false); }
+  };
+
+  const refreshIdeas = async () => {
+    setIdeasLoading(true);
+    try {
+      const { data, error } = await invoke('generate_ideas', {
+        excludeTitles: [...PREMADE_TITLES, ...aiTitles],
+        excludeTopics: [...PREMADE_TOPICS, ...aiTopics],
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const newTitles: string[] = data?.titles || [];
+      const newTopics: string[] = data?.topics || [];
+      if (newTitles.length) setAiTitles(prev => [...newTitles, ...prev].slice(0, 30));
+      if (newTopics.length) setAiTopics(prev => [...newTopics, ...prev].slice(0, 30));
+      toast({ title: `Refreshed ${newTitles.length + newTopics.length} ideas` });
+    } catch (e: any) {
+      toast({ title: 'Idea refresh failed', description: e.message, variant: 'destructive' });
+    } finally { setIdeasLoading(false); }
+  };
+
+  const generateMusic = async () => {
+    const p = (musicPrompt.trim() || MUSIC_PRESETS[0].text);
+    setMusicGenerating(true);
+    try {
+      const planSec = plan ? plan.scenes.reduce((a, s) => a + s.durationMs / 1000, 0) : duration;
+      const ms = Math.max(10000, Math.min(180000, Math.round(planSec * 1000) + 2000));
+      const { data, error } = await invoke('generate_music', { prompt: p, durationMs: ms });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const blob = base64ToBlob(data.audioBase64, data.mime || 'audio/mpeg');
+      musicBufferRef.current = await blob.arrayBuffer();
+      setMusicUrl(URL.createObjectURL(blob));
+      toast({ title: 'Music ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB · mixes into next render` });
+    } catch (e: any) {
+      toast({ title: 'Music failed', description: e.message, variant: 'destructive' });
+    } finally { setMusicGenerating(false); }
+  };
+
+  const clearMusic = () => { musicBufferRef.current = null; setMusicUrl(''); };
 
   const generatePlan = async (): Promise<Plan | null> => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return null; }
@@ -200,6 +332,25 @@ export const RepCreationStudio: React.FC = () => {
         acc += active.scenes[i].durationMs / 1000;
       }
       const totalSec = acc;
+
+      if (musicBufferRef.current) {
+        try {
+          const musicBuf = await audioCtx.decodeAudioData(musicBufferRef.current.slice(0));
+          const musicSrc = audioCtx.createBufferSource();
+          musicSrc.buffer = musicBuf;
+          musicSrc.loop = musicBuf.duration < totalSec;
+          const gain = audioCtx.createGain();
+          const v = Math.max(0, Math.min(1, musicVolume));
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(v, startTime + 0.8);
+          gain.gain.setValueAtTime(v, startTime + Math.max(0.1, totalSec - 1.2));
+          gain.gain.linearRampToValueAtTime(0, startTime + totalSec);
+          musicSrc.connect(gain).connect(dest);
+          musicSrc.start(startTime);
+          musicSrc.stop(startTime + totalSec + 0.1);
+        } catch (musicErr) { console.warn('music mix failed', musicErr); }
+      }
+
       const animStart = performance.now();
 
       const drawScene = (idx: number, localT: number, sceneDur: number) => {
@@ -288,6 +439,109 @@ export const RepCreationStudio: React.FC = () => {
               Starter {i + 1}
             </button>
           ))}
+        </div>
+
+        {/* Title (subject) picker */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-foreground uppercase tracking-wide">Subject / Title</div>
+            <Button variant="ghost" size="sm" onClick={refreshIdeas} disabled={ideasLoading}>
+              {ideasLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+              Fresh ideas
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+            {allTitles.map((t) => {
+              const sel = pickedTitle === t;
+              const isAi = aiTitles.includes(t);
+              return (
+                <button key={t} type="button" onClick={() => applyTitle(t)}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                    sel
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}>
+                  {isAi && '✨ '}{t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Topic picker */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-foreground uppercase tracking-wide">
+              Topics {pickedTopics.length > 0 && <span className="text-amber">· {pickedTopics.length} selected</span>}
+            </div>
+            <div className="flex gap-1">
+              {(pickedTitle || pickedTopics.length > 0) && (
+                <Button variant="ghost" size="sm" onClick={clearIdeation}>Clear</Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={refreshTopics} disabled={topicsLoading}>
+                {topicsLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                More topics
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+            {allTopics.map((t) => {
+              const sel = pickedTopics.includes(t);
+              const isAi = aiTopics.includes(t);
+              return (
+                <button key={t} type="button" onClick={() => toggleTopic(t)}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition text-left ${
+                    sel
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}>
+                  {isAi && '✨ '}{t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Music panel */}
+        <div className="rounded-lg border border-border bg-background/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-foreground uppercase tracking-wide">
+              <Music className="w-3.5 h-3.5 text-amber" /> Background music
+              {musicUrl && <span className="text-amber normal-case">· ready to mix</span>}
+            </div>
+            {musicUrl && (
+              <Button variant="ghost" size="sm" onClick={clearMusic}><X className="w-3 h-3 mr-1" /> Remove</Button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {MUSIC_PRESETS.map((p) => (
+              <button key={p.label} type="button" onClick={() => setMusicPrompt(p.text)}
+                className="text-[11px] px-2.5 py-1 rounded-full border border-border bg-background/40 text-muted-foreground hover:text-amber hover:border-amber/50 transition">
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <Textarea
+            placeholder="Or describe the vibe (e.g., dark cinematic forensic underscore, no vocals)…"
+            value={musicPrompt}
+            onChange={e => setMusicPrompt(e.target.value)}
+            rows={2}
+            className="resize-none text-xs"
+          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button size="sm" onClick={generateMusic} disabled={musicGenerating}>
+              {musicGenerating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Music className="w-3.5 h-3.5 mr-1" />}
+              Generate music
+            </Button>
+            <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              Volume
+              <input type="range" min={0} max={0.5} step={0.01}
+                value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))}
+                className="w-24 accent-amber" />
+              <span className="font-mono text-amber w-8">{Math.round(musicVolume * 100)}%</span>
+            </label>
+            {musicUrl && <audio src={musicUrl} controls className="h-8" />}
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-2">
