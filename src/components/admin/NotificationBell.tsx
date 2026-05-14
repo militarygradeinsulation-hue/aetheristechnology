@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { Person, SharedNotification, personLabel } from "@/lib/sharedWorkspace";
 
