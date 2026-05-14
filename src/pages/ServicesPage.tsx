@@ -87,6 +87,77 @@ const ServicesPage: React.FC = () => {
               <p className="text-foreground font-semibold">Methodology goes to every prospect before pricing.</p>
               <Link to="/methodology" className="text-amber font-semibold hover:underline">Read it →</Link>
             </div>
+
+            {/* Referral bonuses */}
+            <section className="mt-16">
+              <div className="text-center mb-8">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                  Referral Program
+                </div>
+                <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
+                  Send us a deal. <span className="text-amber">Get paid when it closes.</span>
+                </h2>
+                <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+                  If you introduce us to a specialty manufacturer and they sign, you collect — no contracts, no quotas, no fine print designed to dodge the payout.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-5">
+                <div className="premium-tile rounded-sm border border-amber/40 p-6">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 1 · Diagnostic close</div>
+                  <div className="font-forensic text-4xl font-bold text-foreground">$2,000</div>
+                  <p className="text-xs text-muted-foreground mt-1">Per signed 21-Day Diagnostic ($18,500)</p>
+                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
+                    Paid within 7 days of the diagnostic invoice clearing. One flat fee, every time, no scaling math.
+                  </p>
+                </div>
+
+                <div className="premium-tile rounded-sm border border-amber/40 p-6">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 2 · Retainer override</div>
+                  <div className="font-forensic text-4xl font-bold text-foreground">$1,500<span className="text-lg text-muted-foreground"> /mo</span></div>
+                  <p className="text-xs text-muted-foreground mt-1">Every month the client stays on retainer ($15K/mo)</p>
+                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
+                    Recurring override for the full life of the engagement. A single referral that stays 12 months pays $18,000 on top of the Diagnostic bonus.
+                  </p>
+                </div>
+
+                <div className="premium-tile rounded-sm border border-border/60 p-6">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 3 · Warm intro bonus</div>
+                  <div className="font-forensic text-4xl font-bold text-foreground">$500</div>
+                  <p className="text-xs text-muted-foreground mt-1">Per qualified discovery call we book</p>
+                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
+                    Paid the moment a referred prospect shows up to the 30-minute call — even if they don't ultimately sign. Stacks with Tier 1 and Tier 2.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 premium-tile rounded-sm border border-border/60 p-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">The math on one good referral</div>
+                    <p className="text-sm text-foreground/85 leading-relaxed">
+                      Intro bonus + Diagnostic close + 6-month retainer override =
+                      <span className="text-amber font-bold"> $11,500</span> from a single warm introduction. Twelve months on retainer pushes it past <span className="text-amber font-bold">$20,500</span>.
+                    </p>
+                  </div>
+                  <div>
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Who qualifies</div>
+                    <p className="text-sm text-foreground/85 leading-relaxed">
+                      US-based specialty manufacturer, $5M–$25M revenue, decision-maker on the call. We confirm fit on the discovery call before the bonus clock starts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                  Send us a referral <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Reps and partners on the internal program follow the fixed-dollar split in the rep portal — this public bonus is for outside referrers.
+                </p>
+              </div>
+            </section>
           </div>
         </main>
         <Footer />
