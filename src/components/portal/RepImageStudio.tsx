@@ -55,7 +55,7 @@ export const RepImageStudio: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (opts: { aetherisStyle?: boolean; infographic?: boolean } = {}) => {
+  const generate = async (opts: { aetherisStyle?: boolean; infographic?: boolean; cartoon?: boolean } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -65,10 +65,11 @@ export const RepImageStudio: React.FC = () => {
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         infographic: !!opts.infographic,
+        cartoon_style: !!opts.cartoon,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : opts.infographic ? 'Infographic ready' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.infographic ? 'Infographic ready' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
@@ -236,6 +237,15 @@ export const RepImageStudio: React.FC = () => {
                 >
                   {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BarChart3 className="w-4 h-4 mr-1" />}
                   Make Infographic
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ cartoon: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[170px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Editorial Cartoon
                 </Button>
               </>
             )}

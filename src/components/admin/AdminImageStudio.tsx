@@ -48,7 +48,7 @@ export const AdminImageStudio: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (aetherisStyle = false) => {
+  const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -56,11 +56,12 @@ export const AdminImageStudio: React.FC = () => {
         action: editTarget ? 'edit' : 'generate',
         prompt, model,
         source_image_url: editTarget?.url,
-        aetheris_style: aetherisStyle,
+        aetheris_style: !!opts.aetherisStyle,
+        cartoon_style: !!opts.cartoon,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : aetherisStyle ? 'Image generated in Aetheris style' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
@@ -160,19 +161,30 @@ export const AdminImageStudio: React.FC = () => {
             {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
           <div className="flex flex-wrap gap-2 flex-1">
-            <Button onClick={() => generate(false)} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
+            <Button onClick={() => generate()} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
               {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
               {editTarget ? 'Edit Image' : 'Generate'}
             </Button>
             {!editTarget && (
-              <Button
-                onClick={() => generate(true)}
-                disabled={busy || !prompt.trim()}
-                className="flex-1 min-w-[180px] bg-amber text-background hover:bg-amber/90"
-              >
-                {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
-                Generate in Aetheris Style
-              </Button>
+              <>
+                <Button
+                  onClick={() => generate({ aetherisStyle: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[180px] bg-amber text-background hover:bg-amber/90"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Generate in Aetheris Style
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ cartoon: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[180px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Editorial Cartoon
+                </Button>
+              </>
             )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
               <Upload className="w-4 h-4 mr-1" /> Upload
