@@ -1,62 +1,56 @@
+## Goal
+When a prospect books on your HubSpot meetings link, that meeting shows up automatically in the admin area (with name, email, time, link, source rep if known).
 
-# Social Publishing Hub — Plan
+## Approach
+HubSpot exposes meetings as engagements (`/crm/v3/objects/meetings`). The cleanest, no-extra-setup path is **scheduled polling** using the existing HubSpot OAuth token — no developer app or webhook subscription required. (We can layer a webhook later if you want sub-minute latency.)
 
-## Reality check (important)
-HubSpot's public API does **not** support creating or scheduling **social** broadcasts (LinkedIn/FB/IG/X) anymore. It DOES support scheduling **blog posts** via the CMS API. So "to HubSpot" = blog scheduling. True multi-network social scheduling needs a third-party scheduler (Ayrshare is the cleanest single-API option).
+## What gets built
 
----
+### 1. New table `hubspot_meetings`
+Stores synced meeting records.
+- `id` (uuid, pk)
+- `hubspot_id` (text, unique) — meeting object id
+- `title`, `meeting_link`, `location`, `outcome`, `internal_notes`
+- `start_time`, `end_time` (timestamptz)
+- `organizer_email`, `organizer_owner_id`
+- `attendee_email`, `attendee_name`, `attendee_company`, `attendee_phone`
+- `contact_hubspot_id`, `deal_hubspot_id` (when associated)
+- `rep_code` (text, nullable) — matched via `customers.rep_code` lookup on attendee email
+- `source` (text) — `hubspot_meeting_link`
+- `raw` (jsonb) — full HubSpot payload
+- `created_at`, `updated_at`, `synced_at`
+- RLS: admin-only (`is_admin(auth.uid())`)
 
-## Part 1 — HubSpot Blog Scheduler
+### 2. Edge function `hubspot-meetings-sync`
+- Reads HubSpot OAuth token from existing `hubspot_connections` (same helper as `hubspot-sync`)
+- Pulls `/crm/v3/objects/meetings/search` filtered by `hs_lastmodifieddate > last_synced_at` (incremental)
+- Requests properties: `hs_meeting_title`, `hs_meeting_start_time`, `hs_meeting_end_time`, `hs_meeting_location`, `hs_meeting_external_url`, `hs_meeting_outcome`, `hs_meeting_body`, `hubspot_owner_id`, `hs_createdate`
+- Includes associations to contacts → fetches contact email/name/company/phone in batch
+- Filters to meetings that came through a meetings **link** (via `hs_activity_type` / `hs_meeting_source` = scheduling page) so manual log entries are skipped
+- Upserts into `hubspot_meetings` on `hubspot_id`
+- Matches `rep_code` by joining attendee email against `customers` table
+- Pushes a `shared_notifications` row to admin so the bell pings
+- Stores `last_synced_at` watermark in `app_settings` (or a small dedicated row)
 
-New edge function `hubspot-blog-publish` (uses existing OAuth token via `_shared/hubspot-token.ts`):
-- `action: "list-blogs"` → GET `/cms/v3/blogs/blogs` (let user pick which blog)
-- `action: "schedule-post"` → POST `/cms/v3/blogs/posts` with `{ contentGroupId, name, postBody, metaDescription, publishDate (future ISO), state: "SCHEDULED" }`
-- `action: "publish-now"` → same but `state: "PUBLISHED"` and `publishImmediately: true`
-- `action: "list-scheduled"` → GET `/cms/v3/blogs/posts?state=SCHEDULED`
+### 3. Cron schedule
+`pg_cron` / Supabase scheduled trigger every **5 minutes** invoking `hubspot-meetings-sync`. Manual "Sync Now" button available in the panel.
 
-UI: add a **"Send to HubSpot Blog"** button on every long-form generator (`PlaybookCreator`, `BlogList`/blog generation flow, `AllInOneGenerator`'s blog tab). Modal: pick blog, set publish date/time, confirm. Surface result toast with HubSpot post URL.
+### 4. Admin panel `HubSpotMeetingsPanel`
+New tool registered in `ADMIN_TOOLS` as **"Meetings (HubSpot)"**.
+- Tabs: **Upcoming**, **Today**, **Past**, **All**
+- Each row: time (local TZ), attendee name + company, email (mailto via existing rep mail wiring), HubSpot meeting link, source rep badge, outcome
+- Actions: Open in HubSpot, Email attendee, Copy meeting link, Mark as no-show (writes back outcome via HubSpot API)
+- "Sync now" button, last-synced timestamp, count badge for today's meetings
 
-## Part 2 — Extend LinkedIn Queue everywhere
-
-Today only `SocialContentGenerator` and admin LinkedIn panel push to `linkedin_post_queue`. Add a **"Schedule on LinkedIn"** action (with date/time picker) to:
-- `ContentCalendarGenerator` (per-day post)
-- `PostFromSourceGenerator`
-- `RepCreationStudio` social outputs
-- Any other generator that produces short-form copy
-
-Reuses existing `linkedin-post` edge function `action: "queue-from-content"`. Add a small shared `<ScheduleLinkedInButton content={...} />` component so we don't duplicate logic.
-
-Admin: add a **Scheduled Queue** view (table of `linkedin_post_queue` rows with `status in ('queued','approved')`, `scheduled_for`, edit/cancel/post-now buttons). The cron job that calls `process-queue` should already exist; if not, add one (`*/15 * * * *`).
-
-## Part 3 — Multi-network via Ayrshare connector
-
-Ayrshare = one API → LinkedIn/FB/IG/X/TikTok/YouTube/Pinterest/Threads/Bluesky. Free tier covers testing.
-
-Steps:
-1. Ask Joseph for Ayrshare API key (one secret: `AYRSHARE_API_KEY`).
-2. New edge function `social-scheduler`:
-   - `action: "schedule"` → POST `https://api.ayrshare.com/api/post` with `{ post, platforms: [...], scheduleDate, mediaUrls }`
-   - `action: "list"` → GET `/history`
-   - `action: "delete"` → DELETE `/post/:id`
-   - `action: "analytics"` → GET `/analytics/post`
-3. New table `social_scheduled_posts` to mirror status + source generator + rep_code:
-   ```
-   id uuid pk, ayrshare_id text, content text, platforms text[],
-   scheduled_for timestamptz, status text, source text, source_id uuid,
-   media_urls text[], result jsonb, created_by text, created_at, updated_at
-   ```
-   RLS: admin-only via service role (admin token guard on the edge function).
-4. Shared `<ScheduleSocialButton />` (network multiselect + datetime + media URLs) added to every social generator. Replaces the LinkedIn-only button when Ayrshare key is present; falls back to LinkedIn queue when not.
-5. Admin tab **Social Scheduler** under Tools: calendar view + table of upcoming posts across networks, edit/delete/post-now, per-network status icons.
-
-## Technical notes
-- All three edge functions guarded by `verifyAdminToken` (same pattern as `linkedin-post`).
-- HubSpot blog post body should accept HTML; sanitize `<script>` server-side.
-- Date/time picker stored as UTC ISO; UI shows in user's local TZ.
-- New schema migration for `social_scheduled_posts` only (no other table changes).
-- No changes to existing LinkedIn flow — it keeps working as a fallback.
+### 5. Light dashboard widget (optional, included)
+Small "Today's Meetings" card on the main admin dashboard with the next 3 upcoming.
 
 ## Out of scope
-- Posting to HubSpot social (API doesn't allow it).
-- Real-time analytics dashboards (Part 3 just exposes counts; richer analytics later).
-- Buffer/Hootsuite alternatives (Ayrshare picked for single API + low overhead).
+- Real-time webhook (can add later — requires HubSpot developer app + signed webhook handler)
+- Two-way sync of edits made in admin back to HubSpot beyond `outcome` updates
+- Calendar invites / Google Calendar mirror
+
+## Acceptance test
+1. Book a meeting using your HubSpot meetings link as a fake prospect.
+2. Within 5 minutes (or instantly via "Sync now"), it appears under **Admin → Meetings (HubSpot)** with attendee details, time, and a clickable HubSpot link.
+3. If the booking email matches a known customer/rep, the rep badge shows up.

@@ -2376,6 +2376,122 @@ export type Database = {
         }
         Relationships: []
       }
+      hubspot_meetings: {
+        Row: {
+          account_id: string | null
+          attendee_company: string | null
+          attendee_email: string | null
+          attendee_name: string | null
+          attendee_phone: string | null
+          contact_hubspot_id: string | null
+          created_at: string
+          deal_hubspot_id: string | null
+          end_time: string | null
+          hubspot_id: string
+          id: string
+          internal_notes: string | null
+          location: string | null
+          meeting_link: string | null
+          organizer_email: string | null
+          organizer_owner_id: string | null
+          outcome: string | null
+          raw: Json
+          rep_code: string | null
+          source: string | null
+          start_time: string | null
+          synced_at: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          attendee_company?: string | null
+          attendee_email?: string | null
+          attendee_name?: string | null
+          attendee_phone?: string | null
+          contact_hubspot_id?: string | null
+          created_at?: string
+          deal_hubspot_id?: string | null
+          end_time?: string | null
+          hubspot_id: string
+          id?: string
+          internal_notes?: string | null
+          location?: string | null
+          meeting_link?: string | null
+          organizer_email?: string | null
+          organizer_owner_id?: string | null
+          outcome?: string | null
+          raw?: Json
+          rep_code?: string | null
+          source?: string | null
+          start_time?: string | null
+          synced_at?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          attendee_company?: string | null
+          attendee_email?: string | null
+          attendee_name?: string | null
+          attendee_phone?: string | null
+          contact_hubspot_id?: string | null
+          created_at?: string
+          deal_hubspot_id?: string | null
+          end_time?: string | null
+          hubspot_id?: string
+          id?: string
+          internal_notes?: string | null
+          location?: string | null
+          meeting_link?: string | null
+          organizer_email?: string | null
+          organizer_owner_id?: string | null
+          outcome?: string | null
+          raw?: Json
+          rep_code?: string | null
+          source?: string | null
+          start_time?: string | null
+          synced_at?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hubspot_meetings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hubspot_meetings_state: {
+        Row: {
+          id: boolean
+          last_error: string | null
+          last_run_at: string | null
+          last_status: string | null
+          last_synced_at: string | null
+          meetings_synced: number
+        }
+        Insert: {
+          id?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          last_synced_at?: string | null
+          meetings_synced?: number
+        }
+        Update: {
+          id?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          last_synced_at?: string | null
+          meetings_synced?: number
+        }
+        Relationships: []
+      }
       hygiene_actions: {
         Row: {
           account_id: string
