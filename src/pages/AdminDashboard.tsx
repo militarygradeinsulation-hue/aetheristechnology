@@ -51,6 +51,7 @@ import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
+import { AdminCompanyTaskAudit } from '@/components/admin/AdminCompanyTaskAudit';
 import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
 import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
@@ -448,7 +449,12 @@ const AdminDashboard: React.FC = () => {
       case 'training': return <AdminTrainingPanel />;
       case 'onboarding': return <AdminOnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
-      case 'companycal': return <AdminCompanyCalendarPanel />;
+      case 'companycal': return (
+        <div className="space-y-6">
+          <AdminCompanyCalendarPanel />
+          <AdminCompanyTaskAudit />
+        </div>
+      );
       case 'sales': return <SalesCrmPanel />;
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;

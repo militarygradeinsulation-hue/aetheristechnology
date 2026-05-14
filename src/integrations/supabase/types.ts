@@ -3956,6 +3956,47 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_company_task_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          entry_id: string
+          for_date: string
+          id: string
+          note: string | null
+          rep_code: string
+          task_index: number
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          entry_id: string
+          for_date: string
+          id?: string
+          note?: string | null
+          rep_code: string
+          task_index: number
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          entry_id?: string
+          for_date?: string
+          id?: string
+          note?: string | null
+          rep_code?: string
+          task_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_company_task_completions_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "company_calendar"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_daily_checklist: {
         Row: {
           blog_posted: boolean

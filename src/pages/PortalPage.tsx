@@ -40,6 +40,7 @@ import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionP
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
+import { CompanyDailyTasksCard } from '@/components/portal/CompanyDailyTasksCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
@@ -428,6 +429,7 @@ const PortalPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <DailyHustleCard onViewSprint={() => { setTab('sprint'); setActiveTool(null); }} />
+            <CompanyDailyTasksCard />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="w-4 h-4" /> Total Sales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_sales_cents)}</p></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Commission Earned</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmt(profile.total_commission_cents)}</p></CardContent></Card>
