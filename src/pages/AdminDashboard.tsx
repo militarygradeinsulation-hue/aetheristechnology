@@ -892,6 +892,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'playbook' && <PlaybookCreator />}
         {activeTool === 'social_scheduler' && <SocialSchedulerPanel />}
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
+        {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
