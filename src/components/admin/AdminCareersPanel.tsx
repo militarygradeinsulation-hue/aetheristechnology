@@ -479,7 +479,7 @@ export const AdminCareersPanel: React.FC = () => {
     setMinTestScore('');
     setMinFitScore('');
     setFitSort('none');
-    if (preset === 'top') { setMinFitScore('45'); setFitSort('desc'); }
+    if (preset === 'top') { setMinFitScore('25'); setFitSort('desc'); }
     else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
     else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
     else if (preset === 'rejected') { setStageFilter('no'); }
@@ -588,7 +588,7 @@ export const AdminCareersPanel: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Quick:</span>
             {([
-              { k: 'top', label: '🔥 Top fit (80+)' },
+              { k: 'top', label: '🔥 Top fit (25+/60)' },
               { k: 'passedNew', label: '✅ Passed · uncontacted' },
               { k: 'pending', label: '🕒 Pending review' },
               { k: 'rejected', label: '🚫 Rejected' },
@@ -795,6 +795,13 @@ export const AdminCareersPanel: React.FC = () => {
                         <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
                           {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
                           {a.ai_analyzed_at ? 'Re-analyze' : a.resume_path ? 'Analyze AI' : 'Analyze (no resume)'}
+                        </Button>
+                        <Button size="sm"
+                          onClick={() => setStage(a.share_code, 'no')}
+                          disabled={stageSavingId === a.share_code || (a.stage === 'no')}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-60">
+                          {stageSavingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Ban className="w-3 h-3 mr-1" />}
+                          {a.stage === 'no' ? 'Rejected' : 'Reject'}
                         </Button>
                         <Button size="sm" variant={a.contacted ? 'outline' : 'default'}
                           onClick={() => toggleContacted(a.share_code, !a.contacted)}
