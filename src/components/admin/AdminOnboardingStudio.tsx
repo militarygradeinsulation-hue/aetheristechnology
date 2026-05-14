@@ -18,6 +18,7 @@ import {
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
 import { AdminOnboardingScreenshots } from "@/components/admin/AdminOnboardingScreenshots";
+import { RepBootcamp3Day } from "@/components/portal/RepBootcamp3Day";
 
 interface EditorState {
   id: string;
@@ -215,6 +216,7 @@ export const AdminOnboardingStudio: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <RepBootcamp3Day />
       <AdminOnboardingScreenshots />
       <Card>
       <CardHeader>
