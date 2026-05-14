@@ -32,7 +32,9 @@ export const OnboardingLibrary: React.FC = () => {
   }
 
   return (
-    <Card className="border-amber-500/30">
+    <div className="space-y-6">
+      <RepBootcamp3Day />
+      <Card className="border-amber-500/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <GraduationCap className="w-5 h-5 text-amber-500" /> New Rep Onboarding Library
