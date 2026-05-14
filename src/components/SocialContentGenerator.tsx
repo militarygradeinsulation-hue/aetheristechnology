@@ -195,16 +195,30 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
 
     const imagePrompt = post.finding || post.leakName || post.question || post.entry || post.claim || 'business operations forensic analysis';
 
+    const postText = (() => {
+      switch (sectionKey) {
+        case 'case_file': return `${post.finding}\n\n${post.evidence}\n\n${post.math}\n\n${post.fixTease}\n\n${post.lesson}`;
+        case 'leak_of_week': return `${post.leakName}\n\n${post.definition}\n\n${(post.signs || []).join('\n')}\n\n${post.spotIt}`;
+        case 'diagnostic': return `${post.testName}\n\n${post.test}\n\n${post.threshold}\n\n${post.whatItMeans}`;
+        case 'operators_journal': return post.body || '';
+        case 'contrarian': return `${post.claim}\n\n${post.evidence}\n\n${post.counter}\n\n${post.position}`;
+        default: return '';
+      }
+    })();
+
     return (
       <div key={id} className="space-y-2">
         {card}
         {adminMode && visible && (
-          <PostImageGenerator
-            prompt={imagePrompt}
-            postIndex={index}
-            compact
-            onImageGenerated={() => {}}
-          />
+          <>
+            <PostImageGenerator
+              prompt={imagePrompt}
+              postIndex={index}
+              compact
+              onImageGenerated={() => {}}
+            />
+            <ScheduleSocialButton content={postText} source={`social_content:${sectionKey}`} className="w-full" />
+          </>
         )}
       </div>
     );
