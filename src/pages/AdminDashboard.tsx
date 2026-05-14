@@ -449,7 +449,12 @@ const AdminDashboard: React.FC = () => {
       case 'training': return <AdminTrainingPanel />;
       case 'onboarding': return <AdminOnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
-      case 'companycal': return <AdminCompanyCalendarPanel />;
+      case 'companycal': return (
+        <div className="space-y-6">
+          <AdminCompanyCalendarPanel />
+          <AdminCompanyTaskAudit />
+        </div>
+      );
       case 'sales': return <SalesCrmPanel />;
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;
