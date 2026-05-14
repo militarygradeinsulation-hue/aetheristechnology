@@ -136,7 +136,7 @@ serve(async (req) => {
       const { data: row, error: insErr } = await supabase.from("admin_image_studio").insert({
         prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model,
         source: action === "edit" ? "edited" : "generated",
-        metadata: { ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}), aetheris_style: aetherisStyle },
+        metadata: { ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}), aetheris_style: aetherisStyle, cartoon_style: cartoon },
       }).select().single();
       if (insErr) throw insErr;
       return json({ image: row });
