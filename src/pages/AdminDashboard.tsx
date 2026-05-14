@@ -56,8 +56,9 @@ import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { SocialSchedulerPanel } from '@/components/admin/SocialSchedulerPanel';
 import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
+import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings';
 type EventsSubTab = 'campaign' | 'site';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
