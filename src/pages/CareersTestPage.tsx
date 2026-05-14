@@ -179,7 +179,7 @@ const CareersTestPage = () => {
                   <li>Questions are randomized. No back-tracking once submitted.</li>
                   <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code — it's how I review you.</li>
                 </ul>
-                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start the test &rarr;</Button>
+                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start my application →</Button>
               </CardContent>
             </Card>
           )}
