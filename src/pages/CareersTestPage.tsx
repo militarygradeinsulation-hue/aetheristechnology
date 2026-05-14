@@ -321,51 +321,12 @@ const CareersTestPage = () => {
             </Card>
           )}
 
-          {phase === 'apply' && result?.share_code && (
-            <Card className="bg-card/60 backdrop-blur border-amber/40">
-              <CardHeader>
-                <CardTitle className="font-display text-2xl flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" /> You passed — {result.score_pct}%
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-lg border border-amber bg-amber/10 p-4">
-                  <p className="text-xs uppercase font-mono text-amber mb-1">Your share code (save it)</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
-                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
-                      <Copy className="w-3 h-3 mr-1" /> Copy
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">I'll use this code to pull up your test results, resume, and notes. Don't lose it.</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
-                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
-                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
-                  <Textarea
-                    rows={8}
-                    maxLength={4000}
-                    value={appNotes}
-                    onChange={e => setAppNotes(e.target.value)}
-                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
-                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
-                    onContextMenu={e => e.preventDefault()}
-                    autoComplete="off"
-                    spellCheck={true}
-                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
-                  />
-                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
-                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
-                  </p>
-                </div>
-                <Button onClick={submitApplication} disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS} className="bg-amber text-background hover:bg-amber/90">
-                  {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-                  Submit application
-                </Button>
+          {phase === 'finalizing' && (
+            <Card className="bg-card/60 backdrop-blur border-border/50">
+              <CardContent className="p-8 text-center space-y-3">
+                <Loader2 className="w-10 h-10 text-amber mx-auto animate-spin" />
+                <h2 className="font-display text-2xl">Filing your application…</h2>
+                <p className="text-sm text-muted-foreground">You passed. Uploading your resume and locking in your submission.</p>
               </CardContent>
             </Card>
           )}
@@ -374,12 +335,19 @@ const CareersTestPage = () => {
             <Card className="bg-card/60 backdrop-blur border-border/50">
               <CardContent className="p-8 text-center space-y-3">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
-                <h2 className="font-display text-2xl">Submitted</h2>
+                <h2 className="font-display text-2xl">Application submitted — you passed ({result.score_pct}%)</h2>
                 <p className="text-muted-foreground">I'll review your application and reach out if it's a fit.</p>
-                <Badge className="bg-amber text-background text-base font-mono">Code: {result.share_code}</Badge>
+                <div className="rounded-lg border border-amber bg-amber/10 p-4 inline-flex items-center gap-3">
+                  <span className="text-2xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
+                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
+                    <Copy className="w-3 h-3 mr-1" /> Copy
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Save this code — it's how I'll pull up your application.</p>
               </CardContent>
             </Card>
           )}
+
 
         </div>
         <Footer />
