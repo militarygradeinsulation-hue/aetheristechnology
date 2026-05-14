@@ -118,7 +118,18 @@ export const AdminResumeAnalyzer: React.FC = () => {
               {a.headline && <p className="text-muted-foreground mt-1">{a.headline}</p>}
               <p className="text-xs text-muted-foreground mt-2">Extracted via {result.extract_method}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={downloadJson}><Download className="w-4 h-4 mr-1" /> JSON</Button>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Button size="sm" onClick={downloadPdf} className="bg-amber hover:bg-amber/90 text-background font-bold">
+                <Download className="w-4 h-4 mr-1" /> PDF Case File
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadTxt} className="border-amber/40 hover:border-amber">
+                <FileText className="w-4 h-4 mr-1" /> .txt
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyReport}>
+                <Copy className="w-4 h-4 mr-1" /> Copy
+              </Button>
+              <Button variant="ghost" size="sm" onClick={downloadJson}>JSON</Button>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
