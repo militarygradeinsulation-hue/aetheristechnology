@@ -82,7 +82,10 @@ serve(async (req) => {
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nKeep composition clean and intentional. Subject:`;
 
-      const finalPrompt = aetherisStyle ? `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}` : rawPrompt;
+      const IMAGE_NUDGE = "Generate a single high-quality image. Subject:";
+      const finalPrompt = aetherisStyle
+        ? `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`
+        : `${IMAGE_NUDGE} ${rawPrompt}`;
 
       const messages: any[] = [];
       if (action === "edit" && sourceImageUrl) {
@@ -104,13 +107,16 @@ serve(async (req) => {
       });
       if (!aiRes.ok) {
         const t = await aiRes.text();
-        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
-        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
-        return json({ error: `AI gateway: ${t}` }, 502);
+        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." });
+        if (aiRes.status === 402) return json({ error: "AI credits exhausted." });
+        return json({ error: `AI gateway (${aiRes.status}): ${t.slice(0, 400)}` });
       }
       const aiData = await aiRes.json();
       const dataUrl: string | undefined = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-      if (!dataUrl?.startsWith("data:image/")) return json({ error: "No image returned" }, 502);
+      if (!dataUrl?.startsWith("data:image/")) {
+        const textOut = aiData.choices?.[0]?.message?.content;
+        return json({ error: `No image returned. ${typeof textOut === "string" ? textOut.slice(0, 300) : "Try a more visual prompt (describe what should be SHOWN)."}` });
+      }
 
       const m = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/)!;
       const ext = m[1] === "jpeg" ? "jpg" : m[1];
