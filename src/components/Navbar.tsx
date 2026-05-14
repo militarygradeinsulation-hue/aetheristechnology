@@ -55,7 +55,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Careers', href: '/careers', tone: 'yellow' },
   ];
 
-  const showStickyCTA = true;
+  const location = useLocation();
+  // Bookings are for clients only — never expose the meeting link inside the
+  // careers funnel. Applicants must complete the application + test, not book a call.
+  const isCareersContext = location.pathname.startsWith('/careers');
+  const showStickyCTA = !isCareersContext;
   const expanded = isHovered || isMobileMenuOpen;
 
   return (
