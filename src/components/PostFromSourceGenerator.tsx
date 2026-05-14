@@ -7,6 +7,7 @@ import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb } from 'l
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { PostImageGenerator } from './admin/PostImageGenerator';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 
 type SourceType = 'idea' | 'blog' | 'playbook';
 
