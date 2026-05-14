@@ -588,7 +588,7 @@ export const AdminCareersPanel: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Quick:</span>
             {([
-              { k: 'top', label: '🔥 Top fit (80+)' },
+              { k: 'top', label: '🔥 Top fit (25+/60)' },
               { k: 'passedNew', label: '✅ Passed · uncontacted' },
               { k: 'pending', label: '🕒 Pending review' },
               { k: 'rejected', label: '🚫 Rejected' },
