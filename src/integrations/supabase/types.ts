@@ -4977,6 +4977,54 @@ export type Database = {
         }
         Relationships: []
       }
+      social_scheduled_posts: {
+        Row: {
+          ayrshare_id: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          media_urls: string[] | null
+          platforms: string[]
+          result: Json | null
+          scheduled_for: string | null
+          source: string | null
+          source_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ayrshare_id?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          media_urls?: string[] | null
+          platforms?: string[]
+          result?: Json | null
+          scheduled_for?: string | null
+          source?: string | null
+          source_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ayrshare_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          media_urls?: string[] | null
+          platforms?: string[]
+          result?: Json | null
+          scheduled_for?: string | null
+          source?: string | null
+          source_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriber_feedback: {
         Row: {
           created_at: string
