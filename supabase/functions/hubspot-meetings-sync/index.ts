@@ -133,7 +133,23 @@ Deno.serve(async (req) => {
           if (cust?.rep_code) repCode = cust.rep_code;
         }
 
-        const source = props.hs_meeting_source || props.hs_activity_type || "hubspot_meeting_link";
+        // Bookings are for clients only. If the attendee email belongs to a
+        // careers applicant, flag the meeting and notify admin instead of
+        // treating it like a normal client booking.
+        let isApplicant = false;
+        if (attendee.email) {
+          const { data: appRow } = await admin
+            .from("careers_applications")
+            .select("id, candidate_name")
+            .ilike("candidate_email", attendee.email)
+            .limit(1)
+            .maybeSingle();
+          if (appRow) isApplicant = true;
+        }
+
+        const source = isApplicant
+          ? "applicant_booking_blocked"
+          : (props.hs_meeting_source || props.hs_activity_type || "hubspot_meeting_link");
 
         const row = {
           account_id: account.id,
