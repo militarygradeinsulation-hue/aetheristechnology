@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 type Strategy = {
   id: string;
