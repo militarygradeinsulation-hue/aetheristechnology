@@ -9,6 +9,7 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 import { Badge } from '@/components/ui/badge';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 
 const PHASES = [
   { label: 'Running forensic scan...', target: 18 },
