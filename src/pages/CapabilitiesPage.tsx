@@ -33,6 +33,7 @@ const tools: Tool[] = [
   { thumbnail: diagnosticThumb, title: 'Business Diagnostic', description: '20-question assessment that scores your operational health.', path: '/business-diagnostic', category: 'Diagnostic' },
   { thumbnail: scannerThumb, title: 'Website Scanner', description: "Instant audit of your site's SEO, speed, and conversion gaps.", path: '/scan', category: 'Diagnostic' },
   { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', description: 'Expose blind spots across leadership, sales, and operations.', path: '/strategic-questions', category: 'Diagnostic' },
+  { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', description: 'Upload a resume — get an Aetheris case file with fit score, red flags, and interview questions.', path: '/resume-forensics', category: 'Hiring' },
   { thumbnail: brandContradictionsThumb, title: 'Brand Contradiction Finder', description: 'See where your brand says one thing but signals another.', path: '/brand-contradictions', category: 'Brand' },
   { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', description: 'Find the words quietly weakening trust and authority.', path: '/friction-audit', category: 'Brand' },
   { thumbnail: contentGenThumb, title: 'Social Content Generator', description: 'Scan your site — get 25 ready-to-post social pieces.', path: '/content-generator', category: 'Content' },
