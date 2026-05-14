@@ -214,11 +214,13 @@ serve(async (req) => {
       }).eq("id", scan.id);
     }
 
-    // Notify admins (non-blocking)
-    supabase.from("admin_notifications").insert({
-      kind: "resume_scan_complete",
-      title: `Resume scan: ${analysis?.candidate_name || "Unknown"} → ${roleTitle || "?"}`,
-      body: `Fit ${fitScore ?? "?"}/100 — ${recommendation || "?"} — ${email}`,
+    // Log to activity_log so admins see it in their feed
+    supabase.from("activity_log").insert({
+      event_type: "resume_scan.complete",
+      entity_type: "resume_scan",
+      entity_id: scan?.id ?? null,
+      summary: `Resume scan: ${analysis?.candidate_name || "Unknown"} → ${roleTitle || "?"} — Fit ${fitScore ?? "?"}/100`,
+      actor: "system",
       metadata: { scan_id: scan?.id, fit_score: fitScore, email, company_url: companyUrl, role_title: roleTitle },
     } as any).then(() => {}, () => {});
 
