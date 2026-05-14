@@ -1334,6 +1334,33 @@ export type Database = {
           },
         ]
       }
+      company_briefs: {
+        Row: {
+          brief: Json
+          company_url: string
+          created_at: string
+          expires_at: string
+          id: string
+          source_pages: Json | null
+        }
+        Insert: {
+          brief: Json
+          company_url: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          source_pages?: Json | null
+        }
+        Update: {
+          brief?: Json
+          company_url?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          source_pages?: Json | null
+        }
+        Relationships: []
+      }
       company_calendar: {
         Row: {
           ai_plan: Json
@@ -4565,6 +4592,93 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_scan_credits: {
+        Row: {
+          created_at: string
+          credits_purchased: number
+          credits_remaining: number
+          email: string
+          id: string
+          last_purchase_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credits_purchased?: number
+          credits_remaining?: number
+          email: string
+          id?: string
+          last_purchase_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credits_purchased?: number
+          credits_remaining?: number
+          email?: string
+          id?: string
+          last_purchase_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resume_scans: {
+        Row: {
+          company_url: string | null
+          created_at: string
+          email: string
+          error_message: string | null
+          fit_score: number | null
+          id: string
+          pdf_storage_path: string | null
+          recommendation: string | null
+          resume_filename: string | null
+          resume_storage_path: string | null
+          role_notes: string | null
+          role_title: string | null
+          scan_result: Json | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_url?: string | null
+          created_at?: string
+          email: string
+          error_message?: string | null
+          fit_score?: number | null
+          id?: string
+          pdf_storage_path?: string | null
+          recommendation?: string | null
+          resume_filename?: string | null
+          resume_storage_path?: string | null
+          role_notes?: string | null
+          role_title?: string | null
+          scan_result?: Json | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_url?: string | null
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          fit_score?: number | null
+          id?: string
+          pdf_storage_path?: string | null
+          recommendation?: string | null
+          resume_filename?: string | null
+          resume_storage_path?: string | null
+          role_notes?: string | null
+          role_title?: string | null
+          scan_result?: Json | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       retargeting_settings: {
         Row: {
           enabled: boolean
@@ -5857,6 +5971,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_resume_credit: { Args: { _email: string }; Returns: boolean }
       decrypt_token: {
         Args: { _ciphertext: string; _key: string }
         Returns: string
@@ -5951,6 +6066,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      grant_resume_credits: {
+        Args: { _credits: number; _email: string }
+        Returns: undefined
+      }
       increment_rep_sales: {
         Args: { _code: string; _commission: number; _sales: number }
         Returns: undefined
@@ -5975,6 +6094,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      refund_resume_credit: { Args: { _email: string }; Returns: undefined }
       rep_mailbox_local_part: {
         Args: { _code: string; _rep_name: string }
         Returns: string
