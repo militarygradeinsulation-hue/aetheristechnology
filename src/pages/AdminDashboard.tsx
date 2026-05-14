@@ -57,8 +57,9 @@ import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { SocialSchedulerPanel } from '@/components/admin/SocialSchedulerPanel';
 import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
 import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
+import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer';
 type EventsSubTab = 'campaign' | 'site';
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
@@ -75,6 +76,7 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock },
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp },
   { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock },
+  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp },
 ];
 
 interface ContactSubmission {
@@ -893,6 +895,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'social_scheduler' && <SocialSchedulerPanel />}
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
+        {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
