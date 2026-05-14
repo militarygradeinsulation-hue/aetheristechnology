@@ -380,6 +380,22 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       }
     }
 
+    // Resume Forensics scan credits
+    const RESUME_PACKS: Record<string, number> = {
+      resume_scan_1: 1,
+      resume_scan_5: 5,
+      resume_scan_10: 10,
+    };
+    if (priceId && RESUME_PACKS[priceId] && email) {
+      const credits = RESUME_PACKS[priceId];
+      const { error: grantErr } = await supabase.rpc("grant_resume_credits" as any, {
+        _email: email,
+        _credits: credits,
+      });
+      if (grantErr) console.error("grant_resume_credits error:", grantErr);
+      else console.log(`granted ${credits} resume scan credits to ${email}`);
+    }
+
     if (session.metadata?.bundle_items) {
       try {
         const items: string[] = JSON.parse(session.metadata.bundle_items);
