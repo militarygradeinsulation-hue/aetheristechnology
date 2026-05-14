@@ -35,6 +35,39 @@ const PROMPT_STARTERS = [
   'Hard-truth video: why your sales team is bleeding deals at "proposal sent". 6 scenes.',
 ];
 
+const PREMADE_TITLES: string[] = [
+  'Your Business Is Leaking — You Just Can\'t See It',
+  'The $200k Leak Hiding in Your CRM',
+  '7 Steps of The Leak Audit™',
+  'Stop Hiring Reps. Fix the Process.',
+  'The Forensic Diagnostic: $2,500 to Find the Bleed',
+  'Trade-Show Leads Decay in 72 Hours',
+  'The Follow-Up Gap Costing $40k/Month',
+  'AI Won\'t Save a Broken Process',
+];
+
+const PREMADE_TOPICS: string[] = [
+  'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
+  'The dead-lead pile worth $200k that nobody resurrects.',
+  'Quote-to-cash leakage between sales and ops.',
+  'Stalled deals nobody triages — the silent revenue killer.',
+  'Discount creep eating 4 points of margin per quarter.',
+  'CRM stages lying about pipeline value.',
+  'The 72-hour warm-lead decay curve.',
+  'AI-assisted CRM hygiene for $5M-$50M operators.',
+  'Why "more reps" is the wrong fix.',
+  'Discovery calls leak deals — here\'s the script that plugs it.',
+];
+
+const MUSIC_PRESETS: { label: string; text: string }[] = [
+  { label: 'Forensic tension', text: 'Slow cinematic forensic underscore. Low cello drone, sparse dark piano, subtle ticking clock, building tension. No vocals. Loopable.' },
+  { label: 'Operator hustle',  text: 'Confident mid-tempo lo-fi hip-hop instrumental. Warm bass, dusty drums, muted Rhodes. Founder-energy. No vocals.' },
+  { label: 'Boardroom power',  text: 'Modern corporate cinematic with bold brass stabs and driving percussion. High-stakes, decisive. No vocals.' },
+  { label: 'Late-night noir',  text: 'Dark synthwave noir. Analog pads, gated reverb snare, slow arpeggio. No vocals.' },
+  { label: 'Documentary slow', text: 'Sparse acoustic documentary score. Felt piano, soft strings, contemplative. No vocals.' },
+  { label: 'Heist clock',      text: 'Pulsing electronic heist score. Tight kick, ticking hi-hats, plucked synth ostinato. No vocals. Loopable.' },
+];
+
 function base64ToBlob(b64: string, mime: string) {
   const bin = atob(b64);
   const arr = new Uint8Array(bin.length);
