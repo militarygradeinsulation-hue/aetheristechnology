@@ -40,6 +40,7 @@ import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionP
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
+import { CompanyDailyTasksCard } from '@/components/portal/CompanyDailyTasksCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
