@@ -8,6 +8,10 @@ export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
   const { trackEvent } = useTrackEvent();
+  const location = useLocation();
+  // Bookings are reserved for clients. On the careers funnel we hide the
+  // meeting CTA so applicants can't shortcut the application + test gate.
+  const isCareersContext = location.pathname.startsWith('/careers');
 
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
