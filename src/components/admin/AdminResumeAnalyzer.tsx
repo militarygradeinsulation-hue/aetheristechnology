@@ -7,7 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, FileUp, Sparkles, Download } from 'lucide-react';
+import { Loader2, FileUp, Sparkles, Download, FileText, Copy } from 'lucide-react';
+import { downloadResumeAnalysisPdf, downloadResumeAnalysisText, buildResumeAnalysisText } from '@/lib/generateResumePdf';
 
 interface Analysis {
   candidate_name?: string;
@@ -67,6 +68,22 @@ export const AdminResumeAnalyzer: React.FC = () => {
     a.click();
   };
 
+  const downloadPdf = () => {
+    if (!result) return;
+    try { downloadResumeAnalysisPdf(result); }
+    catch (e) { toast({ title: 'PDF failed', description: e instanceof Error ? e.message : 'Try again', variant: 'destructive' }); }
+  };
+
+  const downloadTxt = () => { if (result) downloadResumeAnalysisText(result); };
+
+  const copyReport = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(buildResumeAnalysisText(result));
+      toast({ title: 'Case file copied' });
+    } catch { toast({ title: 'Copy failed', variant: 'destructive' }); }
+  };
+
   const a = result?.analysis;
   const recColor = a?.recommendation?.includes('Strong Yes') ? 'bg-emerald-600' :
     a?.recommendation === 'Yes' ? 'bg-emerald-500' :
@@ -101,7 +118,18 @@ export const AdminResumeAnalyzer: React.FC = () => {
               {a.headline && <p className="text-muted-foreground mt-1">{a.headline}</p>}
               <p className="text-xs text-muted-foreground mt-2">Extracted via {result.extract_method}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={downloadJson}><Download className="w-4 h-4 mr-1" /> JSON</Button>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Button size="sm" onClick={downloadPdf} className="bg-amber hover:bg-amber/90 text-background font-bold">
+                <Download className="w-4 h-4 mr-1" /> PDF Case File
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadTxt} className="border-amber/40 hover:border-amber">
+                <FileText className="w-4 h-4 mr-1" /> .txt
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyReport}>
+                <Copy className="w-4 h-4 mr-1" /> Copy
+              </Button>
+              <Button variant="ghost" size="sm" onClick={downloadJson}>JSON</Button>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
