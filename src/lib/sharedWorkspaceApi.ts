@@ -41,6 +41,14 @@ export async function fetchUnreadNotificationCount(recipient: Person): Promise<n
   return r.count;
 }
 
+export async function markNotificationRead(id: string): Promise<void> {
+  await call({ action: "mark_read", id });
+}
+
+export async function markAllNotificationsRead(recipient: Person): Promise<void> {
+  await call({ action: "mark_all_read", recipient });
+}
+
 export async function deleteSharedTask(id: string): Promise<void> {
   await call({ action: "delete_task", id });
 }
