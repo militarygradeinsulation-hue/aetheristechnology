@@ -62,6 +62,9 @@ const CareersTestPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingMs, phase]);
 
+  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
+  const MIN_NOTE_WORDS = 150;
+
   const startTest = async () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
@@ -84,6 +87,36 @@ const CareersTestPage = () => {
     } finally { setLoading(false); }
   };
 
+  // Finalize the already-submitted application (resume + notes) once the
+  // applicant passes the test. The user filled this out BEFORE the test —
+  // we just persist it now that the gate is cleared.
+  const finalizeApplicationAfterPass = async (shareCode: string) => {
+    if (!resumeFile) return;
+    setLoading(true);
+    setPhase('finalizing');
+    try {
+      const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'upload_resume_url', share_code: shareCode, filename: resumeFile.name },
+      });
+      if (sErr) throw new Error(sErr.message);
+      if ((signed as any)?.error) throw new Error((signed as any).error);
+      const resumePath: string = (signed as any).path;
+      const { error: upErr } = await supabase.storage.from('careers-resumes')
+        .uploadToSignedUrl(resumePath, (signed as any).token, resumeFile);
+      if (upErr) throw upErr;
+
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'finalize_application', share_code: shareCode, resume_path: resumePath, resume_filename: resumeFile.name, notes: appNotes },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setPhase('done');
+    } catch (e) {
+      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      setPhase('apply');
+    } finally { setLoading(false); }
+  };
+
   const submit = async (auto = false) => {
     if (!attemptId) return;
     if (!auto && Object.keys(answers).length < questions.length) {
@@ -96,48 +129,15 @@ const CareersTestPage = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as any);
-      setPhase((data as any).passed ? 'apply' : 'graded');
+      const r = data as any;
+      setResult(r);
+      if (r.passed && r.share_code) {
+        await finalizeApplicationAfterPass(r.share_code);
+      } else {
+        setPhase('graded');
+      }
     } catch (e) {
       toast({ title: 'Submit failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    } finally { setLoading(false); }
-  };
-
-  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
-  const MIN_NOTE_WORDS = 150;
-
-  const submitApplication = async () => {
-    if (!result?.share_code) return;
-    if (!resumeFile) {
-      toast({ title: 'Resume required', description: 'Upload your resume (PDF or DOC) to apply.', variant: 'destructive' });
-      return;
-    }
-    if (noteWordCount < MIN_NOTE_WORDS) {
-      toast({ title: 'Note too short', description: `Write at least ${MIN_NOTE_WORDS} words on why I should interview you (currently ${noteWordCount}).`, variant: 'destructive' });
-      return;
-    }
-    setLoading(true);
-    try {
-      let resumePath: string | null = null;
-      if (resumeFile) {
-        const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
-          body: { action: 'upload_resume_url', share_code: result.share_code, filename: resumeFile.name },
-        });
-        if (sErr) throw new Error(sErr.message);
-        if ((signed as any)?.error) throw new Error((signed as any).error);
-        resumePath = (signed as any).path;
-        const { error: upErr } = await supabase.storage.from('careers-resumes')
-          .uploadToSignedUrl(resumePath!, (signed as any).token, resumeFile);
-        if (upErr) throw upErr;
-      }
-      const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'finalize_application', share_code: result.share_code, resume_path: resumePath, resume_filename: resumeFile?.name, notes: appNotes },
-      });
-      if (error) throw new Error(error.message);
-      if ((data as any)?.error) throw new Error((data as any).error);
-      setPhase('done');
-    } catch (e) {
-      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setLoading(false); }
   };
 
