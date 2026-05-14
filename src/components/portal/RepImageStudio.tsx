@@ -238,6 +238,15 @@ export const RepImageStudio: React.FC = () => {
                   {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BarChart3 className="w-4 h-4 mr-1" />}
                   Make Infographic
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ cartoon: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[170px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Editorial Cartoon
+                </Button>
               </>
             )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
