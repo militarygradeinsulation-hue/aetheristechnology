@@ -124,7 +124,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const secret = Deno.env.get("ADMIN_PIN") || "";
+    const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const apiKey = Deno.env.get("LOVABLE_API_KEY") || "";
     if (!secret || !apiKey) {
       return new Response(JSON.stringify({ error: "Server not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
