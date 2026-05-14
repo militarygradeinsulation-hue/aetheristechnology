@@ -71,14 +71,18 @@ serve(async (req) => {
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
       const infographic = !!body.infographic;
+      const cartoon = !!body.cartoon_style;
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nSubject:`;
 
       const INFOGRAPHIC_SUFFIX = `\n\n--- INFOGRAPHIC LAYOUT ---\nDesign as a single-image infographic suitable for sharing with a business prospect:\n- Clear visual hierarchy with a bold headline at the top\n- 3-5 numbered or icon-led data points / steps stacked vertically\n- Stats or numbers rendered LARGE and legible (no fake/garbled text)\n- Use minimal, crisp typography — every word must be readable, no lorem-ipsum\n- Square or 4:5 portrait composition, social-share friendly\nTopic to visualize:`;
 
+      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
+
       const IMAGE_NUDGE = "Generate a single high-quality image. Subject:";
       let finalPrompt = `${IMAGE_NUDGE} ${rawPrompt}`;
       if (infographic) finalPrompt = `${INFOGRAPHIC_SUFFIX} ${rawPrompt}`;
+      if (cartoon) finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
       if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${infographic ? INFOGRAPHIC_SUFFIX + " " : ""}${rawPrompt}`;
 
       const messages: any[] = [];
