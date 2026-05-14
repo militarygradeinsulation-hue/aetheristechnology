@@ -171,6 +171,90 @@ export const RepCreationStudio: React.FC = () => {
     [images, selectedIds],
   );
 
+  const allTitles = useMemo(() => [...aiTitles, ...PREMADE_TITLES], [aiTitles]);
+  const allTopics = useMemo(() => [...aiTopics, ...PREMADE_TOPICS], [aiTopics]);
+
+  const composePrompt = (overrides?: { title?: string; topics?: string[]; base?: string }) => {
+    const t = overrides?.title ?? pickedTitle;
+    const tps = overrides?.topics ?? pickedTopics;
+    const base = (overrides?.base ?? prompt).trim();
+    const parts: string[] = [];
+    if (t) parts.push(`TITLE: ${t}`);
+    if (tps.length) parts.push(`TOPICS:\n- ${tps.join('\n- ')}`);
+    if (base) parts.push(base);
+    return parts.join('\n\n');
+  };
+
+  const applyTitle = (t: string) => {
+    const next = pickedTitle === t ? '' : t;
+    setPickedTitle(next);
+    setPrompt(composePrompt({ title: next }));
+  };
+  const toggleTopic = (t: string) => {
+    const next = pickedTopics.includes(t) ? pickedTopics.filter(x => x !== t) : [...pickedTopics, t];
+    setPickedTopics(next);
+    setPrompt(composePrompt({ topics: next }));
+  };
+  const clearIdeation = () => {
+    setPickedTitle(''); setPickedTopics([]);
+    setPrompt(composePrompt({ title: '', topics: [] }));
+  };
+
+  const refreshTopics = async () => {
+    setTopicsLoading(true);
+    try {
+      const exclude = [...PREMADE_TOPICS, ...aiTopics];
+      const { data, error } = await invoke('generate_topics', { exclude, count: 10 });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const fresh = (data?.topics || []).filter((t: string) => !exclude.includes(t));
+      if (!fresh.length) { toast({ title: 'No new topics', variant: 'destructive' }); return; }
+      setAiTopics(prev => [...fresh, ...prev].slice(0, 30));
+      toast({ title: `Added ${fresh.length} fresh topics` });
+    } catch (e: any) {
+      toast({ title: 'Topic refresh failed', description: e.message, variant: 'destructive' });
+    } finally { setTopicsLoading(false); }
+  };
+
+  const refreshIdeas = async () => {
+    setIdeasLoading(true);
+    try {
+      const { data, error } = await invoke('generate_ideas', {
+        excludeTitles: [...PREMADE_TITLES, ...aiTitles],
+        excludeTopics: [...PREMADE_TOPICS, ...aiTopics],
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const newTitles: string[] = data?.titles || [];
+      const newTopics: string[] = data?.topics || [];
+      if (newTitles.length) setAiTitles(prev => [...newTitles, ...prev].slice(0, 30));
+      if (newTopics.length) setAiTopics(prev => [...newTopics, ...prev].slice(0, 30));
+      toast({ title: `Refreshed ${newTitles.length + newTopics.length} ideas` });
+    } catch (e: any) {
+      toast({ title: 'Idea refresh failed', description: e.message, variant: 'destructive' });
+    } finally { setIdeasLoading(false); }
+  };
+
+  const generateMusic = async () => {
+    const p = (musicPrompt.trim() || MUSIC_PRESETS[0].text);
+    setMusicGenerating(true);
+    try {
+      const planSec = plan ? plan.scenes.reduce((a, s) => a + s.durationMs / 1000, 0) : duration;
+      const ms = Math.max(10000, Math.min(180000, Math.round(planSec * 1000) + 2000));
+      const { data, error } = await invoke('generate_music', { prompt: p, durationMs: ms });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const blob = base64ToBlob(data.audioBase64, data.mime || 'audio/mpeg');
+      musicBufferRef.current = await blob.arrayBuffer();
+      setMusicUrl(URL.createObjectURL(blob));
+      toast({ title: 'Music ready', description: `${(blob.size / 1024 / 1024).toFixed(1)} MB · mixes into next render` });
+    } catch (e: any) {
+      toast({ title: 'Music failed', description: e.message, variant: 'destructive' });
+    } finally { setMusicGenerating(false); }
+  };
+
+  const clearMusic = () => { musicBufferRef.current = null; setMusicUrl(''); };
+
   const generatePlan = async (): Promise<Plan | null> => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return null; }
     if (available.length === 0) { toast({ title: 'No images available — generate or upload images in your Art Studio first', variant: 'destructive' }); return null; }
