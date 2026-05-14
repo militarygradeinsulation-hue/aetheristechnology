@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Play, CheckCircle2, Loader2 } from "lucide-react";
 import { listModules, listProgress, type OnboardingModule, type ProgressRow } from "@/lib/onboardingApi";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
+import { RepBootcamp3Day } from "@/components/portal/RepBootcamp3Day";
 
 export const OnboardingLibrary: React.FC = () => {
   const [modules, setModules] = useState<OnboardingModule[]>([]);
@@ -26,10 +27,14 @@ export const OnboardingLibrary: React.FC = () => {
   const progBySlug = new Map(progress.map(p => [p.module_slug, p]));
 
   if (loading) return <div className="p-4 text-center"><Loader2 className="w-5 h-5 animate-spin inline" /></div>;
-  if (modules.length === 0) return null;
+  if (modules.length === 0) {
+    return <div className="space-y-6"><RepBootcamp3Day /></div>;
+  }
 
   return (
-    <Card className="border-amber-500/30">
+    <div className="space-y-6">
+      <RepBootcamp3Day />
+      <Card className="border-amber-500/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <GraduationCap className="w-5 h-5 text-amber-500" /> New Rep Onboarding Library
@@ -64,7 +69,8 @@ export const OnboardingLibrary: React.FC = () => {
           })}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
