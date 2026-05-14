@@ -76,9 +76,10 @@ serve(async (req) => {
 
       const INFOGRAPHIC_SUFFIX = `\n\n--- INFOGRAPHIC LAYOUT ---\nDesign as a single-image infographic suitable for sharing with a business prospect:\n- Clear visual hierarchy with a bold headline at the top\n- 3-5 numbered or icon-led data points / steps stacked vertically\n- Stats or numbers rendered LARGE and legible (no fake/garbled text)\n- Use minimal, crisp typography — every word must be readable, no lorem-ipsum\n- Square or 4:5 portrait composition, social-share friendly\nTopic to visualize:`;
 
-      let finalPrompt = rawPrompt;
-      if (infographic) finalPrompt = `${INFOGRAPHIC_SUFFIX} ${finalPrompt}`;
-      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${finalPrompt}`;
+      const IMAGE_NUDGE = "Generate a single high-quality image. Subject:";
+      let finalPrompt = `${IMAGE_NUDGE} ${rawPrompt}`;
+      if (infographic) finalPrompt = `${INFOGRAPHIC_SUFFIX} ${rawPrompt}`;
+      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${infographic ? INFOGRAPHIC_SUFFIX + " " : ""}${rawPrompt}`;
 
       const messages: any[] = [];
       if (action === "edit" && sourceImageUrl) {
