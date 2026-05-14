@@ -45,10 +45,10 @@ export function HubSpotMeetingsPanel() {
     setLoading(true);
     const [{ data: rows }, { data: st }] = await Promise.all([
       supabase.from("hubspot_meetings").select("*").order("start_time", { ascending: false }).limit(500),
-      supabase.from("hubspot_meetings_state" as any).select("*").eq("id", true).maybeSingle(),
+      supabase.from("hubspot_meetings_state" as any).select("*").eq("id", true as any).maybeSingle(),
     ]);
     setMeetings((rows as Meeting[]) || []);
-    setState((st as SyncState) || null);
+    setState((st as unknown as SyncState) || null);
     setLoading(false);
   }, []);
 
