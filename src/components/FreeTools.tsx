@@ -6,6 +6,7 @@ import { ParallaxTilt } from './ParallaxTilt';
 import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
 import scannerThumb from '@/assets/scanner-thumb.jpg';
 import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
+import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
@@ -33,6 +34,12 @@ const tools: Tool[] = [
     title: 'Strategic Question Engine',
     description: 'Expose blind spots across leadership, sales, and operations.',
     path: '/strategic-questions',
+  },
+  {
+    thumbnail: resumeForensicsThumb,
+    title: 'Resume Forensics',
+    description: 'Upload a resume — get an Aetheris case file: fit score, red flags, and interview questions.',
+    path: '/resume-forensics',
   },
 ];
 
