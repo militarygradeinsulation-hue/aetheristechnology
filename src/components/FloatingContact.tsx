@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
