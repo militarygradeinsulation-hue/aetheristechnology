@@ -332,6 +332,25 @@ export const RepCreationStudio: React.FC = () => {
         acc += active.scenes[i].durationMs / 1000;
       }
       const totalSec = acc;
+
+      if (musicBufferRef.current) {
+        try {
+          const musicBuf = await audioCtx.decodeAudioData(musicBufferRef.current.slice(0));
+          const musicSrc = audioCtx.createBufferSource();
+          musicSrc.buffer = musicBuf;
+          musicSrc.loop = musicBuf.duration < totalSec;
+          const gain = audioCtx.createGain();
+          const v = Math.max(0, Math.min(1, musicVolume));
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(v, startTime + 0.8);
+          gain.gain.setValueAtTime(v, startTime + Math.max(0.1, totalSec - 1.2));
+          gain.gain.linearRampToValueAtTime(0, startTime + totalSec);
+          musicSrc.connect(gain).connect(dest);
+          musicSrc.start(startTime);
+          musicSrc.stop(startTime + totalSec + 0.1);
+        } catch (musicErr) { console.warn('music mix failed', musicErr); }
+      }
+
       const animStart = performance.now();
 
       const drawScene = (idx: number, localT: number, sceneDur: number) => {
