@@ -110,6 +110,21 @@ export const RepCreationStudio: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoExt, setVideoExt] = useState<'mp4'|'webm'>('webm');
 
+  // Ideation
+  const [pickedTitle, setPickedTitle] = useState('');
+  const [pickedTopics, setPickedTopics] = useState<string[]>([]);
+  const [aiTitles, setAiTitles] = useState<string[]>([]);
+  const [aiTopics, setAiTopics] = useState<string[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+  const [topicsLoading, setTopicsLoading] = useState(false);
+
+  // Music
+  const [musicPrompt, setMusicPrompt] = useState('');
+  const [musicVolume, setMusicVolume] = useState(0.18);
+  const [musicGenerating, setMusicGenerating] = useState(false);
+  const [musicUrl, setMusicUrl] = useState('');
+  const musicBufferRef = useRef<ArrayBuffer | null>(null);
+
   const invoke = (action: string, body: Record<string, unknown> = {}) => {
     const token = getPortalToken();
     return supabase.functions.invoke('portal-creation-studio', {
