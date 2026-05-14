@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Play, CheckCircle2, Loader2 } from "lucide-react";
 import { listModules, listProgress, type OnboardingModule, type ProgressRow } from "@/lib/onboardingApi";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
+import { RepBootcamp3Day } from "@/components/portal/RepBootcamp3Day";
 
 export const OnboardingLibrary: React.FC = () => {
   const [modules, setModules] = useState<OnboardingModule[]>([]);
