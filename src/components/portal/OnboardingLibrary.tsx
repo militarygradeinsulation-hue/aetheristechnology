@@ -69,7 +69,8 @@ export const OnboardingLibrary: React.FC = () => {
           })}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
