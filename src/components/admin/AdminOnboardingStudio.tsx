@@ -18,6 +18,7 @@ import {
 import { buildOnboardingPackage, downloadBlob } from "@/lib/onboardingPackage";
 import { OnboardingPlayer } from "@/components/onboarding/OnboardingPlayer";
 import { AdminOnboardingScreenshots } from "@/components/admin/AdminOnboardingScreenshots";
+import { RepBootcamp3Day } from "@/components/portal/RepBootcamp3Day";
 
 interface EditorState {
   id: string;
