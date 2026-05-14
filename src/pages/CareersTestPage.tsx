@@ -16,7 +16,7 @@ import { Loader2, Timer, CheckCircle2, XCircle, Upload, Copy, BookOpen, AlertTri
 
 type Choice = { id: string; text: string };
 type Question = { id: string; question: string; choices: Choice[] };
-type Phase = 'intro' | 'identify' | 'in_test' | 'graded' | 'apply' | 'done';
+type Phase = 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
 
 const STUDY_LINKS = [
   { href: '/', label: 'Home — positioning & hook' },
