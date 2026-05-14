@@ -318,6 +318,26 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Resume Forensics teaser */}
+        <section className="px-4 py-12">
+          <div className="max-w-4xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              New · Live AI tool
+            </div>
+            <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Hire the wrong person and your business <span className="text-crimson">starts leaking</span>.
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-5">
+              Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score. <span className="text-amber font-semibold">$20 per scan.</span>
+            </p>
+            <Button asChild size="lg" className="font-bold">
+              <Link to="/resume-forensics">
+                Try Resume Forensics <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </section>
         </main>
 
         <Footer />
