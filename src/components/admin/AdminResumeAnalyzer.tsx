@@ -68,6 +68,22 @@ export const AdminResumeAnalyzer: React.FC = () => {
     a.click();
   };
 
+  const downloadPdf = () => {
+    if (!result) return;
+    try { downloadResumeAnalysisPdf(result); }
+    catch (e) { toast({ title: 'PDF failed', description: e instanceof Error ? e.message : 'Try again', variant: 'destructive' }); }
+  };
+
+  const downloadTxt = () => { if (result) downloadResumeAnalysisText(result); };
+
+  const copyReport = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(buildResumeAnalysisText(result));
+      toast({ title: 'Case file copied' });
+    } catch { toast({ title: 'Copy failed', variant: 'destructive' }); }
+  };
+
   const a = result?.analysis;
   const recColor = a?.recommendation?.includes('Strong Yes') ? 'bg-emerald-600' :
     a?.recommendation === 'Yes' ? 'bg-emerald-500' :
