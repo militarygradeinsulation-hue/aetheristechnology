@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
