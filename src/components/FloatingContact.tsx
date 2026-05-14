@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
@@ -8,6 +8,10 @@ export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
   const { trackEvent } = useTrackEvent();
+  const location = useLocation();
+  // Bookings are reserved for clients. On the careers funnel we hide the
+  // meeting CTA so applicants can't shortcut the application + test gate.
+  const isCareersContext = location.pathname.startsWith('/careers');
 
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
@@ -45,16 +49,18 @@ export const FloatingContact: React.FC = () => {
               <Linkedin className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">LinkedIn</span>
             </a>
-            <a
-              href={BOOK_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-amber px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
-              onClick={() => trackEvent('book_meeting_click', { location: 'floating' })}
-            >
-              <Calendar className="w-5 h-5 text-background" />
-              <span className="text-sm font-bold text-background">Book a Meeting</span>
-            </a>
+            {!isCareersContext && (
+              <a
+                href={BOOK_MEETING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-amber px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
+                onClick={() => trackEvent('book_meeting_click', { location: 'floating' })}
+              >
+                <Calendar className="w-5 h-5 text-background" />
+                <span className="text-sm font-bold text-background">Book a Meeting</span>
+              </a>
+            )}
             <a
               href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
               target="_blank"
