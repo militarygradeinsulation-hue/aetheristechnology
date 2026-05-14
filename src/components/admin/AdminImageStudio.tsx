@@ -48,7 +48,7 @@ export const AdminImageStudio: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (aetherisStyle = false) => {
+  const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -56,11 +56,12 @@ export const AdminImageStudio: React.FC = () => {
         action: editTarget ? 'edit' : 'generate',
         prompt, model,
         source_image_url: editTarget?.url,
-        aetheris_style: aetherisStyle,
+        aetheris_style: !!opts.aetherisStyle,
+        cartoon_style: !!opts.cartoon,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : aetherisStyle ? 'Image generated in Aetheris style' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
