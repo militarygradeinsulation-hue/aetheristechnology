@@ -45,7 +45,7 @@ const tools: Tool[] = [
   { thumbnail: playbooksThumb, title: 'Free Playbooks', description: 'Step-by-step guides you can implement today.', path: '/resources', category: 'Content' },
 ];
 
-const CATEGORIES = ['All', 'Diagnostic', 'Brand', 'Marketing', 'Sales', 'Content'] as const;
+const CATEGORIES = ['All', 'Diagnostic', 'Brand', 'Marketing', 'Sales', 'Content', 'Hiring'] as const;
 
 const CapabilitiesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
