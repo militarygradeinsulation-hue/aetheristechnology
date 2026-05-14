@@ -186,7 +186,7 @@ const CareersTestPage = () => {
 
           {phase === 'identify' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardHeader><CardTitle className="font-display text-2xl">Who are you?</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="font-display text-2xl">Step 1 of 2 — Who are you?</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div><Label>Full name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={100} /></div>
@@ -195,11 +195,68 @@ const CareersTestPage = () => {
                 <div><Label>Phone (optional)</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} maxLength={20} /></div>
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span>Once you click below, your <strong>50-minute timer</strong> starts. You get <strong>5 submitted attempts per day</strong>.</span>
+                  <span>Next you'll <strong>submit your application</strong> (resume + 150-word note). Only after that will the test unlock.</span>
                 </div>
-                <Button onClick={startTest} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
+                <Button
+                  onClick={() => {
+                    if (!form.name.trim() || !form.email.trim()) {
+                      toast({ title: 'Name and email required', variant: 'destructive' }); return;
+                    }
+                    setPhase('apply');
+                  }}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  Continue to application →
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {phase === 'apply' && (
+            <Card className="bg-card/60 backdrop-blur border-amber/40">
+              <CardHeader>
+                <CardTitle className="font-display text-2xl">Step 2 of 2 — Submit your application</CardTitle>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload your resume and write your 150-word pitch. Once you submit, the <strong>50-minute test</strong> unlocks.
+                  Your application is only stored if you pass — fail and you can retry the test.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
+                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
+                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
+                  <Textarea
+                    rows={8}
+                    maxLength={4000}
+                    value={appNotes}
+                    onChange={e => setAppNotes(e.target.value)}
+                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
+                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
+                    onContextMenu={e => e.preventDefault()}
+                    autoComplete="off"
+                    spellCheck={true}
+                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
+                  />
+                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
+                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <span>Clicking below submits your application <strong>and</strong> immediately starts the 50-minute test timer. 5 attempts per day.</span>
+                </div>
+                <Button
+                  onClick={startTest}
+                  disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS}
+                  size="lg"
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
                   {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Timer className="w-4 h-4 mr-1" />}
-                  Start 50-minute test
+                  Submit application & start test →
                 </Button>
               </CardContent>
             </Card>
