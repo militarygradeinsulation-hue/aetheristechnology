@@ -190,9 +190,13 @@ Deno.serve(async (req) => {
           try {
             await admin.from("shared_notifications").insert({
               recipient: "admin",
-              kind: "meeting_booked",
-              title: `New meeting: ${upRow.attendee_name || upRow.attendee_email || "Unknown"}`,
-              body: upRow.start_time ? `Starts ${new Date(upRow.start_time).toLocaleString()}` : "",
+              kind: isApplicant ? "applicant_booking_blocked" : "meeting_booked",
+              title: isApplicant
+                ? `⚠ Applicant tried to book: ${upRow.attendee_name || upRow.attendee_email || "Unknown"}`
+                : `New meeting: ${upRow.attendee_name || upRow.attendee_email || "Unknown"}`,
+              body: isApplicant
+                ? `This email matches a careers application. Bookings are for clients only — review and cancel in HubSpot if needed.`
+                : (upRow.start_time ? `Starts ${new Date(upRow.start_time).toLocaleString()}` : ""),
             });
           } catch (_) { /* notifications table may differ — non-fatal */ }
         }
