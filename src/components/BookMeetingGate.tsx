@@ -213,6 +213,17 @@ export const GatedHubSpotEmbed: React.FC<{ src: string; className?: string }> = 
     }));
   };
 
+  useEffect(() => {
+    if (!revealed) return;
+    // (Re)inject HubSpot embed loader so it picks up newly-mounted containers.
+    const s = document.createElement('script');
+    s.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
+    s.type = 'text/javascript';
+    s.async = true;
+    document.body.appendChild(s);
+    return () => { try { document.body.removeChild(s); } catch { /* ignore */ } };
+  }, [revealed]);
+
   if (revealed) {
     return <div className={className} data-src={src} />;
   }

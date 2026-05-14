@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { SalesChat } from "@/components/SalesChat";
+import { BookMeetingGate } from "@/components/BookMeetingGate";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -172,6 +173,7 @@ const App = () => (
                   </Suspense>
 
                   <SalesChat />
+                  <BookMeetingGate />
                 </AuthProvider>
               }
             />
