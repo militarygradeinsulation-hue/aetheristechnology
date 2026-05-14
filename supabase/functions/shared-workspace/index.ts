@@ -55,6 +55,29 @@ serve(async (req) => {
       return json(200, { count: count || 0 });
     }
 
+    if (action === "mark_read") {
+      const id = String(body.id || "");
+      if (!id) return json(400, { error: "id required" });
+      const { error } = await supabase
+        .from("shared_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
+    if (action === "mark_all_read") {
+      const recipient = String(body.recipient || "");
+      if (!recipient) return json(400, { error: "recipient required" });
+      const { error } = await supabase
+        .from("shared_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("recipient", recipient)
+        .is("read_at", null);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
     if (action === "delete_task") {
       const id = String(body.id || "");
       if (!id) return json(400, { error: "id required" });

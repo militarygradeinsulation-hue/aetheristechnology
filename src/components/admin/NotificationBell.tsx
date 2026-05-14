@@ -34,12 +34,20 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
   const unread = items.filter(i => !i.read_at).length;
 
   const markOne = async (id: string) => {
-    await supabase.from("shared_notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
+    setItems(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
+    try {
+      const { markNotificationRead } = await import("@/lib/sharedWorkspaceApi");
+      await markNotificationRead(id);
+    } catch { /* ignore */ }
     load();
   };
   const markAll = async () => {
-    await supabase.from("shared_notifications").update({ read_at: new Date().toISOString() })
-      .eq("recipient", me).is("read_at", null);
+    const now = new Date().toISOString();
+    setItems(prev => prev.map(n => n.read_at ? n : { ...n, read_at: now }));
+    try {
+      const { markAllNotificationsRead } = await import("@/lib/sharedWorkspaceApi");
+      await markAllNotificationsRead(me);
+    } catch { /* ignore */ }
     load();
   };
 
