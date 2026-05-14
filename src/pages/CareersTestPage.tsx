@@ -16,7 +16,7 @@ import { Loader2, Timer, CheckCircle2, XCircle, Upload, Copy, BookOpen, AlertTri
 
 type Choice = { id: string; text: string };
 type Question = { id: string; question: string; choices: Choice[] };
-type Phase = 'intro' | 'identify' | 'in_test' | 'graded' | 'apply' | 'done';
+type Phase = 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
 
 const STUDY_LINKS = [
   { href: '/', label: 'Home — positioning & hook' },
@@ -62,6 +62,9 @@ const CareersTestPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingMs, phase]);
 
+  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
+  const MIN_NOTE_WORDS = 150;
+
   const startTest = async () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
@@ -84,6 +87,36 @@ const CareersTestPage = () => {
     } finally { setLoading(false); }
   };
 
+  // Finalize the already-submitted application (resume + notes) once the
+  // applicant passes the test. The user filled this out BEFORE the test —
+  // we just persist it now that the gate is cleared.
+  const finalizeApplicationAfterPass = async (shareCode: string) => {
+    if (!resumeFile) return;
+    setLoading(true);
+    setPhase('finalizing');
+    try {
+      const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'upload_resume_url', share_code: shareCode, filename: resumeFile.name },
+      });
+      if (sErr) throw new Error(sErr.message);
+      if ((signed as any)?.error) throw new Error((signed as any).error);
+      const resumePath: string = (signed as any).path;
+      const { error: upErr } = await supabase.storage.from('careers-resumes')
+        .uploadToSignedUrl(resumePath, (signed as any).token, resumeFile);
+      if (upErr) throw upErr;
+
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'finalize_application', share_code: shareCode, resume_path: resumePath, resume_filename: resumeFile.name, notes: appNotes },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setPhase('done');
+    } catch (e) {
+      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      setPhase('apply');
+    } finally { setLoading(false); }
+  };
+
   const submit = async (auto = false) => {
     if (!attemptId) return;
     if (!auto && Object.keys(answers).length < questions.length) {
@@ -96,48 +129,15 @@ const CareersTestPage = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as any);
-      setPhase((data as any).passed ? 'apply' : 'graded');
+      const r = data as any;
+      setResult(r);
+      if (r.passed && r.share_code) {
+        await finalizeApplicationAfterPass(r.share_code);
+      } else {
+        setPhase('graded');
+      }
     } catch (e) {
       toast({ title: 'Submit failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    } finally { setLoading(false); }
-  };
-
-  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
-  const MIN_NOTE_WORDS = 150;
-
-  const submitApplication = async () => {
-    if (!result?.share_code) return;
-    if (!resumeFile) {
-      toast({ title: 'Resume required', description: 'Upload your resume (PDF or DOC) to apply.', variant: 'destructive' });
-      return;
-    }
-    if (noteWordCount < MIN_NOTE_WORDS) {
-      toast({ title: 'Note too short', description: `Write at least ${MIN_NOTE_WORDS} words on why I should interview you (currently ${noteWordCount}).`, variant: 'destructive' });
-      return;
-    }
-    setLoading(true);
-    try {
-      let resumePath: string | null = null;
-      if (resumeFile) {
-        const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
-          body: { action: 'upload_resume_url', share_code: result.share_code, filename: resumeFile.name },
-        });
-        if (sErr) throw new Error(sErr.message);
-        if ((signed as any)?.error) throw new Error((signed as any).error);
-        resumePath = (signed as any).path;
-        const { error: upErr } = await supabase.storage.from('careers-resumes')
-          .uploadToSignedUrl(resumePath!, (signed as any).token, resumeFile);
-        if (upErr) throw upErr;
-      }
-      const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'finalize_application', share_code: result.share_code, resume_path: resumePath, resume_filename: resumeFile?.name, notes: appNotes },
-      });
-      if (error) throw new Error(error.message);
-      if ((data as any)?.error) throw new Error((data as any).error);
-      setPhase('done');
-    } catch (e) {
-      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setLoading(false); }
   };
 
@@ -154,7 +154,7 @@ const CareersTestPage = () => {
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  We don't accept random applications. To prove you've read the site, you'll take a 25-question multiple-choice test pulled from a 60-question bank. Score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day</strong>. Answer order is randomized per attempt — guessing one letter won't pass.
+                  Two steps. <strong>1)</strong> Submit your full application (resume + 150-word pitch). <strong>2)</strong> Take a 25-question multiple-choice test pulled from a 60-question bank — score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong> Your application is only filed if you pass — random apps go in the trash.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -179,14 +179,14 @@ const CareersTestPage = () => {
                   <li>Questions are randomized. No back-tracking once submitted.</li>
                   <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code — it's how I review you.</li>
                 </ul>
-                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start the test &rarr;</Button>
+                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start my application →</Button>
               </CardContent>
             </Card>
           )}
 
           {phase === 'identify' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardHeader><CardTitle className="font-display text-2xl">Who are you?</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="font-display text-2xl">Step 1 of 2 — Who are you?</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div><Label>Full name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={100} /></div>
@@ -195,11 +195,68 @@ const CareersTestPage = () => {
                 <div><Label>Phone (optional)</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} maxLength={20} /></div>
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span>Once you click below, your <strong>50-minute timer</strong> starts. You get <strong>5 submitted attempts per day</strong>.</span>
+                  <span>Next you'll <strong>submit your application</strong> (resume + 150-word note). Only after that will the test unlock.</span>
                 </div>
-                <Button onClick={startTest} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
+                <Button
+                  onClick={() => {
+                    if (!form.name.trim() || !form.email.trim()) {
+                      toast({ title: 'Name and email required', variant: 'destructive' }); return;
+                    }
+                    setPhase('apply');
+                  }}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  Continue to application →
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {phase === 'apply' && (
+            <Card className="bg-card/60 backdrop-blur border-amber/40">
+              <CardHeader>
+                <CardTitle className="font-display text-2xl">Step 2 of 2 — Submit your application</CardTitle>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload your resume and write your 150-word pitch. Once you submit, the <strong>50-minute test</strong> unlocks.
+                  Your application is only stored if you pass — fail and you can retry the test.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
+                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
+                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
+                  <Textarea
+                    rows={8}
+                    maxLength={4000}
+                    value={appNotes}
+                    onChange={e => setAppNotes(e.target.value)}
+                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
+                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
+                    onContextMenu={e => e.preventDefault()}
+                    autoComplete="off"
+                    spellCheck={true}
+                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
+                  />
+                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
+                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <span>Clicking below submits your application <strong>and</strong> immediately starts the 50-minute test timer. 5 attempts per day.</span>
+                </div>
+                <Button
+                  onClick={startTest}
+                  disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS}
+                  size="lg"
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
                   {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Timer className="w-4 h-4 mr-1" />}
-                  Start 50-minute test
+                  Submit application & start test →
                 </Button>
               </CardContent>
             </Card>
@@ -264,51 +321,12 @@ const CareersTestPage = () => {
             </Card>
           )}
 
-          {phase === 'apply' && result?.share_code && (
-            <Card className="bg-card/60 backdrop-blur border-amber/40">
-              <CardHeader>
-                <CardTitle className="font-display text-2xl flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" /> You passed — {result.score_pct}%
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-lg border border-amber bg-amber/10 p-4">
-                  <p className="text-xs uppercase font-mono text-amber mb-1">Your share code (save it)</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
-                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
-                      <Copy className="w-3 h-3 mr-1" /> Copy
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">I'll use this code to pull up your test results, resume, and notes. Don't lose it.</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
-                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
-                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
-                  <Textarea
-                    rows={8}
-                    maxLength={4000}
-                    value={appNotes}
-                    onChange={e => setAppNotes(e.target.value)}
-                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
-                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
-                    onContextMenu={e => e.preventDefault()}
-                    autoComplete="off"
-                    spellCheck={true}
-                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
-                  />
-                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
-                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
-                  </p>
-                </div>
-                <Button onClick={submitApplication} disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS} className="bg-amber text-background hover:bg-amber/90">
-                  {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-                  Submit application
-                </Button>
+          {phase === 'finalizing' && (
+            <Card className="bg-card/60 backdrop-blur border-border/50">
+              <CardContent className="p-8 text-center space-y-3">
+                <Loader2 className="w-10 h-10 text-amber mx-auto animate-spin" />
+                <h2 className="font-display text-2xl">Filing your application…</h2>
+                <p className="text-sm text-muted-foreground">You passed. Uploading your resume and locking in your submission.</p>
               </CardContent>
             </Card>
           )}
@@ -317,12 +335,19 @@ const CareersTestPage = () => {
             <Card className="bg-card/60 backdrop-blur border-border/50">
               <CardContent className="p-8 text-center space-y-3">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
-                <h2 className="font-display text-2xl">Submitted</h2>
+                <h2 className="font-display text-2xl">Application submitted — you passed ({result.score_pct}%)</h2>
                 <p className="text-muted-foreground">I'll review your application and reach out if it's a fit.</p>
-                <Badge className="bg-amber text-background text-base font-mono">Code: {result.share_code}</Badge>
+                <div className="rounded-lg border border-amber bg-amber/10 p-4 inline-flex items-center gap-3">
+                  <span className="text-2xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
+                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
+                    <Copy className="w-3 h-3 mr-1" /> Copy
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Save this code — it's how I'll pull up your application.</p>
               </CardContent>
             </Card>
           )}
+
 
         </div>
         <Footer />
