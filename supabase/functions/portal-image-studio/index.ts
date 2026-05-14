@@ -134,6 +134,7 @@ serve(async (req) => {
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           infographic,
+          cartoon_style: cartoon,
         },
       }).select().single();
       if (insErr) throw insErr;
