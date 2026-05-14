@@ -27,7 +27,9 @@ export const OnboardingLibrary: React.FC = () => {
   const progBySlug = new Map(progress.map(p => [p.module_slug, p]));
 
   if (loading) return <div className="p-4 text-center"><Loader2 className="w-5 h-5 animate-spin inline" /></div>;
-  if (modules.length === 0) return null;
+  if (modules.length === 0) {
+    return <div className="space-y-6"><RepBootcamp3Day /></div>;
+  }
 
   return (
     <Card className="border-amber-500/30">
