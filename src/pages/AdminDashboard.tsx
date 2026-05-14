@@ -51,6 +51,7 @@ import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
+import { AdminCompanyTaskAudit } from '@/components/admin/AdminCompanyTaskAudit';
 import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
 import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
