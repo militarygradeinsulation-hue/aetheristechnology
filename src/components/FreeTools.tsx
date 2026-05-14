@@ -6,6 +6,7 @@ import { ParallaxTilt } from './ParallaxTilt';
 import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
 import scannerThumb from '@/assets/scanner-thumb.jpg';
 import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
+import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
