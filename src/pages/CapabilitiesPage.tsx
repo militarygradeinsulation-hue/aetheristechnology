@@ -19,6 +19,7 @@ import followUpThumb from '@/assets/follow-up-plan-thumb.jpg';
 import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
 import brandContradictionsThumb from '@/assets/brand-contradictions-thumb.jpg';
 import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
+import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
