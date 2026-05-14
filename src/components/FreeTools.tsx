@@ -35,6 +35,12 @@ const tools: Tool[] = [
     description: 'Expose blind spots across leadership, sales, and operations.',
     path: '/strategic-questions',
   },
+  {
+    thumbnail: resumeForensicsThumb,
+    title: 'Resume Forensics',
+    description: 'Upload a resume — get an Aetheris case file: fit score, red flags, and interview questions.',
+    path: '/resume-forensics',
+  },
 ];
 
 export const FreeTools: React.FC = () => {
