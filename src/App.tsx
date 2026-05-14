@@ -56,6 +56,7 @@ const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
+const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
@@ -153,6 +154,7 @@ const App = () => (
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
