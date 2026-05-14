@@ -7,7 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, FileUp, Sparkles, Download } from 'lucide-react';
+import { Loader2, FileUp, Sparkles, Download, FileText, Copy } from 'lucide-react';
+import { downloadResumeAnalysisPdf, downloadResumeAnalysisText, buildResumeAnalysisText } from '@/lib/generateResumePdf';
 
 interface Analysis {
   candidate_name?: string;
