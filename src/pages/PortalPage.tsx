@@ -63,6 +63,8 @@ import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
 import { useUnreadTeamMessages } from '@/hooks/useUnreadTeamMessages';
 import { toast as sonnerToast } from 'sonner';
 import { PortalDocuments } from '@/components/portal/PortalDocuments';
+import { IncentivePlan } from '@/components/portal/IncentivePlan';
+import { Trophy } from 'lucide-react';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
