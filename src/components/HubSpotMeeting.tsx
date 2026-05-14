@@ -1,18 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
+import { GatedHubSpotEmbed } from './BookMeetingGate';
 
 export const HubSpotMeeting: React.FC = () => {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
-    script.type = 'text/javascript';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   return (
     <section className="relative py-24 px-4">
       <div className="max-w-4xl mx-auto">
@@ -28,9 +18,9 @@ export const HubSpotMeeting: React.FC = () => {
         </RevealOnScroll>
         <RevealOnScroll delay={0.2}>
           <div className="glass rounded-2xl p-6 md:p-10 border border-border">
-            <div
+            <GatedHubSpotEmbed
               className="meetings-iframe-container"
-              data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
             />
           </div>
         </RevealOnScroll>

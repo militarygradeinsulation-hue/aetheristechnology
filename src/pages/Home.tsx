@@ -8,6 +8,7 @@ import { CaseFileCard } from '@/components/CaseFileCard';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { GatedHubSpotEmbed } from '@/components/BookMeetingGate';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
@@ -101,9 +102,9 @@ const Home = () => {
               </p>
             </div>
             <div className="premium-tile rounded-sm border border-amber/30 p-2 md:p-4">
-              <div
+              <GatedHubSpotEmbed
                 className="meetings-iframe-container"
-                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+                src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
               />
             </div>
           </div>
