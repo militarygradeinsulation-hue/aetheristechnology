@@ -78,9 +78,12 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
                   {n.body && <div className="text-muted-foreground mt-0.5 line-clamp-2">{n.body}</div>}
                 </div>
                 {!n.read_at && (
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => markOne(n.id)} title="Mark read">
-                    <Check className="w-3 h-3" />
-                  </Button>
+                  <Switch
+                    checked={false}
+                    onCheckedChange={() => markOne(n.id)}
+                    title="Mark read"
+                    className="scale-75"
+                  />
                 )}
               </div>
             </div>
