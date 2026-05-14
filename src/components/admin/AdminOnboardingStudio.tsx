@@ -216,6 +216,7 @@ export const AdminOnboardingStudio: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <RepBootcamp3Day />
       <AdminOnboardingScreenshots />
       <Card>
       <CardHeader>
