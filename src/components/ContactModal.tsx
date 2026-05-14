@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Mail, Phone, MapPin, Linkedin, ArrowRight, Calendar } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
@@ -10,6 +11,9 @@ interface ContactModalProps {
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const { trackEvent } = useTrackEvent();
+  const location = useLocation();
+  // Bookings = clients only. Hide the meeting CTA inside the careers funnel.
+  const isCareersContext = location.pathname.startsWith('/careers');
 
   if (!isOpen) return null;
 
