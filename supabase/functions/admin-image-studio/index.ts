@@ -79,13 +79,18 @@ serve(async (req) => {
       const model = (body.model as string) || "google/gemini-3.1-flash-image-preview";
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
+      const cartoon = !!body.cartoon_style;
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nKeep composition clean and intentional. Subject:`;
+
+      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
 
       const IMAGE_NUDGE = "Generate a single high-quality image. Subject:";
       const finalPrompt = aetherisStyle
         ? `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`
-        : `${IMAGE_NUDGE} ${rawPrompt}`;
+        : cartoon
+          ? `${CARTOON_SUFFIX} ${rawPrompt}`
+          : `${IMAGE_NUDGE} ${rawPrompt}`;
 
       const messages: any[] = [];
       if (action === "edit" && sourceImageUrl) {
