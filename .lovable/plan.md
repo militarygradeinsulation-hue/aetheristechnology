@@ -1,56 +1,67 @@
-## Goal
-When a prospect books on your HubSpot meetings link, that meeting shows up automatically in the admin area (with name, email, time, link, source rep if known).
+## Resume Analysis — Public Paid Tool
 
-## Approach
-HubSpot exposes meetings as engagements (`/crm/v3/objects/meetings`). The cleanest, no-extra-setup path is **scheduled polling** using the existing HubSpot OAuth token — no developer app or webhook subscription required. (We can layer a webhook later if you want sub-minute latency.)
+A public, live-on-homepage tool where prospects buy resume scan credits ($20 each, with 5/10 packs at a discount), enter a company website + role context + upload a resume, and receive an AI-generated culture-fit + capability breakdown plus a branded PDF and a soft upsell to the Forensic Diagnostic.
 
-## What gets built
+### 1. Pricing & credits
 
-### 1. New table `hubspot_meetings`
-Stores synced meeting records.
-- `id` (uuid, pk)
-- `hubspot_id` (text, unique) — meeting object id
-- `title`, `meeting_link`, `location`, `outcome`, `internal_notes`
-- `start_time`, `end_time` (timestamptz)
-- `organizer_email`, `organizer_owner_id`
-- `attendee_email`, `attendee_name`, `attendee_company`, `attendee_phone`
-- `contact_hubspot_id`, `deal_hubspot_id` (when associated)
-- `rep_code` (text, nullable) — matched via `customers.rep_code` lookup on attendee email
-- `source` (text) — `hubspot_meeting_link`
-- `raw` (jsonb) — full HubSpot payload
-- `created_at`, `updated_at`, `synced_at`
-- RLS: admin-only (`is_admin(auth.uid())`)
+- Stripe products via `payments--batch_create_product`:
+  - `resume_scan_1` — $20 (1 credit)
+  - `resume_scan_5` — $80 (5 credits, $16/ea)
+  - `resume_scan_10` — $150 (10 credits, $15/ea)
+- Anonymous flow: buyer enters email at checkout. Credits keyed to lowercased email, not `user_id`.
+- New table `resume_scan_credits` (email, credits_remaining, credits_purchased, last_purchase_at).
+- New table `resume_scans` (email, company_url, role_title, role_notes, resume_storage_path, scan_result jsonb, fit_score int, pdf_url, created_at, stripe_session_id).
+- Storage bucket `resume-scans` (private) for uploaded resumes + generated PDFs.
 
-### 2. Edge function `hubspot-meetings-sync`
-- Reads HubSpot OAuth token from existing `hubspot_connections` (same helper as `hubspot-sync`)
-- Pulls `/crm/v3/objects/meetings/search` filtered by `hs_lastmodifieddate > last_synced_at` (incremental)
-- Requests properties: `hs_meeting_title`, `hs_meeting_start_time`, `hs_meeting_end_time`, `hs_meeting_location`, `hs_meeting_external_url`, `hs_meeting_outcome`, `hs_meeting_body`, `hubspot_owner_id`, `hs_createdate`
-- Includes associations to contacts → fetches contact email/name/company/phone in batch
-- Filters to meetings that came through a meetings **link** (via `hs_activity_type` / `hs_meeting_source` = scheduling page) so manual log entries are skipped
-- Upserts into `hubspot_meetings` on `hubspot_id`
-- Matches `rep_code` by joining attendee email against `customers` table
-- Pushes a `shared_notifications` row to admin so the bell pings
-- Stores `last_synced_at` watermark in `app_settings` (or a small dedicated row)
+### 2. Purchase flow
 
-### 3. Cron schedule
-`pg_cron` / Supabase scheduled trigger every **5 minutes** invoking `hubspot-meetings-sync`. Manual "Sync Now" button available in the panel.
+- Homepage section "Resume Forensics — $20/scan" with the 3 pack tiers.
+- `create-checkout` extended (or new `create-resume-credits-checkout`) to accept `priceId ∈ resume_scan_*` + `customerEmail` (required), `mode: payment`, embedded checkout, `return_url` → `/resume-forensics?session_id={CHECKOUT_SESSION_ID}`.
+- `payments-webhook` handler adds `checkout.session.completed` branch: when line item is a `resume_scan_*` price, increment `resume_scan_credits` for the buyer email by the pack size. Idempotent on `stripe_session_id`.
 
-### 4. Admin panel `HubSpotMeetingsPanel`
-New tool registered in `ADMIN_TOOLS` as **"Meetings (HubSpot)"**.
-- Tabs: **Upcoming**, **Today**, **Past**, **All**
-- Each row: time (local TZ), attendee name + company, email (mailto via existing rep mail wiring), HubSpot meeting link, source rep badge, outcome
-- Actions: Open in HubSpot, Email attendee, Copy meeting link, Mark as no-show (writes back outcome via HubSpot API)
-- "Sync now" button, last-synced timestamp, count badge for today's meetings
+### 3. Tool flow (post-purchase, gated by credits)
 
-### 5. Light dashboard widget (optional, included)
-Small "Today's Meetings" card on the main admin dashboard with the next 3 upcoming.
+New page `/resume-forensics` (`ResumeForensicsPage.tsx`) with 4 steps:
+1. **Email gate** — enter email, fetch credit balance via new edge function `resume-credits-check`. If 0, show pack purchase. If ≥1, proceed.
+2. **Company scan** — input website URL → calls new edge function `resume-company-scan` which uses **Firecrawl** to crawl homepage + `/about` + `/careers` + `/team` (limit 4–6 pages, `formats: ['markdown','summary']`), then Lovable AI (`google/gemini-2.5-pro`) to extract company brief: mission, values, culture signals, hiring posture. Cached on `company_url` for 7 days in a new `company_briefs` table.
+3. **Role context** — title + free-form notes (priorities, deal-breakers, seniority).
+4. **Resume upload + scan** — upload to `resume-scans` bucket, call new edge function `resume-public-scan` which:
+   - decrements 1 credit atomically (RPC `consume_resume_credit(email)`),
+   - reuses the existing `resume-analyze` extraction logic against the resume,
+   - feeds resume + role context + company brief into Gemini for a structured culture-fit JSON: `fit_score` (0–100), `summary`, `culture_alignment[]`, `capability_match[]`, `risk_flags[]`, `interview_questions[]`, `recommended_next_steps`.
+   - generates a branded PDF (jsPDF, dark charcoal + amber, "Aetheris AI Studio" watermark, Fraunces headlines, JetBrains Mono labels — per Forensic Identity memory),
+   - stores PDF in `resume-scans` bucket, returns signed URL,
+   - emails the PDF to the buyer (existing email infra),
+   - inserts notification for admins.
 
-## Out of scope
-- Real-time webhook (can add later — requires HubSpot developer app + signed webhook handler)
-- Two-way sync of edits made in admin back to HubSpot beyond `outcome` updates
-- Calendar invites / Google Calendar mirror
+### 4. Results screen
 
-## Acceptance test
-1. Book a meeting using your HubSpot meetings link as a fake prospect.
-2. Within 5 minutes (or instantly via "Sync now"), it appears under **Admin → Meetings (HubSpot)** with attendee details, time, and a clickable HubSpot link.
-3. If the booking email matches a known customer/rep, the rep badge shows up.
+- Big fit score with crimson accent only if score < 50 (leak signal rule).
+- Sections: Culture Alignment, Capability Match, Risk Flags, Suggested Interview Questions.
+- **Follow-up CTA**: 
+  - Score ≥ 70 → "Lock this hire in — Forensic Diagnostic ($2,500)" linking to existing diagnostic flow.
+  - Score 40–69 → "Borderline — book a 15-min review with the operator" → Calendly/diagnostic.
+  - Score < 40 → "This one's leaking before day 1 — see the Leak Audit".
+- "Buy more scans" button + download PDF.
+
+### 5. Admin
+
+- New row in `AdminDashboard` tools registry: `resume_forensics_orders` showing all purchases, scans, fit scores, buyer emails. Reuses existing admin shell — no new auth.
+- Existing `AdminResumeAnalyzer` stays unchanged for internal hiring use.
+
+### 6. Homepage placement
+
+- New section component `ResumeForensicsTeaser.tsx` placed on `Home.tsx` between existing capability/diagnostic sections.
+- Headline: "Hire the wrong person and your business starts leaking." Sub: "Run any resume against any company in under 90 seconds. $20."
+- Three pack cards → opens embedded Stripe checkout via existing `useStripeCheckout` hook.
+
+### Technical details
+
+- **Edge functions** (new): `resume-credits-check`, `resume-company-scan`, `resume-public-scan`. All `verify_jwt = false` (anonymous).
+- **Modified**: `payments-webhook` (new branch), `create-checkout` (allow new price IDs), `Home.tsx`, `App.tsx` route, types.
+- **DB migration**: 3 new tables + `consume_resume_credit(email)` RPC (SECURITY DEFINER, atomic decrement) + RLS (service-role-only writes; public read disabled — clients always go through edge functions which check email match).
+- **Firecrawl**: connector already enabled (`FIRECRAWL_API_KEY` present). Crawl limit 6 pages, `maxDepth: 2`, scoped to homepage + about/careers/team paths.
+- **Resume parsing**: reuse text-extraction from existing `resume-analyze` function (PDF/DOCX + Gemini OCR fallback).
+- **PDF**: jsPDF in the edge function, base64 → upload to bucket → signed URL.
+- **Anti-abuse**: 1 scan per credit, max 3 company-scan calls per email per credit (cached briefs), 5 MB resume limit, rate limit by email + IP.
+- **Refunds/edge cases**: if AI scan fails after credit decrement, refund credit via the same RPC.
