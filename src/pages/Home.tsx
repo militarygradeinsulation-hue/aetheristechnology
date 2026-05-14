@@ -8,6 +8,7 @@ import { CaseFileCard } from '@/components/CaseFileCard';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { GatedHubSpotEmbed } from '@/components/BookMeetingGate';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
