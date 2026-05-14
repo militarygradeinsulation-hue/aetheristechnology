@@ -26,7 +26,7 @@ interface Tool {
   title: string;
   description: string;
   path: string;
-  category: 'Diagnostic' | 'Marketing' | 'Sales' | 'Brand' | 'Content';
+  category: 'Diagnostic' | 'Marketing' | 'Sales' | 'Brand' | 'Content' | 'Hiring';
 }
 
 const tools: Tool[] = [
