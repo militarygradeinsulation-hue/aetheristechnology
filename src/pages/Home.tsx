@@ -104,9 +104,9 @@ const Home = () => {
               </p>
             </div>
             <div className="premium-tile rounded-sm border border-amber/30 p-2 md:p-4">
-              <GatedHubSpotEmbed
+              <div
                 className="meetings-iframe-container"
-                src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
               />
             </div>
           </div>
