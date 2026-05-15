@@ -697,7 +697,7 @@ const SettingsDialog: React.FC<{
 
           <div>
             <Label>Signature</Label>
-            <Textarea rows={3} value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Bradon Roberts · Aetheris" />
+            <Textarea rows={3} value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Braden Roberts · Aetheris" />
           </div>
 
           <div className="flex items-center justify-between">

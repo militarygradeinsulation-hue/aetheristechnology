@@ -402,7 +402,7 @@ const TRAINING = [
   { module: "Offer Fluency Drill", owner: "Joseph", format: "Live roleplay, 30 min", freq: "Weekly (Days 1–30)", target: "Day 7" },
   { module: "Discovery Call Framework", owner: "Joseph", format: "Recorded call + debrief", freq: "2x/week first month", target: "Day 10" },
   { module: "Objection Response Bank", owner: "Joseph", format: "Written doc + practice", freq: "Review weekly", target: "Day 5" },
-  { module: "Revenue Leak Diagnosis (per ICP)", owner: "Joseph + Brandon", format: "Case study walkthrough", freq: "Per new vertical", target: "Day 14" },
+  { module: "Revenue Leak Diagnosis (per ICP)", owner: "Joseph + Braden", format: "Case study walkthrough", freq: "Per new vertical", target: "Day 14" },
   { module: "CRM Pipeline Discipline", owner: "Joseph", format: "HubSpot SOP document", freq: "One-time + audit", target: "Day 3" },
   { module: "Outreach Sequence Certification", owner: "Joseph", format: "Live review of sent messages", freq: "Weekly", target: "Day 7" },
   { module: "Commission Rep Onboarding Pack", owner: "Joseph", format: "Written + recorded video", freq: "Per new rep", target: "Day 14" },

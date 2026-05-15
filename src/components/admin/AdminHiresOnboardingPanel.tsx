@@ -236,7 +236,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
             <CalendarPlus className="w-4 h-4 text-amber" /> Engagement Schedules — per Team
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            How often you and Brandon meet with each team. Items toggled to "calendar" mirror into the Company Calendar.
+            How often you and Braden meet with each team. Items toggled to "calendar" mirror into the Company Calendar.
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -301,7 +301,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
             <BookOpenCheck className="w-4 h-4 text-amber" /> New-Hire Engagement Playbook
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Tips, scripts, and red flags. Edit as you and Brandon learn what works. These show up in the Rep portal too.
+            Tips, scripts, and red flags. Edit as you and Braden learn what works. These show up in the Rep portal too.
           </p>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">

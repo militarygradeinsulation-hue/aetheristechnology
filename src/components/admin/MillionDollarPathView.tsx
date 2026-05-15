@@ -250,7 +250,7 @@ export const MillionDollarPathView: React.FC = () => {
             "1:1 with each rep weekly",
             "Public LinkedIn post 5x/week",
           ]} />
-          <RoleCard role="Brandon (Partner)" tone="amber" lines={[
+          <RoleCard role="Braden (Partner)" tone="amber" lines={[
             "Shadow every proposal call wk 1-4",
             "Daily 4pm close-call wk 8-13",
             "Own CRM hygiene + commission payouts",
@@ -334,12 +334,12 @@ export const MillionDollarPathView: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-3 text-sm">
-          <TriggerCard when="End of Week 3 < $80k" then="Drop one vertical. Re-target. Brandon takes over rep coaching daily." />
+          <TriggerCard when="End of Week 3 < $80k" then="Drop one vertical. Re-target. Braden takes over rep coaching daily." />
           <TriggerCard when="End of Week 7 < $400k" then="Emergency offer-mix call. Discount Diagnostic to $14k for 14 days OR add a $9k self-serve tier." />
           <TriggerCard when="Any rep <$0 closed by Day 30" then="Move them to Team-2 SDR-only role or terminate. Don't carry dead weight 90 days." />
           <TriggerCard when="MRR not building by Week 8" then="Bundle Diagnostic+3-month retainer for $39k flat. Force the recurring conversion." />
           <TriggerCard when="Pipeline <$300k by Week 5" then="Joseph pauses operator work for 5 days, runs outbound himself. Lead from the front." />
-          <TriggerCard when="Churn risk on any retainer" then="Brandon does a save call same week. Discount mo+1 by 20% to retain. Never let one cancel quietly." />
+          <TriggerCard when="Churn risk on any retainer" then="Braden does a save call same week. Discount mo+1 by 20% to retain. Never let one cancel quietly." />
         </CardContent>
       </Card>
 

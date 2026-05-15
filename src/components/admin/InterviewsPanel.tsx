@@ -30,10 +30,10 @@ export interface SharedInterview {
   scheduled_at: string | null;
   meeting_link: string | null;
   location: string | null;
-  interviewer: "admin" | "bradon" | "both";
+  interviewer: "admin" | "braden" | "both";
   status: "pending" | "scheduled" | "completed" | "passed" | "rejected";
   source: "manual" | "careers";
-  created_by: "admin" | "bradon";
+  created_by: "admin" | "braden";
   notes: string | null;
   task_id: string | null;
   created_at: string;
@@ -58,7 +58,7 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
   const [filter, setFilter] = useState<"upcoming" | "all" | "mine" | "completed">("upcoming");
   const [draft, setDraft] = useState({
     candidate_name: "", candidate_email: "", scheduled_at: "",
-    meeting_link: "", interviewer: me as "admin" | "bradon" | "both", notes: "",
+    meeting_link: "", interviewer: me as "admin" | "braden" | "both", notes: "",
   });
 
   const load = useCallback(async () => {
@@ -191,7 +191,7 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Joseph</SelectItem>
-                  <SelectItem value="bradon">Bradon</SelectItem>
+                  <SelectItem value="braden">Braden</SelectItem>
                   <SelectItem value="both">Both</SelectItem>
                 </SelectContent>
               </Select>
@@ -283,7 +283,7 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Joseph</SelectItem>
-                      <SelectItem value="bradon">Bradon</SelectItem>
+                      <SelectItem value="braden">Braden</SelectItem>
                       <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>
@@ -301,7 +301,7 @@ export const InterviewsPanel: React.FC<Props> = ({ me }) => {
                 <Textarea
                   defaultValue={i.notes || ""}
                   onBlur={e => { if ((e.target.value || "") !== (i.notes || "")) update(i.id, { notes: e.target.value || null }); }}
-                  placeholder="Shared notes (Joseph + Bradon)…"
+                  placeholder="Shared notes (Joseph + Braden)…"
                   className="min-h-[50px] text-xs bg-background/40"
                 />
               </div>
