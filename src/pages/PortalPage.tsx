@@ -48,6 +48,8 @@ import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { ServicesPricing } from '@/components/ServicesPricing';
+import { ShoppingCart } from 'lucide-react';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
