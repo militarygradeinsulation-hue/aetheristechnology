@@ -271,8 +271,38 @@ export const AdminLiveEventsPanel: React.FC = () => {
                 <Textarea rows={2} value={editing.notes || ''} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} />
               </div>
               <div>
-                <Label>Image URL</Label>
-                <Input value={editing.image_url || ''} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} placeholder="https://..." />
+                <Label>Event Image</Label>
+                {editing.image_url && (
+                  <div className="relative mt-2 mb-2 inline-block">
+                    <img src={editing.image_url} alt="Event preview" className="h-32 rounded-sm border border-border/60 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setEditing({ ...editing, image_url: '' })}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow"
+                      aria-label="Remove image"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <div className="flex gap-2 items-center">
+                  <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent">
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {uploading ? 'Uploading…' : 'Upload image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ''; }}
+                    />
+                  </label>
+                  <Input
+                    value={editing.image_url || ''}
+                    onChange={(e) => setEditing({ ...editing, image_url: e.target.value })}
+                    placeholder="…or paste an image URL"
+                  />
+                </div>
               </div>
               <div>
                 <Label>External Signup URL (optional — uses built-in form if blank)</Label>
