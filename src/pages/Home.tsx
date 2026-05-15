@@ -13,6 +13,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 import { Testimonials } from '@/components/Testimonials';
+import { UpcomingEvents } from '@/components/UpcomingEvents';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -320,6 +321,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Upcoming events */}
+        <UpcomingEvents />
 
         {/* Client reviews */}
         <Testimonials />
