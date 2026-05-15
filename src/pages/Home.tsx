@@ -321,6 +321,9 @@ const Home = () => {
           </div>
         </section>
 
+        {/* Client reviews */}
+        <Testimonials />
+
         {/* Resume Forensics teaser */}
         <section className="px-4 py-12">
           <div className="max-w-4xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
