@@ -12,6 +12,7 @@ import { GatedHubSpotEmbed } from '@/components/BookMeetingGate';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
+import { Testimonials } from '@/components/Testimonials';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -319,6 +320,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Client reviews */}
+        <Testimonials />
 
         {/* Resume Forensics teaser */}
         <section className="px-4 py-12">
