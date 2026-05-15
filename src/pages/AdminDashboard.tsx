@@ -55,6 +55,7 @@ import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalend
 import { AdminCompanyTaskAudit } from '@/components/admin/AdminCompanyTaskAudit';
 import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
 import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
+import { AdminLiveEventsPanel } from '@/components/admin/AdminLiveEventsPanel';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { SocialSchedulerPanel } from '@/components/admin/SocialSchedulerPanel';
 import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
@@ -159,7 +160,7 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog' | 'liveevents'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'insights', label: 'AI Insights', icon: Brain },
     { key: 'events', label: 'Campaign', icon: Megaphone },
@@ -168,6 +169,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'catalog', label: 'Catalog & Pricing', icon: ShoppingCart },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
+    { key: 'liveevents', label: 'Live Events & Webinars', icon: CalendarDays },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
@@ -446,6 +448,7 @@ const AdminDashboard: React.FC = () => {
       case 'creation': return <AdminCreationStudio />;
       case 'commissions': return <CommissionStructurePanel />;
       case 'catalog': return <ServicesPricing />;
+      case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;

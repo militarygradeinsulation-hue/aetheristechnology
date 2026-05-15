@@ -2179,6 +2179,98 @@ export type Database = {
         }
         Relationships: []
       }
+      event_signups: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          event_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_signups_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          ends_at: string | null
+          event_type: string
+          id: string
+          image_url: string | null
+          is_published: boolean
+          location: string | null
+          notes: string | null
+          signup_url: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          ends_at?: string | null
+          event_type?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          location?: string | null
+          notes?: string | null
+          signup_url?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          ends_at?: string | null
+          event_type?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          location?: string | null
+          notes?: string | null
+          signup_url?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       forecast_briefings: {
         Row: {
           briefing_date: string
