@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Trash2, Edit, Plus, Users, X, Eye, EyeOff } from 'lucide-react';
+import { Calendar, Trash2, Edit, Plus, Users, X, Eye, EyeOff, Upload, Loader2 } from 'lucide-react';
 
 interface LiveEvent {
   id: string;
