@@ -164,6 +164,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'events', label: 'Campaign', icon: Megaphone },
     { key: 'careers', label: 'Careers', icon: Briefcase },
     { key: 'hires', label: 'Hires & Onboarding', icon: UserPlus },
+    { key: 'catalog', label: 'Catalog & Pricing', icon: ShoppingCart },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
