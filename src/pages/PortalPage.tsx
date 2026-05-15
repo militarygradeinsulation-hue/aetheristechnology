@@ -48,6 +48,8 @@ import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
+import { ServicesPricing } from '@/components/ServicesPricing';
+import { ShoppingCart } from 'lucide-react';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
 import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
 import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
@@ -72,7 +74,7 @@ import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/componen
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -399,6 +401,7 @@ const PortalPage: React.FC = () => {
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
+    { id: 'catalog', label: 'Catalog & Pricing', icon: <ShoppingCart className="w-4 h-4" />, iconCmp: ShoppingCart },
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
@@ -509,6 +512,7 @@ const PortalPage: React.FC = () => {
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
       case 'sprint': return <Sprint90View />;
+      case 'catalog': return <ServicesPricing />;
       case 'careers': return <PortalCareersPanel />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':

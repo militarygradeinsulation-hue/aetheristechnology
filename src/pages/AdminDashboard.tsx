@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
@@ -18,6 +18,7 @@ import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { AdminLibrary } from '@/components/AdminLibrary';
 import { ContentCalendar, type ViewMode } from '@/components/admin/ContentCalendar';
 import { ContentEngine } from '@/components/admin/ContentEngine';
+import { ServicesPricing } from '@/components/ServicesPricing';
 import { AdminCrm } from '@/components/crm/AdminCrm';
 import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
 import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
@@ -158,12 +159,13 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation'>('workspace');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog'>('workspace');
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'insights', label: 'AI Insights', icon: Brain },
     { key: 'events', label: 'Campaign', icon: Megaphone },
     { key: 'careers', label: 'Careers', icon: Briefcase },
     { key: 'hires', label: 'Hires & Onboarding', icon: UserPlus },
+    { key: 'catalog', label: 'Catalog & Pricing', icon: ShoppingCart },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
@@ -443,6 +445,7 @@ const AdminDashboard: React.FC = () => {
       case 'crm': return <AdminCrm />;
       case 'creation': return <AdminCreationStudio />;
       case 'commissions': return <CommissionStructurePanel />;
+      case 'catalog': return <ServicesPricing />;
       case 'forecast': return <ForecastSettingsPanel />;
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;
