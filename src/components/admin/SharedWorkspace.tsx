@@ -61,7 +61,7 @@ export const SharedWorkspace: React.FC<Props> = ({ me, onUnreadChange }) => {
   const [editNoteBody, setEditNoteBody] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const them: Person = me === "admin" ? "bradon" : "admin";
+  const them: Person = me === "admin" ? "braden" : "admin";
 
   useEffect(() => { localStorage.setItem("ws.view", view); }, [view]);
 

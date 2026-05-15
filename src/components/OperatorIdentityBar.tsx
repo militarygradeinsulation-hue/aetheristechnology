@@ -4,7 +4,7 @@ import { getPortalProfile } from '@/lib/portalAuth';
 
 /**
  * Identity + daily-brief strip shown at the top of the Admin and Portal areas.
- * - Brandon (partner code 963169) sees "COO · Brandon Roberts".
+ * - Braden (partner code 963169) sees "COO · Braden Roberts".
  * - Everyone else (master admin / Joseph) sees "CEO · Joseph Toney".
  * - A short "Today's brief" line rotates deterministically each day per role.
  */
@@ -38,9 +38,9 @@ function pickFor(role: 'COO' | 'CEO'): string {
 export const OperatorIdentityBar: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { role, name, title } = useMemo(() => {
     const portal = getPortalProfile();
-    const isBrandon = portal?.role === 'partner' || portal?.code === '963169';
-    return isBrandon
-      ? { role: 'COO' as const, name: 'Brandon Roberts', title: 'Chief Operating Officer' }
+    const isBraden = portal?.role === 'partner' || portal?.code === '963169';
+    return isBraden
+      ? { role: 'COO' as const, name: 'Braden Roberts', title: 'Chief Operating Officer' }
       : { role: 'CEO' as const, name: 'Joseph Toney', title: 'Chief Executive Officer' };
   }, []);
 

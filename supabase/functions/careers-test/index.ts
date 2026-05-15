@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 // Reps/partners with elevated access to careers admin data.
-const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Bradon Roberts
+const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Braden Roberts
 
 async function authorize(req: Request, secret: string): Promise<{ ok: boolean; isAdmin: boolean; claims: PortalClaims | null }> {
   if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return { ok: true, isAdmin: true, claims: null };

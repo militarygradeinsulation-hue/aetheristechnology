@@ -1,4 +1,4 @@
-// Company-wide calendar managed by admin (Bradon). Reps read; admin CRUDs.
+// Company-wide calendar managed by admin (Braden). Reps read; admin CRUDs.
 // Includes AI tactic planner (Lovable AI Gateway).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
@@ -47,7 +47,7 @@ serve(async (req) => {
       const context = String(body.context || "").slice(0, 2000);
       if (!prompt) return json({ error: "Missing prompt" }, 400);
 
-      const sys = `You are a Business Forensics operations strategist for Aetheris Technology (Indianapolis). You help Bradon plan the company calendar for his rep team. Output blunt, tactical, no fluff. Always return JSON with keys: title (short), kind (one of: goal, vertical, topic, event, push, note), summary (2-3 sentences), tactics (array of 4-7 short, action-led bullets reps can run TODAY), kpis (array of 2-4 measurable outcomes), suggested_date (YYYY-MM-DD or null).`;
+      const sys = `You are a Business Forensics operations strategist for Aetheris Technology (Indianapolis). You help Braden plan the company calendar for his rep team. Output blunt, tactical, no fluff. Always return JSON with keys: title (short), kind (one of: goal, vertical, topic, event, push, note), summary (2-3 sentences), tactics (array of 4-7 short, action-led bullets reps can run TODAY), kpis (array of 2-4 measurable outcomes), suggested_date (YYYY-MM-DD or null).`;
 
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",

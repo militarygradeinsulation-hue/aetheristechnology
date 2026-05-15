@@ -12,7 +12,7 @@ interface WorkspaceTabProps {
   sharedPerson?: Person;
 }
 
-export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _sharedPerson = 'bradon' }) => {
+export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _sharedPerson = 'braden' }) => {
   const [sub, setSub] = useState<SubTab>('notes');
   const [search, setSearch] = useState('');
 

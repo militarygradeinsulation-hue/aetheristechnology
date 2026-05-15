@@ -33,7 +33,7 @@ import { InboxTab } from '@/components/portal/InboxTab';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Mail as MailIcon, Newspaper } from 'lucide-react';
 
-const CAREERS_ALLOWED_CODES = new Set(['963169']); // Bradon Roberts
+const CAREERS_ALLOWED_CODES = new Set(['963169']); // Braden Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionPanel';
@@ -501,8 +501,8 @@ const PortalPage: React.FC = () => {
       case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
-      case 'sharedws': return <SharedWorkspace me="bradon" />;
-      case 'interviews': return <InterviewsPanel me="bradon" />;
+      case 'sharedws': return <SharedWorkspace me="braden" />;
+      case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
       case 'video': return <RepCreationStudio />;
       case 'documents': return <PortalDocuments />;

@@ -126,7 +126,7 @@ const FAQS: FAQ[] = [
   { tag: "Leads", q: "Where do leads come from?", a: "Inbound: Leak Audit submissions, free website scanner, contact forms, webinar registrations, and referral traffic. Each rep gets a daily drop of pre-scored leads in the portal at 7am." },
   { tag: "Culture", q: "Who is my ideal customer? Who should I be calling?", a: "$5M–$25M specialty manufacturers, construction, and commercial services in the Midwest. Owners who know they're losing money but can't name where. We do a weekly forecast review. We do not do hour-long Monday meetings. If your numbers are honest and trending up, we leave you alone. If they're not, we coach hard." },
   { tag: "Objections", q: 'This sounds too good to be true / why are you paying so much?', a: "Because the math works for everyone. The Diagnostic is $18,000 and we keep $10,000 of it — that funds the operator who actually runs the work. The retainer is $15k/mo and we keep $8k — that funds delivery, software, and overhead. Your $5k + $4k/mo isn't a marketing line — it's what the model can sustain because we don't have a sales floor, an SDR team, or a VP of Sales taking a cut." },
-  { tag: "Personal", q: "Who's Joseph? Who's Brandon?", a: "I'm Brandon — I've operated and sold inside companies in this revenue band for years. Aetheris is built for the rep I wish I'd had a seat at. The IP is owned by CTOguy.ai. We're based out of Indianapolis. You'll have my phone number from day one — I take rep calls before partner calls. If I can't help you close, you don't owe me your time." },
+  { tag: "Personal", q: "Who's Joseph? Who's Braden?", a: "I'm Braden — I've operated and sold inside companies in this revenue band for years. Aetheris is built for the rep I wish I'd had a seat at. The IP is owned by CTOguy.ai. We're based out of Indianapolis. You'll have my phone number from day one — I take rep calls before partner calls. If I can't help you close, you don't owe me your time." },
   { tag: "Tech", q: "What tools do I need?", a: "Laptop, reliable internet, quiet space for calls. Everything else (CRM, leads, scripts, calendar, training, AI coach) is in the portal. We don't ask reps to buy software." },
   { tag: "Pay", q: "1099 or W-2?", a: "1099 contractor. You set your own hours. The portal tracks everything — clock-in, leads worked, commission ledger — so you always know exactly where you stand." },
   { tag: "Process", q: "What's the ramp?", a: "60 days. Most reps hit their stride in week 6-8. The portal has a sales coach, scripts, training modules, and an AI assistant that pulls live company data so you're never flying blind." },
@@ -162,7 +162,7 @@ export const InterviewBriefingPanel: React.FC = () => {
       <Card className="border-amber/40 bg-card/60">
         <CardHeader>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">For Brandon — Interview Kit</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">For Braden — Interview Kit</span>
             <Badge variant="outline" className="text-[10px] border-amber/40 text-amber ml-auto">v1 · Always current</Badge>
           </div>
           <CardTitle className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export const InterviewBriefingPanel: React.FC = () => {
           <div className="rounded-md border border-amber/30 bg-amber/10 p-4 mt-3 flex items-start gap-3">
             <UserIcon className="w-4 h-4 text-amber mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground">
-              <span className="text-foreground font-semibold">Tip for Brandon:</span> the cleanest interviews follow this order — Company open → Systems → Pay → Bonuses → Culture filter → Objections → Close. If you only have 15 minutes, skip Systems and go straight from Pay to Bonuses to Close. The math closes them faster than the tech.
+              <span className="text-foreground font-semibold">Tip for Braden:</span> the cleanest interviews follow this order — Company open → Systems → Pay → Bonuses → Culture filter → Objections → Close. If you only have 15 minutes, skip Systems and go straight from Pay to Bonuses to Close. The math closes them faster than the tech.
             </p>
           </div>
         </CardContent>
@@ -256,7 +256,7 @@ export const InterviewBriefingPanel: React.FC = () => {
             <Badge variant="outline" className="text-[10px] border-amber/40 text-amber ml-auto">{FAQS.length} answers</Badge>
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            The questions every candidate asks. Pre-baked answers Brandon can read or paraphrase. Click to expand, copy if you want it on your phone.
+            The questions every candidate asks. Pre-baked answers Braden can read or paraphrase. Click to expand, copy if you want it on your phone.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">

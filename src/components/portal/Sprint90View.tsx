@@ -74,7 +74,7 @@ export const Sprint90View: React.FC = () => {
                 Day {todayInfo.day} of {todayInfo.total} · Week {todayInfo.week}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Operator math + weekday motion. This is the same plan Joseph and Brandon are running — your daily targets are below.
+                Operator math + weekday motion. This is the same plan Joseph and Braden are running — your daily targets are below.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">

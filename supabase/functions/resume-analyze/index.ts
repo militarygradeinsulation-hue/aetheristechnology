@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
-const ALLOWED_PORTAL_CODES = new Set(["963169"]); // Bradon
+const ALLOWED_PORTAL_CODES = new Set(["963169"]); // Braden
 
 async function authorize(req: Request, secret: string): Promise<boolean> {
   if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return true;
