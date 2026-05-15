@@ -54,6 +54,31 @@ export const AdminLiveEventsPanel: React.FC = () => {
   const [editing, setEditing] = useState<Partial<LiveEvent> | null>(null);
   const [signupsFor, setSignupsFor] = useState<LiveEvent | null>(null);
   const [signups, setSignups] = useState<Signup[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const uploadImage = async (file: File) => {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: 'Image too large', description: 'Max 8MB.', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('event-images').upload(path, file, {
+        cacheControl: '3600', upsert: false, contentType: file.type,
+      });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from('event-images').getPublicUrl(path);
+      setEditing((prev) => prev ? { ...prev, image_url: data.publicUrl } : prev);
+      toast({ title: 'Image uploaded' });
+    } catch (e: any) {
+      toast({ title: 'Upload failed', description: e?.message || String(e), variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
