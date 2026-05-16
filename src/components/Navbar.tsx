@@ -214,6 +214,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           </a>
         </div>
       )}
+
+      <HeartbeatLine />
     </nav>
   );
 };
