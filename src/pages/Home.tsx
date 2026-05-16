@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
-import { MatrixRain } from '@/components/MatrixRain';
+
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { CaseFileCard } from '@/components/CaseFileCard';
