@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { HeartbeatLine } from './HeartbeatLine';
 import aetherisLogo from '@/assets/aetheris-new-logo.png';
 
 interface NavbarProps {
@@ -213,6 +214,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           </a>
         </div>
       )}
+
+      <HeartbeatLine />
     </nav>
   );
 };
