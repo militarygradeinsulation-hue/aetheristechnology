@@ -65,6 +65,7 @@ const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
 const NewsPostPage = lazy(() => import("./pages/NewsPostPage"));
 const CredentialsPage = lazy(() => import("./pages/CredentialsPage"));
 const ImplementationPage = lazy(() => import("./pages/ImplementationPage"));
+const CatalogPage = lazy(() => import("./pages/CatalogPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 
 const queryClient = new QueryClient({
