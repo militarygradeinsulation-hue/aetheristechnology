@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Calendar } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
+import { BOOK_MEETING_URL } from '@/lib/links';
 import aetherisLogo from '@/assets/aetheris-new-logo.png';
 
 interface NavbarProps {
   onContactClick: () => void;
 }
+
+type NavItem = { label: string; href: string; kind?: 'case' };
 
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { trackEvent } = useTrackEvent();
   const navigate = useNavigate();
+  const location = useLocation();
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -24,8 +28,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     if (tapCountRef.current >= 3) {
       e.preventDefault();
       tapCountRef.current = 0;
-      // Land on the staff entry chooser. It clears any stored token and
-      // forces an explicit code entry — no silent re-auth.
       navigate('/staff');
       return;
     }
@@ -35,71 +37,84 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
-    { label: 'Home', href: '/', special: true },
-    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red' },
-    { label: 'Premium Tech Suite', href: '/catalog', tone: 'yellow' },
-    { label: 'Industries', href: '/industries' },
+  // The Leak Audit gets the forensic case-file treatment; everything else is a quiet link.
+  const navItems: NavItem[] = [
+    { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
+    { label: 'Home', href: '/' },
     { label: 'Methodology', href: '/methodology' },
+    { label: 'Premium Tech Suite', href: '/catalog' },
+    { label: 'Industries', href: '/industries' },
     { label: 'About', href: '/about' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers', tone: 'yellow' },
+    { label: 'Careers', href: '/careers' },
   ];
 
-  const location = useLocation();
-  // Bookings are for clients only — never expose the meeting link inside the
-  // careers funnel. Applicants must complete the application + test, not book a call.
   const isCareersContext = location.pathname.startsWith('/careers');
   const showStickyCTA = !isCareersContext;
   const expanded = isHovered || isMobileMenuOpen;
 
+  const isActive = (href: string) =>
+    href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass py-4' : 'bg-transparent py-6'
+        isScrolled
+          ? 'glass py-3 border-b border-amber/15'
+          : 'bg-transparent py-5'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center space-x-3" onClick={handleLogoTap}>
-            <img 
-              src={aetherisLogo} 
-              alt="Aetheris Business Forensics" 
-              className="w-20 h-20 object-contain select-none transition-transform duration-300 ease-out hover:scale-125"
+        <div className="flex items-center gap-10">
+          <Link to="/" className="flex items-center shrink-0" onClick={handleLogoTap}>
+            <img
+              src={aetherisLogo}
+              alt="Aetheris Business Forensics"
+              className="w-16 h-16 object-contain select-none transition-transform duration-300 ease-out hover:scale-110"
               draggable={false}
             />
           </Link>
 
-          <div className="hidden md:flex items-center gap-2">
+          {/* Desktop nav — quiet text rail */}
+          <div className="hidden lg:flex items-center gap-7 flex-1">
             {navItems.map((item) => {
-              const base =
-                'whitespace-nowrap px-4 py-2 rounded-md text-sm font-semibold tracking-wide border transition-all duration-200 shadow-sm hover:-translate-y-0.5 active:translate-y-0';
-              const variant =
-                item.tone === 'red'
-                  ? 'bg-crimson/10 text-crimson border-crimson/40 hover:bg-crimson hover:text-white hover:border-crimson hover:shadow-[0_8px_20px_-8px_hsl(var(--crimson)/0.7)]'
-                  : item.tone === 'yellow'
-                  ? 'bg-yellow-400/10 text-yellow-300 border-yellow-400/40 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 hover:shadow-[0_8px_20px_-8px_rgba(250,204,21,0.7)]'
-                  : item.special
-                  ? 'bg-amber/10 text-amber border-amber/40 hover:bg-amber hover:text-black hover:border-amber hover:shadow-[0_8px_20px_-8px_hsl(var(--amber)/0.7)]'
-                  : 'bg-white/5 text-foreground border-white/10 hover:bg-white/10 hover:border-amber/40 hover:text-amber';
+              const active = isActive(item.href);
+              if (item.kind === 'case') {
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
+                    className="group flex items-center gap-2 pl-2.5 border-l-2 border-amber/70 hover:border-amber transition-colors"
+                  >
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber/80 group-hover:text-amber transition-colors">
+                      Case ·
+                    </span>
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber font-semibold">
+                      Leak Audit
+                    </span>
+                  </Link>
+                );
+              }
               return (
                 <Link
                   key={item.href}
                   to={item.href}
-                  className={`${base} ${variant}`}
                   onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
+                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:bg-amber after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
+                    active
+                      ? 'text-amber after:w-full after:scale-x-100'
+                      : 'text-foreground/75 hover:text-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                  }`}
                 >
                   {item.label}
                 </Link>
@@ -107,41 +122,70 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             })}
           </div>
 
-          <div className="ml-auto hidden md:block" />
+          {/* Single right-aligned premium CTA */}
+          <div className="hidden lg:flex items-center ml-auto shrink-0">
+            <a
+              href={BOOK_MEETING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('book_meeting_click', { location: 'navbar_cta' })}
+              className="group inline-flex items-center gap-2 bg-amber text-background font-bold text-sm tracking-wide px-5 py-2.5 rounded-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-12px_hsl(var(--amber)/0.7)] active:translate-y-0"
+            >
+              <Calendar className="w-4 h-4" />
+              Book Diagnostic
+            </a>
+          </div>
 
           <button
-            className="md:hidden ml-auto text-foreground"
+            className="lg:hidden ml-auto text-foreground p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
+        {/* Mobile sheet — same hierarchy: quiet links + one amber CTA */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`block transition-colors ${
-                  item.tone === 'red'
-                    ? 'text-crimson hover:text-crimson/80 font-semibold'
-                    : item.tone === 'yellow'
-                    ? 'text-yellow-400 hover:text-yellow-300 font-semibold'
-                    : item.special
-                    ? 'text-amber hover:text-amber/80 font-semibold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link to="/contact" onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: 'nav_contact', location: 'navbar_mobile' }); }}>
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Contact Us
-              </Button>
-            </Link>
+          <div className="lg:hidden mt-4 glass border border-amber/15 rounded-lg p-5 space-y-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              if (item.kind === 'case') {
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
+                    className="flex items-center gap-2 py-2.5 pl-3 border-l-2 border-amber/70"
+                  >
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber/80">Case ·</span>
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber font-semibold">Leak Audit</span>
+                  </Link>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
+                  className={`block py-2.5 text-sm font-medium tracking-wide transition-colors ${
+                    active ? 'text-amber' : 'text-foreground/80 hover:text-amber'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            <a
+              href={BOOK_MEETING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { setIsMobileMenuOpen(false); trackEvent('book_meeting_click', { location: 'navbar_mobile_cta' }); }}
+              className="mt-3 flex items-center justify-center gap-2 bg-amber text-background font-bold text-sm tracking-wide px-5 py-3 rounded-md"
+            >
+              <Calendar className="w-4 h-4" />
+              Book Diagnostic
+            </a>
           </div>
         )}
       </div>
@@ -153,7 +197,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
           } px-4 text-center`}
         >
           <a
-            href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
+            href={BOOK_MEETING_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
