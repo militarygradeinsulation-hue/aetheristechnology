@@ -378,10 +378,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds — because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first — your rolodex is an unfair advantage.' },
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence — you bring the voice.' },
-          { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
-        ].map(({ title, desc }) => (
-          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">Profile</p>
+        ].map(({ title, desc }, i) => (
+          <div key={title} className="forensic-tile rounded-xl p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">PROFILE · {String(i+1).padStart(2,'0')}</p>
             <p className="font-semibold text-foreground font-display">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
           </div>
@@ -397,18 +396,18 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           Ground floor of a category that didn't exist 12 months ago.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
-          "Business Forensics" is a brand-new lane — operator-led diagnostics powered by an in-house AI stack. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
+          "Business Forensics" is a brand-new lane — operator-led diagnostics with an in-house tech stack behind them. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { tag: '01', title: 'Untapped Lane', desc: 'No one else is positioning forensics + AI + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is leading with — you walk in already different.' },
+          { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
+          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using — you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
-          { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
+          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring payouts for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
-          <div key={tag} className="premium-tile rounded-xl p-5 border border-border/50">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">{tag}</p>
+          <div key={tag} className="forensic-tile rounded-xl p-5">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">// {tag}</p>
             <p className="font-semibold text-foreground font-display mt-2">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
           </div>
