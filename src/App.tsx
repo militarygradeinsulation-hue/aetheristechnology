@@ -110,6 +110,7 @@ const App = () => (
               path="/*"
               element={
                 <AuthProvider>
+                  <GlobalMatrixOverlay />
                   <PageViewTracker />
                   <RetargetingPixel />
                   <Suspense fallback={<RouteFallback />}>
