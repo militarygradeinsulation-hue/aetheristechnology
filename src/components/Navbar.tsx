@@ -75,7 +75,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-10">
+        <div className="flex items-center gap-3 lg:gap-10">
+          <button
+            className="lg:hidden text-foreground p-2 -ml-2 order-first"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
           <Link to="/" className="flex items-center shrink-0" onClick={handleLogoTap}>
             <img
               src={aetherisLogo}
@@ -141,13 +149,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             </a>
           </div>
 
-          <button
-            className="lg:hidden ml-auto text-foreground p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
 
         {/* Mobile sheet — same hierarchy: quiet links + one amber CTA */}
