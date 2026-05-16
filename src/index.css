@@ -679,35 +679,40 @@
   }
 }
 
+/* Heartbeat: travel handles horizontal motion on the wrapper */
 @keyframes heartbeat-travel {
   0%   { transform: translate(100vw, -50%); opacity: 0; }
-  15%  { opacity: 1; }
-  100% { transform: translate(-140px, -50%); opacity: 1; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate(-140px, -50%); opacity: 0; }
 }
 
-/* Real heartbeat rhythm: lub-dub-pause */
+/* Heartbeat: lub-dub thump scales and glows the SVG itself */
 @keyframes heartbeat-thump {
-  0%, 100% { filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); transform: translateY(-50%) scaleY(1); }
-  8%       { filter: drop-shadow(0 0 8px hsl(36 90% 55% / 1)); transform: translateY(-50%) scaleY(1.55); }
-  16%      { filter: drop-shadow(0 0 2px hsl(36 90% 55% / 0.5)); transform: translateY(-50%) scaleY(1); }
-  24%      { filter: drop-shadow(0 0 6px hsl(36 90% 55% / 0.9)); transform: translateY(-50%) scaleY(1.35); }
-  32%      { filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); transform: translateY(-50%) scaleY(1); }
+  0%, 100% { transform: scaleY(1);    filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); }
+  8%       { transform: scaleY(1.7);  filter: drop-shadow(0 0 10px hsl(36 90% 55% / 1)); }
+  16%      { transform: scaleY(1);    filter: drop-shadow(0 0 2px hsl(36 90% 55% / 0.5)); }
+  24%      { transform: scaleY(1.4);  filter: drop-shadow(0 0 7px hsl(36 90% 55% / 0.9)); }
+  32%      { transform: scaleY(1);    filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); }
 }
 
 @keyframes baseline-pulse {
-  0%, 100% { opacity: 0.18; }
-  8%       { opacity: 0.7; }
+  0%, 100% { opacity: 0.15; }
+  8%       { opacity: 0.75; }
   16%      { opacity: 0.25; }
-  24%      { opacity: 0.55; }
-  32%      { opacity: 0.2; }
+  24%      { opacity: 0.6; }
+  32%      { opacity: 0.18; }
 }
 
-.heartbeat-pulse {
-  animation:
-    heartbeat-travel 7s linear infinite,
-    heartbeat-thump 1.2s ease-in-out infinite;
+.heartbeat-travel {
+  animation: heartbeat-travel 7s linear infinite;
+  will-change: transform, opacity;
+}
+
+.heartbeat-thump {
   transform-origin: center;
-  will-change: transform, opacity, filter;
+  animation: heartbeat-thump 1.2s ease-in-out infinite;
+  will-change: transform, filter;
 }
 
 .heartbeat-baseline {
