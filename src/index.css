@@ -679,18 +679,18 @@
   }
 }
 
-@keyframes heartbeat-scroll {
-  from { background-position: 0 center; }
-  to { background-position: -200px center; }
+@keyframes heartbeat-travel {
+  0%   { transform: translate(100vw, -50%); opacity: 0; }
+  15%  { opacity: 1; }
+  50%  { transform: translate(calc(50vw - 70px), -50%); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate(-140px, -50%); opacity: 0; }
 }
 
-.heartbeat-strip {
-  background-repeat: repeat-x;
-  background-size: 200px 12px;
-  background-position: 0 center;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='24' viewBox='0 0 200 24' fill='none'><path d='M0 12 L40 12 L48 12 L54 4 L60 20 L66 6 L72 14 L80 12 L120 12 L128 12 L134 2 L140 22 L146 8 L152 14 L160 12 L200 12' stroke='%23B07020' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  animation: heartbeat-scroll 2.4s linear infinite;
-  will-change: background-position;
+.heartbeat-pulse {
+  animation: heartbeat-travel 6s linear infinite;
+  filter: drop-shadow(0 0 3px hsl(36 90% 55% / 0.55));
+  will-change: transform, opacity;
 }
 
 /* Global magnifying glass cursor */
