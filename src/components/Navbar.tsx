@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
     { label: 'Home', href: '/', special: true },
     { label: 'The Leak Audit', href: '/diagnostic', tone: 'red' },
-    { label: 'Catalog', href: '/catalog', tone: 'yellow' },
+    { label: 'Premium Tech Suite', href: '/catalog', tone: 'yellow' },
     { label: 'Industries', href: '/industries' },
     { label: 'Methodology', href: '/methodology' },
     { label: 'About', href: '/about' },
