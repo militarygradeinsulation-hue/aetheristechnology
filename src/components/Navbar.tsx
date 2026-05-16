@@ -11,7 +11,7 @@ interface NavbarProps {
   onContactClick: () => void;
 }
 
-type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean };
+type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean; blood?: boolean };
 
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   // The Leak Audit gets the forensic case-file treatment; everything else is a quiet link.
   const navItems: NavItem[] = [
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
-    { label: 'Home', href: '/' },
+    { label: 'Home', href: '/', blood: true },
     { label: 'Methodology', href: '/methodology' },
     { label: 'Premium Tech Suite', href: '/catalog', accent: true },
     { label: 'Industries', href: '/industries' },
@@ -111,12 +111,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
-                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:bg-amber after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
-                    active
-                      ? 'text-amber after:w-full after:scale-x-100'
+                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
+                    item.blood
+                      ? `text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold after:bg-[hsl(0_75%_32%)] after:w-full ${active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`
+                      : active
+                      ? 'text-amber after:bg-amber after:w-full after:scale-x-100'
                       : item.accent
-                      ? 'text-amber/90 hover:text-amber font-semibold after:w-full after:scale-x-0 hover:after:scale-x-100'
-                      : 'text-foreground/75 hover:text-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      ? 'text-amber/90 hover:text-amber font-semibold after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      : 'text-foreground/75 hover:text-amber after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
                   }`}
                 >
                   {item.label}
@@ -172,7 +174,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   to={item.href}
                   onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
                   className={`block py-2.5 text-sm tracking-wide transition-colors ${
-                    active
+                    item.blood
+                      ? 'text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold'
+                      : active
                       ? 'text-amber font-semibold'
                       : item.accent
                       ? 'text-amber/90 hover:text-amber font-semibold'
