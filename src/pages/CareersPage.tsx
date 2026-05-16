@@ -237,7 +237,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: DollarSign, title: '15% Flat Commission — Recurring', desc: 'Every closed deal pays you 15%. Subscriptions and Fractional retainers pay you 15% every single month, for the life of the client. Two retainers held 12 months = $21,240 in residual.' },
           { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led — You Don\'t Need to Be Technical', desc: 'You don\'t deliver. You don\'t implement. You sell the diagnosis; Joseph and the engineering team do the surgery. Stay in your lane and earn.' },
-          { icon: Rocket, title: 'AI-Powered Sales Stack', desc: 'Built-in AI Sales Coach, Forecast Center, Lead Pool, Business Post Analyst, and 9 closing tools — all free, all inside your portal. No software to buy.' },
+          { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: GraduationCap, title: 'Real Training, Not "Watch This Webinar"', desc: 'In-portal training modules, MCQ + AI-graded scoring, a sales playbook PDF, daily hustle goals, and direct line to the operator. Ramp fast or get cut. We invest in winners.' },
           { icon: Users, title: 'Partner Track — Build a Team, Earn the Override', desc: 'Top reps get promoted to Partner. You bring on reps under your code and earn a 15% override on every sale they close — same recurring math. Build a book of business.' },
           { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. One math equation. The split is locked at 70/15/15 — company / rep / partner. We don\'t move the goalposts.' },
@@ -323,7 +323,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { tag: '01', title: 'Untapped Lane', desc: 'No one else is positioning forensics + AI + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'AI Tailwind', desc: 'Owners are finally curious about AI but terrified to deploy it. We give them a diagnostic first — that\'s the wedge nobody else has built.' },
+          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is leading with — you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
           { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
@@ -367,7 +367,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             {[
               'You need a base salary to feel safe.',
               'You won\'t pick up the phone or message a stranger on LinkedIn.',
-              'You think AI is "just a fad" — we run on it.',
+              'You won\'t pick up the phone or send a real follow-up after the first "not right now."',
               'You want to coast. There\'s no coasting in commission.',
               'You can\'t pass a 20-question reading-comprehension test.',
             ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
