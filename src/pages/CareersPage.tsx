@@ -226,6 +226,108 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </CardContent>
     </Card>
 
+    {/* FLAGSHIP COMMISSIONS + BONUSES */}
+    <div id="earnings" className="mb-14 relative rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.07] via-card/40 to-card/40 p-6 md:p-10 backdrop-blur overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-[0.08] pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(245,166,35,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,1) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
+      <div className="relative">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Payout · Flagship Tier</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-1">
+              Real numbers. <span className="text-amber">Locked splits.</span>
+            </h2>
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-amber/30 rounded px-2 py-1">
+            FIXED-DOLLAR · NO CLAWBACK · 7-DAY PAYOUT
+          </span>
+        </div>
+
+        {/* Flagship product cards */}
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
+            <p className="font-display text-xl text-foreground mt-1">$18,000 Forensic Diagnostic</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
+                <p className="font-display text-2xl text-amber font-bold">$5,000</p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
+                <p className="font-display text-2xl text-foreground">$3,000</p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
+                <p className="font-display text-2xl text-foreground">$10,000</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
+            <p className="font-display text-xl text-foreground mt-1">$15,000/mo Operator Retainer</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
+                <p className="font-display text-2xl text-amber font-bold">$4,000<span className="text-xs text-amber/70">/mo</span></p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
+                <p className="font-display text-2xl text-foreground">$3,000<span className="text-xs text-muted-foreground">/mo</span></p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
+                <p className="font-display text-2xl text-foreground">$8,000<span className="text-xs text-muted-foreground">/mo</span></p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Held 12 months = <strong className="text-amber">$48,000</strong> in your pocket from one client.</p>
+          </div>
+        </div>
+
+        {/* BONUS BANDS */}
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Volume Bonus</p>
+            <p className="font-display text-foreground">Stack closes in a single month.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>2 closes</span><span className="text-amber">+$1,000</span></li>
+              <li className="flex justify-between"><span>3 closes</span><span className="text-amber">+$2,500</span></li>
+              <li className="flex justify-between"><span>5 closes</span><span className="text-amber">+$5,000</span></li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Retention Bonus</p>
+            <p className="font-display text-foreground">Get paid when your clients stay.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>3 months</span><span className="text-amber">+$1,000</span></li>
+              <li className="flex justify-between"><span>6 months</span><span className="text-amber">+$2,500</span></li>
+              <li className="flex justify-between"><span>12 months</span><span className="text-amber">+$5,000</span></li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Referral Bonus</p>
+            <p className="font-display text-foreground">Bring in another closer.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>Onboard</span><span className="text-amber">+$500</span></li>
+              <li className="flex justify-between"><span>Their 1st close</span><span className="text-amber">+$7,000</span></li>
+              <li className="flex justify-between"><span>Override / sale</span><span className="text-amber">+$500 · 12 mo</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
+          // Catalog products pay the standard 15% — flagships are the volume game.
+        </p>
+      </div>
+    </div>
+
     {/* WHY OPERATORS CHOOSE US */}
     <div id="why-us" className="mb-14">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
