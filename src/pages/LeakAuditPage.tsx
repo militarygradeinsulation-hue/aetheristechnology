@@ -237,6 +237,16 @@ const LeakAuditPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
         <main className="pt-28 pb-16 px-4">
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="glass rounded-sm border border-amber/40 px-4 py-3 text-center">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                Proprietary · Built In-House
+              </div>
+              <p className="text-sm text-foreground/90 leading-snug">
+                All technology on this site is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
+              </p>
+            </div>
+          </div>
           <div className="max-w-3xl mx-auto">
             {/* INTAKE */}
             {step === 'intake' && (
