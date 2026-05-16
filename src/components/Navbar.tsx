@@ -11,7 +11,7 @@ interface NavbarProps {
   onContactClick: () => void;
 }
 
-type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean };
+type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean; blood?: boolean };
 
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
