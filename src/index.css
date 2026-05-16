@@ -681,7 +681,13 @@
 
 @keyframes heartbeat-scroll {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-200px); }
+}
+
+.heartbeat-track {
+  width: 800px;
+  animation: heartbeat-scroll 3.5s linear infinite;
+  will-change: transform;
 }
 
 /* Global magnifying glass cursor */
