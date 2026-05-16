@@ -47,13 +47,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
     { label: 'Home', href: '/' },
     { label: 'Methodology', href: '/methodology' },
-    { label: 'Premium Tech Suite', href: '/catalog' },
+    { label: 'Premium Tech Suite', href: '/catalog', accent: true },
     { label: 'Industries', href: '/industries' },
     { label: 'About', href: '/about' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers' },
+    { label: 'Careers', href: '/careers', accent: true },
   ];
 
   const isCareersContext = location.pathname.startsWith('/careers');
