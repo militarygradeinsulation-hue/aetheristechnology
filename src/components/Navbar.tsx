@@ -10,7 +10,7 @@ interface NavbarProps {
   onContactClick: () => void;
 }
 
-type NavItem = { label: string; href: string; kind?: 'case' };
+type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean };
 
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,13 +47,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
     { label: 'Home', href: '/' },
     { label: 'Methodology', href: '/methodology' },
-    { label: 'Premium Tech Suite', href: '/catalog' },
+    { label: 'Premium Tech Suite', href: '/catalog', accent: true },
     { label: 'Industries', href: '/industries' },
     { label: 'About', href: '/about' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers' },
+    { label: 'Careers', href: '/careers', accent: true },
   ];
 
   const isCareersContext = location.pathname.startsWith('/careers');
@@ -113,6 +113,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:bg-amber after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
                     active
                       ? 'text-amber after:w-full after:scale-x-100'
+                      : item.accent
+                      ? 'text-amber/90 hover:text-amber font-semibold after:w-full after:scale-x-0 hover:after:scale-x-100'
                       : 'text-foreground/75 hover:text-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
                   }`}
                 >
@@ -168,8 +170,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
-                  className={`block py-2.5 text-sm font-medium tracking-wide transition-colors ${
-                    active ? 'text-amber' : 'text-foreground/80 hover:text-amber'
+                  className={`block py-2.5 text-sm tracking-wide transition-colors ${
+                    active
+                      ? 'text-amber font-semibold'
+                      : item.accent
+                      ? 'text-amber/90 hover:text-amber font-semibold'
+                      : 'text-foreground/80 hover:text-amber font-medium'
                   }`}
                 >
                   {item.label}
