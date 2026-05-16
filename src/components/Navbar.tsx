@@ -111,12 +111,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
-                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:bg-amber after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
-                    active
-                      ? 'text-amber after:w-full after:scale-x-100'
+                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
+                    item.blood
+                      ? `text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold after:bg-[hsl(0_75%_32%)] after:w-full ${active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`
+                      : active
+                      ? 'text-amber after:bg-amber after:w-full after:scale-x-100'
                       : item.accent
-                      ? 'text-amber/90 hover:text-amber font-semibold after:w-full after:scale-x-0 hover:after:scale-x-100'
-                      : 'text-foreground/75 hover:text-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      ? 'text-amber/90 hover:text-amber font-semibold after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      : 'text-foreground/75 hover:text-amber after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
                   }`}
                 >
                   {item.label}
