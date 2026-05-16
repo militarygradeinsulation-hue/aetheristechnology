@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
+import { MatrixRain } from '@/components/MatrixRain';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { CaseFileCard } from '@/components/CaseFileCard';
@@ -68,6 +69,10 @@ const Home = () => {
         }}
       />
       <Background />
+      {/* Barely-visible amber matrix rain layered on top of particle field */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1, opacity: 0.18, mixBlendMode: 'screen' }}>
+        <MatrixRain color="hsl(36 90% 55%)" fontSize={14} speed={0.25} density={0.45} />
+      </div>
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
