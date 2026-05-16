@@ -130,7 +130,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 }) => (
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     {/* HERO */}
-    <div className="relative rounded-2xl overflow-hidden border border-amber/20 mb-12">
+    <div className="relative rounded-2xl overflow-hidden border border-amber/30 mb-12 shadow-[0_0_60px_-20px_rgba(245,166,35,0.35)]">
       <img
         src={careersHero}
         alt="Aetheris business forensics operator at work — dark room, amber data, dollar-leak signals"
@@ -139,16 +139,30 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         className="w-full h-[420px] md:h-[520px] object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
+      {/* Futuristic grid + scanline overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.18] mix-blend-screen pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(245,166,35,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,0.5) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)',
+        }}
+      />
+      <div className="absolute top-4 right-4 font-mono text-[10px] tracking-[0.3em] text-amber/70 uppercase">
+        CASE-FILE · OPS/2026 · INDY-01
+      </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber mb-3">
-          Now Hiring · Indianapolis & Remote · Commission-Only
+          Now Hiring · Indianapolis &amp; Remote · Commission-Only
         </p>
         <h1 className="text-4xl md:text-6xl font-bold text-foreground font-display max-w-3xl leading-tight">
           Build a career hunting <span className="text-amber">invisible revenue leaks</span>.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-4">
           Every business in America is leaking 8–15% of revenue and can't see it from the inside.
-          You bring the flashlight. We deliver the fix. You earn <strong className="text-foreground">15% of every dollar — for life of the client.</strong>
+          You bring the flashlight. We deliver the fix. One flagship close pays you <strong className="text-foreground">$5,000 cash</strong> — and a single retainer pays <strong className="text-foreground">$4,000 every month it stays open</strong>.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
@@ -156,9 +170,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
               Take the Qualifying Test →
             </Button>
           </a>
-          <a href="#why-us">
+          <a href="#earnings">
             <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-              Why Operators Choose Us
+              See the Numbers
             </Button>
           </a>
         </div>
