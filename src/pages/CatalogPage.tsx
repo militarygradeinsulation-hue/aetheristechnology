@@ -12,11 +12,11 @@ const CatalogPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Catalog & Pricing — Tools, Packages & Monthly Plans | Aetheris"
-        description="Browse every Aetheris package: one-time tools, monthly subscriptions, and mix-and-match bundles. Thumbnails, pricing, and instant checkout."
+        title="Premium Tech Suite — Tools, Packages & Monthly Plans | Aetheris"
+        description="Browse the Aetheris Premium Tech Suite: one-time tools, monthly subscriptions, and mix-and-match bundles. Thumbnails, pricing, and instant checkout."
         path="/catalog"
-        keywords="aetheris catalog, business tools pricing, monthly subscription, mix and match, sales tools, CRM tools"
-        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Catalog', path: '/catalog' }]}
+        keywords="aetheris premium tech suite, business tools pricing, monthly subscription, mix and match, sales tools, CRM tools"
+        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Premium Tech Suite', path: '/catalog' }]}
       />
       <Background />
       <div className="relative z-10">
@@ -24,7 +24,7 @@ const CatalogPage: React.FC = () => {
         <main className="pt-28">
           <div className="px-4 max-w-7xl mx-auto text-center mb-8">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Full Catalog · One-time + Monthly
+              Premium Tech Suite · One-time + Monthly
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
               Every tool, every package, every price.
