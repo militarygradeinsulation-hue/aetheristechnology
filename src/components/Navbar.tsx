@@ -170,8 +170,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
-                  className={`block py-2.5 text-sm font-medium tracking-wide transition-colors ${
-                    active ? 'text-amber' : 'text-foreground/80 hover:text-amber'
+                  className={`block py-2.5 text-sm tracking-wide transition-colors ${
+                    active
+                      ? 'text-amber font-semibold'
+                      : item.accent
+                      ? 'text-amber/90 hover:text-amber font-semibold'
+                      : 'text-foreground/80 hover:text-amber font-medium'
                   }`}
                 >
                   {item.label}
