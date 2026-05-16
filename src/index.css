@@ -682,15 +682,37 @@
 @keyframes heartbeat-travel {
   0%   { transform: translate(100vw, -50%); opacity: 0; }
   15%  { opacity: 1; }
-  50%  { transform: translate(calc(50vw - 70px), -50%); opacity: 1; }
-  85%  { opacity: 1; }
-  100% { transform: translate(-140px, -50%); opacity: 0; }
+  100% { transform: translate(-140px, -50%); opacity: 1; }
+}
+
+/* Real heartbeat rhythm: lub-dub-pause */
+@keyframes heartbeat-thump {
+  0%, 100% { filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); transform: translateY(-50%) scaleY(1); }
+  8%       { filter: drop-shadow(0 0 8px hsl(36 90% 55% / 1)); transform: translateY(-50%) scaleY(1.55); }
+  16%      { filter: drop-shadow(0 0 2px hsl(36 90% 55% / 0.5)); transform: translateY(-50%) scaleY(1); }
+  24%      { filter: drop-shadow(0 0 6px hsl(36 90% 55% / 0.9)); transform: translateY(-50%) scaleY(1.35); }
+  32%      { filter: drop-shadow(0 0 1px hsl(36 90% 55% / 0.4)); transform: translateY(-50%) scaleY(1); }
+}
+
+@keyframes baseline-pulse {
+  0%, 100% { opacity: 0.18; }
+  8%       { opacity: 0.7; }
+  16%      { opacity: 0.25; }
+  24%      { opacity: 0.55; }
+  32%      { opacity: 0.2; }
 }
 
 .heartbeat-pulse {
-  animation: heartbeat-travel 6s linear infinite;
-  filter: drop-shadow(0 0 3px hsl(36 90% 55% / 0.55));
-  will-change: transform, opacity;
+  animation:
+    heartbeat-travel 7s linear infinite,
+    heartbeat-thump 1.2s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+}
+
+.heartbeat-baseline {
+  animation: baseline-pulse 1.2s ease-in-out infinite;
+  will-change: opacity;
 }
 
 /* Global magnifying glass cursor */
