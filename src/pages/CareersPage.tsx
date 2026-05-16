@@ -200,16 +200,16 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
     </div>
 
     {/* QUICK STATS */}
-
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
       {[
-        { stat: '15%', label: 'Flat commission, recurring' },
+        { stat: '$5K', label: 'Per flagship close, flat' },
+        { stat: '$4K/mo', label: 'Recurring retainer cut' },
         { stat: '7d', label: 'Pay timeline post-clearance' },
-        { stat: '$885/mo', label: 'Per Fractional retainer, residual' },
-        { stat: '0', label: 'Caps. Clawbacks. Goalposts moved.' },
-      ].map((s) => (
-        <div key={s.label} className="premium-tile rounded-xl p-5 text-center border border-amber/20">
-          <p className="font-display text-3xl md:text-4xl text-amber font-bold">{s.stat}</p>
+        { stat: '0', label: 'Caps · clawbacks · ceilings' },
+      ].map((s, i) => (
+        <div key={s.label} className="forensic-tile rounded-xl p-5 text-center">
+          <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase">// stat_{String(i+1).padStart(2,'0')}</p>
+          <p className="font-display text-3xl md:text-4xl text-amber font-bold mt-1">{s.stat}</p>
           <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
         </div>
       ))}
@@ -317,21 +317,20 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: DollarSign, title: '15% Flat Commission — Recurring', desc: 'Every closed deal pays you 15%. Subscriptions and Fractional retainers pay you 15% every single month, for the life of the client. Two retainers held 12 months = $21,240 in residual.' },
           { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
-          { icon: Brain, title: 'Operator-Led — You Don\'t Need to Be Technical', desc: 'You don\'t deliver. You don\'t implement. You sell the diagnosis; Joseph and the engineering team do the surgery. Stay in your lane and earn.' },
-          { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
-          { icon: GraduationCap, title: 'Real Training, Not "Watch This Webinar"', desc: 'In-portal training modules, MCQ + AI-graded scoring, a sales playbook PDF, daily hustle goals, and direct line to the operator. Ramp fast or get cut. We invest in winners.' },
-          { icon: Users, title: 'Partner Track — Build a Team, Earn the Override', desc: 'Top reps get promoted to Partner. You bring on reps under your code and earn a 15% override on every sale they close — same recurring math. Build a book of business.' },
-          { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. You close it, you get paid — and you keep getting paid as long as the client stays. We don\'t move the goalposts.' },
+          { icon: Brain, title: 'Operator-Led — You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
+          { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
+          { icon: Users, title: 'Partner Track — Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
           { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
-        ].map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="premium-tile rounded-xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
+          { icon: GraduationCap, title: 'Real Ramp, Not "Watch This Webinar"', desc: 'Onboarding playbook, daily hustle goals, in-portal training with scoring, and direct coaching — all aimed at your first close in week 1. We invest in winners.' },
+        ].map(({ icon: Icon, title, desc }, i) => (
+          <div key={title} className="forensic-tile rounded-xl p-6">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-lg bg-amber/15 border border-amber/30 flex items-center justify-center flex-shrink-0">
+              <div className="w-11 h-11 rounded-lg bg-amber/15 border border-amber/40 flex items-center justify-center flex-shrink-0">
                 <Icon className="w-5 h-5 text-amber" />
               </div>
               <div>
+                <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-1">// pt_{String(i+1).padStart(2,'0')}</p>
                 <h3 className="font-semibold text-foreground font-display text-lg">{title}</h3>
                 <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
               </div>
@@ -347,18 +346,16 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
         Built for closers. Run on your terms.
       </h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { icon: Clock, title: 'Set Your Own Hours', desc: 'Built-in time clock if you want to track. Otherwise, you\'re your own boss. Results matter, not the calendar.' },
+          { icon: Clock, title: 'Set Your Own Hours', desc: 'Built-in time clock if you want to track. Otherwise you\'re your own boss. Results matter, not the calendar.' },
           { icon: MapPin, title: 'Remote-First, Indy-Loved', desc: 'Headquartered in Indianapolis. Reps welcome anywhere in the US. Boots-on-ground in Indy = priority lead routing.' },
           { icon: Shield, title: 'No Cold-Call Quotas', desc: 'No "smile and dial" KPIs. Sell how you sell — LinkedIn, email, in-person, referrals. Whatever works.' },
-          { icon: Brain, title: 'Free Access to All Tools', desc: 'Free Leak Audit, Website Scanner, Diagnostic Quiz, Sales Scripts, Follow-Up Plans, and 5 more — all available to send prospects or use yourself.' },
-          { icon: Rocket, title: 'Fast Ramp Path', desc: 'Onboarding playbook, daily hustle goals, a live company calendar, and direct operator coaching — all aimed at your first close in week 1.' },
-          { icon: Trophy, title: 'Promotion to Partner', desc: 'Hit consistent numbers, get promoted. Partner status = recruit reps, earn overrides, get a seat at the strategy table.' },
-        ].map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
+        ].map(({ icon: Icon, title, desc }, i) => (
+          <div key={title} className="forensic-tile rounded-xl p-5">
+            <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-2">// perk_{String(i+1).padStart(2,'0')}</p>
             <Icon className="w-5 h-5 text-amber mb-3" />
-            <p className="font-semibold text-foreground">{title}</p>
+            <p className="font-semibold text-foreground font-display">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5">{desc}</p>
           </div>
         ))}
@@ -381,10 +378,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds — because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first — your rolodex is an unfair advantage.' },
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence — you bring the voice.' },
-          { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
-        ].map(({ title, desc }) => (
-          <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">Profile</p>
+        ].map(({ title, desc }, i) => (
+          <div key={title} className="forensic-tile rounded-xl p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">PROFILE · {String(i+1).padStart(2,'0')}</p>
             <p className="font-semibold text-foreground font-display">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
           </div>
@@ -400,18 +396,18 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           Ground floor of a category that didn't exist 12 months ago.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
-          "Business Forensics" is a brand-new lane — operator-led diagnostics powered by an in-house AI stack. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
+          "Business Forensics" is a brand-new lane — operator-led diagnostics with an in-house tech stack behind them. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { tag: '01', title: 'Untapped Lane', desc: 'No one else is positioning forensics + AI + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is leading with — you walk in already different.' },
+          { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
+          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using — you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
-          { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
+          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring payouts for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
-          <div key={tag} className="premium-tile rounded-xl p-5 border border-border/50">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">{tag}</p>
+          <div key={tag} className="forensic-tile rounded-xl p-5">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">// {tag}</p>
             <p className="font-semibold text-foreground font-display mt-2">{title}</p>
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
           </div>

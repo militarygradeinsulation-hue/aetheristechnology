@@ -427,6 +427,51 @@
       z-index: 1;
     }
 
+    /* Forensic tile — futuristic case-file aesthetic */
+    .forensic-tile {
+      position: relative;
+      background:
+        linear-gradient(135deg, hsl(var(--card) / 0.7), hsl(var(--card) / 0.35));
+      border: 1px solid hsl(var(--amber) / 0.22);
+      backdrop-filter: blur(8px);
+      transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .forensic-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(hsl(var(--amber) / 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, hsl(var(--amber) / 0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse at 100% 0%, black 0%, transparent 65%);
+      -webkit-mask-image: radial-gradient(ellipse at 100% 0%, black 0%, transparent 65%);
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .forensic-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(to right, hsl(var(--amber) / 0.9), hsl(var(--amber) / 0.9)) top left / 14px 1px no-repeat,
+        linear-gradient(to bottom, hsl(var(--amber) / 0.9), hsl(var(--amber) / 0.9)) top left / 1px 14px no-repeat,
+        linear-gradient(to right, hsl(var(--amber) / 0.9), hsl(var(--amber) / 0.9)) bottom right / 14px 1px no-repeat,
+        linear-gradient(to bottom, hsl(var(--amber) / 0.9), hsl(var(--amber) / 0.9)) bottom right / 1px 14px no-repeat;
+      opacity: 0.7;
+    }
+    .forensic-tile:hover {
+      border-color: hsl(var(--amber) / 0.55);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px -20px hsl(var(--amber) / 0.35);
+    }
+    .forensic-tile > * { position: relative; z-index: 1; }
+
     /* Thumb frame — for image thumbnails inside cards */
     .thumb-frame {
       position: relative;
