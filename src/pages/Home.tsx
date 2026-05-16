@@ -69,10 +69,6 @@ const Home = () => {
         }}
       />
       <Background />
-      {/* Barely-visible amber matrix rain layered on top of particle field */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1, opacity: 0.1, mixBlendMode: 'screen' }}>
-        <MatrixRain color="hsl(36 90% 55%)" fontSize={14} speed={0.12} density={0.3} />
-      </div>
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
