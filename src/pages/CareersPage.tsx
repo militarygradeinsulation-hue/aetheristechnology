@@ -241,7 +241,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Payout · Flagship Tier</p>
             <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-1">
-              Real numbers. <span className="text-amber">Locked splits.</span>
+              Real numbers. <span className="text-amber">Real payouts.</span>
             </h2>
           </div>
           <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-amber/30 rounded px-2 py-1">
@@ -251,43 +251,24 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 
         {/* Flagship product cards */}
         <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
-            <p className="font-display text-xl text-foreground mt-1">$18,000 Forensic Diagnostic</p>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
-                <p className="font-display text-2xl text-amber font-bold">$5,000</p>
-              </div>
-              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
-                <p className="font-display text-2xl text-foreground">$3,000</p>
-              </div>
-              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
-                <p className="font-display text-2xl text-foreground">$10,000</p>
-              </div>
+            <p className="font-display text-xl text-foreground mt-1">Forensic Diagnostic</p>
+            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
+              <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
+              <p className="text-xs text-muted-foreground mt-2">Paid within 7 days of client clearance.</p>
             </div>
           </div>
 
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
-            <p className="font-display text-xl text-foreground mt-1">$15,000/mo Operator Retainer</p>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
-                <p className="font-display text-2xl text-amber font-bold">$4,000<span className="text-xs text-amber/70">/mo</span></p>
-              </div>
-              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
-                <p className="font-display text-2xl text-foreground">$3,000<span className="text-xs text-muted-foreground">/mo</span></p>
-              </div>
-              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
-                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
-                <p className="font-display text-2xl text-foreground">$8,000<span className="text-xs text-muted-foreground">/mo</span></p>
-              </div>
+            <p className="font-display text-xl text-foreground mt-1">Operator Retainer</p>
+            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
+              <p className="font-display text-5xl text-amber font-bold mt-1">$4,000<span className="text-lg text-amber/70">/mo</span></p>
+              <p className="text-xs text-muted-foreground mt-2">Held 12 months = <strong className="text-amber">$48,000</strong> from one client.</p>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">Held 12 months = <strong className="text-amber">$48,000</strong> in your pocket from one client.</p>
           </div>
         </div>
 
@@ -342,7 +323,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: GraduationCap, title: 'Real Training, Not "Watch This Webinar"', desc: 'In-portal training modules, MCQ + AI-graded scoring, a sales playbook PDF, daily hustle goals, and direct line to the operator. Ramp fast or get cut. We invest in winners.' },
           { icon: Users, title: 'Partner Track — Build a Team, Earn the Override', desc: 'Top reps get promoted to Partner. You bring on reps under your code and earn a 15% override on every sale they close — same recurring math. Build a book of business.' },
-          { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. One math equation. The split is locked at 70/15/15 — company / rep / partner. We don\'t move the goalposts.' },
+          { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. You close it, you get paid — and you keep getting paid as long as the client stays. We don\'t move the goalposts.' },
           { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
         ].map(({ icon: Icon, title, desc }) => (
           <div key={title} className="premium-tile rounded-xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
@@ -569,7 +550,7 @@ const PlaybookSection = () => (
             Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code — including recurring monthly invoices for the life of the subscription.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            One rule. No tiers. No caps. No clawbacks on completed work. The split is locked: 70% company / 15% rep / 15% partner override. Easy math on every product, every time.
+            One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time.
           </p>
         </div>
 
