@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
-                  className={`relative whitespace-nowrap text-sm font-medium tracking-wide transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
+                  className={`relative whitespace-nowrap font-edge uppercase text-[15px] tracking-[0.14em] transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
                     item.blood
                       ? `text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold after:bg-[hsl(0_75%_32%)] after:w-full ${active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`
                       : active
@@ -173,7 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
-                  className={`block py-2.5 text-sm tracking-wide transition-colors ${
+                  className={`block py-2.5 font-edge uppercase text-base tracking-[0.14em] transition-colors ${
                     item.blood
                       ? 'text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold'
                       : active

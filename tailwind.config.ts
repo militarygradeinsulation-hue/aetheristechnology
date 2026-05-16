@@ -18,6 +18,7 @@ export default {
         body: ["Inter", "sans-serif"],
         forensic: ["Fraunces", "Georgia", "serif"],
         case: ["JetBrains Mono", "ui-monospace", "monospace"],
+        edge: ["Bebas Neue", "Space Grotesk", "Impact", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
