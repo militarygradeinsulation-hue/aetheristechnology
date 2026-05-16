@@ -130,7 +130,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 }) => (
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     {/* HERO */}
-    <div className="relative rounded-2xl overflow-hidden border border-amber/20 mb-12">
+    <div className="relative rounded-2xl overflow-hidden border border-amber/30 mb-12 shadow-[0_0_60px_-20px_rgba(245,166,35,0.35)]">
       <img
         src={careersHero}
         alt="Aetheris business forensics operator at work — dark room, amber data, dollar-leak signals"
@@ -139,16 +139,30 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         className="w-full h-[420px] md:h-[520px] object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
+      {/* Futuristic grid + scanline overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.18] mix-blend-screen pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(245,166,35,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,0.5) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)',
+        }}
+      />
+      <div className="absolute top-4 right-4 font-mono text-[10px] tracking-[0.3em] text-amber/70 uppercase">
+        CASE-FILE · OPS/2026 · INDY-01
+      </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber mb-3">
-          Now Hiring · Indianapolis & Remote · Commission-Only
+          Now Hiring · Indianapolis &amp; Remote · Commission-Only
         </p>
         <h1 className="text-4xl md:text-6xl font-bold text-foreground font-display max-w-3xl leading-tight">
           Build a career hunting <span className="text-amber">invisible revenue leaks</span>.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-4">
           Every business in America is leaking 8–15% of revenue and can't see it from the inside.
-          You bring the flashlight. We deliver the fix. You earn <strong className="text-foreground">15% of every dollar — for life of the client.</strong>
+          You bring the flashlight. We deliver the fix. One flagship close pays you <strong className="text-foreground">$5,000 cash</strong> — and a single retainer pays <strong className="text-foreground">$4,000 every month it stays open</strong>.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
@@ -156,9 +170,9 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
               Take the Qualifying Test →
             </Button>
           </a>
-          <a href="#why-us">
+          <a href="#earnings">
             <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-              Why Operators Choose Us
+              See the Numbers
             </Button>
           </a>
         </div>
@@ -212,6 +226,108 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </CardContent>
     </Card>
 
+    {/* FLAGSHIP COMMISSIONS + BONUSES */}
+    <div id="earnings" className="mb-14 relative rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.07] via-card/40 to-card/40 p-6 md:p-10 backdrop-blur overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-[0.08] pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(245,166,35,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,1) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
+      <div className="relative">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Payout · Flagship Tier</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-1">
+              Real numbers. <span className="text-amber">Locked splits.</span>
+            </h2>
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-amber/30 rounded px-2 py-1">
+            FIXED-DOLLAR · NO CLAWBACK · 7-DAY PAYOUT
+          </span>
+        </div>
+
+        {/* Flagship product cards */}
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
+            <p className="font-display text-xl text-foreground mt-1">$18,000 Forensic Diagnostic</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
+                <p className="font-display text-2xl text-amber font-bold">$5,000</p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
+                <p className="font-display text-2xl text-foreground">$3,000</p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
+                <p className="font-display text-2xl text-foreground">$10,000</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-amber/30 bg-background/60 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
+            <p className="font-display text-xl text-foreground mt-1">$15,000/mo Operator Retainer</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-amber/10 border border-amber/40 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-amber uppercase">You · Rep</p>
+                <p className="font-display text-2xl text-amber font-bold">$4,000<span className="text-xs text-amber/70">/mo</span></p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Partner</p>
+                <p className="font-display text-2xl text-foreground">$3,000<span className="text-xs text-muted-foreground">/mo</span></p>
+              </div>
+              <div className="rounded-lg bg-background/60 border border-border/50 p-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground uppercase">Company</p>
+                <p className="font-display text-2xl text-foreground">$8,000<span className="text-xs text-muted-foreground">/mo</span></p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Held 12 months = <strong className="text-amber">$48,000</strong> in your pocket from one client.</p>
+          </div>
+        </div>
+
+        {/* BONUS BANDS */}
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Volume Bonus</p>
+            <p className="font-display text-foreground">Stack closes in a single month.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>2 closes</span><span className="text-amber">+$1,000</span></li>
+              <li className="flex justify-between"><span>3 closes</span><span className="text-amber">+$2,500</span></li>
+              <li className="flex justify-between"><span>5 closes</span><span className="text-amber">+$5,000</span></li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Retention Bonus</p>
+            <p className="font-display text-foreground">Get paid when your clients stay.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>3 months</span><span className="text-amber">+$1,000</span></li>
+              <li className="flex justify-between"><span>6 months</span><span className="text-amber">+$2,500</span></li>
+              <li className="flex justify-between"><span>12 months</span><span className="text-amber">+$5,000</span></li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Referral Bonus</p>
+            <p className="font-display text-foreground">Bring in another closer.</p>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
+              <li className="flex justify-between"><span>Onboard</span><span className="text-amber">+$500</span></li>
+              <li className="flex justify-between"><span>Their 1st close</span><span className="text-amber">+$7,000</span></li>
+              <li className="flex justify-between"><span>Override / sale</span><span className="text-amber">+$500 · 12 mo</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
+          // Catalog products pay the standard 15% — flagships are the volume game.
+        </p>
+      </div>
+    </div>
+
     {/* WHY OPERATORS CHOOSE US */}
     <div id="why-us" className="mb-14">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
@@ -223,7 +339,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: DollarSign, title: '15% Flat Commission — Recurring', desc: 'Every closed deal pays you 15%. Subscriptions and Fractional retainers pay you 15% every single month, for the life of the client. Two retainers held 12 months = $21,240 in residual.' },
           { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led — You Don\'t Need to Be Technical', desc: 'You don\'t deliver. You don\'t implement. You sell the diagnosis; Joseph and the engineering team do the surgery. Stay in your lane and earn.' },
-          { icon: Rocket, title: 'AI-Powered Sales Stack', desc: 'Built-in AI Sales Coach, Forecast Center, Lead Pool, Business Post Analyst, and 9 closing tools — all free, all inside your portal. No software to buy.' },
+          { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: GraduationCap, title: 'Real Training, Not "Watch This Webinar"', desc: 'In-portal training modules, MCQ + AI-graded scoring, a sales playbook PDF, daily hustle goals, and direct line to the operator. Ramp fast or get cut. We invest in winners.' },
           { icon: Users, title: 'Partner Track — Build a Team, Earn the Override', desc: 'Top reps get promoted to Partner. You bring on reps under your code and earn a 15% override on every sale they close — same recurring math. Build a book of business.' },
           { icon: Trophy, title: 'No Caps. No Tiers. No Clawbacks.', desc: 'One rule. One number. One math equation. The split is locked at 70/15/15 — company / rep / partner. We don\'t move the goalposts.' },
@@ -256,7 +372,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { icon: MapPin, title: 'Remote-First, Indy-Loved', desc: 'Headquartered in Indianapolis. Reps welcome anywhere in the US. Boots-on-ground in Indy = priority lead routing.' },
           { icon: Shield, title: 'No Cold-Call Quotas', desc: 'No "smile and dial" KPIs. Sell how you sell — LinkedIn, email, in-person, referrals. Whatever works.' },
           { icon: Brain, title: 'Free Access to All Tools', desc: 'Free Leak Audit, Website Scanner, Diagnostic Quiz, Sales Scripts, Follow-Up Plans, and 5 more — all available to send prospects or use yourself.' },
-          { icon: Rocket, title: 'Fast Ramp Path', desc: 'Onboarding playbook, daily hustle goals, AI coach, and the company calendar all push you toward your first close in week 1.' },
+          { icon: Rocket, title: 'Fast Ramp Path', desc: 'Onboarding playbook, daily hustle goals, a live company calendar, and direct operator coaching — all aimed at your first close in week 1.' },
           { icon: Trophy, title: 'Promotion to Partner', desc: 'Hit consistent numbers, get promoted. Partner status = recruit reps, earn overrides, get a seat at the strategy table.' },
         ].map(({ icon: Icon, title, desc }) => (
           <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
@@ -283,7 +399,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds — because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first — your rolodex is an unfair advantage.' },
-          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you scripts, hooks, and AI content help — you bring the voice.' },
+          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence — you bring the voice.' },
           { title: 'The Builder Looking for Equity-Track', desc: 'You don\'t want to be a rep forever. Promotion to Partner unlocks overrides, recruiting, and a real seat at the strategy table.' },
         ].map(({ title, desc }) => (
           <div key={title} className="premium-tile rounded-xl p-5 border border-border/50 hover:border-amber/30 transition-colors">
@@ -309,7 +425,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { tag: '01', title: 'Untapped Lane', desc: 'No one else is positioning forensics + AI + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'AI Tailwind', desc: 'Owners are finally curious about AI but terrified to deploy it. We give them a diagnostic first — that\'s the wedge nobody else has built.' },
+          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is leading with — you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
           { tag: '04', title: 'Equity-Adjacent Upside', desc: 'Recurring 15% for the life of the account, plus a clear path to Partner overrides. The reps who join now build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
@@ -353,7 +469,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             {[
               'You need a base salary to feel safe.',
               'You won\'t pick up the phone or message a stranger on LinkedIn.',
-              'You think AI is "just a fad" — we run on it.',
+              'You won\'t pick up the phone or send a real follow-up after the first "not right now."',
               'You want to coast. There\'s no coasting in commission.',
               'You can\'t pass a 20-question reading-comprehension test.',
             ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
