@@ -38,6 +38,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'RFQ-to-PO conversion by lane',
     ],
     slug: 'ai-for-manufacturing',
+    image: INFOGRAPHICS.industryManufacturing,
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -56,6 +57,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'Change-order capture rate',
     ],
     slug: 'ai-for-construction',
+    image: INFOGRAPHICS.industryConstruction,
     recommended: {
       name: '21-Day Revenue Diagnostic',
       price: '$18,500',
@@ -74,6 +76,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'Exception triage cycle',
     ],
     slug: 'ai-for-logistics',
+    image: INFOGRAPHICS.industryLogistics,
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -92,6 +95,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'Prior-auth aging buckets',
     ],
     slug: 'ai-for-healthcare',
+    image: INFOGRAPHICS.industryHealthcare,
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
@@ -110,6 +114,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'Re-work rate per file',
     ],
     slug: 'ai-for-finance',
+    image: INFOGRAPHICS.industryFinance,
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -128,6 +133,7 @@ const INDUSTRIES: IndustryLeak[] = [
       'Expansion playbook touch-rate',
     ],
     slug: 'ai-for-saas',
+    image: INFOGRAPHICS.industrySaas,
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
@@ -230,6 +236,19 @@ const IndustriesPage: React.FC = () => {
                     to={`/${v.slug}`}
                     className="forensic-tile rounded-sm p-6 border border-border/60 hover:border-amber/50 transition-all hover:-translate-y-1 group flex flex-col"
                   >
+                    <div className="relative -mx-6 -mt-6 mb-5 overflow-hidden border-b border-amber/20 bg-background/40">
+                      <img
+                        src={v.image}
+                        alt={`${v.industry} forensic case-file infographic`}
+                        loading="lazy"
+                        width={768}
+                        height={768}
+                        className="w-full aspect-[2/1] object-cover"
+                      />
+                      <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
+                        Aetheris AI Studio
+                      </span>
+                    </div>
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
                         <Icon className="w-6 h-6 text-amber" />
