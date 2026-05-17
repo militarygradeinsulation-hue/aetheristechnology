@@ -76,7 +76,7 @@ const AboutPage = () => {
                   Credentials · Aetheris
                 </div>
                 <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Joseph Toney — Operator.
+                  Joseph Toney — Architect.
                 </h2>
                 <p className="text-lg text-muted-foreground mt-4">
                   Background, certifications, prior operator roles, and the business-continuity plan procurement teams ask for.
