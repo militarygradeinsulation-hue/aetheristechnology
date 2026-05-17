@@ -95,6 +95,18 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             Aetheris is a revenue forensics firm for US specialty manufacturers, <span className="text-foreground font-semibold">$5M–$25M</span>. We audit your CRM, sales follow-up, and operations, put a dollar number on every leak, and either hand you the roadmap or implement the fixes ourselves.
           </p>
 
+          <div className="flex justify-center pt-1">
+            <Link to="/about">
+              <Button
+                size="lg"
+                className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold hover-lift"
+              >
+                See who the CEO is — read his story
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+
           <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
             <div className="premium-tile rounded-sm border border-border/60 p-4">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we do</div>
