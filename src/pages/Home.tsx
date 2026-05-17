@@ -251,18 +251,24 @@ const Home = () => {
                 businessType="$4M services firm"
                 leakFound="Inbound leads dying inside one Gmail inbox — no routing, no SLA, no second touch."
                 amountBled="$380K / yr"
+                image={INFOGRAPHICS.case47Gmail}
+                imageAlt="Overflowing inbox with $380K/yr leak stamp"
               />
               <CaseFileCard
                 caseNumber={62}
                 businessType="Regional B2B SaaS"
                 leakFound="73% of priced proposals never followed up after Day 3."
                 amountBled="$610K / yr"
+                image={INFOGRAPHICS.case62Proposals}
+                imageAlt="Stack of priced proposals stamped NO FOLLOWUP"
               />
               <CaseFileCard
                 caseNumber={74}
                 businessType="Construction sub, $8M"
                 leakFound="Owner bottleneck on every quote — 11 days avg time-to-bid."
                 amountBled="$1.1M / yr"
+                image={INFOGRAPHICS.case74Bottleneck}
+                imageAlt="Bottleneck diagram with owner choke point"
               />
             </div>
           </div>
