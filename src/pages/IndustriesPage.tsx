@@ -16,6 +16,12 @@ interface IndustryLeak {
   typicalLoss: string;
   whatWeMeasure: string[];
   slug: string;
+  recommended: {
+    name: string;
+    price: string;
+    why: string;
+    link: string;
+  };
 }
 
 const INDUSTRIES: IndustryLeak[] = [
@@ -30,6 +36,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'RFQ-to-PO conversion by lane',
     ],
     slug: 'ai-for-manufacturing',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Quote-to-cash is where manufacturers leak most. Diagnostic maps it, retainer rebuilds the follow-up engine.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Construction',
@@ -42,6 +54,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Change-order capture rate',
     ],
     slug: 'ai-for-construction',
+    recommended: {
+      name: '21-Day Revenue Diagnostic',
+      price: '$18,500',
+      why: 'Bid follow-up and change-order capture are the two biggest dollar leaks. Sealed report shows both in 21 days.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Logistics',
@@ -54,6 +72,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Exception triage cycle',
     ],
     slug: 'ai-for-logistics',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Lane margin and quote response are operational — they need both forensic audit and hands-on fix execution.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Healthcare',
@@ -66,6 +90,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Prior-auth aging buckets',
     ],
     slug: 'ai-for-healthcare',
+    recommended: {
+      name: 'Forensic Diagnostic',
+      price: '$2,500 flat',
+      why: 'Start with the operator-led mini-audit. Intake and prior-auth leaks usually surface inside two weeks. Fee applies to engagement.',
+      link: '/leak-audit',
+    },
   },
   {
     industry: 'Finance',
@@ -78,6 +108,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Re-work rate per file',
     ],
     slug: 'ai-for-finance',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Highest dollar bleed per leak. Underwriting cycle and KYC handoffs need both audit and ongoing system rebuild.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'B2B SaaS',
@@ -90,6 +126,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Expansion playbook touch-rate',
     ],
     slug: 'ai-for-saas',
+    recommended: {
+      name: 'Forensic Diagnostic',
+      price: '$2,500 flat',
+      why: 'Most popular entry for SaaS — fast read on activation and churn signals. Fee applies toward a larger engagement.',
+      link: '/leak-audit',
+    },
   },
 ];
 
