@@ -121,30 +121,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Meet the CEO before you partner */}
-        <section className="px-4 pt-6 pb-4">
-          <div className="max-w-5xl mx-auto">
-            <RevealOnScroll>
-              <div className="premium-tile rounded-sm border border-amber/40 p-7 md:p-10">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                  Before you decide to partner with us
-                </div>
-                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-                  See who the <span className="text-amber">CEO</span> is — and read his story.
-                </h2>
-                <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                  Marine Corps veteran wounded in Iraq. Built a construction company from nothing while his kids fought through open-heart surgery and major medical battles. Every system we build comes from that experience — not theory.
-                </p>
-                <Link to="/about">
-                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                    Read Joseph's story <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </RevealOnScroll>
-          </div>
-        </section>
-
         {/* Front-and-center booking */}
         <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
           <div className="max-w-4xl mx-auto">
