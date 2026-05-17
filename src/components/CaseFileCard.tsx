@@ -8,6 +8,8 @@ interface CaseFileCardProps {
   status?: 'SEALED' | 'ACTIVE';
   notes?: string;
   className?: string;
+  image?: string;
+  imageAlt?: string;
 }
 
 /**
@@ -23,6 +25,8 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
   status = 'SEALED',
   notes,
   className = '',
+  image,
+  imageAlt,
 }) => {
   const padded = String(caseNumber).padStart(3, '0');
 
@@ -31,6 +35,12 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
       className={`group relative glass glass-shine hover-lift shimmer-border rounded-lg border border-border/60 p-6 md:p-7 overflow-hidden transition-colors hover:border-amber/40 ${className}`}
     >
       <span className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      {image && (
+        <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square mb-4">
+          <img src={image} alt={imageAlt ?? `Case file #${padded} forensic infographic`} width={512} height={512} loading="lazy" className="w-full h-full object-cover" />
+          <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+        </div>
+      )}
       {/* Top bar — case number + status */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/40">
         <div className="font-case text-xs tracking-widest text-muted-foreground uppercase">

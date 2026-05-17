@@ -124,18 +124,22 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
           <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
-            <div className="forensic-tile rounded-sm border border-border/60 p-4">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we do</div>
-              <div className="font-forensic text-lg font-bold text-foreground leading-snug">Forensic audit of your revenue systems.</div>
-            </div>
-            <div className="forensic-tile rounded-sm border border-border/60 p-4">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we look for</div>
-              <div className="font-forensic text-lg font-bold text-foreground leading-snug">Lost leads, dead follow-up, broken handoffs, CRM rot.</div>
-            </div>
-            <div className="forensic-tile rounded-sm border border-border/60 p-4">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What you get</div>
-              <div className="font-forensic text-lg font-bold text-foreground leading-snug">A written report with prioritized fixes and ROI per fix.</div>
-            </div>
+            {[
+              { img: INFOGRAPHICS.heroWhatWeDo, alt: 'Stethoscope on a CRM dashboard — forensic audit infographic', label: 'What we do', body: 'Forensic audit of your revenue systems.' },
+              { img: INFOGRAPHICS.heroWhatWeLookFor, alt: 'Magnifying glass over a leaking sales funnel', label: 'What we look for', body: 'Lost leads, dead follow-up, broken handoffs, CRM rot.' },
+              { img: INFOGRAPHICS.heroWhatYouGet, alt: 'Stack of forensic report binders with priority tab', label: 'What you get', body: 'A written report with prioritized fixes and ROI per fix.' },
+            ].map((t) => (
+              <div key={t.label} className="forensic-tile rounded-sm border border-border/60 p-4 flex flex-col gap-3">
+                <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                  <img src={t.img} alt={t.alt} width={512} height={512} loading="lazy" className="w-full h-full object-cover" />
+                  <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+                </div>
+                <div>
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">{t.label}</div>
+                  <div className="font-forensic text-lg font-bold text-foreground leading-snug">{t.body}</div>
+                </div>
+              </div>
+            ))}
           </div>
 
           <h2 className="font-case text-xs md:text-sm uppercase tracking-widest text-muted-foreground max-w-4xl mx-auto pt-2">
