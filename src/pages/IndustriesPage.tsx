@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign, Star } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -16,6 +16,12 @@ interface IndustryLeak {
   typicalLoss: string;
   whatWeMeasure: string[];
   slug: string;
+  recommended: {
+    name: string;
+    price: string;
+    why: string;
+    link: string;
+  };
 }
 
 const INDUSTRIES: IndustryLeak[] = [
@@ -30,6 +36,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'RFQ-to-PO conversion by lane',
     ],
     slug: 'ai-for-manufacturing',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Quote-to-cash is where manufacturers leak most. Diagnostic maps it, retainer rebuilds the follow-up engine.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Construction',
@@ -42,6 +54,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Change-order capture rate',
     ],
     slug: 'ai-for-construction',
+    recommended: {
+      name: '21-Day Revenue Diagnostic',
+      price: '$18,500',
+      why: 'Bid follow-up and change-order capture are the two biggest dollar leaks. Sealed report shows both in 21 days.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Logistics',
@@ -54,6 +72,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Exception triage cycle',
     ],
     slug: 'ai-for-logistics',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Lane margin and quote response are operational — they need both forensic audit and hands-on fix execution.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'Healthcare',
@@ -66,6 +90,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Prior-auth aging buckets',
     ],
     slug: 'ai-for-healthcare',
+    recommended: {
+      name: 'Forensic Diagnostic',
+      price: '$2,500 flat',
+      why: 'Start with the operator-led mini-audit. Intake and prior-auth leaks usually surface inside two weeks. Fee applies to engagement.',
+      link: '/leak-audit',
+    },
   },
   {
     industry: 'Finance',
@@ -78,6 +108,12 @@ const INDUSTRIES: IndustryLeak[] = [
       'Re-work rate per file',
     ],
     slug: 'ai-for-finance',
+    recommended: {
+      name: '21-Day Revenue Diagnostic + Implementation Retainer',
+      price: '$18,500 + $15K/mo',
+      why: 'Highest dollar bleed per leak. Underwriting cycle and KYC handoffs need both audit and ongoing system rebuild.',
+      link: '/diagnostic',
+    },
   },
   {
     industry: 'B2B SaaS',
@@ -90,11 +126,18 @@ const INDUSTRIES: IndustryLeak[] = [
       'Expansion playbook touch-rate',
     ],
     slug: 'ai-for-saas',
+    recommended: {
+      name: 'Forensic Diagnostic',
+      price: '$2,500 flat',
+      why: 'Most popular entry for SaaS — fast read on activation and churn signals. Fee applies toward a larger engagement.',
+      link: '/leak-audit',
+    },
   },
 ];
 
 const IndustriesPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const jsonLd = combineSchemas(
     serviceSchema(
@@ -200,13 +243,30 @@ const IndustriesPage: React.FC = () => {
                     <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
                       What we measure
                     </div>
-                    <ul className="space-y-1 mb-5 flex-1">
+                    <ul className="space-y-1 mb-4 flex-1">
                       {v.whatWeMeasure.map((m) => (
                         <li key={m} className="text-xs text-foreground/75 flex gap-2">
                           <span className="text-amber">›</span>{m}
                         </li>
                       ))}
                     </ul>
+
+                    <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
+                      <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+                        <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+                      </div>
+                      <div className="font-bold text-sm text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
+                      <div className="font-mono text-amber text-xs mb-2">{v.recommended.price}</div>
+                      <p className="text-[11px] text-muted-foreground leading-snug mb-2">{v.recommended.why}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber hover:underline"
+                      >
+                        View this package <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+
                     <div className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40">
                       Open the case file <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
