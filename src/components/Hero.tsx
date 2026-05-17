@@ -99,7 +99,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <Link to="/about">
               <Button
                 size="lg"
-                className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold hover-lift"
+                className="bg-crimson hover:bg-crimson/90 text-white font-bold hover-lift"
               >
                 Read CEO's Story Before Deciding Anything
                 <ArrowRight className="ml-2 w-4 h-4" />
