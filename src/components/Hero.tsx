@@ -91,6 +91,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-foreground"> — and fix the systems causing it.</span>
           </h1>
 
+          <p className="font-case text-sm md:text-base uppercase tracking-widest text-amber max-w-3xl mx-auto">
+            78% of companies we've found don't even know they exist.
+          </p>
+
           <p className="font-sans text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Aetheris is a revenue forensics firm for US specialty manufacturers, <span className="text-foreground font-semibold">$5M–$25M</span>. We audit your CRM, sales follow-up, and operations, put a dollar number on every leak, and either hand you the roadmap or implement the fixes ourselves.
           </p>
