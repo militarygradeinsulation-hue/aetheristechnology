@@ -153,107 +153,29 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Investment breakdown — anticipates the price objection */}
+        {/* Trust + try-before-you-buy */}
         <section className="px-4 py-12">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
-              <div className="text-center mb-10">
+              <div className="premium-tile rounded-sm border border-amber/40 p-7 md:p-10 mb-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                  The Investment
+                  We know what you're thinking
                 </div>
-                <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
-                  Yes, it's <span className="text-amber">premium.</span> Here's the math.
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
+                  There's a ton of AI gurus out there. <span className="text-amber">Hard to trust any of them.</span>
                 </h2>
-                <p className="text-muted-foreground mt-3 max-w-3xl mx-auto text-base md:text-lg">
-                  Before you scroll past the number, do the division. This is what a full marketing, analytics, and ops consulting team would cost you — compressed into one operator and a fixed timeline.
+                <p className="text-base text-muted-foreground leading-relaxed mb-5">
+                  We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it — go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
                 </p>
-              </div>
-            </RevealOnScroll>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="premium-tile rounded-sm border border-amber/40 p-7">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">21-Day Revenue Diagnostic</div>
-                <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground mb-1">$18,500</div>
-                <div className="text-sm text-muted-foreground mb-5">One-time. Fixed fee. No retainer required to walk away with the report.</div>
-
-                <div className="space-y-3 border-t border-border/60 pt-4">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Per day (21 days)</span>
-                    <span className="font-forensic text-2xl font-bold text-amber">$880</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Per week</span>
-                    <span className="font-forensic text-2xl font-bold text-foreground">$6,167</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Range we typically find</span>
-                    <span className="font-forensic text-2xl font-bold text-foreground">$200K–$2M</span>
-                  </div>
-                </div>
-
-                <p className="text-sm text-foreground/80 leading-relaxed mt-5">
-                  $880/day is what a single mid-tier marketing consultant bills for half a day. You're getting marketing, analytics, sales-ops, and CRM forensics — under one operator, on a fixed timeline. A comparable agency-and-consultant stack runs $60K–$120K and takes 3–6 months to produce the same map.
-                </p>
-              </div>
-
-              <div className="premium-tile rounded-sm border border-border/60 p-7">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Implementation Retainer</div>
-                <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground mb-1">$15,000<span className="text-xl text-muted-foreground"> / mo</span></div>
-                <div className="text-sm text-muted-foreground mb-5">3-month minimum. Diagnostic clients only. We execute the prioritized fixes ourselves.</div>
-
-                <div className="space-y-3 border-t border-border/60 pt-4">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Per week</span>
-                    <span className="font-forensic text-2xl font-bold text-amber">$1,250</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Per day (business days)</span>
-                    <span className="font-forensic text-2xl font-bold text-foreground">$682</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-case text-xs uppercase tracking-wider text-muted-foreground">Annualized FTE equivalent</span>
-                    <span className="font-forensic text-2xl font-bold text-foreground">$180K</span>
-                  </div>
-                </div>
-
-                <p className="text-sm text-foreground/80 leading-relaxed mt-5">
-                  $1,250/week is below the loaded cost of a single mid-level RevOps hire — and you don't carry headcount, benefits, ramp time, or hiring risk. A 3-month sprint from a Big-Four consultancy starts at $90K+ and ships slide decks. We ship working systems.
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center mt-8 max-w-3xl mx-auto">
-              <p className="text-sm md:text-base text-muted-foreground italic">
-                If the Diagnostic finds even the floor of the range we typically uncover, the investment pays for itself <span className="text-amber font-semibold">10x in the first year.</span> If we don't find a leak worth fixing, you still walk away with a full written audit a CFO can re-derive.
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <Link to="/diagnostic">
-                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                    See what's in the Diagnostic <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* The objection we hear every time */}
-            <RevealOnScroll>
-              <div id="objection" className="mt-10 premium-tile rounded-sm border-l-4 border-l-destructive border-y border-r border-border/60 p-6 md:p-8 bg-card/40">
-                <div className="grid md:grid-cols-[1fr_auto] gap-6 items-center">
-                  <div>
-                    <div className="font-case text-[10px] uppercase tracking-widest text-destructive mb-2">
-                      The objection we hear every time
-                    </div>
-                    <div className="font-forensic text-2xl md:text-3xl font-bold text-destructive italic mb-2">
-                      "That's just too expensive!"
-                    </div>
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                      Said by every CFO who hasn't done the math yet.
-                      <span className="text-foreground font-semibold"> Here's the math.</span>
-                    </p>
-                  </div>
-                  <Link to="/why-us#math" className="shrink-0">
-                    <Button size="lg" variant="outline" className="border-amber/60 text-amber hover:bg-amber/10 font-bold">
-                      Show me the math <ArrowRight className="w-4 h-4 ml-2" />
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/leak-audit">
+                    <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                      Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                  <Link to="/catalog">
+                    <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
+                      Browse the tool catalog <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
                 </div>
