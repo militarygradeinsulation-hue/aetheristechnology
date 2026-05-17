@@ -250,6 +250,21 @@ const Home = () => {
         {/* Client reviews */}
         <Testimonials />
 
+        {/* New Tech Launch Showcase */}
+        <section className="px-4 pt-10 pb-2">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Showcase
+            </div>
+            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
+              New Tech Launch <span className="text-amber">Showcase</span>
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
+              Every new system our company builds gets displayed here. Live, working, and yours to try.
+            </p>
+          </div>
+        </section>
+
         {/* Resume Forensics teaser */}
         <section className="px-4 py-12">
           <div className="max-w-4xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
