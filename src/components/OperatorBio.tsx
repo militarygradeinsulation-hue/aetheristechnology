@@ -132,6 +132,15 @@ export const OperatorBio: React.FC = () => {
                   <span className="text-amber font-semibold">Aetheris Technology</span>.
                 </p>
                 <p>
+                  I'm deeply devoted to helping people succeed because I know what it feels like to
+                  fight just to keep moving forward. Along the way, I've been burned by business
+                  partners, taken advantage of by companies, and even faced situations where people
+                  tried to claim or steal technology and systems I spent years building. But no
+                  matter what happens, I keep pushing forward. That mindset was built long before
+                  business. It was built through pain, pressure, setbacks, and refusing to quit when
+                  quitting would have been easier.
+                </p>
+                <p>
                   Today, I build AI systems, automation tools, and operational solutions designed for
                   real business owners because I've lived the reality myself. My goal is not to sell
                   hype or complicated tech. It's to help businesses eliminate unnecessary friction,
