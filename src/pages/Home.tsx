@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 import { Testimonials } from '@/components/Testimonials';
 import { UpcomingEvents } from '@/components/UpcomingEvents';
+import { ForensicInfographic } from '@/components/ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
