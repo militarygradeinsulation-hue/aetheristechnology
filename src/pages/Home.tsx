@@ -203,22 +203,30 @@ const Home = () => {
         <section className="px-4 py-14">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
-              <div className="forensic-tile rounded-sm border border-amber/40 p-8 md:p-12 text-center">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                  What makes us different
+              <div className="forensic-tile rounded-sm border border-amber/40 p-8 md:p-12">
+                <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-center">
+                  <div>
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                      What makes us different
+                    </div>
+                    <h2 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-5">
+                      Everyone else is selling you advice.<br className="hidden md:block" />
+                      <span className="text-amber"> We're an AI-native operator.</span>
+                    </h2>
+                    <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-7">
+                      Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
+                    </p>
+                    <Link to="/why-us">
+                      <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                        See exactly what makes us different <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                    <img src={INFOGRAPHICS.homeAiOperator} alt="AI agents running diagnostics inside a CRM, slide deck rejected" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
+                    <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+                  </div>
                 </div>
-                <h2 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-5">
-                  Everyone else is selling you advice.<br className="hidden md:block" />
-                  <span className="text-amber"> We're an AI-native operator.</span>
-                </h2>
-                <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-7">
-                  Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
-                </p>
-                <Link to="/why-us">
-                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                    See exactly what makes us different <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
               </div>
             </RevealOnScroll>
           </div>
