@@ -164,10 +164,16 @@ const Home = () => {
             </RevealOnScroll>
             <div className="grid md:grid-cols-3 gap-4">
               {steps.map((s) => (
-                <div key={s.n} className="forensic-tile rounded-sm border border-border/60 p-6">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
-                  <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
-                  <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                <div key={s.n} className="forensic-tile rounded-sm border border-border/60 p-6 flex flex-col gap-4">
+                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                    <img src={s.img} alt={s.alt} width={512} height={512} loading="lazy" className="w-full h-full object-cover" />
+                    <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+                  </div>
+                  <div>
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
+                    <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
+                    <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                  </div>
                 </div>
               ))}
             </div>
