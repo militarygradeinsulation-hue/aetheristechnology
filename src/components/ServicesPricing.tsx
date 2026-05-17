@@ -1058,7 +1058,7 @@ export const ServicesPricing: React.FC = () => {
 
         {/* CTA */}
         <RevealOnScroll delay={0.3}>
-          <div className="premium-tile amber-corner mt-12 p-10 md:p-12 rounded-xl text-center overflow-hidden">
+          <div className="forensic-tile amber-corner mt-12 p-10 md:p-12 rounded-xl text-center overflow-hidden">
             {/* Top hairline */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent pointer-events-none" />
 

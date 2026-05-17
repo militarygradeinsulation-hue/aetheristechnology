@@ -30,7 +30,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, caseFileNumber }) => {
   return (
     <Link
       to={`/blog/${post.slug}`}
-      className="block premium-tile rounded-xl overflow-hidden h-full group"
+      className="block forensic-tile rounded-xl overflow-hidden h-full group"
     >
       {/* Case File Image */}
       <div className="h-64 bg-[#0c0c0c] overflow-hidden relative flex items-center justify-center">

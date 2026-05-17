@@ -90,7 +90,7 @@ const AboutPage = () => {
               </div>
               <div className="space-y-5">
                 {CRED_BLOCKS.map((b) => (
-                  <section key={b.label} className="premium-tile rounded-sm border border-border/60 p-6">
+                  <section key={b.label} className="forensic-tile rounded-sm border border-border/60 p-6">
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">{b.label}</div>
                     <p className="text-foreground/85 leading-relaxed">{b.body}</p>
                   </section>

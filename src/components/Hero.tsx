@@ -112,15 +112,15 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
           <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
-            <div className="premium-tile rounded-sm border border-border/60 p-4">
+            <div className="forensic-tile rounded-sm border border-border/60 p-4">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we do</div>
               <div className="font-forensic text-lg font-bold text-foreground leading-snug">Forensic audit of your revenue systems.</div>
             </div>
-            <div className="premium-tile rounded-sm border border-border/60 p-4">
+            <div className="forensic-tile rounded-sm border border-border/60 p-4">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we look for</div>
               <div className="font-forensic text-lg font-bold text-foreground leading-snug">Lost leads, dead follow-up, broken handoffs, CRM rot.</div>
             </div>
-            <div className="premium-tile rounded-sm border border-border/60 p-4">
+            <div className="forensic-tile rounded-sm border border-border/60 p-4">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What you get</div>
               <div className="font-forensic text-lg font-bold text-foreground leading-snug">A written report with prioritized fixes and ROI per fix.</div>
             </div>

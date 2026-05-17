@@ -62,7 +62,7 @@ export const VerifiableOutcomes: React.FC = () => {
             const Icon = outcome.icon;
             return (
               <RevealOnScroll key={outcome.industry} delay={idx * 0.08}>
-                <article className="premium-tile amber-corner group rounded-2xl p-7 h-full flex flex-col">
+                <article className="forensic-tile amber-corner group rounded-2xl p-7 h-full flex flex-col">
                   <div className="w-11 h-11 rounded-xl bg-amber/[0.08] border border-amber/15 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5 text-amber" aria-hidden="true" />
                   </div>

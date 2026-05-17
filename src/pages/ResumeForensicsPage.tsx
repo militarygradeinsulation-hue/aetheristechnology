@@ -172,7 +172,7 @@ export default function ResumeForensicsPage() {
             </div>
 
             {/* STEP 1 — Email + credits */}
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
+            <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 1 · Identify</div>
               <h2 className="font-forensic text-2xl font-bold mb-4">Your email</h2>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -206,7 +206,7 @@ export default function ResumeForensicsPage() {
                 {PACKS.map((p) => (
                   <div
                     key={p.id}
-                    className={`premium-tile rounded-sm border p-5 flex flex-col ${p.highlight ? 'border-amber' : 'border-amber/20'}`}
+                    className={`forensic-tile rounded-sm border p-5 flex flex-col ${p.highlight ? 'border-amber' : 'border-amber/20'}`}
                   >
                     {p.highlight && (
                       <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
@@ -235,7 +235,7 @@ export default function ResumeForensicsPage() {
             </section>
 
             {/* STEP 2 — Company */}
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
+            <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 2 · Scan target company</div>
               <h2 className="font-forensic text-2xl font-bold mb-4 flex items-center gap-2">
                 <Building2 className="h-5 w-5" /> Company website
@@ -272,7 +272,7 @@ export default function ResumeForensicsPage() {
             </section>
 
             {/* STEP 3 — Role */}
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
+            <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 3 · Role context</div>
               <h2 className="font-forensic text-2xl font-bold mb-4">What are you hiring for?</h2>
               <div className="space-y-3">
@@ -299,7 +299,7 @@ export default function ResumeForensicsPage() {
             </section>
 
             {/* STEP 4 — Resume + run */}
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
+            <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 4 · Upload resume</div>
               <h2 className="font-forensic text-2xl font-bold mb-4 flex items-center gap-2">
                 <FileText className="h-5 w-5" /> Candidate resume
@@ -338,7 +338,7 @@ export default function ResumeForensicsPage() {
 
             {/* RESULTS */}
             {analysis && (
-              <section id="scan-results" className="premium-tile rounded-sm border border-amber p-6 md:p-10 mb-6">
+              <section id="scan-results" className="forensic-tile rounded-sm border border-amber p-6 md:p-10 mb-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Forensic result</div>
                 <div className="grid md:grid-cols-3 gap-6 items-start mb-6">
                   <div className="md:col-span-2">

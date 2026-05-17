@@ -101,7 +101,7 @@ const MethodologyPage: React.FC = () => {
 
             <div className="space-y-10">
               {SECTIONS.map((s, i) => (
-                <section key={s.title} className="premium-tile rounded-sm border border-border/60 p-6 md:p-8">
+                <section key={s.title} className="forensic-tile rounded-sm border border-border/60 p-6 md:p-8">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                     Section {String(i + 1).padStart(2, '0')}
                   </div>
@@ -115,7 +115,7 @@ const MethodologyPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="mt-12 premium-tile rounded-sm border border-amber/30 p-6 text-center">
+            <div className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <p className="text-foreground font-semibold">Ready to see this run on your numbers?</p>
               <p className="text-sm text-muted-foreground mt-1">21 days. $18,500 fixed fee. Specialty manufacturers, $5M–$25M.</p>
               <a
