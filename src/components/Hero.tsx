@@ -101,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 size="lg"
                 className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold hover-lift"
               >
-                See who the CEO is — read his story
+                Read CEO's Story Before Deciding Anything
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
