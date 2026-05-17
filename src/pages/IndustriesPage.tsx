@@ -137,6 +137,7 @@ const INDUSTRIES: IndustryLeak[] = [
 
 const IndustriesPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const jsonLd = combineSchemas(
     serviceSchema(
