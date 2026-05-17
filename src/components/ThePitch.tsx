@@ -1,6 +1,8 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Users, Brain, Mail, BarChart3 } from 'lucide-react';
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 export const ThePitch: React.FC = () => {
   const services = [
@@ -41,6 +43,18 @@ export const ThePitch: React.FC = () => {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               We step into your business, find the gaps bleeding revenue, and build the systems to fix them.
             </p>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll>
+          <div className="mb-12">
+            <ForensicInfographic
+              image={INFOGRAPHICS.pitchCaseFile}
+              imageAlt="Manila case file labeled Case 001 Revenue Leak with redaction bars and a crimson signature drip"
+              caseNumber="004 · The Engagement"
+              title="One folder. One leak map. One fixed-fee quote."
+              summary="Step into the business. Find the gaps bleeding revenue. Build the systems that close them. You get a written report, a prioritized fix list with ROI per fix, and a quote for the work — not a deck."
+            />
           </div>
         </RevealOnScroll>
 

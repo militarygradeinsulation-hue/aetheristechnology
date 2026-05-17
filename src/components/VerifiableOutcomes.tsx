@@ -1,6 +1,8 @@
 import React from 'react';
 import { TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 interface Outcome {
   industry: string;
@@ -54,6 +56,18 @@ export const VerifiableOutcomes: React.FC = () => {
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
               We don't publish testimonials we can't verify. These are anonymized outcomes from real engagements — industry, metric, and the engagement type that produced them.
             </p>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll>
+          <div className="max-w-5xl mx-auto mb-10">
+            <ForensicInfographic
+              image={INFOGRAPHICS.outcomesTerminal}
+              imageAlt="Terminal screen showing before/after revenue metrics with one row stamped Recovered"
+              caseNumber="003 · The Evidence"
+              title="Before. After. On the same screen."
+              summary="Every outcome we publish is tied to a measurable pre-fix baseline and a post-fix re-measure of the same metric on the same population. Same definition, same query — only the number changes."
+            />
           </div>
         </RevealOnScroll>
 

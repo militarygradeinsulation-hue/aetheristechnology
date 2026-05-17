@@ -8,6 +8,41 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { generateMethodologyPdf } from '@/lib/generateMethodologyPdf';
+import { ForensicInfographic } from '@/components/ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
+
+const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: string }> = {
+  0: {
+    image: INFOGRAPHICS.methodologyDefineLeak,
+    alt: 'Sales funnel cross-section showing a measurable gap between Revenue Expected and Revenue Captured',
+    summary: 'A revenue leak is a measurable gap between two observable numbers — never a forecast, never a "potential opportunity." Examples: lead-to-contact SLA misses, deals stalled past Day 3, duplicate CRM records.',
+  },
+  1: {
+    image: INFOGRAPHICS.methodologyBaseline,
+    alt: 'Terminal display of a 12-month CRM export with three measurement layers and one stalled row flagged',
+    summary: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency. Where data is missing, we say so — we never estimate around gaps.',
+  },
+  2: {
+    image: INFOGRAPHICS.methodologyAttribution,
+    alt: 'Blueprint showing pre-fix and post-fix pipelines with the same metric tagged on both, post stamped Recovered',
+    summary: 'Every leak is tagged with the baseline metric, the fix, conservative and aggressive ROI, and the exact metric we will re-measure after implementation. Recovered revenue requires same-metric, same-population proof.',
+  },
+  3: {
+    image: INFOGRAPHICS.methodologyScope,
+    alt: 'Split diagram with amber In-Scope icons on the left and gray Out-of-Scope icons on the right',
+    summary: 'In scope: CRM data, sales activity, attribution, cadences, handoffs. Out of scope: pricing strategy, brand strategy, hiring, capital structure, legal compliance, shop-floor manufacturing.',
+  },
+  4: {
+    image: INFOGRAPHICS.pitchCaseFile,
+    alt: 'Forensic case file with redaction bars and a crimson signature drip',
+    summary: 'Every claim in the final report traces back to a record export. We deliver the source CSVs, the queries, this methodology document, and a re-runnable script — anything an auditor would need to verify the numbers.',
+  },
+  5: {
+    image: INFOGRAPHICS.methodologyDeliverables,
+    alt: 'Stack of forensic deliverables: a 24-page leak map report, a CSV source data appendix, a fixed-fee quote',
+    summary: 'Written report (15–30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $18,500 flat, 21 calendar days, CRM-agnostic.',
+  },
+};
 
 const SECTIONS = [
   {
@@ -75,7 +110,7 @@ const MethodologyPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="px-4 pt-28 pb-16">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Measurement Methodology · v1.0
@@ -100,19 +135,21 @@ const MethodologyPage: React.FC = () => {
             </div>
 
             <div className="space-y-10">
-              {SECTIONS.map((s, i) => (
-                <section key={s.title} className="forensic-tile rounded-sm border border-border/60 p-6 md:p-8">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                    Section {String(i + 1).padStart(2, '0')}
-                  </div>
-                  <h2 className="font-forensic text-2xl font-bold text-foreground mb-4">{s.title}</h2>
-                  <div className="space-y-3 text-foreground/85 leading-relaxed">
-                    {s.body.map((p, idx) => (
-                      <p key={idx}>{p}</p>
-                    ))}
-                  </div>
-                </section>
-              ))}
+              {SECTIONS.map((s, i) => {
+                const meta = SECTION_IMAGES[i];
+                return (
+                  <ForensicInfographic
+                    key={s.title}
+                    image={meta.image}
+                    imageAlt={meta.alt}
+                    caseNumber={`Section ${String(i + 1).padStart(2, '0')}`}
+                    title={s.title}
+                    summary={meta.summary}
+                    fullText={s.body}
+                    reverse={i % 2 === 1}
+                  />
+                );
+              })}
             </div>
 
             <div className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 text-center">

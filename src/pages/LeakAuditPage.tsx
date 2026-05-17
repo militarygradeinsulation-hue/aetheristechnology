@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
+import { ForensicInfographic } from '@/components/ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -263,6 +265,14 @@ const LeakAuditPage = () => {
                     PDF case file, downloadable when you're done.
                   </p>
                 </div>
+
+                <ForensicInfographic
+                  image={INFOGRAPHICS.leakAuditAutopsy}
+                  imageAlt="Forensic autopsy diagram of a business with seven amber annotation arrows and one crimson leak point"
+                  caseNumber="LA-001 · Self-Scan"
+                  title="14 questions. Four categories. One leak map."
+                  summary="We score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion — then name the specific leaks in each, with a real dollar estimate tied to your revenue band."
+                />
 
                 <div className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5">
                   <div>
