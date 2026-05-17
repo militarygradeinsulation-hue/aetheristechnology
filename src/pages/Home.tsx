@@ -152,38 +152,6 @@ const Home = () => {
             </div>
           </div>
         </section>
-
-        {/* Trust + try-before-you-buy */}
-        <section className="px-4 py-12">
-          <div className="max-w-5xl mx-auto">
-            <RevealOnScroll>
-              <div className="premium-tile rounded-sm border border-amber/40 p-7 md:p-10 mb-6">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                  We know what you're thinking
-                </div>
-                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-                  There's a ton of AI gurus out there. <span className="text-amber">Hard to trust any of them.</span>
-                </h2>
-                <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                  We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it — go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/leak-audit">
-                    <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                      Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                  <Link to="/catalog">
-                    <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
-                      Browse the tool catalog <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </RevealOnScroll>
-          </div>
-        </section>
-
         {/* What makes us different — AI-native operator */}
         <section className="px-4 py-14">
           <div className="max-w-5xl mx-auto">
