@@ -78,7 +78,7 @@ const Home = () => {
         <section className="px-4 pt-8 pb-4">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
-              <div className="premium-tile rounded-sm border border-amber/40 p-7 md:p-10">
+              <div className="forensic-tile rounded-sm border border-amber/40 p-7 md:p-10">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                   We know what you're thinking
                 </div>
@@ -107,7 +107,7 @@ const Home = () => {
 
         {/* Listen: who we are & what we do */}
         <section className="px-4 pt-8 pb-2">
-          <div className="max-w-3xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-7">
+          <div className="max-w-3xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-7">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               Listen · 5 min briefing
             </div>
@@ -135,7 +135,7 @@ const Home = () => {
                 30 minutes. I'll tell you on the call where your revenue systems are most likely losing money — before you spend a dollar on the Diagnostic.
               </p>
             </div>
-            <div className="premium-tile rounded-sm border border-amber/30 p-2 md:p-4">
+            <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
               <div
                 className="meetings-iframe-container"
                 data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
@@ -162,7 +162,7 @@ const Home = () => {
             </RevealOnScroll>
             <div className="grid md:grid-cols-3 gap-4">
               {steps.map((s) => (
-                <div key={s.n} className="premium-tile rounded-sm border border-border/60 p-6">
+                <div key={s.n} className="forensic-tile rounded-sm border border-border/60 p-6">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
                   <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
                   <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
@@ -187,7 +187,7 @@ const Home = () => {
         <section className="px-4 py-14">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
-              <div className="premium-tile rounded-sm border border-amber/40 p-8 md:p-12 text-center">
+              <div className="forensic-tile rounded-sm border border-amber/40 p-8 md:p-12 text-center">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                   What makes us different
                 </div>
@@ -267,7 +267,7 @@ const Home = () => {
 
         {/* Resume Forensics teaser */}
         <section className="px-4 py-12">
-          <div className="max-w-4xl mx-auto premium-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
+          <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               New · Live AI tool
             </div>

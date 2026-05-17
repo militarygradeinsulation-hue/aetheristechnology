@@ -260,7 +260,7 @@ const ResourcesPage = () => {
 
                   return (
                     <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                      <div className={`premium-tile rounded-2xl p-8 border transition-all group h-full flex flex-col ${
+                      <div className={`forensic-tile rounded-2xl p-8 border transition-all group h-full flex flex-col ${
                         isUnlocked
                           ? 'border-border hover:border-amber/30'
                           : 'border-border/50 hover:border-primary/30'

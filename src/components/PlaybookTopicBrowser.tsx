@@ -134,7 +134,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
               <button
                 key={topic.title}
                 onClick={() => setSelectedTopic(topic)}
-                className="premium-tile rounded-xl p-5 border border-border hover:border-amber/30 transition-all text-left group"
+                className="forensic-tile rounded-xl p-5 border border-border hover:border-amber/30 transition-all text-left group"
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">

@@ -156,7 +156,7 @@ export const BlogList: React.FC = () => {
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-20 premium-tile rounded-2xl p-8 md:p-12 text-center">
+        <div className="mt-20 forensic-tile rounded-2xl p-8 md:p-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
             Stop Wasting Money on Broken Systems
           </h2>

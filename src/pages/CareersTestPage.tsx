@@ -150,7 +150,7 @@ const CareersTestPage = () => {
         <div className="pt-24 pb-32 px-4 max-w-3xl mx-auto">
 
           {phase === 'intro' && (
-            <Card className="bg-card/60 backdrop-blur border-border/50 premium-tile">
+            <Card className="bg-card/60 backdrop-blur border-border/50 forensic-tile">
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">

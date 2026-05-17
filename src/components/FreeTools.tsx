@@ -67,7 +67,7 @@ export const FreeTools: React.FC = () => {
               <ParallaxTilt intensity={0.3} className="h-full">
                 <Link
                   to={tool.path}
-                  className="premium-tile amber-corner group rounded-xl flex flex-col h-full"
+                  className="forensic-tile amber-corner group rounded-xl flex flex-col h-full"
                 >
                   <div className="thumb-frame w-full aspect-[16/10] rounded-t-xl">
                     <span className="thumb-hairline" />

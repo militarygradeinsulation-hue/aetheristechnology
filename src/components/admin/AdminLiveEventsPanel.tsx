@@ -174,14 +174,14 @@ export const AdminLiveEventsPanel: React.FC = () => {
       {loading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : events.length === 0 ? (
-        <div className="premium-tile rounded-sm border border-border/60 p-8 text-center">
+        <div className="forensic-tile rounded-sm border border-border/60 p-8 text-center">
           <Calendar className="w-10 h-10 mx-auto text-amber mb-3" />
           <p className="text-muted-foreground">No events yet. Click "New Event" to add a webinar or live meeting.</p>
         </div>
       ) : (
         <div className="grid gap-3">
           {events.map((e) => (
-            <div key={e.id} className="premium-tile rounded-sm border border-border/60 p-4 flex flex-col md:flex-row gap-4">
+            <div key={e.id} className="forensic-tile rounded-sm border border-border/60 p-4 flex flex-col md:flex-row gap-4">
               {e.image_url && (
                 <img src={e.image_url} alt={e.title} className="w-full md:w-40 h-28 object-cover rounded-sm border border-border/60" />
               )}

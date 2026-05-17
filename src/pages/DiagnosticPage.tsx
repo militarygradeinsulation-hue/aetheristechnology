@@ -194,7 +194,7 @@ const DiagnosticPage: React.FC = () => {
               </div>
             </div>
 
-            <section className="premium-tile rounded-sm border border-crimson/40 p-6 mb-10">
+            <section className="forensic-tile rounded-sm border border-crimson/40 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
                 Why we're not another AI company
               </div>
@@ -202,7 +202,7 @@ const DiagnosticPage: React.FC = () => {
                 Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="premium-tile rounded-sm border border-border/60 p-4">
+                <div className="forensic-tile rounded-sm border border-border/60 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
                   <ul className="space-y-1.5 text-sm text-foreground/65">
                     <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
@@ -213,7 +213,7 @@ const DiagnosticPage: React.FC = () => {
                     <li>• You do the work of finding what's broken</li>
                   </ul>
                 </div>
-                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
@@ -230,7 +230,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <div className="premium-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
+            <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
               <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
               <p className="text-sm text-muted-foreground mt-2">21 calendar days. No retainer required. No percentage-of-savings.</p>
@@ -252,7 +252,7 @@ const DiagnosticPage: React.FC = () => {
             </div>
 
             {/* Objection / rebuttal */}
-            <section className="premium-tile rounded-sm border border-crimson/50 p-6 md:p-8 mb-10">
+            <section className="forensic-tile rounded-sm border border-crimson/50 p-6 md:p-8 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
                 The objection we hear every time
               </div>
@@ -304,21 +304,21 @@ const DiagnosticPage: React.FC = () => {
               </div>
 
               <div className="grid md:grid-cols-3 gap-4 mb-6">
-                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">21 days</div>
                   <div className="text-xs text-muted-foreground mt-1">Fixed timeline. Agencies average 90–120 days to deliver less.</div>
                 </div>
-                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
                   <div className="text-xs text-muted-foreground mt-1">20+ years running real P&Ls. Not a junior + a GPT wrapper.</div>
                 </div>
-                <div className="premium-tile rounded-sm border border-amber/40 p-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">$0 retainer</div>
                   <div className="text-xs text-muted-foreground mt-1">Read the report. Walk away. Or hire us to fix it. Your call.</div>
                 </div>
               </div>
 
-              <div className="premium-tile rounded-sm border border-crimson/40 p-5">
+              <div className="forensic-tile rounded-sm border border-crimson/40 p-5">
                 <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
                   The real math
                 </div>
@@ -332,7 +332,7 @@ const DiagnosticPage: React.FC = () => {
             </section>
 
             <div className="grid md:grid-cols-2 gap-4 mb-10">
-              <section className="premium-tile rounded-sm border border-border/60 p-6">
+              <section className="forensic-tile rounded-sm border border-border/60 p-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What you get</div>
                 <ul className="space-y-2.5">
                   {INCLUDES.map((i) => (
@@ -343,7 +343,7 @@ const DiagnosticPage: React.FC = () => {
                   ))}
                 </ul>
               </section>
-              <section className="premium-tile rounded-sm border border-border/60 p-6">
+              <section className="forensic-tile rounded-sm border border-border/60 p-6">
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">What it isn't</div>
                 <ul className="space-y-2.5">
                   {NOT_INCLUDED.map((i) => (
@@ -356,7 +356,7 @@ const DiagnosticPage: React.FC = () => {
               </section>
             </div>
 
-            <section className="premium-tile rounded-sm border border-amber/40 p-6 mb-10">
+            <section className="forensic-tile rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber">
                   Automatically included · $18,500 package
@@ -378,7 +378,7 @@ const DiagnosticPage: React.FC = () => {
                   return (
                     <div
                       key={t.name}
-                      className={`premium-tile rounded-md transition-all duration-500 ${
+                      className={`forensic-tile rounded-md transition-all duration-500 ${
                         isOpen
                           ? 'border-amber/70 md:col-span-2 lg:col-span-3 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
                           : 'border-border/60 hover:border-amber/50'
@@ -482,7 +482,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <section className="premium-tile rounded-sm border border-border/60 p-6 mb-10">
+            <section className="forensic-tile rounded-sm border border-border/60 p-6 mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
               <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
               <p className="text-sm text-foreground/80">
@@ -490,7 +490,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 text-center">
+            <section className="forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">After the diagnostic</div>
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer — $15K/month.</h2>
               <p className="text-sm text-foreground/80 mb-4">

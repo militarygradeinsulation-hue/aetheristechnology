@@ -90,7 +90,7 @@ export const UpcomingEvents: React.FC = () => {
             const start = new Date(e.starts_at);
             const end = e.ends_at ? new Date(e.ends_at) : null;
             return (
-              <article key={e.id} className="premium-tile rounded-sm border border-border/60 overflow-hidden flex flex-col">
+              <article key={e.id} className="forensic-tile rounded-sm border border-border/60 overflow-hidden flex flex-col">
                 {e.image_url && (
                   <img src={e.image_url} alt={e.title} className="w-full h-40 object-cover border-b border-border/60" loading="lazy" />
                 )}
