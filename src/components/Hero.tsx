@@ -6,6 +6,8 @@ import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import architectLogo from '@/assets/architect-logo.jpg';
 import heroLeakVideo from '@/assets/hero-leak.mp4';
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -95,9 +97,19 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             78% of companies we've found don't even know they exist.
           </p>
 
-          <p className="font-sans text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Aetheris is a revenue forensics firm for US specialty manufacturers, <span className="text-foreground font-semibold">$5M–$25M</span>. We audit your CRM, sales follow-up, and operations, put a dollar number on every leak, and either hand you the roadmap or implement the fixes ourselves.
-          </p>
+          <div className="max-w-5xl mx-auto pt-4 text-left">
+            <ForensicInfographic
+              image={INFOGRAPHICS.heroLeakingGauge}
+              imageAlt="Cracked revenue pressure gauge bleeding crimson onto a charcoal desk"
+              caseNumber="001 · The Leak"
+              title="Your business is leaking. You can't see it from the inside."
+              summary="Aetheris is a revenue forensics firm for US specialty manufacturers, $5M–$25M. We audit your CRM, sales follow-up, and operations, put a dollar figure on every leak, and either hand you the roadmap or implement the fixes ourselves."
+              fullText={[
+                "78% of the companies we've audited didn't know their biggest leak existed until we ran the diagnostic.",
+                "Most are losing 8–22% of annual revenue to leaks they can't see: lost leads, dead follow-up, broken handoffs, CRM rot.",
+              ]}
+            />
+          </div>
 
           <div className="flex justify-center pt-1">
             <Link to="/about">
