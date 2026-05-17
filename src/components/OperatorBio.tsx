@@ -94,26 +94,53 @@ export const OperatorBio: React.FC = () => {
           <RevealOnScroll delay={0.15}>
             <div className="space-y-6">
               <p className="font-forensic text-2xl md:text-3xl text-foreground leading-snug">
-                "Most businesses don't have a marketing problem, a sales problem, or an AI problem.
-                They have a <span className="text-crimson">leak</span> problem — and they can't see
-                it from inside the building."
+                "What started as <span className="text-crimson">survival</span> eventually became{' '}
+                <span className="text-amber">purpose</span>."
               </p>
 
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  I'm not a consultant who ships decks. I'm an operator who runs autopsies on
-                  businesses, names exactly where revenue is bleeding out, and rebuilds the systems
-                  that stopped it from being seen in the first place.
+                  I'm a Marine Corps veteran who was wounded in Iraq and came home carrying more than
+                  just physical injuries. Like many veterans, I felt lost trying to rebuild my life and
+                  figure out where I fit in after the military. With no background in construction, no
+                  roadmap, and no safety net, I started a construction company from the ground up.
                 </p>
                 <p>
-                  The stack is unusual on purpose: psychology degree (so I see the human leaks, not
-                  just the tech ones), Marine Corps background (reconnaissance and systems-under-pressure),
-                  and 20 years actually building the production systems most consultants only describe.
+                  In the beginning, it was me out in the field freezing inside unfinished homes,
+                  dragging trailers through mud, getting stuck on job sites, and doing whatever it took
+                  to keep the business alive. Over time, that small operation grew into full crews,
+                  fleets of vehicles, and major contracts. It was built through long days, failures,
+                  stress, and persistence.
                 </p>
                 <p>
-                  Aetheris is the field kit. The Leak Audit<sup className="text-amber">™</sup> is
-                  the methodology. AI, automation, and CRM are the stitches — applied after the wound
-                  is named, never before.
+                  At the same time, life at home was testing us in ways I could never have prepared
+                  for. Every one of my children faced major medical challenges at a young age. We went
+                  through open heart surgery, surgeries to help one of them see, jaw extractions so
+                  another could breathe properly, and countless hospital visits, all while they were
+                  still babies. I still had to show up to work every day, keep the business running,
+                  support my family, and somehow hold everything together.
+                </p>
+                <p>
+                  What frustrated me most was realizing how much time business owners waste doing
+                  repetitive tasks they think are just "part of the job." Endless follow ups,
+                  paperwork, quoting, missed leads, scheduling chaos, disconnected systems, and
+                  constant busy work. I started building tools and systems simply because I was
+                  exhausted and needed a better way to operate.
+                </p>
+                <p>
+                  That became the foundation for{' '}
+                  <span className="text-amber font-semibold">Aetheris Technology</span>.
+                </p>
+                <p>
+                  Today, I build AI systems, automation tools, and operational solutions designed for
+                  real business owners because I've lived the reality myself. My goal is not to sell
+                  hype or complicated tech. It's to help businesses eliminate unnecessary friction,
+                  save time, grow smarter, and regain control of their lives and operations.
+                </p>
+                <p>
+                  Everything I create comes from experience in the trenches, not theory. I know what
+                  it feels like to carry pressure at work while carrying even heavier pressure at
+                  home. That perspective shapes every system I build.
                 </p>
               </div>
 
