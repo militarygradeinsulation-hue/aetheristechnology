@@ -85,23 +85,33 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </span>
           </div>
 
-          <h1 className="font-forensic text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
-            <span className="text-foreground">We help specialty manufacturers find the </span>
-            <span className="text-amber">$200K–$2M</span>
-            <br className="hidden md:block" />
-            <span className="text-foreground"> they're </span>
-            <span className="text-crimson">losing</span>
-            <span className="text-foreground"> to broken </span>
-            <span className="text-crimson">CRM</span>
-            <span className="text-foreground">, sales, and operational systems — and fix it.</span>
+          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
+            <span className="text-foreground">We find the money your business is </span>
+            <span className="text-crimson">leaking</span>
+            <span className="text-foreground"> — and fix the systems causing it.</span>
           </h1>
 
-          <h2 className="font-forensic text-xl md:text-2xl lg:text-3xl font-bold leading-[1.1] tracking-tight max-w-5xl mx-auto text-muted-foreground">
-            <span className="text-foreground">20 years building revenue systems for </span>
-            <span className="text-amber">manufacturers.</span>
-            <br className="hidden md:block" />
-            <span className="text-foreground"> Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with </span>
-            <span className="text-amber">SpaceX accounts.</span>
+          <p className="font-sans text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Aetheris is a revenue forensics firm for US specialty manufacturers, <span className="text-foreground font-semibold">$5M–$25M</span>. We audit your CRM, sales follow-up, and operations, put a dollar number on every leak, and either hand you the roadmap or implement the fixes ourselves.
+          </p>
+
+          <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
+            <div className="premium-tile rounded-sm border border-border/60 p-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we do</div>
+              <div className="font-forensic text-lg font-bold text-foreground leading-snug">Forensic audit of your revenue systems.</div>
+            </div>
+            <div className="premium-tile rounded-sm border border-border/60 p-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What we look for</div>
+              <div className="font-forensic text-lg font-bold text-foreground leading-snug">Lost leads, dead follow-up, broken handoffs, CRM rot.</div>
+            </div>
+            <div className="premium-tile rounded-sm border border-border/60 p-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">What you get</div>
+              <div className="font-forensic text-lg font-bold text-foreground leading-snug">A written report with prioritized fixes and ROI per fix.</div>
+            </div>
+          </div>
+
+          <h2 className="font-case text-xs md:text-sm uppercase tracking-widest text-muted-foreground max-w-4xl mx-auto pt-2">
+            20 years building revenue systems · Marine Corps veteran · Former Director of Strategy, $25M aerospace firm with SpaceX accounts
           </h2>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
