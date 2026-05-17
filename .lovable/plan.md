@@ -1,44 +1,64 @@
-# Premium Navbar Redesign
+## Goal
 
-## The problem
-The current navbar throws four button styles at the user simultaneously: red pill (Leak Audit), yellow pill (Premium Tech Suite, Careers), amber pill (Home), and gray pill (everything else). It reads like a stoplight, not a forensics firm. No element earns priority — every link is shouting.
+Cut the wall-of-text feel on the highest-traffic pages by pairing each section with a forensic case-file infographic. Image carries the message; a short summary sits beside it. Long-form copy stays available but condensed.
 
-## The fix: one rail, one CTA
-A premium operator nav has three tiers, not four colors:
+## Scope (this round)
 
-1. **Logo** — anchors the brand (unchanged).
-2. **Nav links** — a single quiet, unified row. No filled buttons. Subtle underline-on-hover, amber-on-active. Reads as type, not as UI chrome.
-3. **One CTA on the right** — the only filled, amber button in the bar: **"Book the Diagnostic"**. This is what we want every visitor to click.
+**Home page** (`src/components/Hero.tsx`, `src/components/LeakAuditMethod.tsx`, `src/components/VerifiableOutcomes.tsx`, `src/components/ThePitch.tsx`)
+**Leak Audit page** (`src/pages/LeakAuditPage.tsx`)
+**Methodology page** (`src/pages/MethodologyPage.tsx` — 6 sections)
 
-The Leak Audit gets a small forensic micro-tag treatment (case-file mono label, no pill), keeping its priority without competing with the CTA.
+Other pages (Services, About, Industries, Credentials) — deferred to a follow-up round once we lock the pattern.
 
-## Visual spec
+## Infographic set (10 images)
+
+All generated via existing `generate-content-image` edge function (already locked to the brand palette + Aetheris watermark). Style chosen per topic:
+
+| # | Page / Section | Style | Subject |
+|---|---|---|---|
+| 1 | Home Hero — "Your business is leaking" | `noir_object` | Cracked pipeline gauge dripping crimson onto charcoal desk |
+| 2 | Home — Leak Audit Method (7 steps) | `blueprint` | Isometric 7-stage pipeline blueprint, one stage breach-flagged |
+| 3 | Home — Verifiable Outcomes | `data_macro` | Terminal screen, before/after revenue rows, one row crimson-underlined |
+| 4 | Home — The Pitch | `case_file` | Manila folder labeled "CASE #001 — REVENUE LEAK" with redaction bars |
+| 5 | Leak Audit page hero | `autopsy_diagram` | Business-process autopsy with 7 amber annotation arrows |
+| 6 | Methodology §1 "What is a leak" | `autopsy_diagram` | Sales funnel cross-section with measurable gap highlighted |
+| 7 | Methodology §2 "Baseline measurement" | `data_macro` | 12-month CRM data export with sample layers labeled |
+| 8 | Methodology §3 "Attribution" | `blueprint` | Pre/post measurement diagram, same metric tagged on both sides |
+| 9 | Methodology §4 "Scope" | `isometric` | Split diagram — "IN SCOPE" amber zone vs "OUT OF SCOPE" graphite zone |
+| 10 | Methodology §6 "Deliverables" | `case_file` | Stack of deliverables: report, CSV appendix, quote sheet |
+
+Images stored in `content-images` bucket, URLs pasted directly into components (no runtime generation on page load).
+
+## Layout pattern
+
+Two-column on desktop, stacked on mobile, inside the existing `forensic-tile`:
 
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│  [LOGO]   Home  Methodology  Industries  About  Field Notes  …      │
-│                                                  [ Book Diagnostic ] │
-└──────────────────────────────────────────────────────────────────────┘
-       ↑ scroll → glass blur + thin amber hairline on bottom edge
++--------------------------------------------------+
+|  [ INFOGRAPHIC ]   | CASE · 03                   |
+|                    | Headline (Fraunces)         |
+|   square, ~480px   | 2–3 line summary (Inter)    |
+|                    |                             |
+|                    | [Read full detail ▾]        |
++--------------------------------------------------+
 ```
 
-- **Bar background:** transparent at top, `glass` (backdrop blur + 1px amber/15 hairline border-bottom) once scrolled.
-- **Nav links:** `text-foreground/80`, `text-sm`, `tracking-wide`, `font-medium`. Hover: `text-amber` + animated underline (the existing `story-link` utility — 2px amber bar that wipes from right to left on hover, 300ms). Active route gets a permanent thin amber underline.
-- **"The Leak Audit" link:** rendered as a JetBrains Mono micro-label `CASE · LEAK AUDIT` in amber, `text-[10px] uppercase tracking-[0.2em]`, with a 1.5px amber left bar. Forensic, not loud.
-- **Primary CTA button (right-aligned):** `Book Diagnostic` in solid amber, black text, `font-bold`, `rounded-md` (not pill), subtle 1px amber-glow shadow on hover (`shadow-[0_10px_30px_-12px_hsl(var(--amber)/0.6)]`), `-translate-y-0.5` lift.
-- **Spacing:** more generous gap between links (`gap-7`), larger horizontal padding on the bar.
-- **Mobile:** sheet panel keeps the same hierarchy — quiet text links, single amber CTA pinned to bottom.
+- Image: `aspect-square`, `rounded-sm`, amber border on hover.
+- Summary: capped at ~280 characters.
+- Full text moved into a collapsible `<details>` so it stays indexable for SEO but is hidden by default.
 
-## Why this is "premium"
+## Steps
 
-- Restraint. One color (amber), used once for the action that matters.
-- Typography does the work, not button chrome.
-- Hairline borders and micro-labels signal forensic / editorial (Bloomberg, FT, Linear, Stripe), not consultant-template.
-- Removes the yellow/red/amber/gray collision that currently competes with the hero.
+1. **Generate the 10 images** — one script call per image to `generate-content-image` with the prompts above, save the returned URLs to a small constants file `src/lib/infographics.ts`.
+2. **Build `<ForensicInfographic>`** component (`src/components/ForensicInfographic.tsx`) — props: `image`, `caseNumber`, `title`, `summary`, `fullText?`. Handles the two-column layout + collapsible.
+3. **Wire into Home sections** — replace existing tile bodies in Hero, LeakAuditMethod, VerifiableOutcomes, ThePitch with `<ForensicInfographic>`.
+4. **Wire into Leak Audit page** — add hero infographic above the 7-step list.
+5. **Wire into Methodology page** — wrap each of the 6 SECTIONS entries with `<ForensicInfographic>`, condensing the body[] arrays into a single summary string; original paragraphs go into `fullText`.
+6. **QA pass** — screenshot Home, /leak-audit, /methodology at 1366px and mobile, verify alignment + readability.
 
-## Files changed
+## Notes
 
-- `src/components/Navbar.tsx` — replace the per-item `tone` pill variants with a unified link style + single right-aligned amber CTA. Keep all routes, click tracking, logo-tap staff entry, mobile menu, sticky CTA bar, and the careers-context hiding logic intact.
-
-No new components, no design-token changes, no other files touched.
-
+- No backend/data changes. Frontend + edge-function image generation only.
+- Brand rules already enforced inside the edge function (charcoal/amber, crimson only for leak, watermark).
+- If a generated image misses the brief, regenerate just that one — no need to redo the set.
+- Other pages (Services, Industries, About, Credentials) — separate round after you approve the pattern on these three.
