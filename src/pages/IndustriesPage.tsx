@@ -8,6 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 interface IndustryLeak {
   industry: string;
@@ -16,6 +17,7 @@ interface IndustryLeak {
   typicalLoss: string;
   whatWeMeasure: string[];
   slug: string;
+  image: string;
   recommended: {
     name: string;
     price: string;
