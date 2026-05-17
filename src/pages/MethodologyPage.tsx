@@ -110,7 +110,7 @@ const MethodologyPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="px-4 pt-28 pb-16">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="mb-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Measurement Methodology · v1.0
