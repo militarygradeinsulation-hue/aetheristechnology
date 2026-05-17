@@ -297,21 +297,29 @@ const Home = () => {
 
         {/* Resume Forensics teaser */}
         <section className="px-4 py-12">
-          <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10 text-center">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              New · Live AI tool
+          <div className="max-w-5xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10">
+            <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] items-center">
+              <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                <img src={INFOGRAPHICS.homeResumeForensics} alt="Resume under forensic light with fit-score gauge" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
+                <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+              </div>
+              <div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                  New · Live AI tool
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
+                  Hire the wrong person and your business <span className="text-crimson">starts leaking</span>.
+                </h2>
+                <p className="text-muted-foreground mb-5">
+                  Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score. <span className="text-amber font-semibold">$20 per scan.</span>
+                </p>
+                <Button asChild size="lg" className="font-bold">
+                  <Link to="/resume-forensics">
+                    Try Resume Forensics <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Hire the wrong person and your business <span className="text-crimson">starts leaking</span>.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-5">
-              Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score. <span className="text-amber font-semibold">$20 per scan.</span>
-            </p>
-            <Button asChild size="lg" className="font-bold">
-              <Link to="/resume-forensics">
-                Try Resume Forensics <ArrowRight className="h-4 w-4 ml-2" />
-              </Link>
-            </Button>
           </div>
         </section>
         </main>
