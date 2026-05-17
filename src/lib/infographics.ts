@@ -20,6 +20,12 @@ import case74Bottleneck from '@/assets/infographics/case-74-bottleneck.jpg';
 import homeAiGurus from '@/assets/infographics/home-ai-gurus.jpg';
 import homeAiOperator from '@/assets/infographics/home-ai-operator.jpg';
 import homeResumeForensics from '@/assets/infographics/home-resume-forensics.jpg';
+import industryManufacturing from '@/assets/infographics/industry-manufacturing.jpg';
+import industryConstruction from '@/assets/infographics/industry-construction.jpg';
+import industryLogistics from '@/assets/infographics/industry-logistics.jpg';
+import industryHealthcare from '@/assets/infographics/industry-healthcare.jpg';
+import industryFinance from '@/assets/infographics/industry-finance.jpg';
+import industrySaas from '@/assets/infographics/industry-saas.jpg';
 
 export const INFOGRAPHICS = {
   heroLeakingGauge,
@@ -44,4 +50,10 @@ export const INFOGRAPHICS = {
   homeAiGurus,
   homeAiOperator,
   homeResumeForensics,
+  industryManufacturing,
+  industryConstruction,
+  industryLogistics,
+  industryHealthcare,
+  industryFinance,
+  industrySaas,
 };
