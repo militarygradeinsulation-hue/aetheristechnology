@@ -242,13 +242,36 @@ const IndustriesPage: React.FC = () => {
                     <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
                       What we measure
                     </div>
-                    <ul className="space-y-1 mb-5 flex-1">
+                    <ul className="space-y-1 mb-4 flex-1">
                       {v.whatWeMeasure.map((m) => (
                         <li key={m} className="text-xs text-foreground/75 flex gap-2">
                           <span className="text-amber">›</span>{m}
                         </li>
                       ))}
                     </ul>
+
+                    <div
+                      className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3"
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest('a')) e.preventDefault();
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+                        <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+                      </div>
+                      <div className="font-bold text-sm text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
+                      <div className="font-mono text-amber text-xs mb-2">{v.recommended.price}</div>
+                      <p className="text-[11px] text-muted-foreground leading-snug mb-2">{v.recommended.why}</p>
+                      <Link
+                        to={v.recommended.link}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View this package <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+
                     <div className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40">
                       Open the case file <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
