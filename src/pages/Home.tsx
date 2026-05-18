@@ -187,9 +187,16 @@ const Home = () => {
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
                     <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
-                    <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                    <p className="text-sm text-foreground/80 leading-relaxed mb-3">{s.body}</p>
+                    <div className="pt-3 border-t border-amber/15">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1">
+                        What this gives you
+                      </div>
+                      <p className="text-[13px] text-foreground/85 leading-relaxed italic">{s.real}</p>
+                    </div>
                   </div>
                 </div>
+
               ))}
             </div>
             <div className="text-center mt-8 flex flex-wrap justify-center gap-3">
