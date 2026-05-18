@@ -245,7 +245,7 @@ const Home = () => {
                     </Link>
 
                   </div>
-                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square max-h-[440px] md:max-h-[480px] md:self-center mx-auto w-full">
                     <img src={INFOGRAPHICS.homeAiOperator} alt="AI agents running diagnostics inside a CRM, slide deck rejected" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
                     <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
                   </div>
