@@ -214,11 +214,11 @@ const Home = () => {
           </div>
         </section>
         {/* What makes us different, AI-native operator */}
-        <section className="px-4 py-14">
+        <section className="px-4 pt-14 pb-6">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
               <div className="forensic-tile rounded-sm border border-amber/40 p-8 md:p-12">
-                <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-center">
+                <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start">
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                       What makes us different
