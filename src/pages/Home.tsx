@@ -336,12 +336,18 @@ const Home = () => {
                 <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
                   Hire the wrong person and your business <span className="text-crimson">starts leaking</span>.
                 </h2>
-                <p className="text-muted-foreground mb-5">
-                  Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score. <span className="text-amber font-semibold">$20 per scan.</span>
+                <p className="text-muted-foreground mb-4">
+                  You know the feeling. The resume looks great, the interview goes fine, and six months later you're paying severance, re-posting the job, and explaining to your team why the seat is empty again. Every bad hire is a leak, salary, ramp time, lost deals, the customers they touched, the people who quit because of them.
                 </p>
+                <p className="text-muted-foreground mb-5">
+                  Drop the resume in. We scan their actual work history against your actual company in 90 seconds and tell you, in plain English, whether this person will plug a leak or open a new one. <span className="text-amber font-semibold">$20 per scan.</span> Cheaper than one bad lunch interview.
+                </p>
+                <div className="border-l-2 border-amber/40 pl-4 mb-5 text-sm text-muted-foreground/90 italic">
+                  I've made the wrong hire. Twice. Both times I knew within 30 days and spent the next 8 months pretending I didn't. Built this so you don't have to do the pretending part. , Joseph
+                </div>
                 <Button asChild size="lg" className="font-bold">
                   <Link to="/resume-forensics">
-                    Try Resume Forensics <ArrowRight className="h-4 w-4 ml-2" />
+                    Run a resume now <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
               </div>
