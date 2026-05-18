@@ -105,9 +105,9 @@ export const RetargetingPanel: React.FC = () => {
             <p className="text-sm text-muted-foreground mt-1">
               {settings.enabled
                 ? livePixels.length > 0
-                  ? `Active — ${livePixels.join(', ')} firing on every page`
+                  ? `Active, ${livePixels.join(', ')} firing on every page`
                   : 'Enabled but no pixel IDs configured'
-                : 'Disabled — flip the switch below to start collecting audiences'}
+                : 'Disabled, flip the switch below to start collecting audiences'}
             </p>
           </div>
           <div className={`px-3 py-1 rounded-full text-xs font-bold ${settings.enabled && livePixels.length > 0 ? 'bg-amber/20 text-amber' : 'bg-muted text-muted-foreground'}`}>
@@ -132,7 +132,7 @@ export const RetargetingPanel: React.FC = () => {
 
         <PixelField
           icon={<Linkedin className="w-4 h-4 text-amber" />}
-          label="LinkedIn Insight Tag — Partner ID"
+          label="LinkedIn Insight Tag, Partner ID"
           help="LinkedIn Campaign Manager → Account Assets → Insight Tag → Partner ID (e.g. 1234567)"
           docsUrl="https://www.linkedin.com/help/lms/answer/a427660"
           value={settings.linkedin_partner_id || ''}
@@ -183,9 +183,9 @@ export const RetargetingPanel: React.FC = () => {
       <div className="glass p-6 rounded-xl">
         <h3 className="text-lg font-bold text-foreground font-display mb-4">Suggested Audiences</h3>
         <div className="space-y-3 text-sm">
-          <AudienceRow label="🔥 Hot — Pricing/services viewers, no contact" filter="URL contains /services OR /why-us OR /capabilities — exclude conversions" />
-          <AudienceRow label="🌡 Warm — Blog readers" filter="URL contains /blog" />
-          <AudienceRow label="🧊 Cold — Homepage only" filter="URL equals / — exclude all other paths" />
+          <AudienceRow label="🔥 Hot, Pricing/services viewers, no contact" filter="URL contains /services OR /why-us OR /capabilities, exclude conversions" />
+          <AudienceRow label="🌡 Warm, Blog readers" filter="URL contains /blog" />
+          <AudienceRow label="🧊 Cold, Homepage only" filter="URL equals /, exclude all other paths" />
           <AudienceRow label="🎯 Converters (lookalike seed)" filter="URL contains /checkout/return OR /contact" />
         </div>
       </div>

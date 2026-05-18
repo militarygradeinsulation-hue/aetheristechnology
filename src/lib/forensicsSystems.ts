@@ -263,7 +263,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     ])},
 ];
 
-// Public checkout is disabled for these priceIds — they render a red "Coming Soon"
+// Public checkout is disabled for these priceIds, they render a red "Coming Soon"
 // badge on /services and cannot be added to the Mix & Match bundle. Admins can
 // still run them free-of-charge from the Admin → Forensics Systems panel.
 // To re-enable sales, remove the priceId from this set.
@@ -272,7 +272,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   // Monthly variants surfaced in ServicesPricing but not in this catalog
   "crm_health_check_monthly",
   "lead_flow_mapper_monthly",
-  // 1M IQ Innovations — net-new categories, public checkout disabled
+  // 1M IQ Innovations, net-new categories, public checkout disabled
   "obsession_engine_once", "obsession_engine_monthly",
   "revenue_leak_detector_once", "revenue_leak_detector_monthly",
   "messaging_psychologist_once", "messaging_psychologist_monthly",
@@ -291,7 +291,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "product_usage_optimization_monthly",
   "customer_research_automation_monthly",
   "sales_team_cloning_monthly",
-  // 1M IQ Innovations #31–#40 (skipped #34, #37 — overlap with Customer Research Automation)
+  // 1M IQ Innovations #31–#40 (skipped #34, #37, overlap with Customer Research Automation)
   "hiring_predictor_monthly",
   "customer_health_score_monthly",
   "territory_intelligence_once",

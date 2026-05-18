@@ -53,7 +53,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
     case "pre_start":
       return [
         { id: "ps1", label: "Send welcome text + portal link", owner: "Joseph",
-          detail: `Text ${name}: "Welcome aboard. Your portal is live — log in tonight, watch the 5-min Welcome video, and reply when you're done. Tomorrow we hit the ground running."`,
+          detail: `Text ${name}: "Welcome aboard. Your portal is live, log in tonight, watch the 5-min Welcome video, and reply when you're done. Tomorrow we hit the ground running."`,
           scriptKey: "day_one" },
         { id: "ps2", label: "Add to shared calendar + Team thread", owner: "Either",
           detail: "Mirror cadence events to their Cal. Drop them into the team Slack/SMS thread with a one-line intro.", },
@@ -77,7 +77,7 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
           detail: "Track completion in Training Studio. Gate Week-2 portal features behind it." },
         { id: "w3", label: "First booked meeting target", owner: "Braden",
           detail: "Goal: 1 qualified meeting booked by Friday. Pair them for the close." },
-        { id: "w4", label: "Friday debrief — keep/change/start", owner: "Either",
+        { id: "w4", label: "Friday debrief, keep/change/start", owner: "Either",
           detail: "What's working, what's broken, what they need from us next week.", scriptKey: "week_one" },
       ];
     case "first_month":
@@ -125,11 +125,11 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
 
 function healthFor(rep: RepCodeRow, days: number): { health: "green" | "yellow" | "red"; reason: string } {
   if (!rep.is_active) return { health: "red", reason: "Account inactive" };
-  if (days <= 7) return { health: "green", reason: "New hire — too early to judge" };
+  if (days <= 7) return { health: "green", reason: "New hire, too early to judge" };
   const sales = rep.total_sales_cents || 0;
-  if (days >= 30 && sales === 0) return { health: "red", reason: "30+ days, $0 in sales — intervene now" };
-  if (days >= 14 && sales === 0) return { health: "yellow", reason: "2 weeks, no closes yet — watch closely" };
-  if (sales > 0) return { health: "green", reason: `Producing — $${(sales / 100).toLocaleString()} closed` };
+  if (days >= 30 && sales === 0) return { health: "red", reason: "30+ days, $0 in sales, intervene now" };
+  if (days >= 14 && sales === 0) return { health: "yellow", reason: "2 weeks, no closes yet, watch closely" };
+  if (sales > 0) return { health: "green", reason: `Producing, $${(sales / 100).toLocaleString()} closed` };
   return { health: "yellow", reason: "No clear signal yet" };
 }
 

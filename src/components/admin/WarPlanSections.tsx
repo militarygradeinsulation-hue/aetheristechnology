@@ -1,4 +1,4 @@
-// War Plan operational content — offers, ICP, scripts, sales process, training, KPIs.
+// War Plan operational content, offers, ICP, scripts, sales process, training, KPIs.
 // Styled with the project's forensic tokens (amber/charcoal/Fraunces/JetBrains Mono).
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,7 @@ const useCopy = () => {
 // ──────────────────────────────────────────────────────────────────────
 const OFFERS_TABLE = [
   { name: "Forensic Diagnostic (Leak Audit)", what: "Full forensic: CRM, marketing, ops, systems. Ranked list of where money is being lost and how to recover it.", price: "$2.5k → applied", time: "7–10 days", use: "Entry point. Almost always reveals enough to sell implementation." },
-  { name: "Revenue Recovery Sprint", what: "Fix the top 3 highest-impact leaks identified in the audit. CRM cleanup, automation, offer restructuring, funnel repair.", price: "$25k – $50k", time: "30 days", use: "Post-audit upsell. High close rate — the problem is already proven." },
+  { name: "Revenue Recovery Sprint", what: "Fix the top 3 highest-impact leaks identified in the audit. CRM cleanup, automation, offer restructuring, funnel repair.", price: "$25k – $50k", time: "30 days", use: "Post-audit upsell. High close rate, the problem is already proven." },
   { name: "Implementation Retainer", what: "Custom AI tools, automation stacks, digital infrastructure. Recovery Engine, Hygiene Engine, LinkedIn Engine, custom builds.", price: "$15k / mo", time: "rolling 3–6 mo", use: "Mid-market $10M–$50M ready to scale operations." },
   { name: "Fractional CTO Retainer", what: "Strategic oversight of tech stack, AI roadmap, vendor management, system governance. Monthly calls + async + quarterly reviews.", price: "$5k – $15k / mo", time: "rolling 6–12 mo", use: "Post-project. Builds recurring revenue. Stacks fast." },
   { name: "Done-For-You Growth Stack", what: "Full engagement: audit + systems build + 90 days of retainer support. White-glove, premium.", price: "$100k – $175k", time: "90–120 days", use: "Serious operators who want one partner, not a patchwork." },
@@ -69,14 +69,14 @@ export const OfferStackSection: React.FC = () => (
             <li>Diagnostic priced as a no-brainer vs. what they bleed monthly</li>
             <li>Sprints are ROI-positive in 60 days or less</li>
             <li>Retainers convert because clients won't lose the relationship post-build</li>
-            <li>Never discount — offer payment terms instead</li>
+            <li>Never discount, offer payment terms instead</li>
             <li>Anchor every conversation to cost of inaction</li>
           </ul>
         </div>
         <div className="rounded-md border border-amber/30 bg-amber/5 p-3">
           <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-1">The framing that closes</div>
           <p className="text-xs text-muted-foreground italic">
-            "Most companies your size are losing $300k–$2M a year in preventable revenue leaks — missed follow-up,
+            "Most companies your size are losing $300k–$2M a year in preventable revenue leaks, missed follow-up,
             broken systems, underperforming marketing, ops gaps. We find exactly where it's happening and fix it. The
             audit pays for itself in the first finding."
           </p>
@@ -90,21 +90,21 @@ export const OfferStackSection: React.FC = () => (
 // 2. ICP / TARGET MARKET
 // ──────────────────────────────────────────────────────────────────────
 const VERTICALS = [
-  { tag: "Vertical 1 — Primary", name: "Specialty Manufacturers", lines: [
+  { tag: "Vertical 1, Primary", name: "Specialty Manufacturers", lines: [
     "Revenue: $5M–$50M",
     "Pain: long sales cycles, manual quoting, no CRM discipline, outdated systems",
     'Trigger words: "leaving money on the table" / "sales doesn\'t follow up" / "built on spreadsheets"',
     "Best entry: Forensic Diagnostic",
     "Find them: LinkedIn, NAM + regional mfg councils, trade shows",
   ]},
-  { tag: "Vertical 2 — Secondary", name: "Commercial Construction & GCs", lines: [
+  { tag: "Vertical 2, Secondary", name: "Commercial Construction & GCs", lines: [
     "Revenue: $8M–$40M",
     "Pain: chaotic bid process, project handoffs break, post-close client comms fail",
     'Trigger words: "win bids but lose on margins" / "can\'t scale without hiring" / "CRM is a mess"',
     "Best entry: Revenue Recovery Sprint",
     "Find them: LinkedIn, AGC chapter events, local business journals",
   ]},
-  { tag: "Vertical 3 — Fast Cash", name: "Commercial Services ($10M–$30M)", lines: [
+  { tag: "Vertical 3, Fast Cash", name: "Commercial Services ($10M–$30M)", lines: [
     "HVAC, electrical, landscaping, facility management at commercial scale",
     "Pain: recurring revenue uncaptured, tech stack is a mess, marketing scattered",
     'Trigger words: "website doesn\'t bring anything" / "lose customers after year 1" / "no system"',
@@ -175,27 +175,27 @@ export const TargetMarketSection: React.FC = () => (
 // 3. OUTREACH SCRIPTS (copyable)
 // ──────────────────────────────────────────────────────────────────────
 const SCRIPTS = [
-  { label: "LinkedIn DM — First Touch (Cold Connection)", note: "Keep it short. One question at the end. No links. Reply rate drops 60% with links in first message.",
-    text: `Hey [First Name] — noticed you're running [Company] in [industry].
+  { label: "LinkedIn DM, First Touch (Cold Connection)", note: "Keep it short. One question at the end. No links. Reply rate drops 60% with links in first message.",
+    text: `Hey [First Name], noticed you're running [Company] in [industry].
 
 Most companies your size are quietly bleeding $300k–$1M/year through broken follow-up systems, underperforming marketing, and ops gaps they don't even know exist.
 
-We built a diagnostic process that finds exactly where it's happening — in about 7 days.
+We built a diagnostic process that finds exactly where it's happening, in about 7 days.
 
-Not pitching anything today — just thought this might be worth a 15-minute conversation if the timing is right.
+Not pitching anything today, just thought this might be worth a 15-minute conversation if the timing is right.
 
 Interested?` },
-  { label: "LinkedIn DM — Follow Up (Day 5, no reply)", note: 'The reversal ("if everything is fine, you don\'t need us") consistently outperforms standard follow-ups by triggering self-assessment.',
-    text: `Hey [First Name] — following up on my note from earlier this week.
+  { label: "LinkedIn DM, Follow Up (Day 5, no reply)", note: 'The reversal ("if everything is fine, you don\'t need us") consistently outperforms standard follow-ups by triggering self-assessment.',
+    text: `Hey [First Name], following up on my note from earlier this week.
 
-Quick version: we find where B2B companies your size are leaking revenue — then fix it.
+Quick version: we find where B2B companies your size are leaking revenue, then fix it.
 
-If you're not losing any leads, your systems are running clean, and your marketing is working the way it should — you definitely don't need us.
+If you're not losing any leads, your systems are running clean, and your marketing is working the way it should, you definitely don't need us.
 
 If any of those feel off, might be worth a short call.
 
 Up to you either way.` },
-  { label: 'Cold Email — Subject: "Quick question about [Company]"', note: 'Personalize [Company] and [industry]. Send from a warmed domain. Use Instantly or Smartlead. Never use "I hope this email finds you well."',
+  { label: 'Cold Email, Subject: "Quick question about [Company]"', note: 'Personalize [Company] and [industry]. Send from a warmed domain. Use Instantly or Smartlead. Never use "I hope this email finds you well."',
     text: `Subject: Quick question about [Company Name]
 
 [First Name],
@@ -207,20 +207,20 @@ Most of the time, the biggest problems are:
 → Marketing that looks busy but doesn't convert
 → Ops and systems that can't scale without adding headcount
 
-We do a 7-day Forensic Diagnostic that surfaces exactly where the money is going — and what it would take to get it back.
+We do a 7-day Forensic Diagnostic that surfaces exactly where the money is going, and what it would take to get it back.
 
 Worth a 20-minute call to see if it applies to [Company Name]?
 
-— Joseph
+,  Joseph
 Aetheris AI | aetheris.technology` },
   { label: "Referral Partner Outreach (CPAs, Attorneys, M&A Advisors)", note: "Position as a resource, not a commission pitch. Referral fee conversation happens AFTER they show interest.",
-    text: `Hey [Name] — I know you work with a lot of growth-stage businesses in the $5M–$50M range.
+    text: `Hey [Name], I know you work with a lot of growth-stage businesses in the $5M–$50M range.
 
-We do revenue and operations diagnostics for companies in that zone — specifically finding where they're bleeding money in their systems, marketing, and ops.
+We do revenue and operations diagnostics for companies in that zone, specifically finding where they're bleeding money in their systems, marketing, and ops.
 
 It's not a marketing agency play. We find broken things and build tools to fix them. Most engagements recover significantly more than they cost.
 
-If any of your clients are dealing with stalled growth, chaotic operations, or "we're leaving money on the table" conversations — I'd love to be on your referral list.
+If any of your clients are dealing with stalled growth, chaotic operations, or "we're leaving money on the table" conversations, I'd love to be on your referral list.
 
 Happy to send over a one-pager or jump on a call if that's easier.
 
@@ -277,13 +277,13 @@ export const OutreachSection: React.FC = () => {
             </ul>
           </div>
           <div className="rounded-md border border-border/60 bg-background/40 p-3">
-            <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">LinkedIn content — 5 posts / week</div>
+            <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">LinkedIn content, 5 posts / week</div>
             <ul className="text-xs text-muted-foreground space-y-1">
-              <li><strong className="text-foreground">Mon</strong> — revenue leak insight (problem awareness)</li>
-              <li><strong className="text-foreground">Tue</strong> — mini case study / before-after</li>
-              <li><strong className="text-foreground">Wed</strong> — diagnostic question ("does your company have this?")</li>
-              <li><strong className="text-foreground">Thu</strong> — system or tool breakdown (credibility)</li>
-              <li><strong className="text-foreground">Fri</strong> — POV post — the thing most consultants won't say</li>
+              <li><strong className="text-foreground">Mon</strong>, revenue leak insight (problem awareness)</li>
+              <li><strong className="text-foreground">Tue</strong>, mini case study / before-after</li>
+              <li><strong className="text-foreground">Wed</strong>, diagnostic question ("does your company have this?")</li>
+              <li><strong className="text-foreground">Thu</strong>, system or tool breakdown (credibility)</li>
+              <li><strong className="text-foreground">Fri</strong>, POV post, the thing most consultants won't say</li>
             </ul>
           </div>
         </div>
@@ -309,7 +309,7 @@ const STAGES = [
       'Lead with what you heard: "Based on our conversation, here\'s what appears to be happening…"',
       "Describe the audit process and what they'll receive (ranked issues, recovery estimates, recommended path)",
       "Price: $2.5k Forensic Diagnostic (applied toward engagement)",
-      'Frame: "Either it shows you where the money is — or confirms you don\'t have a problem. Either way, you\'ll know."',
+      'Frame: "Either it shows you where the money is, or confirms you don\'t have a problem. Either way, you\'ll know."',
   ]},
   { stage: "Stage 3", time: "Audit Delivery · Day 7–10", title: "The proof moment",
     bullets: [
@@ -321,7 +321,7 @@ const STAGES = [
   ]},
   { stage: "Stage 4", time: "Sprint / Build Proposal · 48–72 hrs", title: "The big close",
     bullets: [
-      "The hard sell is already done — by the audit findings",
+      "The hard sell is already done, by the audit findings",
       "Proposal scoped to their exact issues, not a generic package",
       'Anchor to ROI: "Recover 20% of what we found and this pays for itself 4x over"',
       "Offer two paths: Sprint ($25k–$50k) or Implementation Retainer ($15k/mo)",
@@ -330,7 +330,7 @@ const STAGES = [
   { stage: "Stage 5", time: "Retainer Conversion · Day 60–90", title: "Lock in recurring revenue",
     bullets: [
       "At 60–70% completion of any project, introduce the retainer",
-      'Frame: "Most clients keep us on for strategic oversight — last thing you want is to rebuild these systems in 6 months without anyone watching the architecture"',
+      'Frame: "Most clients keep us on for strategic oversight, last thing you want is to rebuild these systems in 6 months without anyone watching the architecture"',
       "$5k–$15k/month depending on scope",
       "Goal: 5 retainer clients by Day 90 = $25k–$75k/month MRR foundation",
   ]},
@@ -338,11 +338,11 @@ const STAGES = [
 
 const OBJECTIONS = [
   { tag: "Too Expensive", title: "The cost of nothing",
-    body: '"What I\'d ask you to consider — based on what we found in the audit, you\'re losing roughly [X] per month right now. This engagement costs [Y]. If we recover even 30% of what\'s leaking, it pays for itself in [Z] weeks. The real question isn\'t whether this costs too much — it\'s whether you can afford to keep losing it."' },
+    body: '"What I\'d ask you to consider, based on what we found in the audit, you\'re losing roughly [X] per month right now. This engagement costs [Y]. If we recover even 30% of what\'s leaking, it pays for itself in [Z] weeks. The real question isn\'t whether this costs too much, it\'s whether you can afford to keep losing it."' },
   { tag: "Not the Right Time", title: "Timing reframe",
-    body: '"I hear that — when would be a better time? Reason I ask: every month this isn\'t fixed is another month of [the problem]. Most clients tell us they wish they\'d started sooner. Is there a specific constraint right now, or is it more about bandwidth?"' },
+    body: '"I hear that, when would be a better time? Reason I ask: every month this isn\'t fixed is another month of [the problem]. Most clients tell us they wish they\'d started sooner. Is there a specific constraint right now, or is it more about bandwidth?"' },
   { tag: "We Need to Think About It", title: "The clear ask",
-    body: '"Absolutely — what specifically is the part you\'d want to think through? Want to make sure I haven\'t left anything unclear. Most of the time when someone wants to think it over, there\'s a specific concern I haven\'t addressed — what is it for you?"' },
+    body: '"Absolutely, what specifically is the part you\'d want to think through? Want to make sure I haven\'t left anything unclear. Most of the time when someone wants to think it over, there\'s a specific concern I haven\'t addressed, what is it for you?"' },
 ];
 
 export const SalesProcessSection: React.FC = () => {
@@ -354,7 +354,7 @@ export const SalesProcessSection: React.FC = () => {
           <Handshake className="w-4 h-4 text-amber" /> Sales Process · Diagnose, Don't Pitch
         </CardTitle>
         <p className="text-xs text-muted-foreground mt-1">
-          You are not a salesperson — you are a <strong className="text-foreground">diagnostician</strong>. Your job is
+          You are not a salesperson, you are a <strong className="text-foreground">diagnostician</strong>. Your job is
           to help the prospect see the problem more clearly than they ever have.
         </p>
       </CardHeader>
@@ -446,22 +446,22 @@ export const TrainingMatrixSection: React.FC = () => (
         <div className="rounded-md border border-border/60 bg-background/40 p-3">
           <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">Sales rep onboarding · Days 1–7</div>
           <ul className="text-xs text-muted-foreground space-y-1">
-            <li><strong className="text-foreground">Day 1</strong> — mission, ICP, offer stack, pricing rationale</li>
-            <li><strong className="text-foreground">Day 2</strong> — Revenue Leak frame in 90 seconds</li>
-            <li><strong className="text-foreground">Day 3</strong> — discovery script, flow, qualifying fast</li>
-            <li><strong className="text-foreground">Day 4</strong> — objection handling — top 5 word for word</li>
-            <li><strong className="text-foreground">Day 5</strong> — LinkedIn outreach — 10 messages supervised</li>
-            <li><strong className="text-foreground">Day 6</strong> — shadow Joseph on a live call or replay</li>
-            <li><strong className="text-foreground">Day 7</strong> — solo discovery call with debrief</li>
+            <li><strong className="text-foreground">Day 1</strong>, mission, ICP, offer stack, pricing rationale</li>
+            <li><strong className="text-foreground">Day 2</strong>, Revenue Leak frame in 90 seconds</li>
+            <li><strong className="text-foreground">Day 3</strong>, discovery script, flow, qualifying fast</li>
+            <li><strong className="text-foreground">Day 4</strong>, objection handling, top 5 word for word</li>
+            <li><strong className="text-foreground">Day 5</strong>, LinkedIn outreach, 10 messages supervised</li>
+            <li><strong className="text-foreground">Day 6</strong>, shadow Joseph on a live call or replay</li>
+            <li><strong className="text-foreground">Day 7</strong>, solo discovery call with debrief</li>
           </ul>
         </div>
         <div className="rounded-md border border-border/60 bg-background/40 p-3">
           <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">Weekly team rhythm</div>
           <ul className="text-xs text-muted-foreground space-y-1">
-            <li><strong className="text-foreground">Mon 9am</strong> — pipeline review (moved / stuck / closes-this-week)</li>
-            <li><strong className="text-foreground">Wed</strong> — call debrief — replay one call, identify one fix</li>
-            <li><strong className="text-foreground">Fri</strong> — numbers check — sent / replies / booked / proposals / closed</li>
-            <li><strong className="text-foreground">Always</strong> — every rep logs activity in HubSpot same day. No exceptions.</li>
+            <li><strong className="text-foreground">Mon 9am</strong>, pipeline review (moved / stuck / closes-this-week)</li>
+            <li><strong className="text-foreground">Wed</strong>, call debrief, replay one call, identify one fix</li>
+            <li><strong className="text-foreground">Fri</strong>, numbers check, sent / replies / booked / proposals / closed</li>
+            <li><strong className="text-foreground">Always</strong>, every rep logs activity in HubSpot same day. No exceptions.</li>
           </ul>
         </div>
       </div>
@@ -534,19 +534,19 @@ export const KpiScoreboardSection: React.FC = () => (
         <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="w-4 h-4 text-destructive" />
-            <div className="text-[10px] uppercase tracking-wide text-destructive font-mono">Recovery protocol — if behind</div>
+            <div className="text-[10px] uppercase tracking-wide text-destructive font-mono">Recovery protocol, if behind</div>
           </div>
           <ul className="text-xs text-muted-foreground space-y-1 list-disc ml-5">
-            <li><strong className="text-foreground">Wk 3 not at $50k</strong> — work warm network harder. Personal calls, not messages.</li>
-            <li><strong className="text-foreground">Wk 6 not at $300k</strong> — add a second rep, increase outreach 2x.</li>
-            <li><strong className="text-foreground">Wk 9 not at $600k</strong> — drop all non-revenue activity. Outreach + calls only.</li>
-            <li><strong className="text-foreground">Never</strong> — lower prices, add products, or pivot positioning mid-sprint.</li>
+            <li><strong className="text-foreground">Wk 3 not at $50k</strong>, work warm network harder. Personal calls, not messages.</li>
+            <li><strong className="text-foreground">Wk 6 not at $300k</strong>, add a second rep, increase outreach 2x.</li>
+            <li><strong className="text-foreground">Wk 9 not at $600k</strong>, drop all non-revenue activity. Outreach + calls only.</li>
+            <li><strong className="text-foreground">Never</strong>, lower prices, add products, or pivot positioning mid-sprint.</li>
           </ul>
         </div>
         <div className="rounded-md border border-amber/40 bg-amber/5 p-3">
           <div className="flex items-center gap-2 mb-2">
             <Rocket className="w-4 h-4 text-amber" />
-            <div className="text-[10px] uppercase tracking-wide text-amber font-mono">Acceleration protocol — if ahead</div>
+            <div className="text-[10px] uppercase tracking-wide text-amber font-mono">Acceleration protocol, if ahead</div>
           </div>
           <ul className="text-xs text-muted-foreground space-y-1 list-disc ml-5">
             <li>Add a second commissioned rep immediately</li>
@@ -577,7 +577,7 @@ export const KpiScoreboardSection: React.FC = () => (
           <MessageSquare className="w-4 h-4 text-amber mt-0.5" />
           <p className="text-sm text-foreground/90 italic leading-relaxed">
             <strong className="text-amber">The final word.</strong> Companies our size, with our offer, at our price
-            points, do not need luck — they need execution discipline. The math works. The market is there. The only
+            points, do not need luck, they need execution discipline. The math works. The market is there. The only
             variable is whether the machine runs every day without exception. Run the machine.
           </p>
         </div>

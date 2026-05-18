@@ -225,7 +225,7 @@ export const hygieneCostModels: Record<string, HygieneCostModel> = {
   engagement_orphans: {
     perIssue: 2,
     basis: "attribution loss",
-    why: "Orphan engagements (calls, emails, meetings not linked to a contact or deal) break attribution and clutter activity timelines. Cost is mostly reporting noise — small per record.",
+    why: "Orphan engagements (calls, emails, meetings not linked to a contact or deal) break attribution and clutter activity timelines. Cost is mostly reporting noise, small per record.",
     formula: "$2 × orphans (lost attribution credit)",
   },
 };

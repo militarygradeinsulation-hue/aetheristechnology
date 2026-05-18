@@ -137,7 +137,7 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
                 )}
                 <span className={isCurrent ? "text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground/60"}>
                   {s.label}
-                  {isCurrent && stageMessage && <span className="text-muted-foreground ml-2">— {stageMessage}</span>}
+                  {isCurrent && stageMessage && <span className="text-muted-foreground ml-2">,  {stageMessage}</span>}
                 </span>
               </div>
             );

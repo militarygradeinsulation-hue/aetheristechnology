@@ -75,7 +75,7 @@ export const TemplateEditor: React.FC = () => {
           {s.steps.map((step, stepIdx) => (
             <div key={stepIdx} className="bg-secondary/40 p-3 rounded-lg space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-muted-foreground">Step {stepIdx + 1} {stepIdx === 0 && '(hardcoded — not editable)'}</span>
+                <span className="text-xs font-mono text-muted-foreground">Step {stepIdx + 1} {stepIdx === 0 && '(hardcoded, not editable)'}</span>
                 <div className="flex items-center gap-2">
                   <Label htmlFor={`d-${sIdx}-${stepIdx}`} className="text-xs">Delay days</Label>
                   <Input id={`d-${sIdx}-${stepIdx}`} type="number" className="w-20 h-8" value={step.delay_days}

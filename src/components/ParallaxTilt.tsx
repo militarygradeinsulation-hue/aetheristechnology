@@ -9,7 +9,7 @@ interface ParallaxTiltProps {
 }
 
 /**
- * ParallaxTilt — wraps a tile and applies a subtle scroll-driven Y translate
+ * ParallaxTilt, wraps a tile and applies a subtle scroll-driven Y translate
  * + rotateX so it appears to "hover" as the user scrolls past.
  * Respects prefers-reduced-motion.
  */

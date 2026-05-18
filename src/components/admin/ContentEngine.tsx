@@ -90,7 +90,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
     'The 5 silent leaks bleeding 6-figures from your ops',
     'Why your "best" rep is actually your biggest leak',
     'The follow-up gap that costs $40k/month (and nobody tracks it)',
-    'Stop calling it a pipeline problem — it\'s a process leak',
+    'Stop calling it a pipeline problem, it\'s a process leak',
     'The ghosted-proposal autopsy: where the deal actually died',
     'Three questions that expose a leaking sales process in 10 minutes',
     'The retention leak hiding in your onboarding (and how to seal it)',
@@ -104,7 +104,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
     'How a $7M shop found $1.2M in 14 days without hiring',
     'What I found inside a $30M company\'s revenue ops in 90 minutes',
     'The 14-day Forensic Diagnostic framework I run on every engagement',
-    'Why I charge $2,500 flat to look — and why it\'s the cheapest thing you\'ll buy this year',
+    'Why I charge $2,500 flat to look, and why it\'s the cheapest thing you\'ll buy this year',
     'Inside a real diagnostic: 4 leaks, $480k recovered, no new tools',
     'The case for a forensic diagnostic before any tech stack rebuild',
     'Diagnostic vs. consulting call: why one finds money and the other wastes time',
@@ -117,11 +117,11 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
     'Why discounting is a symptom, not a strategy',
     'Operator > consultant: what the difference looks like in the field',
     'The CEO dashboard I rebuild on every engagement (and why)',
-    'When to fire your "rockstar" — the operator\'s checklist',
+    'When to fire your "rockstar", the operator\'s checklist',
     'Stop measuring activity. Start measuring leaks.',
   ],
   'AI / Tech': [
-    'AI won\'t fix a broken process — it\'ll just speed up the bleed',
+    'AI won\'t fix a broken process, it\'ll just speed up the bleed',
     'Why "we tried automation" usually means "we bought software"',
     'Your CRM is lying to you. Here\'s how to prove it.',
     'The 3-question test before you let AI touch your sales pipeline',
@@ -133,7 +133,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
   'Sales & Pipeline': [
     'The follow-up SLA that doubled close rate at a $12M services firm',
     'Stuck-deal triage: the 4 questions that move (or kill) a deal in 1 call',
-    'Why "warm leads" go cold in 72 hours — and the fix takes 20 minutes',
+    'Why "warm leads" go cold in 72 hours, and the fix takes 20 minutes',
     'The proposal template I rewrote that closed an extra $310k in Q2',
     'Discovery calls are leaking deals. Here\'s the script that plugs it.',
     'Why your CRM stages are lying about your pipeline value',
@@ -147,7 +147,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
   'Trust & Positioning': [
     'I don\'t do retainers until I find the leak. Here\'s why.',
     'What a "Business Forensics Operator" actually does (it\'s not consulting)',
-    'Why I refuse to pitch — and what I do instead',
+    'Why I refuse to pitch, and what I do instead',
     'The 3 kinds of clients I turn away (and why you should too)',
     'How to vet anyone selling you "AI for your business" in 4 questions',
   ],
@@ -324,7 +324,7 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
-  // Headshots library — loaded once
+  // Headshots library, loaded once
   const [headshots, setHeadshots] = useState<Headshot[]>([]);
   useEffect(() => {
     callThumb('list_headshots').then((d) => setHeadshots(d.headshots || [])).catch(() => {});
@@ -678,7 +678,7 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
             value={userPrompt}
             onChange={(e) => setUserPrompt(e.target.value)}
           />
-          <p className="text-[11px] text-muted-foreground mt-1.5">Free-text direction. Highest priority — every post in the batch will obey this.</p>
+          <p className="text-[11px] text-muted-foreground mt-1.5">Free-text direction. Highest priority, every post in the batch will obey this.</p>
         </div>
 
         <div>
@@ -986,7 +986,7 @@ function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrate
       </Section>
 
       <Section title="Voice">
-        <Field label="Voice Reference (paste your writing samples — the more specific, the better the mimicry)">
+        <Field label="Voice Reference (paste your writing samples, the more specific, the better the mimicry)">
           <Textarea rows={6} value={strategy.voice_reference} onChange={(e) => update('voice_reference', e.target.value)} />
         </Field>
       </Section>
@@ -1283,7 +1283,7 @@ function ThumbnailBlock({ post, headshots, onGenerate }: {
         </div>
         {post.thumbnail_status === 'error' && (
           <div className="px-3 py-2 text-[11px] text-crimson border-t border-crimson/30 bg-crimson/5">
-            Last attempt failed — check edge function logs.
+            Last attempt failed, check edge function logs.
           </div>
         )}
       </div>
@@ -1344,7 +1344,7 @@ function UnifiedImageStudio({ post, headshots, onUpdate, onGenerateThumbnail }: 
 
       <p className="text-[11px] text-muted-foreground mt-2">
         {mode === 'ai'
-          ? 'Free prompt — generate any image you want with AI.'
+          ? 'Free prompt, generate any image you want with AI.'
           : 'Generates a branded thumbnail from one of your reference photos.'}
       </p>
     </div>

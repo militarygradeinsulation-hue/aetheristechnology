@@ -66,7 +66,7 @@ export const BlogList: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We break down exactly how businesses waste money on AI, marketing, and disconnected systems —
+            We break down exactly how businesses waste money on AI, marketing, and disconnected systems , 
             with real numbers, real costs, and real solutions. No fluff. No hype.
           </p>
         </div>
@@ -162,7 +162,7 @@ export const BlogList: React.FC = () => {
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM
-            systems — and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
+            systems, and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a

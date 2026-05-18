@@ -50,7 +50,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'friction_audit',
-          title: `${form.url} — Friction audit — ${new Date().toLocaleDateString()}`,
+          title: `${form.url}, Friction audit, ${new Date().toLocaleDateString()}`,
           input_data: form,
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -95,7 +95,7 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
       {/* Results */}
       {result && (
         <div className="space-y-8">
-          <QuickDownloadBar toolType="friction_audit" title={`${form.url} — Friction audit — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
+          <QuickDownloadBar toolType="friction_audit" title={`${form.url}, Friction audit, ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Score */}
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Copy Friction Score</h2>

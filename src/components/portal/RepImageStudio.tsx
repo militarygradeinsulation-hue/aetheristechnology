@@ -23,8 +23,8 @@ const MODELS = [
 ];
 
 const PROMPT_STARTERS: { label: string; prompt: string; infographic?: boolean }[] = [
-  { label: '5 ways your business is leaking', prompt: '5 ways small business owners are silently losing $50k+ a year — show each leak as a forensic case-file fragment with a $ amount.', infographic: true },
-  { label: 'Before / After Leak Audit', prompt: 'Before and after the Leak Audit — left side: chaotic dashboard bleeding red. Right side: clean, profitable, amber-lit operation.', infographic: true },
+  { label: '5 ways your business is leaking', prompt: '5 ways small business owners are silently losing $50k+ a year, show each leak as a forensic case-file fragment with a $ amount.', infographic: true },
+  { label: 'Before / After Leak Audit', prompt: 'Before and after the Leak Audit, left side: chaotic dashboard bleeding red. Right side: clean, profitable, amber-lit operation.', infographic: true },
   { label: 'Forensic dashboard hero', prompt: 'A dramatic forensic business dashboard with redacted bars, glowing amber metrics, and a single crimson "ACTIVE LEAK" stamp.' },
   { label: '7-step Leak Audit infographic', prompt: 'The 7-step Leak Audit methodology shown as numbered evidence cards laid on a dark dossier desk.', infographic: true },
 ];
@@ -145,7 +145,7 @@ export const RepImageStudio: React.FC = () => {
           <h2 className="text-xl font-bold text-foreground font-display">Personal Creation Studio</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Generate on-brand images and infographics to send your leads. Upload a photo of yourself to use as a base for personalized graphics, headshots, or pitch visuals — anything you make is saved here.
+          Generate on-brand images and infographics to send your leads. Upload a photo of yourself to use as a base for personalized graphics, headshots, or pitch visuals, anything you make is saved here.
         </p>
 
         {/* Upload Your Photo CTA */}
@@ -153,7 +153,7 @@ export const RepImageStudio: React.FC = () => {
           <div className="flex items-center gap-2 text-sm flex-1">
             <ImageIcon className="w-4 h-4 text-amber shrink-0" />
             <span className="text-foreground font-medium">Upload a photo of yourself</span>
-            <span className="text-xs text-muted-foreground hidden sm:inline">— use it as a base for branded portraits, social posts, or LinkedIn graphics</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">,  use it as a base for branded portraits, social posts, or LinkedIn graphics</span>
           </div>
           <Button
             size="sm"

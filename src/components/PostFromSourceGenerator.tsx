@@ -117,7 +117,7 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adm
           <div className="mb-4">
             <Label>Pick a blog</Label>
             <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} className="w-full mt-1 bg-background border border-input rounded-md px-3 py-2 text-sm">
-              <option value="">— Select a blog post —</option>
+              <option value="">,  Select a blog post , </option>
               {blogs.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
             </select>
           </div>
@@ -127,7 +127,7 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adm
           <div className="mb-4">
             <Label>Pick a playbook</Label>
             <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} className="w-full mt-1 bg-background border border-input rounded-md px-3 py-2 text-sm">
-              <option value="">— Select a playbook —</option>
+              <option value="">,  Select a playbook , </option>
               {playbooks.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
           </div>

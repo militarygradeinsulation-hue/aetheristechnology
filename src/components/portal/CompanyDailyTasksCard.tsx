@@ -88,7 +88,7 @@ export const CompanyDailyTasksCard: React.FC = () => {
       <Card className="border-border/60">
         <CardHeader className="pb-3">
           <CardTitle className="font-display flex items-center gap-2 text-base">
-            <ListChecks className="w-5 h-5 text-amber" /> Company Tasks — Today
+            <ListChecks className="w-5 h-5 text-amber" /> Company Tasks, Today
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -104,7 +104,7 @@ export const CompanyDailyTasksCard: React.FC = () => {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <CardTitle className="font-display flex items-center gap-2 text-base">
-              <ListChecks className="w-5 h-5 text-amber" /> Company Tasks — Today
+              <ListChecks className="w-5 h-5 text-amber" /> Company Tasks, Today
             </CardTitle>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mt-1">
               {totals.done}/{totals.total} complete · {date}

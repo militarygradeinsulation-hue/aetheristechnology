@@ -47,7 +47,7 @@ export const LeadScraperPanel: React.FC = () => {
     setRunning(true);
     try {
       const token = getAdminToken();
-      if (!token) throw new Error('Admin session expired — log in again.');
+      if (!token) throw new Error('Admin session expired, log in again.');
       const { data, error } = await supabase.functions.invoke('admin-scrape-leads', {
         body: { industry, location, count },
         headers: { 'x-admin-token': token },
@@ -104,7 +104,7 @@ export const LeadScraperPanel: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="font-display">Recent Leads</CardTitle>
-            <p className="text-sm text-muted-foreground">Last 50 in the rep pool — admin scraped, rep uploaded, or manually added.</p>
+            <p className="text-sm text-muted-foreground">Last 50 in the rep pool, admin scraped, rep uploaded, or manually added.</p>
           </div>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
@@ -119,7 +119,7 @@ export const LeadScraperPanel: React.FC = () => {
                 <div key={l.id} className="flex items-center gap-3 p-2 bg-secondary/30 rounded-lg text-sm">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-foreground truncate">{l.business_name || '—'}</span>
+                      <span className="font-semibold text-foreground truncate">{l.business_name || ', '}</span>
                       {typeof l.score === 'number' && <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-amber/15 text-amber">{l.score}</span>}
                       <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{l.status}</span>
                       <span className="text-[10px] font-mono uppercase text-muted-foreground">{l.source.replace('_',' ')}</span>

@@ -28,7 +28,7 @@ export const Services: React.FC = () => {
       features: ['Needs Assessment', 'Model Strategy', 'Data Readiness Audit'],
       pricing: 'From $2,500',
       priceId: 'consulting_ml_strategy_once',
-      ctaLabel: 'Buy — $2,500',
+      ctaLabel: 'Buy, $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Strategic Discovery Audit', cost: '$500' },
@@ -42,7 +42,7 @@ export const Services: React.FC = () => {
       features: ['Process Mapping', 'Workflow Design', 'ROI Analysis'],
       pricing: 'From $299',
       priceId: 'consulting_automation_once',
-      ctaLabel: 'Buy — $299',
+      ctaLabel: 'Buy, $299',
       relatedServices: [
         { name: 'Strategy Blueprint', cost: '$299' },
         { name: '14-Day Diagnostic', cost: '$2,500' },
@@ -52,11 +52,11 @@ export const Services: React.FC = () => {
     {
       icon: Code,
       title: 'AI Implementation Advisory',
-      description: 'Hands-on guidance through every phase of your AI project—from architecture to deployment and beyond.',
+      description: 'Hands-on guidance through every phase of your AI project, from architecture to deployment and beyond.',
       features: ['Architecture Review', 'Vendor Evaluation', 'Implementation Roadmap'],
       pricing: 'From $2,500',
       priceId: 'consulting_ai_implementation_once',
-      ctaLabel: 'Buy — $2,500',
+      ctaLabel: 'Buy, $2,500',
       relatedServices: [
         { name: '14-Day Diagnostic', cost: '$2,500' },
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
@@ -70,7 +70,7 @@ export const Services: React.FC = () => {
       features: ['Data Governance', 'Analytics Strategy', 'Infrastructure Planning'],
       pricing: 'From $500',
       priceId: 'consulting_data_strategy_once',
-      ctaLabel: 'Buy — $500',
+      ctaLabel: 'Buy, $500',
       relatedServices: [
         { name: 'Strategic Discovery Audit', cost: '$500' },
         { name: 'Website Evaluation', cost: '$500' },
@@ -84,7 +84,7 @@ export const Services: React.FC = () => {
       features: ['Executive Workshops', 'Technology Roadmap', 'Change Management'],
       pricing: 'From $5,000/mo',
       priceId: 'consulting_ai_transformation_monthly',
-      ctaLabel: 'Subscribe — $5,000/mo',
+      ctaLabel: 'Subscribe, $5,000/mo',
       isMonthly: true,
       relatedServices: [
         { name: 'Fractional CTO/CMO', cost: '$5,000/mo' },
@@ -99,7 +99,7 @@ export const Services: React.FC = () => {
       features: ['System Audit', 'Optimization Plan', 'Cost Analysis'],
       pricing: 'From $500',
       priceId: 'consulting_performance_once',
-      ctaLabel: 'Buy — $500',
+      ctaLabel: 'Buy, $500',
       relatedServices: [
         { name: 'Strategic Discovery Audit', cost: '$500' },
         { name: 'Digital Snapshot', cost: '$125' },
@@ -266,7 +266,7 @@ export const Services: React.FC = () => {
                 CRM/ERP Consulting
               </h3>
               <p className="text-muted-foreground mb-6">
-                We design and implement intelligent CRM/ERP systems tailored to your operations—guiding you from strategy through deployment.
+                We design and implement intelligent CRM/ERP systems tailored to your operations, guiding you from strategy through deployment.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
                 <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
@@ -307,7 +307,7 @@ export const Services: React.FC = () => {
                 AI Interior Design Studio
               </h3>
               <p className="text-muted-foreground mb-6">
-                For designers who want to reimagine any room—swap furniture, change styles, colors, layouts. If you can imagine it, the AI can render it.
+                For designers who want to reimagine any room, swap furniture, change styles, colors, layouts. If you can imagine it, the AI can render it.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50 mt-auto">
                 <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
@@ -330,10 +330,10 @@ export const Services: React.FC = () => {
           <RevealOnScroll delay={0.2}>
             <div className="glass p-8 rounded-xl">
               <h3 className="text-2xl font-bold mb-4 text-amber glow-text font-display">
-                ArchiScan — AI Architectural Rendering
+                ArchiScan, AI Architectural Rendering
               </h3>
               <p className="text-muted-foreground mb-6 max-w-3xl">
-                For architects who want to bring their sketches and concepts to life. Upload a hand-drawn sketch or blueprint and watch AI transform it into a photorealistic render—instantly.
+                For architects who want to bring their sketches and concepts to life. Upload a hand-drawn sketch or blueprint and watch AI transform it into a photorealistic render, instantly.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50">
                 <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
@@ -359,7 +359,7 @@ export const Services: React.FC = () => {
                 AI Image Recoloring
               </h3>
               <p className="text-muted-foreground mb-6 max-w-3xl">
-                Instantly recolor any image with AI. Change product colors, room palettes, or branding assets in seconds—perfect for designers, marketers, and e-commerce teams.
+                Instantly recolor any image with AI. Change product colors, room palettes, or branding assets in seconds, perfect for designers, marketers, and e-commerce teams.
               </p>
               <div className="rounded-lg overflow-hidden border border-border/50">
                 <div style={{ padding: '75% 0 0 0', position: 'relative' }}>
@@ -440,7 +440,7 @@ export const Services: React.FC = () => {
                 Don't see your industry? We provide expert AI consulting for any business sector.
               </p>
               <p className="text-amber font-semibold">
-                Every industry has unique challenges—we help you navigate them with the right AI strategy.
+                Every industry has unique challenges, we help you navigate them with the right AI strategy.
               </p>
             </div>
           </RevealOnScroll>

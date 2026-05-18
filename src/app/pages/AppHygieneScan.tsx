@@ -135,7 +135,7 @@ const AppHygieneScan = () => {
               {isRunning
                 ? "Scanning your CRM for data quality issues across 8 categories..."
                 : latestScan
-                ? `Last scan: ${new Date(latestScan.scan_date).toLocaleString()} — ${latestScan.total_issues.toLocaleString()} issues found.`
+                ? `Last scan: ${new Date(latestScan.scan_date).toLocaleString()}, ${latestScan.total_issues.toLocaleString()} issues found.`
                 : "Run your first scan to surface duplicates, formatting issues, owner gaps, stale records, and more."}
             </p>
             {isRunning && (

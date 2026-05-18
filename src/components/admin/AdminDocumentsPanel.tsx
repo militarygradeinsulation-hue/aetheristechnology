@@ -66,7 +66,7 @@ const QUICK_PROMPTS: { label: string; type: string; prompt: string }[] = [
   {
     label: "Data Handling Policy",
     type: "data_handling",
-    prompt: "Policy describing how reps must handle prospect PII (names, emails, phones, scan data) — store only in /portal Workspace, never export to personal email or third-party CRMs, delete on request, breach notification within 24h to joseph@aetheris.technology.",
+    prompt: "Policy describing how reps must handle prospect PII (names, emails, phones, scan data), store only in /portal Workspace, never export to personal email or third-party CRMs, delete on request, breach notification within 24h to joseph@aetheris.technology.",
   },
 ];
 
@@ -116,7 +116,7 @@ export const AdminDocumentsPanel: React.FC = () => {
       const { content, suggested_title } = await call("generate", { prompt, doc_type: docType });
       setDraftContent(content);
       setDraftTitle(suggested_title);
-      toast({ title: "Document generated — review and save below" });
+      toast({ title: "Document generated, review and save below" });
     } catch (e) {
       toast({ title: "Generation failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
     } finally { setGenerating(false); }
@@ -182,7 +182,7 @@ export const AdminDocumentsPanel: React.FC = () => {
             <Sparkles className="w-5 h-5 text-amber" /> AI Legal Document Drafter
           </CardTitle>
           <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            Generates in Aetheris voice — direct, operator-tone, Indiana law, signature-ready
+            Generates in Aetheris voice, direct, operator-tone, Indiana law, signature-ready
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -63,7 +63,7 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
       if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'strategic_questions',
-          title: `${form.industry} — ${form.companySize} — ${new Date().toLocaleDateString()}`,
+          title: `${form.industry}, ${form.companySize}, ${new Date().toLocaleDateString()}`,
           input_data: form,
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -124,7 +124,7 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
       {/* Results */}
       {result && (
         <div className="space-y-8">
-          <QuickDownloadBar toolType="strategic_questions" title={`${form.industry} — ${form.companySize} — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
+          <QuickDownloadBar toolType="strategic_questions" title={`${form.industry}, ${form.companySize}, ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Snapshot */}
           <div className="glass rounded-xl p-6 border border-border">
             <h2 className="text-2xl font-bold text-foreground font-display mb-3">Company Snapshot</h2>

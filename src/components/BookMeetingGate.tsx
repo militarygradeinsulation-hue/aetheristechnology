@@ -170,7 +170,7 @@ export const BookMeetingGate: React.FC = () => {
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</> : 'Continue to calendar'}
               </button>
               <p className="text-[11px] text-muted-foreground text-center">
-                Applying for a role? Use <a href="/careers" className="text-amber underline">/careers</a> instead — bookings are for clients only.
+                Applying for a role? Use <a href="/careers" className="text-amber underline">/careers</a> instead, bookings are for clients only.
               </p>
             </form>
           </>

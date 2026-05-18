@@ -12,7 +12,7 @@ import { getPortalProfile } from '@/lib/portalAuth';
 const COO_BRIEFS = [
   "Run the field. Coach the close. Protect the pipeline.",
   "Two demos booked beats ten pitches sent.",
-  "Every rep with a stuck deal — call them today.",
+  "Every rep with a stuck deal, call them today.",
   "Forecast accuracy is a leadership trait, not a CRM field.",
   "Tighten the funnel. Reps follow what you measure.",
   "Make one rep's week today with a personal note.",
@@ -22,7 +22,7 @@ const COO_BRIEFS = [
 const CEO_BRIEFS = [
   "Ship one decision today. Don't sit on three.",
   "Talk to a customer before lunch.",
-  "What's leaking the most money this week — fix that first.",
+  "What's leaking the most money this week, fix that first.",
   "Hire for the org you'll be in 90 days.",
   "Margin > revenue. Always.",
   "If it's not on the calendar, it isn't real.",

@@ -61,7 +61,7 @@ export const InboxTab: React.FC = () => {
       const url = await outlookConnect.getAuthUrl();
       const w = window.open(url, "outlook_oauth", "width=520,height=720");
       if (!w) {
-        // popup blocked — fall back to full redirect
+        // popup blocked, fall back to full redirect
         window.location.href = url;
       }
     } catch (e: any) {
@@ -457,7 +457,7 @@ const ComposeDialog: React.FC<{
       // If linked to a lead, show the log panel; else close immediately.
       if (linkedLead) {
         setSentSuccess(true);
-        toast({ title: "Sent — log it against the lead?" });
+        toast({ title: "Sent, log it against the lead?" });
       } else {
         onSent();
       }
@@ -473,7 +473,7 @@ const ComposeDialog: React.FC<{
       const stamp = new Date().toLocaleString();
       const prevNotes = linkedLead.notes || "";
       const tag = kind === "sent" ? "SENT" : "RECEIVED REPLY";
-      const composedNote = `[${stamp}] ${tag} — "${subject}"${logNotes ? `\n${logNotes}` : ""}`;
+      const composedNote = `[${stamp}] ${tag}, "${subject}"${logNotes ? `\n${logNotes}` : ""}`;
       const fullNotes = prevNotes ? `${composedNote}\n\n${prevNotes}` : composedNote;
       await portalLeads.updateStatus(linkedLead.id, {
         notes: fullNotes,
@@ -509,7 +509,7 @@ const ComposeDialog: React.FC<{
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{sentSuccess ? "Sent — log this against the lead?" : "New message"}</DialogTitle>
+          <DialogTitle>{sentSuccess ? "Sent, log this against the lead?" : "New message"}</DialogTitle>
         </DialogHeader>
 
         {linkedLead && (
@@ -730,7 +730,7 @@ function relTime(iso: string): string {
   return d.toLocaleDateString();
 }
 
-// Minimal HTML sanitizer — strip script/style, event handlers, and javascript: urls.
+// Minimal HTML sanitizer, strip script/style, event handlers, and javascript: urls.
 function sanitizeHtml(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, "")

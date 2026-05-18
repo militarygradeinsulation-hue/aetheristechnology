@@ -92,7 +92,7 @@ const AppReports = () => {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Audits</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {view === "active" ? "Past revenue leak audit reports" : "Deleted audits — restore or remove permanently"}
+            {view === "active" ? "Past revenue leak audit reports" : "Deleted audits, restore or remove permanently"}
           </p>
         </div>
         <div className="flex items-center gap-2">

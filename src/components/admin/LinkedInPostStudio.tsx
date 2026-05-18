@@ -47,7 +47,7 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Most manufacturers have no idea how many leads fall through the cracks after a trade show.',
     'The follow-up gap that quietly costs commercial services firms $40k/month.',
     'Quote-to-cash leakage: where B2B operators lose 8-12% margin without noticing.',
-    'Your "best" rep is your biggest leak — and your CRM proves it.',
+    'Your "best" rep is your biggest leak, and your CRM proves it.',
     'The 3 silent leaks every $5M-$50M business has but refuses to look at.',
   ],
   'Systems & Ops': [
@@ -57,7 +57,7 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Your tech stack isn\'t the problem. The handoffs between tools are.',
   ],
   'AI / Practical': [
-    'AI won\'t fix a broken process — it\'ll just speed up the bleed.',
+    'AI won\'t fix a broken process, it\'ll just speed up the bleed.',
     'The cheapest AI win in any business: dead-lead resurrection.',
     'Most "AI consultants" are just SaaS resellers in a hoodie. Here\'s the test.',
     'Ethan Mollick calls AI your co-pilot. In ops, it\'s the diagnostic engine.',
@@ -71,7 +71,7 @@ const PREMADE_TOPICS: Record<string, string[]> = {
   'Founder POV': [
     'Owner-operators: the 4 reports your finance lead should be running weekly.',
     'Why discounting is a symptom, not a strategy.',
-    'When to fire your "rockstar" — the operator\'s checklist.',
+    'When to fire your "rockstar", the operator\'s checklist.',
     'Stop measuring activity. Start measuring leaks.',
   ],
   'Industry-Specific': [
@@ -205,7 +205,7 @@ export default function LinkedInPostStudio() {
       <Card className="p-5 glass border-border space-y-4">
         <div>
           <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">01 — Topic</div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">01, Topic</div>
             <button onClick={cycleTopic} className="text-[10px] text-muted-foreground hover:text-amber uppercase tracking-wider flex items-center gap-1">
               <Shuffle className="w-3 h-3" /> Cycle
             </button>
@@ -218,7 +218,7 @@ export default function LinkedInPostStudio() {
           />
 
           <div className="mt-3">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Premade topics — click to use</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Premade topics, click to use</div>
             <div className="flex flex-wrap gap-1 mb-2">
               {['All', ...Object.keys(PREMADE_TOPICS)].map((cat) => {
                 const on = topicCategory === cat;
@@ -253,7 +253,7 @@ export default function LinkedInPostStudio() {
       </Card>
 
       <Card className="p-5 glass border-border space-y-4">
-        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">02 — Parameters</div>
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">02, Parameters</div>
         <div className="grid md:grid-cols-2 gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Content Pillar</div>
@@ -307,7 +307,7 @@ export default function LinkedInPostStudio() {
       </Card>
 
       <Card className="p-5 glass border-border space-y-3">
-        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">03 — Creator Tag</div>
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">03, Creator Tag</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {[
             { key: 'auto', name: 'Auto-Select', niche: 'AI picks best fit' },
@@ -384,7 +384,7 @@ export default function LinkedInPostStudio() {
                   className="bg-amber text-background hover:bg-amber/90"
                 >
                   {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
-                  {saving ? 'Saving…' : savedId ? 'Saved — save again' : 'Save to calendar'}
+                  {saving ? 'Saving…' : savedId ? 'Saved, save again' : 'Save to calendar'}
                 </Button>
                 {savedId && (
                   <span className="text-[11px] text-amber flex items-center gap-1">

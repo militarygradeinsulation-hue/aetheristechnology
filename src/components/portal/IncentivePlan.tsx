@@ -6,13 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { DollarSign, Users, Calendar, Megaphone, Copy, Sparkles, Trophy, Target } from "lucide-react";
 
 /**
- * IncentivePlan — Aetheris Referral & Lead-Gen Incentive Plan
+ * IncentivePlan, Aetheris Referral & Lead-Gen Incentive Plan
  * Calibrated to the real flagship economics:
- *   • 21-Day Revenue Diagnostic — $18,500  → Rep $5,000 / Partner $3,000 / Company $10,000
- *   • Implementation Retainer  — $15,000/mo → Rep $4,000/mo / Partner $3,000/mo / Company $8,000/mo
+ *   • 21-Day Revenue Diagnostic, $18,500  → Rep $5,000 / Partner $3,000 / Company $10,000
+ *   • Implementation Retainer , $15,000/mo → Rep $4,000/mo / Partner $3,000/mo / Company $8,000/mo
  *   • Existing referral overlay: $500 onboard + $7,000 first-close + $500/sale override 12 months
  *
- * This screen doubles as a content kit — every block has a "Copy as post" button
+ * This screen doubles as a content kit, every block has a "Copy as post" button
  * so reps can paste straight into LinkedIn / SMS / email.
  */
 
@@ -24,23 +24,23 @@ const POST_BLOCKS: PostBlock[] = [
     body:
 `Most businesses are leaking 6–7 figures a year and can't see it from the inside.
 
-We run a 21-Day Revenue Diagnostic — forensic-grade, $18,500 flat — and hand back the exact list of leaks plus what to plug first.
+We run a 21-Day Revenue Diagnostic, forensic-grade, $18,500 flat, and hand back the exact list of leaks plus what to plug first.
 
 If you know an operator who'd want that audit, send them my way. I get paid to make warm intros, you get the leak map. Everyone wins.`,
   },
   {
     title: "The intro ask (DM / text)",
     body:
-`Quick favor — I'm rolling out forensic revenue diagnostics for SMBs and SaaS shops doing $1M–$50M.
+`Quick favor, I'm rolling out forensic revenue diagnostics for SMBs and SaaS shops doing $1M–$50M.
 
 If you know one founder/operator who'd want a 21-day audit of where their business is leaking money, drop their name. No pressure on them, no commitment from you.`,
   },
   {
     title: "The webinar invite",
     body:
-`Free 30-min session: "Where Your Business Is Leaking — and the 7-Step Fix."
+`Free 30-min session: "Where Your Business Is Leaking, and the 7-Step Fix."
 
-We walk live through the same forensic framework we use on $18,500 paid diagnostics. No fluff, no upsell theater — bring a notebook.
+We walk live through the same forensic framework we use on $18,500 paid diagnostics. No fluff, no upsell theater, bring a notebook.
 
 Drop your email and I'll send you the link with my name attached.`,
   },
@@ -86,7 +86,7 @@ export function IncentivePlan() {
             <div>
               <CardTitle className="font-display text-2xl">Aetheris Referral & Lead-Gen Incentive Plan</CardTitle>
               <p className="text-sm text-muted-foreground mt-2">
-                Layered on top of your direct commission. Multiple paths to earn — close, refer,
+                Layered on top of your direct commission. Multiple paths to earn, close, refer,
                 book, or invite. Every block below has a <span className="text-amber font-semibold">Copy as post</span> button so you can ship it today.
               </p>
             </div>
@@ -138,7 +138,7 @@ export function IncentivePlan() {
             </div>
             <p className="text-sm text-muted-foreground mt-3">
               Your referred prospect signs the $18,500 Diagnostic. You get a flat <span className="text-amber font-mono">$7,000</span> first-close bounty
-              — <em>plus</em> a <span className="text-amber font-mono">$500/sale override</span> on every additional Aetheris purchase that account makes for the next 12 months.
+             , <em>plus</em> a <span className="text-amber font-mono">$500/sale override</span> on every additional Aetheris purchase that account makes for the next 12 months.
               You don't have to be on the calls. You just made the intro.
             </p>
           </div>
@@ -156,7 +156,7 @@ export function IncentivePlan() {
             </div>
             <p className="text-sm text-muted-foreground mt-3">
               Referred prospect completes the intake call or books a demo with our team. We pay <span className="font-mono text-amber">$250</span> the moment
-              they hit qualified status — even if they never close. Builds your pipeline depth and your bank account at the same time.
+              they hit qualified status, even if they never close. Builds your pipeline depth and your bank account at the same time.
             </p>
           </div>
 
@@ -217,7 +217,7 @@ export function IncentivePlan() {
             </div>
             <p className="text-sm text-muted-foreground mt-3">
               Use your tracking link <code className="text-xs bg-muted px-1.5 py-0.5 rounded">aetheris.technology/webinar?ref=YOUR_CODE</code>.
-              They register, they attend, they close inside 30 days — you get <span className="font-mono text-amber">$400</span>.
+              They register, they attend, they close inside 30 days, you get <span className="font-mono text-amber">$400</span>.
               Even if someone else on the team runs the close call.
             </p>
           </div>
@@ -251,7 +251,7 @@ export function IncentivePlan() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-3">
-              Your retainer client stays past 3, 6, and 12 months — you get a one-time bonus at each milestone, on top of your monthly $4k.
+              Your retainer client stays past 3, 6, and 12 months, you get a one-time bonus at each milestone, on top of your monthly $4k.
             </p>
           </div>
         </CardContent>
@@ -268,9 +268,9 @@ export function IncentivePlan() {
           <div>
             <p className="text-foreground font-semibold">Referrals</p>
             <ul className="list-disc list-inside space-y-1 mt-1">
-              <li>Submit via the <span className="text-amber">Leads</span> tab — name, company, contact, why they're a fit.</li>
+              <li>Submit via the <span className="text-amber">Leads</span> tab, name, company, contact, why they're a fit.</li>
               <li>Referrals are live for <span className="font-mono text-foreground">90 days</span>. Closes inside that window count.</li>
-              <li>If you also close the deal yourself, you get the direct commission — not the referral bounty (no double-dip on the base).</li>
+              <li>If you also close the deal yourself, you get the direct commission, not the referral bounty (no double-dip on the base).</li>
             </ul>
           </div>
           <div>
@@ -295,7 +295,7 @@ export function IncentivePlan() {
       <Card className="border-amber/30">
         <CardHeader>
           <CardTitle className="font-display text-lg flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber" /> 4. Sample Monthly Stack — Rep "Jessica"
+            <Sparkles className="w-5 h-5 text-amber" /> 4. Sample Monthly Stack, Rep "Jessica"
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -322,7 +322,7 @@ export function IncentivePlan() {
           </div>
           <p className="text-xs text-muted-foreground mt-3">
             That's <span className="text-foreground font-semibold">{fmt(sample.total)}</span> in one month
-            — without Jessica having to close more than one deal herself. Stack referrals, intros, and webinar invites and the math compounds fast.
+           , without Jessica having to close more than one deal herself. Stack referrals, intros, and webinar invites and the math compounds fast.
           </p>
         </CardContent>
       </Card>
@@ -331,7 +331,7 @@ export function IncentivePlan() {
       <Card>
         <CardHeader>
           <CardTitle className="font-display text-lg flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-amber" /> 5. Post Kit — copy & ship
+            <Megaphone className="w-5 h-5 text-amber" /> 5. Post Kit, copy & ship
           </CardTitle>
           <p className="text-xs text-muted-foreground">Drop straight into LinkedIn, SMS, or email. Swap your name + tracking link in.</p>
         </CardHeader>
@@ -358,7 +358,7 @@ export function IncentivePlan() {
         <CardContent>
           <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
             <li><span className="text-foreground font-semibold">Scalable.</span> We only pay when deals close or pipeline moves. Low risk to the company, zero ceiling for you.</li>
-            <li><span className="text-foreground font-semibold">Multiple paths.</span> Close it, refer it, book it, or invite — every action has a payout attached.</li>
+            <li><span className="text-foreground font-semibold">Multiple paths.</span> Close it, refer it, book it, or invite, every action has a payout attached.</li>
             <li><span className="text-foreground font-semibold">Stackable.</span> Direct commissions + referral bounty + 12-mo override + activity bonuses + volume + retention all add up.</li>
             <li><span className="text-foreground font-semibold">Self-sustaining.</span> Reps become the sourcing engine. The pipeline gets warmer every month.</li>
           </ol>

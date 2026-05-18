@@ -30,7 +30,7 @@ const AssessmentPage = () => {
   );
 
   const faqs = [
-    { question: 'What is an AI maturity assessment?', answer: 'A structured evaluation of how prepared a business is to adopt AI — covering data quality, process maturity, team capability, infrastructure, and governance. Aetheris AI offers a free 2-minute version.' },
+    { question: 'What is an AI maturity assessment?', answer: 'A structured evaluation of how prepared a business is to adopt AI, covering data quality, process maturity, team capability, infrastructure, and governance. Aetheris AI offers a free 2-minute version.' },
     { question: 'How long does the AI Readiness Assessment take?', answer: 'About 2 minutes. You answer 5 quick questions about your operations and receive an instant maturity score with a personalized roadmap.' },
     { question: 'Is the AI Readiness Assessment really free?', answer: 'Yes. The 5-question assessment is 100% free with no login or credit card required. You receive an instant score and a category-by-category breakdown.' },
     { question: 'What does the assessment score me on?', answer: 'Automation maturity, CRM and data infrastructure, AI adoption stage, team capability, and operational efficiency. The score identifies where you are leaking time and money.' },
@@ -59,14 +59,14 @@ const AssessmentPage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20 mb-4">
-                Free — Takes 2 Minutes
+                Free, Takes 2 Minutes
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground font-display mb-4">
                 How <span className="text-gradient-amber">AI-Ready</span> Is Your Business?
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Answer 5 quick questions about your operations and get an instant readiness score 
-                with a personalized breakdown of where you're losing efficiency — and money.
+                with a personalized breakdown of where you're losing efficiency, and money.
               </p>
             </div>
 
@@ -80,7 +80,7 @@ const AssessmentPage = () => {
               </div>
               <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
                 The AI Readiness Assessment is a free 2-minute, 5-question diagnostic that scores your
-                business on automation, CRM, data, adoption, and team capability — then returns a
+                business on automation, CRM, data, adoption, and team capability, then returns a
                 prioritized AI roadmap with the highest-ROI use cases for your operation.
               </p>
             </div>

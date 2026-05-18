@@ -105,7 +105,7 @@ export const ServiceCapabilities: React.FC = () => {
           })}
         </div>
 
-        {/* Vertical specialization — keyword-rich body copy for crawlers */}
+        {/* Vertical specialization, keyword-rich body copy for crawlers */}
         <div className="mt-16 glass rounded-2xl p-8 md:p-10 border border-border">
           <h3 className="text-2xl md:text-3xl font-bold font-display mb-3 text-foreground">
             AI Consulting for Your Industry

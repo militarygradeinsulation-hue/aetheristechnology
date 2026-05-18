@@ -138,7 +138,7 @@ export const AdminCareersPanel: React.FC = () => {
       await upsertCompanyEntry({
         date: calDate,
         kind: 'event',
-        title: `Interview ${calTime} — ${who}`,
+        title: `Interview ${calTime}, ${who}`,
         body,
         pinned: true,
         color: 'cat:interview',
@@ -152,7 +152,7 @@ export const AdminCareersPanel: React.FC = () => {
   const buildShareText = () => {
     if (!detailAttempt) return '';
     const lines = [
-      `Candidate: ${detailAttempt.candidate_name || '—'}`,
+      `Candidate: ${detailAttempt.candidate_name || ', '}`,
       `Email: ${detailAttempt.candidate_email}`,
       detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
       detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
@@ -199,7 +199,7 @@ export const AdminCareersPanel: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : '—';
+  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : ', ';
   const q = filter.trim().toLowerCase();
   const minTest = minTestScore === '' ? null : Number(minTestScore);
   const minFit = minFitScore === '' ? null : Number(minFitScore);
@@ -752,7 +752,7 @@ export const AdminCareersPanel: React.FC = () => {
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
                             {a.ai_section_scores && Object.keys(a.ai_section_scores).length > 0 && (
                               <div>
-                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1–10) — sum = fit score / 60</div>
+                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1–10), sum = fit score / 60</div>
                                 <div className="grid sm:grid-cols-2 gap-1">
                                   {SECTION_LABELS.map(([key, label]) => {
                                     const s = a.ai_section_scores?.[key];
@@ -881,7 +881,7 @@ export const AdminCareersPanel: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           {savedIds.has(a.id) && <Star className="w-3.5 h-3.5 text-amber fill-amber" />}
-                          <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || '—'}</span>
+                          <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || ', '}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
                             <Badge variant="outline" className="font-mono">
@@ -948,7 +948,7 @@ export const AdminCareersPanel: React.FC = () => {
           </DialogHeader>
           {detailAttempt && (
             <div className="space-y-3 text-sm">
-              {/* CONTACT — sky */}
+              {/* CONTACT, sky */}
               <div className="rounded-lg border-l-4 border-sky-500 bg-sky-500/5 p-3">
                 <div className="text-[10px] font-mono uppercase tracking-widest text-sky-400 mb-2">Contact</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -985,7 +985,7 @@ export const AdminCareersPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* CANDIDATE NOTES — amber */}
+              {/* CANDIDATE NOTES, amber */}
               {detailAttempt.notes_to_admin && (
                 <div className="rounded-lg border-l-4 border-amber bg-amber/10 p-3">
                   <div className="flex items-center justify-between mb-1">
@@ -998,7 +998,7 @@ export const AdminCareersPanel: React.FC = () => {
 
               {matchingApp ? (
                 <>
-                  {/* AI SUMMARY — purple */}
+                  {/* AI SUMMARY, purple */}
                   {matchingApp.ai_summary && (
                     <div className="rounded-lg border-l-4 border-purple-500 bg-purple-500/5 p-3">
                       <div className="flex items-center justify-between mb-1">
@@ -1011,7 +1011,7 @@ export const AdminCareersPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* AI FIT SCORE — emerald */}
+                  {/* AI FIT SCORE, emerald */}
                   {matchingApp.ai_fit_score != null && (
                     <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-500/5 p-3">
                       <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300 mb-1">AI Fit Score</div>
@@ -1019,7 +1019,7 @@ export const AdminCareersPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* STRENGTHS — green */}
+                  {/* STRENGTHS, green */}
                   {matchingApp.ai_strengths && matchingApp.ai_strengths.length > 0 && (
                     <div className="rounded-lg border-l-4 border-green-500 bg-green-500/5 p-3">
                       <div className="flex items-center justify-between mb-1">
@@ -1032,7 +1032,7 @@ export const AdminCareersPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* CONCERNS — crimson */}
+                  {/* CONCERNS, crimson */}
                   {matchingApp.ai_concerns && matchingApp.ai_concerns.length > 0 && (
                     <div className="rounded-lg border-l-4 border-crimson bg-crimson/10 p-3">
                       <div className="flex items-center justify-between mb-1">
@@ -1045,7 +1045,7 @@ export const AdminCareersPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* CANDIDATE APP NOTES — indigo */}
+                  {/* CANDIDATE APP NOTES, indigo */}
                   {matchingApp.notes && (
                     <div className="rounded-lg border-l-4 border-indigo-500 bg-indigo-500/5 p-3">
                       <div className="flex items-center justify-between mb-1">
@@ -1056,7 +1056,7 @@ export const AdminCareersPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* ADMIN NOTES — slate */}
+                  {/* ADMIN NOTES, slate */}
                   {matchingApp.admin_notes && (
                     <div className="rounded-lg border-l-4 border-slate-400 bg-slate-400/10 p-3">
                       <div className="flex items-center justify-between mb-1">

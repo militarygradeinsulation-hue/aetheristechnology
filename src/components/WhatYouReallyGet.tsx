@@ -15,28 +15,28 @@ const rows: Row[] = [
     sold: 'Website Gap Scan',
     soldDetail: 'A 30-second AI audit of your digital footprint.',
     given: 'You get home in time for dinner.',
-    givenDetail: 'I find the broken connections costing you leads at 9pm — so you stop answering "why isn\'t the site working" emails from the driveway.',
+    givenDetail: 'I find the broken connections costing you leads at 9pm, so you stop answering "why isn\'t the site working" emails from the driveway.',
     Icon: Home,
   },
   {
     sold: 'The Leak Audit™',
     soldDetail: 'A forensic scan of every place your business is bleeding revenue.',
     given: 'You stop carrying it home in your chest.',
-    givenDetail: 'I find the leaks AND help you plug them — so Monday morning doesn\'t feel like another fire drill. You walk into work calm because the system finally holds.',
+    givenDetail: 'I find the leaks AND help you plug them, so Monday morning doesn\'t feel like another fire drill. You walk into work calm because the system finally holds.',
     Icon: Coffee,
   },
   {
     sold: 'Resume Forensics',
     soldDetail: '$20 multi-page scan: any resume vs. any company in 90 seconds.',
     given: 'You stop firing in 90 days.',
-    givenDetail: 'I tell you who actually fits before you sign the offer — so you stop bleeding $40K on bad hires and stop having "we need to let you go" conversations.',
+    givenDetail: 'I tell you who actually fits before you sign the offer, so you stop bleeding $40K on bad hires and stop having "we need to let you go" conversations.',
     Icon: Users,
   },
   {
     sold: '21-Day Revenue Diagnostic',
     soldDetail: '$18,500 fixed-fee forensic report on your CRM and sales follow-up.',
     given: 'You finally know where the money went.',
-    givenDetail: 'I hand you the $200K–$2M you\'re losing in writing — so you stop guessing, stop second-guessing yourself, and start sleeping through the night.',
+    givenDetail: 'I hand you the $200K–$2M you\'re losing in writing, so you stop guessing, stop second-guessing yourself, and start sleeping through the night.',
     Icon: Moon,
   },
   {
@@ -50,7 +50,7 @@ const rows: Row[] = [
     sold: 'AI Tools Catalog',
     soldDetail: 'A library of self-serve forensic tools, run them yourself.',
     given: 'You stop paying consultants for answers you already had.',
-    givenDetail: 'You run the diagnostic, see the leak, fix it yourself — and whatever you spend on a tool discounts off a bigger engagement when you\'re ready to step up.',
+    givenDetail: 'You run the diagnostic, see the leak, fix it yourself, and whatever you spend on a tool discounts off a bigger engagement when you\'re ready to step up.',
     Icon: Briefcase,
   },
 ];
@@ -80,7 +80,7 @@ export const WhatYouReallyGet: React.FC = () => {
             <RevealOnScroll key={r.sold} delay={i * 50}>
               <div className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
                 <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.3fr)] items-stretch">
-                  {/* LEFT — what you pay for */}
+                  {/* LEFT, what you pay for */}
                   <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15">
                     <div className="font-case text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
                       Invoice line item
@@ -100,7 +100,7 @@ export const WhatYouReallyGet: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* RIGHT — what you actually get */}
+                  {/* RIGHT, what you actually get */}
                   <div className="p-6 md:p-7 relative">
                     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-amber/0 via-amber/40 to-amber/0 md:hidden" />
                     <div className="flex items-start gap-4">
@@ -132,7 +132,7 @@ export const WhatYouReallyGet: React.FC = () => {
               "Nobody buys a forensic audit because they love forensics. They buy it because they want to stop waking up at 3am wondering where the money went."
             </p>
             <p className="font-case text-[10px] uppercase tracking-widest text-amber mt-3">
-              — Joseph Toney, Operator
+             , Joseph Toney, Operator
             </p>
           </div>
         </RevealOnScroll>

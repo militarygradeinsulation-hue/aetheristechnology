@@ -102,7 +102,7 @@ export async function setRepTeam(repId: string, teamName: string) {
 }
 
 /**
- * Revoke all access for a rep — deletes their auth user (if any),
+ * Revoke all access for a rep, deletes their auth user (if any),
  * then their rep_codes row (which cascades to mailbox/notes/library/settings).
  */
 export async function revokeRepAccess(code: string): Promise<{ revoked: boolean; auth_deleted: boolean }> {

@@ -74,7 +74,7 @@ export const AdminLeadBrowser: React.FC = () => {
     setLoading(true);
     try {
       const token = getAdminToken();
-      if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+      if (!token) throw new Error('Admin session expired, log in again at /admin/login');
       const { data, error } = await supabase.functions.invoke('admin-data', {
         body: {
           action: 'leads_browser',
@@ -106,7 +106,7 @@ export const AdminLeadBrowser: React.FC = () => {
 
   const callAdmin = async (path: string, body: Record<string, unknown>) => {
     const token = getAdminToken();
-    if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+    if (!token) throw new Error('Admin session expired, log in again at /admin/login');
     const { data, error } = await supabase.functions.invoke(path, { body, headers: { 'x-admin-token': token } });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
@@ -202,7 +202,7 @@ export const AdminLeadBrowser: React.FC = () => {
   };
 
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
-  const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
+  const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : ', ';
 
   return (
     <Card>
@@ -371,15 +371,15 @@ export const AdminLeadBrowser: React.FC = () => {
                 <Checkbox checked={selected.has(l.id)} onCheckedChange={() => toggle(l.id)} />
                 <button onClick={() => setDetail(l)} className="text-left min-w-0">
                   <div className="font-semibold text-foreground truncate flex items-center gap-1">
-                    {l.business_name || '—'}
+                    {l.business_name || ', '}
                     {l.enriched_at && <Sparkles className="w-3 h-3 text-amber shrink-0" />}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || '—'}
+                    {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || ', '}
                   </div>
                 </button>
                 <span className={`font-mono text-sm ${(l.score ?? 0) >= 70 ? 'text-green-400' : (l.score ?? 0) >= 40 ? 'text-amber' : 'text-muted-foreground'}`}>
-                  {l.score ?? '—'}
+                  {l.score ?? ', '}
                 </span>
                 <span>
                   <Badge variant="outline" className="text-[10px] font-mono uppercase">{l.status}</Badge>
@@ -473,7 +473,7 @@ export const AdminLeadBrowser: React.FC = () => {
                       <div className="text-xs">
                         <div className="font-display mb-1">Likely decision makers</div>
                         {detail.enrichment.decision_makers.map((d: any, i: number) => (
-                          <div key={i}>· <strong>{d.role}</strong> — {d.why}</div>
+                          <div key={i}>· <strong>{d.role}</strong>, {d.why}</div>
                         ))}
                       </div>
                     )}

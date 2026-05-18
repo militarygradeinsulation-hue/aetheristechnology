@@ -112,7 +112,7 @@ export const PortalCareersPanel: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const fmt = (s: string | null) => s ? new Date(s).toLocaleString() : '—';
+  const fmt = (s: string | null) => s ? new Date(s).toLocaleString() : ', ';
   const q = filter.trim().toLowerCase();
   const filteredAttempts = useMemo(() => q ? attempts.filter(a =>
     (a.candidate_name || '').toLowerCase().includes(q) ||
@@ -380,7 +380,7 @@ export const PortalCareersPanel: React.FC = () => {
                   return (
                     <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                        <span className="font-display font-bold text-foreground">{a.candidate_name || ', '}</span>
                         <StatusBadge s={a.status} />
                         {a.score_pct != null && (
                           <Badge variant="outline" className="font-mono">

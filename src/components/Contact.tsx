@@ -98,7 +98,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 The Forensic Diagnostic
               </h3>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                14 days inside your operation — CRM, inboxes, sales pipeline, team workflows. 
+                14 days inside your operation, CRM, inboxes, sales pipeline, team workflows. 
                 Every leak named, traced, and dollar-quantified in a sealed case file. Applied toward engagement if you proceed.
               </p>
 

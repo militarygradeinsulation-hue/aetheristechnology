@@ -113,7 +113,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           <div>
             <CardTitle className="font-display flex items-center gap-2">
               <Flame className={`w-5 h-5 ${allDone ? "text-amber" : "text-muted-foreground"}`} />
-              Daily Hustle — {new Date(state.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+              Daily Hustle, {new Date(state.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
             </CardTitle>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mt-1">
               {completed}/3 complete {allDone && "· streak day banked"}
@@ -155,7 +155,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           );
         })()}
 
-        {/* TASK 1 — notifications + repost */}
+        {/* TASK 1, notifications + repost */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
           <Checkbox
             checked={checklist.notifications_reposted}
@@ -178,7 +178,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           </div>
         </div>
 
-        {/* TASK 2 — 10 connections */}
+        {/* TASK 2, 10 connections */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
           <Checkbox
             checked={checklist.connections_added >= CONN_TARGET}
@@ -218,7 +218,7 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           </div>
         </div>
 
-        {/* TASK 3 — Post today's blog */}
+        {/* TASK 3, Post today's blog */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
           <Checkbox
             checked={checklist.blog_posted}

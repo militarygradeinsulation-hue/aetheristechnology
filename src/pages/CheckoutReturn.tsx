@@ -122,7 +122,7 @@ function DeliverableReadyView({ deliverables }: { deliverables: any[] }) {
             <span className="text-sm font-bold text-foreground">Bonus: Pick a Free Playbook</span>
           </div>
           <p className="text-xs text-muted-foreground mb-3">
-            As a thank you for your purchase, choose any strategic playbook — on us.
+            As a thank you for your purchase, choose any strategic playbook, on us.
           </p>
           <select
             value={selectedTopic || ''}

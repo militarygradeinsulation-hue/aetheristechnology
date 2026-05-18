@@ -139,7 +139,7 @@ function RepPerformancePanel() {
             {repCodes.map(r => (
               <tr key={r.id} className="border-b border-border/50">
                 <td className="py-2 pr-4 font-mono text-amber">{r.code}</td>
-                <td className="py-2 pr-4 text-foreground">{r.rep_name || '—'}</td>
+                <td className="py-2 pr-4 text-foreground">{r.rep_name || ', '}</td>
                 <td className="py-2 pr-4 text-muted-foreground">{(r.commission_rate * 100).toFixed(0)}%</td>
                 <td className="py-2 pr-4 text-foreground font-medium">{fmt(r.total_sales_cents)}</td>
                 <td className="py-2 pr-4 text-amber font-medium">{fmt(r.total_commission_cents)}</td>
@@ -855,7 +855,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         <div className="flex items-center gap-2 mb-2">
           <Wrench className="w-6 h-6 text-amber" />
           <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
-          <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
+          <span className="text-xs text-muted-foreground ml-2">Full access, no paywall</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ADMIN_TOOLS.map(tool => (
@@ -879,7 +879,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-5 h-5 text-amber" />
             <h2 className="text-xl font-bold text-foreground font-display">Tool History</h2>
-            <span className="text-xs text-muted-foreground ml-2">Every saved run — view, download as PDF, or delete</span>
+            <span className="text-xs text-muted-foreground ml-2">Every saved run, view, download as PDF, or delete</span>
           </div>
           <AdminLibrary />
         </div>
@@ -913,7 +913,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-5 h-5 text-amber" />
             <h3 className="text-lg font-bold text-foreground font-display">Recent Runs</h3>
-            <span className="text-xs text-muted-foreground ml-2">All saved tool runs — filter by type</span>
+            <span className="text-xs text-muted-foreground ml-2">All saved tool runs, filter by type</span>
           </div>
           <AdminLibrary />
         </div>

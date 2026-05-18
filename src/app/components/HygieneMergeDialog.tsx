@@ -291,6 +291,6 @@ export const HygieneMergeDialog = ({ action, open, onClose, onComplete }: Props)
 const Field = ({ label, value }: { label: string; value?: string | null }) => (
   <div>
     <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-    <div className="truncate">{value || <span className="text-muted-foreground italic">—</span>}</div>
+    <div className="truncate">{value || <span className="text-muted-foreground italic">, </span>}</div>
   </div>
 );

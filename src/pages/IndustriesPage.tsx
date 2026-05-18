@@ -83,12 +83,12 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-logistics',
     image: INFOGRAPHICS.industryLogistics,
-    humanCost: "You feel the lanes losing money but can't prove which ones — so every Monday meeting becomes a guess and a fight.",
+    humanCost: "You feel the lanes losing money but can't prove which ones, so every Monday meeting becomes a guess and a fight.",
     whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
-      why: 'Lane margin and quote response are operational — they need both forensic audit and hands-on fix execution.',
+      why: 'Lane margin and quote response are operational, they need both forensic audit and hands-on fix execution.',
       link: '/diagnostic',
     },
   },
@@ -146,12 +146,12 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-saas',
     image: INFOGRAPHICS.industrySaas,
-    humanCost: "MRR looks fine until it doesn't. You find out an anchor account is gone two weeks after they decided — and nobody saw it coming.",
+    humanCost: "MRR looks fine until it doesn't. You find out an anchor account is gone two weeks after they decided, and nobody saw it coming.",
     whatYouGetBack: "Churn signals named before the cancel email. Trial activation actually working. You stop apologizing to your board for surprises.",
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
-      why: 'Most popular entry for SaaS — fast read on activation and churn signals. Fee applies toward a larger engagement.',
+      why: 'Most popular entry for SaaS, fast read on activation and churn signals. Fee applies toward a larger engagement.',
       link: '/leak-audit',
     },
   },
@@ -163,15 +163,15 @@ const IndustriesPage: React.FC = () => {
 
   const jsonLd = combineSchemas(
     serviceSchema(
-      'The Leak Audit — by Industry',
+      'The Leak Audit, by Industry',
       '21-Day Revenue Diagnostic ($18,500) applied to specialty manufacturing, construction, logistics, healthcare, finance, and B2B SaaS. Fixed-fee. Source-data appendix included.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'What does the 21-Day Leak Audit actually deliver per industry?', answer: 'Same deliverable shape across industries: a 15–30 page leak map, dollar-quantified leaks, prioritized fixes, ROI projections, source-data appendix, and a 60-min readout. The leak *patterns* differ by industry — that\'s what these vertical pages document.' },
-    { question: 'How much is the Leak Audit?', answer: 'Fixed fee of $18,500. 21 calendar days from kickoff. CRM-agnostic — runs on a CSV export from HubSpot, Salesforce, or any system of record.' },
+    { question: 'What does the 21-Day Leak Audit actually deliver per industry?', answer: 'Same deliverable shape across industries: a 15–30 page leak map, dollar-quantified leaks, prioritized fixes, ROI projections, source-data appendix, and a 60-min readout. The leak *patterns* differ by industry, that\'s what these vertical pages document.' },
+    { question: 'How much is the Leak Audit?', answer: 'Fixed fee of $18,500. 21 calendar days from kickoff. CRM-agnostic, runs on a CSV export from HubSpot, Salesforce, or any system of record.' },
     { question: 'What if my industry isn\'t listed?', answer: 'The methodology travels. If your business has leads, dollars, or hours moving through systems and people, there are leaks. Book a 15-minute call and we\'ll scope it.' },
     { question: 'How fast do you find the first leak?', answer: 'Free self-scan: 14 minutes. Operator-led 21-Day Leak Audit: first leaks named within Week 1, full sealed report Day 21.' },
   ];
@@ -209,13 +209,13 @@ const IndustriesPage: React.FC = () => {
               Different wound patterns. Same 3am chest tightness. Same "I know something's off but I can't put my finger on it."
             </p>
             <p className="text-base md:text-lg text-foreground/80 max-w-3xl mx-auto mb-8 italic">
-              I built this because I lived it. Marine, construction operator, dad with kids in surgery — running a business while everything else was on fire. Below is what your industry's bleed actually feels like at 7pm, and what stops feeling that way once we fix it.
+              I built this because I lived it. Marine, construction operator, dad with kids in surgery, running a business while everything else was on fire. Below is what your industry's bleed actually feels like at 7pm, and what stops feeling that way once we fix it.
             </p>
 
 
             <div className="forensic-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                What you get — every industry, every engagement
+                What you get, every industry, every engagement
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-start gap-3">
@@ -345,7 +345,7 @@ const IndustriesPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/diagnostic">
                 <Button size="lg" className="bg-crimson hover:bg-crimson/90 text-foreground font-semibold">
-                  Open The Leak Audit — $18,500 <ArrowRight className="ml-2 w-4 h-4" />
+                  Open The Leak Audit, $18,500 <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link to="/leak-audit">

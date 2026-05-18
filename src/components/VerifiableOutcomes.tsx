@@ -54,7 +54,7 @@ export const VerifiableOutcomes: React.FC = () => {
               Anonymized. <span className="text-gradient-amber">Quantified.</span> Real.
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              We don't publish testimonials we can't verify. These are anonymized outcomes from real engagements — industry, metric, and the engagement type that produced them.
+              We don't publish testimonials we can't verify. These are anonymized outcomes from real engagements, industry, metric, and the engagement type that produced them.
             </p>
           </div>
         </RevealOnScroll>
@@ -66,7 +66,7 @@ export const VerifiableOutcomes: React.FC = () => {
               imageAlt="Terminal screen showing before/after revenue metrics with one row stamped Recovered"
               caseNumber="003 · The Evidence"
               title="Before. After. On the same screen."
-              summary="Every outcome we publish is tied to a measurable pre-fix baseline and a post-fix re-measure of the same metric on the same population. Same definition, same query — only the number changes."
+              summary="Every outcome we publish is tied to a measurable pre-fix baseline and a post-fix re-measure of the same metric on the same population. Same definition, same query, only the number changes."
             />
           </div>
         </RevealOnScroll>
@@ -105,7 +105,7 @@ export const VerifiableOutcomes: React.FC = () => {
 
         <RevealOnScroll delay={0.3}>
           <p className="text-center text-xs text-muted-foreground/70 mt-8 max-w-2xl mx-auto italic">
-            Client identities and proprietary data withheld by agreement. Outcomes representative of typical engagement results — your situation may differ.
+            Client identities and proprietary data withheld by agreement. Outcomes representative of typical engagement results, your situation may differ.
           </p>
         </RevealOnScroll>
       </div>

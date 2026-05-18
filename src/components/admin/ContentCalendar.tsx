@@ -320,7 +320,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
                 </div>
               </div>
 
-              {/* Side panel — items for selected day */}
+              {/* Side panel, items for selected day */}
               {selectedDay && (
                 <div className="w-full lg:w-[360px] space-y-3">
                   <div className="flex items-center justify-between">
@@ -370,7 +370,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
                           value={genPrompt}
                           onChange={(e) => setGenPrompt(e.target.value)}
                           rows={3}
-                          placeholder='Optional direction. e.g. "Quote-to-cash leak in commercial roofing — cite a $187k example."'
+                          placeholder='Optional direction. e.g. "Quote-to-cash leak in commercial roofing, cite a $187k example."'
                           className="text-xs"
                           disabled={genLoading}
                         />

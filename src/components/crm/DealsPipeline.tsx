@@ -33,7 +33,7 @@ const DealCard: React.FC<{ deal: CrmDeal; companyName?: string; contactName?: st
       className={`glass p-3 rounded-lg cursor-grab active:cursor-grabbing border border-border hover:border-amber/40 transition-colors ${isDragging ? "opacity-50" : ""}`}
     >
       <div className="font-semibold text-sm text-foreground line-clamp-2">{deal.title}</div>
-      <div className="text-xs text-muted-foreground mt-1">{companyName || contactName || "—"}</div>
+      <div className="text-xs text-muted-foreground mt-1">{companyName || contactName || ", "}</div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-amber font-bold text-sm font-display">{formatMoney(deal.value_cents, deal.currency)}</span>
         {deal.expected_close_date && (

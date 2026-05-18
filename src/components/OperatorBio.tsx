@@ -32,7 +32,7 @@ export const OperatorBio: React.FC = () => {
               The Operator
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Joseph Toney —{' '}
+              Joseph Toney , {' '}
               <span className="text-amber">Business Forensics Operator</span>
             </h2>
           </div>
@@ -157,7 +157,7 @@ export const OperatorBio: React.FC = () => {
                 <CaseFileCard
                   caseNumber={47}
                   businessType="$4M/yr services firm"
-                  leakFound="Inbound leads dying inside one Gmail inbox — no routing, no SLA, no second touch."
+                  leakFound="Inbound leads dying inside one Gmail inbox, no routing, no SLA, no second touch."
                   amountBled="$380K / yr"
                   status="SEALED"
                 />

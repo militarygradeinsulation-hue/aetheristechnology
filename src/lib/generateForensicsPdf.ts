@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 
 /**
- * Aetheris Forensic Playbook PDF — matches the live "Aetheris Playbook" style
+ * Aetheris Forensic Playbook PDF, matches the live "Aetheris Playbook" style
  * used by supabase/functions/generate-playbook (dark bg, gold pillar tag,
  * large helvetica title, gold accent bars, section numbering).
  */
@@ -83,7 +83,7 @@ function renderCover(doc: jsPDF, title: string, subtitle: string, pillar: string
     doc.text(tags.join('   •   '), MARGIN, tagsY);
   }
 
-  // Bottom block — gold bar, AETHERIS, meta
+  // Bottom block, gold bar, AETHERIS, meta
   doc.setFillColor(...GOLD);
   doc.rect(MARGIN, PAGE_H - 60, 50, 2, 'F');
 
@@ -104,7 +104,7 @@ function renderCover(doc: jsPDF, title: string, subtitle: string, pillar: string
 
   doc.setFontSize(7);
   doc.setTextColor(80, 75, 70);
-  doc.text('CONFIDENTIAL — FOR AUTHORIZED DISTRIBUTION ONLY', MARGIN, PAGE_H - 20);
+  doc.text('CONFIDENTIAL, FOR AUTHORIZED DISTRIBUTION ONLY', MARGIN, PAGE_H - 20);
 }
 
 function renderTOC(doc: jsPDF, sections: string[]) {
@@ -164,7 +164,7 @@ function renderBackCover(doc: jsPDF) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BODY);
   const ctaLines = doc.splitTextToSize(
-    'This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $2,500, applied toward engagement.',
+    'This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan, a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $2,500, applied toward engagement.',
     CONTENT_W - 20,
   );
   doc.text(ctaLines, PAGE_W / 2, 108, { align: 'center' });

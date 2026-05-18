@@ -34,8 +34,8 @@ function nextBusinessMorningISO(): string {
 }
 
 function scoreTier(score: number): { label: string; tone: string; advice: string } {
-  if (score >= 80) return { label: 'HOT — call today', tone: 'text-emerald-400', advice: 'Top-tier fit. Phone first, email second. These close fastest.' };
-  if (score >= 60) return { label: 'WARM — reach this week', tone: 'text-amber', advice: 'Strong fit. Personalized email + LinkedIn touch. Follow up in 48h.' };
+  if (score >= 80) return { label: 'HOT, call today', tone: 'text-emerald-400', advice: 'Top-tier fit. Phone first, email second. These close fastest.' };
+  if (score >= 60) return { label: 'WARM, reach this week', tone: 'text-amber', advice: 'Strong fit. Personalized email + LinkedIn touch. Follow up in 48h.' };
   if (score >= 40) return { label: 'WORTH A SHOT', tone: 'text-amber/70', advice: 'Decent fit. Use a templated outreach. Don\'t over-invest until they reply.' };
   return { label: 'LOW PRIORITY', tone: 'text-muted-foreground', advice: 'Weak signal. Only work if your queue is empty. Consider skipping back to pool.' };
 }
@@ -179,7 +179,7 @@ export const LeadsBoard: React.FC = () => {
   const handleSkipDrip = async (lead: RepLead) => {
     try {
       await portalLeads.skipDrip(lead.id);
-      toast({ title: 'Skipped — back to pool' });
+      toast({ title: 'Skipped, back to pool' });
       refreshDrip();
     } catch (e) {
       toast({ title: 'Skip failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -245,7 +245,7 @@ export const LeadsBoard: React.FC = () => {
       push('not_contacted', 'NOT CONTACTED YET',
         'bg-blue-500/15 text-blue-400 border-blue-500/30',
         sorted.filter(l => (l.touch_count ?? 0) === 0 && !CONTACTED_STATUSES.includes(l.status)));
-      push('contacted', 'CONTACTED — NO REPLY',
+      push('contacted', 'CONTACTED, NO REPLY',
         'bg-amber/15 text-amber border-amber/30',
         sorted.filter(l => ((l.touch_count ?? 0) > 0 || ['outreach','touched'].includes(l.status))
           && !CONNECTED_STATUSES.includes(l.status) && l.status !== 'lost' && l.status !== 'dead'));
@@ -317,7 +317,7 @@ export const LeadsBoard: React.FC = () => {
           await createCalendarEvent({
             kind: 'follow_up',
             title: `Follow up: ${businessName}`,
-            body: `Lead: ${businessName}\nDeep scan complete — review insights and reach out.`,
+            body: `Lead: ${businessName}\nDeep scan complete, review insights and reach out.`,
             start_at: nextBusinessMorningISO(),
             all_day: false,
             lead_id: l.id,
@@ -361,7 +361,7 @@ export const LeadsBoard: React.FC = () => {
         ))}
       </div>
 
-      {/* DRIP — Today's Drop */}
+      {/* DRIP, Today's Drop */}
       {sub === 'drip' && (
         <Card>
           <CardHeader>
@@ -392,9 +392,9 @@ export const LeadsBoard: React.FC = () => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || ', '}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
+                          {[l.industry, l.location].filter(Boolean).join(' · ') || ', '}
                         </p>
                       </div>
                       <ScoreBadge lead={l} tone="amber" />
@@ -428,7 +428,7 @@ export const LeadsBoard: React.FC = () => {
               <Sparkles className="w-5 h-5 text-amber" /> Admin-Pushed Leads
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Vetted prospects scraped by the company. Claim one and it's yours to work — others can't see it once claimed.
+              Vetted prospects scraped by the company. Claim one and it's yours to work, others can't see it once claimed.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -459,9 +459,9 @@ export const LeadsBoard: React.FC = () => {
                   <div key={l.id} className="rounded-lg border border-border/50 bg-card/40 p-3 hover:border-amber/40 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || ', '}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
+                          {[l.industry, l.location].filter(Boolean).join(' · ') || ', '}
                         </p>
                       </div>
                       <ScoreBadge lead={l} tone="amber-soft" />
@@ -607,7 +607,7 @@ export const LeadsBoard: React.FC = () => {
         </Card>
       )}
 
-      {/* HUNT — AI scraper */}
+      {/* HUNT, AI scraper */}
       {sub === 'hunt' && (
         <HuntPanel onScraped={(toMine) => {
           if (toMine) { setSub('drip'); refreshDrip(); }
@@ -623,7 +623,7 @@ export const LeadsBoard: React.FC = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan — Pick up to 10
+              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan, Pick up to 10
             </DialogTitle>
             <DialogDescription>
               Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
@@ -661,7 +661,7 @@ export const LeadsBoard: React.FC = () => {
                     className="accent-amber"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || ', '}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {[l.industry, l.location, l.website].filter(Boolean).join(' · ')}
                     </p>
@@ -706,7 +706,7 @@ export const LeadsBoard: React.FC = () => {
                   )}
                 </DialogTitle>
                 <DialogDescription>
-                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || '—'}
+                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || ', '}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3 text-sm">
@@ -776,7 +776,7 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
     setRunning(true);
     try {
       const token = getPortalToken();
-      if (!token) throw new Error('Portal session expired — sign in again.');
+      if (!token) throw new Error('Portal session expired, sign in again.');
       const { data, error } = await supabase.functions.invoke('portal-scrape-leads', {
         body: { industry, location, count, assign_to_me: assignToMe },
         headers: { 'x-portal-token': token },
@@ -800,7 +800,7 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
     <Card>
       <CardHeader>
         <CardTitle className="font-display flex items-center gap-2">
-          <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode — AI Web Scraper
+          <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode, AI Web Scraper
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
@@ -980,7 +980,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
       setScan(res.scan);
       setOpen(true); // ensure still open after data lands
-      toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete — saved to lead' });
+      toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead' });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -1014,7 +1014,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               lead.phone ? `Phone: ${lead.phone}` : null,
               lead.website ? `Website: ${lead.website}` : null,
               '',
-              'Deep scan complete — review insights and reach out.',
+              'Deep scan complete, review insights and reach out.',
             ].filter(Boolean).join('\n'),
             start_at: nextBusinessMorningISO(),
             all_day: false,
@@ -1035,7 +1035,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       <div className="w-full flex items-start gap-2 hover:bg-amber/5 transition-colors">
         <button type="button" onClick={() => setOpen(o => !o)} className="text-left p-3 flex items-start justify-between gap-2 flex-1 min-w-0">
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || '—'}</p>
+            <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || ', '}</p>
             <p className="text-xs text-muted-foreground truncate">
               {lead.contact_name && <span>{lead.contact_name}</span>}
               {lead.email && (
@@ -1055,7 +1055,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <span>{lead.phone}</span>
                 </>
               )}
-              {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || '—')}
+              {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || ', ')}
             </p>
           </div>
           <div className="text-right text-xs text-muted-foreground flex-shrink-0">
@@ -1132,7 +1132,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
 
-          {/* Rep Game Plan — adaptive coaching */}
+          {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
           <div className="flex flex-wrap gap-2">
             <select
@@ -1222,7 +1222,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Deep Scan — Person + Company
+                <Sparkles className="w-3 h-3" /> Deep Scan, Person + Company
               </p>
               {(rr?.fetched_at || fc?.fetched_at) && (
                 <span className="text-[10px] text-muted-foreground">
@@ -1275,7 +1275,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       return (
                         <p key={i} className={isBest ? 'opacity-60' : ''}>
                           <a href="#" onClick={(ev)=>{ev.preventDefault();openRepMail(e.email);}} className="text-amber hover:underline">{e.email}</a>
-                          <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
+                          <span className="text-muted-foreground ml-2">[{e.type || ', '}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
                           {isBest && <span className="ml-2 text-[10px] text-amber">★ best</span>}
                         </p>
                       );
@@ -1288,7 +1288,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     {rr.phones.map((p: any, i: number) => (
                       <p key={i}>
                         <a href={`tel:${p.number}`} className="text-amber hover:underline">{p.number}</a>
-                        <span className="text-muted-foreground ml-2">[{p.type || '—'}]</span>
+                        <span className="text-muted-foreground ml-2">[{p.type || ', '}]</span>
                       </p>
                     ))}
                   </div>
@@ -1329,7 +1329,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                             </p>
                           )}
                           {Array.isArray(c.phones) && c.phones[0]?.number && (
-                            <p><a href={`tel:${c.phones[0].number}`} className="text-amber hover:underline">{c.phones[0].number}</a> <span className="text-muted-foreground text-[10px]">[{c.phones[0].type || '—'}]</span></p>
+                            <p><a href={`tel:${c.phones[0].number}`} className="text-amber hover:underline">{c.phones[0].number}</a> <span className="text-muted-foreground text-[10px]">[{c.phones[0].type || ', '}]</span></p>
                           )}
                         </div>
                       ))}
@@ -1340,7 +1340,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             )}
             {fc && (
               <div className="space-y-2 mt-3 pt-3 border-t border-amber/20 text-xs">
-                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Firecrawl — Company Intel</p>
+                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Firecrawl, Company Intel</p>
                 {fc.json && (
                   <div className="space-y-1">
                     {fc.json.legal_name && <p><span className="text-muted-foreground">Legal name:</span> <span className="text-foreground font-semibold">{fc.json.legal_name}</span></p>}
@@ -1365,7 +1365,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                           {fc.json.leadership.slice(0, 8).map((p: any, i: number) => {
                             const name = typeof p?.name === 'string' ? p.name : (typeof p === 'string' ? p : '');
                             const title = typeof p?.title === 'string' ? p.title : '';
-                            return <li key={i}>{name}{title ? ` — ${title}` : ''}</li>;
+                            return <li key={i}>{name}{title ? `, ${title}` : ''}</li>;
                           })}
                         </ul>
                       </div>
@@ -1410,7 +1410,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                         const title = typeof w?.title === 'string' ? w.title : (w?.title ? JSON.stringify(w.title) : '');
                         const desc = typeof w?.description === 'string' ? w.description : '';
                         if (!url && !title) return null;
-                        return <li key={i}><a href={url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{title || url}</a>{desc ? ` — ${desc}` : ''}</li>;
+                        return <li key={i}><a href={url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{title || url}</a>{desc ? `, ${desc}` : ''}</li>;
                       })}
                     </ul>
                   </details>
@@ -1434,7 +1434,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                Lead notes — autosaves (visible to admin)
+                Lead notes, autosaves (visible to admin)
               </p>
               <Button
                 size="sm"
@@ -1449,7 +1449,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   try {
                     await upsertRepNote({
                       title: `Lead: ${lead.business_name || lead.contact_name || 'Untitled'}`,
-                      body: `${trimmed}\n\n— from lead ${lead.id}`,
+                      body: `${trimmed}\n\n,  from lead ${lead.id}`,
                       pinned: false,
                       tags: ['lead'],
                       attachments: [],
@@ -1466,7 +1466,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <Textarea
               value={notes}
               onChange={e => scheduleSaveNotes(e.target.value)}
-              placeholder="Notes about this lead — autosaves and visible on the lead. Use 'Save copy to My Notes' to keep a private snapshot in your workspace."
+              placeholder="Notes about this lead, autosaves and visible on the lead. Use 'Save copy to My Notes' to keep a private snapshot in your workspace."
               className="min-h-[80px] text-sm"
             />
           </div>
@@ -1534,10 +1534,10 @@ const UploadDownloadPanel: React.FC<{ onUploaded: () => void }> = ({ onUploaded 
           </button>
           {rows.length > 0 && (
             <div className="rounded-lg border border-border/50 bg-card/40 p-3 space-y-2">
-              <p className="text-sm text-foreground font-semibold">{filename} — {rows.length} row{rows.length === 1 ? '' : 's'}</p>
+              <p className="text-sm text-foreground font-semibold">{filename}, {rows.length} row{rows.length === 1 ? '' : 's'}</p>
               <div className="text-xs text-muted-foreground max-h-40 overflow-y-auto space-y-1">
                 {rows.slice(0, 5).map((r, i) => (
-                  <p key={i} className="truncate">• {r.business_name || r.email || '—'} {r.industry && `(${r.industry})`}</p>
+                  <p key={i} className="truncate">• {r.business_name || r.email || ', '} {r.industry && `(${r.industry})`}</p>
                 ))}
                 {rows.length > 5 && <p>… and {rows.length - 5} more</p>}
               </div>

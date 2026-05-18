@@ -34,12 +34,12 @@ const STEPS = [
   {
     icon: Wrench,
     title: 'Prescribe',
-    desc: 'Exact fix per leak — system change, automation, AI agent, or human discipline. Ranked by ROI.',
+    desc: 'Exact fix per leak, system change, automation, AI agent, or human discipline. Ranked by ROI.',
   },
   {
     icon: ShieldCheck,
     title: 'Seal',
-    desc: 'Implement, instrument, verify the leak is closed. Not "delivered" — proven sealed in the data.',
+    desc: 'Implement, instrument, verify the leak is closed. Not "delivered", proven sealed in the data.',
   },
 ];
 
@@ -71,7 +71,7 @@ export const LeakAuditMethod: React.FC = () => {
               imageAlt="Isometric blueprint of a seven-stage revenue pipeline with one stage flagged as a breach"
               caseNumber="002 · The Method"
               title="Seven steps. One breach map."
-              summary="Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. Every business we engage gets run through the same forensic process. Each stage names a different class of leak — and produces evidence, not opinion."
+              summary="Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. Every business we engage gets run through the same forensic process. Each stage names a different class of leak, and produces evidence, not opinion."
             />
             <div className="mt-4 flex justify-center">
               <button

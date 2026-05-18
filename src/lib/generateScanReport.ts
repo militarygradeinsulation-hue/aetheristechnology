@@ -241,7 +241,7 @@ export function generateFullReport(report: FullReport): void {
     y += 8;
   }
 
-  // === GAPS — full text, every gap ===
+  // === GAPS, full text, every gap ===
   y = newPage(doc);
   y = sectionHeader(doc, 'Revenue Leaks & Gaps', y);
 
@@ -343,7 +343,7 @@ export function generateFullReport(report: FullReport): void {
 
       doc.setFontSize(7);
       doc.setTextColor(...COLORS.gray);
-      doc.text(`Cost: ${item.estimatedCost || '—'}  |  Recovery: ${item.projectedRecovery || '—'}`, MARGIN + 8, y + cardH - 4);
+      doc.text(`Cost: ${item.estimatedCost || ', '}  |  Recovery: ${item.projectedRecovery || ', '}`, MARGIN + 8, y + cardH - 4);
 
       y += cardH + 4;
     }

@@ -13,7 +13,7 @@ import {
 } from "@/lib/millionDollarPath";
 
 // Anchor for the current 90-day sprint. Update this when a new sprint kicks off.
-// Must be a Monday — buildDailyGoals snaps to the Monday of the week regardless.
+// Must be a Monday, buildDailyGoals snaps to the Monday of the week regardless.
 export const SPRINT_START = new Date("2026-04-06T12:00:00");
 
 export function getCurrentSprintDay(today = new Date()): { day: number; week: number; total: number } {
@@ -74,7 +74,7 @@ export const Sprint90View: React.FC = () => {
                 Day {todayInfo.day} of {todayInfo.total} · Week {todayInfo.week}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Operator math + weekday motion. This is the same plan Joseph and Braden are running — your daily targets are below.
+                Operator math + weekday motion. This is the same plan Joseph and Braden are running, your daily targets are below.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">

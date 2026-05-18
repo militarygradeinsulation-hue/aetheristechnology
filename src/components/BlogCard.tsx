@@ -4,7 +4,7 @@ import { Calendar, User, MapPin, ArrowRight, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import architectLogo from '@/assets/architect-logo.jpg';
 
-// Re-export for backwards compat — always returns the Architect logo
+// Re-export for backwards compat, always returns the Architect logo
 export const getImageForSlug = (_slug: string): string => architectLogo;
 
 interface BlogPost {

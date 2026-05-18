@@ -33,10 +33,10 @@ const tools: Tool[] = [
   { thumbnail: diagnosticThumb, title: 'Business Diagnostic', description: '20-question assessment that scores your operational health.', path: '/business-diagnostic', category: 'Diagnostic' },
   { thumbnail: scannerThumb, title: 'Website Scanner', description: "Instant audit of your site's SEO, speed, and conversion gaps.", path: '/scan', category: 'Diagnostic' },
   { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', description: 'Expose blind spots across leadership, sales, and operations.', path: '/strategic-questions', category: 'Diagnostic' },
-  { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', description: 'Upload a resume — get an Aetheris case file with fit score, red flags, and interview questions.', path: '/resume-forensics', category: 'Hiring' },
+  { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', description: 'Upload a resume, get an Aetheris case file with fit score, red flags, and interview questions.', path: '/resume-forensics', category: 'Hiring' },
   { thumbnail: brandContradictionsThumb, title: 'Brand Contradiction Finder', description: 'See where your brand says one thing but signals another.', path: '/brand-contradictions', category: 'Brand' },
   { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', description: 'Find the words quietly weakening trust and authority.', path: '/friction-audit', category: 'Brand' },
-  { thumbnail: contentGenThumb, title: 'Social Content Generator', description: 'Scan your site — get 25 ready-to-post social pieces.', path: '/content-generator', category: 'Content' },
+  { thumbnail: contentGenThumb, title: 'Social Content Generator', description: 'Scan your site, get 25 ready-to-post social pieces.', path: '/content-generator', category: 'Content' },
   { thumbnail: contentCalendarThumb, title: '30-Day Content Calendar', description: 'Daily post ideas, hooks, and topics for your industry.', path: '/content-calendar', category: 'Content' },
   
   { thumbnail: salesScriptsThumb, title: 'Sales Script Generator', description: 'AI call scripts, objection handlers, and follow-up templates.', path: '/sales-scripts', category: 'Sales' },
@@ -56,7 +56,7 @@ const CapabilitiesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Capability Demonstrations — Aetheris AI"
+        title="Capability Demonstrations, Aetheris AI"
         description="Working examples of the AI systems Aetheris AI deploys for clients. Diagnostics, brand audits, marketing tools, sales engines, and content generators."
         path="/capabilities"
         keywords="AI capability demos, free AI tools, AI diagnostic tools, AI marketing tools, AI sales tools"
@@ -82,7 +82,7 @@ const CapabilitiesPage = () => {
                   Capability <span className="text-gradient-amber">Demonstrations</span>
                 </h1>
                 <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                  Every tool here is a working example of an AI system we deploy for paying clients. Use them free — then talk to us about a custom-built version.
+                  Every tool here is a working example of an AI system we deploy for paying clients. Use them free, then talk to us about a custom-built version.
                 </p>
               </div>
             </RevealOnScroll>

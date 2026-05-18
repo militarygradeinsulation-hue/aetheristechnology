@@ -116,7 +116,7 @@ const areas = [
   {
     id: 'digital-strategy',
     title: 'Digital Strategy',
-    description: 'Custom AI-rendered visuals built in-house at Aetheris AI Studio — no stock photos, no generic templates.',
+    description: 'Custom AI-rendered visuals built in-house at Aetheris AI Studio, no stock photos, no generic templates.',
   },
   {
     id: 'branding',

@@ -147,13 +147,13 @@ const AppHygieneHistory = () => {
                                   log.field_changes.slice(0, 3).map((c, i) => (
                                     <div key={i} className="text-muted-foreground">
                                       <span className="text-foreground">{c.field}:</span>{" "}
-                                      <span className="line-through text-rose-400">{String(c.before ?? "—").slice(0, 40)}</span>
+                                      <span className="line-through text-rose-400">{String(c.before ?? ", ").slice(0, 40)}</span>
                                       {" → "}
-                                      <span className="text-emerald-400">{String(c.after ?? "—").slice(0, 40)}</span>
+                                      <span className="text-emerald-400">{String(c.after ?? ", ").slice(0, 40)}</span>
                                     </div>
                                   ))
                                 ) : (
-                                  <span className="text-muted-foreground">—</span>
+                                  <span className="text-muted-foreground">, </span>
                                 )}
                               </td>
                               <td className="px-3 py-2">

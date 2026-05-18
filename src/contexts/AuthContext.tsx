@@ -50,7 +50,7 @@ const readCachedSession = (): Session | null => {
       }
     }
   } catch {
-    /* ignore — fall back to network */
+    /* ignore, fall back to network */
   }
   return null;
 };

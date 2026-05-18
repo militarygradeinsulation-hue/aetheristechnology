@@ -36,13 +36,13 @@ const Home = () => {
     { question: 'What does the 21-Day Revenue Diagnostic include?', answer: 'A 12-month CRM snapshot, lead-to-contact and deal-stage analysis, a written 15–30 page report with prioritized fixes and ROI projections, a source-data appendix, and a 60-minute readout. Fixed fee: $18,500.' },
     { question: 'Do I need to be on HubSpot or Salesforce?', answer: 'No. The Diagnostic is CRM-agnostic and runs on a CSV export of contacts, deals, and activity. Live integration with your CRM is an optional upsell, not a prerequisite.' },
     { question: 'How does the implementation retainer work?', answer: '$15,000 per month, 3-month minimum, available only to Diagnostic clients. We execute the prioritized fixes ourselves and re-measure recovery monthly.' },
-    { question: 'Who do you work with?', answer: 'Business owners $1M–$50M who already know something is broken and are exhausted from trying to find the fix. Manufacturers, service firms, SaaS, contractors, agencies. Headquartered in Indianapolis, Indiana — engagements run remotely and on-site, US-wide.' },
+    { question: 'Who do you work with?', answer: 'Business owners $1M–$50M who already know something is broken and are exhausted from trying to find the fix. Manufacturers, service firms, SaaS, contractors, agencies. Headquartered in Indianapolis, Indiana, engagements run remotely and on-site, US-wide.' },
   ];
 
   const steps = [
-    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', real: "You finally see the whole business on one page — every place leads, dollars, and hours are slipping out. The stuff you sensed but couldn't prove.", img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
+    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', real: "You finally see the whole business on one page, every place leads, dollars, and hours are slipping out. The stuff you sensed but couldn't prove.", img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
     { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.', real: "You walk out with a number you can say out loud to your spouse, your CFO, your board. No more 'I think we're losing money somewhere.'", img: INFOGRAPHICS.diagnosticQuantify, alt: 'Calculator and accounting ledger tallying revenue leaks' },
-    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', real: "You stop being the bottleneck. There's a sequenced plan, a fixed quote, and a clear answer to 'what do I do Monday?' — and you can walk if you want.", img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
+    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', real: "You stop being the bottleneck. There's a sequenced plan, a fixed quote, and a clear answer to 'what do I do Monday?', and you can walk if you want.", img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
   ];
 
 
@@ -101,7 +101,7 @@ const Home = () => {
                       There's a ton of AI gurus out there. <span className="text-amber">Hard to trust any of them.</span>
                     </h2>
                     <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                      We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it — go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
+                      We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it, go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <Link to="/leak-audit">
@@ -132,7 +132,7 @@ const Home = () => {
               Who we are. What we do for you. <span className="text-amber">In our own words.</span>
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Stopping revenue leaks with Aetheris forensics — an in-depth audio briefing on the methodology, the math, and what an engagement actually looks like.
+              Stopping revenue leaks with Aetheris forensics, an in-depth audio briefing on the methodology, the math, and what an engagement actually looks like.
             </p>
             <AudioBriefingPlayer src="/audio/stopping-revenue-leaks-aetheris-forensics.m4a" />
           </div>
@@ -143,13 +143,13 @@ const Home = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-5">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Skip the form — book the operator
+                Skip the form, book the operator
               </div>
               <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
                 Book a meeting <span className="text-amber">with me directly.</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto">
-                30 minutes. I'll tell you on the call where your revenue systems are most likely losing money — before you spend a dollar on the Diagnostic.
+                30 minutes. I'll tell you on the call where your revenue systems are most likely losing money, before you spend a dollar on the Diagnostic.
               </p>
             </div>
             <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
@@ -213,7 +213,7 @@ const Home = () => {
             </div>
           </div>
         </section>
-        {/* What makes us different — AI-native operator */}
+        {/* What makes us different, AI-native operator */}
         <section className="px-4 py-14">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
@@ -228,14 +228,14 @@ const Home = () => {
                       <span className="text-amber"> We're an AI-native operator.</span>
                     </h2>
                     <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-5">
-                      Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
+                      Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems, at a fraction of the cost, in a fraction of the time.
                     </p>
                     <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 mb-7">
                       <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
-                        Why this matters to you — Joseph
+                        Why this matters to you, Joseph
                       </div>
                       <p className="text-foreground/85 text-[15px] leading-relaxed italic">
-                        I've sat across the desk from the consultants. I've cut the checks. I watched them walk out with a binder and leave me with the same problems and a lighter bank account. I built Aetheris so you'd never feel that twice. You don't hire me to think about your business — you hire me to actually go inside it, find the bleed, and either hand you the wrench or pick it up myself.
+                        I've sat across the desk from the consultants. I've cut the checks. I watched them walk out with a binder and leave me with the same problems and a lighter bank account. I built Aetheris so you'd never feel that twice. You don't hire me to think about your business, you hire me to actually go inside it, find the bleed, and either hand you the wrench or pick it up myself.
                       </p>
                     </div>
                     <Link to="/why-us">
@@ -275,7 +275,7 @@ const Home = () => {
               <CaseFileCard
                 caseNumber={47}
                 businessType="$4M services firm"
-                leakFound="Inbound leads dying inside one Gmail inbox — no routing, no SLA, no second touch."
+                leakFound="Inbound leads dying inside one Gmail inbox, no routing, no SLA, no second touch."
                 amountBled="$380K / yr"
                 image={INFOGRAPHICS.case47Gmail}
                 imageAlt="Overflowing inbox with $380K/yr leak stamp"
@@ -291,7 +291,7 @@ const Home = () => {
               <CaseFileCard
                 caseNumber={74}
                 businessType="Construction sub, $8M"
-                leakFound="Owner bottleneck on every quote — 11 days avg time-to-bid."
+                leakFound="Owner bottleneck on every quote, 11 days avg time-to-bid."
                 amountBled="$1.1M / yr"
                 image={INFOGRAPHICS.case74Bottleneck}
                 imageAlt="Bottleneck diagram with owner choke point"

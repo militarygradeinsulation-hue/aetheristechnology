@@ -29,12 +29,12 @@ export const TOPIC_POOL = [
   { title: "The Competitive Intelligence Operating System", subtitle: "Real-Time Market Positioning in the AI Economy", pillar: "Strategic Consulting", tags: ["Competitive Intelligence", "Market Positioning", "AI Economy"], icon: "Shield" },
   { title: "The AI Visibility Scorecard Framework", subtitle: "Measuring and Maximizing Your Brand's AI Search Presence", pillar: "AI Transformation", tags: ["AI Visibility", "GEO", "Brand Presence"], icon: "BarChart3" },
   { title: "The Autonomous Workforce Integration Guide", subtitle: "Deploying AI Agents Without Destroying Team Culture", pillar: "AI Transformation", tags: ["AI Agents", "Workforce Transformation", "Change Management"], icon: "Video" },
-  { title: "The Generative Engine Optimization Masterclass", subtitle: "From SEO to GEO — The Complete Transition Playbook", pillar: "AI Transformation", tags: ["GEO", "AI Search", "Content Optimization"], icon: "TrendingUp" },
+  { title: "The Generative Engine Optimization Masterclass", subtitle: "From SEO to GEO, The Complete Transition Playbook", pillar: "AI Transformation", tags: ["GEO", "AI Search", "Content Optimization"], icon: "TrendingUp" },
   { title: "The AI-First Customer Experience Blueprint", subtitle: "Designing Touchpoints That Learn, Adapt, and Convert", pillar: "AI Transformation", tags: ["Customer Experience", "AI Personalization", "Conversion Design"], icon: "BookOpen" },
   { title: "The Predictive Analytics Implementation Roadmap", subtitle: "From Historical Reporting to Revenue Forecasting in 90 Days", pillar: "AI Transformation", tags: ["Predictive Analytics", "Revenue Forecasting", "Data Strategy"], icon: "BarChart3" },
   { title: "The AI Ethics and Governance Playbook", subtitle: "Building Trust While Deploying Autonomous Systems", pillar: "AI Transformation", tags: ["AI Ethics", "Governance", "Trust Architecture"], icon: "Shield" },
   { title: "The Account-Based Marketing Execution Guide", subtitle: "Targeting the 20% of Accounts That Drive 80% of Revenue", pillar: "Marketing Technology", tags: ["ABM", "Target Accounts", "Revenue Concentration"], icon: "TrendingUp" },
-  { title: "The Email Deliverability & Reputation Playbook", subtitle: "Stop Landing in Spam — Engineering Inbox Placement at Scale", pillar: "Marketing Technology", tags: ["Email Marketing", "Deliverability", "Sender Reputation"], icon: "FileText" },
+  { title: "The Email Deliverability & Reputation Playbook", subtitle: "Stop Landing in Spam, Engineering Inbox Placement at Scale", pillar: "Marketing Technology", tags: ["Email Marketing", "Deliverability", "Sender Reputation"], icon: "FileText" },
   { title: "The Social Proof Automation Framework", subtitle: "Systematizing Testimonials, Reviews, and Case Studies", pillar: "Marketing Technology", tags: ["Social Proof", "Testimonials", "Trust Signals"], icon: "BookOpen" },
   { title: "The Marketing Analytics Dashboard Blueprint", subtitle: "Building Real-Time Visibility Into Every Dollar Spent", pillar: "Marketing Technology", tags: ["Marketing Dashboards", "Real-Time Analytics", "Data Visualization"], icon: "BarChart3" },
   { title: "The Lead Scoring & Qualification Engine", subtitle: "Separating Tire-Kickers from Buyers With Predictive Models", pillar: "Marketing Technology", tags: ["Lead Scoring", "Sales Qualification", "Predictive Models"], icon: "TrendingUp" },
@@ -98,7 +98,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
             Build Your Own <span className="text-amber glow-text">Playbook</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Pick a topic. <span className="text-amber font-semibold">OUR Strategic Business AI</span> generates a comprehensive 20+ page strategic playbook — custom frameworks, data, and action plans. <span className="text-amber font-semibold">$29 each.</span>
+            Pick a topic. <span className="text-amber font-semibold">OUR Strategic Business AI</span> generates a comprehensive 20+ page strategic playbook, custom frameworks, data, and action plans. <span className="text-amber font-semibold">$29 each.</span>
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
                     {user ? (
                       <>
                         <Sparkles className="w-4 h-4" />
-                        Generate & Buy — $25
+                        Generate & Buy, $25
                       </>
                     ) : (
                       <>

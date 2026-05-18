@@ -191,7 +191,7 @@ const SchedulePanel: React.FC<{ rows: ScheduleBlock[]; setRows: (r: ScheduleBloc
           <Card key={d} className="glass">
             <CardHeader className="pb-2"><CardTitle className="text-sm">{dn}</CardTitle></CardHeader>
             <CardContent className="space-y-2 px-3 pb-3">
-              {grouped[d].length === 0 && <p className="text-xs text-muted-foreground italic">—</p>}
+              {grouped[d].length === 0 && <p className="text-xs text-muted-foreground italic">, </p>}
               {grouped[d].map(b => (
                 <div key={b.id} className="bg-card/50 rounded p-2 border border-border/50 group cursor-pointer hover:border-amber/50"
                   onClick={() => setEditing(b)}>
@@ -407,7 +407,7 @@ const QuotasPanel: React.FC<{ rows: Quota[]; setRows: (r: Quota[]) => void; reps
         </CardHeader>
         <CardContent>
           {leaderboard.length === 0 ? (
-            <p className="text-sm text-muted-foreground italic">No CRM activity yet — once contacts/deals get owner_code tags, leaderboard fills automatically.</p>
+            <p className="text-sm text-muted-foreground italic">No CRM activity yet, once contacts/deals get owner_code tags, leaderboard fills automatically.</p>
           ) : (
             <table className="w-full text-sm">
               <thead><tr className="text-left text-muted-foreground border-b border-border">

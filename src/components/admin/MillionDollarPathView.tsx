@@ -47,7 +47,7 @@ export const MillionDollarPathView: React.FC = () => {
       await upsertCompanyEntry({
         date: startDate,
         kind: "goal",
-        title: `🎯 $1M in 90 Days — Sprint Begins`,
+        title: `🎯 $1M in 90 Days, Sprint Begins`,
         body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${retainers} Retainers (mo1) + ${recurringMonths} recurring retainer-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
         pinned: true,
         color: "cat:kickoff_90day",
@@ -85,7 +85,7 @@ export const MillionDollarPathView: React.FC = () => {
           body,
           color: "cat:kickoff_90day",
           ai_plan: {
-            summary: `Week ${w.week} of $1M sprint — ${w.phase}.`,
+            summary: `Week ${w.week} of $1M sprint, ${w.phase}.`,
             tactics: w.focus,
             kpis: [`$${Math.round(w.revenueTarget/100).toLocaleString()} cumulative`, `${w.newMeetings} new meetings`, `${w.newCloses} new closes`],
           },
@@ -94,7 +94,7 @@ export const MillionDollarPathView: React.FC = () => {
       } catch { failed++; }
     }
 
-    // Daily goals — Mon–Fri for all 13 weeks (~65 working days)
+    // Daily goals, Mon–Fri for all 13 weeks (~65 working days)
     const dailyGoals = buildDailyGoals(new Date(`${startDate}T12:00:00`), { scenario });
     for (const g of dailyGoals) {
       const date = g.date.toISOString().slice(0, 10);
@@ -117,7 +117,7 @@ export const MillionDollarPathView: React.FC = () => {
           body,
           color: "cat:kickoff_90day",
           ai_plan: {
-            summary: `${g.motion} — ${g.phase} phase, week ${g.weekNumber} of 13.`,
+            summary: `${g.motion}, ${g.phase} phase, week ${g.weekNumber} of 13.`,
             tactics: g.focus,
             kpis: g.kpis,
           },
@@ -135,7 +135,7 @@ export const MillionDollarPathView: React.FC = () => {
   };
   const onPace = scenario.grossRevenue >= MDP_GOAL_CENTS;
 
-  // Today’s position in the 90 days (rough — uses week 1 as anchor of NOW)
+  // Today’s position in the 90 days (rough, uses week 1 as anchor of NOW)
   // Operator can use the weekly checkboxes to mark themselves "current"
   const completedWeeks = weeks.filter(w => done[`week:${w.week}`]).length;
   const cumulativeAchieved = completedWeeks > 0 ? weeks[completedWeeks - 1].revenueTarget : 0;
@@ -171,7 +171,7 @@ export const MillionDollarPathView: React.FC = () => {
             <CalendarPlus className="w-5 h-5 text-amber shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-foreground">Push the 90-day plan to the Company Calendar</div>
-              <div className="text-xs text-muted-foreground">Drops the kickoff goal, all 13 weekly milestones, <strong>and a daily goal for every Mon–Fri</strong> (~65 working days) — Pipeline Mondays, Discovery Tuesdays, Proposal Wednesdays, Close Thursdays, Friday Wins — onto everyone's calendar.</div>
+              <div className="text-xs text-muted-foreground">Drops the kickoff goal, all 13 weekly milestones, <strong>and a daily goal for every Mon–Fri</strong> (~65 working days), Pipeline Mondays, Discovery Tuesdays, Proposal Wednesdays, Close Thursdays, Friday Wins, onto everyone's calendar.</div>
             </div>
             <div className="flex items-center gap-2">
               <Input
@@ -239,7 +239,7 @@ export const MillionDollarPathView: React.FC = () => {
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Users className="w-4 h-4 text-amber" /> Who Does What — Daily Floors
+            <Users className="w-4 h-4 text-amber" /> Who Does What, Daily Floors
           </CardTitle>
         </CardHeader>
         <CardContent className="grid md:grid-cols-3 gap-3">
@@ -260,14 +260,14 @@ export const MillionDollarPathView: React.FC = () => {
           <RoleCard role="Each Rep" tone="amber" lines={[
             `${scenario.outboundPerDay >= 60 ? "60+" : `${Math.max(40, Math.ceil(scenario.outboundPerDay / 10))}+`}/day outbound (call+LI+email)`,
             "3 booked meetings/day floor by wk 5",
-            "Clock in via portal — partners see efficiency",
+            "Clock in via portal, partners see efficiency",
             "Update every lead in portal same-day",
             "Use AI Coach before every important call",
           ]} />
         </CardContent>
       </Card>
 
-      {/* WAR PLAN — Operational Sections (offers, ICP, scripts, sales, training) */}
+      {/* WAR PLAN, Operational Sections (offers, ICP, scripts, sales, training) */}
       <OfferStackSection />
       <TargetMarketSection />
       <OutreachSection />
@@ -357,7 +357,7 @@ export const MillionDollarPathView: React.FC = () => {
             <NetCard label="Recurring × 14 mo" company={OFFERS.recurring.companyNet * 14} rep={OFFERS.recurring.repPayout * 14} partner={OFFERS.recurring.partnerPayout * 14} />
           </div>
           <div className="text-xs text-muted-foreground italic">
-            Locked split honors the rep + partner every single recurring month. The recurring tail is the actual prize — the
+            Locked split honors the rep + partner every single recurring month. The recurring tail is the actual prize, the
             sprint just builds the book.
           </div>
         </CardContent>

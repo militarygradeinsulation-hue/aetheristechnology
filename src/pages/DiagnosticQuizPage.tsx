@@ -24,7 +24,7 @@ const DiagnosticQuizPage: React.FC = () => {
         { name: 'Open the Business Diagnostic', text: 'Go to aetheris.technology/business-diagnostic.' },
         { name: 'Answer 20 quick questions', text: 'Cover marketing, conversion, branding, systems, and growth.' },
         { name: 'Get your category scores', text: 'See exactly which area is bleeding revenue and why.' },
-        { name: 'Download your action plan', text: 'Receive a prioritized list of fixes — DIY or book a call to remediate.' },
+        { name: 'Download your action plan', text: 'Receive a prioritized list of fixes, DIY or book a call to remediate.' },
       ],
       'PT5M'
     )
@@ -35,7 +35,7 @@ const DiagnosticQuizPage: React.FC = () => {
     { question: 'How long does the diagnostic take?', answer: 'About 5 minutes. You answer 20 quick questions and get instant scoring across five categories with a personalized PDF report.' },
     { question: 'Is the Business Diagnostic free?', answer: 'Yes. The full 20-question diagnostic and PDF report are completely free with no credit card or login required.' },
     { question: 'What does it diagnose?', answer: 'Marketing efficiency, conversion friction, brand clarity, operational systems and automation gaps, and growth strategy maturity.' },
-    { question: 'How is this different from the AI Readiness Assessment?', answer: 'The AI Readiness Assessment focuses on AI maturity (5 questions). The Business Diagnostic is broader — 20 questions covering all five revenue-leak categories of your operation.' },
+    { question: 'How is this different from the AI Readiness Assessment?', answer: 'The AI Readiness Assessment focuses on AI maturity (5 questions). The Business Diagnostic is broader, 20 questions covering all five revenue-leak categories of your operation.' },
   ];
 
   return (
@@ -78,7 +78,7 @@ const DiagnosticQuizPage: React.FC = () => {
               </div>
               <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
                 The Business Diagnostic is a free 20-question, 5-minute audit that scores your business
-                on marketing, conversion, branding, systems, and growth — and returns a category-by-category
+                on marketing, conversion, branding, systems, and growth, and returns a category-by-category
                 breakdown of where revenue is leaking, with prioritized fixes.
               </p>
             </div>
@@ -95,7 +95,7 @@ const DiagnosticQuizPage: React.FC = () => {
             Want a Deeper Look at Your Website?
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            Run a free AI-powered scan to uncover SEO issues, weak CTAs, and missed conversion opportunities — instantly.
+            Run a free AI-powered scan to uncover SEO issues, weak CTAs, and missed conversion opportunities, instantly.
           </p>
         </div>
       </div>

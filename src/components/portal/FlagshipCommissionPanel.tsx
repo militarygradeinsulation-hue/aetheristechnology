@@ -97,7 +97,7 @@ const BONUSES: Bonus[] = [
     key: 'volume',
     name: 'Volume Bonus',
     icon: Trophy,
-    description: 'Stack monthly flagship sales — extra cash on top of every commission.',
+    description: 'Stack monthly flagship sales, extra cash on top of every commission.',
     unit: 'monthly flagship sales',
     tiers: [
       { threshold: '2 sales / mo', amountCents: 100_000 },
@@ -109,7 +109,7 @@ const BONUSES: Bonus[] = [
     key: 'retention',
     name: 'Retention Bonus',
     icon: Repeat,
-    description: 'Earn more when retainer clients stay subscribed — your residual pays twice.',
+    description: 'Earn more when retainer clients stay subscribed, your residual pays twice.',
     unit: 'months client extends',
     tiers: [
       { threshold: '3-month extension', amountCents: 100_000 },
@@ -158,7 +158,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
             What we sell on aetheris.technology
           </div>
           <CardTitle className="flex items-center gap-2 font-display">
-            <DollarSign className="w-5 h-5 text-amber" /> Flagship Offers — Your Real Earning Engine
+            <DollarSign className="w-5 h-5 text-amber" /> Flagship Offers, Your Real Earning Engine
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
             Fixed-dollar payouts on every closed sale.{' '}
@@ -167,7 +167,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           </p>
         </CardHeader>
         <CardContent>
-          {/* Months projection slider — applies to recurring math + combined-deal example */}
+          {/* Months projection slider, applies to recurring math + combined-deal example */}
           <div className="mb-5 rounded-lg border border-amber/30 bg-background/40 p-4">
             <label className="text-[10px] text-muted-foreground block mb-2 font-mono uppercase tracking-wider">
               Project recurring revenue over: <span className="text-amber font-bold">{months} {months === 1 ? 'month' : 'months'}</span>
@@ -264,7 +264,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           {/* Combined-deal example */}
           <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
             <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Full-stack close — what one client is worth in {months} {months === 1 ? 'month' : 'months'}
+              <TrendingUp className="w-3.5 h-3.5" /> Full-stack close, what one client is worth in {months} {months === 1 ? 'month' : 'months'}
             </div>
             <p className="text-sm text-muted-foreground mb-3">
               Diagnostic ({fmtUsd(FLAGSHIPS[0].priceCents)} one-time) + Retainer ({fmtUsd(FLAGSHIPS[1].priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
@@ -310,7 +310,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
       <Card className="border-amber/40 bg-amber/[0.03]">
         <CardHeader>
           <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">
-            Bonus stack — stacks on top of every commission above
+            Bonus stack, stacks on top of every commission above
           </div>
           <CardTitle className="flex items-center gap-2 font-display">
             <Gift className="w-5 h-5 text-amber" /> Volume · Retention · Referral

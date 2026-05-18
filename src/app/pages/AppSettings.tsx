@@ -97,7 +97,7 @@ const AppSettings = () => {
             <div className="space-y-4">
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between"><dt className="text-muted-foreground">Portal ID</dt><dd className="font-mono">{account.hubspot_portal_id}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted-foreground">Connected</dt><dd>{account.hubspot_connected_at ? new Date(account.hubspot_connected_at).toLocaleDateString() : "—"}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">Connected</dt><dd>{account.hubspot_connected_at ? new Date(account.hubspot_connected_at).toLocaleDateString() : ", "}</dd></div>
                 <div className="flex justify-between"><dt className="text-muted-foreground">Last sync</dt><dd>{account.last_sync_at ? new Date(account.last_sync_at).toLocaleString() : "Never"}</dd></div>
               </dl>
               <div className="flex flex-wrap gap-2 pt-2">

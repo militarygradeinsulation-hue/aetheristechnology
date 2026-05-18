@@ -37,59 +37,59 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
   const steps = useMemo(() => {
     // 1. Triage
     const triage: string[] = [
-      hasScan ? '✓ Company Scan complete — check the score & gaps below' : 'Run the **Company Scan** above (just needs the website) to get a score, top revenue leaks, and an executive summary.',
-      hasDeep ? '✓ Deep Scan complete — verified contact + company intel below' : 'Run the **Deep Scan** to pull verified emails, phones, LinkedIn, work history, and tech stack.',
-      lead.email || rr?.emails?.length ? 'Verify the best email (prefer "professional" or "verified" grade from RocketReach).' : 'No verified email yet — Deep Scan will surface one.',
+      hasScan ? '✓ Company Scan complete, check the score & gaps below' : 'Run the **Company Scan** above (just needs the website) to get a score, top revenue leaks, and an executive summary.',
+      hasDeep ? '✓ Deep Scan complete, verified contact + company intel below' : 'Run the **Deep Scan** to pull verified emails, phones, LinkedIn, work history, and tech stack.',
+      lead.email || rr?.emails?.length ? 'Verify the best email (prefer "professional" or "verified" grade from RocketReach).' : 'No verified email yet, Deep Scan will surface one.',
       'Set status to **Outreach** when you start working it. Log a touch every time you send a message or call.',
     ];
 
     // 2. Analyze
     const analyze: string[] = [];
     if (scan?.score != null) {
-      analyze.push(`Forensic score is **${scan.grade || ''} (${scan.score}/100)** — ${scan.score < 60 ? 'huge leak surface, lead with the diagnostic anchor' : scan.score < 80 ? 'mid-tier, lead with one specific gap' : 'tight ship, sell strategy/Fractional not basic fixes'}.`);
+      analyze.push(`Forensic score is **${scan.grade || ''} (${scan.score}/100)**, ${scan.score < 60 ? 'huge leak surface, lead with the diagnostic anchor' : scan.score < 80 ? 'mid-tier, lead with one specific gap' : 'tight ship, sell strategy/Fractional not basic fixes'}.`);
     }
     if (topGap) {
-      analyze.push(`Top leak: **${topGap.title}** — costs ~${topGap.annualCost}/yr. Use this exact number in your opener.`);
+      analyze.push(`Top leak: **${topGap.title}**, costs ~${topGap.annualCost}/yr. Use this exact number in your opener.`);
     }
-    if (scan?.executiveSummary) analyze.push('Read the **Executive Summary** above — that\'s your "I noticed…" line.');
-    if (tech.length) analyze.push(`Tech stack: ${tech.slice(0, 5).join(', ')} — note anything outdated, missing analytics, or no CRM.`);
-    if (services.length) analyze.push(`They sell: ${services.slice(0, 3).join(', ')} — tie the leak to lost ${services[0]} revenue.`);
-    if (fc?.json?.employee_count) analyze.push(`~${fc.json.employee_count} employees — size their pain (under 20 = owner pain, 20-100 = ops pain, 100+ = systems pain).`);
-    if (rr?.job_history?.length > 1) analyze.push(`${contactFirstName} has been at ${rr.employer || company} for a while — they own the problem. New hires (<1yr) buy faster but have less budget.`);
-    if (!analyze.length) analyze.push('Run the scans above first — without data you\'re cold-pitching.');
+    if (scan?.executiveSummary) analyze.push('Read the **Executive Summary** above, that\'s your "I noticed…" line.');
+    if (tech.length) analyze.push(`Tech stack: ${tech.slice(0, 5).join(', ')}, note anything outdated, missing analytics, or no CRM.`);
+    if (services.length) analyze.push(`They sell: ${services.slice(0, 3).join(', ')}, tie the leak to lost ${services[0]} revenue.`);
+    if (fc?.json?.employee_count) analyze.push(`~${fc.json.employee_count} employees, size their pain (under 20 = owner pain, 20-100 = ops pain, 100+ = systems pain).`);
+    if (rr?.job_history?.length > 1) analyze.push(`${contactFirstName} has been at ${rr.employer || company} for a while, they own the problem. New hires (<1yr) buy faster but have less budget.`);
+    if (!analyze.length) analyze.push('Run the scans above first, without data you\'re cold-pitching.');
     analyze.push('**Red flags** = green lights for us: outdated site, no analytics, no booking, no testimonials, broken forms, generic copy.');
 
     // 3. Talk to THIS person
     const talkTo: string[] = [];
-    if (isOwner) talkTo.push(`**${contactFirstName} is an owner/operator.** They care about: revenue leaks, time leaks, hiring leaks. Skip features. Lead with: "I scanned ${company} — found about ${topGap?.annualCost || '$50k–$120k'}/yr leaving silently. Want the breakdown?"`);
-    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics — most ops leaders we audit find 8–15% of revenue leaking through process gaps. 14-day diagnostic, $2,900, applied to anything bigger."`);
-    else if (isMarketing) talkTo.push(`**Marketing leader.** They care about: attribution, conversion leaks, brand contradictions. Lead with: "We ran a brand contradiction scan on ${company} — found [X]. Want to see the rest?" (use Brand Contradiction Finder first.)`);
+    if (isOwner) talkTo.push(`**${contactFirstName} is an owner/operator.** They care about: revenue leaks, time leaks, hiring leaks. Skip features. Lead with: "I scanned ${company}, found about ${topGap?.annualCost || '$50k–$120k'}/yr leaving silently. Want the breakdown?"`);
+    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics, most ops leaders we audit find 8–15% of revenue leaking through process gaps. 14-day diagnostic, $2,900, applied to anything bigger."`);
+    else if (isMarketing) talkTo.push(`**Marketing leader.** They care about: attribution, conversion leaks, brand contradictions. Lead with: "We ran a brand contradiction scan on ${company}, found [X]. Want to see the rest?" (use Brand Contradiction Finder first.)`);
     else if (isSales) talkTo.push(`**Sales leader.** They care about: pipeline leaks, follow-up failure, lost deals. Lead with: "Our forensic audit on companies your size usually finds 20-30% of pipeline value leaking from broken follow-up. Want a free leak audit?"`);
-    else if (isTech) talkTo.push(`**Tech leader.** They care about: stack debt, integration leaks, data silos. They\'ll skip BS — go technical fast. Mention Triple-AI architecture and skip the marketing pitch.`);
-    else talkTo.push(`Title unclear — open broad: "I help operators find revenue leaks they can\'t see from inside the building. Took a quick look at ${company} — should I send what I found?"`);
+    else if (isTech) talkTo.push(`**Tech leader.** They care about: stack debt, integration leaks, data silos. They\'ll skip BS, go technical fast. Mention Triple-AI architecture and skip the marketing pitch.`);
+    else talkTo.push(`Title unclear, open broad: "I help operators find revenue leaks they can\'t see from inside the building. Took a quick look at ${company}, should I send what I found?"`);
 
     talkTo.push(`**Channel order:** 1) Personalized email referencing one specific finding. 2) LinkedIn DM 24h later. 3) Call 48h after that. Never pitch in DM #1.`);
     talkTo.push(`**Always close with the wedge:** the free /leak-audit self-scan or the $2,900 14-Day Forensic Diagnostic. Never quote retainer first.`);
-    talkTo.push(`**Objection "we're fine"** → "That\'s what every leak sounds like from the inside. The diagnostic exists to prove it either way — $2,900 to know for sure."`);
+    talkTo.push(`**Objection "we're fine"** → "That\'s what every leak sounds like from the inside. The diagnostic exists to prove it either way, $2,900 to know for sure."`);
 
     // 4. Tools to use
     const tools: { name: string; why: string; href: string }[] = [];
-    if (!hasScan) tools.push({ name: 'Company Scan (above)', why: 'Always start here — gives you score + top gaps for the opener.', href: '#' });
+    if (!hasScan) tools.push({ name: 'Company Scan (above)', why: 'Always start here, gives you score + top gaps for the opener.', href: '#' });
     tools.push({ name: 'Sales Script Generator', why: `Generate a 5-touch script tailored to ${company} + ${role || 'their role'}. Auto-saves to your Workspace.`, href: '/portal?tab=tools&tool=sales-script' });
     tools.push({ name: 'Follow-Up Plan', why: 'Build a 14-day cadence so you don\'t lose them after touch #2.', href: '/portal?tab=tools&tool=follow-up' });
     tools.push({ name: 'Strategic Question Engine', why: 'Generates the 5 questions that make this prospect say "how did you know that?"', href: '/portal?tab=tools&tool=strategic-questions' });
-    tools.push({ name: 'Brand Contradiction Finder', why: 'Pull 1 brand contradiction from their site — drop it in the email subject line. Devastating.', href: '/portal?tab=tools&tool=brand-contradictions' });
+    tools.push({ name: 'Brand Contradiction Finder', why: 'Pull 1 brand contradiction from their site, drop it in the email subject line. Devastating.', href: '/portal?tab=tools&tool=brand-contradictions' });
     tools.push({ name: 'Friction Vocabulary Audit', why: 'Finds the corporate jargon on their site that\'s costing them conversions. Great mid-funnel proof.', href: '/portal?tab=tools&tool=friction-audit' });
     tools.push({ name: 'AI Sales Coach', why: 'Stuck on an objection? Paste the reply and the coach gives you the exact next sentence.', href: '/portal?tab=coach' });
 
     // Pre-built openers
     const openers: string[] = [];
     if (topGap) {
-      openers.push(`Subject: ${topGap.title} at ${company}\n\nHi ${contactFirstName} — ran a forensic scan on ${company} this morning. Top finding: ${topGap.title}. We estimate it's costing about ${topGap.annualCost}/yr in silent leaks.\n\nNot a sales pitch — happy to send the full breakdown (free). Worth 60 seconds?\n\n— [Your name], Aetheris`);
+      openers.push(`Subject: ${topGap.title} at ${company}\n\nHi ${contactFirstName}, ran a forensic scan on ${company} this morning. Top finding: ${topGap.title}. We estimate it's costing about ${topGap.annualCost}/yr in silent leaks.\n\nNot a sales pitch, happy to send the full breakdown (free). Worth 60 seconds?\n\n,  [Your name], Aetheris`);
     }
-    openers.push(`Hi ${contactFirstName} — I run forensic diagnostics on companies in ${lead.industry || 'your space'}. Most are leaking 8–15% of revenue through gaps they can't see from inside.\n\nI looked at ${company} for 5 minutes. Want me to send what I found?\n\n— [Your name]`);
+    openers.push(`Hi ${contactFirstName}, I run forensic diagnostics on companies in ${lead.industry || 'your space'}. Most are leaking 8–15% of revenue through gaps they can't see from inside.\n\nI looked at ${company} for 5 minutes. Want me to send what I found?\n\n,  [Your name]`);
     if (hasScan) {
-      openers.push(`Hi ${contactFirstName} — quick one. I scored ${company} on our forensic scan: ${scan?.grade || ''} (${scan?.score}/100). The 3 biggest leaks are fixable in <30 days.\n\nSend the report? No charge.\n\n— [Your name]`);
+      openers.push(`Hi ${contactFirstName}, quick one. I scored ${company} on our forensic scan: ${scan?.grade || ''} (${scan?.score}/100). The 3 biggest leaks are fixable in <30 days.\n\nSend the report? No charge.\n\n,  [Your name]`);
     }
 
     return { triage, analyze, talkTo, tools, openers };
@@ -113,10 +113,10 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
   };
 
   const sections = [
-    { title: 'Step 1 — When you claim it', subtitle: 'Triage & enrich', items: steps.triage },
-    { title: 'Step 2 — Analyze the lead', subtitle: 'What to look for in the data', items: steps.analyze },
-    { title: `Step 3 — Talk to ${contactFirstName}`, subtitle: 'Foot-in-the-door playbook for this person', items: steps.talkTo },
-    { title: 'Step 4 — Forensics toolkit', subtitle: 'Which tools to run on this company', items: [] as string[] },
+    { title: 'Step 1, When you claim it', subtitle: 'Triage & enrich', items: steps.triage },
+    { title: 'Step 2, Analyze the lead', subtitle: 'What to look for in the data', items: steps.analyze },
+    { title: `Step 3, Talk to ${contactFirstName}`, subtitle: 'Foot-in-the-door playbook for this person', items: steps.talkTo },
+    { title: 'Step 4, Forensics toolkit', subtitle: 'Which tools to run on this company', items: [] as string[] },
   ];
 
   return (
@@ -128,7 +128,7 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
       >
         <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-amber" />
-          <span className="text-sm font-display font-semibold text-foreground">Rep Game Plan — what to do next</span>
+          <span className="text-sm font-display font-semibold text-foreground">Rep Game Plan, what to do next</span>
           <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70">4 steps</span>
         </div>
         {open ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}

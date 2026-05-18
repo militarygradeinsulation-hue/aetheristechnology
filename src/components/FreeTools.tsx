@@ -16,20 +16,20 @@ interface Tool {
   path: string;
 }
 
-// Curated top 6 — the rest live on /capabilities
+// Curated top 6, the rest live on /capabilities
 const tools: Tool[] = [
   {
     thumbnail: diagnosticThumb,
     title: 'Business Diagnostic',
     description: '20-question assessment that scores your operational health.',
-    realTalk: "You'll finally see — in writing — what your gut has been telling you for months. No more lying awake guessing which part of the business is the one that's broken.",
+    realTalk: "You'll finally see, in writing, what your gut has been telling you for months. No more lying awake guessing which part of the business is the one that's broken.",
     path: '/business-diagnostic',
   },
   {
     thumbnail: scannerThumb,
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and conversion gaps.",
-    realTalk: "I find the broken pipes between your site and your phone — so leads stop dying at 9pm while you're trying to eat dinner with your family.",
+    realTalk: "I find the broken pipes between your site and your phone, so leads stop dying at 9pm while you're trying to eat dinner with your family.",
     path: '/scan',
   },
   {
@@ -42,8 +42,8 @@ const tools: Tool[] = [
   {
     thumbnail: resumeForensicsThumb,
     title: 'Resume Forensics',
-    description: 'Upload a resume — get an Aetheris case file: fit score, red flags, and interview questions.',
-    realTalk: "Know who you're hiring before you sign the offer — so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
+    description: 'Upload a resume, get an Aetheris case file: fit score, red flags, and interview questions.',
+    realTalk: "Know who you're hiring before you sign the offer, so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
     path: '/resume-forensics',
   },
 ];
@@ -61,7 +61,7 @@ export const FreeTools: React.FC = () => {
               The tools <span className="text-gradient-amber">I wish I'd had</span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              I built every one of these because I needed it myself — when I was running a construction company in the mud, dragging trailers through job sites, with kids in hospital rooms. Run them free. Each one is a piece of pressure off your chest.
+              I built every one of these because I needed it myself, when I was running a construction company in the mud, dragging trailers through job sites, with kids in hospital rooms. Run them free. Each one is a piece of pressure off your chest.
             </p>
           </div>
         </RevealOnScroll>

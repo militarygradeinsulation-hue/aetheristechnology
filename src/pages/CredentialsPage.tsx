@@ -23,7 +23,7 @@ const BLOCKS: { label: string; body: string }[] = [
   },
   {
     label: 'Certifications',
-    body: 'Vibe Coding — Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis) — Google. AI for Business — Harvard edX AI for Business Systems. AI Engineer — IBM AI Engineering. HubSpot Certification — HubSpot. Biomedical & Health Science Researchers — CITI Program (Credential ID 76234047). Google Analytics Individual Qualification — Google Operations Center. Marketing & Analytics — Google Digital Academy (Skillshop).',
+    body: 'Vibe Coding, Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis), Google. AI for Business, Harvard edX AI for Business Systems. AI Engineer, IBM AI Engineering. HubSpot Certification, HubSpot. Biomedical & Health Science Researchers, CITI Program (Credential ID 76234047). Google Analytics Individual Qualification, Google Operations Center. Marketing & Analytics, Google Digital Academy (Skillshop).',
   },
   {
     label: 'Company',
@@ -40,7 +40,7 @@ const CredentialsPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Credentials — Joseph Toney, Aetheris Operator"
+        title="Credentials, Joseph Toney, Aetheris Operator"
         description="20 years building revenue systems for manufacturers. Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm."
         path="/credentials"
         keywords="Joseph Toney, Aetheris operator, manufacturing revenue consultant, Indianapolis"
@@ -56,7 +56,7 @@ const CredentialsPage: React.FC = () => {
                 Credentials · Aetheris
               </div>
               <h1 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                Joseph Toney — Operator.
+                Joseph Toney, Operator.
               </h1>
               <p className="text-lg text-muted-foreground mt-4">
                 Background, certifications, prior operator roles, and the business-continuity plan procurement teams ask for.

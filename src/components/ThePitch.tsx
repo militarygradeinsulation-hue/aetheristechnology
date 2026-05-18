@@ -9,7 +9,7 @@ export const ThePitch: React.FC = () => {
     {
       icon: Users,
       title: 'Lead Generation',
-      description: 'We build systems that find and qualify prospects automatically — so your pipeline stays full without you chasing.',
+      description: 'We build systems that find and qualify prospects automatically, so your pipeline stays full without you chasing.',
       tags: ['AUTO-PROSPECTING', 'LEAD SCORING', 'ROUTING'],
     },
     {
@@ -21,13 +21,13 @@ export const ThePitch: React.FC = () => {
     {
       icon: Mail,
       title: '24/7 Marketing Engine',
-      description: 'Automated outreach that runs while you sleep — email, content, campaigns — all working around the clock.',
+      description: 'Automated outreach that runs while you sleep, email, content, campaigns, all working around the clock.',
       tags: ['CONTINUOUS OUTREACH', 'AUTOMATED CAMPAIGNS', '24/7 ENGAGEMENT'],
     },
     {
       icon: BarChart3,
       title: 'You Focus on Your Business',
-      description: 'We handle the systems, the automation, and the infrastructure. You do what you do best — and collect the revenue.',
+      description: 'We handle the systems, the automation, and the infrastructure. You do what you do best, and collect the revenue.',
       tags: ['CORE FOCUS', 'FULL AUTOMATION', 'SCALE REVENUE'],
     },
   ];
@@ -53,7 +53,7 @@ export const ThePitch: React.FC = () => {
               imageAlt="Manila case file labeled Case 001 Revenue Leak with redaction bars and a crimson signature drip"
               caseNumber="004 · The Engagement"
               title="One folder. One leak map. One fixed-fee quote."
-              summary="Step into the business. Find the gaps bleeding revenue. Build the systems that close them. You get a written report, a prioritized fix list with ROI per fix, and a quote for the work — not a deck."
+              summary="Step into the business. Find the gaps bleeding revenue. Build the systems that close them. You get a written report, a prioritized fix list with ROI per fix, and a quote for the work, not a deck."
             />
           </div>
         </RevealOnScroll>

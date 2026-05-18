@@ -15,14 +15,14 @@ const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: stri
   0: {
     image: INFOGRAPHICS.methodologyDefineLeak,
     alt: 'Sales funnel cross-section showing a measurable gap between Revenue Expected and Revenue Captured',
-    summary: 'A revenue leak is a measurable gap between two observable numbers — never a forecast, never a "potential opportunity." Examples: lead-to-contact SLA misses, deals stalled past Day 3, duplicate CRM records.',
-    humanWhy: "You already feel this. It's the gut-pinch when you look at your pipeline and know the number on the screen is a lie. I refuse to add to that. A leak only counts if I can show it to you in your own data — no hand-waving, no 'potential.'",
+    summary: 'A revenue leak is a measurable gap between two observable numbers, never a forecast, never a "potential opportunity." Examples: lead-to-contact SLA misses, deals stalled past Day 3, duplicate CRM records.',
+    humanWhy: "You already feel this. It's the gut-pinch when you look at your pipeline and know the number on the screen is a lie. I refuse to add to that. A leak only counts if I can show it to you in your own data, no hand-waving, no 'potential.'",
   },
   1: {
     image: INFOGRAPHICS.methodologyBaseline,
     alt: 'Terminal display of a 12-month CRM export with three measurement layers and one stalled row flagged',
-    summary: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency. Where data is missing, we say so — we never estimate around gaps.',
-    humanWhy: "I've been the owner staring at a CRM at midnight wondering what's real. I don't fill gaps with guesses to make the report look smarter. If your data has holes, you'll see exactly where — because trusting the number is the only way you'll sleep.",
+    summary: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency. Where data is missing, we say so, we never estimate around gaps.',
+    humanWhy: "I've been the owner staring at a CRM at midnight wondering what's real. I don't fill gaps with guesses to make the report look smarter. If your data has holes, you'll see exactly where, because trusting the number is the only way you'll sleep.",
   },
   2: {
     image: INFOGRAPHICS.methodologyAttribution,
@@ -34,13 +34,13 @@ const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: stri
     image: INFOGRAPHICS.methodologyScope,
     alt: 'Split diagram with amber In-Scope icons on the left and gray Out-of-Scope icons on the right',
     summary: 'In scope: CRM data, sales activity, attribution, cadences, handoffs. Out of scope: pricing strategy, brand strategy, hiring, capital structure, legal compliance, shop-floor manufacturing.',
-    humanWhy: "You don't need another vendor promising to fix everything and fixing nothing. I tell you up front what I will and won't touch — so you stop paying for scope creep and start paying for things that actually close.",
+    humanWhy: "You don't need another vendor promising to fix everything and fixing nothing. I tell you up front what I will and won't touch, so you stop paying for scope creep and start paying for things that actually close.",
   },
   4: {
     image: INFOGRAPHICS.pitchCaseFile,
     alt: 'Forensic case file with redaction bars and a crimson signature drip',
-    summary: 'Every claim in the final report traces back to a record export. We deliver the source CSVs, the queries, this methodology document, and a re-runnable script — anything an auditor would need to verify the numbers.',
-    humanWhy: "I've been burned by partners and watched people try to claim work that wasn't theirs. I write reports the way I wish vendors had written them for me — so your CFO, your spouse, your board, anyone, can re-run the numbers themselves.",
+    summary: 'Every claim in the final report traces back to a record export. We deliver the source CSVs, the queries, this methodology document, and a re-runnable script, anything an auditor would need to verify the numbers.',
+    humanWhy: "I've been burned by partners and watched people try to claim work that wasn't theirs. I write reports the way I wish vendors had written them for me, so your CFO, your spouse, your board, anyone, can re-run the numbers themselves.",
   },
   5: {
     image: INFOGRAPHICS.methodologyDeliverables,
@@ -76,7 +76,7 @@ const SECTIONS = [
     ],
   },
   {
-    title: 'Scope — what is in, what is out',
+    title: 'Scope, what is in, what is out',
     body: [
       'In scope: CRM data, sales activity logs, lead-source attribution, sales-stage definitions, follow-up cadences, quote-to-close timelines, and operational handoffs between marketing, sales, and delivery.',
       'Out of scope: product pricing strategy, brand strategy, hiring decisions, capital structure, legal compliance, manufacturing operations on the shop floor.',
@@ -106,7 +106,7 @@ const MethodologyPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Revenue Diagnostic Methodology — Aetheris"
+        title="Revenue Diagnostic Methodology, Aetheris"
         description="How Aetheris defines, measures, and attributes revenue leaks for specialty manufacturers. Sent to every prospect before pricing."
         path="/methodology"
         keywords="revenue diagnostic methodology, manufacturing revenue audit, CRM data audit, sales attribution"
@@ -122,11 +122,11 @@ const MethodologyPage: React.FC = () => {
                 Measurement Methodology · v1.0
               </div>
               <h1 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                How I find the money you've been losing —<br className="hidden md:block" />
+                How I find the money you've been losing , <br className="hidden md:block" />
                 <span className="text-amber"> and how you'll know I actually found it.</span>
               </h1>
               <p className="text-lg text-muted-foreground mt-4">
-                Written for the owner who's been burned before. Every section has the forensic rule and — underneath it — why I built it that way, because I was that owner.
+                Written for the owner who's been burned before. Every section has the forensic rule and, underneath it, why I built it that way, because I was that owner.
               </p>
 
               <div className="flex flex-wrap gap-3 mt-6">
@@ -158,7 +158,7 @@ const MethodologyPage: React.FC = () => {
                     />
                     <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 ml-1">
                       <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
-                        Why I do it this way — Joseph
+                        Why I do it this way, Joseph
                       </div>
                       <p className="text-foreground/85 text-[15px] leading-relaxed italic">
                         {meta.humanWhy}

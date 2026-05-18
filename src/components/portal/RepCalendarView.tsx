@@ -283,7 +283,7 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
                               className={`text-left text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate ${meta.color} ${
                                 e.completed ? "line-through opacity-60" : ""
                               }`}
-                              title={`${meta.label} · ${fmtTime(e.start_at)} — ${e.title}`}
+                              title={`${meta.label} · ${fmtTime(e.start_at)}, ${e.title}`}
                             >
                               <span className="mr-0.5">{meta.icon}</span>
                               {!e.all_day && <span className="opacity-70 mr-1">{fmtTime(e.start_at)}</span>}
@@ -316,7 +316,7 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
       {activeLeads.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="font-display text-base">Active leads — schedule a follow-up</CardTitle>
+            <CardTitle className="font-display text-base">Active leads, schedule a follow-up</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">

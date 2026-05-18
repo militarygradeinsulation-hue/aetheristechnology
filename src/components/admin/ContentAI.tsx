@@ -124,7 +124,7 @@ export const ContentAI: React.FC<Props> = ({ item, onClose, onItemUpdated }) => 
                   assistantSoFar = '';
                 }
               } catch {
-                // Not a tool call, just regular text — already rendered
+                // Not a tool call, just regular text, already rendered
               }
             }
           } catch {

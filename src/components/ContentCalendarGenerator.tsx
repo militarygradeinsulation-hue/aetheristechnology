@@ -75,7 +75,7 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
       if (adminMode) {
         saveToAdminLibrary({
           tool_type: 'content_calendar',
-          title: `${form.industry} — 30-day calendar — ${new Date().toLocaleDateString()}`,
+          title: `${form.industry}, 30-day calendar, ${new Date().toLocaleDateString()}`,
           input_data: form,
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -137,7 +137,7 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
         <div className="space-y-6">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-foreground font-display mb-2">Your <span className="text-amber">30-Day</span> Content Calendar</h2>
-            <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && '— unlock for the full calendar'}</p>
+            <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && ',  unlock for the full calendar'}</p>
           </div>
 
           <div className="space-y-3">

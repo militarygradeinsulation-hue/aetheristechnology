@@ -27,13 +27,13 @@ const categoryActions: Record<string, { title: string; actions: string[] }> = {
   marketing: {
     title: 'Fix Your Marketing & Visibility',
     actions: [
-      'Audit your current lead sources — identify which ones bring revenue vs. just traffic.',
+      'Audit your current lead sources, identify which ones bring revenue vs. just traffic.',
       'Build a simple content calendar: 3 posts/week minimum (2 educational, 1 promotional).',
       'Set up Google Analytics or a similar tool to track which channels drive actual inquiries.',
       'Create one lead magnet (checklist, guide, or calculator) relevant to your ideal customer.',
       'Implement UTM tracking on all outbound links so you know exactly what works.',
       'Dedicate 30 minutes weekly to engaging with your audience on your primary social platform.',
-      'Start an email list — even 50 subscribers is a direct line to potential customers.',
+      'Start an email list, even 50 subscribers is a direct line to potential customers.',
       'Run a small paid ad test ($5-10/day) on your best-performing content to amplify reach.',
     ],
   },
@@ -41,12 +41,12 @@ const categoryActions: Record<string, { title: string; actions: string[] }> = {
     title: 'Fix Your Conversion & Sales Process',
     actions: [
       'Add a clear, single call-to-action above the fold on your homepage (e.g., "Get a Free Quote").',
-      'Set up an auto-responder for all inquiries — respond within 5 minutes, not 5 hours.',
+      'Set up an auto-responder for all inquiries, respond within 5 minutes, not 5 hours.',
       'Create a 3-touch follow-up sequence: Day 1 (thank you + next steps), Day 3 (value-add), Day 7 (check-in).',
-      'Add social proof near your CTAs — testimonials, case studies, or client logos.',
+      'Add social proof near your CTAs, testimonials, case studies, or client logos.',
       'Simplify your contact/quote form to 3-5 fields maximum.',
       'Install a live chat or chatbot to capture visitors who won\'t fill out a form.',
-      'Review your last 10 lost deals — identify the common objection and address it on your site.',
+      'Review your last 10 lost deals, identify the common objection and address it on your site.',
       'Create a "What to Expect" page or section that walks prospects through your process.',
     ],
   },
@@ -57,10 +57,10 @@ const categoryActions: Record<string, { title: string; actions: string[] }> = {
       'Replace all stock photos with real photos of your team, work, or office within 30 days.',
       'Create a competitor comparison page that clearly shows your differentiation.',
       'Develop 3 core brand messages and use them consistently across all channels.',
-      'Ask 5 existing customers why they chose you — use their exact words in your marketing.',
-      'Audit your website for jargon — replace industry terms with plain language.',
+      'Ask 5 existing customers why they chose you, use their exact words in your marketing.',
+      'Audit your website for jargon, replace industry terms with plain language.',
       'Create a brand voice guide: are you professional, friendly, bold, or technical? Be consistent.',
-      'Record a 60-second video explaining what you do — put it on your homepage.',
+      'Record a 60-second video explaining what you do, put it on your homepage.',
     ],
   },
   systems: {
@@ -83,7 +83,7 @@ const categoryActions: Record<string, { title: string; actions: string[] }> = {
       'Set a 90-day revenue target and work backward to determine how many leads you need.',
       'Identify your top 3 most profitable services/products and double down on marketing them.',
       'Calculate your customer acquisition cost (CAC) and customer lifetime value (LTV).',
-      'Create a referral program — your happiest customers are your best salespeople.',
+      'Create a referral program, your happiest customers are your best salespeople.',
       'Block 2 hours weekly for strategic work (not operational tasks).',
       'Find one strategic partnership that gives you access to your ideal customer base.',
       'Track your key metrics weekly: revenue, leads, conversion rate, average deal size.',
@@ -121,7 +121,7 @@ export function generateDiagnosticPdf(data: DiagnosticPdfData) {
   if (data.name || data.company) {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    const label = [data.name, data.company].filter(Boolean).join(' — ');
+    const label = [data.name, data.company].filter(Boolean).join(', ');
     doc.text(`Prepared for: ${label}`, pageW / 2, 85, { align: 'center' });
   }
 
@@ -226,7 +226,7 @@ export function generateDiagnosticPdf(data: DiagnosticPdfData) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(200, 200, 200);
   const ctaLines = doc.splitTextToSize(
-    'Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a custom roadmap to fix it. No guesswork — just data-driven action steps tailored to your business.',
+    'Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a custom roadmap to fix it. No guesswork, just data-driven action steps tailored to your business.',
     contentW
   );
   doc.text(ctaLines, pageW / 2, 80, { align: 'center' });

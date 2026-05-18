@@ -161,7 +161,7 @@ export const NewsFeedPanel: React.FC = () => {
         <div className="flex items-center gap-3">
           <Newspaper className="w-5 h-5 text-amber" />
           <div>
-            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Aetheris News — Live Wire</h2>
+            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Aetheris News, Live Wire</h2>
             <p className="text-xs text-muted-foreground">
               The same intelligence feed at <Link to="/news" className="text-amber hover:underline">businessforensics.tech/news</Link>
               {lastRefresh && <> · refreshed {formatDistanceToNow(new Date(lastRefresh), { addSuffix: true })}</>}

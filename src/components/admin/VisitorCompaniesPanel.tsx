@@ -123,7 +123,7 @@ export const VisitorCompaniesPanel: React.FC = () => {
                 {(v.person_name || v.title) && (
                   <div className="text-sm text-muted-foreground mt-1">
                     {v.person_name && <span className="font-medium text-foreground">{v.person_name}</span>}
-                    {v.title && <span> — {v.title}</span>}
+                    {v.title && <span>, {v.title}</span>}
                   </div>
                 )}
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-2">

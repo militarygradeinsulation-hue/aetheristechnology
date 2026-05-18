@@ -142,7 +142,7 @@ export const RepActivityPanel: React.FC = () => {
                           <p className="text-xs font-mono text-muted-foreground">{r.code}</p>
                         </td>
                         <td className="text-right text-muted-foreground text-xs">
-                          {r.last_login ? new Date(r.last_login).toLocaleString() : '—'}
+                          {r.last_login ? new Date(r.last_login).toLocaleString() : ', '}
                         </td>
                         <td className="text-right">{r.logins_7d}</td>
                         <td className="text-right">{r.claims_7d}</td>
@@ -185,8 +185,8 @@ export const RepActivityPanel: React.FC = () => {
                                 <tbody>
                                   {r.leads.map(l => (
                                     <tr key={l.id} className="border-b border-border/20">
-                                      <td className="py-1.5 px-2 font-medium">{l.business_name || '—'}</td>
-                                      <td className="py-1.5 px-2">{l.contact_name || '—'}</td>
+                                      <td className="py-1.5 px-2 font-medium">{l.business_name || ', '}</td>
+                                      <td className="py-1.5 px-2">{l.contact_name || ', '}</td>
                                       <td className="py-1.5 px-2">
                                         {l.email ? (
                                           <a
@@ -195,20 +195,20 @@ export const RepActivityPanel: React.FC = () => {
                                           >
                                             {l.email}
                                           </a>
-                                        ) : '—'}
+                                        ) : ', '}
                                       </td>
-                                      <td className="py-1.5 px-2">{l.phone || '—'}</td>
-                                      <td className="py-1.5 px-2">{l.industry || '—'}</td>
-                                      <td className="py-1.5 px-2">{l.location || '—'}</td>
-                                      <td className="py-1.5 px-2 text-right">{l.score ?? '—'}</td>
+                                      <td className="py-1.5 px-2">{l.phone || ', '}</td>
+                                      <td className="py-1.5 px-2">{l.industry || ', '}</td>
+                                      <td className="py-1.5 px-2">{l.location || ', '}</td>
+                                      <td className="py-1.5 px-2 text-right">{l.score ?? ', '}</td>
                                       <td className="py-1.5 px-2">
                                         <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono ${l.claimed_by_code ? 'bg-amber/20 text-amber' : 'bg-muted text-muted-foreground'}`}>
                                           {l.claimed_by_code ? 'CLAIMED' : 'ASSIGNED'}
                                         </span>
                                       </td>
-                                      <td className="py-1.5 px-2">{l.status || '—'}</td>
+                                      <td className="py-1.5 px-2">{l.status || ', '}</td>
                                       <td className="py-1.5 px-2 text-right text-muted-foreground">
-                                        {l.last_touched_at ? new Date(l.last_touched_at).toLocaleDateString() : '—'}
+                                        {l.last_touched_at ? new Date(l.last_touched_at).toLocaleDateString() : ', '}
                                       </td>
                                     </tr>
                                   ))}

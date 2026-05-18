@@ -92,7 +92,7 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            {/* Admin routes — isolated from AuthProvider for instant PIN-only login */}
+            {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
@@ -103,7 +103,7 @@ const App = () => (
                 </AuthProvider>
               }
             />
-            {/* Revenue Recovery Engine — isolated SaaS area */}
+            {/* Revenue Recovery Engine, isolated SaaS area */}
             <Route path="/app/*" element={<AppRouter />} />
             {/* All other routes use the shared AuthProvider */}
             <Route

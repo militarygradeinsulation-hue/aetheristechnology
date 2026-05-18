@@ -16,7 +16,7 @@ const CRED_BLOCKS: { label: string; body: string }[] = [
   { label: 'Background', body: '20 years building revenue systems for manufacturers. Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with SpaceX accounts.' },
   { label: 'Prior operator roles', body: 'Director of Strategy, $25M aerospace contract manufacturer. Revenue operations, CRM implementation, and sales-process rebuild for specialty manufacturing across construction, aerospace, and equipment categories.' },
   { label: 'Education', body: 'B.A. in Psychology and Communication. M.S. in Business Marketing. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.' },
-  { label: 'Certifications', body: 'Vibe Coding — Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis) — Google. AI for Business — Harvard edX AI for Business Systems. AI Engineer — IBM AI Engineering. HubSpot Certification — HubSpot. Biomedical & Health Science Researchers — CITI Program (Credential ID 76234047). Google Analytics Individual Qualification — Google Operations Center. Marketing & Analytics — Google Digital Academy (Skillshop).' },
+  { label: 'Certifications', body: 'Vibe Coding, Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis), Google. AI for Business, Harvard edX AI for Business Systems. AI Engineer, IBM AI Engineering. HubSpot Certification, HubSpot. Biomedical & Health Science Researchers, CITI Program (Credential ID 76234047). Google Analytics Individual Qualification, Google Operations Center. Marketing & Analytics, Google Digital Academy (Skillshop).' },
   { label: 'Company', body: 'Aetheris. Headquartered in Indianapolis, Indiana. US-wide engagements remote and on-site. Intellectual property held by CTOguy.ai.' },
   { label: 'Business continuity', body: 'Sales calls run by Joseph Toney. Active engagements delivered jointly with operating partner. Client files, contracts, and credentials live in a documented, partner-accessible system. Continuity contact and escalation path provided to every retained client.' },
 ];
@@ -44,14 +44,14 @@ const AboutPage = () => {
 
   const faqs = [
     { question: 'Who is Joseph Toney?', answer: 'Founder of Aetheris and a Business Forensics Operator. Marine Corps veteran with a psychology degree and 20 years building production systems. Runs The Leak Audit™ methodology on B2B operations to find where revenue is bleeding before deploying any AI or automation.' },
-    { question: 'What does "Business Forensics Operator" mean?', answer: 'Not a consultant. Not an agency. An operator who autopsies businesses — names every revenue leak, quantifies the dollar bleed, and then rebuilds the systems that hid the leaks in the first place.' },
+    { question: 'What does "Business Forensics Operator" mean?', answer: 'Not a consultant. Not an agency. An operator who autopsies businesses, names every revenue leak, quantifies the dollar bleed, and then rebuilds the systems that hid the leaks in the first place.' },
     { question: 'Where is Aetheris based?', answer: 'Indianapolis, Indiana. Forensic engagements run with US businesses remotely and on-site.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Joseph Toney — Business Forensics Operator | Aetheris"
+        title="Joseph Toney, Business Forensics Operator | Aetheris"
         description="Marine veteran, psychology background, 20 years building systems. Runs forensic audits on B2B operations to find revenue leaks before deploying AI."
         path="/about"
         keywords="Joseph Toney, business forensics operator, AI consultant Indianapolis, revenue leak audit, B2B operations consultant, fix your business consulting"
@@ -76,7 +76,7 @@ const AboutPage = () => {
                   Credentials · Aetheris
                 </div>
                 <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Joseph Toney — Architect.
+                  Joseph Toney, Architect.
                 </h2>
                 <p className="text-lg text-muted-foreground mt-4">
                   Background, certifications, prior operator roles, and the business-continuity plan procurement teams ask for.

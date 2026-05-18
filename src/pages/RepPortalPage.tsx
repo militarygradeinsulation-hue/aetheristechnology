@@ -126,7 +126,7 @@ const RepPortalPage: React.FC = () => {
             <CardContent className="space-y-6">
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                 <p className="text-foreground font-medium">
-                  You earn <span className="text-primary font-bold">{(repData.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code — including recurring monthly invoices for as long as the client stays subscribed.
+                  You earn <span className="text-primary font-bold">{(repData.commission_rate * 100).toFixed(0)}%</span> of every sale tied to your code, including recurring monthly invoices for as long as the client stays subscribed.
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Paid within 7 days of the client's payment clearing. No tiers. No caps. No clawbacks on completed work.

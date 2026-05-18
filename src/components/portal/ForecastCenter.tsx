@@ -35,7 +35,7 @@ const ALL_SECTIONS: { key: SectionKey; label: string }[] = [
 const STORAGE_KEY = "aetheris_forecast_user_sections_v1";
 
 const formatAge = (h: number | null): string => {
-  if (h == null) return "—";
+  if (h == null) return ", ";
   if (h < 1) return `${Math.round(h * 60)}m ago`;
   if (h < 24) return `${Math.round(h)}h ago`;
   return `${Math.round(h / 24)}d ago`;
@@ -101,7 +101,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         description: looks401 && authMode === "admin"
           ? "Your admin session may have expired. Sign out and re-enter your PIN at /admin/login."
           : looks401
-            ? "Session expired — please sign in again."
+            ? "Session expired, please sign in again."
             : msg,
         variant: "destructive",
       });
@@ -302,7 +302,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
           <section>
             <div className="flex items-center gap-2 mb-3">
               <GraduationCap className="w-4 h-4 text-amber" />
-              <h3 className="font-display font-semibold">Operator Education — Read Today</h3>
+              <h3 className="font-display font-semibold">Operator Education, Read Today</h3>
               <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{briefing.education!.length}</Badge>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -369,7 +369,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4 text-amber" />
-              <h3 className="font-display font-semibold">Target Companies — Hunt Today</h3>
+              <h3 className="font-display font-semibold">Target Companies, Hunt Today</h3>
               <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{briefing.companies.length}</Badge>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">

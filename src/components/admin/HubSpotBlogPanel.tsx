@@ -76,7 +76,7 @@ export const HubSpotBlogPanel: React.FC = () => {
         <div className="flex items-center gap-2">
           <FileUp className="w-6 h-6 text-amber" />
           <h2 className="text-2xl font-bold text-foreground font-display">HubSpot Blog Publisher</h2>
-          <span className="text-xs text-muted-foreground ml-2">Push your local blog posts to HubSpot CMS — schedule or publish now.</span>
+          <span className="text-xs text-muted-foreground ml-2">Push your local blog posts to HubSpot CMS, schedule or publish now.</span>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={loadScheduled} disabled={scheduledLoading}>

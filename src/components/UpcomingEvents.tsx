@@ -81,7 +81,7 @@ export const UpcomingEvents: React.FC = () => {
             Webinars, live meetings & <span className="text-amber">working sessions</span>
           </h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Reserve your spot. Limited seats — these are working sessions, not webinars-as-marketing.
+            Reserve your spot. Limited seats, these are working sessions, not webinars-as-marketing.
           </p>
         </div>
 

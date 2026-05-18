@@ -99,7 +99,7 @@ const VerticalLandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* TL;DR — Speakable */}
+        {/* TL;DR, Speakable */}
         <section className="py-12 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="glass rounded-2xl p-8 border border-amber/20">
@@ -169,7 +169,7 @@ const VerticalLandingPage: React.FC = () => {
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
-              How AI transforms {vertical.industry.toLowerCase()} — 5 steps
+              How AI transforms {vertical.industry.toLowerCase()}, 5 steps
             </h2>
             <p className="text-muted-foreground text-center mb-10">
               The deployment sequence. No fluff. No "consider thinking about." Run this.

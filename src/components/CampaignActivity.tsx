@@ -67,9 +67,9 @@ export const CampaignActivity: React.FC = () => {
     setLoading(true);
     try {
       const [sentRes, pendingRes, failedRes, prospectRes, seqRes, subRes, countRes] = await Promise.all([
-        // Recently sent (last 30d) — ordered by sent_at so today's sends always appear
+        // Recently sent (last 30d), ordered by sent_at so today's sends always appear
         supabase.from('drip_emails').select('*').eq('status', 'sent').order('sent_at', { ascending: false }).limit(300),
-        // Upcoming pending — ordered by scheduled_for ascending so soonest sends appear first
+        // Upcoming pending, ordered by scheduled_for ascending so soonest sends appear first
         supabase.from('drip_emails').select('*').in('status', ['pending', 'scheduled']).order('scheduled_for', { ascending: true }).limit(500),
         // Failed/bounced
         supabase.from('drip_emails').select('*').in('status', ['failed', 'bounced']).order('scheduled_for', { ascending: false }).limit(200),
@@ -208,7 +208,7 @@ export const CampaignActivity: React.FC = () => {
                   <span className="text-foreground font-medium truncate flex-1 min-w-0">
                     {p?.business_name || p?.email || 'Unknown'}
                   </span>
-                  <span className="text-muted-foreground text-xs truncate hidden sm:block max-w-[35%]">{e.subject || '—'}</span>
+                  <span className="text-muted-foreground text-xs truncate hidden sm:block max-w-[35%]">{e.subject || ', '}</span>
                   <span className="text-amber text-xs whitespace-nowrap">Step {e.step_index + 1}{stepCount > 0 ? `/${stepCount}` : ''}</span>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(e.sent_at!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -312,7 +312,7 @@ export const CampaignActivity: React.FC = () => {
                               {new Date(e.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className="text-foreground flex-1 truncate">{p?.business_name || p?.email || 'Unknown'}</span>
-                            <span className="text-muted-foreground truncate max-w-[40%]">{e.subject || '—'}</span>
+                            <span className="text-muted-foreground truncate max-w-[40%]">{e.subject || ', '}</span>
                             <span className="text-amber whitespace-nowrap">Step {e.step_index + 1}{stepCount > 0 ? `/${stepCount}` : ''}</span>
                           </div>
                         );
@@ -365,7 +365,7 @@ export const CampaignActivity: React.FC = () => {
                   <span className="text-foreground font-medium truncate flex-1 min-w-0">
                     {p?.business_name || p?.email || 'Unknown prospect'}
                   </span>
-                  <span className="text-muted-foreground truncate hidden sm:block max-w-[30%]">{e.subject || '—'}</span>
+                  <span className="text-muted-foreground truncate hidden sm:block max-w-[30%]">{e.subject || ', '}</span>
                   <span className="text-amber text-xs whitespace-nowrap">Step {e.step_index + 1}{stepCount > 0 ? `/${stepCount}` : ''}</span>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}

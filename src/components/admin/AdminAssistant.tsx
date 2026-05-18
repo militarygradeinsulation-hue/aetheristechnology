@@ -11,7 +11,7 @@ const STORAGE_KEY = 'admin_assistant_conversation';
 const INITIAL_MESSAGE: Msg = {
   role: 'assistant',
   content:
-    "**Operator Assistant online.** I can pull live data from the database and answer anything about the site, pricing, reps, leads, audits, blog, drip — anything. Ask away.",
+    "**Operator Assistant online.** I can pull live data from the database and answer anything about the site, pricing, reps, leads, audits, blog, drip, anything. Ask away.",
   suggestions: [
     'Give me a dashboard summary',
     'Show unread contact submissions',
@@ -144,7 +144,7 @@ export const AdminAssistant: React.FC = () => {
       {/* Panel */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden">
-          {/* Header — case-file styling */}
+          {/* Header, case-file styling */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
@@ -226,7 +226,7 @@ export const AdminAssistant: React.FC = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything — leads, reps, blog, audits..."
+              placeholder="Ask anything, leads, reps, blog, audits..."
               disabled={isLoading}
               className="flex-1 bg-background/60 border border-border/50 rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
             />
