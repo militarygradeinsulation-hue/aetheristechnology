@@ -16,6 +16,7 @@ import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 import { Testimonials } from '@/components/Testimonials';
 import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
+import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
 const Home = () => {
@@ -231,6 +232,9 @@ const Home = () => {
             </RevealOnScroll>
           </div>
         </section>
+
+        {/* What you're actually buying */}
+        <WhatYouReallyGet />
 
         {/* Sample case files */}
         <section className="px-4 py-10">
