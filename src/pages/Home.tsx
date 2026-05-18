@@ -17,6 +17,7 @@ import { Testimonials } from '@/components/Testimonials';
 import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
+import { ThisIsForYou } from '@/components/ThisIsForYou';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
 const Home = () => {
@@ -77,9 +78,13 @@ const Home = () => {
         <main>
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+        {/* This is for you if... */}
+        <ThisIsForYou />
+
         {/* Trust + try-before-you-buy */}
         <section className="px-4 pt-8 pb-4">
           <div className="max-w-5xl mx-auto">
+
             <RevealOnScroll>
               <div className="forensic-tile rounded-sm border border-amber/40 p-7 md:p-10">
                 <div className="grid gap-6 md:gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center">
