@@ -278,11 +278,25 @@ const IndustriesPage: React.FC = () => {
                       </div>
                     </div>
                     <h2 className="text-xl font-bold font-forensic mb-2 text-foreground">{v.industry}</h2>
-                    <p className="text-sm text-muted-foreground mb-4 italic">"{v.primaryLeak}"</p>
+                    <p className="text-sm text-muted-foreground mb-3 italic">"{v.primaryLeak}"</p>
+
+                    <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">
+                        What this costs you personally
+                      </div>
+                      <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
+                    </div>
+                    <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
+                        What you get back
+                      </div>
+                      <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
+                    </div>
 
                     <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
                       What we measure
                     </div>
+
                     <ul className="space-y-1 mb-4 flex-1">
                       {v.whatWeMeasure.map((m) => (
                         <li key={m} className="text-xs text-foreground/75 flex gap-2">
