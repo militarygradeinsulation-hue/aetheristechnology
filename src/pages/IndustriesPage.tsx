@@ -202,11 +202,16 @@ const IndustriesPage: React.FC = () => {
               The Leak Audit · By Industry
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Every industry leaks <span className="text-crimson">differently</span>.
+              Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
+              Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Same fixed-fee diagnostic. Same forensic deliverable. Different wound patterns by sector.
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-4">
+              Different wound patterns. Same 3am chest tightness. Same "I know something's off but I can't put my finger on it."
             </p>
+            <p className="text-base md:text-lg text-foreground/80 max-w-3xl mx-auto mb-8 italic">
+              I built this because I lived it. Marine, construction operator, dad with kids in surgery — running a business while everything else was on fire. Below is what your industry's bleed actually feels like at 7pm, and what stops feeling that way once we fix it.
+            </p>
+
 
             <div className="forensic-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
