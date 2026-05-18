@@ -11,36 +11,42 @@ import { generateMethodologyPdf } from '@/lib/generateMethodologyPdf';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
-const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: string }> = {
+const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: string; humanWhy: string }> = {
   0: {
     image: INFOGRAPHICS.methodologyDefineLeak,
     alt: 'Sales funnel cross-section showing a measurable gap between Revenue Expected and Revenue Captured',
     summary: 'A revenue leak is a measurable gap between two observable numbers — never a forecast, never a "potential opportunity." Examples: lead-to-contact SLA misses, deals stalled past Day 3, duplicate CRM records.',
+    humanWhy: "You already feel this. It's the gut-pinch when you look at your pipeline and know the number on the screen is a lie. I refuse to add to that. A leak only counts if I can show it to you in your own data — no hand-waving, no 'potential.'",
   },
   1: {
     image: INFOGRAPHICS.methodologyBaseline,
     alt: 'Terminal display of a 12-month CRM export with three measurement layers and one stalled row flagged',
     summary: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency. Where data is missing, we say so — we never estimate around gaps.',
+    humanWhy: "I've been the owner staring at a CRM at midnight wondering what's real. I don't fill gaps with guesses to make the report look smarter. If your data has holes, you'll see exactly where — because trusting the number is the only way you'll sleep.",
   },
   2: {
     image: INFOGRAPHICS.methodologyAttribution,
     alt: 'Blueprint showing pre-fix and post-fix pipelines with the same metric tagged on both, post stamped Recovered',
     summary: 'Every leak is tagged with the baseline metric, the fix, conservative and aggressive ROI, and the exact metric we will re-measure after implementation. Recovered revenue requires same-metric, same-population proof.',
+    humanWhy: "You've been sold 'ROI' by enough consultants to know it usually means nothing. I tie every dollar to a metric we measured before and the same metric we'll measure after. If it didn't move, I didn't earn it.",
   },
   3: {
     image: INFOGRAPHICS.methodologyScope,
     alt: 'Split diagram with amber In-Scope icons on the left and gray Out-of-Scope icons on the right',
     summary: 'In scope: CRM data, sales activity, attribution, cadences, handoffs. Out of scope: pricing strategy, brand strategy, hiring, capital structure, legal compliance, shop-floor manufacturing.',
+    humanWhy: "You don't need another vendor promising to fix everything and fixing nothing. I tell you up front what I will and won't touch — so you stop paying for scope creep and start paying for things that actually close.",
   },
   4: {
     image: INFOGRAPHICS.pitchCaseFile,
     alt: 'Forensic case file with redaction bars and a crimson signature drip',
     summary: 'Every claim in the final report traces back to a record export. We deliver the source CSVs, the queries, this methodology document, and a re-runnable script — anything an auditor would need to verify the numbers.',
+    humanWhy: "I've been burned by partners and watched people try to claim work that wasn't theirs. I write reports the way I wish vendors had written them for me — so your CFO, your spouse, your board, anyone, can re-run the numbers themselves.",
   },
   5: {
     image: INFOGRAPHICS.methodologyDeliverables,
     alt: 'Stack of forensic deliverables: a 24-page leak map report, a CSV source data appendix, a fixed-fee quote',
     summary: 'Written report (15–30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $18,500 flat, 21 calendar days, CRM-agnostic.',
+    humanWhy: "At the end of 21 days you don't get a slide deck and a hug. You get a sealed report you can hand to anyone, a number to act on, and a fixed quote if you want me to fix it. No mystery invoices. No 'let's chat about phase two.'",
   },
 };
 
