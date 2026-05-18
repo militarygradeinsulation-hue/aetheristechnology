@@ -146,19 +146,29 @@ const MethodologyPage: React.FC = () => {
               {SECTIONS.map((s, i) => {
                 const meta = SECTION_IMAGES[i];
                 return (
-                  <ForensicInfographic
-                    key={s.title}
-                    image={meta.image}
-                    imageAlt={meta.alt}
-                    caseNumber={`Section ${String(i + 1).padStart(2, '0')}`}
-                    title={s.title}
-                    summary={meta.summary}
-                    fullText={s.body}
-                    reverse={i % 2 === 1}
-                  />
+                  <div key={s.title} className="space-y-3">
+                    <ForensicInfographic
+                      image={meta.image}
+                      imageAlt={meta.alt}
+                      caseNumber={`Section ${String(i + 1).padStart(2, '0')}`}
+                      title={s.title}
+                      summary={meta.summary}
+                      fullText={s.body}
+                      reverse={i % 2 === 1}
+                    />
+                    <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 ml-1">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
+                        Why I do it this way — Joseph
+                      </div>
+                      <p className="text-foreground/85 text-[15px] leading-relaxed italic">
+                        {meta.humanWhy}
+                      </p>
+                    </div>
+                  </div>
                 );
               })}
             </div>
+
 
             <div className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <p className="text-foreground font-semibold">Ready to see this run on your numbers?</p>
