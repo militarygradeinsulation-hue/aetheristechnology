@@ -79,7 +79,7 @@ export const WhatYouReallyGet: React.FC = () => {
           {rows.map((r, i) => (
             <RevealOnScroll key={r.sold} delay={i * 50}>
               <div className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
-                <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-stretch">
+                <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-center">
                   <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
                     <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
                       {r.sold}

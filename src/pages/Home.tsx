@@ -214,11 +214,11 @@ const Home = () => {
           </div>
         </section>
         {/* What makes us different, AI-native operator */}
-        <section className="px-4 py-14">
+        <section className="px-4 pt-14 pb-6">
           <div className="max-w-5xl mx-auto">
             <RevealOnScroll>
               <div className="forensic-tile rounded-sm border border-amber/40 p-8 md:p-12">
-                <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-center">
+                <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start">
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                       What makes us different
@@ -245,7 +245,7 @@ const Home = () => {
                     </Link>
 
                   </div>
-                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
+                  <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square max-h-[440px] md:max-h-[480px] md:self-center mx-auto w-full">
                     <img src={INFOGRAPHICS.homeAiOperator} alt="AI agents running diagnostics inside a CRM, slide deck rejected" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
                     <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
                   </div>
