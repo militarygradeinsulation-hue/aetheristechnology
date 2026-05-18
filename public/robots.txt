@@ -32,7 +32,7 @@ User-agent: LinkedInBot
 Allow: /
 Disallow: /admin
 
-# AI / Answer Engines (AEO) — explicitly allow citation
+# AI / Answer Engines (AEO), explicitly allow citation
 User-agent: GPTBot
 Allow: /
 Disallow: /admin

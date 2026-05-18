@@ -1,20 +1,20 @@
-# Aetheris — Revenue Systems for Specialty Manufacturers
+# Aetheris, Revenue Systems for Specialty Manufacturers
 
-> Aetheris helps specialty manufacturers ($5M–$25M revenue, US-based) find the $200K–$2M they're losing to broken CRM, sales follow-up, and operational systems — and fix it. Indianapolis-based. 21-Day Revenue Diagnostic at $18,500 fixed fee. Implementation Retainer at $15K/month for Diagnostic clients.
+> Aetheris helps specialty manufacturers ($5M–$25M revenue, US-based) find the $200K–$2M they're losing to broken CRM, sales follow-up, and operational systems, and fix it. Indianapolis-based. 21-Day Revenue Diagnostic at $18,500 fixed fee. Implementation Retainer at $15K/month for Diagnostic clients.
 
 ## About
 - Name: Aetheris (also: Aetheris AI, Aetheris Technology)
 - Positioning: Revenue systems operator for specialty manufacturers
-- Founder & Operator: Joseph Toney — 20 years building revenue systems for manufacturers, Marine Corps veteran, former Director of Strategy at a $25M aerospace firm with SpaceX accounts
+- Founder & Operator: Joseph Toney, 20 years building revenue systems for manufacturers, Marine Corps veteran, former Director of Strategy at a $25M aerospace firm with SpaceX accounts
 - Location: Indianapolis, Indiana, United States
 - Phone: (317) 376-2110
 - Email: aetheris.technology@outlook.com
 - Website: https://businessforensics.tech
-- Service area: United States (HQ Indianapolis, IN — remote + on-site)
+- Service area: United States (HQ Indianapolis, IN, remote + on-site)
 
 ## Pages
-- [Home](/): Revenue systems operator for specialty manufacturers — overview and booking.
-- [21-Day Revenue Diagnostic](/diagnostic): $18,500 fixed-fee diagnostic — what's included, deliverables, timeline.
+- [Home](/): Revenue systems operator for specialty manufacturers, overview and booking.
+- [21-Day Revenue Diagnostic](/diagnostic): $18,500 fixed-fee diagnostic, what's included, deliverables, timeline.
 - [Implementation Retainer](/implementation): $15K/month execution retainer for Diagnostic clients.
 - [Methodology](/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
 - [Credentials](/credentials): Operator background, certifications, and prior engagements.
