@@ -40,10 +40,11 @@ const Home = () => {
   ];
 
   const steps = [
-    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
-    { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.', img: INFOGRAPHICS.diagnosticQuantify, alt: 'Calculator and accounting ledger tallying revenue leaks' },
-    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
+    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', real: "You finally see the whole business on one page — every place leads, dollars, and hours are slipping out. The stuff you sensed but couldn't prove.", img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
+    { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.', real: "You walk out with a number you can say out loud to your spouse, your CFO, your board. No more 'I think we're losing money somewhere.'", img: INFOGRAPHICS.diagnosticQuantify, alt: 'Calculator and accounting ledger tallying revenue leaks' },
+    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', real: "You stop being the bottleneck. There's a sequenced plan, a fixed quote, and a clear answer to 'what do I do Monday?' — and you can walk if you want.", img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
   ];
+
 
   return (
     <div className="relative min-h-screen">
