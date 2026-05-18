@@ -83,18 +83,17 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
             <span className="font-case text-xs uppercase tracking-widest text-amber">
-              Revenue systems for specialty manufacturers · Indianapolis
+              For exhausted business owners · Indianapolis · US-wide
             </span>
           </div>
 
           <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
-            <span className="text-foreground">We find the money your business is </span>
-            <span className="text-crimson">leaking</span>
-            <span className="text-foreground"> — and fix the systems causing it.</span>
+            <span className="text-foreground">You know something's wrong. You're tired of looking for the fix. </span>
+            <span className="text-crimson">We find it.</span>
           </h1>
 
           <p className="font-case text-sm md:text-base uppercase tracking-widest text-amber max-w-3xl mx-auto">
-            78% of companies we've found don't even know they exist.
+            78% of the leaks we find, the owner already felt — they just couldn't name them.
           </p>
 
           <div className="max-w-5xl mx-auto pt-4 text-left">
@@ -103,13 +102,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               imageAlt="Cracked revenue pressure gauge bleeding crimson onto a charcoal desk"
               caseNumber="001 · The Leak"
               title="Your business is leaking. You can't see it from the inside."
-              summary="Aetheris is a revenue forensics firm for US specialty manufacturers, $5M–$25M. We audit your CRM, sales follow-up, and operations, put a dollar figure on every leak, and either hand you the roadmap or implement the fixes ourselves."
+              summary="Aetheris is a revenue forensics firm for business owners who already know something is broken and are exhausted from chasing the fix. Manufacturers, service firms, SaaS, contractors, agencies — $1M–$50M. We audit your CRM, sales follow-up, and operations, put a dollar figure on every leak, and either hand you the roadmap or implement the fixes ourselves."
               fullText={[
-                "78% of the companies we've audited didn't know their biggest leak existed until we ran the diagnostic.",
-                "Most are losing 8–22% of annual revenue to leaks they can't see: lost leads, dead follow-up, broken handoffs, CRM rot.",
+                "78% of the owners we've audited already sensed the leak — they just couldn't name it or find it from inside the business.",
+                "Most are losing 8–22% of annual revenue to leaks they can't see: lost leads, dead follow-up, broken handoffs, CRM rot, founder bottlenecks.",
               ]}
             />
           </div>
+
 
           <div className="flex justify-center pt-1">
             <Link to="/about">
