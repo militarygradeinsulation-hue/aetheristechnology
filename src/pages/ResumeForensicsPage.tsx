@@ -146,7 +146,7 @@ export default function ResumeForensicsPage() {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Resume Forensics — $20 AI Culture-Fit Scan | Aetheris"
+        title="Resume Forensics, $20 AI Culture-Fit Scan | Aetheris"
         description="Live AI tool. Paste any company URL, upload a resume, get a forensic culture-fit score in 90 seconds. $20 per scan. No account required."
         path="/resume-forensics"
         keywords="resume analysis, AI culture fit, hiring tool, resume screener, candidate evaluation"
@@ -171,7 +171,7 @@ export default function ResumeForensicsPage() {
               </p>
             </div>
 
-            {/* STEP 1 — Email + credits */}
+            {/* STEP 1, Email + credits */}
             <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 1 · Identify</div>
               <h2 className="font-forensic text-2xl font-bold mb-4">Your email</h2>
@@ -194,13 +194,13 @@ export default function ResumeForensicsPage() {
                     <span className={`font-bold text-lg ${credits > 0 ? 'text-amber' : 'text-crimson'}`}>{credits}</span>
                   </div>
                   {credits === 0 && (
-                    <Badge variant="outline" className="border-crimson text-crimson">No credits — buy a pack below</Badge>
+                    <Badge variant="outline" className="border-crimson text-crimson">No credits, buy a pack below</Badge>
                   )}
                 </div>
               )}
             </section>
 
-            {/* PACKS — always visible */}
+            {/* PACKS, always visible */}
             <section className="mb-6">
               <div className="grid md:grid-cols-3 gap-4">
                 {PACKS.map((p) => (
@@ -234,7 +234,7 @@ export default function ResumeForensicsPage() {
               </div>
             </section>
 
-            {/* STEP 2 — Company */}
+            {/* STEP 2, Company */}
             <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 2 · Scan target company</div>
               <h2 className="font-forensic text-2xl font-bold mb-4 flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function ResumeForensicsPage() {
               )}
             </section>
 
-            {/* STEP 3 — Role */}
+            {/* STEP 3, Role */}
             <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 3 · Role context</div>
               <h2 className="font-forensic text-2xl font-bold mb-4">What are you hiring for?</h2>
@@ -280,7 +280,7 @@ export default function ResumeForensicsPage() {
                   <Label htmlFor="role-title">Role title</Label>
                   <Input
                     id="role-title"
-                    placeholder="e.g. Senior Account Executive — Manufacturing"
+                    placeholder="e.g. Senior Account Executive, Manufacturing"
                     value={roleTitle}
                     onChange={(e) => setRoleTitle(e.target.value)}
                   />
@@ -298,7 +298,7 @@ export default function ResumeForensicsPage() {
               </div>
             </section>
 
-            {/* STEP 4 — Resume + run */}
+            {/* STEP 4, Resume + run */}
             <section className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8 mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step 4 · Upload resume</div>
               <h2 className="font-forensic text-2xl font-bold mb-4 flex items-center gap-2">
@@ -332,7 +332,7 @@ export default function ResumeForensicsPage() {
                 </Button>
               </div>
               {credits === 0 && (
-                <div className="mt-3 text-sm text-crimson font-case">No credits remaining — buy a pack above.</div>
+                <div className="mt-3 text-sm text-crimson font-case">No credits remaining, buy a pack above.</div>
               )}
             </section>
 
@@ -412,7 +412,7 @@ export default function ResumeForensicsPage() {
                   {score !== null && score !== undefined && score < 40 && (
                     <CTA
                       eyebrow="This one's leaking before day 1"
-                      title="The candidate isn't the problem — your filter is."
+                      title="The candidate isn't the problem, your filter is."
                       body="If your top of funnel is producing this, you have a sourcing leak. Run the free Leak Audit™."
                       href="/leak-audit"
                       cta="Run the Leak Audit"
@@ -439,7 +439,7 @@ export default function ResumeForensicsPage() {
       <Dialog open={!!checkoutPriceId} onOpenChange={(o) => !o && setCheckoutPriceId(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Resume Forensics — Buy scan credits</DialogTitle>
+            <DialogTitle>Resume Forensics, Buy scan credits</DialogTitle>
           </DialogHeader>
           {checkoutPriceId && (
             <StripeEmbeddedCheckout

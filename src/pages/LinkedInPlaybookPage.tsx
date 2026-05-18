@@ -20,7 +20,7 @@ interface ChoreoBlock {
 
 const CHOREOGRAPHY: ChoreoBlock[] = [
   { time: '08:00', gear: 'Forensic Content', action: 'Drop today\'s post + engage Reciprocity Pod', detail: 'Publish the scheduled post. Within 30 min, get 5–8 pod members to leave additive comments to spike algorithmic velocity.' },
-  { time: '09:00', gear: 'Borrowed Distribution', action: 'Comment-Jack 5 industry giants', detail: 'Be in the first 5 comments on 5 high-reach posts. Sharp, additive insights only — never compliments. Their audience clicks your profile.' },
+  { time: '09:00', gear: 'Borrowed Distribution', action: 'Comment-Jack 5 industry giants', detail: 'Be in the first 5 comments on 5 high-reach posts. Sharp, additive insights only, never compliments. Their audience clicks your profile.' },
   { time: '11:00', gear: 'Surgical Outbound', action: 'Record + dispatch 10 Loom audits', detail: '3-min screen recording of prospect\'s site pointing out 2–3 visible leaks. Target mid-level Marketing/Ops, not CEOs.' },
   { time: '14:00', gear: 'Surgical Outbound', action: 'Reverse-engineer demand search', detail: 'Search "looking for help with [HubSpot / lead flow / CRM]" → Posts → Latest. Comment thoughtfully on 5–10. NO pitch.' },
   { time: '16:00', gear: 'Forensic Content', action: 'Reply + Soft Front Door DM drop', detail: 'Reply to every comment on today\'s post. DM the asset to anyone who used the keyword. Ask ONE curious question. Never pitch.' },
@@ -29,23 +29,23 @@ const CHOREOGRAPHY: ChoreoBlock[] = [
 const SCRIPTS = [
   {
     name: 'Loom Audit DM',
-    body: 'Hey [Name] — found 3 things on your site probably costing you leads. Recorded a 3-min teardown for you here: [LOOM LINK]. Free, no pitch.',
+    body: 'Hey [Name], found 3 things on your site probably costing you leads. Recorded a 3-min teardown for you here: [LOOM LINK]. Free, no pitch.',
   },
   {
     name: 'Soft Front Door DM (after they comment keyword)',
-    body: 'Here\'s the [asset] you asked for: [LINK]. No strings.\n\nQuick curious question — when\'s the last time anyone audited your [specific system]?',
+    body: 'Here\'s the [asset] you asked for: [LINK]. No strings.\n\nQuick curious question, when\'s the last time anyone audited your [specific system]?',
   },
   {
     name: 'Reverse-Engineered Demand Comment (then DM 24h later)',
-    body: 'Saw your post about [X]. I work on exactly this — happy to do a free 20-min teardown of where the leak likely is. No pitch, just curious if my hypothesis is right.',
+    body: 'Saw your post about [X]. I work on exactly this, happy to do a free 20-min teardown of where the leak likely is. No pitch, just curious if my hypothesis is right.',
   },
   {
     name: 'Mid-Level Bypass DM (skip the C-suite)',
-    body: 'Noticed your team posted about scaling — I help companies your size find leaks BEFORE scaling makes them worse. Happy to share a 1-page framework with you, no ask.',
+    body: 'Noticed your team posted about scaling, I help companies your size find leaks BEFORE scaling makes them worse. Happy to share a 1-page framework with you, no ask.',
   },
   {
     name: 'Comment-Jack Template',
-    body: '[Counter-intuitive insight that builds on their point with a specific number]. I see this in [vertical] all the time — usually masks a [specific underlying leak].',
+    body: '[Counter-intuitive insight that builds on their point with a specific number]. I see this in [vertical] all the time, usually masks a [specific underlying leak].',
   },
 ];
 
@@ -161,7 +161,7 @@ const LinkedInPlaybookPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="LinkedIn Daily Choreography — Aetheris Playbook"
+        title="LinkedIn Daily Choreography, Aetheris Playbook"
         description="The forensic operator's daily LinkedIn execution playbook. Three gears, five timed blocks, copy-paste scripts."
         path="/playbook/linkedin"
       />

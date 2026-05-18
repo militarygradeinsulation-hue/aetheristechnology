@@ -13,7 +13,7 @@ const ContentGeneratorPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Forensic Content Pack | Aetheris AI"
-        description="Scan your website. Get 7 forensic LinkedIn posts — Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes. Built on the five-format Business Forensics architecture."
+        description="Scan your website. Get 7 forensic LinkedIn posts, Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes. Built on the five-format Business Forensics architecture."
         path="/content-generator"
       />
       <Background />

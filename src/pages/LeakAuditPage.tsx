@@ -28,12 +28,12 @@ interface Q {
 const QUESTIONS: Q[] = [
   // Lead Capture (4)
   { id: 'q1', cat: 'capture', text: 'Every inbound channel (form, phone, email, DM, walk-in) lands in a single tracked system.' },
-  { id: 'q2', cat: 'capture', text: 'You can name your top 3 lead sources by revenue this quarter — not just by volume.' },
+  { id: 'q2', cat: 'capture', text: 'You can name your top 3 lead sources by revenue this quarter, not just by volume.' },
   { id: 'q3', cat: 'capture', text: 'Every lead is tagged with source on capture, automatically.' },
   { id: 'q4', cat: 'capture', text: 'Zero leads are routed to a single human inbox (Gmail/Outlook) with no backup.' },
   // Response & Follow-Up (4)
   { id: 'q5', cat: 'response', text: 'New inbound leads receive a real human or auto-response in under 5 minutes during business hours.' },
-  { id: 'q6', cat: 'response', text: 'Every quoted/proposed deal has a scheduled second touch within 72 hours — without anyone remembering to do it.' },
+  { id: 'q6', cat: 'response', text: 'Every quoted/proposed deal has a scheduled second touch within 72 hours, without anyone remembering to do it.' },
   { id: 'q7', cat: 'response', text: 'You have a defined cadence for follow-ups beyond the second touch (Day 7, 14, 30…).' },
   { id: 'q8', cat: 'response', text: 'You can pull a list right now of every "stalled" deal older than 14 days with no activity.' },
   // Operational Drag (3)
@@ -42,7 +42,7 @@ const QUESTIONS: Q[] = [
   { id: 'q11', cat: 'drag', text: 'Your team can find any client document or past quote in under 60 seconds.' },
   // Trust & Conversion (3)
   { id: 'q12', cat: 'trust', text: 'Your website tells a visitor exactly what you do, who it\'s for, and what to do next within 5 seconds.' },
-  { id: 'q13', cat: 'trust', text: 'Pricing, process, or "what happens next" is visible — not hidden behind a contact form.' },
+  { id: 'q13', cat: 'trust', text: 'Pricing, process, or "what happens next" is visible, not hidden behind a contact form.' },
   { id: 'q14', cat: 'trust', text: 'Visible proof (case studies, names, numbers, real results) backs every major claim on the site.' },
 ];
 
@@ -72,38 +72,38 @@ const SCALE = [
 const CAT_DIAGNOSIS: Record<string, { strong: string; weak: string; leaks: string[] }> = {
   capture: {
     strong: 'Lead capture is operationally tight. Sources are tagged, channels are unified, and nothing is dying in someone\'s personal inbox.',
-    weak: 'Lead capture is leaking. Inbound is fragmented across inboxes, channels, and humans — meaning leads are being lost before anyone even knows they arrived.',
+    weak: 'Lead capture is leaking. Inbound is fragmented across inboxes, channels, and humans, meaning leads are being lost before anyone even knows they arrived.',
     leaks: [
-      'Single Inbox Leak — leads landing in one human\'s Gmail with no routing or backup',
-      'Untagged Source Leak — you can\'t prove which channel actually drives revenue, so spend allocation is guesswork',
-      'Channel Blindspot — at least one inbound channel (DM, phone, walk-in, form) is not in your CRM',
+      'Single Inbox Leak, leads landing in one human\'s Gmail with no routing or backup',
+      'Untagged Source Leak, you can\'t prove which channel actually drives revenue, so spend allocation is guesswork',
+      'Channel Blindspot, at least one inbound channel (DM, phone, walk-in, form) is not in your CRM',
     ],
   },
   response: {
     strong: 'Response cadence is disciplined. Speed-to-lead and second-touch coverage are systematized, not memory-based.',
-    weak: 'Response is bleeding. Speed-to-lead and follow-up are memory-driven — which means most leads die in the first 72 hours and stalled deals never get reactivated.',
+    weak: 'Response is bleeding. Speed-to-lead and follow-up are memory-driven, which means most leads die in the first 72 hours and stalled deals never get reactivated.',
     leaks: [
-      'Speed-to-Lead Leak — first response averaging hours instead of minutes (industry norm: 5x close rate at <5min)',
-      'Stale Lead Leak — proposals over 14 days old with zero activity, no automated reactivation',
-      'Quote Follow-Up Gap — priced opportunities never touched after Day 3 (typically 60-80% of proposals)',
+      'Speed-to-Lead Leak, first response averaging hours instead of minutes (industry norm: 5x close rate at <5min)',
+      'Stale Lead Leak, proposals over 14 days old with zero activity, no automated reactivation',
+      'Quote Follow-Up Gap, priced opportunities never touched after Day 3 (typically 60-80% of proposals)',
     ],
   },
   drag: {
     strong: 'Operations run on systems, not heroics. The owner is not a single point of failure on weekly tasks.',
     weak: 'Operational drag is dragging the entire P&L. Repeated work is being retyped, key people are bottlenecks, and "the way we do it here" lives in someone\'s head.',
     leaks: [
-      'Owner Bottleneck Leak — at least one critical workflow (quotes, invoicing, scheduling) waits on a single person',
-      'Re-Type Tax — the same data is keyed into 2+ systems weekly with no integration',
-      'Document Hunt Leak — staff hours/week burned hunting for past quotes, contracts, or files',
+      'Owner Bottleneck Leak, at least one critical workflow (quotes, invoicing, scheduling) waits on a single person',
+      'Re-Type Tax, the same data is keyed into 2+ systems weekly with no integration',
+      'Document Hunt Leak, staff hours/week burned hunting for past quotes, contracts, or files',
     ],
   },
   trust: {
     strong: 'Trust signals are intentional. Visitors get clarity in seconds and proof at every claim.',
-    weak: 'The site is sending mixed signals. Visitors can\'t answer "what do you do, for who, what happens next" in 5 seconds — which kills conversion before any sales touch.',
+    weak: 'The site is sending mixed signals. Visitors can\'t answer "what do you do, for who, what happens next" in 5 seconds, which kills conversion before any sales touch.',
     leaks: [
-      '5-Second Clarity Gap — value proposition not legible above the fold',
-      'Hidden Process Leak — pricing/process buried behind a contact form, killing self-qualifying buyers',
-      'Unbacked Claim Leak — major claims with no visible proof, eroding credibility silently',
+      '5-Second Clarity Gap, value proposition not legible above the fold',
+      'Hidden Process Leak, pricing/process buried behind a contact form, killing self-qualifying buyers',
+      'Unbacked Claim Leak, major claims with no visible proof, eroding credibility silently',
     ],
   },
 };
@@ -179,7 +179,7 @@ const LeakAuditPage = () => {
 
   const handleSubmitGate = async () => {
     if (!email || !email.includes('@')) {
-      toast.error('Drop a real email — that\'s where the report goes.');
+      toast.error('Drop a real email, that\'s where the report goes.');
       return;
     }
     if (!result) return;
@@ -225,7 +225,7 @@ const LeakAuditPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The Leak Audit™ — Free Business Forensics Self-Scan | Aetheris"
+        title="The Leak Audit™, Free Business Forensics Self-Scan | Aetheris"
         description="Run the free 14-point Leak Audit. Find where your business is bleeding revenue across lead capture, follow-up, operations, and trust. Estimated annual leak in $."
         path="/leak-audit"
         keywords="business leak audit, revenue leak assessment, business forensics audit, sales leak finder, operational diagnostic, AI consulting Indianapolis"
@@ -271,7 +271,7 @@ const LeakAuditPage = () => {
                   imageAlt="Forensic autopsy diagram of a business with seven amber annotation arrows and one crimson leak point"
                   caseNumber="LA-001 · Self-Scan"
                   title="14 questions. Four categories. One leak map."
-                  summary="We score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion — then name the specific leaks in each, with a real dollar estimate tied to your revenue band."
+                  summary="We score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion, then name the specific leaks in each, with a real dollar estimate tied to your revenue band."
                 />
 
                 <div className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5">
@@ -417,7 +417,7 @@ const LeakAuditPage = () => {
                     The audit found leaks.
                   </h2>
                   <p className="text-muted-foreground text-lg">
-                    Drop your email — your case file PDF downloads now and a copy hits your inbox.
+                    Drop your email, your case file PDF downloads now and a copy hits your inbox.
                   </p>
                 </div>
 
@@ -493,7 +493,7 @@ const LeakAuditPage = () => {
                     Your audit is downloaded.
                   </h2>
                   <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                    The PDF is in your downloads. Here's the headline finding — and the next step.
+                    The PDF is in your downloads. Here's the headline finding, and the next step.
                   </p>
                 </div>
 
@@ -515,7 +515,7 @@ const LeakAuditPage = () => {
                     Next Step
                   </div>
                   <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Forensic Diagnostic — $2,500
+                    The Forensic Diagnostic, $2,500
                   </h3>
                   <p className="text-muted-foreground max-w-xl mx-auto">
                     The Leak Audit was self-reported. The Forensic Diagnostic is the operator-led

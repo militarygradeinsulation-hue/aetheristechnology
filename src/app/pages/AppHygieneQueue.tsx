@@ -28,7 +28,7 @@ const AppHygieneQueue = () => {
   const [mergeAction, setMergeAction] = useState<HygieneActionRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // View mode (locked once chosen — list won't reshuffle on poll)
+  // View mode (locked once chosen, list won't reshuffle on poll)
   const VIEW_KEY = "hygiene_queue_view";
   const [view, setView] = useState<HygieneQueueView>(() => {
     if (typeof window === "undefined") return "priority";
@@ -114,7 +114,7 @@ const AppHygieneQueue = () => {
   // entries that say the same thing. Keep only the newest action per category
   // and remember how many older duplicates it represents.
   // Consolidate duplicate rows strictly by category. Rows missing a category
-  // never get merged — they bucket into `uncategorized` and render in their
+  // never get merged, they bucket into `uncategorized` and render in their
   // own section so unrelated rows aren't collapsed together by an id fallback.
   const { categorized: dedupedActions, uncategorized } = useMemo(() => {
     const byCat = new Map<string, HygieneActionRow & { _duplicateCount?: number; _duplicateIds?: string[] }>();
@@ -298,7 +298,7 @@ const AppHygieneQueue = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium">{meta?.label || a.category_label}</span>
-                      <span className="text-xs text-muted-foreground">— {a.affected_count.toLocaleString()} records</span>
+                      <span className="text-xs text-muted-foreground">,  {a.affected_count.toLocaleString()} records</span>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className={`text-xs px-2 py-0.5 rounded border ${severityClass(a.severity)}`}>{a.severity}</span>
@@ -458,7 +458,7 @@ const AppHygieneQueue = () => {
             <div>
               <h2 className="text-sm font-medium text-foreground">Uncategorized actions</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {uncategorized.length} pending — these rows have no category and are not consolidated.
+                {uncategorized.length} pending, these rows have no category and are not consolidated.
               </p>
             </div>
             <Button
@@ -522,7 +522,7 @@ const AppHygieneQueue = () => {
               className="bg-cyan-500 hover:bg-cyan-600 text-white"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirm — Execute All
+              Confirm, Execute All
             </Button>
           </DialogFooter>
         </DialogContent>

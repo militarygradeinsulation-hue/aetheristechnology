@@ -80,7 +80,7 @@ export function formatMoney(cents: number, currency = "usd"): string {
   }).format(cents / 100);
 }
 
-/** Public demo — anyone can read. */
+/** Public demo, anyone can read. */
 export async function loadDemoDataset(): Promise<CrmDataset> {
   const { data, error } = await supabase
     .from("crm_demo_data")
@@ -97,7 +97,7 @@ export async function loadDemoDataset(): Promise<CrmDataset> {
   };
 }
 
-/** Real CRM — admin only (RLS-locked, but we also have a service-role
+/** Real CRM, admin only (RLS-locked, but we also have a service-role
  * edge function `admin-data` you could route through if desired). For now
  * authenticated admin reads work directly via the supabase client. */
 export async function loadAdminDataset(): Promise<CrmDataset> {

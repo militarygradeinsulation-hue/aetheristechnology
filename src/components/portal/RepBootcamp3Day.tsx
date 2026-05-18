@@ -224,7 +224,7 @@ export const RepBootcamp3Day: React.FC = () => {
               3-Day Operator Bootcamp
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Everything you need in 72 hours. Check off tasks as you complete them — your partner and admin can see your progress.
+              Everything you need in 72 hours. Check off tasks as you complete them, your partner and admin can see your progress.
             </p>
           </div>
           <div className="text-right">

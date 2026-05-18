@@ -128,7 +128,7 @@ export function downloadCsv(filename: string, csv: string) {
 }
 
 export function parseCsv(text: string): Record<string, string>[] {
-  // Minimal CSV parser (no quoted-newline support — sufficient for typical lead exports)
+  // Minimal CSV parser (no quoted-newline support, sufficient for typical lead exports)
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (!lines.length) return [];
   const splitRow = (line: string) => {

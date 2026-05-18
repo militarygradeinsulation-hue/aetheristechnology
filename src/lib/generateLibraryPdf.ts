@@ -3,7 +3,7 @@ import type { AdminLibraryItem } from '@/lib/adminLibrary';
 
 /**
  * Professional library PDF generator.
- * Light theme (white background, black text) — guarantees readability and printability.
+ * Light theme (white background, black text), guarantees readability and printability.
  * Aetheris amber accents for brand consistency.
  */
 
@@ -209,7 +209,7 @@ class PdfWriter {
     const h = end - start;
     // Draw a left amber bar + soft fill BEHIND the already-drawn text by re-drawing the text on top.
     // Simpler approach: draw the fill+left bar BEFORE the content using a deferred rectangle.
-    // jsPDF doesn't support layers, so we instead leave a thin left bar only — drawn AFTER text is fine.
+    // jsPDF doesn't support layers, so we instead leave a thin left bar only, drawn AFTER text is fine.
     this.doc.setFillColor(...AMBER);
     this.doc.rect(MARGIN - 2, start, 1.2, h, 'F');
     // hairline bottom
@@ -265,7 +265,7 @@ class PdfWriter {
     this.doc.setFont('helvetica', 'bold');
     this.doc.setFontSize(9);
     this.doc.setTextColor(...INK);
-    this.doc.text('Confidential — Strategic Asset', MARGIN, PAGE_H - 28);
+    this.doc.text('Confidential, Strategic Asset', MARGIN, PAGE_H - 28);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(8);
     this.doc.setTextColor(...SUB);
@@ -330,9 +330,9 @@ function renderSocial(w: PdfWriter, d: any) {
         if (c.fixTease) w.kv('Fix tease', c.fixTease);
         if (c.lesson) w.kv('Lesson', c.lesson);
         if (Array.isArray(c.carouselSlides) && c.carouselSlides.length) {
-          w.paragraph(`Carousel — ${c.carouselSlides.length} slides`, SUB, 9, true);
+          w.paragraph(`Carousel, ${c.carouselSlides.length} slides`, SUB, 9, true);
           c.carouselSlides.forEach((sl: any) => {
-            const line = `Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`;
+            const line = `Slide ${sl.slideNumber || ''}, ${sl.headline || ''}`;
             w.paragraph(line.trim(), INK, 9, true);
             if (sl.body) w.paragraph(String(sl.body), INK, 9);
           });
@@ -371,9 +371,9 @@ function renderSocial(w: PdfWriter, d: any) {
         if (t.threshold) w.kv('Threshold', t.threshold);
         if (t.whatItMeans) w.kv('What it means', t.whatItMeans);
         if (Array.isArray(t.carouselSlides) && t.carouselSlides.length) {
-          w.paragraph(`Carousel — ${t.carouselSlides.length} slides`, SUB, 9, true);
+          w.paragraph(`Carousel, ${t.carouselSlides.length} slides`, SUB, 9, true);
           t.carouselSlides.forEach((sl: any) => {
-            w.paragraph(`Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`.trim(), INK, 9, true);
+            w.paragraph(`Slide ${sl.slideNumber || ''}, ${sl.headline || ''}`.trim(), INK, 9, true);
             if (sl.body) w.paragraph(String(sl.body), INK, 9);
           });
         }

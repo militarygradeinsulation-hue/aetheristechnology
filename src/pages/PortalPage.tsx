@@ -82,11 +82,11 @@ type ToolKey =
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
-  { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL — runs every prospect tool at once.' },
-  { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post — instant prospect ammo.', external: true },
+  { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL, runs every prospect tool at once.' },
+  { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post, instant prospect ammo.', external: true },
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
-  { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF — perfect demo asset.' },
+  { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF, perfect demo asset.' },
   { key: 'sales-scripts',       name: 'Sales Script Generator',              href: '/sales-scripts',        desc: 'Custom cold-call & email scripts in seconds.' },
   { key: 'follow-up-plan',      name: 'Follow-Up Plan',                      href: '/follow-up-plan',       desc: '7-touch sequences tuned to a specific prospect.' },
   { key: 'strategic-questions', name: 'Strategic Question Engine',           href: '/strategic-questions',  desc: 'Discovery-call questions to uncover real pain.' },
@@ -251,8 +251,8 @@ const PortalPage: React.FC = () => {
     if (hasValidPortalSession() && !profile) {
       const p = getPortalProfile();
       setProfile(p);
-      // Partner sessions normally land on the Admin Console — but NOT when
-      // we're inside the admin dashboard's "Company Portal — Live Preview"
+      // Partner sessions normally land on the Admin Console, but NOT when
+      // we're inside the admin dashboard's "Company Portal, Live Preview"
       // iframe. Otherwise /portal redirects to /admin, which embeds /portal
       // again, recursing forever (the stacked "Company Portal" widgets the
       // user was seeing).
@@ -318,7 +318,7 @@ const PortalPage: React.FC = () => {
     navigate('/portal');
   };
 
-  // Hooks must run unconditionally — call before any early return.
+  // Hooks must run unconditionally, call before any early return.
   const { unread: unreadChat } = useUnreadTeamMessages(profile?.code || '', !!profile && tab === 'team');
 
   // ============ LOGIN VIEW ============
@@ -655,14 +655,14 @@ const PortalPage: React.FC = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 pb-2"><WhosWorkingBar /></div>
-        {/* Tab nav (only in 'tabs' layout) — admin-style amber pill buttons */}
+        {/* Tab nav (only in 'tabs' layout), admin-style amber pill buttons */}
         {layout === 'tabs' && (
           <div className="max-w-7xl mx-auto px-4 pb-3 pt-1">
             <div className="flex gap-2 flex-wrap">
               {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
                 const active = tab === t.id;
                 const Icon = t.iconCmp;
-                // Steven's personalized Inbox highlight — bigger, brighter, hard to miss
+                // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
                 const isStevenInbox = t.id === 'inbox' && profile?.code === '317469';
                 return (
                   <Button

@@ -149,7 +149,7 @@ export const AdminMailboxesPanel: React.FC = () => {
                     {r.mailbox ? (
                       <code className="text-xs">{r.mailbox.address}</code>
                     ) : (
-                      <span className="text-xs text-muted-foreground">— none —</span>
+                      <span className="text-xs text-muted-foreground">,  none , </span>
                     )}
                   </td>
                   <td className="p-3">
@@ -157,14 +157,14 @@ export const AdminMailboxesPanel: React.FC = () => {
                       r.mailbox.is_active
                         ? <Badge variant="default">active</Badge>
                         : <Badge variant="secondary">disabled</Badge>
-                    ) : "—"}
+                    ) : ", "}
                   </td>
-                  <td className="p-3 text-xs">{r.mailbox?.forwarding_to || "—"}</td>
+                  <td className="p-3 text-xs">{r.mailbox?.forwarding_to || ", "}</td>
                   <td className="p-3 text-right">{r.mailbox?.message_count ?? 0}</td>
                   <td className="p-3 text-xs">
                     {r.mailbox?.last_inbound_at
                       ? new Date(r.mailbox.last_inbound_at).toLocaleString()
-                      : "—"}
+                      : ", "}
                   </td>
                   <td className="p-3 text-right space-x-2 whitespace-nowrap">
                     {r.mailbox ? (
@@ -239,7 +239,7 @@ const EditDialog: React.FC<{ row: AdminMailboxRow | null; onClose: () => void }>
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit mailbox — {row.rep_name}</DialogTitle>
+          <DialogTitle>Edit mailbox, {row.rep_name}</DialogTitle>
           <DialogDescription>Manage address, forwarding, signature, and auto-reply.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -260,7 +260,7 @@ const EditDialog: React.FC<{ row: AdminMailboxRow | null; onClose: () => void }>
             <Switch checked={autoReplyEnabled} onCheckedChange={setAutoReplyEnabled} />
           </div>
           {autoReplyEnabled && (
-            <Textarea value={autoReplyBody} onChange={(e) => setAutoReplyBody(e.target.value)} rows={3} placeholder="Thanks for your message — I'll get back to you within 24 hours." />
+            <Textarea value={autoReplyBody} onChange={(e) => setAutoReplyBody(e.target.value)} rows={3} placeholder="Thanks for your message, I'll get back to you within 24 hours." />
           )}
           <div className="flex items-center justify-between">
             <Label>Mailbox active</Label>

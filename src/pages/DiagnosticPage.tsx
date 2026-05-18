@@ -15,9 +15,9 @@ import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 const INCLUDES = [
   '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
   'Lead-to-contact, deal-stage progression, and touch-frequency analysis',
-  'Full Operator Tool Suite (9 live tools) run against your business — see below',
+  'Full Operator Tool Suite (9 live tools) run against your business, see below',
   'Written report (15–30 pages): leak map + prioritized fixes + ROI projections',
-  'Source-data appendix — every CSV, query, and tool export used',
+  'Source-data appendix, every CSV, query, and tool export used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
 ];
@@ -55,7 +55,7 @@ const TOOL_BUNDLE: ToolItem[] = [
     inputs: ['12-month CSV export from HubSpot, Salesforce, or any CRM', 'Pipeline + deal stage definitions', 'Sales rep activity log if available'],
     process: ['De-duplicate contacts and companies', 'Flag deals stalled >30/60/90 days at each stage', 'Audit stage definitions against actual rep behavior'],
     deliverables: ['Cleaned contact + deal database returned to you', 'Stalled-deal report by rep, stage, and dollar value', 'Rewritten stage exit criteria'],
-    exampleLeak: '$1.1M in pipeline marked "Proposal Sent" that had no follow-up activity in 60+ days — quietly dying in the CRM.',
+    exampleLeak: '$1.1M in pipeline marked "Proposal Sent" that had no follow-up activity in 60+ days, quietly dying in the CRM.',
     standalonePrice: '$79',
     standaloneDetail: 'one-time · CRM health check',
     priceId: 'crm_health_check_once',
@@ -159,7 +159,7 @@ const DiagnosticPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The 21-Day Revenue Diagnostic — $18,500 | Aetheris"
+        title="The 21-Day Revenue Diagnostic, $18,500 | Aetheris"
         description="Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
@@ -217,7 +217,7 @@ const DiagnosticPage: React.FC = () => {
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
-                    <li>• You get a written leak map — not a software login</li>
+                    <li>• You get a written leak map, not a software login</li>
                     <li>• One fixed fee. $18,500. No retainer to read the report</li>
                     <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
@@ -264,7 +264,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
 
               <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
-                $18,500 buys you what an agency charges $90K–$240K for — and most agencies still won't touch your CRM data.
+                $18,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
               </h3>
 
               <div className="overflow-x-auto mb-6">
@@ -326,7 +326,7 @@ const DiagnosticPage: React.FC = () => {
                   The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$18,500 to find the leak is roughly 1.3% – 4.6% of what it's costing you to ignore it.</span> One recovered deal usually pays for the engagement 5–20x over.
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-3">
-                  If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves — before you sign anything else.
+                  If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves, before you sign anything else.
                 </p>
               </div>
             </section>
@@ -369,7 +369,7 @@ const DiagnosticPage: React.FC = () => {
                 The full Operator Tool Suite ships with every Diagnostic.
               </h2>
               <p className="text-sm text-foreground/75 mb-5">
-                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business — the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
+                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {TOOL_BUNDLE.map((t, idx) => {
@@ -486,13 +486,13 @@ const DiagnosticPage: React.FC = () => {
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
               <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
               <p className="text-sm text-foreground/80">
-                You don't need to be on HubSpot or Salesforce. We work from a CSV export of contacts, deals, and activity. If you want us to run it live in your CRM, that's a paid upsell — not a prerequisite.
+                You don't need to be on HubSpot or Salesforce. We work from a CSV export of contacts, deals, and activity. If you want us to run it live in your CRM, that's a paid upsell, not a prerequisite.
               </p>
             </section>
 
             <section className="forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">After the diagnostic</div>
-              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer — $15K/month.</h2>
+              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer, $15K/month.</h2>
               <p className="text-sm text-foreground/80 mb-4">
                 3-month minimum. Available only to Diagnostic clients. We execute the prioritized fixes ourselves.
               </p>

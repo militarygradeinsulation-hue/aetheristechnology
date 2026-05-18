@@ -96,7 +96,7 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Globe,
       fn: 'scan-website',
       body: () => ({ url: f.url.trim() }),
-      titleFor: () => `${f.businessName || f.url} — Website Scan`,
+      titleFor: () => `${f.businessName || f.url}, Website Scan`,
     },
     {
       key: 'diagnose',
@@ -119,7 +119,7 @@ export const AllInOneGenerator: React.FC = () => {
           f.goals && `Goals: ${f.goals}`,
         ].filter(Boolean).join('\n'),
       }),
-      titleFor: () => `${f.businessName || f.url} — What's Wrong Diagnostic`,
+      titleFor: () => `${f.businessName || f.url}, What's Wrong Diagnostic`,
     },
     {
       key: 'social',
@@ -128,7 +128,7 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Megaphone,
       fn: 'generate-social-content',
       body: () => ({ url: f.url.trim() }),
-      titleFor: (d) => `${d?.businessName || f.businessName || f.url} — Social Pack`,
+      titleFor: (d) => `${d?.businessName || f.businessName || f.url}, Social Pack`,
     },
     {
       key: 'calendar',
@@ -141,7 +141,7 @@ export const AllInOneGenerator: React.FC = () => {
         goals: f.goals || 'grow brand awareness and inbound leads',
         platforms: 'LinkedIn, Facebook, Instagram',
       }),
-      titleFor: () => `${f.industry || f.businessName || f.url} — 30-Day Calendar`,
+      titleFor: () => `${f.industry || f.businessName || f.url}, 30-Day Calendar`,
     },
     {
       key: 'sales',
@@ -156,7 +156,7 @@ export const AllInOneGenerator: React.FC = () => {
         objections: '',
       }),
       skipReason: () => (!f.industry && !f.product && !f.businessName ? 'Add an industry or product to generate sales scripts.' : null),
-      titleFor: () => `${f.industry || f.businessName} — Sales Scripts`,
+      titleFor: () => `${f.industry || f.businessName}, Sales Scripts`,
     },
     {
       key: 'followup',
@@ -169,7 +169,7 @@ export const AllInOneGenerator: React.FC = () => {
         salesCycleLength: '14-30 days',
         currentTools: 'Email + phone + LinkedIn',
       }),
-      titleFor: () => `${f.industry || f.businessName} — Follow-Up Plan`,
+      titleFor: () => `${f.industry || f.businessName}, Follow-Up Plan`,
     },
     {
       key: 'brand',
@@ -183,7 +183,7 @@ export const AllInOneGenerator: React.FC = () => {
         idealCustomer: f.targetCustomer || 'mid-market decision makers',
         desiredPerception: ['Premium', 'Trusted', 'Expert'],
       }),
-      titleFor: () => `${f.businessName || f.url} — Brand Contradictions`,
+      titleFor: () => `${f.businessName || f.url}, Brand Contradictions`,
     },
     {
       key: 'friction',
@@ -197,7 +197,7 @@ export const AllInOneGenerator: React.FC = () => {
         industry: f.industry || f.businessName || 'general business',
         targetCustomer: f.targetCustomer || 'mid-market decision makers',
       }),
-      titleFor: () => `${f.businessName || f.url} — Friction Audit`,
+      titleFor: () => `${f.businessName || f.url}, Friction Audit`,
     },
     {
       key: 'questions',
@@ -217,7 +217,7 @@ export const AllInOneGenerator: React.FC = () => {
         goal: f.goals || 'Predictable inbound pipeline',
       }),
       skipReason: () => (!f.industry && !f.businessName ? 'Add an industry or business name to generate strategic questions.' : null),
-      titleFor: () => `${f.industry || f.businessName} — Strategic Questions`,
+      titleFor: () => `${f.industry || f.businessName}, Strategic Questions`,
     },
   ];
 
@@ -267,7 +267,7 @@ export const AllInOneGenerator: React.FC = () => {
       // Save to the right library (rep_library for portal sessions, admin_library for admins)
       await saveToolRun({
         tool_type: job.toolType,
-        title: `${job.titleFor(data)} — ${new Date().toLocaleDateString()}`,
+        title: `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`,
         input_data: { source: 'all-in-one', ...form, ...job.body() },
         output_data: data,
       });
@@ -290,7 +290,7 @@ export const AllInOneGenerator: React.FC = () => {
     if (needsInference) {
       const inferred = await inferFromUrl(form.url);
       if (inferred) workingForm = inferred;
-      // continue even if inference fails — tools will fall back to URL-only
+      // continue even if inference fails, tools will fall back to URL-only
     }
 
     setRunning(true);
@@ -306,7 +306,7 @@ export const AllInOneGenerator: React.FC = () => {
     let skipped = 0;
     const total = allJobs.length;
 
-    // Run all tools fully in parallel — retry logic handles transient 429s.
+    // Run all tools fully in parallel, retry logic handles transient 429s.
     // Tiny stagger (50ms each) avoids a thundering-herd against the AI gateway.
     await Promise.all(
       allJobs.map(async (job, idx) => {
@@ -445,7 +445,7 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
+          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>, we'll read your
           site, infer your business profile, then run all 9 tools fully in parallel (~30–60 seconds). If a tool gets
           rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
         </p>

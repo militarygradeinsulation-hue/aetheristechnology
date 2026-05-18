@@ -16,7 +16,7 @@ const AIConsultantPage = () => {
           { name: 'AI Business Consultant', path: '/ai-consultant' },
         ]}
         faqs={[
-          { question: 'What is the free AI Business Consultant tool?', answer: 'A free, no-login AI chat tool from Aetheris AI that gives you on-demand business consulting advice — strategy, AI use cases, operations — backed by our consulting framework.' },
+          { question: 'What is the free AI Business Consultant tool?', answer: 'A free, no-login AI chat tool from Aetheris AI that gives you on-demand business consulting advice, strategy, AI use cases, operations, backed by our consulting framework.' },
           { question: 'Is the AI consultant really free?', answer: 'Yes. No login, no credit card. For deeper engagements, you can book Aetheris AI consulting (Rapid Evaluation $750, 14-Day Diagnostic $7,500, or Custom Implementation $25,000+).' },
           { question: 'How is this different from ChatGPT?', answer: 'It is fine-tuned for B2B AI consulting questions, runs against the Aetheris consulting framework, and links directly to actionable next steps with our team.' },
         ]}

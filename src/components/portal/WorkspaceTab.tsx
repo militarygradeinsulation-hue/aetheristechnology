@@ -22,7 +22,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({ sharedPerson: _share
         <div>
           <h2 className="text-2xl font-bold text-foreground font-display">My Workspace</h2>
           <p className="text-sm text-muted-foreground">
-            Your personal CRM — saved tool runs, notes, and defaults. Tied to your code.
+            Your personal CRM, saved tool runs, notes, and defaults. Tied to your code.
           </p>
         </div>
         {(sub === 'history' || sub === 'notes') && (

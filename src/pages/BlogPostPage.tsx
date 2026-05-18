@@ -33,7 +33,7 @@ const SITE_URL = 'https://aetheris.technology';
 // Clean up encoding artifacts
 const cleanText = (text: string): string => {
   return text
-    .replace(/â€"/g, '—')
+    .replace(/â€"/g, ', ')
     .replace(/â€"/g, '–')
     .replace(/â€œ/g, '"')
     .replace(/â€[^a-zA-Z]/g, '"')
@@ -266,7 +266,7 @@ const BlogPostPage = () => {
                     )}
                   </div>
 
-                  {/* AEO TL;DR — AI engines extract this verbatim */}
+                  {/* AEO TL;DR, AI engines extract this verbatim */}
                   {post.excerpt && (
                     <div
                       className="tldr glass rounded-xl border border-amber/30 p-4 md:p-5 mb-6"
@@ -332,7 +332,7 @@ const BlogPostPage = () => {
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                     Our 14-Day Operational Systems Diagnostic exposes exactly where your business 
-                    is leaking revenue — and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
+                    is leaking revenue, and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                     <a 

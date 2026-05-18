@@ -105,8 +105,8 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Sales Rep — Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell business forensics & digital transformation to SMB owners. Earn 15% on every deal — including recurring revenue."
+        title="Sales Rep, Commission-Only | Aetheris AI"
+        description="Independent commission sales role. Sell business forensics & digital transformation to SMB owners. Earn 15% on every deal, including recurring revenue."
         path="/careers"
       />
       <Background />
@@ -133,7 +133,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
     <div className="relative rounded-2xl overflow-hidden border border-amber/30 mb-12 shadow-[0_0_60px_-20px_rgba(245,166,35,0.35)]">
       <img
         src={careersHero}
-        alt="Aetheris business forensics operator at work — dark room, amber data, dollar-leak signals"
+        alt="Aetheris business forensics operator at work, dark room, amber data, dollar-leak signals"
         width={1920}
         height={1080}
         className="w-full h-[420px] md:h-[520px] object-cover"
@@ -162,7 +162,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-4">
           Every business in America is leaking 8–15% of revenue and can't see it from the inside.
-          You bring the flashlight. We deliver the fix. One flagship close pays you <strong className="text-foreground">$5,000 cash</strong> — and a single retainer pays <strong className="text-foreground">$4,000 every month it stays open</strong>.
+          You bring the flashlight. We deliver the fix. One flagship close pays you <strong className="text-foreground">$5,000 cash</strong>, and a single retainer pays <strong className="text-foreground">$4,000 every month it stays open</strong>.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
@@ -304,7 +304,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </div>
 
         <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Catalog products pay the standard 15% — flagships are the volume game.
+          // Catalog products pay the standard 15%, flagships are the volume game.
         </p>
       </div>
     </div>
@@ -318,11 +318,11 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid md:grid-cols-2 gap-5">
         {[
           { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
-          { icon: Brain, title: 'Operator-Led — You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
-          { icon: Rocket, title: 'Operator Stack — Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal — all built in. Nothing to buy. Nothing to bolt on.' },
-          { icon: Users, title: 'Partner Track — Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
+          { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
+          { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
+          { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
           { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
-          { icon: GraduationCap, title: 'Real Ramp, Not "Watch This Webinar"', desc: 'Onboarding playbook, daily hustle goals, in-portal training with scoring, and direct coaching — all aimed at your first close in week 1. We invest in winners.' },
+          { icon: GraduationCap, title: 'Real Ramp, Not "Watch This Webinar"', desc: 'Onboarding playbook, daily hustle goals, in-portal training with scoring, and direct coaching, all aimed at your first close in week 1. We invest in winners.' },
         ].map(({ icon: Icon, title, desc }, i) => (
           <div key={title} className="forensic-tile rounded-xl p-6">
             <div className="flex items-start gap-4">
@@ -350,7 +350,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         {[
           { icon: Clock, title: 'Set Your Own Hours', desc: 'Built-in time clock if you want to track. Otherwise you\'re your own boss. Results matter, not the calendar.' },
           { icon: MapPin, title: 'Remote-First, Indy-Loved', desc: 'Headquartered in Indianapolis. Reps welcome anywhere in the US. Boots-on-ground in Indy = priority lead routing.' },
-          { icon: Shield, title: 'No Cold-Call Quotas', desc: 'No "smile and dial" KPIs. Sell how you sell — LinkedIn, email, in-person, referrals. Whatever works.' },
+          { icon: Shield, title: 'No Cold-Call Quotas', desc: 'No "smile and dial" KPIs. Sell how you sell, LinkedIn, email, in-person, referrals. Whatever works.' },
         ].map(({ icon: Icon, title, desc }, i) => (
           <div key={title} className="forensic-tile rounded-xl p-5">
             <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-2">// perk_{String(i+1).padStart(2,'0')}</p>
@@ -369,15 +369,15 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         If you see yourself here, you're already half-hired.
       </h2>
       <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto mb-8">
-        We're not looking for resumes — we're looking for operators. These are the people who tend to print here.
+        We're not looking for resumes, we're looking for operators. These are the people who tend to print here.
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
           { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
-          { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds — because it bled out of yours. That insight closes deals fast.' },
-          { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first — your rolodex is an unfair advantage.' },
-          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence — you bring the voice.' },
+          { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
+          { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
+          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence, you bring the voice.' },
         ].map(({ title, desc }, i) => (
           <div key={title} className="forensic-tile rounded-xl p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">PROFILE · {String(i+1).padStart(2,'0')}</p>
@@ -388,7 +388,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </div>
     </div>
 
-    {/* WHY NOW — GROUND FLOOR */}
+    {/* WHY NOW, GROUND FLOOR */}
     <div className="mb-14 rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-card/40 to-card/40 p-8 md:p-10 backdrop-blur">
       <div className="text-center mb-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Why Now</p>
@@ -396,14 +396,14 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           Ground floor of a category that didn't exist 12 months ago.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
-          "Business Forensics" is a brand-new lane — operator-led diagnostics with an in-house tech stack behind them. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
+          "Business Forensics" is a brand-new lane, operator-led diagnostics with an in-house tech stack behind them. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using — you walk in already different.' },
-          { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests — all open.' },
+          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using, you walk in already different.' },
+          { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests, all open.' },
           { tag: '04', title: 'Residual That Compounds', desc: 'Recurring payouts for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
           <div key={tag} className="forensic-tile rounded-xl p-5">
@@ -430,7 +430,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
               'You can hold a real conversation with a business owner without sounding like a script.',
               'You actually believe most businesses are leaking money (because they are).',
               'You want commission upside, not a salary safety net.',
-              'You can take rejection like a forensic — clinical, not personal.',
+              'You can take rejection like a forensic, clinical, not personal.',
             ].map((t) => <li key={t} className="flex gap-2"><span className="text-emerald-500">✓</span>{t}</li>)}
           </ul>
         </CardContent>
@@ -455,7 +455,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </Card>
     </div>
 
-    {/* GATE — FINAL */}
+    {/* GATE, FINAL */}
     <Card className="bg-card/60 backdrop-blur border-amber/40">
       <CardHeader>
         <CardTitle className="text-2xl text-foreground font-display">One Door In: The Test</CardTitle>
@@ -466,7 +466,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           you won't be bothered to follow up with prospects. Pass the test → application unlocks → we review every passing app personally.
         </p>
         <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-5">
-          <li>Read the site — especially <a href="/leak-audit" className="text-amber hover:underline">/leak-audit</a> and <a href="/services" className="text-amber hover:underline">/services</a>.</li>
+          <li>Read the site, especially <a href="/leak-audit" className="text-amber hover:underline">/leak-audit</a> and <a href="/services" className="text-amber hover:underline">/services</a>.</li>
           <li>Take the 20-question test (45 min, 70% to pass).</li>
           <li>Pass it → application form unlocks instantly with your share code.</li>
           <li>Joseph personally reviews every passing application within 48 hours.</li>
@@ -518,7 +518,7 @@ const PlaybookSection = () => (
           </TableHeader>
           <TableBody>
             {[
-              ["Digital Snapshot", "$149", "Automated report", "Door opener — shows them their gaps"],
+              ["Digital Snapshot", "$149", "Automated report", "Door opener, shows them their gaps"],
               ["Website Evaluation", "$599", "Detailed analysis + call", "Builds authority, earns trust"],
               ["14-Day Forensic Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
               ["Implementation", "$5K–$25K+", "Full build-out", "Website, CRM, automation, the works"],
@@ -543,7 +543,7 @@ const PlaybookSection = () => (
       <CardContent className="space-y-6">
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
           <p className="text-foreground font-medium">
-            Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code — including recurring monthly invoices for the life of the subscription.
+            Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code, including recurring monthly invoices for the life of the subscription.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time.
@@ -600,7 +600,7 @@ const PlaybookSection = () => (
           <div className="space-y-3">
             {[
               "Visit their website. Find 2-3 obvious problems (slow load, no mobile, outdated photos, no CTA).",
-              "Send a short email or LinkedIn message: 'I looked at your site — you're leaving money on the table. Want me to show you where?'",
+              "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
               "Offer the $149 Digital Snapshot as the entry point. It's cheap, it's fast, and it proves value.",
               "Once they see the report, they'll ask 'what now?' That's when you introduce the Strategy Blueprint or 14-Day Diagnostic.",
               "Implementation and Fractional CTO/CMO retainers sell themselves after the diagnostic reveals the full damage.",
@@ -678,14 +678,14 @@ const PlaybookSection = () => (
     {/* HOW TO GET STARTED */}
     <Card className="bg-card/60 backdrop-blur border-border/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Zap className="text-primary" /> How to Get Started — Today</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Zap className="text-primary" /> How to Get Started, Today</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
             { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
-            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site — I think you're losing 8–15% of revenue silently. Want to see where?'" },
+            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site, I think you're losing 8–15% of revenue silently. Want to see where?'" },
             { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $2,500 Forensic Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">

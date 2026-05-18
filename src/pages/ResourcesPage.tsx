@@ -155,7 +155,7 @@ const ResourcesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Strategic Playbooks — AI & Marketing | Aetheris"
+        title="Strategic Playbooks, AI & Marketing | Aetheris"
         description="Free playbooks on AI search, digital influence, short-form video, and leadership. Built from real consulting engagements."
         path="/resources"
         jsonLd={{
@@ -233,11 +233,11 @@ const ResourcesPage = () => {
                 Playbooks from the field.
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-                The frameworks behind The Leak Audit™ — the patterns we see bleeding revenue across operations, 
+                The frameworks behind The Leak Audit™, the patterns we see bleeding revenue across operations, 
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks — $29 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
+                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks, $29 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
               </p>
             </RevealOnScroll>
           </div>
@@ -310,7 +310,7 @@ const ResourcesPage = () => {
                           {isUnlocked ? (
                             <><Download className="w-4 h-4" /> Download PDF</>
                           ) : (
-                            <><ShoppingCart className="w-4 h-4" /> Unlock — $25</>
+                            <><ShoppingCart className="w-4 h-4" /> Unlock, $25</>
                           )}
                         </Button>
                       </div>
@@ -339,7 +339,7 @@ const ResourcesPage = () => {
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
                     Free playbooks teach the patterns we see across businesses. The Forensic Diagnostic ($2,500 flat) 
-                    names the leaks bleeding <em>your</em> revenue right now — and credits in full toward the rebuild.
+                    names the leaks bleeding <em>your</em> revenue right now, and credits in full toward the rebuild.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="/leak-audit">

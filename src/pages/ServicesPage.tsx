@@ -14,7 +14,7 @@ const ServicesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Services — 21-Day Diagnostic + Implementation | Aetheris"
+        title="Services, 21-Day Diagnostic + Implementation | Aetheris"
         description="Two offers. The 21-Day Revenue Diagnostic ($18,500 fixed fee) and Implementation Retainer ($15K/mo, Diagnostic clients only)."
         path="/services"
         keywords="revenue diagnostic, implementation retainer, manufacturing CRM consulting"
@@ -47,7 +47,7 @@ const ServicesPage: React.FC = () => {
                   {[
                     'Map every leak in CRM, sales follow-up, and lead flow',
                     'Written report with prioritized fixes + ROI',
-                    'Source-data appendix — every CSV and query',
+                    'Source-data appendix, every CSV and query',
                     'CRM-agnostic (CSV export works)',
                   ].map((i) => (
                     <li key={i} className="flex gap-2"><Check className="w-4 h-4 text-amber shrink-0 mt-0.5" />{i}</li>
@@ -98,7 +98,7 @@ const ServicesPage: React.FC = () => {
                   Send us a deal. <span className="text-amber">Get paid when it closes.</span>
                 </h2>
                 <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-                  If you introduce us to a specialty manufacturer and they sign, you collect — no contracts, no quotas, no fine print designed to dodge the payout.
+                  If you introduce us to a specialty manufacturer and they sign, you collect, no contracts, no quotas, no fine print designed to dodge the payout.
                 </p>
               </div>
 
@@ -126,7 +126,7 @@ const ServicesPage: React.FC = () => {
                   <div className="font-forensic text-4xl font-bold text-foreground">$500</div>
                   <p className="text-xs text-muted-foreground mt-1">Per qualified discovery call we book</p>
                   <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
-                    Paid the moment a referred prospect shows up to the 30-minute call — even if they don't ultimately sign. Stacks with Tier 1 and Tier 2.
+                    Paid the moment a referred prospect shows up to the 30-minute call, even if they don't ultimately sign. Stacks with Tier 1 and Tier 2.
                   </p>
                 </div>
               </div>
@@ -154,7 +154,7 @@ const ServicesPage: React.FC = () => {
                   Send us a referral <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
-                  Reps and partners on the internal program follow the fixed-dollar split in the rep portal — this public bonus is for outside referrers.
+                  Reps and partners on the internal program follow the fixed-dollar split in the rep portal, this public bonus is for outside referrers.
                 </p>
               </div>
             </section>

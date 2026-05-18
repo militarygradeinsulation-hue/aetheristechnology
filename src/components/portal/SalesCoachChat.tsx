@@ -40,7 +40,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const initialMessage: Msg = {
     role: 'assistant',
     content: isPartner
-      ? "**Sales Coach + Company View online.** Ask me anything — coaching, scripts, objections, OR live company stats (leads, reps, submissions). I pull live data when you ask for numbers."
+      ? "**Sales Coach + Company View online.** Ask me anything, coaching, scripts, objections, OR live company stats (leads, reps, submissions). I pull live data when you ask for numbers."
       : "**Sales Coach online.** Ask me anything: how to handle an objection, what to pitch a specific prospect, exact words for a follow-up email, commission math, or how to explain any service.",
     suggestions: isPartner
       ? ['Give me a company summary', 'Show recent leads', 'Coach me through a price objection']
@@ -182,7 +182,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     if (errors.length) {
       setMessages((prev) => [...prev, {
         role: 'assistant',
-        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet — paste the relevant text instead.`,
+        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet, paste the relevant text instead.`,
       }]);
     }
   }, []);
@@ -388,7 +388,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
             onClick={toggleRecording}
             disabled={isLoading || isTranscribing}
             aria-label={isRecording ? 'Stop recording' : 'Record voice'}
-            title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+            title={isRecording ? 'Stop recording' : 'Hold a call to your mic, I\'ll transcribe & coach'}
             className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
               isRecording
                 ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'

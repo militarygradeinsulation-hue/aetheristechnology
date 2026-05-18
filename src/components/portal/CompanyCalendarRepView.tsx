@@ -98,7 +98,7 @@ export const CompanyCalendarRepView: React.FC = () => {
                 Daily goals, vertical focuses, topics to post, sales pushes, and team events from leadership.
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mt-2 inline-flex items-center gap-1">
-                <Lock className="w-3 h-3" /> Read-only — managed by leadership
+                <Lock className="w-3 h-3" /> Read-only, managed by leadership
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -229,7 +229,7 @@ const ListView: React.FC<{ entries: CompanyCalendarEntry[]; todayStr: string; on
     const date = new Date(d + "T12:00:00");
     const isToday = d === todayStr;
     const label = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-    return isToday ? `Today — ${label}` : label;
+    return isToday ? `Today, ${label}` : label;
   };
 
   return (
@@ -287,7 +287,7 @@ const WeekView: React.FC<{ entries: CompanyCalendarEntry[]; weekStart: Date; tod
             </CardHeader>
             <CardContent className="space-y-2 min-h-[80px]">
               {list.length === 0
-                ? <p className="text-[11px] text-muted-foreground italic">—</p>
+                ? <p className="text-[11px] text-muted-foreground italic">, </p>
                 : list.map(e => <EntryCard key={e.id} e={e} onPick={onPick} compact />)}
             </CardContent>
           </Card>
@@ -412,7 +412,7 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
           <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
-          <Lock className="w-3 h-3" /> Read-only — only leadership can edit this entry
+          <Lock className="w-3 h-3" /> Read-only, only leadership can edit this entry
         </p>
       </div>
     </div>

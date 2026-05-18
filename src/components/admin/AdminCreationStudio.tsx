@@ -29,7 +29,7 @@ const SCENE_STYLE_OPTIONS: { key: SceneImageStyle; label: string; desc: string }
   { key: 'data_macro',        label: 'Data Macro',        desc: 'CRT terminal close-up · scan lines' },
   { key: 'noir_object',       label: 'Noir Object',       desc: 'Single object · hard amber light' },
   { key: 'isometric',         label: 'Isometric',         desc: 'Clean vector · negative space' },
-  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay, anything goes' },
 ];
 
 const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
@@ -40,12 +40,12 @@ const ASPECTS: { key: string; w: number; h: number; label: string }[] = [
 
 // ===== Premade ideation: titles, topics, prompt recipes =====
 const PREMADE_TITLES: string[] = [
-  'Your Business Is Leaking — You Just Can\'t See It',
+  'Your Business Is Leaking, You Just Can\'t See It',
   'The $200k Leak Hiding in Your CRM',
   'Why Your "Best Rep" Is Your Biggest Leak',
   '7 Steps of The Leak Audit™',
   'Stop Hiring Reps. Fix the Process They\'re Drowning In.',
-  'AI Won\'t Save a Broken Process — It Speeds the Bleed',
+  'AI Won\'t Save a Broken Process, It Speeds the Bleed',
   'The Forensic Diagnostic: $2,500 to Find the Bleed',
   'Trade-Show Leads Decay in 72 Hours. Here\'s the Fix.',
   'Quote-to-Cash Leakage: The Silent 8-12% Margin Killer',
@@ -59,7 +59,7 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
     'The dead-lead pile worth $200k that nobody resurrects.',
     'Quote-to-cash leakage between sales and ops.',
-    'Stalled deals nobody triages — the silent revenue killer.',
+    'Stalled deals nobody triages, the silent revenue killer.',
     'The 30-day no-touch deal that quietly becomes closed-lost.',
     'Refund / credit-memo leakage that finance never traces back to ops.',
     'Discount creep eating 4 points of margin per quarter.',
@@ -73,14 +73,14 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Why "more reps" is the wrong fix.',
     'Process documentation that actually gets followed.',
     'The 4 SOPs that prevent 80% of operational leaks.',
-    'Why your tech stack is fine — your handoffs are bleeding.',
+    'Why your tech stack is fine, your handoffs are bleeding.',
     'How to spot a swivel-chair process in 60 seconds.',
     'The single weekly meeting that closes 3 leaks at once.',
     'Why your COO is the most expensive bottleneck on the org chart.',
     'Operational debt: the silent tax on every growth dollar.',
   ],
   'AI / Practical': [
-    'Dead-lead resurrection with AI — the cheapest win.',
+    'Dead-lead resurrection with AI, the cheapest win.',
     'AI-assisted CRM hygiene for $5M-$50M operators.',
     'Why most AI consultants are SaaS resellers in a hoodie.',
     'Forensic diagnostics powered by your own data.',
@@ -92,8 +92,8 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Stop buying AI tools. Start buying AI outcomes.',
   ],
   'Sales & Pipeline': [
-    'Stuck-deal triage — 4 questions that move or kill a deal.',
-    'Discovery calls leak deals — here\'s the script that plugs it.',
+    'Stuck-deal triage, 4 questions that move or kill a deal.',
+    'Discovery calls leak deals, here\'s the script that plugs it.',
     'CRM stages lying about pipeline value.',
     'The 72-hour warm-lead decay curve.',
     'The 5 pipeline metrics owners should run weekly (most run none).',
@@ -106,14 +106,14 @@ const PREMADE_TOPICS: Record<string, string[]> = {
   'Founder POV': [
     'Owner-operators: the 4 weekly reports finance should run.',
     'Discounting is a symptom, not a strategy.',
-    'When to fire your "rockstar" — operator\'s checklist.',
+    'When to fire your "rockstar", operator\'s checklist.',
     'Stop measuring activity. Start measuring leaks.',
     'The 90-minute Friday review that prevents Monday surprises.',
     'Why founder-led sales stops scaling at $7M (and what to do).',
     'The CEO calendar audit: where your time is actually leaking.',
     'Hiring a VP of Sales before you fix the process is malpractice.',
     'The brutal question every owner should ask their #2.',
-    'Cash, conviction, calendar — the three things owners protect at all costs.',
+    'Cash, conviction, calendar, the three things owners protect at all costs.',
   ],
   'Industry-Specific': [
     'Specialty manufacturers and the trade-show decay curve.',
@@ -122,7 +122,7 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Indianapolis mid-market margin squeeze.',
     'HVAC and plumbing: the 24-hour callback rule that prints money.',
     'Specialty distribution: SKU-level margin leaks hiding in plain sight.',
-    'Professional services: utilization vs realization — which is bleeding?',
+    'Professional services: utilization vs realization, which is bleeding?',
     'Field-service techs as a forgotten revenue channel.',
     'Industrial OEMs: the warranty leak nobody owns.',
     'B2B SaaS in the Midwest: NRR is your only honest metric.',
@@ -358,7 +358,7 @@ export const AdminCreationStudio: React.FC = () => {
     finally { setLibDeletingId(null); }
   };
 
-  // ===== Image library (every generated/uploaded image — admin + reps) =====
+  // ===== Image library (every generated/uploaded image, admin + reps) =====
   type ImageLibItem = {
     id: string;
     prompt: string;
@@ -424,7 +424,7 @@ export const AdminCreationStudio: React.FC = () => {
   const generateSceneImage = async (sceneIdx: number) => {
     if (!plan) return;
     const scene = plan.scenes[sceneIdx];
-    const fallback = [scene.caption, scene.voiceover].filter(Boolean).join(' — ').trim();
+    const fallback = [scene.caption, scene.voiceover].filter(Boolean).join(', ').trim();
     const promptText = (scene.imagePrompt?.trim() || fallback);
     const style = scene.imageStyle || 'case_file';
     if (!promptText) {
@@ -595,7 +595,7 @@ export const AdminCreationStudio: React.FC = () => {
       if (data?.error) throw new Error(data.error);
       if (!data?.plan) throw new Error('Empty response from server');
       setPlan(data.plan);
-      setStep('Plan ready — review or render.');
+      setStep('Plan ready, review or render.');
       return data.plan as Plan;
     } catch (e) {
       const msg = (e as Error).message || 'Plan failed';
@@ -790,7 +790,7 @@ export const AdminCreationStudio: React.FC = () => {
       setVideoExt(ext);
       setProgress(100);
       const sizeMb = (blob.size / 1024 / 1024).toFixed(1);
-      setStep(`Done — ${sizeMb} MB`);
+      setStep(`Done, ${sizeMb} MB`);
       toast({ title: 'Video ready', description: `${sizeMb} MB` });
 
       // Auto-save to library so it can be revisited
@@ -804,7 +804,7 @@ export const AdminCreationStudio: React.FC = () => {
         const publicUrl = pub.publicUrl;
         await saveToolRun({
           tool_type: 'video',
-          title: activePlan.title || `Video — ${new Date().toLocaleString()}`,
+          title: activePlan.title || `Video, ${new Date().toLocaleString()}`,
           input_data: { prompt, aspect, scenes: activePlan.scenes.length },
           output_data: {
             title: activePlan.title,
@@ -857,7 +857,7 @@ export const AdminCreationStudio: React.FC = () => {
               <Film className="w-5 h-5 text-amber" /> Video Studio
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              AI-scripted video with your ElevenLabs voice + real site photos. Mix premade titles, topics, and prompt recipes — or write your own.
+              AI-scripted video with your ElevenLabs voice + real site photos. Mix premade titles, topics, and prompt recipes, or write your own.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchVoices} disabled={loadingVoices}>
@@ -874,7 +874,7 @@ export const AdminCreationStudio: React.FC = () => {
               onChange={(e) => setVoiceId(e.target.value)}
               className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
             >
-              {voices.length === 0 && <option value="">— No voices loaded —</option>}
+              {voices.length === 0 && <option value="">,  No voices loaded , </option>}
               {voices.map(v => (
                 <option key={v.voice_id} value={v.voice_id}>
                   {v.name} {v.category ? `· ${v.category}` : ''}
@@ -904,7 +904,7 @@ export const AdminCreationStudio: React.FC = () => {
         {/* Premade ideation: titles, topics, prompt recipes */}
         <div className="mt-5 space-y-4 rounded-lg border border-amber/20 bg-background/30 p-4">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Idea Mixer — pick & combine</div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Idea Mixer, pick & combine</div>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -969,7 +969,7 @@ export const AdminCreationStudio: React.FC = () => {
           {/* Topics */}
           <div>
             <div className="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics — click to combine</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Topics, click to combine</div>
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
@@ -1046,7 +1046,7 @@ export const AdminCreationStudio: React.FC = () => {
           {/* Prompt recipes */}
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-              Prompt recipes — pick a structure {aiRecipes.length > 0 && <span className="text-amber/70">· +{aiRecipes.length} fresh</span>}
+              Prompt recipes, pick a structure {aiRecipes.length > 0 && <span className="text-amber/70">· +{aiRecipes.length} fresh</span>}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(() => {
@@ -1084,7 +1084,7 @@ export const AdminCreationStudio: React.FC = () => {
 
         <div className="mt-4">
           <div className="flex items-center justify-between">
-            <Label>Prompt — what's the video about?</Label>
+            <Label>Prompt, what's the video about?</Label>
             <button
               type="button"
               onClick={() => { setPickedTitle(''); setPickedTopics([]); setPickedRecipe(''); setPrompt(''); }}
@@ -1095,7 +1095,7 @@ export const AdminCreationStudio: React.FC = () => {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={6}
-            placeholder='Pick from the Idea Mixer above, or write your own. e.g. "Punchy 30-second LinkedIn video about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals — pitch the Forensic Diagnostic."'
+            placeholder='Pick from the Idea Mixer above, or write your own. e.g. "Punchy 30-second LinkedIn video about how a $5M-$25M manufacturer leaks $200k/yr in stalled deals, pitch the Forensic Diagnostic."'
             className="mt-1"
           />
         </div>
@@ -1129,7 +1129,7 @@ export const AdminCreationStudio: React.FC = () => {
       {/* Image library + uploads */}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="glass p-4 rounded-xl">
-          <h3 className="font-bold mb-2 text-sm">Site library ({siteLibrary.length}) — click to include</h3>
+          <h3 className="font-bold mb-2 text-sm">Site library ({siteLibrary.length}), click to include</h3>
           <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
             {siteLibrary.map(img => {
               const on = selectedSiteIds.has(img.id);
@@ -1175,7 +1175,7 @@ export const AdminCreationStudio: React.FC = () => {
         </div>
       </div>
 
-      {/* Shared Image Library — every image generated/uploaded by anyone */}
+      {/* Shared Image Library, every image generated/uploaded by anyone */}
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-base font-display flex items-center gap-2">
@@ -1193,7 +1193,7 @@ export const AdminCreationStudio: React.FC = () => {
         {imgLibLoading && imageLibrary.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin" /></div>
         ) : imageLibrary.length === 0 ? (
-          <div className="text-xs text-muted-foreground py-6 text-center">No images yet — generate one in a scene or in the Art Studio.</div>
+          <div className="text-xs text-muted-foreground py-6 text-center">No images yet, generate one in a scene or in the Art Studio.</div>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 max-h-[420px] overflow-y-auto">
             {imageLibrary.map(img => (
@@ -1299,7 +1299,7 @@ export const AdminCreationStudio: React.FC = () => {
                               if (!title) return;
                               next.scenes[i] = {
                                 ...s,
-                                imagePrompt: existing ? `${title} — ${existing}` : title,
+                                imagePrompt: existing ? `${title}, ${existing}` : title,
                               };
                               setPlan(next);
                               toast({ title: 'Title pasted into image prompt' });
@@ -1346,7 +1346,7 @@ export const AdminCreationStudio: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Background music (optional)</div>
-                <div className="text-xs text-muted-foreground">AI-generated original score via ElevenLabs Music — royalty-free, yours to use.</div>
+                <div className="text-xs text-muted-foreground">AI-generated original score via ElevenLabs Music, royalty-free, yours to use.</div>
               </div>
               {musicUrl && (
                 <button type="button" onClick={clearMusic} className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-destructive">
@@ -1433,7 +1433,7 @@ export const AdminCreationStudio: React.FC = () => {
         </div>
       )}
 
-      {/* Video Library — every video you've made, auto-saved */}
+      {/* Video Library, every video you've made, auto-saved */}
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <h3 className="font-bold font-display text-lg flex items-center gap-2">

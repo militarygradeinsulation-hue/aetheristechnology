@@ -156,7 +156,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         ai_plan: { summary: plan.summary, tactics: plan.tactics, kpis: plan.kpis, generated_at: new Date().toISOString(), raw: plan.raw },
       });
       setAiPrompt("");
-      toast.success("AI plan added — review & save");
+      toast.success("AI plan added, review & save");
     } catch (e: any) { toast.error("AI failed", { description: e.message }); }
     finally { setAiBusy(false); }
   };
@@ -181,14 +181,14 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Full visual calendar (month/week/list) — same view reps see */}
+      {/* Full visual calendar (month/week/list), same view reps see */}
       <CompanyCalendarRepView />
 
       {/* Admin list with edit/delete controls */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            All entries — click to edit
+            All entries, click to edit
           </CardTitle>
         </CardHeader>
       </Card>
@@ -312,7 +312,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                   <Sparkles className="w-3 h-3" /> AI Tactics Planner
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Tell the AI what you want the team to do — it'll draft tactics + KPIs into the body field.
+                  Tell the AI what you want the team to do, it'll draft tactics + KPIs into the body field.
                 </p>
                 <div className="flex gap-2">
                   <Input value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}

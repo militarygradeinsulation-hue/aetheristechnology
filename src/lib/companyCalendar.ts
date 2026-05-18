@@ -104,7 +104,7 @@ export function categoryOf(entry: Pick<CompanyCalendarEntry, "color">): CompanyC
   return CATEGORY_KEYS.includes(key) ? key : null;
 }
 
-/** Resolve display (label/icon/color classes) for an entry — category wins, else kind. */
+/** Resolve display (label/icon/color classes) for an entry, category wins, else kind. */
 export function entryDisplay(entry: Pick<CompanyCalendarEntry, "color" | "kind">): { label: string; icon: string; color: string } {
   const cat = categoryOf(entry);
   if (cat) {

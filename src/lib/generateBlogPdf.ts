@@ -13,7 +13,7 @@ interface BlogPdfData {
 
 const cleanText = (text: string): string => {
   return text
-    .replace(/â€"/g, '—')
+    .replace(/â€"/g, ', ')
     .replace(/â€"/g, '–')
     .replace(/â€œ/g, '"')
     .replace(/â€[^a-zA-Z]/g, '"')
@@ -23,7 +23,7 @@ const cleanText = (text: string): string => {
     .replace(/â€¦/g, '…')
     .replace(/â€¢/g, '•')
     .replace(/\u00a0/g, ' ')
-    // Strip emojis — they render as black squares in jsPDF helvetica
+    // Strip emojis, they render as black squares in jsPDF helvetica
     .replace(/[\u{1F300}-\u{1FAFF}]|[\u{2600}-\u{27BF}]/gu, '')
     .replace(/[\u{1F000}-\u{1F2FF}]/gu, '');
 };
@@ -79,7 +79,7 @@ const toBlocks = (raw: string): Block[] => {
     if (/^[-*•]\s+/.test(line)) { blocks.push({ kind: 'bullet', text: stripInline(line.replace(/^[-*•]\s+/, '')) }); numberedCounter = 0; continue; }
     const num = line.match(/^(\d+)[\.\)]\s+(.*)$/);
     if (num) { numberedCounter += 1; blocks.push({ kind: 'numbered', n: numberedCounter, text: stripInline(num[2]) }); continue; }
-    // Skip markdown table rows — jsPDF can't render them cleanly; fall back to a one-line summary
+    // Skip markdown table rows, jsPDF can't render them cleanly; fall back to a one-line summary
     if (/^\|.*\|$/.test(line)) {
       const cells = line.split('|').map(c => c.trim()).filter(Boolean);
       if (cells.length && !cells.every(c => /^[-:\s]+$/.test(c))) {
@@ -330,7 +330,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
   pdf.setFontSize(11);
   pdf.setTextColor(...inkSoft);
   const ctaLines = pdf.splitTextToSize(
-    'The Forensic Diagnostic — $2,500, applied toward engagement. A 14-day operator-led audit that maps every revenue, margin, and capacity leak in your business.',
+    'The Forensic Diagnostic, $2,500, applied toward engagement. A 14-day operator-led audit that maps every revenue, margin, and capacity leak in your business.',
     contentW - 30,
   );
   pdf.text(ctaLines, pageW / 2, cy, { align: 'center' });

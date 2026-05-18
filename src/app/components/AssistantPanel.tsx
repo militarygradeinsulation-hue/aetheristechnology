@@ -37,7 +37,7 @@ const ProposalCard = ({
   </div>
 );
 
-// Inline diff for a confirmed write — built from action_before / action_after
+// Inline diff for a confirmed write, built from action_before / action_after
 // returned by assistant-execute. Shows verified state + deep link to HubSpot.
 const InlineWriteResult = ({ m, portalId }: { m: AssistantMessage; portalId: string | null }) => {
   if (!m.action_id || !m.action_after) return null;
@@ -67,7 +67,7 @@ const InlineWriteResult = ({ m, portalId }: { m: AssistantMessage; portalId: str
     <div className={`mt-2 border rounded p-2 text-[11px] ${isPartial ? "border-amber-500/40 bg-amber-500/5" : "border-emerald-500/30 bg-emerald-500/5"}`}>
       <div className="flex items-center gap-2 mb-1.5 font-mono text-[10px] uppercase">
         {isPartial ? (
-          <span className="text-amber-500 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> partial — re-check in hubspot</span>
+          <span className="text-amber-500 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> partial, re-check in hubspot</span>
         ) : (
           <span className="text-emerald-500 inline-flex items-center gap-1"><Check className="h-3 w-3" /> verified in hubspot</span>
         )}
@@ -83,10 +83,10 @@ const InlineWriteResult = ({ m, portalId }: { m: AssistantMessage; portalId: str
             <div key={k} className="flex items-baseline gap-2">
               <span className="text-muted-foreground shrink-0">{k}:</span>
               <span className={v.match ? "text-foreground" : "text-amber-500"}>
-                {String(v.actual ?? "—")}
+                {String(v.actual ?? ", ")}
               </span>
               {!v.match && (
-                <span className="text-[10px] text-muted-foreground">(wrote: {String(v.written ?? "—")})</span>
+                <span className="text-[10px] text-muted-foreground">(wrote: {String(v.written ?? ", ")})</span>
               )}
             </div>
           ))}

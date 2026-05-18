@@ -36,7 +36,7 @@ const PROMPT_STARTERS = [
 ];
 
 const PREMADE_TITLES: string[] = [
-  'Your Business Is Leaking — You Just Can\'t See It',
+  'Your Business Is Leaking, You Just Can\'t See It',
   'The $200k Leak Hiding in Your CRM',
   '7 Steps of The Leak Audit™',
   'Stop Hiring Reps. Fix the Process.',
@@ -50,13 +50,13 @@ const PREMADE_TOPICS: string[] = [
   'Manufacturers losing 30%+ of trade-show leads to bad follow-up.',
   'The dead-lead pile worth $200k that nobody resurrects.',
   'Quote-to-cash leakage between sales and ops.',
-  'Stalled deals nobody triages — the silent revenue killer.',
+  'Stalled deals nobody triages, the silent revenue killer.',
   'Discount creep eating 4 points of margin per quarter.',
   'CRM stages lying about pipeline value.',
   'The 72-hour warm-lead decay curve.',
   'AI-assisted CRM hygiene for $5M-$50M operators.',
   'Why "more reps" is the wrong fix.',
-  'Discovery calls leak deals — here\'s the script that plugs it.',
+  'Discovery calls leak deals, here\'s the script that plugs it.',
 ];
 
 const MUSIC_PRESETS: { label: string; text: string }[] = [
@@ -257,7 +257,7 @@ export const RepCreationStudio: React.FC = () => {
 
   const generatePlan = async (): Promise<Plan | null> => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return null; }
-    if (available.length === 0) { toast({ title: 'No images available — generate or upload images in your Art Studio first', variant: 'destructive' }); return null; }
+    if (available.length === 0) { toast({ title: 'No images available, generate or upload images in your Art Studio first', variant: 'destructive' }); return null; }
     setBusy(true); setStep('Asking AI for scene plan…'); setPlan(null); setVideoUrl('');
     try {
       const { data, error } = await invoke('plan_video', {
@@ -266,7 +266,7 @@ export const RepCreationStudio: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setPlan(data.plan); setStep('Plan ready — review or render.');
+      setPlan(data.plan); setStep('Plan ready, review or render.');
       return data.plan as Plan;
     } catch (e: any) {
       toast({ title: 'Plan failed', description: e.message, variant: 'destructive' });
@@ -406,7 +406,7 @@ export const RepCreationStudio: React.FC = () => {
       setVideoUrl(URL.createObjectURL(blob));
       setVideoExt(ext); setProgress(100);
       const mb = (blob.size / 1024 / 1024).toFixed(1);
-      setStep(`Done — ${mb} MB`);
+      setStep(`Done, ${mb} MB`);
       toast({ title: 'Video ready', description: `${mb} MB` });
     } catch (e: any) {
       toast({ title: 'Render failed', description: e.message, variant: 'destructive' });

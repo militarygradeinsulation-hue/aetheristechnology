@@ -141,11 +141,11 @@ const SocialContentView = ({ data, copiedId, setCopiedId }: any) => {
                     {c.lesson && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">Lesson:</span> {c.lesson}</p>}
                     {Array.isArray(c.carouselSlides) && c.carouselSlides.length > 0 && (
                       <details className="mt-2">
-                        <summary className="text-xs text-primary cursor-pointer">Carousel — {c.carouselSlides.length} slides</summary>
+                        <summary className="text-xs text-primary cursor-pointer">Carousel, {c.carouselSlides.length} slides</summary>
                         <div className="mt-2 space-y-1 pl-2 border-l border-border">
                           {c.carouselSlides.map((sl: any, idx: number) => (
                             <div key={idx} className="text-xs">
-                              <p className="font-bold text-foreground">Slide {sl.slideNumber} — {sl.headline}</p>
+                              <p className="font-bold text-foreground">Slide {sl.slideNumber}, {sl.headline}</p>
                               {sl.body && <p className="text-muted-foreground">{sl.body}</p>}
                             </div>
                           ))}
@@ -373,7 +373,7 @@ const FollowUpPlanView = ({ data, copiedId, setCopiedId }: any) => {
           {days.map((s: any, i: number) => {
             const dayNum = s.day || s.dayNumber || i + 1;
             const body = s.template || s.message || s.body || s.script || '';
-            const text = `Day ${dayNum} — ${s.channel || ''} (${s.timing || ''})\n${s.action ? `Action: ${s.action}\n` : ''}${s.subject ? `Subject: ${s.subject}\n` : ''}${body}\n${s.tips ? `\nTips: ${s.tips}` : ''}`;
+            const text = `Day ${dayNum}, ${s.channel || ''} (${s.timing || ''})\n${s.action ? `Action: ${s.action}\n` : ''}${s.subject ? `Subject: ${s.subject}\n` : ''}${body}\n${s.tips ? `\nTips: ${s.tips}` : ''}`;
             return (
               <div key={i} className="relative glass rounded-lg p-4 border border-border">
                 <CopyBtn text={text} id={`fu-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />

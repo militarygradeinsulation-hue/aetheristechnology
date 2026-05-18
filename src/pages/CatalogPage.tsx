@@ -12,7 +12,7 @@ const CatalogPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Premium Tech Suite — Tools, Packages & Monthly Plans | Aetheris"
+        title="Premium Tech Suite, Tools, Packages & Monthly Plans | Aetheris"
         description="Browse the Aetheris Premium Tech Suite: one-time tools, monthly subscriptions, and mix-and-match bundles. Thumbnails, pricing, and instant checkout."
         path="/catalog"
         keywords="aetheris premium tech suite, business tools pricing, monthly subscription, mix and match, sales tools, CRM tools"

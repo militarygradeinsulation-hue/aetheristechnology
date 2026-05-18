@@ -7,7 +7,7 @@ import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Consolidated to 4 high-signal categories — keeps the "no fluff" promise
+// Consolidated to 4 high-signal categories, keeps the "no fluff" promise
 const ISSUE_CATEGORIES = [
   {
     id: 'brand-digital',
@@ -30,7 +30,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'Spending on ads with no measurable ROI',
       'No idea where leads actually come from',
-      'Leads go cold — follow-up is too slow or inconsistent',
+      'Leads go cold, follow-up is too slow or inconsistent',
       'No repeatable sales process',
       'Losing deals to cheaper competitors',
     ],
@@ -43,7 +43,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'CRM is a mess or does not exist',
       'Team is doing busywork instead of revenue work',
-      'Everything is manual — no automation',
+      'Everything is manual, no automation',
       'Data lives in spreadsheets and sticky notes',
       'Cannot track what is actually working',
     ],
@@ -56,7 +56,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'Revenue is stuck and we cannot break through',
       'Leadership is the bottleneck',
-      'Tried everything — nothing moves the needle',
+      'Tried everything, nothing moves the needle',
       'Do not know which problem to solve first',
       'Need a real strategy, not more tactics',
     ],
@@ -175,7 +175,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             Where is your business <span className="text-amber italic">leaking</span>?
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Pick the symptom. We&apos;ll name the leak, quantify the bleed, and prescribe the exact fix — in under 60 seconds.
+            Pick the symptom. We&apos;ll name the leak, quantify the bleed, and prescribe the exact fix, in under 60 seconds.
           </p>
         </div>
 

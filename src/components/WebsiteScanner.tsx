@@ -276,7 +276,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
       if (isPortalSession() || hasValidAdminToken()) {
         saveToolRun({
           tool_type: 'website_scan',
-          title: `${url.trim()} — Website scan — ${new Date().toLocaleDateString()}`,
+          title: `${url.trim()}, Website scan, ${new Date().toLocaleDateString()}`,
           input_data: { url: url.trim() },
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -331,7 +331,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               Scan Your Website for <span className="text-primary">Hidden Gaps</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities — in under 30 seconds.
+              Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities, in under 30 seconds.
             </p>
           </div>
         )}
@@ -500,7 +500,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                     </div>
 
                     <p className="text-xs italic text-muted-foreground text-center max-w-sm">
-                      "I didn't ask for your business. This is free. I find problems. I show the math. If you want them fixed — that's when I go to work."
+                      "I didn't ask for your business. This is free. I find problems. I show the math. If you want them fixed, that's when I go to work."
                     </p>
                   </div>
                 </div>

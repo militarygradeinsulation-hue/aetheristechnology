@@ -16,7 +16,7 @@ const AdminLogin: React.FC = () => {
   const { toast } = useToast();
 
   // SECURITY: Always require a fresh PIN on this page. Never auto-redirect
-  // based on a stored token — that would let anyone who can reach this URL
+  // based on a stored token, that would let anyone who can reach this URL
   // bypass authentication. Also wipe any stale rep/partner session so the
   // login boundary is clean.
   useEffect(() => {

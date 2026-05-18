@@ -143,9 +143,9 @@ export default function SalesCrmPanel() {
                   <tr key={s.id} className="border-b border-border/50">
                     <td className="py-2 px-2 font-mono text-xs">{new Date(s.occurred_at).toLocaleString()}</td>
                     <td>{s.email}</td>
-                    <td className="font-mono text-xs">{s.price_id || s.product_name || "—"}</td>
+                    <td className="font-mono text-xs">{s.price_id || s.product_name || ", "}</td>
                     <td className="text-xs">{s.kind}</td>
-                    <td className="font-mono text-xs">{s.rep_code || "—"}</td>
+                    <td className="font-mono text-xs">{s.rep_code || ", "}</td>
                     <td className="text-right font-mono">{dollars(s.amount_cents)}</td>
                     <td className="text-xs">{s.environment}</td>
                   </tr>
@@ -169,8 +169,8 @@ export default function SalesCrmPanel() {
                 {customers.filter(c=>!q || c.email.includes(q.toLowerCase())).map(c => (
                   <tr key={c.id} className="border-b border-border/50">
                     <td className="py-2 px-2">{c.email}</td>
-                    <td>{c.name || "—"}</td>
-                    <td className="font-mono text-xs">{c.rep_code || "—"}</td>
+                    <td>{c.name || ", "}</td>
+                    <td className="font-mono text-xs">{c.rep_code || ", "}</td>
                     <td className="text-right font-mono">{dollars(c.lifetime_value_cents)}</td>
                     <td className="text-right font-mono">{c.total_purchases}</td>
                     <td className="text-xs">{new Date(c.last_seen_at).toLocaleDateString()}</td>

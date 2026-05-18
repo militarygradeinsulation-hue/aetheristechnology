@@ -76,16 +76,16 @@ export default function AIChecklistPage() {
               The AI Implementation Checklist <span className="text-amber italic">for Operations Managers</span>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              7 forensic sections. 35 checkboxes. Every box you cannot tick is a leak —
+              7 forensic sections. 35 checkboxes. Every box you cannot tick is a leak , 
               and pilots launched on top of unchecked boxes don't fail loudly. They fail
               quietly while the invoice keeps clearing.
             </p>
 
             <ul className="space-y-3 text-sm">
               {[
-                'Pre-flight operational readiness — what to confirm before any tool touches your stack',
+                'Pre-flight operational readiness, what to confirm before any tool touches your stack',
                 'Use-case triage: build vs. buy vs. skip (with a kill-it scoring rubric)',
-                'Data & access hygiene — the audit-log + DPA list ops managers always forget',
+                'Data & access hygiene, the audit-log + DPA list ops managers always forget',
                 '30-day pilot design with pre-defined kill criteria',
                 'Rollout, change management, risk, and ROI measurement',
               ].map((t) => (
@@ -130,7 +130,7 @@ export default function AIChecklistPage() {
                   </div>
                   <div>
                     <Label htmlFor="pain">Biggest operational leak right now</Label>
-                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={(e) => setForm({ ...form, biggest_pain: e.target.value })} placeholder="Optional — we read every one." />
+                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={(e) => setForm({ ...form, biggest_pain: e.target.value })} placeholder="Optional, we read every one." />
                   </div>
                   <Button type="submit" size="lg" disabled={submitting} className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                     {submitting ? 'Generating PDF…' : (<><Download className="w-4 h-4 mr-2" />Download the Checklist</>)}

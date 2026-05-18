@@ -13,7 +13,7 @@ interface Section {
 const SECTIONS: Section[] = [
   {
     title: 'Definition',
-    body: 'A revenue leak is a measurable gap between revenue captured and revenue that should have been captured, attributable to a specific operational, sales, or system failure. Not a forecast. A delta between two observable numbers — leads not contacted in SLA, deals stalled past Day 3, contracts never billed, duplicate CRM records, marketing pipeline that never matched closed-won.',
+    body: 'A revenue leak is a measurable gap between revenue captured and revenue that should have been captured, attributable to a specific operational, sales, or system failure. Not a forecast. A delta between two observable numbers, leads not contacted in SLA, deals stalled past Day 3, contracts never billed, duplicate CRM records, marketing pipeline that never matched closed-won.',
   },
   {
     title: 'Baseline',
@@ -32,8 +32,8 @@ const SECTIONS: Section[] = [
     body: 'Every claim traces to a record export. Deliverables include source CSVs/API pulls, the SQL or pandas queries behind each metric, this methodology doc, and a re-runnable post-implementation script. A controller or external auditor with read-only CRM access can re-derive every number.',
   },
   {
-    title: '21-Day Diagnostic — deliverables',
-    body: 'Written report (15–30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic — runs on a CSV export.',
+    title: '21-Day Diagnostic, deliverables',
+    body: 'Written report (15–30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic, runs on a CSV export.',
   },
 ];
 
@@ -51,7 +51,7 @@ export function generateMethodologyPdf() {
     doc.rect(0, 0, pageW, 3, 'F');
   };
 
-  // Page 1 — Title + first half
+  // Page 1, Title + first half
   paintBg();
 
   doc.setFont('courier', 'bold');

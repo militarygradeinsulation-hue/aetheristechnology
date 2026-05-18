@@ -41,7 +41,7 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
           <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
         </div>
       )}
-      {/* Top bar — case number + status */}
+      {/* Top bar, case number + status */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/40">
         <div className="font-case text-xs tracking-widest text-muted-foreground uppercase">
           CASE FILE #{padded}

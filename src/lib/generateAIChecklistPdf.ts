@@ -19,7 +19,7 @@ const SECTIONS: Section[] = [
     items: [
       'Documented map of every recurring operational workflow (sales, ops, finance, support).',
       'Single source of truth for customer data (CRM, billing, support all reconcile).',
-      'Defined owner per workflow — name, not job title.',
+      'Defined owner per workflow, name, not job title.',
       'Baseline KPIs captured for each process (time-to-close, response time, error rate).',
       'Written list of the top 5 "this is broken and we know it" leaks.',
     ],
@@ -52,9 +52,9 @@ const SECTIONS: Section[] = [
     items: [
       'Pilot scoped to ONE workflow, ONE team, ONE success metric.',
       'Baseline metric captured for 30 days BEFORE the pilot starts.',
-      'Pre-defined kill criteria — what number triggers shutdown.',
+      'Pre-defined kill criteria, what number triggers shutdown.',
       'Human-in-loop checkpoint on every AI output during pilot.',
-      'Weekly written debrief — what worked, what hallucinated, what was slower.',
+      'Weekly written debrief, what worked, what hallucinated, what was slower.',
     ],
   },
   {
@@ -65,7 +65,7 @@ const SECTIONS: Section[] = [
       'Customer-facing copy updated if AI now answers them.',
       'Internal Slack/Teams channel for "AI did something weird" reports.',
       'Quarterly recalibration: retrain prompts, swap models, kill what underperforms.',
-      'Compensation/ops plan adjusted — capacity that AI freed up has a new mission.',
+      'Compensation/ops plan adjusted, capacity that AI freed up has a new mission.',
     ],
   },
   {
@@ -75,13 +75,13 @@ const SECTIONS: Section[] = [
       'Disclosure language reviewed by legal (FTC AI guidance, EU AI Act if EU customers).',
       'Bias test on any AI touching hiring, lending, pricing, or customer eligibility.',
       'Bot/AI clearly labeled to end-users where required by jurisdiction.',
-      'Insurance carrier notified — many policies now require AI use disclosure.',
+      'Insurance carrier notified, many policies now require AI use disclosure.',
       'Vendor exit plan: if the AI vendor disappears tomorrow, what breaks?',
     ],
   },
   {
     title: '7 · Measure What Actually Moved',
-    intro: 'If you cannot tie AI to dollars, you do not have AI — you have a toy.',
+    intro: 'If you cannot tie AI to dollars, you do not have AI, you have a toy.',
     items: [
       'Hours saved × loaded labor cost = hard-dollar savings, calculated monthly.',
       'Conversion lift / response-time lift attributed only after holdout test.',
@@ -147,7 +147,7 @@ export function generateAIChecklistPdf(data: ChecklistPdfData): jsPDF {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(11);
   const intro = pdf.splitTextToSize(
-    'Use this as a forensic pre-flight before any AI rollout. Every checkbox you cannot truthfully tick is a leak. Pilots launched on top of unchecked boxes do not fail loudly — they fail quietly while the invoice keeps clearing.',
+    'Use this as a forensic pre-flight before any AI rollout. Every checkbox you cannot truthfully tick is a leak. Pilots launched on top of unchecked boxes do not fail loudly, they fail quietly while the invoice keeps clearing.',
     W - M * 2,
   );
   pdf.text(intro, M, y);
@@ -208,7 +208,7 @@ export function generateAIChecklistPdf(data: ChecklistPdfData): jsPDF {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   pdf.setTextColor(...PAPER);
-  pdf.text('Forensic Diagnostic — $2,500 flat, applied 1:1 toward any engagement.', M + 16, y + 44);
+  pdf.text('Forensic Diagnostic, $2,500 flat, applied 1:1 toward any engagement.', M + 16, y + 44);
   pdf.text('aetheris.technology  ·  hello@aetheris.technology  ·  (317) 376-2110', M + 16, y + 60);
 
   // Watermark

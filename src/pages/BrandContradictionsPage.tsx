@@ -12,7 +12,7 @@ const BrandContradictionsPage = () => {
   const staffUnlock = useStaffUnlock();
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Brand Contradiction Finder | Aetheris AI" description="Buyers feel contradiction before they can explain it. Find where trust in your brand is quietly weakening — free preview." path="/brand-contradictions" />
+      <SEOHead title="Brand Contradiction Finder | Aetheris AI" description="Buyers feel contradiction before they can explain it. Find where trust in your brand is quietly weakening, free preview." path="/brand-contradictions" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />

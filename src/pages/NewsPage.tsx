@@ -198,8 +198,8 @@ const NewsPage = () => {
     <div className="relative min-h-screen bg-background">
       <Background />
       <SEOHead
-        title="Aetheris News — Live AI & Industry Intelligence Feed"
-        description="Live AI, business, marketing, security, and industry news — aggregated from the world's top sources. Stay ahead of what's actually moving."
+        title="Aetheris News, Live AI & Industry Intelligence Feed"
+        description="Live AI, business, marketing, security, and industry news, aggregated from the world's top sources. Stay ahead of what's actually moving."
         path="/news"
         type="website"
         jsonLd={{ "@context": "https://schema.org", "@type": "CollectionPage", name: "Aetheris News", url: "https://aetheris.technology/news" }}
@@ -215,7 +215,7 @@ const NewsPage = () => {
                 <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Aetheris News · Live Wire</span>
               </div>
               <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">The intelligence feed.</h1>
-              <p className="text-muted-foreground mt-3 max-w-2xl text-lg">Live AI and industry news from the sources that matter — aggregated, deduped, and refreshed automatically.</p>
+              <p className="text-muted-foreground mt-3 max-w-2xl text-lg">Live AI and industry news from the sources that matter, aggregated, deduped, and refreshed automatically.</p>
               {lastRefresh && (
                 <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mt-2">
                   Last refresh · {formatDistanceToNow(new Date(lastRefresh), { addSuffix: true })}
@@ -354,7 +354,7 @@ const NewsPage = () => {
                 {/* Operator-led upgrade */}
                 <div className="border border-border rounded-xl bg-card/30 p-5">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Operator-led</div>
-                  <div className="font-display text-lg font-semibold text-foreground leading-tight">Forensic Diagnostic — $2,500 flat</div>
+                  <div className="font-display text-lg font-semibold text-foreground leading-tight">Forensic Diagnostic, $2,500 flat</div>
                   <p className="text-sm text-muted-foreground mt-2">A live, operator-led teardown of your funnel, ops, and tech stack. The full $2,500 applies toward any engagement.</p>
                   <button onClick={() => setIsContactModalOpen(true)} className="mt-3 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
                     Book the diagnostic <ArrowRight className="w-3.5 h-3.5" />
@@ -507,7 +507,7 @@ const NewsPage = () => {
                 <div className="lg:col-span-2 border border-border rounded-xl bg-card/30 p-7">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">How to read the wire</div>
                   <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground leading-tight">Most operators read the news wrong.</h2>
-                  <p className="text-muted-foreground mt-3 leading-relaxed">News is a leak detector, not a horoscope. Every headline is a signal that something in the market just shifted — pricing power, attention, regulation, tooling. The question isn't "is this cool?" — it's <span className="text-foreground">"does this widen or narrow my leaks this week?"</span></p>
+                  <p className="text-muted-foreground mt-3 leading-relaxed">News is a leak detector, not a horoscope. Every headline is a signal that something in the market just shifted, pricing power, attention, regulation, tooling. The question isn't "is this cool?", it's <span className="text-foreground">"does this widen or narrow my leaks this week?"</span></p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                     {[
                       { n: "01", t: "Filter to your stack", d: "Ignore anything that doesn't touch your funnel, ops, retention, or cash." },
@@ -548,9 +548,9 @@ const NewsPage = () => {
                     {[
                       { q: "How often does the wire refresh?", a: "Every 30 minutes. Dedupe is automatic across 21 sources, so you don't read the same headline three times." },
                       { q: "Why are some thumbnails generic?", a: "A few sources block scrapers (OpenAI, BleepingComputer, etc.). We fall back to category-relevant imagery so the grid stays clean." },
-                      { q: "What's the Aetheris Take?", a: "An operator POV on each story — what it means for funnel, ops, retention, and where the leverage points are. Not a summary, an angle." },
-                      { q: "Can I get this as a weekly digest?", a: "Yes. Run the Leak Audit and you're auto-subscribed to the operator dispatch — one email, no fluff, unsubscribe anytime." },
-                      { q: "Do you cover my industry?", a: "If it's healthcare, manufacturing, construction, logistics, finance, SaaS, or services — yes. Use the category filter at the top of the wire." },
+                      { q: "What's the Aetheris Take?", a: "An operator POV on each story, what it means for funnel, ops, retention, and where the leverage points are. Not a summary, an angle." },
+                      { q: "Can I get this as a weekly digest?", a: "Yes. Run the Leak Audit and you're auto-subscribed to the operator dispatch, one email, no fluff, unsubscribe anytime." },
+                      { q: "Do you cover my industry?", a: "If it's healthcare, manufacturing, construction, logistics, finance, SaaS, or services, yes. Use the category filter at the top of the wire." },
                     ].map((f) => (
                       <details key={f.q} className="group border border-border rounded-lg bg-card/30 p-4 hover:border-amber/40 transition">
                         <summary className="cursor-pointer flex items-center justify-between gap-4 list-none">

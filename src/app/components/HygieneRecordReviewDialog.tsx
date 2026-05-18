@@ -228,7 +228,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Review &amp; approve — {action.recommended_action?.label}</DialogTitle>
+          <DialogTitle>Review &amp; approve, {action.recommended_action?.label}</DialogTitle>
           <DialogDescription>
             Inspect each proposed change. Uncheck rows you want to skip; edit values inline. Only checked rows will be sent to HubSpot.
           </DialogDescription>

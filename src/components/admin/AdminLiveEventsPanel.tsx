@@ -305,7 +305,7 @@ export const AdminLiveEventsPanel: React.FC = () => {
                 </div>
               </div>
               <div>
-                <Label>External Signup URL (optional — uses built-in form if blank)</Label>
+                <Label>External Signup URL (optional, uses built-in form if blank)</Label>
                 <Input value={editing.signup_url || ''} onChange={(e) => setEditing({ ...editing, signup_url: e.target.value })} placeholder="https://..." />
               </div>
               <label className="flex items-center gap-2 text-sm">
@@ -327,7 +327,7 @@ export const AdminLiveEventsPanel: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-forensic text-xl font-bold text-foreground">Signups</h3>
-                <p className="text-sm text-muted-foreground">{signupsFor.title} — {signups.length} total</p>
+                <p className="text-sm text-muted-foreground">{signupsFor.title}, {signups.length} total</p>
               </div>
               <Button size="sm" variant="ghost" onClick={() => setSignupsFor(null)}><X className="w-4 h-4" /></Button>
             </div>

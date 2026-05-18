@@ -63,7 +63,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
   }, [reps]);
 
   const onAssignTeam = async (rep: RepCodeRow, teamName: string) => {
-    // Optimistic update — no full reload, no "Loading…" flash
+    // Optimistic update, no full reload, no "Loading…" flash
     setReps(prev => prev.map(r => r.id === rep.id ? ({ ...r, team_name: teamName } as any) : r));
     try {
       await setRepTeam(rep.id, teamName);
@@ -144,7 +144,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="w-4 h-4 text-amber" /> Hired Roster — by Team
+            <Users className="w-4 h-4 text-amber" /> Hired Roster, by Team
             <Badge variant="outline" className="ml-2 text-[10px] uppercase">{reps.length} active</Badge>
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
@@ -171,7 +171,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
                       <div key={r.id} className="flex items-center justify-between gap-2 rounded border border-border/40 bg-background/60 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-medium truncate">{r.rep_name}</div>
-                          <div className="text-[11px] text-muted-foreground font-mono truncate">{r.rep_email || "—"} • code ••••{r.code.slice(-2)}</div>
+                          <div className="text-[11px] text-muted-foreground font-mono truncate">{r.rep_email || ", "} • code ••••{r.code.slice(-2)}</div>
                         </div>
                         <select
                           className="h-8 rounded-md border border-input bg-background px-2 text-xs"
@@ -218,7 +218,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
           <div className="rounded-md border border-dashed border-amber/40 p-3 bg-amber/5">
             <div className="text-xs uppercase tracking-wide text-amber mb-2 font-mono">+ New Team</div>
             <div className="grid md:grid-cols-4 gap-2">
-              <Input placeholder="Name (e.g. Team 3 — SDRs)" value={newTeam.name} onChange={e => setNewTeam(s => ({ ...s, name: e.target.value }))} />
+              <Input placeholder="Name (e.g. Team 3, SDRs)" value={newTeam.name} onChange={e => setNewTeam(s => ({ ...s, name: e.target.value }))} />
               <Input placeholder="Experience band (e.g. 0–3mo)" value={newTeam.experience_band} onChange={e => setNewTeam(s => ({ ...s, experience_band: e.target.value }))} />
               <Input className="md:col-span-2" placeholder="Description" value={newTeam.description} onChange={e => setNewTeam(s => ({ ...s, description: e.target.value }))} />
             </div>
@@ -233,7 +233,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
       <Card className="bg-card/60 border-border/60">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarPlus className="w-4 h-4 text-amber" /> Engagement Schedules — per Team
+            <CalendarPlus className="w-4 h-4 text-amber" /> Engagement Schedules, per Team
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
             How often you and Braden meet with each team. Items toggled to "calendar" mirror into the Company Calendar.

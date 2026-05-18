@@ -117,8 +117,8 @@ export const CompanyPortalPreview: React.FC = () => {
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-amber" />
           <div>
-            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Company Portal — Live Preview</h2>
-            <p className="text-xs text-muted-foreground">View any rep's real portal — leads, commissions, calendar, training. Changes are live.</p>
+            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Company Portal, Live Preview</h2>
+            <p className="text-xs text-muted-foreground">View any rep's real portal, leads, commissions, calendar, training. Changes are live.</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +185,7 @@ export const CompanyPortalPreview: React.FC = () => {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Pick a specific <span className="text-amber">rep or partner</span> to load their actual portal — assigned leads, notes, calendar, commissions, training. Generic views show the empty experience. Anything you change here writes to the live database.
+        Pick a specific <span className="text-amber">rep or partner</span> to load their actual portal, assigned leads, notes, calendar, commissions, training. Generic views show the empty experience. Anything you change here writes to the live database.
       </p>
     </div>
   );

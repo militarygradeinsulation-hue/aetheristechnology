@@ -17,7 +17,7 @@ const SalesCompassPage = () => {
         ]}
         faqs={[
           { question: 'What is the AI Sales Compass?', answer: 'A free Aetheris AI tool that produces sales strategy, workflow automation recommendations, and AI agent playbooks tailored to your sales motion.' },
-          { question: 'How does AI improve B2B sales?', answer: 'AI compresses prospecting and follow-up via lead-scoring agents, auto-personalized outbound, conversational qualification, and CRM hygiene automation — letting reps spend more time closing.' },
+          { question: 'How does AI improve B2B sales?', answer: 'AI compresses prospecting and follow-up via lead-scoring agents, auto-personalized outbound, conversational qualification, and CRM hygiene automation, letting reps spend more time closing.' },
           { question: 'Is the Sales Compass really free?', answer: 'Yes. No login, no credit card. For full sales operations rebuilds we offer Rapid Evaluation ($750), 14-Day Diagnostic ($7,500), or Custom Implementation ($25,000+).' },
         ]}
       />

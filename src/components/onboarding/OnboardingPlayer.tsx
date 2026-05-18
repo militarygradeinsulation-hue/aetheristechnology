@@ -70,7 +70,7 @@ export const OnboardingPlayer: React.FC<Props> = ({ module, onClose, trackProgre
   const next = () => {
     if (idx < slides.length - 1) setIdx(idx + 1);
     else {
-      // finished — flush completion
+      // finished, flush completion
       if (trackProgress) void updateProgress(module.slug, total, true);
     }
   };

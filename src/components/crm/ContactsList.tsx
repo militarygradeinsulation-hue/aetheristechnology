@@ -37,13 +37,13 @@ export const ContactsList: React.FC<Props> = ({ dataset, onOpen }) => {
                 <div className="font-semibold text-foreground">{c.full_name}</div>
                 {c.source && <div className="text-[10px] text-muted-foreground mt-0.5">via {c.source}</div>}
               </td>
-              <td className="px-4 py-3 hidden md:table-cell text-muted-foreground">{c.title || "—"}</td>
+              <td className="px-4 py-3 hidden md:table-cell text-muted-foreground">{c.title || ", "}</td>
               <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">
                 {c.company_id && companyMap[c.company_id] ? (
                   <span className="inline-flex items-center gap-1">
                     <Building2 className="w-3 h-3" /> {companyMap[c.company_id]}
                   </span>
-                ) : "—"}
+                ) : ", "}
               </td>
               <td className="px-4 py-3 hidden md:table-cell text-muted-foreground">
                 <div className="flex flex-col gap-0.5 text-xs">

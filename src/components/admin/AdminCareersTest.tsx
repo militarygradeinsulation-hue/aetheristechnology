@@ -41,7 +41,7 @@ export const AdminCareersTest: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-display flex items-center gap-2"><Search className="w-5 h-5 text-amber" /> Careers Test — Review by Code</CardTitle>
+        <CardTitle className="font-display flex items-center gap-2"><Search className="w-5 h-5 text-amber" /> Careers Test, Review by Code</CardTitle>
         <p className="text-sm text-muted-foreground">Enter the 6-character share code the candidate gave you.</p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,9 +93,9 @@ export const AdminCareersTest: React.FC = () => {
                       <p className="font-mono text-[10px] text-muted-foreground">Q{i + 1} {correct ? '✓' : '✗'}</p>
                       <p className="font-medium">{q.question}</p>
                       <p className="text-muted-foreground mt-1">
-                        Picked: <span className={correct ? 'text-green-400' : 'text-destructive'}>{ans ? `${ans.toUpperCase()} — ${q.choices.find((c: any) => c.id === ans)?.text || '(invalid)'}` : '(skipped)'}</span>
+                        Picked: <span className={correct ? 'text-green-400' : 'text-destructive'}>{ans ? `${ans.toUpperCase()}, ${q.choices.find((c: any) => c.id === ans)?.text || '(invalid)'}` : '(skipped)'}</span>
                       </p>
-                      {!correct && <p className="text-green-400/80 mt-0.5">Correct: {q.correct_choice_id.toUpperCase()} — {q.choices.find((c: any) => c.id === q.correct_choice_id)?.text}</p>}
+                      {!correct && <p className="text-green-400/80 mt-0.5">Correct: {q.correct_choice_id.toUpperCase()}, {q.choices.find((c: any) => c.id === q.correct_choice_id)?.text}</p>}
                     </div>
                   );
                 })}

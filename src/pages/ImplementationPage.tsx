@@ -21,7 +21,7 @@ const ImplementationPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Implementation Retainer — $15K/mo | Aetheris"
+        title="Implementation Retainer, $15K/mo | Aetheris"
         description="Operator-led execution of the prioritized fixes from your Revenue Diagnostic. $15K/month, 3-month minimum, Diagnostic clients only."
         path="/implementation"
         keywords="revenue operations retainer, fractional CRM implementation, manufacturing sales operations"
@@ -40,7 +40,7 @@ const ImplementationPage: React.FC = () => {
                 Implementation Retainer.
               </h1>
               <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We execute the prioritized fixes from your Diagnostic ourselves — CRM, sales process, follow-up cadences — and re-measure recovery monthly.
+                We execute the prioritized fixes from your Diagnostic ourselves, CRM, sales process, follow-up cadences, and re-measure recovery monthly.
               </p>
             </div>
 
@@ -69,7 +69,7 @@ const ImplementationPage: React.FC = () => {
 
             <section className="forensic-tile rounded-sm border border-border/60 p-6">
               <p className="text-foreground/80">
-                Implementation is only available after the Diagnostic. We will not take a retainer without first running the 21 days — that's how we keep our scope honest and our recovery numbers verifiable.
+                Implementation is only available after the Diagnostic. We will not take a retainer without first running the 21 days, that's how we keep our scope honest and our recovery numbers verifiable.
               </p>
               <div className="mt-4">
                 <Link to="/diagnostic" className="text-amber font-semibold hover:underline">

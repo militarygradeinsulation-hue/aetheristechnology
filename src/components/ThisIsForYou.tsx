@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 const signals = [
   { Icon: Moon, text: "You wake up at 3am running the same revenue math in your head." },
   { Icon: Phone, text: "Your phone doesn't stop. None of the calls are actually moving the business forward." },
-  { Icon: FileWarning, text: "You can feel money leaking somewhere — you just can't point at the hole." },
+  { Icon: FileWarning, text: "You can feel money leaking somewhere, you just can't point at the hole." },
   { Icon: Repeat, text: "You've tried coaches, agencies, AI gurus, courses. Nothing actually changed the numbers." },
   { Icon: Search, text: "You've stared at the CRM, the P&L, the pipeline. From the inside, it all looks 'fine.'" },
   { Icon: AlertTriangle, text: "You're the bottleneck. Nothing important closes without you, and you're cooked." },

@@ -8,7 +8,7 @@ const MarketingStrategistPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
         title="Free AI Marketing Strategist | Aetheris AI"
-        description="AI marketing automation and conversational AI strategy. Free tool — no login. Indianapolis-based AI consulting."
+        description="AI marketing automation and conversational AI strategy. Free tool, no login. Indianapolis-based AI consulting."
         path="/marketing-strategist"
         keywords="AI marketing automation, conversational AI, AI marketing strategist, marketing workflow automation, AI for marketing, performance optimization, AI consultant Indianapolis"
         breadcrumbs={[
@@ -16,9 +16,9 @@ const MarketingStrategistPage = () => {
           { name: 'Marketing Strategist', path: '/marketing-strategist' },
         ]}
         faqs={[
-          { question: 'What is the AI Marketing Strategist?', answer: 'A free AI tool from Aetheris AI that generates marketing automation and conversational AI strategy tailored to your business — no login required.' },
-          { question: 'Can AI really build my marketing strategy?', answer: 'AI can produce a strong first-draft strategy in minutes — channel mix, messaging, automation, content calendar. For execution and ongoing optimization, our team can implement it end-to-end.' },
-          { question: 'What is conversational AI for marketing?', answer: 'Conversational AI uses LLMs to power chatbots, voice agents, and inbound triage that qualify leads, answer questions, and book meetings 24/7 — replacing manual SDR work.' },
+          { question: 'What is the AI Marketing Strategist?', answer: 'A free AI tool from Aetheris AI that generates marketing automation and conversational AI strategy tailored to your business, no login required.' },
+          { question: 'Can AI really build my marketing strategy?', answer: 'AI can produce a strong first-draft strategy in minutes, channel mix, messaging, automation, content calendar. For execution and ongoing optimization, our team can implement it end-to-end.' },
+          { question: 'What is conversational AI for marketing?', answer: 'Conversational AI uses LLMs to power chatbots, voice agents, and inbound triage that qualify leads, answer questions, and book meetings 24/7, replacing manual SDR work.' },
         ]}
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">

@@ -5,12 +5,12 @@ import { ComparisonChart } from './ComparisonChart';
 
 export const WhyUs: React.FC = () => {
   const benefits = [
-    'Operator-led — never an account manager, never a junior',
-    'Diagnosis before prescription — every leak named and quantified in dollars',
-    'The Leak Audit™ — a named, repeatable 7-step forensic methodology',
-    'Psychology + Marine + 20yr operator stack — behavioral leaks, not just tech leaks',
-    'Sealed case files — every engagement closes with verifiable, dollar-tied outcomes',
-    'No retainer ransom — flat-fee Forensic Diagnostic, applied toward engagement',
+    'Operator-led, never an account manager, never a junior',
+    'Diagnosis before prescription, every leak named and quantified in dollars',
+    'The Leak Audit™, a named, repeatable 7-step forensic methodology',
+    'Psychology + Marine + 20yr operator stack, behavioral leaks, not just tech leaks',
+    'Sealed case files, every engagement closes with verifiable, dollar-tied outcomes',
+    'No retainer ransom, flat-fee Forensic Diagnostic, applied toward engagement',
   ];
 
   return (
@@ -25,7 +25,7 @@ export const WhyUs: React.FC = () => {
               Most consultants sell the prescription. <span className="text-crimson">We do the autopsy first.</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              You can't fix what you can't see — and you can't see it from inside the building.
+              You can't fix what you can't see, and you can't see it from inside the building.
             </p>
           </div>
         </RevealOnScroll>
@@ -50,7 +50,7 @@ export const WhyUs: React.FC = () => {
 
               <p className="text-muted-foreground pt-6">
                 Generic AI consultants ship generic deployments. We name the wound, quantify the bleed, 
-                then close it with the right mix of AI agents, automation, CRM, and human process redesign — 
+                then close it with the right mix of AI agents, automation, CRM, and human process redesign, 
                 in that order.
               </p>
             </div>

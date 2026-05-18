@@ -13,7 +13,7 @@ const SERVICE_OPTIONS = [
   'CRM systems audit',
   'Operational diagnostic',
   'Strategic Discovery Audit ($500)',
-  "Not sure yet — let's talk",
+  "Not sure yet, let's talk",
 ];
 
 export const ContactForm: React.FC = () => {
@@ -150,7 +150,7 @@ export const ContactForm: React.FC = () => {
           </select>
           {isAnalyticsPackage && (
             <div className="mt-3 rounded-lg border border-amber/25 bg-amber/[0.04] p-4">
-              <p className="text-sm font-semibold text-amber mb-2">Strategic Discovery Audit — $500</p>
+              <p className="text-sm font-semibold text-amber mb-2">Strategic Discovery Audit, $500</p>
               <p className="text-sm text-muted-foreground mb-2">A foundational diagnostic engagement. We map your full digital footprint, marketing spend, and CRM operations to surface where revenue is leaking before any custom work begins.</p>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
                 <li>Website &amp; social presence analysis</li>
@@ -168,7 +168,7 @@ export const ContactForm: React.FC = () => {
               name="message"
               value={form.message}
               onChange={handleChange}
-              placeholder="Tell us what's not working in your business — the more detail, the sharper our response."
+              placeholder="Tell us what's not working in your business, the more detail, the sharper our response."
               required
               maxLength={2000}
               rows={5}
@@ -177,7 +177,7 @@ export const ContactForm: React.FC = () => {
           </div>
           <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
             <Send className="w-5 h-5 mr-2" />
-            {loading ? 'Sending...' : 'Send It — No Strings Attached'}
+            {loading ? 'Sending...' : 'Send It, No Strings Attached'}
           </Button>
         </form>
       </div>

@@ -89,7 +89,7 @@ export const PortalDocuments: React.FC = () => {
       <Card className="border-amber/40 bg-amber/5">
         <CardHeader className="pb-2">
           <CardTitle className="font-display flex items-center gap-2 text-base">
-            <ShieldCheck className="w-4 h-4 text-amber" /> Joseph Toney — Operator Credentials
+            <ShieldCheck className="w-4 h-4 text-amber" /> Joseph Toney, Operator Credentials
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1 font-mono uppercase tracking-wider">
             Reference · Send to prospects who ask "who are you?"

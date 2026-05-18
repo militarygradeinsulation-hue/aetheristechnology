@@ -102,7 +102,7 @@ export const CEOProfile: React.FC = () => {
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   With 20 years of proven experience building high-impact systems that fuel growth,
-                  Joseph Toney leads the Aetheris AI team — a Marine Corps veteran turned AI strategist
+                  Joseph Toney leads the Aetheris AI team, a Marine Corps veteran turned AI strategist
                   who personally architects the solutions our clients deploy.
                 </p>
 
@@ -116,7 +116,7 @@ export const CEOProfile: React.FC = () => {
 
                 <div className="glass p-6 rounded-xl mt-6">
                   <p className="italic text-foreground">
-                    "We don't just lead teams — we build the systems ourselves: coded, tested, deployed.
+                    "We don't just lead teams, we build the systems ourselves: coded, tested, deployed.
                     Whether the client is an aerospace contractor or a regional SMB, we deliver results
                     leaders can measure."
                   </p>

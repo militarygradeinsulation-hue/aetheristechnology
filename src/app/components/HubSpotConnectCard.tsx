@@ -56,7 +56,7 @@ export const HubSpotConnectCard = () => {
         // HubSpot blocks loading inside iframes (preview). Always break out to a new top-level tab.
         const win = window.open(data.authorizeUrl, "_blank", "noopener,noreferrer");
         if (!win) {
-          // Popup blocked — fall back to top-level navigation (escape iframe if possible)
+          // Popup blocked, fall back to top-level navigation (escape iframe if possible)
           try {
             if (window.top && window.top !== window.self) {
               (window.top as Window).location.href = data.authorizeUrl;

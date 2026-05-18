@@ -166,7 +166,7 @@ const AppReportDetail = () => {
       {/* Appendix */}
       {remaining.length > 0 && (
         <>
-          <h2 className="text-xl font-semibold mb-4">Appendix — additional findings</h2>
+          <h2 className="text-xl font-semibold mb-4">Appendix, additional findings</h2>
           <div className="space-y-3">
             {remaining.map((f, i) => (
               <details key={f.key} className="bg-card border border-border rounded-lg p-4">

@@ -2,9 +2,9 @@
 // Prices in cents to avoid float math.
 //
 // TIERED COMMISSION MODEL (replaces the old flat 70/15/15 split).
-// Tier 1 — Entry ($29–$59):   Company 50% · Rep 30% · Partner 20%
-// Tier 2 — Mid   ($79–$349):  Company 60% · Rep 25% · Partner 15%
-// Tier 3 — High  ($599+):     Company 70% · Rep 20% · Partner 10%
+// Tier 1, Entry ($29–$59):   Company 50% · Rep 30% · Partner 20%
+// Tier 2, Mid   ($79–$349):  Company 60% · Rep 25% · Partner 15%
+// Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
 
 export type CommissionTier = 1 | 2 | 3;
 
@@ -35,9 +35,9 @@ export interface RepProduct {
 }
 
 export const REP_PRODUCTS: RepProduct[] = [
-  // Leak Audit — paid CRM scan
+  // Leak Audit, paid CRM scan
   { name: 'Leak Audit (CRM Scan)', priceCents: 250000, tier: 3, highlight: true },
-  // Tier 1 — Entry ($29–$59)
+  // Tier 1, Entry ($29–$59)
   { name: 'Playbook Unlock', priceCents: 2900, tier: 1 },
   { name: 'Social Content Pack', priceCents: 3900, tier: 1 },
   { name: 'Content Calendar', priceCents: 3900, tier: 1 },
@@ -45,7 +45,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: 'Follow-Up Plan', priceCents: 5900, tier: 1 },
   { name: 'Full Website Report', priceCents: 5900, tier: 1 },
   { name: 'CRM Health Check', priceCents: 7900, tier: 1 },
-  // Tier 2 — Mid ($79–$349)
+  // Tier 2, Mid ($79–$349)
   { name: 'Friction Vocabulary Audit', priceCents: 7900, tier: 2 },
   { name: 'Lead Flow Mapper', priceCents: 9900, tier: 2 },
   { name: 'Strategic Question Engine', priceCents: 9900, tier: 2 },
@@ -60,7 +60,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: 'Strategy Blueprint', priceCents: 34900, tier: 2 },
   { name: 'CRM Setup & Optimization', priceCents: 39900, tier: 2 },
   { name: 'Sales Coaching Retainer', priceCents: 49900, tier: 2, recurring: true },
-  // Tier 3 — High-Ticket ($599+)
+  // Tier 3, High-Ticket ($599+)
   { name: 'Website Evaluation', priceCents: 59900, tier: 3 },
   { name: 'Strategic Discovery Audit', priceCents: 59900, tier: 3 },
   { name: '30-Day Lead Gen Sprint', priceCents: 99900, tier: 3, highlight: true },

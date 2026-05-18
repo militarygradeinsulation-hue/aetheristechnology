@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const STYLE_OPTIONS = [
-  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay — anything goes' },
+  { key: 'free',              label: 'Free Prompt',       desc: 'No brand overlay, anything goes' },
   { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction bars · crimson signature' },
   { key: 'autopsy_diagram',   label: 'Autopsy Diagram',   desc: 'Anatomical chart of a broken process' },
   { key: 'blueprint',         label: 'Blueprint',         desc: 'CRM pipeline schematic with breach callout' },
@@ -140,7 +140,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
             rows={3}
-            placeholder="Describe the image you want — anything goes."
+            placeholder="Describe the image you want, anything goes."
             className="text-sm"
           />
         </div>

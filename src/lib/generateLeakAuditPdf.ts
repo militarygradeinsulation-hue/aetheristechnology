@@ -47,7 +47,7 @@ export function generateLeakAuditPdf(data: LeakAuditPdfData) {
   const margin = 18;
   const contentW = pageW - margin * 2;
 
-  // ============== COVER — CASE FILE ==============
+  // ============== COVER, CASE FILE ==============
   doc.setFillColor(...INK);
   doc.rect(0, 0, pageW, pageH, 'F');
 
@@ -210,7 +210,7 @@ export function generateLeakAuditPdf(data: LeakAuditPdfData) {
   doc.setFontSize(11);
   doc.setTextColor(200, 195, 180);
   const ctaCopy = doc.splitTextToSize(
-    'The Leak Audit is a self-reported scan. The Forensic Diagnostic is the operator-led investigation — 14 days inside your operation, mapping every system, channel, and handoff. We name every leak, quantify the exact dollar bleed, and hand you a sealed remediation plan.',
+    'The Leak Audit is a self-reported scan. The Forensic Diagnostic is the operator-led investigation, 14 days inside your operation, mapping every system, channel, and handoff. We name every leak, quantify the exact dollar bleed, and hand you a sealed remediation plan.',
     contentW
   );
   doc.text(ctaCopy, margin, 92);

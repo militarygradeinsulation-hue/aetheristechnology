@@ -34,7 +34,7 @@ interface SEOHeadProps {
 const SITE_URL = 'https://aetheris.technology';
 const SITE_NAME = 'Aetheris AI';
 const OG_IMAGE = `${SITE_URL}/aetheris-logo.png`;
-const DEFAULT_IMAGE_ALT = 'Aetheris AI — Indianapolis AI Consulting & Automation';
+const DEFAULT_IMAGE_ALT = 'Aetheris AI, Indianapolis AI Consulting & Automation';
 
 const MAX_TITLE = 60;
 const MAX_DESC = 155;

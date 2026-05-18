@@ -19,7 +19,7 @@ type Question = { id: string; question: string; choices: Choice[] };
 type Phase = 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
 
 const STUDY_LINKS = [
-  { href: '/', label: 'Home — positioning & hook' },
+  { href: '/', label: 'Home, positioning & hook' },
   { href: '/leak-audit', label: 'The Leak Audit (free self-scan)' },
   { href: '/services', label: 'Services & pricing ladder' },
   { href: '/careers', label: 'Careers (commission structure)' },
@@ -88,7 +88,7 @@ const CareersTestPage = () => {
   };
 
   // Finalize the already-submitted application (resume + notes) once the
-  // applicant passes the test. The user filled this out BEFORE the test —
+  // applicant passes the test. The user filled this out BEFORE the test , 
   // we just persist it now that the gate is cleared.
   const finalizeApplicationAfterPass = async (shareCode: string) => {
     if (!resumeFile) return;
@@ -143,7 +143,7 @@ const CareersTestPage = () => {
 
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Careers Test — Aetheris AI" description="Take the 20-question knowledge test to apply as a sales rep." path="/careers/test" />
+      <SEOHead title="Careers Test, Aetheris AI" description="Take the 20-question knowledge test to apply as a sales rep." path="/careers/test" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
@@ -154,7 +154,7 @@ const CareersTestPage = () => {
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Two steps. <strong>1)</strong> Submit your full application (resume + 150-word pitch). <strong>2)</strong> Take a 25-question multiple-choice test pulled from a 60-question bank — score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong> Your application is only filed if you pass — random apps go in the trash.
+                  Two steps. <strong>1)</strong> Submit your full application (resume + 150-word pitch). <strong>2)</strong> Take a 25-question multiple-choice test pulled from a 60-question bank, score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong> Your application is only filed if you pass, random apps go in the trash.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -177,7 +177,7 @@ const CareersTestPage = () => {
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
                   <li>Topics: positioning, Leak Audit, pricing ($149 Snapshot · $599 Eval · $2,500 Forensic Diagnostic · Fractional retainers), commission (15% flat, recurring for life), sales process, brand rules.</li>
                   <li>Questions are randomized. No back-tracking once submitted.</li>
-                  <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code — it's how I review you.</li>
+                  <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code, it's how I review you.</li>
                 </ul>
                 <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start my application →</Button>
               </CardContent>
@@ -186,7 +186,7 @@ const CareersTestPage = () => {
 
           {phase === 'identify' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardHeader><CardTitle className="font-display text-2xl">Step 1 of 2 — Who are you?</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="font-display text-2xl">Step 1 of 2, Who are you?</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div><Label>Full name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={100} /></div>
@@ -215,10 +215,10 @@ const CareersTestPage = () => {
           {phase === 'apply' && (
             <Card className="bg-card/60 backdrop-blur border-amber/40">
               <CardHeader>
-                <CardTitle className="font-display text-2xl">Step 2 of 2 — Submit your application</CardTitle>
+                <CardTitle className="font-display text-2xl">Step 2 of 2, Submit your application</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
                   Upload your resume and write your 150-word pitch. Once you submit, the <strong>50-minute test</strong> unlocks.
-                  Your application is only stored if you pass — fail and you can retry the test.
+                  Your application is only stored if you pass, fail and you can retry the test.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -228,7 +228,7 @@ const CareersTestPage = () => {
                   {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words — original writing only, paste disabled)</span></Label>
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words, original writing only, paste disabled)</span></Label>
                   <Textarea
                     rows={8}
                     maxLength={4000}
@@ -239,7 +239,7 @@ const CareersTestPage = () => {
                     onContextMenu={e => e.preventDefault()}
                     autoComplete="off"
                     spellCheck={true}
-                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected."
+                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific, generic answers get rejected."
                   />
                   <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
                     {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
@@ -315,7 +315,7 @@ const CareersTestPage = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 80%.</p>
-                <p className="text-sm text-muted-foreground">You can try again — up to 5 attempts per day. Re-read the site first; the questions test what's actually on it.</p>
+                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it.</p>
                 <Button variant="outline" onClick={() => { setPhase('intro'); setResult(null); setAnswers({}); setNotes(''); }}>Go back to intro</Button>
               </CardContent>
             </Card>
@@ -335,7 +335,7 @@ const CareersTestPage = () => {
             <Card className="bg-card/60 backdrop-blur border-border/50">
               <CardContent className="p-8 text-center space-y-3">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
-                <h2 className="font-display text-2xl">Application submitted — you passed ({result.score_pct}%)</h2>
+                <h2 className="font-display text-2xl">Application submitted, you passed ({result.score_pct}%)</h2>
                 <p className="text-muted-foreground">I'll review your application and reach out if it's a fit.</p>
                 <div className="rounded-lg border border-amber bg-amber/10 p-4 inline-flex items-center gap-3">
                   <span className="text-2xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
@@ -343,7 +343,7 @@ const CareersTestPage = () => {
                     <Copy className="w-3 h-3 mr-1" /> Copy
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">Save this code — it's how I'll pull up your application.</p>
+                <p className="text-xs text-muted-foreground">Save this code, it's how I'll pull up your application.</p>
               </CardContent>
             </Card>
           )}

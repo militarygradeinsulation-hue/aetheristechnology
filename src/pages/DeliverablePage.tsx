@@ -80,7 +80,7 @@ export default function DeliverablePage() {
       }));
       toast.success("Auto-filled from your website. Review and add the rest.");
     } catch (e: any) {
-      toast.error(e.message || "Couldn't read your site — fill manually.");
+      toast.error(e.message || "Couldn't read your site, fill manually.");
     } finally {
       setAutofilling(false);
     }
@@ -96,7 +96,7 @@ export default function DeliverablePage() {
         body: JSON.stringify({ intake: form }),
       });
       if (!r.ok) throw new Error((await r.json()).error || "Submit failed");
-      toast.success("Submitted — building your deliverable now.");
+      toast.success("Submitted, building your deliverable now.");
       await fetchData();
     } catch (e: any) {
       toast.error(e.message);
@@ -155,7 +155,7 @@ export default function DeliverablePage() {
           <Card className="p-6 md:p-8">
             <h2 className="text-xl font-semibold mb-2">Quick intake</h2>
             <p className="text-muted-foreground mb-6">
-              Drop your website URL and click <span className="font-semibold text-primary">Auto-fill</span> — we'll pre-populate
+              Drop your website URL and click <span className="font-semibold text-primary">Auto-fill</span>, we'll pre-populate
               what we can. Total time: ~2 minutes.
             </p>
             <form onSubmit={submitIntake} className="space-y-5">
@@ -204,7 +204,7 @@ export default function DeliverablePage() {
                 Generate my deliverable
               </Button>
               <p className="text-xs text-muted-foreground">
-                Builds in 30–90 seconds. You can close this tab — your link stays active.
+                Builds in 30–90 seconds. You can close this tab, your link stays active.
               </p>
             </form>
           </Card>

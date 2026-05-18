@@ -169,23 +169,23 @@ const categoryMap: Record<string, { label: string; icon: React.ReactNode; questi
 
 const categoryNarratives: Record<string, string[]> = {
   marketing: [
-    "Your lead generation is inconsistent — you're relying on methods that don't scale.",
+    "Your lead generation is inconsistent, you're relying on methods that don't scale.",
     "Content posting is sporadic, which means you're invisible to potential customers most of the time.",
     "You lack visibility into which marketing efforts actually drive revenue.",
   ],
   conversion: [
-    "Your website doesn't make it clear what visitors should do next — they're bouncing.",
+    "Your website doesn't make it clear what visitors should do next, they're bouncing.",
     "Slow response times to inquiries mean warm leads are going cold before you reach them.",
     "Without a structured follow-up system, potential customers are slipping through the cracks.",
   ],
   brand: [
     "Your brand messaging doesn't clearly differentiate you from competitors.",
-    "Generic visuals are undermining trust — prospects can't see real proof of your work.",
+    "Generic visuals are undermining trust, prospects can't see real proof of your work.",
     "People can't instantly understand what you do, which kills first impressions.",
   ],
   systems: [
     "Without a CRM, leads are getting lost and follow-ups are inconsistent.",
-    "You have no visibility into your sales pipeline — growth is a guessing game.",
+    "You have no visibility into your sales pipeline, growth is a guessing game.",
     "Manual processes are creating bottlenecks that cost you time and revenue.",
   ],
   growth: [

@@ -89,12 +89,12 @@ export const CommissionStructurePanel: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-display">
-            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure — Tiered 3-Way Split
+            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure, Tiered 3-Way Split
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Every closed sale tied to the rep's 6-digit code splits three ways. The percentage depends on the product's price tier — entry-level products pay reps a higher % to drive volume; high-ticket deals pay reps fewer points but far more dollars per close. Applies to one-time and recurring invoices.
+            Every closed sale tied to the rep's 6-digit code splits three ways. The percentage depends on the product's price tier, entry-level products pay reps a higher % to drive volume; high-ticket deals pay reps fewer points but far more dollars per close. Applies to one-time and recurring invoices.
           </p>
 
           <div className="grid md:grid-cols-3 gap-3">
@@ -246,7 +246,7 @@ export const CommissionStructurePanel: React.FC = () => {
                           R: {fmtUsd(repLine)}{p.recurring ? '/mo' : ''}<br />
                           P: {fmtUsd(partnerLine)}{p.recurring ? '/mo' : ''}
                         </>
-                      ) : '—'}
+                      ) : ', '}
                     </span>
                   </div>
                 </div>

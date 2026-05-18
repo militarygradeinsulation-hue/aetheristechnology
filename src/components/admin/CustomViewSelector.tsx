@@ -77,7 +77,7 @@ export const CustomViewSelector: React.FC<Props> = ({
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Hydrate from cloud — but never overwrite changes the user already made this session.
+  // Hydrate from cloud, but never overwrite changes the user already made this session.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -252,7 +252,7 @@ export const CustomViewSelector: React.FC<Props> = ({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">
-              {editingName ? `Edit View — ${editingName}` : "Create New View"}
+              {editingName ? `Edit View, ${editingName}` : "Create New View"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">

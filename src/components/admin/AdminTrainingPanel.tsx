@@ -404,7 +404,7 @@ export const AdminTrainingPanel: React.FC = () => {
                 <h4 className="font-semibold text-foreground">Generate questions from uploads</h4>
               </div>
               <p className="text-xs text-muted-foreground">
-                Tick the files above to use as source. Reference notes are also included. AI builds {draft.kind === "mcq" ? "multiple-choice" : "open-answer"} questions and appends them below — you can still edit each one.
+                Tick the files above to use as source. Reference notes are also included. AI builds {draft.kind === "mcq" ? "multiple-choice" : "open-answer"} questions and appends them below, you can still edit each one.
               </p>
               <div className="grid sm:grid-cols-3 gap-3">
                 <div>
@@ -558,11 +558,11 @@ export const AdminTrainingPanel: React.FC = () => {
                 <div key={a.id} className="rounded-lg border border-border/50 bg-card/40 p-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold text-foreground">{a.trainings?.title ?? "—"}</p>
+                      <p className="font-semibold text-foreground">{a.trainings?.title ?? ", "}</p>
                       <p className="text-xs font-mono text-muted-foreground">Rep: {a.rep_code} • {a.completed_at ? new Date(a.completed_at).toLocaleString() : "in progress"}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`font-display text-lg font-bold ${a.passed ? "text-emerald-400" : "text-crimson"}`}>{a.score ?? "—"}%</span>
+                      <span className={`font-display text-lg font-bold ${a.passed ? "text-emerald-400" : "text-crimson"}`}>{a.score ?? ", "}%</span>
                       {a.passed ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-crimson" />}
                     </div>
                   </div>

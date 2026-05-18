@@ -93,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             />
           </Link>
 
-          {/* Desktop nav — quiet text rail */}
+          {/* Desktop nav, quiet text rail */}
           <div className="hidden lg:flex items-center gap-7 flex-1">
             {navItems.map((item) => {
               const active = isActive(item.href);
@@ -151,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
         </div>
 
-        {/* Mobile sheet — same hierarchy: quiet links + one amber CTA */}
+        {/* Mobile sheet, same hierarchy: quiet links + one amber CTA */}
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 glass border border-amber/15 rounded-lg p-5 space-y-1">
             {navItems.map((item) => {

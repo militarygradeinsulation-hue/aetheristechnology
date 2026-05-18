@@ -96,7 +96,7 @@ export function AdminForensicsSystemsPanel() {
         <div className="flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-amber" />
           <h2 className="text-2xl font-bold text-foreground font-display">Forensics Systems</h2>
-          <span className="text-xs text-muted-foreground ml-2">Public checkout disabled — admin-only access, runs free, no Stripe</span>
+          <span className="text-xs text-muted-foreground ml-2">Public checkout disabled, admin-only access, runs free, no Stripe</span>
         </div>
         {tiers.map(tier => (
           <div key={tier}>
@@ -138,7 +138,7 @@ export function AdminForensicsSystemsPanel() {
                 type="url"
                 value={autofillUrl}
                 onChange={e => setAutofillUrl(e.target.value)}
-                placeholder="https://company.com — AI scrapes & fills the rest"
+                placeholder="https://company.com, AI scrapes & fills the rest"
               />
               <Button onClick={autofillFromUrl} disabled={autofilling} variant="outline" size="sm" className="shrink-0">
                 {autofilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Wand2 className="w-4 h-4 mr-1" />Autofill</>}

@@ -110,7 +110,7 @@ export const LeadPipelinePanel: React.FC = () => {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
       setImportCursor(data.nextCursor);
-      setImportProgress(`Inserted ${data.inserted} · Skipped ${data.skipped} · Scanned ${data.scanned}${data.hasMore ? ' (more available — click again)' : ' (done)'}`);
+      setImportProgress(`Inserted ${data.inserted} · Skipped ${data.skipped} · Scanned ${data.scanned}${data.hasMore ? ' (more available, click again)' : ' (done)'}`);
       toast({ title: `Imported ${data.inserted} leads`, description: `Scanned ${data.scanned}, skipped ${data.skipped}` });
       refreshStats();
     } catch (e) {
@@ -165,7 +165,7 @@ export const LeadPipelinePanel: React.FC = () => {
           <Card key={s.label}>
             <CardContent className="p-3">
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{s.label}</p>
-              <p className={`text-2xl font-display ${s.color}`}>{s.value?.toLocaleString() ?? '—'}</p>
+              <p className={`text-2xl font-display ${s.color}`}>{s.value?.toLocaleString() ?? ', '}</p>
             </CardContent>
           </Card>
         ))}
@@ -179,7 +179,7 @@ export const LeadPipelinePanel: React.FC = () => {
               <Database className="w-5 h-5 text-amber" /> Import HubSpot Contacts
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Pulls eligible contacts from your HubSpot mirror into the rep lead pool. Runs in 5,000-row batches — click again to continue. Idempotent on contact ID.
+              Pulls eligible contacts from your HubSpot mirror into the rep lead pool. Runs in 5,000-row batches, click again to continue. Idempotent on contact ID.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">

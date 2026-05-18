@@ -60,7 +60,7 @@ export const AdminNewsPanel: React.FC = () => {
         <div className="flex items-center gap-3">
           <Newspaper className="w-5 h-5 text-amber" />
           <div>
-            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Aetheris News — Public Feed</h2>
+            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Aetheris News, Public Feed</h2>
             <p className="text-xs text-muted-foreground">Posts publish to the live <code>/news</code> page on aetheris.technology.</p>
           </div>
         </div>
@@ -75,7 +75,7 @@ export const AdminNewsPanel: React.FC = () => {
         <div className="flex items-center gap-2 mb-3">
           <Radio className="w-4 h-4 text-amber" />
           <h3 className="font-display font-semibold text-foreground">Live feed</h3>
-          <span className="text-xs text-muted-foreground font-mono">— exactly what visitors see on /news</span>
+          <span className="text-xs text-muted-foreground font-mono">,  exactly what visitors see on /news</span>
         </div>
         <NewsFeedPanel />
       </div>
