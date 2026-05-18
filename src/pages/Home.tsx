@@ -17,6 +17,7 @@ import { Testimonials } from '@/components/Testimonials';
 import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
+import { ThisIsForYou } from '@/components/ThisIsForYou';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
 const Home = () => {
@@ -35,7 +36,7 @@ const Home = () => {
     { question: 'What does the 21-Day Revenue Diagnostic include?', answer: 'A 12-month CRM snapshot, lead-to-contact and deal-stage analysis, a written 15–30 page report with prioritized fixes and ROI projections, a source-data appendix, and a 60-minute readout. Fixed fee: $18,500.' },
     { question: 'Do I need to be on HubSpot or Salesforce?', answer: 'No. The Diagnostic is CRM-agnostic and runs on a CSV export of contacts, deals, and activity. Live integration with your CRM is an optional upsell, not a prerequisite.' },
     { question: 'How does the implementation retainer work?', answer: '$15,000 per month, 3-month minimum, available only to Diagnostic clients. We execute the prioritized fixes ourselves and re-measure recovery monthly.' },
-    { question: 'Who do you work with?', answer: 'Specialty manufacturers, $5M–$25M in revenue, US-based. Headquartered in Indianapolis, Indiana — engagements run remotely and on-site.' },
+    { question: 'Who do you work with?', answer: 'Business owners $1M–$50M who already know something is broken and are exhausted from trying to find the fix. Manufacturers, service firms, SaaS, contractors, agencies. Headquartered in Indianapolis, Indiana — engagements run remotely and on-site, US-wide.' },
   ];
 
   const steps = [
@@ -48,9 +49,9 @@ const Home = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Revenue Systems for Specialty Manufacturers | Aetheris"
-        description="20 years building revenue systems. Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M — find the $200K–$2M you're losing to broken CRM and sales follow-up."
+        description="For business owners who know something's wrong and are exhausted chasing the fix. Fixed-fee 21-day forensic diagnostic finds the $200K–$2M leaking from your CRM, sales follow-up, and operations."
         path="/"
-        keywords="revenue diagnostic, specialty manufacturers, manufacturing CRM, sales operations, HubSpot Salesforce audit, Indianapolis"
+        keywords="business forensics, revenue diagnostic, exhausted business owner, CRM audit, sales operations, HubSpot Salesforce audit, Indianapolis, business owner burnout fix"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         faqs={faqs}
         speakable={['h1', 'h2']}
@@ -60,7 +61,7 @@ const Home = () => {
           "name": "Aetheris",
           "url": "https://aetheris.technology",
           "logo": "https://aetheris.technology/aetheris-logo.png",
-          "description": "Revenue systems for specialty manufacturers. Fixed-fee 21-Day Revenue Diagnostic ($18,500) finds where CRM, sales follow-up, and lead flow are losing money. Indianapolis-based, US-wide.",
+          "description": "Business forensics for owners who know something's wrong and are tired of looking for the fix. Fixed-fee 21-Day Revenue Diagnostic ($18,500) finds where your CRM, sales follow-up, and operations are losing money. Indianapolis-based, US-wide.",
           "telephone": "+1-317-376-2110",
           "email": "aetheris.technology@outlook.com",
           "address": { "@type": "PostalAddress", "addressLocality": "Indianapolis", "addressRegion": "IN", "addressCountry": "US" },
@@ -77,9 +78,13 @@ const Home = () => {
         <main>
         <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+        {/* This is for you if... */}
+        <ThisIsForYou />
+
         {/* Trust + try-before-you-buy */}
         <section className="px-4 pt-8 pb-4">
           <div className="max-w-5xl mx-auto">
+
             <RevealOnScroll>
               <div className="forensic-tile rounded-sm border border-amber/40 p-7 md:p-10">
                 <div className="grid gap-6 md:gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] items-center">
@@ -167,7 +172,7 @@ const Home = () => {
                   Map. Quantify. Roadmap.
                 </h2>
                 <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-                  Fixed fee: $18,500. CRM-agnostic. Specialty manufacturers $5M–$25M.
+                  Fixed fee: $18,500. CRM-agnostic. For owner-led businesses $1M–$50M.
                 </p>
               </div>
             </RevealOnScroll>
@@ -245,7 +250,7 @@ const Home = () => {
                   Field Reports
                 </div>
                 <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                  What we've found inside specialty manufacturers.
+                  What we've found inside exhausted owner-led businesses.
                 </h2>
               </div>
             </RevealOnScroll>
