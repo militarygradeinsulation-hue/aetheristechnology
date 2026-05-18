@@ -12,6 +12,7 @@ interface Tool {
   thumbnail: string;
   title: string;
   description: string;
+  realTalk: string;
   path: string;
 }
 
@@ -21,24 +22,28 @@ const tools: Tool[] = [
     thumbnail: diagnosticThumb,
     title: 'Business Diagnostic',
     description: '20-question assessment that scores your operational health.',
+    realTalk: "You'll finally see — in writing — what your gut has been telling you for months. No more lying awake guessing which part of the business is the one that's broken.",
     path: '/business-diagnostic',
   },
   {
     thumbnail: scannerThumb,
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and conversion gaps.",
+    realTalk: "I find the broken pipes between your site and your phone — so leads stop dying at 9pm while you're trying to eat dinner with your family.",
     path: '/scan',
   },
   {
     thumbnail: strategicQuestionsThumb,
     title: 'Strategic Question Engine',
     description: 'Expose blind spots across leadership, sales, and operations.',
+    realTalk: "The questions your team won't ask you, and the ones you've stopped asking yourself. The kind of honesty that turns a 3am spiral into a Monday morning plan.",
     path: '/strategic-questions',
   },
   {
     thumbnail: resumeForensicsThumb,
     title: 'Resume Forensics',
     description: 'Upload a resume — get an Aetheris case file: fit score, red flags, and interview questions.',
+    realTalk: "Know who you're hiring before you sign the offer — so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
     path: '/resume-forensics',
   },
 ];
