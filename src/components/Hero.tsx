@@ -96,7 +96,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             78% of the leaks we find, the owner already felt — they just couldn't name them.
           </p>
 
-          <div className="max-w-5xl mx-auto pt-4 text-left">
+          <div className="max-w-5xl mx-auto pt-4 text-left space-y-3">
             <ForensicInfographic
               image={INFOGRAPHICS.heroLeakingGauge}
               imageAlt="Cracked revenue pressure gauge bleeding crimson onto a charcoal desk"
@@ -108,6 +108,14 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 "Most are losing 8–22% of annual revenue to leaks they can't see: lost leads, dead follow-up, broken handoffs, CRM rot, founder bottlenecks.",
               ]}
             />
+            <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 ml-1">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
+                Why I do it this way — Joseph
+              </div>
+              <p className="text-foreground/85 text-[15px] leading-relaxed italic">
+                I built this firm because I lived the other side of it. Marine, then a construction operator freezing inside half-built houses with kids in surgery and a business I couldn't put down. I knew something was wrong inside my own company for years before I could name it — and every "expert" I paid made it worse. Aetheris is the operator I needed back then: someone who walks in, finds the leak in writing, and either hands you the fix or runs it themselves so you can finally exhale.
+              </p>
+            </div>
           </div>
 
 
@@ -125,9 +133,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
             {[
-              { img: INFOGRAPHICS.heroWhatWeDo, alt: 'Stethoscope on a CRM dashboard — forensic audit infographic', label: 'What we do', body: 'Forensic audit of your revenue systems.' },
-              { img: INFOGRAPHICS.heroWhatWeLookFor, alt: 'Magnifying glass over a leaking sales funnel', label: 'What we look for', body: 'Lost leads, dead follow-up, broken handoffs, CRM rot.' },
-              { img: INFOGRAPHICS.heroWhatYouGet, alt: 'Stack of forensic report binders with priority tab', label: 'What you get', body: 'A written report with prioritized fixes and ROI per fix.' },
+              { img: INFOGRAPHICS.heroWhatWeDo, alt: 'Stethoscope on a CRM dashboard — forensic audit infographic', label: 'What we do', body: 'Forensic audit of your revenue systems.', real: "I open up your business the way a mechanic opens a hood — and tell you the truth nobody on payroll will." },
+              { img: INFOGRAPHICS.heroWhatWeLookFor, alt: 'Magnifying glass over a leaking sales funnel', label: 'What we look for', body: 'Lost leads, dead follow-up, broken handoffs, CRM rot.', real: "The quiet bleeds — the ones costing you a vacation, a hire, your weekends — that look 'fine' from the inside." },
+              { img: INFOGRAPHICS.heroWhatYouGet, alt: 'Stack of forensic report binders with priority tab', label: 'What you get', body: 'A written report with prioritized fixes and ROI per fix.', real: "Proof in writing. A number you can act on Monday. And the first night in months you sleep without doing CRM math in your head." },
             ].map((t) => (
               <div key={t.label} className="forensic-tile rounded-sm border border-border/60 p-4 flex flex-col gap-3">
                 <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
@@ -136,11 +144,15 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 </div>
                 <div>
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">{t.label}</div>
-                  <div className="font-forensic text-lg font-bold text-foreground leading-snug">{t.body}</div>
+                  <div className="font-forensic text-lg font-bold text-foreground leading-snug mb-2">{t.body}</div>
+                  <p className="text-[12px] text-foreground/75 leading-snug italic border-t border-amber/15 pt-2">
+                    {t.real}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+
 
           <h2 className="font-case text-xs md:text-sm uppercase tracking-widest text-muted-foreground max-w-4xl mx-auto pt-2">
             20 years building revenue systems · Marine Corps veteran · Former Director of Strategy, $25M aerospace firm with SpaceX accounts
