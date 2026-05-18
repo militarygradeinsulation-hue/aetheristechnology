@@ -55,13 +55,13 @@ export const FreeTools: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12">
             <span className="text-amber/80 font-medium text-xs tracking-[0.22em] uppercase mb-4 block">
-              See Our AI in Action
+              Built by an exhausted operator, for exhausted operators
             </span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4 text-float">
-              Capability <span className="text-gradient-amber">Demonstrations</span>
+              The tools <span className="text-gradient-amber">I wish I'd had</span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Working examples of the AI systems we deploy for clients. Use them free — see what custom-built versions could do for your business.
+              I built every one of these because I needed it myself — when I was running a construction company in the mud, dragging trailers through job sites, with kids in hospital rooms. Run them free. Each one is a piece of pressure off your chest.
             </p>
           </div>
         </RevealOnScroll>
