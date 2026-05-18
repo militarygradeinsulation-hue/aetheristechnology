@@ -41,6 +41,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-manufacturing',
     image: INFOGRAPHICS.industryManufacturing,
+    humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
+    whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -60,6 +62,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-construction',
     image: INFOGRAPHICS.industryConstruction,
+    humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
+    whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
     recommended: {
       name: '21-Day Revenue Diagnostic',
       price: '$18,500',
@@ -79,6 +83,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-logistics',
     image: INFOGRAPHICS.industryLogistics,
+    humanCost: "You feel the lanes losing money but can't prove which ones — so every Monday meeting becomes a guess and a fight.",
+    whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -98,6 +104,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-healthcare',
     image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Patients are calling and never booking. Front desk is drowning. You feel like you're running a clinic that's leaking patients out the back door.",
+    whatYouGetBack: "Inquiries become appointments. Prior auths stop aging out. Your front desk stops crying in the breakroom on Fridays.",
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
@@ -117,6 +125,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-finance',
     image: INFOGRAPHICS.industryFinance,
+    humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
+    whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -136,6 +146,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-saas',
     image: INFOGRAPHICS.industrySaas,
+    humanCost: "MRR looks fine until it doesn't. You find out an anchor account is gone two weeks after they decided — and nobody saw it coming.",
+    whatYouGetBack: "Churn signals named before the cancel email. Trial activation actually working. You stop apologizing to your board for surprises.",
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
