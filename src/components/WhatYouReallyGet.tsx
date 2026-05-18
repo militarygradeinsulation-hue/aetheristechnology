@@ -57,7 +57,7 @@ const rows: Row[] = [
 
 export const WhatYouReallyGet: React.FC = () => {
   return (
-    <section className="px-4 py-14">
+    <section className="px-4 pt-14 pb-6">
       <div className="max-w-6xl mx-auto">
         <RevealOnScroll>
           <div className="text-center mb-10">
@@ -79,13 +79,9 @@ export const WhatYouReallyGet: React.FC = () => {
           {rows.map((r, i) => (
             <RevealOnScroll key={r.sold} delay={i * 50}>
               <div className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
-                <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.3fr)] items-stretch">
-                  {/* LEFT, what you pay for */}
-                  <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15">
-                    <div className="font-case text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                      Invoice line item
-                    </div>
-                    <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/80 mb-2">
+                <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-stretch">
+                  <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
+                    <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
                       {r.sold}
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
@@ -93,14 +89,12 @@ export const WhatYouReallyGet: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* ARROW */}
                   <div className="hidden md:flex items-center justify-center px-4 bg-background/20">
                     <div className="w-10 h-10 rounded-full border border-amber/40 flex items-center justify-center bg-amber/5">
                       <ArrowRight className="w-5 h-5 text-amber" />
                     </div>
                   </div>
 
-                  {/* RIGHT, what you actually get */}
                   <div className="p-6 md:p-7 relative">
                     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-amber/0 via-amber/40 to-amber/0 md:hidden" />
                     <div className="flex items-start gap-4">
@@ -108,10 +102,7 @@ export const WhatYouReallyGet: React.FC = () => {
                         <r.Icon className="w-5 h-5 text-amber" />
                       </div>
                       <div className="min-w-0">
-                        <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-2">
-                          What you actually take home
-                        </div>
-                        <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2">
+                        <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight">
                           {r.given}
                         </h3>
                         <p className="text-sm md:text-[15px] text-foreground/85 leading-relaxed">
@@ -127,16 +118,17 @@ export const WhatYouReallyGet: React.FC = () => {
         </div>
 
         <RevealOnScroll>
-          <div className="mt-10 text-center">
+          <div className="mt-8 text-center">
             <p className="font-forensic text-lg md:text-xl text-foreground/90 max-w-3xl mx-auto italic">
               "Nobody buys a forensic audit because they love forensics. They buy it because they want to stop waking up at 3am wondering where the money went."
             </p>
             <p className="font-case text-[10px] uppercase tracking-widest text-amber mt-3">
-             , Joseph Toney, Operator
+              Joseph Toney, Operator
             </p>
           </div>
         </RevealOnScroll>
       </div>
     </section>
+
   );
 };
