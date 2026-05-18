@@ -116,18 +116,8 @@ export const WhatYouReallyGet: React.FC = () => {
             </RevealOnScroll>
           ))}
         </div>
-
-        <RevealOnScroll>
-          <div className="mt-8 text-center">
-            <p className="font-forensic text-lg md:text-xl text-foreground/90 max-w-3xl mx-auto italic">
-              "Nobody buys a forensic audit because they love forensics. They buy it because they want to stop waking up at 3am wondering where the money went."
-            </p>
-            <p className="font-case text-[10px] uppercase tracking-widest text-amber mt-3">
-              Joseph Toney, Operator
-            </p>
-          </div>
-        </RevealOnScroll>
       </div>
+
     </section>
 
   );
