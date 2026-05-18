@@ -122,11 +122,13 @@ const MethodologyPage: React.FC = () => {
                 Measurement Methodology · v1.0
               </div>
               <h1 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                How we define, measure, and attribute revenue leaks.
+                How I find the money you've been losing —<br className="hidden md:block" />
+                <span className="text-amber"> and how you'll know I actually found it.</span>
               </h1>
               <p className="text-lg text-muted-foreground mt-4">
-                Sent to every prospect before pricing is discussed. If a vendor can't write this, they shouldn't be charging for outcomes.
+                Written for the owner who's been burned before. Every section has the forensic rule and — underneath it — why I built it that way, because I was that owner.
               </p>
+
               <div className="flex flex-wrap gap-3 mt-6">
                 <Button onClick={() => generateMethodologyPdf()} className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                   <Download className="w-4 h-4 mr-2" />
