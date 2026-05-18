@@ -18,6 +18,8 @@ interface IndustryLeak {
   whatWeMeasure: string[];
   slug: string;
   image: string;
+  humanCost: string;
+  whatYouGetBack: string;
   recommended: {
     name: string;
     price: string;
