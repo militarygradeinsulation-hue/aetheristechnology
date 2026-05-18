@@ -12,6 +12,7 @@ interface Tool {
   thumbnail: string;
   title: string;
   description: string;
+  realTalk: string;
   path: string;
 }
 
@@ -21,24 +22,28 @@ const tools: Tool[] = [
     thumbnail: diagnosticThumb,
     title: 'Business Diagnostic',
     description: '20-question assessment that scores your operational health.',
+    realTalk: "You'll finally see — in writing — what your gut has been telling you for months. No more lying awake guessing which part of the business is the one that's broken.",
     path: '/business-diagnostic',
   },
   {
     thumbnail: scannerThumb,
     title: 'Website Scanner',
     description: "Instant audit of your site's SEO, speed, and conversion gaps.",
+    realTalk: "I find the broken pipes between your site and your phone — so leads stop dying at 9pm while you're trying to eat dinner with your family.",
     path: '/scan',
   },
   {
     thumbnail: strategicQuestionsThumb,
     title: 'Strategic Question Engine',
     description: 'Expose blind spots across leadership, sales, and operations.',
+    realTalk: "The questions your team won't ask you, and the ones you've stopped asking yourself. The kind of honesty that turns a 3am spiral into a Monday morning plan.",
     path: '/strategic-questions',
   },
   {
     thumbnail: resumeForensicsThumb,
     title: 'Resume Forensics',
     description: 'Upload a resume — get an Aetheris case file: fit score, red flags, and interview questions.',
+    realTalk: "Know who you're hiring before you sign the offer — so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
     path: '/resume-forensics',
   },
 ];
@@ -50,13 +55,13 @@ export const FreeTools: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12">
             <span className="text-amber/80 font-medium text-xs tracking-[0.22em] uppercase mb-4 block">
-              See Our AI in Action
+              Built by an exhausted operator, for exhausted operators
             </span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4 text-float">
-              Capability <span className="text-gradient-amber">Demonstrations</span>
+              The tools <span className="text-gradient-amber">I wish I'd had</span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Working examples of the AI systems we deploy for clients. Use them free — see what custom-built versions could do for your business.
+              I built every one of these because I needed it myself — when I was running a construction company in the mud, dragging trailers through job sites, with kids in hospital rooms. Run them free. Each one is a piece of pressure off your chest.
             </p>
           </div>
         </RevealOnScroll>
@@ -84,11 +89,19 @@ export const FreeTools: React.FC = () => {
                     <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
                       {tool.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {tool.description}
                     </p>
+                    <div className="mb-5 pt-4 border-t border-amber/15 flex-1">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
+                        What this actually does for you
+                      </div>
+                      <p className="text-[13px] text-foreground/85 leading-relaxed italic">
+                        {tool.realTalk}
+                      </p>
+                    </div>
                     <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:bg-amber after:w-0 group-hover:after:w-full after:transition-all after:duration-500">
-                      Explore Tool <ArrowRight className="w-4 h-4" />
+                      Run it free <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
                 </Link>

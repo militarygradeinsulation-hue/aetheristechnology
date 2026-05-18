@@ -18,6 +18,8 @@ interface IndustryLeak {
   whatWeMeasure: string[];
   slug: string;
   image: string;
+  humanCost: string;
+  whatYouGetBack: string;
   recommended: {
     name: string;
     price: string;
@@ -39,6 +41,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-manufacturing',
     image: INFOGRAPHICS.industryManufacturing,
+    humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
+    whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -58,6 +62,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-construction',
     image: INFOGRAPHICS.industryConstruction,
+    humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
+    whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
     recommended: {
       name: '21-Day Revenue Diagnostic',
       price: '$18,500',
@@ -77,6 +83,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-logistics',
     image: INFOGRAPHICS.industryLogistics,
+    humanCost: "You feel the lanes losing money but can't prove which ones — so every Monday meeting becomes a guess and a fight.",
+    whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -96,6 +104,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-healthcare',
     image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Patients are calling and never booking. Front desk is drowning. You feel like you're running a clinic that's leaking patients out the back door.",
+    whatYouGetBack: "Inquiries become appointments. Prior auths stop aging out. Your front desk stops crying in the breakroom on Fridays.",
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
@@ -115,6 +125,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-finance',
     image: INFOGRAPHICS.industryFinance,
+    humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
+    whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
     recommended: {
       name: '21-Day Revenue Diagnostic + Implementation Retainer',
       price: '$18,500 + $15K/mo',
@@ -134,6 +146,8 @@ const INDUSTRIES: IndustryLeak[] = [
     ],
     slug: 'ai-for-saas',
     image: INFOGRAPHICS.industrySaas,
+    humanCost: "MRR looks fine until it doesn't. You find out an anchor account is gone two weeks after they decided — and nobody saw it coming.",
+    whatYouGetBack: "Churn signals named before the cancel email. Trial activation actually working. You stop apologizing to your board for surprises.",
     recommended: {
       name: 'Forensic Diagnostic',
       price: '$2,500 flat',
@@ -188,11 +202,16 @@ const IndustriesPage: React.FC = () => {
               The Leak Audit · By Industry
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Every industry leaks <span className="text-crimson">differently</span>.
+              Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
+              Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Same fixed-fee diagnostic. Same forensic deliverable. Different wound patterns by sector.
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-4">
+              Different wound patterns. Same 3am chest tightness. Same "I know something's off but I can't put my finger on it."
             </p>
+            <p className="text-base md:text-lg text-foreground/80 max-w-3xl mx-auto mb-8 italic">
+              I built this because I lived it. Marine, construction operator, dad with kids in surgery — running a business while everything else was on fire. Below is what your industry's bleed actually feels like at 7pm, and what stops feeling that way once we fix it.
+            </p>
+
 
             <div className="forensic-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
@@ -259,11 +278,25 @@ const IndustriesPage: React.FC = () => {
                       </div>
                     </div>
                     <h2 className="text-xl font-bold font-forensic mb-2 text-foreground">{v.industry}</h2>
-                    <p className="text-sm text-muted-foreground mb-4 italic">"{v.primaryLeak}"</p>
+                    <p className="text-sm text-muted-foreground mb-3 italic">"{v.primaryLeak}"</p>
+
+                    <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">
+                        What this costs you personally
+                      </div>
+                      <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
+                    </div>
+                    <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
+                        What you get back
+                      </div>
+                      <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
+                    </div>
 
                     <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
                       What we measure
                     </div>
+
                     <ul className="space-y-1 mb-4 flex-1">
                       {v.whatWeMeasure.map((m) => (
                         <li key={m} className="text-xs text-foreground/75 flex gap-2">
