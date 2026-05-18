@@ -89,11 +89,19 @@ export const FreeTools: React.FC = () => {
                     <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
                       {tool.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {tool.description}
                     </p>
+                    <div className="mb-5 pt-4 border-t border-amber/15 flex-1">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
+                        What this actually does for you
+                      </div>
+                      <p className="text-[13px] text-foreground/85 leading-relaxed italic">
+                        {tool.realTalk}
+                      </p>
+                    </div>
                     <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:bg-amber after:w-0 group-hover:after:w-full after:transition-all after:duration-500">
-                      Explore Tool <ArrowRight className="w-4 h-4" />
+                      Run it free <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
                 </Link>
