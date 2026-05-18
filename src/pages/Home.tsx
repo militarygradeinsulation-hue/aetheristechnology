@@ -227,14 +227,23 @@ const Home = () => {
                       Everyone else is selling you advice.<br className="hidden md:block" />
                       <span className="text-amber"> We're an AI-native operator.</span>
                     </h2>
-                    <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-7">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-5">
                       Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
                     </p>
+                    <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 mb-7">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
+                        Why this matters to you — Joseph
+                      </div>
+                      <p className="text-foreground/85 text-[15px] leading-relaxed italic">
+                        I've sat across the desk from the consultants. I've cut the checks. I watched them walk out with a binder and leave me with the same problems and a lighter bank account. I built Aetheris so you'd never feel that twice. You don't hire me to think about your business — you hire me to actually go inside it, find the bleed, and either hand you the wrench or pick it up myself.
+                      </p>
+                    </div>
                     <Link to="/why-us">
                       <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                         See exactly what makes us different <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
+
                   </div>
                   <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
                     <img src={INFOGRAPHICS.homeAiOperator} alt="AI agents running diagnostics inside a CRM, slide deck rejected" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
