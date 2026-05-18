@@ -40,10 +40,11 @@ const Home = () => {
   ];
 
   const steps = [
-    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
-    { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.', img: INFOGRAPHICS.diagnosticQuantify, alt: 'Calculator and accounting ledger tallying revenue leaks' },
-    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
+    { n: '01', label: 'Map', body: 'Pull a 12-month snapshot from HubSpot, Salesforce, or a CSV export. Identify every leak point in lead capture, sales follow-up, and operational handoffs.', real: "You finally see the whole business on one page — every place leads, dollars, and hours are slipping out. The stuff you sensed but couldn't prove.", img: INFOGRAPHICS.diagnosticMap, alt: 'Topographic map overlay on CRM data with amber leak pins' },
+    { n: '02', label: 'Quantify', body: 'Put a real dollar number on each leak. Conservative and aggressive ROI projections per fix. Source data and queries included so a CFO can re-derive every number.', real: "You walk out with a number you can say out loud to your spouse, your CFO, your board. No more 'I think we're losing money somewhere.'", img: INFOGRAPHICS.diagnosticQuantify, alt: 'Calculator and accounting ledger tallying revenue leaks' },
+    { n: '03', label: 'Roadmap', body: 'Prioritized fix list, sequenced by impact and effort. Fixed-fee implementation quote if you want us to execute. No retainer required to walk away with the report.', real: "You stop being the bottleneck. There's a sequenced plan, a fixed quote, and a clear answer to 'what do I do Monday?' — and you can walk if you want.", img: INFOGRAPHICS.diagnosticRoadmap, alt: 'Clipboard repair checklist with amber priority flags' },
   ];
+
 
   return (
     <div className="relative min-h-screen">
@@ -186,9 +187,16 @@ const Home = () => {
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Step {s.n}</div>
                     <h3 className="font-forensic text-2xl font-bold text-foreground mb-2">{s.label}</h3>
-                    <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                    <p className="text-sm text-foreground/80 leading-relaxed mb-3">{s.body}</p>
+                    <div className="pt-3 border-t border-amber/15">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1">
+                        What this gives you
+                      </div>
+                      <p className="text-[13px] text-foreground/85 leading-relaxed italic">{s.real}</p>
+                    </div>
                   </div>
                 </div>
+
               ))}
             </div>
             <div className="text-center mt-8 flex flex-wrap justify-center gap-3">
@@ -219,14 +227,23 @@ const Home = () => {
                       Everyone else is selling you advice.<br className="hidden md:block" />
                       <span className="text-amber"> We're an AI-native operator.</span>
                     </h2>
-                    <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-7">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-5">
                       Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems — at a fraction of the cost, in a fraction of the time.
                     </p>
+                    <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 mb-7">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
+                        Why this matters to you — Joseph
+                      </div>
+                      <p className="text-foreground/85 text-[15px] leading-relaxed italic">
+                        I've sat across the desk from the consultants. I've cut the checks. I watched them walk out with a binder and leave me with the same problems and a lighter bank account. I built Aetheris so you'd never feel that twice. You don't hire me to think about your business — you hire me to actually go inside it, find the bleed, and either hand you the wrench or pick it up myself.
+                      </p>
+                    </div>
                     <Link to="/why-us">
                       <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                         See exactly what makes us different <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
+
                   </div>
                   <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
                     <img src={INFOGRAPHICS.homeAiOperator} alt="AI agents running diagnostics inside a CRM, slide deck rejected" width={1024} height={1024} loading="lazy" className="w-full h-full object-cover" />
