@@ -76,44 +76,42 @@ export const WhatYouReallyGet: React.FC = () => {
         </RevealOnScroll>
 
         <div className="space-y-4">
-          {rows.map((r, i) => (
-            <RevealOnScroll key={r.sold} delay={i * 50}>
-              <div className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
-                <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-center">
-                  <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
-                    <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
-                      {r.sold}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {r.soldDetail}
-                    </p>
-                  </div>
+          {rows.map((r) => (
+            <div key={r.sold} className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
+              <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-center">
+                <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
+                  <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
+                    {r.sold}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {r.soldDetail}
+                  </p>
+                </div>
 
-                  <div className="hidden md:flex items-center justify-center px-4 bg-background/20">
-                    <div className="w-10 h-10 rounded-full border border-amber/40 flex items-center justify-center bg-amber/5">
-                      <ArrowRight className="w-5 h-5 text-amber" />
+                <div className="hidden md:flex items-center justify-center px-4 bg-background/20">
+                  <div className="w-10 h-10 rounded-full border border-amber/40 flex items-center justify-center bg-amber/5">
+                    <ArrowRight className="w-5 h-5 text-amber" />
+                  </div>
+                </div>
+
+                <div className="p-6 md:p-7 relative">
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-amber/0 via-amber/40 to-amber/0 md:hidden" />
+                  <div className="flex items-start gap-4">
+                    <div className="hidden sm:flex shrink-0 w-11 h-11 rounded-sm border border-amber/40 bg-amber/10 items-center justify-center">
+                      <r.Icon className="w-5 h-5 text-amber" />
                     </div>
-                  </div>
-
-                  <div className="p-6 md:p-7 relative">
-                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-amber/0 via-amber/40 to-amber/0 md:hidden" />
-                    <div className="flex items-start gap-4">
-                      <div className="hidden sm:flex shrink-0 w-11 h-11 rounded-sm border border-amber/40 bg-amber/10 items-center justify-center">
-                        <r.Icon className="w-5 h-5 text-amber" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight">
-                          {r.given}
-                        </h3>
-                        <p className="text-sm md:text-[15px] text-foreground/85 leading-relaxed">
-                          {r.givenDetail}
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight">
+                        {r.given}
+                      </h3>
+                      <p className="text-sm md:text-[15px] text-foreground/85 leading-relaxed">
+                        {r.givenDetail}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
-            </RevealOnScroll>
+            </div>
           ))}
         </div>
       </div>
