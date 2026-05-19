@@ -455,12 +455,13 @@ export default function LinkedInPostStudio() {
 
         <Button
           onClick={generateResponse}
-          disabled={respondLoading || !respondImage}
+          disabled={respondLoading || (respondSourceType === 'image' ? !respondImage : respondText.trim().length < 20)}
           className="w-full bg-amber text-background hover:bg-amber/90"
         >
           {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
           {respondLoading ? 'Reading post & drafting response…' : 'Respond to this post'}
         </Button>
+
 
         {(respondLoading || respondOutput) && (
           <div className="rounded-lg border border-border bg-background/40 p-4">
