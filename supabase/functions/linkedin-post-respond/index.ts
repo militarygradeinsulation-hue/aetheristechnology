@@ -138,7 +138,7 @@ ${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : 
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
 2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
-3. Open with one of the signature openers ("The part people miss is that…" / "What most operators get wrong here is…" / "I've watched this pattern repeat…"). Never with a compliment or agreement.
+3. Open with a VARIED signature opener from the categories in the style guide (audit/observation, reframe, hidden-mechanism, direct-diagnosis, concession-pivot). Rotate aggressively across responses. Do NOT default to "The part people miss is that…" — that phrase is rare-use only (max 1 in every 8 responses). Never open with a compliment or agreement.
 4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor. This is a real operator speaking from real reps, not a brand voice.
 5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
 6. Reference "At Aetheris.technology we…" at most ONCE, and only if it earns the line.
