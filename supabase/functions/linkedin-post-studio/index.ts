@@ -153,7 +153,9 @@ ${postType ? `POST TYPE: ${postType}` : ""}
 CREATOR TAG INSTRUCTION: ${creatorInstruction}
 ${extraPrompt ? `\nADDITIONAL DIRECTION: ${extraPrompt}` : ""}
 
-Follow all brand voice, structure, hashtag, and tone rules from your instructions. Output only the post — no commentary, no labels, no quotation marks around the post.`;
+Follow all brand voice, structure, hashtag, and tone rules from your instructions. Output only the post — no commentary, no labels, no quotation marks around the post.
+
+LEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category from the Aetheris Lexicon (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor a concrete number inside Cost of the Leak / COI framing? (c) Did I close on Revenue Recovery or Revenue Loop language, not generic 'growth'? (d) Did I avoid all forbidden substitutions (consulting / funnel / strategy / mindset / tip / hack / hustle / grind / unlock)? Rewrite before returning if any answer is no.`;
 
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
