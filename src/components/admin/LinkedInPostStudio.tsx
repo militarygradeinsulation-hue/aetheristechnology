@@ -485,10 +485,30 @@ export default function LinkedInPostStudio() {
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{respondOutput}</div>
+              <>
+                <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{respondOutput}</div>
+                <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-[10px] text-muted-foreground">
+                    Turn this reply into a full post for your own page.
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => createPostFromResponse(
+                      respondSourceType === 'text' ? respondText.trim() : `[screenshot uploaded: ${respondFileName || 'LinkedIn post'}]`,
+                      respondOutput,
+                    )}
+                    disabled={creatingPost}
+                    className="h-7 text-[10px] bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+                  >
+                    {creatingPost ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand className="w-3 h-3 mr-1" />}
+                    {creatingPost ? 'Creating post…' : 'Create standalone post'}
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         )}
+
 
         {/* Response Library */}
         <div className="pt-3 border-t border-border/60">
