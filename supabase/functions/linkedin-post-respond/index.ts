@@ -160,7 +160,7 @@ Return ONLY the response text. One paragraph. No line breaks between sentences. 
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing a LinkedIn comment in first person. ONE dense paragraph, no line breaks. Open with 'The part people miss is that…' or similar. Use I/I've/I see. No em dashes. No emojis. No compliments. No motivational language. No questions at the end." },
+            { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing a LinkedIn comment in first person. ONE dense paragraph, no line breaks. Open with a VARIED forensic opener — rotate across audit observations ('I see this in audits weekly.'), reframes ('This isn't a X problem. It's a Y problem.'), hidden-mechanism reveals ('The hidden variable here is…'), or direct diagnoses ('Finding: …'). Do NOT default to 'The part people miss is that…' — that opener is banned from appearing more than once in every 8 responses. Use I/I've/I see. No em dashes. No emojis. No compliments. No motivational language. No questions at the end." },
             {
               role: "user",
               content: hasImage
