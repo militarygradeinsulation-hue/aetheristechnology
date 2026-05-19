@@ -186,7 +186,28 @@ export default function LinkedInPostStudio() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setRespondOutput(data.post || '');
+      const post = data.post || '';
+      setRespondOutput(post);
+      // Auto-save to response library
+      if (post.trim()) {
+        try {
+          const firstLine = post.split('\n').map((s: string) => s.trim()).find(Boolean) || 'LinkedIn response';
+          const saved = await saveToAdminLibrary({
+            tool_type: 'linkedin_response',
+            title: firstLine.slice(0, 90),
+            input_data: {
+              imageDataUrl: respondImage,
+              fileName: respondFileName,
+              mode: respondMode,
+              extraContext: respondExtra.trim(),
+            },
+            output_data: { body: post, mode: respondMode },
+          });
+          setResponseLibrary(prev => [saved, ...prev]);
+        } catch {
+          // non-fatal
+        }
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Generation failed';
       toast({ title: 'Failed to generate response', description: msg, variant: 'destructive' });
