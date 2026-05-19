@@ -81,21 +81,26 @@ serve(async (req) => {
 
     const body = await req.json();
     const imageDataUrl: string = body?.imageDataUrl || "";
+    const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
     const mode: string = body?.mode === "brief" ? "brief" : "full"; // "brief" = comment, "full" = standalone repost
 
-    if (!imageDataUrl || !imageDataUrl.startsWith("data:image/")) {
-      return new Response(JSON.stringify({ error: "imageDataUrl (data:image/...) required" }), {
+    const hasImage = imageDataUrl && imageDataUrl.startsWith("data:image/");
+    const hasText = postText.length > 10;
+
+    if (!hasImage && !hasText) {
+      return new Response(JSON.stringify({ error: "imageDataUrl or postText required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     const userInstruction = `${STYLE_GUIDE}
 
 ═══════════════════════════════════════════════════════════
 TASK
 ═══════════════════════════════════════════════════════════
-The image attached is a screenshot of someone's LinkedIn post.
+${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
 2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
@@ -124,11 +129,14 @@ Return ONLY the response text. One paragraph. No line breaks between sentences. 
             { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing a LinkedIn comment in first person. ONE dense paragraph, no line breaks. Open with 'The part people miss is that…' or similar. Use I/I've/I see. No em dashes. No emojis. No compliments. No motivational language. No questions at the end." },
             {
               role: "user",
-              content: [
-                { type: "text", text: userInstruction },
-                { type: "image_url", image_url: { url: imageDataUrl } },
-              ],
+              content: hasImage
+                ? [
+                    { type: "text", text: userInstruction },
+                    { type: "image_url", image_url: { url: imageDataUrl } },
+                  ]
+                : userInstruction,
             },
+
           ],
         }),
       });

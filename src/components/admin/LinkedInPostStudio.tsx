@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2 } from 'lucide-react';
+import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -111,14 +111,18 @@ export default function LinkedInPostStudio() {
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
 
-  // Respond-to-post (image upload) state
+  // Respond-to-post (image upload OR pasted text) state
+  const [respondSourceType, setRespondSourceType] = useState<'image' | 'text'>('image');
   const [respondImage, setRespondImage] = useState<string | null>(null);
   const [respondFileName, setRespondFileName] = useState<string>('');
+  const [respondText, setRespondText] = useState<string>('');
   const [respondMode, setRespondMode] = useState<'brief' | 'full'>('brief');
   const [respondExtra, setRespondExtra] = useState('');
   const [respondLoading, setRespondLoading] = useState(false);
   const [respondOutput, setRespondOutput] = useState('');
   const [respondCopied, setRespondCopied] = useState(false);
+  const [creatingPost, setCreatingPost] = useState(false);
+
 
   // Response library state
   const [responseLibrary, setResponseLibrary] = useState<AdminLibraryItem[]>([]);
@@ -172,8 +176,13 @@ export default function LinkedInPostStudio() {
   };
 
   const generateResponse = async () => {
-    if (!respondImage) {
+    const useImage = respondSourceType === 'image';
+    if (useImage && !respondImage) {
       toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    if (!useImage && respondText.trim().length < 20) {
+      toast({ title: 'Paste the post text first (at least 20 chars)', variant: 'destructive' });
       return;
     }
     setRespondLoading(true);
@@ -181,7 +190,9 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
-        body: { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() },
+        body: useImage
+          ? { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() }
+          : { postText: respondText.trim(), mode: respondMode, extraContext: respondExtra.trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -196,8 +207,10 @@ export default function LinkedInPostStudio() {
             tool_type: 'linkedin_response',
             title: firstLine.slice(0, 90),
             input_data: {
-              imageDataUrl: respondImage,
-              fileName: respondFileName,
+              imageDataUrl: useImage ? respondImage : null,
+              fileName: useImage ? respondFileName : null,
+              postText: useImage ? null : respondText.trim(),
+              sourceType: respondSourceType,
               mode: respondMode,
               extraContext: respondExtra.trim(),
             },
@@ -215,6 +228,40 @@ export default function LinkedInPostStudio() {
       setRespondLoading(false);
     }
   };
+
+  const createPostFromResponse = async (sourceCtx: string, draft: string) => {
+    if (!draft.trim()) return;
+    setCreatingPost(true);
+    try {
+      const adminToken = getAdminToken();
+      const firstLine = draft.split(/[.!?]/).map(s => s.trim()).find(Boolean) || 'Standalone post';
+      const { data, error } = await supabase.functions.invoke('linkedin-post-studio', {
+        body: {
+          topic: firstLine.slice(0, 180),
+          pillar: '',
+          postType: '',
+          creator: 'none',
+          extraPrompt: `Expand the following diagnostic take into a polished standalone LinkedIn POST for Joseph Toney's own page (200–260 words, ONE dense paragraph, first person, no compliments, no em dashes, no emojis, no questions as closers, mandatory numeric anchor, signature verdict shape). Do NOT reference the source post directly or use phrases like "in response to" or "your post". Make it stand alone as Joseph's original post.\n\nSOURCE CONTEXT THAT INSPIRED IT (do not quote): ${sourceCtx.slice(0, 1200)}\n\nJOSEPH'S DRAFT TAKE TO EXPAND/POLISH: ${draft}`,
+        },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const post = (data.post || '').trim();
+      if (!post) throw new Error('Empty post');
+      setTopic(firstLine.slice(0, 180));
+      setGenerated(post);
+      toast({ title: 'Standalone post created', description: 'Scroll down to copy or schedule it.' });
+      // scroll to bottom-ish
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to create post';
+      toast({ title: 'Could not create post', description: msg, variant: 'destructive' });
+    } finally {
+      setCreatingPost(false);
+    }
+  };
+
 
   const copyResponse = () => {
     navigator.clipboard.writeText(respondOutput);
@@ -321,35 +368,69 @@ export default function LinkedInPostStudio() {
           <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Respond to a LinkedIn Post</div>
         </div>
         <p className="text-xs text-muted-foreground -mt-2">
-          Upload a screenshot of someone's LinkedIn post. The forensic operator voice will read it and write your reply.
+          Upload a screenshot OR paste the post text. The forensic operator voice will read it and write your reply.
+          Then turn that reply into a standalone post for your own page.
         </p>
 
-        {!respondImage ? (
-          <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30">
-            <Upload className="w-6 h-6 text-muted-foreground" />
-            <div className="text-sm font-semibold text-foreground">Upload screenshot</div>
-            <div className="text-[11px] text-muted-foreground">PNG, JPG, or WEBP (max 10 MB)</div>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleRespondFile(e.target.files?.[0])}
-            />
-          </label>
+
+        <div className="flex gap-1 p-1 bg-background/40 border border-border rounded-md w-fit">
+          <button
+            type="button"
+            onClick={() => setRespondSourceType('image')}
+            className={`text-[10px] uppercase tracking-wider px-3 py-1.5 rounded flex items-center gap-1.5 transition ${
+              respondSourceType === 'image' ? 'bg-amber text-background font-bold' : 'text-muted-foreground hover:text-amber'
+            }`}
+          >
+            <ImageIcon className="w-3 h-3" /> Screenshot
+          </button>
+          <button
+            type="button"
+            onClick={() => setRespondSourceType('text')}
+            className={`text-[10px] uppercase tracking-wider px-3 py-1.5 rounded flex items-center gap-1.5 transition ${
+              respondSourceType === 'text' ? 'bg-amber text-background font-bold' : 'text-muted-foreground hover:text-amber'
+            }`}
+          >
+            <FileText className="w-3 h-3" /> Paste text
+          </button>
+        </div>
+
+        {respondSourceType === 'image' ? (
+          !respondImage ? (
+            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30">
+              <Upload className="w-6 h-6 text-muted-foreground" />
+              <div className="text-sm font-semibold text-foreground">Upload screenshot</div>
+              <div className="text-[11px] text-muted-foreground">PNG, JPG, or WEBP (max 10 MB)</div>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleRespondFile(e.target.files?.[0])}
+              />
+            </label>
+          ) : (
+            <div className="relative rounded-lg border border-border bg-background/40 p-3">
+              <button
+                type="button"
+                onClick={() => { setRespondImage(null); setRespondFileName(''); setRespondOutput(''); }}
+                className="absolute top-2 right-2 bg-background/80 border border-border rounded-full p-1 hover:bg-background"
+                aria-label="Remove image"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <img src={respondImage} alt="Uploaded LinkedIn post" className="max-h-72 mx-auto rounded" />
+              <div className="text-[11px] text-muted-foreground mt-2 text-center truncate">{respondFileName}</div>
+            </div>
+          )
         ) : (
-          <div className="relative rounded-lg border border-border bg-background/40 p-3">
-            <button
-              type="button"
-              onClick={() => { setRespondImage(null); setRespondFileName(''); setRespondOutput(''); }}
-              className="absolute top-2 right-2 bg-background/80 border border-border rounded-full p-1 hover:bg-background"
-              aria-label="Remove image"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-            <img src={respondImage} alt="Uploaded LinkedIn post" className="max-h-72 mx-auto rounded" />
-            <div className="text-[11px] text-muted-foreground mt-2 text-center truncate">{respondFileName}</div>
-          </div>
+          <Textarea
+            rows={8}
+            placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
+            value={respondText}
+            onChange={(e) => setRespondText(e.target.value)}
+            className="text-sm"
+          />
         )}
+
 
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
@@ -374,12 +455,13 @@ export default function LinkedInPostStudio() {
 
         <Button
           onClick={generateResponse}
-          disabled={respondLoading || !respondImage}
+          disabled={respondLoading || (respondSourceType === 'image' ? !respondImage : respondText.trim().length < 20)}
           className="w-full bg-amber text-background hover:bg-amber/90"
         >
           {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
           {respondLoading ? 'Reading post & drafting response…' : 'Respond to this post'}
         </Button>
+
 
         {(respondLoading || respondOutput) && (
           <div className="rounded-lg border border-border bg-background/40 p-4">
@@ -403,10 +485,30 @@ export default function LinkedInPostStudio() {
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{respondOutput}</div>
+              <>
+                <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{respondOutput}</div>
+                <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-[10px] text-muted-foreground">
+                    Turn this reply into a full post for your own page.
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => createPostFromResponse(
+                      respondSourceType === 'text' ? respondText.trim() : `[screenshot uploaded: ${respondFileName || 'LinkedIn post'}]`,
+                      respondOutput,
+                    )}
+                    disabled={creatingPost}
+                    className="h-7 text-[10px] bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+                  >
+                    {creatingPost ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand className="w-3 h-3 mr-1" />}
+                    {creatingPost ? 'Creating post…' : 'Create standalone post'}
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         )}
+
 
         {/* Response Library */}
         <div className="pt-3 border-t border-border/60">
@@ -454,8 +556,11 @@ export default function LinkedInPostStudio() {
                         {img ? (
                           <img src={img} alt="Post" className="w-16 h-16 object-cover rounded border border-border" />
                         ) : (
-                          <div className="w-16 h-16 bg-muted rounded" />
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-muted-foreground" />
+                          </div>
                         )}
+
                       </button>
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
                         <div className="flex items-center gap-2 mb-0.5">
@@ -513,6 +618,12 @@ export default function LinkedInPostStudio() {
                 className="max-h-72 mx-auto rounded border border-border mb-4"
               />
             )}
+            {(viewItem.input_data as any)?.postText && (
+              <div className="text-[11px] text-foreground/70 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source post</div>
+                {(viewItem.input_data as any).postText}
+              </div>
+            )}
             {(viewItem.input_data as any)?.extraContext && (
               <div className="text-[11px] text-muted-foreground mb-3">
                 <span className="font-semibold text-foreground/80">Direction: </span>
@@ -522,7 +633,22 @@ export default function LinkedInPostStudio() {
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed border-t border-border pt-4">
               {(viewItem.output_data as any)?.body}
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
+              <Button
+                size="sm"
+                onClick={() => {
+                  const src = (viewItem.input_data as any)?.postText
+                    || `[screenshot: ${(viewItem.input_data as any)?.fileName || 'LinkedIn post'}]`;
+                  const draft = (viewItem.output_data as any)?.body || '';
+                  setViewItem(null);
+                  createPostFromResponse(src, draft);
+                }}
+                disabled={creatingPost}
+                className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+              >
+                {creatingPost ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand className="w-3 h-3 mr-1" />}
+                Create standalone post
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -538,6 +664,7 @@ export default function LinkedInPostStudio() {
                 <Trash2 className="w-3 h-3 mr-1 text-red-400" /> Delete
               </Button>
             </div>
+
           </div>
         </div>
       )}
