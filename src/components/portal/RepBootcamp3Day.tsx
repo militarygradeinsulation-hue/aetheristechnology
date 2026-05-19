@@ -286,8 +286,14 @@ export const RepBootcamp3Day: React.FC = () => {
                                 <div className={`text-sm ${checked ? "line-through text-muted-foreground" : ""}`}>{t.label}</div>
                                 {t.detail && <div className="text-[11px] text-muted-foreground mt-0.5">{t.detail}</div>}
                                 {t.route && (
-                                  <a href={t.route} className="text-[11px] text-amber hover:underline font-mono mt-0.5 inline-block">
-                                    open → {t.route}
+                                  <a
+                                    href={t.route}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-[11px] text-amber hover:underline font-mono mt-0.5 inline-block"
+                                  >
+                                    open → {t.route} ↗
                                   </a>
                                 )}
                               </div>
