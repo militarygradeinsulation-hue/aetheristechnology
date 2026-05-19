@@ -74,28 +74,16 @@ TASK
 ═══════════════════════════════════════════════════════════
 The image attached is a screenshot of someone's LinkedIn post.
 
-1. Read the post in the image carefully. Identify the author's core claim and the surface framing.
-2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (60–110 words)" : "standalone LinkedIn POST response (120–180 words)"} in the AETHERIS forensic operator voice.
-3. Do NOT summarize the original post. Engage with it directly. Reframe → audit anchor → mechanism → verdict.
-4. If the author's framing is surface-level, name the system underneath it. If they're right, extend their point with a forensic mechanism they didn't name.
-5. Never start with "Great post", "I agree", or compliments. Never tag the author with @ unless their handle is clearly visible AND it strengthens the response.
+1. Read the post carefully. Identify the author's core claim and the surface framing.
+2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
+3. Open with one of the signature openers ("The part people miss is that…" / "What most operators get wrong here is…" / "I've watched this pattern repeat…"). Never with a compliment or agreement.
+4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor. This is a real operator speaking from real reps, not a brand voice.
+5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
+6. Reference "At Aetheris.technology we…" at most ONCE, and only if it earns the line.
 ${extraContext ? `\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : ""}
 
-Return ONLY the response text. No commentary, no labels, no quotation marks, no markdown.`;
+Return ONLY the response text. One paragraph. No line breaks between sentences. No commentary, no labels, no quotation marks, no markdown.`;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-    let aiRes: Response;
-    try {
-      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        signal: controller.signal,
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-═══════════════════════════════════════════════════════════
-TASK
-═══════════════════════════════════════════════════════════
 The image attached is a screenshot of someone's LinkedIn post.
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
