@@ -18,6 +18,7 @@
 - [Pricing & Business Model](mem://business/pricing) — Public offers, legacy product status, tiered commission
 - [Brand Strategy](mem://business/brand-strategy) — Specialty-manufacturer wedge, credentials-first positioning, two-offer surface
 - [Content Strategy](mem://marketing/content-strategy) — Automated blog/playbook schedules, LinkedIn 360 Brew
+- [Aetheris Lexicon](mem://marketing/aetheris-lexicon) — REQUIRED Leak Audit™ vocabulary + structural rules for ALL LinkedIn posts/comments/replies (enforced in linkedin-post-respond + linkedin-post-studio)
 - [Visual Identity](mem://style/visual-identity) — Dark theme aesthetics, typography, Vimeo demo rules
 - [Forensic Identity](mem://style/forensic-identity) — Case-file aesthetics, crimson rules (long-form content only)
 - [UI Constraints](mem://style/ui-constraints) — Forbidden UX patterns, floating contact system rules
