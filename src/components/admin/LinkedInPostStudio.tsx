@@ -556,8 +556,11 @@ export default function LinkedInPostStudio() {
                         {img ? (
                           <img src={img} alt="Post" className="w-16 h-16 object-cover rounded border border-border" />
                         ) : (
-                          <div className="w-16 h-16 bg-muted rounded" />
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-muted-foreground" />
+                          </div>
                         )}
+
                       </button>
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
                         <div className="flex items-center gap-2 mb-0.5">
