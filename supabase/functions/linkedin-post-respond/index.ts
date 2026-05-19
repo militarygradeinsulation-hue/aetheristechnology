@@ -239,10 +239,12 @@ Return ONLY the response text. One paragraph. No line breaks between sentences. 
 
     const userInstruction = `${STYLE_GUIDE}
 
+${AETHERIS_LEXICON}
+
 ═══════════════════════════════════════════════════════════
 TASK
 ═══════════════════════════════════════════════════════════
-${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.` : topLevelTaskBlock}`;
+${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor in Cost of the Leak with a real number? (c) Did I close on Revenue Recovery or Revenue Loop language? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLEXICON CHECK BEFORE OUTPUT: (a) Named specific leak category? (b) Anchored a number in Cost of the Leak / COI framing? (c) Closed on Revenue Recovery or Revenue Loop? Rewrite if any answer is no.`}`;
 
 
 
