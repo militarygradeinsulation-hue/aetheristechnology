@@ -120,6 +120,38 @@ export default function LinkedInPostStudio() {
   const [respondOutput, setRespondOutput] = useState('');
   const [respondCopied, setRespondCopied] = useState(false);
 
+  // Response library state
+  const [responseLibrary, setResponseLibrary] = useState<AdminLibraryItem[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(true);
+  const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
+
+  const loadResponseLibrary = useCallback(async () => {
+    setLibraryLoading(true);
+    try {
+      const items = await listAdminLibrary();
+      setResponseLibrary(items.filter(i => i.tool_type === 'linkedin_response'));
+    } catch (e) {
+      // silent
+    } finally {
+      setLibraryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadResponseLibrary(); }, [loadResponseLibrary]);
+
+  const deleteLibraryItem = async (id: string) => {
+    if (!confirm('Delete this saved response?')) return;
+    try {
+      await deleteFromAdminLibrary(id);
+      setResponseLibrary(prev => prev.filter(i => i.id !== id));
+      if (viewItem?.id === id) setViewItem(null);
+      toast({ title: 'Deleted' });
+    } catch (e) {
+      toast({ title: 'Delete failed', variant: 'destructive' });
+    }
+  };
+
   const handleRespondFile = (file: File | null | undefined) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
