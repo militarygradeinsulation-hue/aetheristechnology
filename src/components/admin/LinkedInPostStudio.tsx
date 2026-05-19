@@ -176,8 +176,13 @@ export default function LinkedInPostStudio() {
   };
 
   const generateResponse = async () => {
-    if (!respondImage) {
+    const useImage = respondSourceType === 'image';
+    if (useImage && !respondImage) {
       toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    if (!useImage && respondText.trim().length < 20) {
+      toast({ title: 'Paste the post text first (at least 20 chars)', variant: 'destructive' });
       return;
     }
     setRespondLoading(true);
@@ -185,7 +190,9 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
-        body: { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() },
+        body: useImage
+          ? { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() }
+          : { postText: respondText.trim(), mode: respondMode, extraContext: respondExtra.trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -200,8 +207,10 @@ export default function LinkedInPostStudio() {
             tool_type: 'linkedin_response',
             title: firstLine.slice(0, 90),
             input_data: {
-              imageDataUrl: respondImage,
-              fileName: respondFileName,
+              imageDataUrl: useImage ? respondImage : null,
+              fileName: useImage ? respondFileName : null,
+              postText: useImage ? null : respondText.trim(),
+              sourceType: respondSourceType,
               mode: respondMode,
               extraContext: respondExtra.trim(),
             },
@@ -219,6 +228,40 @@ export default function LinkedInPostStudio() {
       setRespondLoading(false);
     }
   };
+
+  const createPostFromResponse = async (sourceCtx: string, draft: string) => {
+    if (!draft.trim()) return;
+    setCreatingPost(true);
+    try {
+      const adminToken = getAdminToken();
+      const firstLine = draft.split(/[.!?]/).map(s => s.trim()).find(Boolean) || 'Standalone post';
+      const { data, error } = await supabase.functions.invoke('linkedin-post-studio', {
+        body: {
+          topic: firstLine.slice(0, 180),
+          pillar: '',
+          postType: '',
+          creator: 'none',
+          extraPrompt: `Expand the following diagnostic take into a polished standalone LinkedIn POST for Joseph Toney's own page (200–260 words, ONE dense paragraph, first person, no compliments, no em dashes, no emojis, no questions as closers, mandatory numeric anchor, signature verdict shape). Do NOT reference the source post directly or use phrases like "in response to" or "your post". Make it stand alone as Joseph's original post.\n\nSOURCE CONTEXT THAT INSPIRED IT (do not quote): ${sourceCtx.slice(0, 1200)}\n\nJOSEPH'S DRAFT TAKE TO EXPAND/POLISH: ${draft}`,
+        },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const post = (data.post || '').trim();
+      if (!post) throw new Error('Empty post');
+      setTopic(firstLine.slice(0, 180));
+      setGenerated(post);
+      toast({ title: 'Standalone post created', description: 'Scroll down to copy or schedule it.' });
+      // scroll to bottom-ish
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to create post';
+      toast({ title: 'Could not create post', description: msg, variant: 'destructive' });
+    } finally {
+      setCreatingPost(false);
+    }
+  };
+
 
   const copyResponse = () => {
     navigator.clipboard.writeText(respondOutput);
