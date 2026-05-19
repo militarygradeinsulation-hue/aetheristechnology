@@ -182,22 +182,37 @@ export default function LinkedInPostStudio() {
 
   const generateResponse = async () => {
     const useImage = respondSourceType === 'image';
+    const isReply = respondSourceType === 'reply';
     if (useImage && !respondImage) {
       toast({ title: 'Upload a screenshot first', variant: 'destructive' });
       return;
     }
-    if (!useImage && respondText.trim().length < 20) {
+    if (respondSourceType === 'text' && respondText.trim().length < 20) {
       toast({ title: 'Paste the post text first (at least 20 chars)', variant: 'destructive' });
+      return;
+    }
+    if (isReply && (myComment.trim().length < 10 || theirReply.trim().length < 5)) {
+      toast({ title: 'Paste your comment AND their reply', variant: 'destructive' });
       return;
     }
     setRespondLoading(true);
     setRespondOutput('');
     try {
       const adminToken = getAdminToken();
+      const body = isReply
+        ? {
+            conversationKind: 'reply_to_reply',
+            myComment: myComment.trim(),
+            theirReply: theirReply.trim(),
+            originalPostText: replyOriginalPost.trim(),
+            mode: 'brief',
+            extraContext: respondExtra.trim(),
+          }
+        : useImage
+        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() }
+        : { postText: respondText.trim(), mode: respondMode, extraContext: respondExtra.trim() };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
-        body: useImage
-          ? { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() }
-          : { postText: respondText.trim(), mode: respondMode, extraContext: respondExtra.trim() },
+        body,
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -208,18 +223,22 @@ export default function LinkedInPostStudio() {
       if (post.trim()) {
         try {
           const firstLine = post.split('\n').map((s: string) => s.trim()).find(Boolean) || 'LinkedIn response';
+          const titlePrefix = isReply ? '↳ Reply: ' : '';
           const saved = await saveToAdminLibrary({
             tool_type: 'linkedin_response',
-            title: firstLine.slice(0, 90),
+            title: (titlePrefix + firstLine).slice(0, 90),
             input_data: {
               imageDataUrl: useImage ? respondImage : null,
               fileName: useImage ? respondFileName : null,
-              postText: useImage ? null : respondText.trim(),
+              postText: respondSourceType === 'text' ? respondText.trim() : null,
               sourceType: respondSourceType,
-              mode: respondMode,
+              mode: isReply ? 'reply' : respondMode,
               extraContext: respondExtra.trim(),
+              myComment: isReply ? myComment.trim() : null,
+              theirReply: isReply ? theirReply.trim() : null,
+              originalPostText: isReply ? replyOriginalPost.trim() : null,
             },
-            output_data: { body: post, mode: respondMode },
+            output_data: { body: post, mode: isReply ? 'reply' : respondMode },
           });
           setResponseLibrary(prev => [saved, ...prev]);
         } catch {
