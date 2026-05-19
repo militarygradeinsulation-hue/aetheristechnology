@@ -615,6 +615,12 @@ export default function LinkedInPostStudio() {
                 className="max-h-72 mx-auto rounded border border-border mb-4"
               />
             )}
+            {(viewItem.input_data as any)?.postText && (
+              <div className="text-[11px] text-foreground/70 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source post</div>
+                {(viewItem.input_data as any).postText}
+              </div>
+            )}
             {(viewItem.input_data as any)?.extraContext && (
               <div className="text-[11px] text-muted-foreground mb-3">
                 <span className="font-semibold text-foreground/80">Direction: </span>
@@ -624,7 +630,22 @@ export default function LinkedInPostStudio() {
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed border-t border-border pt-4">
               {(viewItem.output_data as any)?.body}
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
+              <Button
+                size="sm"
+                onClick={() => {
+                  const src = (viewItem.input_data as any)?.postText
+                    || `[screenshot: ${(viewItem.input_data as any)?.fileName || 'LinkedIn post'}]`;
+                  const draft = (viewItem.output_data as any)?.body || '';
+                  setViewItem(null);
+                  createPostFromResponse(src, draft);
+                }}
+                disabled={creatingPost}
+                className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+              >
+                {creatingPost ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand className="w-3 h-3 mr-1" />}
+                Create standalone post
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -640,6 +661,7 @@ export default function LinkedInPostStudio() {
                 <Trash2 className="w-3 h-3 mr-1 text-red-400" /> Delete
               </Button>
             </div>
+
           </div>
         </div>
       )}
