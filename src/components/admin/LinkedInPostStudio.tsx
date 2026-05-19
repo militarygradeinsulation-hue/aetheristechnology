@@ -333,9 +333,14 @@ export default function LinkedInPostStudio() {
             <div className="flex items-center justify-between mb-2">
               <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Forensic Response</div>
               {respondOutput && (
-                <Button variant="outline" size="sm" onClick={copyResponse} className="h-7 text-[10px]">
-                  {respondCopied ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={generateResponse} disabled={respondLoading} className="h-7 text-[10px]">
+                    <RefreshCw className="w-3 h-3 mr-1" /> Redo
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={copyResponse} className="h-7 text-[10px]">
+                    {respondCopied ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+                  </Button>
+                </div>
               )}
             </div>
             {respondLoading ? (
