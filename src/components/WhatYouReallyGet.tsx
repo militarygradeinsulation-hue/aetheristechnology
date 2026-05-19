@@ -1,6 +1,12 @@
 import React from 'react';
 import { ArrowRight, Home, Coffee, Briefcase, Moon, Users, Heart } from 'lucide-react';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
+import buyDinnerHome from '@/assets/infographics/buy-dinner-home.jpg';
+import buyChestRelief from '@/assets/infographics/buy-chest-relief.jpg';
+import buyResumeScan from '@/assets/infographics/buy-resume-scan.jpg';
+import buyFullNightSleep from '@/assets/infographics/buy-full-night-sleep.jpg';
+import buyWeekendBack from '@/assets/infographics/buy-weekend-back.jpg';
+import buyToolsCatalog from '@/assets/infographics/buy-tools-catalog.jpg';
 
 type Row = {
   sold: string;
@@ -8,6 +14,8 @@ type Row = {
   given: string;
   givenDetail: string;
   Icon: React.ComponentType<{ className?: string }>;
+  image: string;
+  imageAlt: string;
 };
 
 const rows: Row[] = [
