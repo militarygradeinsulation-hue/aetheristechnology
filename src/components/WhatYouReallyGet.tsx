@@ -1,6 +1,12 @@
 import React from 'react';
 import { ArrowRight, Home, Coffee, Briefcase, Moon, Users, Heart } from 'lucide-react';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
+import buyDinnerHome from '@/assets/infographics/buy-dinner-home.jpg';
+import buyChestRelief from '@/assets/infographics/buy-chest-relief.jpg';
+import buyResumeScan from '@/assets/infographics/buy-resume-scan.jpg';
+import buyFullNightSleep from '@/assets/infographics/buy-full-night-sleep.jpg';
+import buyWeekendBack from '@/assets/infographics/buy-weekend-back.jpg';
+import buyToolsCatalog from '@/assets/infographics/buy-tools-catalog.jpg';
 
 type Row = {
   sold: string;
@@ -8,6 +14,8 @@ type Row = {
   given: string;
   givenDetail: string;
   Icon: React.ComponentType<{ className?: string }>;
+  image: string;
+  imageAlt: string;
 };
 
 const rows: Row[] = [
@@ -17,6 +25,8 @@ const rows: Row[] = [
     given: 'You get home in time for dinner.',
     givenDetail: 'You know that knot in your stomach when a prospect says "I emailed you last week and never heard back"? It\'s because your site quietly broke a form, a redirect, or a tracking pixel and nobody told you. I find every silent break in 30 seconds so you stop losing leads while you\'re trying to eat with your family, and you stop answering "is the site down again?" texts from the driveway at 9pm.',
     Icon: Home,
+    image: buyDinnerHome,
+    imageAlt: 'Father at family dinner table, phone face down, warm lamplight',
   },
   {
     sold: 'The Leak Audit™',
@@ -24,6 +34,8 @@ const rows: Row[] = [
     given: 'You stop carrying it home in your chest.',
     givenDetail: 'Right now you can feel money walking out the door, but you can\'t point to where. That\'s the worst part — not the leak itself, but not knowing. I walk through your business the way a forensic accountant walks a crime scene and put a dollar number on every wound. Then I help you close them. Monday morning stops feeling like a fire drill because for the first time in years, the system actually holds without you holding it up.',
     Icon: Coffee,
+    image: buyChestRelief,
+    imageAlt: 'Weight lifting off an owner\'s chest as the ledger settles',
   },
   {
     sold: 'Resume Forensics',
@@ -31,6 +43,8 @@ const rows: Row[] = [
     given: 'You stop firing in 90 days.',
     givenDetail: 'You already know what a bad hire costs — it\'s not the $40K salary, it\'s the 8 months you spent pretending it was working, the customers they touched, the good people who quit because of them, the "we need to talk" conversation you rehearsed in the shower. I read the resume the way the candidate hopes you won\'t, score the fit against your actual company, and tell you in plain English whether to sign the offer or keep looking. $20 to never have that conversation again.',
     Icon: Users,
+    image: buyResumeScan,
+    imageAlt: 'Resume under amber magnifying glass with fit-score gauge',
   },
   {
     sold: '21-Day Revenue Diagnostic',
@@ -38,6 +52,8 @@ const rows: Row[] = [
     given: 'You finally know where the money went.',
     givenDetail: 'You\'ve been guessing for years. Is it the team? The marketing? The pricing? Me? That guessing is what wakes you up at 3am. In 21 days I hand you a written ledger of the $200K to $2M slipping through your CRM and follow-up, named line by line, with the fix attached to each one. You stop second-guessing yourself in board meetings, stop apologizing to your spouse for being checked out at dinner, and start sleeping a full night for the first time in a long time.',
     Icon: Moon,
+    image: buyFullNightSleep,
+    imageAlt: 'Quiet bedroom at sunrise, untouched phone on nightstand',
   },
   {
     sold: 'Implementation Retainer',
@@ -45,6 +61,8 @@ const rows: Row[] = [
     given: 'You get your weekends back.',
     givenDetail: 'Knowing where the leaks are doesn\'t fix them — somebody has to actually do the work. That somebody has been you, on Saturdays, after the kids go to bed, on the laptop you swore you wouldn\'t open. I take the wrench out of your hand and run the repair work month over month, so your weekend is your kid\'s soccer game and a real cup of coffee, not another "quick sync" that turns into four hours.',
     Icon: Heart,
+    image: buyWeekendBack,
+    imageAlt: 'Closed laptop on kitchen counter with soccer ball and coffee',
   },
   {
     sold: 'AI Tools Catalog',
@@ -52,6 +70,8 @@ const rows: Row[] = [
     given: 'You stop paying consultants for answers you already had.',
     givenDetail: 'You don\'t need another $30K engagement to confirm what your gut\'s been telling you for 18 months. Run the tool yourself for the price of a steak dinner, see the leak with your own eyes, and either fix it in-house or bring me in when you\'re actually ready. Whatever you spend on a tool comes off the bigger engagement. No more being talked down to by consultants who know less about your business than your shop foreman does.',
     Icon: Briefcase,
+    image: buyToolsCatalog,
+    imageAlt: 'Workbench of labeled forensic toolboxes with amber price tags',
   },
 ];
 
@@ -78,7 +98,21 @@ export const WhatYouReallyGet: React.FC = () => {
         <div className="space-y-4">
           {rows.map((r) => (
             <div key={r.sold} className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
-              <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-center">
+              <div className="grid md:grid-cols-[minmax(0,180px)_minmax(0,1fr)_auto_minmax(0,1.4fr)] items-stretch">
+                <div className="relative bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 aspect-square md:aspect-auto md:min-h-[180px] overflow-hidden">
+                  <img
+                    src={r.image}
+                    alt={r.imageAlt}
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
+                    Aetheris AI Studio
+                  </span>
+                </div>
+
                 <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
                   <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
                     {r.sold}
