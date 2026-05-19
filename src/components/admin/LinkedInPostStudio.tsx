@@ -261,6 +261,96 @@ export default function LinkedInPostStudio() {
         </p>
       </div>
 
+      {/* Respond to a LinkedIn post */}
+      <Card className="p-5 glass border-amber/40 space-y-4">
+        <div className="flex items-center gap-2">
+          <MessageSquareReply className="w-4 h-4 text-amber" />
+          <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Respond to a LinkedIn Post</div>
+        </div>
+        <p className="text-xs text-muted-foreground -mt-2">
+          Upload a screenshot of someone's LinkedIn post. The forensic operator voice will read it and write your reply.
+        </p>
+
+        {!respondImage ? (
+          <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30">
+            <Upload className="w-6 h-6 text-muted-foreground" />
+            <div className="text-sm font-semibold text-foreground">Upload screenshot</div>
+            <div className="text-[11px] text-muted-foreground">PNG, JPG, or WEBP (max 10 MB)</div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleRespondFile(e.target.files?.[0])}
+            />
+          </label>
+        ) : (
+          <div className="relative rounded-lg border border-border bg-background/40 p-3">
+            <button
+              type="button"
+              onClick={() => { setRespondImage(null); setRespondFileName(''); setRespondOutput(''); }}
+              className="absolute top-2 right-2 bg-background/80 border border-border rounded-full p-1 hover:bg-background"
+              aria-label="Remove image"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+            <img src={respondImage} alt="Uploaded LinkedIn post" className="max-h-72 mx-auto rounded" />
+            <div className="text-[11px] text-muted-foreground mt-2 text-center truncate">{respondFileName}</div>
+          </div>
+        )}
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Response Format</div>
+            <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'brief' | 'full')}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="brief">Comment Reply (60-110 words)</SelectItem>
+                <SelectItem value="full">Standalone Repost (120-180 words)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Extra Direction (optional)</div>
+            <Input
+              placeholder="e.g. Disagree with their framing. Lead with a stat."
+              value={respondExtra}
+              onChange={(e) => setRespondExtra(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <Button
+          onClick={generateResponse}
+          disabled={respondLoading || !respondImage}
+          className="w-full bg-amber text-background hover:bg-amber/90"
+        >
+          {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
+          {respondLoading ? 'Reading post & drafting response…' : 'Respond to this post'}
+        </Button>
+
+        {(respondLoading || respondOutput) && (
+          <div className="rounded-lg border border-border bg-background/40 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Forensic Response</div>
+              {respondOutput && (
+                <Button variant="outline" size="sm" onClick={copyResponse} className="h-7 text-[10px]">
+                  {respondCopied ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+                </Button>
+              )}
+            </div>
+            {respondLoading ? (
+              <div className="space-y-2">
+                {[90, 75, 85, 60].map((w, i) => (
+                  <div key={i} className="h-3 rounded bg-muted animate-pulse" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{respondOutput}</div>
+            )}
+          </div>
+        )}
+      </Card>
+
       <Card className="p-5 glass border-border space-y-4">
         <div>
           <div className="flex items-center justify-between mb-2">
