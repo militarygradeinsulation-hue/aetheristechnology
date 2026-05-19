@@ -98,7 +98,21 @@ export const WhatYouReallyGet: React.FC = () => {
         <div className="space-y-4">
           {rows.map((r) => (
             <div key={r.sold} className="forensic-tile rounded-sm border border-amber/30 overflow-hidden">
-              <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.4fr)] items-center">
+              <div className="grid md:grid-cols-[minmax(0,180px)_minmax(0,1fr)_auto_minmax(0,1.4fr)] items-stretch">
+                <div className="relative bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 aspect-square md:aspect-auto md:min-h-[180px] overflow-hidden">
+                  <img
+                    src={r.image}
+                    alt={r.imageAlt}
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
+                    Aetheris AI Studio
+                  </span>
+                </div>
+
                 <div className="p-6 md:p-7 bg-background/40 border-b md:border-b-0 md:border-r border-amber/15 flex flex-col justify-center">
                   <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground/85 mb-2 leading-tight">
                     {r.sold}
