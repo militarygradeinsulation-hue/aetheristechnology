@@ -129,11 +129,14 @@ Return ONLY the response text. One paragraph. No line breaks between sentences. 
             { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing a LinkedIn comment in first person. ONE dense paragraph, no line breaks. Open with 'The part people miss is that…' or similar. Use I/I've/I see. No em dashes. No emojis. No compliments. No motivational language. No questions at the end." },
             {
               role: "user",
-              content: [
-                { type: "text", text: userInstruction },
-                { type: "image_url", image_url: { url: imageDataUrl } },
-              ],
+              content: hasImage
+                ? [
+                    { type: "text", text: userInstruction },
+                    { type: "image_url", image_url: { url: imageDataUrl } },
+                  ]
+                : userInstruction,
             },
+
           ],
         }),
       });
