@@ -407,7 +407,140 @@ export default function LinkedInPostStudio() {
             )}
           </div>
         )}
+
+        {/* Response Library */}
+        <div className="pt-3 border-t border-border/60">
+          <button
+            type="button"
+            onClick={() => setLibraryOpen(o => !o)}
+            className="w-full flex items-center justify-between text-left group"
+          >
+            <div className="flex items-center gap-2">
+              <Library className="w-4 h-4 text-amber" />
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">
+                Response Library
+              </div>
+              <span className="text-[10px] text-muted-foreground">({responseLibrary.length})</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground group-hover:text-amber">
+              {libraryOpen ? 'Hide' : 'Show'}
+            </span>
+          </button>
+
+          {libraryOpen && (
+            <div className="mt-3 space-y-2 max-h-96 overflow-y-auto pr-1">
+              {libraryLoading ? (
+                <div className="text-[11px] text-muted-foreground">Loading…</div>
+              ) : responseLibrary.length === 0 ? (
+                <div className="text-[11px] text-muted-foreground">
+                  No saved responses yet. Generate one above and it will be saved here automatically.
+                </div>
+              ) : (
+                responseLibrary.map((item) => {
+                  const img = (item.input_data as any)?.imageDataUrl as string | undefined;
+                  const body = (item.output_data as any)?.body as string | undefined;
+                  const mode = (item.output_data as any)?.mode as string | undefined;
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 p-2 rounded-md border border-border bg-background/40 hover:border-amber/40 transition"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setViewItem(item)}
+                        className="flex-shrink-0"
+                        aria-label="View"
+                      >
+                        {img ? (
+                          <img src={img} alt="Post" className="w-16 h-16 object-cover rounded border border-border" />
+                        ) : (
+                          <div className="w-16 h-16 bg-muted rounded" />
+                        )}
+                      </button>
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[9px] uppercase tracking-wider text-amber/80">
+                            {mode === 'full' ? 'Repost' : 'Reply'}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground">
+                            {new Date(item.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-xs text-foreground/90 line-clamp-2">{body}</div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => { navigator.clipboard.writeText(body || ''); toast({ title: 'Copied' }); }}
+                          title="Copy"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => deleteLibraryItem(item.id)}
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-400" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
       </Card>
+
+      {viewItem && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setViewItem(null)}>
+          <div className="bg-background rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative border border-border" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setViewItem(null)}>
+              <X className="w-5 h-5" />
+            </Button>
+            <div className="text-[10px] uppercase tracking-widest text-amber mb-2">
+              {(viewItem.output_data as any)?.mode === 'full' ? 'Standalone Repost' : 'Comment Reply'} · {new Date(viewItem.created_at).toLocaleString()}
+            </div>
+            {(viewItem.input_data as any)?.imageDataUrl && (
+              <img
+                src={(viewItem.input_data as any).imageDataUrl}
+                alt="Original post"
+                className="max-h-72 mx-auto rounded border border-border mb-4"
+              />
+            )}
+            {(viewItem.input_data as any)?.extraContext && (
+              <div className="text-[11px] text-muted-foreground mb-3">
+                <span className="font-semibold text-foreground/80">Direction: </span>
+                {(viewItem.input_data as any).extraContext}
+              </div>
+            )}
+            <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed border-t border-border pt-4">
+              {(viewItem.output_data as any)?.body}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { navigator.clipboard.writeText((viewItem.output_data as any)?.body || ''); toast({ title: 'Copied' }); }}
+              >
+                <Copy className="w-3 h-3 mr-1" /> Copy
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => deleteLibraryItem(viewItem.id)}
+              >
+                <Trash2 className="w-3 h-3 mr-1 text-red-400" /> Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Card className="p-5 glass border-border space-y-4">
         <div>
