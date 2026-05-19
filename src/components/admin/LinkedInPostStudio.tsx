@@ -111,8 +111,8 @@ export default function LinkedInPostStudio() {
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
 
-  // Respond-to-post (image upload OR pasted text) state
-  const [respondSourceType, setRespondSourceType] = useState<'image' | 'text'>('image');
+  // Respond-to-post (image upload OR pasted text OR reply-to-reply) state
+  const [respondSourceType, setRespondSourceType] = useState<'image' | 'text' | 'reply'>('image');
   const [respondImage, setRespondImage] = useState<string | null>(null);
   const [respondFileName, setRespondFileName] = useState<string>('');
   const [respondText, setRespondText] = useState<string>('');
@@ -122,6 +122,11 @@ export default function LinkedInPostStudio() {
   const [respondOutput, setRespondOutput] = useState('');
   const [respondCopied, setRespondCopied] = useState(false);
   const [creatingPost, setCreatingPost] = useState(false);
+
+  // Reply-to-reply fields
+  const [myComment, setMyComment] = useState('');
+  const [theirReply, setTheirReply] = useState('');
+  const [replyOriginalPost, setReplyOriginalPost] = useState('');
 
 
   // Response library state
