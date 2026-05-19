@@ -65,23 +65,39 @@ ${extraContext ? `\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : ""}
 
 Return ONLY the response text. No commentary, no labels, no quotation marks, no markdown.`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: "You are the AETHERIS forensic operator. Reframe → audit anchor → mechanism → verdict. No em dashes. No emojis. No hedging. No motivational language." },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: userInstruction },
-              { type: "image_url", image_url: { url: imageDataUrl } },
-            ],
-          },
-        ],
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+    let aiRes: Response;
+    try {
+      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        signal: controller.signal,
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: "You are the AETHERIS forensic operator. Reframe → audit anchor → mechanism → verdict. No em dashes. No emojis. No hedging. No motivational language." },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userInstruction },
+                { type: "image_url", image_url: { url: imageDataUrl } },
+              ],
+            },
+          ],
+        }),
+      });
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err instanceof Error && err.name === "AbortError") {
+        return new Response(JSON.stringify({ error: "AI took too long. Try a smaller image or retry." }), {
+          status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw err;
+    }
+    clearTimeout(timeoutId);
 
     if (!aiRes.ok) {
       const t = await aiRes.text();
