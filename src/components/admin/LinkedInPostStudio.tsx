@@ -368,8 +368,10 @@ export default function LinkedInPostStudio() {
           <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Respond to a LinkedIn Post</div>
         </div>
         <p className="text-xs text-muted-foreground -mt-2">
-          Upload a screenshot of someone's LinkedIn post. The forensic operator voice will read it and write your reply.
+          Upload a screenshot OR paste the post text. The forensic operator voice will read it and write your reply.
+          Then turn that reply into a standalone post for your own page.
         </p>
+
 
         <div className="flex gap-1 p-1 bg-background/40 border border-border rounded-md w-fit">
           <button
