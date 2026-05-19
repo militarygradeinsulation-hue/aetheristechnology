@@ -136,7 +136,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You write LinkedIn posts in 2026 short-line style. Diagnostic operator voice. No em dashes. Return only valid JSON." },
+          { role: "system", content: "You are the AETHERIS forensic operator. Reframe → audit anchor → mechanism → verdict. No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON." },
           { role: "user", content: prompt },
         ],
       }),
