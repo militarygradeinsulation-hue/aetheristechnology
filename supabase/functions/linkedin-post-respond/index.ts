@@ -81,14 +81,19 @@ serve(async (req) => {
 
     const body = await req.json();
     const imageDataUrl: string = body?.imageDataUrl || "";
+    const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
     const mode: string = body?.mode === "brief" ? "brief" : "full"; // "brief" = comment, "full" = standalone repost
 
-    if (!imageDataUrl || !imageDataUrl.startsWith("data:image/")) {
-      return new Response(JSON.stringify({ error: "imageDataUrl (data:image/...) required" }), {
+    const hasImage = imageDataUrl && imageDataUrl.startsWith("data:image/");
+    const hasText = postText.length > 10;
+
+    if (!hasImage && !hasText) {
+      return new Response(JSON.stringify({ error: "imageDataUrl or postText required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     const userInstruction = `${STYLE_GUIDE}
 
