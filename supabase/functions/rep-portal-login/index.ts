@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const code = String(body?.code || "").trim();
     if (!/^\d{4,12}$/.test(code)) {
-      return new Response(JSON.stringify({ error: "Invalid code format" }), {
-        status: 400,
+      return new Response(JSON.stringify({ ok: false, error: "Invalid code format" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
