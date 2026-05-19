@@ -111,6 +111,65 @@ export default function LinkedInPostStudio() {
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
 
+  // Respond-to-post (image upload) state
+  const [respondImage, setRespondImage] = useState<string | null>(null);
+  const [respondFileName, setRespondFileName] = useState<string>('');
+  const [respondMode, setRespondMode] = useState<'brief' | 'full'>('brief');
+  const [respondExtra, setRespondExtra] = useState('');
+  const [respondLoading, setRespondLoading] = useState(false);
+  const [respondOutput, setRespondOutput] = useState('');
+  const [respondCopied, setRespondCopied] = useState(false);
+
+  const handleRespondFile = (file: File | null | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Please upload an image file', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'Image too large (max 10 MB)', variant: 'destructive' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRespondImage(reader.result as string);
+      setRespondFileName(file.name);
+      setRespondOutput('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const generateResponse = async () => {
+    if (!respondImage) {
+      toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    setRespondLoading(true);
+    setRespondOutput('');
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
+        body: { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setRespondOutput(data.post || '');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Generation failed';
+      toast({ title: 'Failed to generate response', description: msg, variant: 'destructive' });
+    } finally {
+      setRespondLoading(false);
+    }
+  };
+
+  const copyResponse = () => {
+    navigator.clipboard.writeText(respondOutput);
+    setRespondCopied(true);
+    setTimeout(() => setRespondCopied(false), 1800);
+    toast({ title: 'Copied to clipboard' });
+  };
+
   const generate = async () => {
     if (!topic.trim()) {
       toast({ title: 'Add a topic first', variant: 'destructive' });
