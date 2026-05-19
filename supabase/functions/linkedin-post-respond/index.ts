@@ -93,9 +93,34 @@ Return ONLY the response text. No commentary, no labels, no quotation marks, no 
         signal: controller.signal,
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
+═══════════════════════════════════════════════════════════
+TASK
+═══════════════════════════════════════════════════════════
+The image attached is a screenshot of someone's LinkedIn post.
+
+1. Read the post carefully. Identify the author's core claim and the surface framing.
+2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
+3. Open with one of the signature openers ("The part people miss is that…" / "What most operators get wrong here is…" / "I've watched this pattern repeat…"). Never with a compliment or agreement.
+4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor — this is a real operator speaking from real reps, not a brand voice.
+5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
+6. Reference "At Aetheris.technology we…" at most ONCE, and only if it earns the line.
+${extraContext ? `\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : ""}
+
+Return ONLY the response text. One paragraph. No line breaks between sentences. No commentary, no labels, no quotation marks, no markdown.`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+    let aiRes: Response;
+    try {
+      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        signal: controller.signal,
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You are the AETHERIS forensic operator. Reframe → audit anchor → mechanism → verdict. No em dashes. No emojis. No hedging. No motivational language." },
+            { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing a LinkedIn comment in first person. ONE dense paragraph, no line breaks. Open with 'The part people miss is that…' or similar. Use I/I've/I see. No em dashes. No emojis. No compliments. No motivational language. No questions at the end." },
             {
               role: "user",
               content: [
