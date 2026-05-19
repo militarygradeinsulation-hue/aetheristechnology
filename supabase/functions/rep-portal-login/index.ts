@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (error || !data) {
-      return new Response(JSON.stringify({ error: "Invalid or inactive code" }), {
-        status: 401,
+      return new Response(JSON.stringify({ ok: false, error: "Invalid or inactive code" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
