@@ -392,12 +392,12 @@ export default function LinkedInPostStudio() {
           <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Respond to a LinkedIn Post</div>
         </div>
         <p className="text-xs text-muted-foreground -mt-2">
-          Upload a screenshot OR paste the post text. The forensic operator voice will read it and write your reply.
-          Then turn that reply into a standalone post for your own page.
+          Upload a screenshot, paste a post, or paste a reply someone left on your comment.
+          The forensic voice handles the gear shift between top-level diagnosis and thread reply.
         </p>
 
 
-        <div className="flex gap-1 p-1 bg-background/40 border border-border rounded-md w-fit">
+        <div className="flex flex-wrap gap-1 p-1 bg-background/40 border border-border rounded-md w-fit">
           <button
             type="button"
             onClick={() => setRespondSourceType('image')}
@@ -414,7 +414,17 @@ export default function LinkedInPostStudio() {
               respondSourceType === 'text' ? 'bg-amber text-background font-bold' : 'text-muted-foreground hover:text-amber'
             }`}
           >
-            <FileText className="w-3 h-3" /> Paste text
+            <FileText className="w-3 h-3" /> Paste post
+          </button>
+          <button
+            type="button"
+            onClick={() => setRespondSourceType('reply')}
+            className={`text-[10px] uppercase tracking-wider px-3 py-1.5 rounded flex items-center gap-1.5 transition ${
+              respondSourceType === 'reply' ? 'bg-amber text-background font-bold' : 'text-muted-foreground hover:text-amber'
+            }`}
+            title="Someone replied to your comment — write the next reply back to them"
+          >
+            <MessageSquareReply className="w-3 h-3" /> Reply to reply
           </button>
         </div>
 
@@ -445,7 +455,7 @@ export default function LinkedInPostStudio() {
               <div className="text-[11px] text-muted-foreground mt-2 text-center truncate">{respondFileName}</div>
             </div>
           )
-        ) : (
+        ) : respondSourceType === 'text' ? (
           <Textarea
             rows={8}
             placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
@@ -453,24 +463,59 @@ export default function LinkedInPostStudio() {
             onChange={(e) => setRespondText(e.target.value)}
             className="text-sm"
           />
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Original post (optional context)</div>
+              <Textarea
+                rows={3}
+                placeholder="Optional: paste the original post you commented on. Helps anchor the thread."
+                value={replyOriginalPost}
+                onChange={(e) => setReplyOriginalPost(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Your prior comment</div>
+              <Textarea
+                rows={4}
+                placeholder="Paste the comment YOU wrote (the one they're replying to)."
+                value={myComment}
+                onChange={(e) => setMyComment(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Their reply to you</div>
+              <Textarea
+                rows={4}
+                placeholder="Paste their reply to your comment. This is what you're answering."
+                value={theirReply}
+                onChange={(e) => setTheirReply(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+          </div>
         )}
 
 
         <div className="grid sm:grid-cols-2 gap-3">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Response Format</div>
-            <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'brief' | 'full')}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="brief">Comment Reply (60-110 words)</SelectItem>
-                <SelectItem value="full">Standalone Repost (120-180 words)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
+          {respondSourceType !== 'reply' && (
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Response Format</div>
+              <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'brief' | 'full')}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="brief">Comment Reply (60-110 words)</SelectItem>
+                  <SelectItem value="full">Standalone Repost (120-180 words)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className={respondSourceType === 'reply' ? 'sm:col-span-2' : ''}>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Extra Direction (optional)</div>
             <Input
-              placeholder="e.g. Disagree with their framing. Lead with a stat."
+              placeholder={respondSourceType === 'reply' ? 'e.g. Push back hard on their second point.' : 'e.g. Disagree with their framing. Lead with a stat.'}
               value={respondExtra}
               onChange={(e) => setRespondExtra(e.target.value)}
             />
@@ -479,7 +524,12 @@ export default function LinkedInPostStudio() {
 
         <Button
           onClick={generateResponse}
-          disabled={respondLoading || (respondSourceType === 'image' ? !respondImage : respondText.trim().length < 20)}
+          disabled={
+            respondLoading ||
+            (respondSourceType === 'image' && !respondImage) ||
+            (respondSourceType === 'text' && respondText.trim().length < 20) ||
+            (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+          }
           className="w-full bg-amber text-background hover:bg-amber/90"
         >
           {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
