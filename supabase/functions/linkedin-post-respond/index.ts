@@ -172,6 +172,13 @@ ${extraContext ? `\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : ""}
 
 Return ONLY the response text. One paragraph. No line breaks between sentences. No commentary, no labels, no quotation marks, no markdown.`;
 
+    const userInstruction = `${STYLE_GUIDE}
+
+═══════════════════════════════════════════════════════════
+TASK
+═══════════════════════════════════════════════════════════
+${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.` : topLevelTaskBlock}`;
+
 
 
     const controller = new AbortController();
