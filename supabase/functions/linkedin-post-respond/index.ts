@@ -118,23 +118,49 @@ serve(async (req) => {
     const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
     const mode: string = body?.mode === "brief" ? "brief" : "full"; // "brief" = comment, "full" = standalone repost
+    const conversationKind: string = body?.conversationKind === "reply_to_reply" ? "reply_to_reply" : "comment_on_post";
+    const myComment: string = (body?.myComment || "").toString().trim();
+    const theirReply: string = (body?.theirReply || "").toString().trim();
+    const originalPostText: string = (body?.originalPostText || "").toString().trim();
 
     const hasImage = imageDataUrl && imageDataUrl.startsWith("data:image/");
     const hasText = postText.length > 10;
+    const isReplyToReply = conversationKind === "reply_to_reply";
 
-    if (!hasImage && !hasText) {
+    if (isReplyToReply) {
+      if (myComment.length < 10 || theirReply.length < 5) {
+        return new Response(JSON.stringify({ error: "myComment and theirReply required (paste both)" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else if (!hasImage && !hasText) {
       return new Response(JSON.stringify({ error: "imageDataUrl or postText required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR (Joseph's) comment, and you are writing the next reply back to THEM directly.
 
-    const userInstruction = `${STYLE_GUIDE}
+${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
+"""
+${myComment}
+"""
 
-═══════════════════════════════════════════════════════════
-TASK
-═══════════════════════════════════════════════════════════
-${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
+THEIR REPLY TO YOU (this is who you're now answering):
+"""
+${theirReply}
+"""
+
+GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level comment):
+- This is conversational, not a fresh diagnosis. You already made the diagnosis upstream.
+- Acknowledge or engage their specific point in the first clause. Name what they got right OR sharpen where their framing slips. No compliments ("great point"), no "thanks for the thoughtful reply" — just engage the substance directly.
+- DO NOT re-open with one of the forensic "I see this in audits weekly" openers. That's for top-level comments. Here the opener is a direct hook into THEIR words: "Where I'd push back on that is…", "Right on the [X], but the [Y] piece is where it gets interesting…", "That's the version most people land on. The deeper read is…", "Agreed on [X]. Where it gets messy is [Y]."
+- Shorter than a top-level comment: 80–140 words. ONE dense paragraph. No line breaks.
+- Still first person ("I", "I've", "in my audits"). Still systems-first. Still one numeric anchor if it earns the line.
+- End with a tight verdict OR a single sharp clarifying line that hands the conversation back without asking a soft permission question. ("That's the line that separates X from Y." is fine. "Does that make sense?" is banned.)
+- All other HARD BANS still apply (no em dashes, no emojis, no motivational language, no compliments, no questions as closers unless it's a forensic challenge).`;
+
+    const topLevelTaskBlock = `${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
 2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
