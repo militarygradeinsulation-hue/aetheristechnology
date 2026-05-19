@@ -533,7 +533,9 @@ export default function LinkedInPostStudio() {
           className="w-full bg-amber text-background hover:bg-amber/90"
         >
           {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
-          {respondLoading ? 'Reading post & drafting response…' : 'Respond to this post'}
+          {respondLoading
+            ? (respondSourceType === 'reply' ? 'Reading the thread & drafting reply…' : 'Reading post & drafting response…')
+            : (respondSourceType === 'reply' ? 'Reply to their comment' : 'Respond to this post')}
         </Button>
 
 
