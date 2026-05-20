@@ -87,6 +87,23 @@ function buildDossier(payload: any): string {
     lines.push("\n=== FORENSIC SCAN === (not run yet)");
   }
 
+  // Admin enrichment (admin-enrich-lead output: score, weak_points, talking_points, icebreaker, decision_makers, score_reason, estimated_revenue_band, confidence)
+  const enr = payload?.enrichment;
+  if (enr && typeof enr === "object") {
+    lines.push("\n=== ADMIN AI ENRICHMENT ===");
+    if (payload?.score != null) lines.push(`Admin score: ${payload.score}`);
+    if (enr.score_reason) lines.push(`Score reason: ${String(enr.score_reason).slice(0, 600)}`);
+    if (Array.isArray(enr.weak_points) && enr.weak_points.length) lines.push(`Weak points: ${enr.weak_points.slice(0, 8).join(" | ")}`);
+    if (Array.isArray(enr.talking_points) && enr.talking_points.length) lines.push(`Talking points: ${enr.talking_points.slice(0, 8).join(" | ")}`);
+    if (enr.icebreaker) lines.push(`Prior icebreaker: ${enr.icebreaker}`);
+    if (Array.isArray(enr.decision_makers) && enr.decision_makers.length) {
+      lines.push("Likely decision makers:");
+      enr.decision_makers.slice(0, 5).forEach((d: any) => lines.push(`  - ${d.role || ""}: ${d.why || ""}`));
+    }
+    if (enr.estimated_revenue_band) lines.push(`Revenue band: ${enr.estimated_revenue_band}`);
+    if (enr.confidence) lines.push(`Confidence: ${enr.confidence}`);
+  }
+
   if (rocketreach) {
     lines.push("\n=== CONTACT INTEL (RocketReach) ===");
     lines.push(`Name: ${rocketreach.name || ""}`);
