@@ -192,29 +192,53 @@ export const AdminAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating launcher button */}
+      {/* Floating launcher button — draggable */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open Operator Assistant"
-          className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
+        <div
+          className="fixed z-50"
+          style={{ left: launcherPos.x, top: launcherPos.y }}
         >
-          <Wrench className="w-4 h-4" />
-          <span className="font-mono text-xs uppercase tracking-wider font-bold">Operator</span>
-          <MessageCircle className="w-4 h-4" />
-        </button>
+          <div className="group flex items-center rounded-full bg-amber text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow">
+            <button
+              type="button"
+              onPointerDown={startDrag('launcher')}
+              title="Drag to move"
+              aria-label="Drag launcher"
+              className="pl-2 pr-1 py-3 cursor-grab active:cursor-grabbing touch-none"
+            >
+              <GripVertical className="w-4 h-4 opacity-80" />
+            </button>
+            <button
+              onClick={() => { if (!dragRef.current?.moved) setIsOpen(true); }}
+              aria-label="Open Operator Assistant"
+              className="flex items-center gap-2 pr-4 pl-1 py-3"
+            >
+              <Wrench className="w-4 h-4" />
+              <span className="font-mono text-xs uppercase tracking-wider font-bold">Operator</span>
+              <MessageCircle className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Panel */}
+      {/* Panel — draggable via header */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden">
-          {/* Header, case-file styling */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
+        <div
+          className="fixed z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden"
+          style={{ left: panelPos.x, top: panelPos.y }}
+        >
+          {/* Header, case-file styling — drag handle */}
+          <div
+            className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60 cursor-grab active:cursor-grabbing touch-none select-none"
+            onPointerDown={startDrag('panel')}
+          >
             <div className="flex items-center gap-2">
+              <GripVertical className="w-3.5 h-3.5 text-amber/70" />
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
                 Case File · Operator Assistant
               </span>
             </div>
+
             <div className="flex items-center gap-1">
               <button
                 onClick={resetConversation}
