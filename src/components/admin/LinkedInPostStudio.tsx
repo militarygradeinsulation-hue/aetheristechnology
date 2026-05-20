@@ -848,6 +848,49 @@ export default function LinkedInPostStudio() {
         </div>
       </Card>
 
+      {/* URL / YouTube → Aetheris Post */}
+      <Card className="p-5 glass border-amber/40 space-y-3">
+        <div className="flex items-center gap-2">
+          <LinkIcon className="w-4 h-4 text-amber" />
+          <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Post from URL or YouTube</div>
+        </div>
+        <p className="text-xs text-muted-foreground -mt-1">
+          Paste an article, blog, podcast page, or YouTube link. The AI reads the source, learns the topic, and writes one original Aetheris post in your forensic voice.
+        </p>
+        <Input
+          placeholder="https://example.com/article or https://youtube.com/watch?v=..."
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+        />
+        <Input
+          placeholder="Optional angle, e.g. 'Reframe their CRM advice as a Follow-Up Failure leak.'"
+          value={sourceExtra}
+          onChange={(e) => setSourceExtra(e.target.value)}
+        />
+        <div className="flex gap-2">
+          <Button
+            onClick={generateFromUrl}
+            disabled={sourceLoading || !sourceUrl.trim()}
+            className="flex-1 bg-amber text-background hover:bg-amber/90"
+          >
+            {sourceLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Wand className="w-4 h-4 mr-2" />}
+            {sourceLoading ? 'Scanning source & writing post…' : 'Scan source & write Aetheris post'}
+          </Button>
+          {(sourceUrl || sourceExtra) && (
+            <Button
+              variant="ghost"
+              onClick={() => { setSourceUrl(''); setSourceExtra(''); }}
+              disabled={sourceLoading}
+              className="text-muted-foreground hover:text-amber"
+            >
+              <Eraser className="w-3 h-3 mr-1" /> Clear
+            </Button>
+          )}
+        </div>
+      </Card>
+
+
+
       <Card className="p-5 glass border-border space-y-4">
         <div className="text-[10px] uppercase tracking-widest font-bold text-amber">02, Parameters</div>
         <div className="grid md:grid-cols-2 gap-3">
