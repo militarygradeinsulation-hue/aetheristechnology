@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download } from 'lucide-react';
+import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
-import type { RepLead, LeadScan } from '@/lib/portalLeads';
+import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
+
+type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
 interface Props {
   lead: Partial<RepLead> & Record<string, any>;
