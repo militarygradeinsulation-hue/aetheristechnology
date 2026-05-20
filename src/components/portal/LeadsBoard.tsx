@@ -1132,6 +1132,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
 
+          {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+          <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
           <div className="flex flex-wrap gap-2">
