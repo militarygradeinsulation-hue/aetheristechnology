@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon, Crop } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
+import { ScreenSnip } from '@/components/ScreenSnip';
 
 type Attachment =
   | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
@@ -65,6 +66,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [snipping, setSnipping] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -385,6 +387,16 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           </button>
           <button
             type="button"
+            onClick={() => setSnipping(true)}
+            disabled={isLoading || isRecording || isTranscribing}
+            aria-label="Snip an area of the screen"
+            title="Drag-select an area of the page and ask about it"
+            className="p-2 rounded-md border bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Crop className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
             onClick={toggleRecording}
             disabled={isLoading || isTranscribing}
             aria-label={isRecording ? 'Stop recording' : 'Record voice'}
@@ -416,7 +428,22 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     </div>
   );
 
-  if (embedded) return Panel;
+  const snipOverlay = snipping ? (
+    <ScreenSnip
+      onCancel={() => setSnipping(false)}
+      onCapture={(dataUrl) => {
+        setSnipping(false);
+        setAttachments((prev) => [
+          ...prev,
+          { kind: 'image', name: `screen-snip-${Date.now()}.png`, dataUrl, mimeType: 'image/png' },
+        ]);
+        setIsOpen(true);
+        setInput((cur) => cur || 'Explain what is in this part of the screen and answer my questions about it.');
+      }}
+    />
+  ) : null;
+
+  if (embedded) return <>{Panel}{snipOverlay}</>;
 
   return (
     <>
@@ -432,6 +459,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
         </button>
       )}
       {isOpen && Panel}
+      {snipOverlay}
     </>
   );
 };
