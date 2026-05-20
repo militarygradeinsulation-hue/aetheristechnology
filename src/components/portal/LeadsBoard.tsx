@@ -19,6 +19,7 @@ import {
 } from '@/lib/portalLeads';
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
+import { DetectiveMode } from './DetectiveMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
