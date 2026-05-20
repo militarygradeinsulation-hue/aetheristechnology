@@ -25,7 +25,7 @@ interface DetectiveResult {
   fallback_subjects?: string[];
 }
 
-export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc }) => {
+export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment, auth = 'portal' }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
@@ -33,14 +33,22 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc }) => {
   const [copied, setCopied] = useState<string | null>(null);
 
   const run = async (ch: 'email' | 'linkedin' = channel) => {
-    const token = getPortalToken();
-    if (!token) { toast({ title: 'Sign in again', variant: 'destructive' }); return; }
+    const headers: Record<string, string> = {};
+    if (auth === 'admin') {
+      const t = getAdminToken();
+      if (!t) { toast({ title: 'Admin session expired', variant: 'destructive' }); return; }
+      headers['x-admin-token'] = t;
+    } else {
+      const t = getPortalToken();
+      if (!t) { toast({ title: 'Sign in again', variant: 'destructive' }); return; }
+      headers['x-portal-token'] = t;
+    }
     setChannel(ch);
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('portal-detective', {
-        body: { lead, scan, rocketreach: rr, firecrawl: fc, channel: ch },
-        headers: { 'x-portal-token': token },
+        body: { lead, scan, rocketreach: rr, firecrawl: fc, enrichment, score: (lead as any)?.score, channel: ch },
+        headers,
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -51,6 +59,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc }) => {
       setLoading(false);
     }
   };
+
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
