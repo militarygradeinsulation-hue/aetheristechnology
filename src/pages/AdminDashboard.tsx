@@ -48,6 +48,7 @@ import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import NotificationBell from '@/components/admin/NotificationBell';
+import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
@@ -597,7 +598,7 @@ const AdminDashboard: React.FC = () => {
               })}
             </div>
 
-            {renderTabBody(activeTab)}
+            <EasyModeWrapper tabKey={activeTab}>{renderTabBody(activeTab)}</EasyModeWrapper>
           </>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
