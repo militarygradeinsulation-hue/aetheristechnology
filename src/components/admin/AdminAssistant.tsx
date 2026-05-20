@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Wrench } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Wrench, GripVertical } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getAdminToken } from '@/lib/adminAuth';
 
@@ -35,6 +35,22 @@ const parseSuggestions = (text: string): { clean: string; suggestions?: string[]
   return { clean: text.replace(SUGGESTIONS_RE, '').trim() };
 };
 
+const POS_STORAGE_KEY = 'admin_assistant_position';
+const LAUNCHER_POS_STORAGE_KEY = 'admin_assistant_launcher_position';
+
+type Pos = { x: number; y: number };
+
+const loadPos = (key: string, fallback: Pos): Pos => {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const p = JSON.parse(raw);
+    if (typeof p?.x === 'number' && typeof p?.y === 'number') return p;
+  } catch { /* ignore */ }
+  return fallback;
+};
+
 export const AdminAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>(() => {
@@ -53,6 +69,54 @@ export const AdminAssistant: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Draggable positions — bottom-right defaults, persisted.
+  const defaultPanelPos: Pos = typeof window !== 'undefined'
+    ? { x: Math.max(16, window.innerWidth - 440), y: Math.max(16, window.innerHeight - 680) }
+    : { x: 24, y: 24 };
+  const defaultLauncherPos: Pos = typeof window !== 'undefined'
+    ? { x: Math.max(16, window.innerWidth - 180), y: Math.max(16, window.innerHeight - 80) }
+    : { x: 24, y: 24 };
+  const [panelPos, setPanelPos] = useState<Pos>(() => loadPos(POS_STORAGE_KEY, defaultPanelPos));
+  const [launcherPos, setLauncherPos] = useState<Pos>(() => loadPos(LAUNCHER_POS_STORAGE_KEY, defaultLauncherPos));
+  const dragRef = useRef<{ target: 'panel' | 'launcher'; dx: number; dy: number; moved: boolean } | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(POS_STORAGE_KEY, JSON.stringify(panelPos)); } catch { /* ignore */ }
+  }, [panelPos]);
+  useEffect(() => {
+    try { localStorage.setItem(LAUNCHER_POS_STORAGE_KEY, JSON.stringify(launcherPos)); } catch { /* ignore */ }
+  }, [launcherPos]);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      if (!dragRef.current) return;
+      const { target, dx, dy } = dragRef.current;
+      const w = target === 'panel' ? 420 : 160;
+      const h = target === 'panel' ? 640 : 48;
+      const x = Math.min(Math.max(8, e.clientX - dx), window.innerWidth - w + 40);
+      const y = Math.min(Math.max(8, e.clientY - dy), window.innerHeight - h + 20);
+      dragRef.current.moved = true;
+      if (target === 'panel') setPanelPos({ x, y }); else setLauncherPos({ x, y });
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, []);
+
+  const startDrag = (target: 'panel' | 'launcher') => (e: React.PointerEvent) => {
+    const pos = target === 'panel' ? panelPos : launcherPos;
+    dragRef.current = { target, dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false };
+    document.body.style.userSelect = 'none';
+  };
+
 
   useEffect(() => {
     try {
@@ -128,30 +192,54 @@ export const AdminAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating launcher button */}
+      {/* Floating launcher button — draggable */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open Operator Assistant"
-          className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
+        <div
+          className="fixed z-50"
+          style={{ left: launcherPos.x, top: launcherPos.y }}
         >
-          <Wrench className="w-4 h-4" />
-          <span className="font-mono text-xs uppercase tracking-wider font-bold">Operator</span>
-          <MessageCircle className="w-4 h-4" />
-        </button>
+          <div className="group flex items-center rounded-full bg-amber text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow">
+            <button
+              type="button"
+              onPointerDown={startDrag('launcher')}
+              title="Drag to move"
+              aria-label="Drag launcher"
+              className="pl-2 pr-1 py-3 cursor-grab active:cursor-grabbing touch-none"
+            >
+              <GripVertical className="w-4 h-4 opacity-80" />
+            </button>
+            <button
+              onClick={() => { if (!dragRef.current?.moved) setIsOpen(true); }}
+              aria-label="Open Operator Assistant"
+              className="flex items-center gap-2 pr-4 pl-1 py-3"
+            >
+              <Wrench className="w-4 h-4" />
+              <span className="font-mono text-xs uppercase tracking-wider font-bold">Operator</span>
+              <MessageCircle className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Panel */}
+      {/* Panel — draggable via header */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden">
-          {/* Header, case-file styling */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
+        <div
+          className="fixed z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden"
+          style={{ left: panelPos.x, top: panelPos.y }}
+        >
+          {/* Header, case-file styling — drag handle */}
+          <div
+            className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60 cursor-grab active:cursor-grabbing touch-none select-none"
+            onPointerDown={startDrag('panel')}
+          >
             <div className="flex items-center gap-2">
+              <GripVertical className="w-3.5 h-3.5 text-amber/70" />
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
                 Case File · Operator Assistant
               </span>
             </div>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center gap-1" onPointerDown={(e) => e.stopPropagation()}>
               <button
                 onClick={resetConversation}
                 className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-secondary/50 transition-colors"

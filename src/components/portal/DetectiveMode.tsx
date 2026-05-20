@@ -7,6 +7,7 @@ import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
@@ -309,13 +310,18 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           Reads every scrap on this lead, picks the single best angle from their leaks and gaps,
           shows the deduction (point A → point B), then writes the message in Aetheris voice.
         </p>
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-1 items-center">
           <Button size="sm" onClick={() => run('email')} className="bg-amber text-background hover:bg-amber/90 h-8">
             <Search className="w-3 h-3 mr-1" /> Open the case (email)
           </Button>
           <Button size="sm" variant="outline" onClick={() => run('linkedin')} className="h-8 border-amber/50 text-amber hover:bg-amber/10">
             <Linkedin className="w-3 h-3 mr-1" /> LinkedIn version
           </Button>
+          <ReadAloudButton
+            text="Detective Mode. Reads every scrap on this lead, picks the single best angle from their leaks and gaps, shows the deduction from point A to point B, then writes the message in Aetheris voice."
+            label="Listen"
+            className="h-8 border-amber/40 text-amber hover:bg-amber/10"
+          />
         </div>
       </div>
     );
@@ -502,7 +508,12 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           <span className="text-sm font-display font-semibold text-foreground">Case File</span>
           <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70">{channel === 'email' ? 'email build' : 'linkedin build'}</span>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
+          <ReadAloudButton
+            text={buildCaseText(r)}
+            label="Listen"
+            className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+          />
           <Button size="sm" variant="ghost" onClick={() => run(channel === 'email' ? 'linkedin' : 'email')} className="h-7 text-[10px] text-amber hover:text-amber">
             <Sparkles className="w-3 h-3 mr-1" /> Rerun as {channel === 'email' ? 'LinkedIn' : 'email'}
           </Button>
@@ -639,9 +650,16 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
               <p className="text-[10px] font-mono uppercase tracking-wider text-amber flex items-center gap-1">
                 {channel === 'email' ? <Mail className="w-3 h-3" /> : <Linkedin className="w-3 h-3" />} The message
               </p>
-              <Button size="sm" variant="ghost" onClick={() => copy(fullMsg, 'msg')} className="h-6 text-[10px] text-amber hover:text-amber">
-                {copied === 'msg' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
-              </Button>
+              <div className="flex items-center gap-1">
+                <ReadAloudButton
+                  text={[msg.subject ? `Subject: ${msg.subject}.` : '', msg.body || '', msg.why_it_lands ? `Why it lands: ${msg.why_it_lands}` : ''].filter(Boolean).join(' ')}
+                  label="Listen"
+                  className="h-6 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                />
+                <Button size="sm" variant="ghost" onClick={() => copy(fullMsg, 'msg')} className="h-6 text-[10px] text-amber hover:text-amber">
+                  {copied === 'msg' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+                </Button>
+              </div>
             </div>
             {msg.subject && channel === 'email' && (
               <p className="text-xs"><span className="text-muted-foreground">Subject: </span><span className="text-foreground font-medium">{msg.subject}</span></p>
