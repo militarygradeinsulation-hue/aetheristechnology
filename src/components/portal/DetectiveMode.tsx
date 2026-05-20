@@ -82,6 +82,84 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const buildCaseText = (r: DetectiveResult): string => {
+    const L: string[] = [];
+    const who = (lead as any)?.business_name || (lead as any)?.contact_name || 'lead';
+    L.push(`AETHERIS — CASE FILE`);
+    L.push(`Subject: ${who}`);
+    L.push(`Channel: ${channel}`);
+    L.push(`Generated: ${new Date().toLocaleString()}`);
+    L.push('');
+    if (r.monologue?.length) {
+      L.push('── DETECTIVE MONOLOGUE ──');
+      r.monologue.forEach((b) => L.push(`[${b.type.toUpperCase()}] ${b.text}`));
+      L.push('');
+    }
+    if (r.best_angle) {
+      L.push('── VERDICT ──');
+      L.push(r.best_angle.title || r.best_angle.leak_or_gap || '');
+      if (r.best_angle.leak_or_gap) L.push(`Leak: ${r.best_angle.leak_or_gap}${r.best_angle.estimated_cost ? ` (~${r.best_angle.estimated_cost}/yr)` : ''}`);
+      if (r.best_angle.why_this_one) L.push(r.best_angle.why_this_one);
+      L.push('');
+    }
+    if (r.deduction_chain?.length) {
+      L.push('── DEDUCTION (A → B) ──');
+      r.deduction_chain.forEach((s, i) => {
+        L.push(`${String(s.step || i + 1).padStart(2, '0')}. ${s.from}  →  ${s.to}`);
+        if (s.evidence) L.push(`    Evidence: ${s.evidence}`);
+      });
+      L.push('');
+    }
+    if (r.deeper_forensics?.length) {
+      L.push('── HOLD IN RESERVE ──');
+      r.deeper_forensics.forEach((b) => L.push(`• ${b}`));
+      L.push('');
+    }
+    if (r.message?.body) {
+      L.push('── THE MESSAGE ──');
+      if (r.message.subject && channel === 'email') L.push(`Subject: ${r.message.subject}`);
+      L.push('');
+      L.push(r.message.body);
+      if (r.message.why_it_lands) { L.push(''); L.push(`Why it lands: ${r.message.why_it_lands}`); }
+    }
+    return L.join('\n');
+  };
+
+  const downloadCase = (r: DetectiveResult) => {
+    const text = buildCaseText(r);
+    const who = ((lead as any)?.business_name || 'case').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `case-file-${who}.txt`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const saveCase = async (r: DetectiveResult) => {
+    setSaving(true);
+    try {
+      await saveToolRun({
+        tool_type: 'detective_case',
+        title: `Case File — ${(lead as any)?.business_name || (lead as any)?.contact_name || 'lead'}`,
+        input_data: { lead_id: (lead as any)?.id, channel },
+        output_data: { ...r, _text: buildCaseText(r) },
+      });
+      toast({ title: 'Saved to library' });
+    } catch (e) {
+      toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const beatIcon = (t: MonologueBeat['type']) => {
+    if (t === 'question') return <HelpCircle className="w-3.5 h-3.5 text-amber" />;
+    if (t === 'observation') return <Eye className="w-3.5 h-3.5 text-sky-400" />;
+    if (t === 'conclusion') return <Gavel className="w-3.5 h-3.5 text-emerald-400" />;
+    return <Lightbulb className="w-3.5 h-3.5 text-amber/70" />;
+  };
+
   if (!result && !loading) {
     return (
       <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-3 space-y-2">
