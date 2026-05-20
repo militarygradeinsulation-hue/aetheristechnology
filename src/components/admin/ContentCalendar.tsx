@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, saveToAdminLibrary, rescheduleAdminLibraryItem, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
+import { EasyReadButton } from '@/components/EasyReadButton';
 import { ContentAI } from './ContentAI';
 import { PostImageGenerator } from './PostImageGenerator';
 import { supabase } from '@/integrations/supabase/client';
@@ -487,6 +488,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
               <Button variant="outline" size="sm" onClick={() => handleCopy(viewItem)}><Copy className="w-4 h-4 mr-1" /> Copy</Button>
               <Button variant="outline" size="sm" onClick={() => downloadLibraryItemAsPdf(viewItem)}><Download className="w-4 h-4 mr-1" /> PDF</Button>
               <Button variant="outline" size="sm" onClick={() => { setAiItem(viewItem); setViewItem(null); }}><MessageSquare className="w-4 h-4 mr-1" /> Edit with AI</Button>
+              <EasyReadButton source={formatLibraryItemAsText(viewItem)} toolLabel={TOOL_LABELS[viewItem.tool_type] || viewItem.tool_type} />
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
               <LibraryItemRenderer item={viewItem} />

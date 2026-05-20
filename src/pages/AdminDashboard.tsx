@@ -875,7 +875,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           ))}
         </div>
 
-        <div className="pt-8 mt-4 border-t border-border">
+        <div id="tool-history" className="pt-8 mt-4 border-t border-border scroll-mt-24">
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-5 h-5 text-amber" />
             <h2 className="text-xl font-bold text-foreground font-display">Tool History</h2>
@@ -886,9 +886,23 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
       </>
     ) : (
       <>
-        <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
-        </Button>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setActiveTool(null);
+              setTimeout(() => {
+                document.getElementById('tool-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 50);
+            }}
+          >
+            <Clock className="w-4 h-4 mr-1" /> Tool History
+          </Button>
+        </div>
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
