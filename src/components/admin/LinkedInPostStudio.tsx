@@ -495,13 +495,27 @@ export default function LinkedInPostStudio() {
             </div>
           )
         ) : respondSourceType === 'text' ? (
-          <Textarea
-            rows={8}
-            placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
-            value={respondText}
-            onChange={(e) => setRespondText(e.target.value)}
-            className="text-sm"
-          />
+          <div className="space-y-2">
+            <Textarea
+              rows={8}
+              placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
+              value={respondText}
+              onChange={(e) => setRespondText(e.target.value)}
+              className="text-sm"
+            />
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearPastedPost}
+                disabled={!respondText && !respondExtra && !respondOutput}
+                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
+              >
+                <Eraser className="w-3 h-3 mr-1" /> Clear all
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             <div>
