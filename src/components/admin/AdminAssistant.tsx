@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Wrench } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Wrench, GripVertical } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getAdminToken } from '@/lib/adminAuth';
 
