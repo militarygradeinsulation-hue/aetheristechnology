@@ -280,12 +280,29 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
 
   if (loading) {
     return (
-      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 flex items-center gap-3">
-        <Loader2 className="w-5 h-5 text-amber animate-spin" />
-        <div>
-          <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
-          <p className="text-[11px] text-muted-foreground">Cross-referencing scan, contact intel, company facts, and tech stack.</p>
+      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-5 h-5 text-amber animate-spin" />
+          <div>
+            <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
+            <p className="text-[11px] text-muted-foreground">Auto-running the toolbar so the detective has every angle.</p>
+          </div>
         </div>
+        {prepSteps.length > 0 && (
+          <ul className="space-y-1.5 pl-1">
+            {prepSteps.map((s) => (
+              <li key={s.key} className="flex items-center gap-2 text-[11px]">
+                {s.status === 'running' && <Loader2 className="w-3 h-3 text-amber animate-spin flex-shrink-0" />}
+                {s.status === 'done' && <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
+                {s.status === 'pending' && <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />}
+                {s.status === 'fail' && <span className="w-3 h-3 rounded-full bg-red-500/60 flex-shrink-0" />}
+                {s.status === 'skip' && <span className="w-3 h-3 rounded-full bg-muted flex-shrink-0" />}
+                <span className={s.status === 'done' ? 'text-foreground' : 'text-muted-foreground'}>{s.label}</span>
+                {s.note && <span className="text-[10px] text-amber/70 font-mono">· {s.note}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
