@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from './LibraryItemRenderer';
+import { EasyReadButton } from './EasyReadButton';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -180,6 +181,7 @@ export const AdminLibrary: React.FC = () => {
                   <Button variant="outline" size="sm"><ExternalLink className="w-4 h-4 mr-1" /> Open PDF</Button>
                 </a>
               )}
+              <EasyReadButton source={formatLibraryItemAsText(viewItem)} toolLabel={TOOL_LABELS[viewItem.tool_type] || viewItem.tool_type} />
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
               <LibraryItemRenderer item={viewItem} />
