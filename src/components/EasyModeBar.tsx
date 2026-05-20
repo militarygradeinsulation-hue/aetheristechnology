@@ -212,7 +212,7 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
 
   // Reset simplified text when leaving easy mode.
   useEffect(() => {
-    if (!easy) { setSimplified(''); setShowOriginal(false); }
+    if (!easy) { setSimplified(''); }
   }, [easy]);
 
   const style: React.CSSProperties = size !== 1 ? { zoom: size as unknown as number } : {};
@@ -228,28 +228,17 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
               <BookOpen className="w-4 h-4 text-amber" />
               <span className="text-[10px] uppercase tracking-widest font-bold text-amber">Plain-English version of this section</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => { simplifyCache.delete(`${tabKey}:${hashStr(collectSource())}`); setVersion((v) => v + 1); }}
-                disabled={busy}
-                className="h-7 text-[10px]"
-                title="Re-read this section"
-              >
-                <RefreshCw className="w-3 h-3 mr-1" /> Refresh
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowOriginal((v) => !v)}
-                className="h-7 text-[10px]"
-              >
-                {showOriginal ? 'Hide original' : 'Show original below'}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => { simplifyCache.delete(`${tabKey}:${hashStr(collectSource())}`); setVersion((v) => v + 1); }}
+              disabled={busy}
+              className="h-7 text-[10px]"
+              title="Re-read this section"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" /> Refresh
+            </Button>
           </div>
           {busy && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -262,23 +251,15 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
             </div>
           )}
           {!busy && !simplified && (
-            <p className="text-sm text-muted-foreground">Nothing to simplify yet — interact with the section, then tap Refresh.</p>
+            <p className="text-sm text-muted-foreground">Reading this section… give it a moment, then tap Refresh if nothing appears.</p>
           )}
+          <p className="text-[10px] text-muted-foreground/70">The original section is still below — keep using it as normal.</p>
         </div>
       )}
 
-      <div
-        ref={contentRef}
-        style={easy && !showOriginal ? { display: 'none' } : undefined}
-        aria-hidden={easy && !showOriginal ? 'true' : undefined}
-      >
+      <div ref={contentRef}>
         {children}
       </div>
-
-      {/* Always keep a mount point even when hidden, so we can read text. */}
-      {easy && !showOriginal && (
-        <div ref={contentRef} className="sr-only" aria-hidden="true">{children}</div>
-      )}
     </div>
   );
 };
