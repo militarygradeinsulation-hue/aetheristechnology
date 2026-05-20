@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download } from 'lucide-react';
+import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
-import type { RepLead, LeadScan } from '@/lib/portalLeads';
+import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
+
+type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
 interface Props {
   lead: Partial<RepLead> & Record<string, any>;
@@ -36,7 +38,96 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [copied, setCopied] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [prepSteps, setPrepSteps] = useState<PrepStep[]>([]);
+  // Live data — starts from props, gets overwritten as we auto-run tools.
+  const [liveScan, setLiveScan] = useState<any>(scan);
+  const [liveRr, setLiveRr] = useState<any>(rr);
+  const [liveFc, setLiveFc] = useState<any>(fc);
+  const [liveEnrich, setLiveEnrich] = useState<any>(enrichment);
   const tileRef = useRef<HTMLDivElement>(null);
+
+  const updateStep = (key: string, patch: Partial<PrepStep>) =>
+    setPrepSteps((s) => s.map((x) => (x.key === key ? { ...x, ...patch } : x)));
+
+  const gatherIntel = async (): Promise<{ scan: any; rr: any; fc: any; enrich: any }> => {
+    let curScan = liveScan;
+    let curRr = liveRr;
+    let curFc = liveFc;
+    let curEnrich = liveEnrich;
+
+    if (auth === 'admin') {
+      const steps: PrepStep[] = [];
+      if (!curEnrich && (lead as any)?.id) steps.push({ key: 'enrich', label: 'AI enrichment (weak points, talking points, decision makers)', status: 'pending' });
+      setPrepSteps(steps);
+
+      if (!curEnrich && (lead as any)?.id) {
+        updateStep('enrich', { status: 'running' });
+        try {
+          const t = getAdminToken();
+          const { data, error } = await supabase.functions.invoke('admin-enrich-lead', {
+            body: { ids: [(lead as any).id] },
+            headers: { 'x-admin-token': t || '' },
+          });
+          if (error) throw new Error(error.message);
+          // Re-fetch the lead row to get fresh enrichment
+          const { data: rows } = await supabase.functions.invoke('admin-data', {
+            body: { action: 'leads_browser', filter: 'all', search: (lead as any).business_name || '', minScore: null },
+            headers: { 'x-admin-token': t || '' },
+          });
+          const fresh = (rows?.leads || []).find((l: any) => l.id === (lead as any).id);
+          if (fresh?.enrichment) {
+            curEnrich = fresh.enrichment;
+            curScan = fresh.enrichment?.scan || curScan;
+            curRr = fresh.enrichment?.rocketreach || curRr;
+            curFc = fresh.enrichment?.firecrawl || curFc;
+            setLiveEnrich(curEnrich); setLiveScan(curScan); setLiveRr(curRr); setLiveFc(curFc);
+          }
+          updateStep('enrich', { status: 'done', note: 'intel cached' });
+        } catch (e) {
+          updateStep('enrich', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+        }
+      }
+      return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
+    }
+
+    // Portal path — chain the rep's toolbar: forensic scan, then deep scan (RocketReach + Firecrawl)
+    const steps: PrepStep[] = [];
+    const hasWebsite = !!(lead as any)?.website;
+    if (!curScan && hasWebsite) steps.push({ key: 'scan', label: 'Forensic website scan', status: 'pending' });
+    if (!curRr || !curFc) steps.push({ key: 'deep', label: 'Deep scan (RocketReach + Firecrawl)', status: 'pending' });
+    setPrepSteps(steps);
+
+    if (!curScan && hasWebsite) {
+      updateStep('scan', { status: 'running' });
+      try {
+        const res = await portalLeads.scan((lead as any).id, { url: (lead as any).website });
+        curScan = res.scan;
+        setLiveScan(curScan);
+        updateStep('scan', { status: 'done', note: res.scan?.grade ? `Grade ${res.scan.grade}` : 'done' });
+      } catch (e) {
+        updateStep('scan', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+      }
+    } else if (curScan) {
+      // nothing
+    } else if (!hasWebsite) {
+      // no scan possible
+    }
+
+    if (!curRr || !curFc) {
+      updateStep('deep', { status: 'running' });
+      try {
+        const res: any = await portalLeads.rocketReach((lead as any).id, {});
+        curRr = res.person || curRr;
+        if (res.firecrawl) curFc = res.firecrawl;
+        setLiveRr(curRr); setLiveFc(curFc);
+        updateStep('deep', { status: 'done', note: res.cached ? 'loaded saved' : 'fresh pull' });
+      } catch (e) {
+        updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+      }
+    }
+
+    return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
+  };
 
   const run = async (ch: 'email' | 'linkedin' = channel) => {
     const headers: Record<string, string> = {};
@@ -51,17 +142,20 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     }
     setChannel(ch);
     setLoading(true);
+    setResult(null);
+    setRevealed(0);
     try {
+      // 1) Auto-run the rep's toolbar so the detective has everything.
+      const intel = await gatherIntel();
+      // 2) Now run the detective with the freshly assembled dossier.
       const { data, error } = await supabase.functions.invoke('portal-detective', {
-        body: { lead, scan, rocketreach: rr, firecrawl: fc, enrichment, score: (lead as any)?.score, channel: ch },
+        body: { lead, scan: intel.scan, rocketreach: intel.rr, firecrawl: intel.fc, enrichment: intel.enrich, score: (lead as any)?.score, channel: ch },
         headers,
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
       const res = (data as any).result || null;
       setResult(res);
-      // progressive reveal of monologue
-      setRevealed(0);
       const beats = res?.monologue?.length || 0;
       if (beats > 0) {
         for (let i = 1; i <= beats; i++) {
@@ -186,12 +280,29 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
 
   if (loading) {
     return (
-      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 flex items-center gap-3">
-        <Loader2 className="w-5 h-5 text-amber animate-spin" />
-        <div>
-          <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
-          <p className="text-[11px] text-muted-foreground">Cross-referencing scan, contact intel, company facts, and tech stack.</p>
+      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-5 h-5 text-amber animate-spin" />
+          <div>
+            <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
+            <p className="text-[11px] text-muted-foreground">Auto-running the toolbar so the detective has every angle.</p>
+          </div>
         </div>
+        {prepSteps.length > 0 && (
+          <ul className="space-y-1.5 pl-1">
+            {prepSteps.map((s) => (
+              <li key={s.key} className="flex items-center gap-2 text-[11px]">
+                {s.status === 'running' && <Loader2 className="w-3 h-3 text-amber animate-spin flex-shrink-0" />}
+                {s.status === 'done' && <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
+                {s.status === 'pending' && <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />}
+                {s.status === 'fail' && <span className="w-3 h-3 rounded-full bg-red-500/60 flex-shrink-0" />}
+                {s.status === 'skip' && <span className="w-3 h-3 rounded-full bg-muted flex-shrink-0" />}
+                <span className={s.status === 'done' ? 'text-foreground' : 'text-muted-foreground'}>{s.label}</span>
+                {s.note && <span className="text-[10px] text-amber/70 font-mono">· {s.note}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
