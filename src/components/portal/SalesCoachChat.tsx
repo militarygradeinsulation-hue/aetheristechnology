@@ -428,7 +428,22 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     </div>
   );
 
-  if (embedded) return Panel;
+  const snipOverlay = snipping ? (
+    <ScreenSnip
+      onCancel={() => setSnipping(false)}
+      onCapture={(dataUrl) => {
+        setSnipping(false);
+        setAttachments((prev) => [
+          ...prev,
+          { kind: 'image', name: `screen-snip-${Date.now()}.png`, dataUrl, mimeType: 'image/png' },
+        ]);
+        setIsOpen(true);
+        setInput((cur) => cur || 'Explain what is in this part of the screen and answer my questions about it.');
+      }}
+    />
+  ) : null;
+
+  if (embedded) return <>{Panel}{snipOverlay}</>;
 
   return (
     <>
