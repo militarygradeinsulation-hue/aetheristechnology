@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand } from 'lucide-react';
+import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand, Link as LinkIcon, Eraser } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -127,6 +127,45 @@ export default function LinkedInPostStudio() {
   const [myComment, setMyComment] = useState('');
   const [theirReply, setTheirReply] = useState('');
   const [replyOriginalPost, setReplyOriginalPost] = useState('');
+
+  // URL / YouTube → Post
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [sourceExtra, setSourceExtra] = useState('');
+  const [sourceLoading, setSourceLoading] = useState(false);
+
+  const clearPastedPost = () => {
+    setRespondText('');
+    setRespondExtra('');
+    setRespondOutput('');
+    toast({ title: 'Cleared' });
+  };
+
+  const generateFromUrl = async () => {
+    const u = sourceUrl.trim();
+    if (!u) { toast({ title: 'Paste a URL or YouTube link first', variant: 'destructive' }); return; }
+    setSourceLoading(true);
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
+        body: { url: u, extraPrompt: sourceExtra.trim() },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const post = (data.post || '').trim();
+      if (!post) throw new Error('Empty post');
+      const firstLine = post.split('\n').map((s: string) => s.trim()).find(Boolean) || u;
+      setTopic(firstLine.slice(0, 180));
+      setGenerated(post);
+      toast({ title: 'Post created from source', description: data.sourceKind === 'youtube' ? 'YouTube video processed' : 'URL scanned' });
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed';
+      toast({ title: 'URL post failed', description: msg, variant: 'destructive' });
+    } finally {
+      setSourceLoading(false);
+    }
+  };
 
 
   // Response library state
@@ -456,13 +495,27 @@ export default function LinkedInPostStudio() {
             </div>
           )
         ) : respondSourceType === 'text' ? (
-          <Textarea
-            rows={8}
-            placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
-            value={respondText}
-            onChange={(e) => setRespondText(e.target.value)}
-            className="text-sm"
-          />
+          <div className="space-y-2">
+            <Textarea
+              rows={8}
+              placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
+              value={respondText}
+              onChange={(e) => setRespondText(e.target.value)}
+              className="text-sm"
+            />
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearPastedPost}
+                disabled={!respondText && !respondExtra && !respondOutput}
+                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
+              >
+                <Eraser className="w-3 h-3 mr-1" /> Clear all
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             <div>
@@ -794,6 +847,49 @@ export default function LinkedInPostStudio() {
           </div>
         </div>
       </Card>
+
+      {/* URL / YouTube → Aetheris Post */}
+      <Card className="p-5 glass border-amber/40 space-y-3">
+        <div className="flex items-center gap-2">
+          <LinkIcon className="w-4 h-4 text-amber" />
+          <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Post from URL or YouTube</div>
+        </div>
+        <p className="text-xs text-muted-foreground -mt-1">
+          Paste an article, blog, podcast page, or YouTube link. The AI reads the source, learns the topic, and writes one original Aetheris post in your forensic voice.
+        </p>
+        <Input
+          placeholder="https://example.com/article or https://youtube.com/watch?v=..."
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+        />
+        <Input
+          placeholder="Optional angle, e.g. 'Reframe their CRM advice as a Follow-Up Failure leak.'"
+          value={sourceExtra}
+          onChange={(e) => setSourceExtra(e.target.value)}
+        />
+        <div className="flex gap-2">
+          <Button
+            onClick={generateFromUrl}
+            disabled={sourceLoading || !sourceUrl.trim()}
+            className="flex-1 bg-amber text-background hover:bg-amber/90"
+          >
+            {sourceLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Wand className="w-4 h-4 mr-2" />}
+            {sourceLoading ? 'Scanning source & writing post…' : 'Scan source & write Aetheris post'}
+          </Button>
+          {(sourceUrl || sourceExtra) && (
+            <Button
+              variant="ghost"
+              onClick={() => { setSourceUrl(''); setSourceExtra(''); }}
+              disabled={sourceLoading}
+              className="text-muted-foreground hover:text-amber"
+            >
+              <Eraser className="w-3 h-3 mr-1" /> Clear
+            </Button>
+          )}
+        </div>
+      </Card>
+
+
 
       <Card className="p-5 glass border-border space-y-4">
         <div className="text-[10px] uppercase tracking-widest font-bold text-amber">02, Parameters</div>
