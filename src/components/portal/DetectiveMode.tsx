@@ -279,10 +279,120 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   }
 
   if (loading) {
+    const runningStep = prepSteps.find((s) => s.status === 'running');
+    const activeLabel = runningStep?.label || 'Cross-referencing signals…';
+    const thoughtWords = ['scan', 'leaks', 'gaps', 'stack', 'roles', 'revenue', 'evidence', 'angle', 'verdict', 'message'];
     return (
-      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-3">
+      <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-3 overflow-hidden">
+        {/* Animated brain visualization */}
+        <div className="relative h-32 rounded-md bg-background/40 border border-amber/20 overflow-hidden">
+          {/* scanline */}
+          <div className="absolute inset-x-0 top-0 h-px bg-amber/60 shadow-[0_0_8px_hsl(var(--amber))] animate-[detective-scan_2.4s_linear_infinite]" />
+          {/* grid */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                'linear-gradient(to right, hsl(var(--amber)/0.25) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--amber)/0.25) 1px, transparent 1px)',
+              backgroundSize: '16px 16px',
+            }}
+          />
+          {/* brain SVG */}
+          <svg viewBox="0 0 200 120" className="absolute inset-0 w-full h-full">
+            <defs>
+              <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="hsl(var(--amber))" stopOpacity="0.45" />
+                <stop offset="100%" stopColor="hsl(var(--amber))" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            {/* soft glow */}
+            <circle cx="100" cy="60" r="48" fill="url(#brainGlow)">
+              <animate attributeName="r" values="40;52;40" dur="2.2s" repeatCount="indefinite" />
+            </circle>
+            {/* brain hemispheres */}
+            <g
+              fill="none"
+              stroke="hsl(var(--amber))"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              style={{ filter: 'drop-shadow(0 0 4px hsl(var(--amber)/0.6))' }}
+            >
+              <path d="M100 22 C 70 22, 52 40, 52 60 C 52 82, 72 98, 100 98 L 100 22 Z" opacity="0.85" />
+              <path d="M100 22 C 130 22, 148 40, 148 60 C 148 82, 128 98, 100 98 L 100 22 Z" opacity="0.85" />
+              {/* folds — left */}
+              <path d="M60 48 C 70 44, 80 50, 88 46" opacity="0.7" />
+              <path d="M58 62 C 70 58, 82 66, 92 60" opacity="0.7" />
+              <path d="M62 78 C 72 74, 84 82, 94 76" opacity="0.7" />
+              {/* folds — right */}
+              <path d="M112 46 C 120 50, 130 44, 140 48" opacity="0.7" />
+              <path d="M108 60 C 118 66, 130 58, 142 62" opacity="0.7" />
+              <path d="M106 76 C 116 82, 128 74, 138 78" opacity="0.7" />
+            </g>
+            {/* synapse nodes firing */}
+            {[
+              { cx: 70, cy: 48, d: '0s' },
+              { cx: 88, cy: 62, d: '0.4s' },
+              { cx: 110, cy: 50, d: '0.8s' },
+              { cx: 130, cy: 70, d: '1.2s' },
+              { cx: 96, cy: 82, d: '1.6s' },
+              { cx: 76, cy: 76, d: '2s' },
+            ].map((n, i) => (
+              <g key={i}>
+                <circle cx={n.cx} cy={n.cy} r="2" fill="hsl(var(--amber))">
+                  <animate attributeName="r" values="1.5;4;1.5" dur="1.6s" begin={n.d} repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" begin={n.d} repeatCount="indefinite" />
+                </circle>
+              </g>
+            ))}
+            {/* connecting pulses */}
+            <g stroke="hsl(var(--amber))" strokeWidth="0.8" opacity="0.55">
+              <line x1="70" y1="48" x2="88" y2="62">
+                <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.6s" repeatCount="indefinite" />
+              </line>
+              <line x1="88" y1="62" x2="110" y2="50">
+                <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.6s" begin="0.3s" repeatCount="indefinite" />
+              </line>
+              <line x1="110" y1="50" x2="130" y2="70">
+                <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.6s" begin="0.6s" repeatCount="indefinite" />
+              </line>
+              <line x1="130" y1="70" x2="96" y2="82">
+                <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.6s" begin="0.9s" repeatCount="indefinite" />
+              </line>
+              <line x1="96" y1="82" x2="76" y2="76">
+                <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.6s" begin="1.2s" repeatCount="indefinite" />
+              </line>
+            </g>
+          </svg>
+          {/* floating thought words */}
+          <div className="absolute inset-0 pointer-events-none">
+            {thoughtWords.map((w, i) => (
+              <span
+                key={w}
+                className="absolute text-[9px] font-mono uppercase tracking-wider text-amber/70"
+                style={{
+                  left: `${8 + ((i * 11) % 80)}%`,
+                  top: `${10 + ((i * 19) % 75)}%`,
+                  animation: `detective-float 3.2s ease-in-out ${i * 0.25}s infinite`,
+                }}
+              >
+                {w}
+              </span>
+            ))}
+          </div>
+          {/* status badge */}
+          <div className="absolute bottom-1.5 left-2 right-2 flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-amber bg-background/70 backdrop-blur-sm rounded px-2 py-1 border border-amber/30">
+            <Brain className="w-3 h-3 animate-pulse" />
+            <span className="truncate">{activeLabel}</span>
+            <span className="ml-auto inline-flex gap-0.5">
+              <span className="w-1 h-1 rounded-full bg-amber animate-[detective-dot_1.2s_ease-in-out_infinite]" />
+              <span className="w-1 h-1 rounded-full bg-amber animate-[detective-dot_1.2s_ease-in-out_0.2s_infinite]" />
+              <span className="w-1 h-1 rounded-full bg-amber animate-[detective-dot_1.2s_ease-in-out_0.4s_infinite]" />
+            </span>
+          </div>
+        </div>
+
         <div className="flex items-center gap-3">
-          <Loader2 className="w-5 h-5 text-amber animate-spin" />
+          <Loader2 className="w-4 h-4 text-amber animate-spin flex-shrink-0" />
           <div>
             <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
             <p className="text-[11px] text-muted-foreground">Auto-running the toolbar so the detective has every angle.</p>
