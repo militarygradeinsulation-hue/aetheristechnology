@@ -155,7 +155,7 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
   const contentRef = useRef<HTMLDivElement>(null);
   const [simplified, setSimplified] = useState<string>('');
   const [busy, setBusy] = useState(false);
-  const [showOriginal, setShowOriginal] = useState(false);
+  const [version, setVersion] = useState(0);
   const [version, setVersion] = useState(0); // bump to force re-simplify
 
   // Read visible text from this tab's section.
