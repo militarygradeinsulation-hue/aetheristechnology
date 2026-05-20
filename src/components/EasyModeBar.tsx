@@ -130,21 +130,155 @@ export const EasyModeBar: React.FC<EasyModeBarProps> = ({ tabKey, longCopy, clas
 
 interface EasyModeWrapperProps {
   tabKey: string;
+  /** Optional explicit copy to simplify. When omitted, the wrapper auto-reads visible text from its own DOM. */
   longCopy?: string;
   showBar?: boolean;
   children: React.ReactNode;
 }
 
-/** Wraps a tab body and applies the per-tab size scaling using CSS zoom. */
+// In-memory cache so toggling Easy Mode off/on doesn't re-spend AI credits for the same content.
+const simplifyCache = new Map<string, string>();
+
+function hashStr(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return String(h);
+}
+
+/** Wraps a tab body, applies per-tab size scaling, and — when Easy Mode is ON — auto-simplifies
+ *  the visible text in that section into a plain-English panel at the top. */
 export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCopy, showBar = true, children }) => {
-  const { sizeFor } = useEasyMode();
+  const { easy, sizeFor } = useEasyMode();
   const size = sizeFor(tabKey);
-  // CSS `zoom` scales layout (text, padding, buttons) uniformly. Supported in Chromium, Safari, and modern Firefox.
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [simplified, setSimplified] = useState<string>('');
+  const [busy, setBusy] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [version, setVersion] = useState(0); // bump to force re-simplify
+
+  // Read visible text from this tab's section.
+  const collectSource = (): string => {
+    if (longCopy && longCopy.trim().length > 40) return longCopy.trim().slice(0, 12000);
+    const root = contentRef.current;
+    if (!root) return '';
+    // Exclude the easy-mode panel itself so we don't feed it back into the model.
+    const clone = root.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll('[data-easy-skip="true"]').forEach((n) => n.remove());
+    const raw = (clone.innerText || '').replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return raw.slice(0, 12000);
+  };
+
+  const runSimplify = async () => {
+    const src = collectSource();
+    if (src.length < 80) {
+      toast({ title: 'Not enough text on this section to simplify' });
+      return;
+    }
+    const cacheKey = `${tabKey}:${hashStr(src)}`;
+    const cached = simplifyCache.get(cacheKey);
+    if (cached && version === 0) {
+      setSimplified(cached);
+      return;
+    }
+    setBusy(true);
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('forensics-simplify', {
+        body: { source: src, toolLabel: `Portal section: ${tabKey}` },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const out = (data?.simplified || '').trim();
+      setSimplified(out);
+      simplifyCache.set(cacheKey, out);
+    } catch (e) {
+      toast({ title: 'Easy Mode failed', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Auto-run when Easy Mode turns on (or tab/version changes).
+  useEffect(() => {
+    if (!easy) return;
+    // Wait for children to mount + render before reading text.
+    const t = window.setTimeout(() => { runSimplify(); }, 350);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [easy, tabKey, version]);
+
+  // Reset simplified text when leaving easy mode.
+  useEffect(() => {
+    if (!easy) { setSimplified(''); setShowOriginal(false); }
+  }, [easy]);
+
   const style: React.CSSProperties = size !== 1 ? { zoom: size as unknown as number } : {};
+
   return (
     <div style={style}>
-      {showBar && <EasyModeBar tabKey={tabKey} longCopy={longCopy} />}
-      {children}
+      {showBar && <div data-easy-skip="true"><EasyModeBar tabKey={tabKey} /></div>}
+
+      {easy && (
+        <div data-easy-skip="true" className="glass rounded-xl border border-amber/40 p-4 mb-4 space-y-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-amber" />
+              <span className="text-[10px] uppercase tracking-widest font-bold text-amber">Plain-English version of this section</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => { simplifyCache.delete(`${tabKey}:${hashStr(collectSource())}`); setVersion((v) => v + 1); }}
+                disabled={busy}
+                className="h-7 text-[10px]"
+                title="Re-read this section"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" /> Refresh
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowOriginal((v) => !v)}
+                className="h-7 text-[10px]"
+              >
+                {showOriginal ? 'Hide original' : 'Show original below'}
+              </Button>
+            </div>
+          </div>
+          {busy && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin text-amber" /> Reading this section and rewriting it in plain English…
+            </div>
+          )}
+          {!busy && simplified && (
+            <div className="bg-background/40 border border-border rounded p-4 text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed max-h-[60vh] overflow-y-auto">
+              {simplified}
+            </div>
+          )}
+          {!busy && !simplified && (
+            <p className="text-sm text-muted-foreground">Nothing to simplify yet — interact with the section, then tap Refresh.</p>
+          )}
+        </div>
+      )}
+
+      <div
+        ref={contentRef}
+        style={easy && !showOriginal ? { display: 'none' } : undefined}
+        aria-hidden={easy && !showOriginal ? 'true' : undefined}
+      >
+        {children}
+      </div>
+
+      {/* Always keep a mount point even when hidden, so we can read text. */}
+      {easy && !showOriginal && (
+        <div ref={contentRef} className="sr-only" aria-hidden="true">{children}</div>
+      )}
     </div>
   );
 };
