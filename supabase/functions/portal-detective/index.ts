@@ -124,9 +124,11 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const token = getPortalTokenFromRequest(req);
-    const claims = token ? await verifyPortalToken(token, SERVICE) : null;
-    if (!claims) {
+    const portalTok = getPortalTokenFromRequest(req);
+    const portalClaims = portalTok ? await verifyPortalToken(portalTok, SERVICE) : null;
+    const adminTok = getAdminTokenFromRequest(req);
+    const adminOk = adminTok ? await verifyAdminToken(adminTok, SERVICE) : false;
+    if (!portalClaims && !adminOk) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
