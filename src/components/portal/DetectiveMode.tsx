@@ -340,6 +340,28 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             </div>
           </div>
         )}
+
+        {/* Save / Copy / Download — the case-file tile actions */}
+        <div className="rounded-md border-2 border-dashed border-amber/40 bg-background/40 p-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileSearch className="w-4 h-4 text-amber flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-display font-semibold text-foreground truncate">Keep this case file</p>
+              <p className="text-[10px] text-muted-foreground truncate">Save the full deduction + monologue + message</p>
+            </div>
+          </div>
+          <div className="flex gap-1.5 flex-shrink-0">
+            <Button size="sm" variant="outline" onClick={() => copy(buildCaseText(r), 'case')} className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10">
+              {copied === 'case' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => downloadCase(r)} className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10">
+              <Download className="w-3 h-3 mr-1" /> Download
+            </Button>
+            <Button size="sm" onClick={() => saveCase(r)} disabled={saving} className="h-7 text-[10px] bg-amber text-background hover:bg-amber/90">
+              {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />} Save
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
