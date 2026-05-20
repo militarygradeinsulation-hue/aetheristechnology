@@ -438,24 +438,39 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           <Loader2 className="w-4 h-4 text-amber animate-spin flex-shrink-0" />
           <div>
             <p className="text-sm font-display font-semibold text-foreground">Working the case…</p>
-            <p className="text-[11px] text-muted-foreground">Auto-running the toolbar so the detective has every angle.</p>
+            <p className="text-[11px] text-muted-foreground">Detective is talking to themself. Auto-running the toolbar.</p>
           </div>
         </div>
+
+        {/* Live self-talk — the detective muttering as it works */}
+        <div className="rounded-md border border-amber/25 bg-background/60 p-2.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80 flex items-center gap-1">
+              <Brain className="w-3 h-3" /> internal monologue · live
+            </p>
+            <span className="text-[9px] font-mono text-muted-foreground/60">{selfTalk.length} thoughts</span>
+          </div>
+          <div ref={talkScrollRef} className="max-h-36 overflow-y-auto space-y-1 pr-1">
+            {selfTalk.map((line, i) => {
+              const isLast = i === selfTalk.length - 1;
+              return (
+                <p
+                  key={`${i}-${line.slice(0, 8)}`}
+                  className={`text-[11.5px] leading-snug font-case italic animate-fade-in ${
+                    isLast ? 'text-amber' : 'text-muted-foreground/70'
+                  }`}
+                >
+                  <span className="text-amber/50 mr-1.5 not-italic">›</span>
+                  {line}
+                  {isLast && <span className="inline-block w-1.5 h-3 ml-0.5 bg-amber/80 align-middle animate-pulse" />}
+                </p>
+              );
+            })}
+          </div>
+        </div>
+
         {prepSteps.length > 0 && (
           <ul className="space-y-1.5 pl-1">
-            {prepSteps.map((s) => (
-              <li key={s.key} className="flex items-center gap-2 text-[11px]">
-                {s.status === 'running' && <Loader2 className="w-3 h-3 text-amber animate-spin flex-shrink-0" />}
-                {s.status === 'done' && <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
-                {s.status === 'pending' && <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />}
-                {s.status === 'fail' && <span className="w-3 h-3 rounded-full bg-red-500/60 flex-shrink-0" />}
-                {s.status === 'skip' && <span className="w-3 h-3 rounded-full bg-muted flex-shrink-0" />}
-                <span className={s.status === 'done' ? 'text-foreground' : 'text-muted-foreground'}>{s.label}</span>
-                {s.note && <span className="text-[10px] text-amber/70 font-mono">· {s.note}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     );
   }
