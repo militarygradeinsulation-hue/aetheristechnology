@@ -508,7 +508,12 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           <span className="text-sm font-display font-semibold text-foreground">Case File</span>
           <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70">{channel === 'email' ? 'email build' : 'linkedin build'}</span>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
+          <ReadAloudButton
+            text={buildCaseText(r)}
+            label="Listen"
+            className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+          />
           <Button size="sm" variant="ghost" onClick={() => run(channel === 'email' ? 'linkedin' : 'email')} className="h-7 text-[10px] text-amber hover:text-amber">
             <Sparkles className="w-3 h-3 mr-1" /> Rerun as {channel === 'email' ? 'LinkedIn' : 'email'}
           </Button>
