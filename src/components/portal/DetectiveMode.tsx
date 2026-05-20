@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 import type { RepLead, LeadScan } from '@/lib/portalLeads';
 
 interface Props {
@@ -17,7 +18,9 @@ interface Props {
 }
 
 interface DeductionStep { step: number; from: string; to: string; evidence: string }
+interface MonologueBeat { type: 'question' | 'thought' | 'observation' | 'conclusion'; text: string }
 interface DetectiveResult {
+  monologue?: MonologueBeat[];
   best_angle?: { title?: string; leak_or_gap?: string; estimated_cost?: string | null; why_this_one?: string };
   deduction_chain?: DeductionStep[];
   deeper_forensics?: string[];
