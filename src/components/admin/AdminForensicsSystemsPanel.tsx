@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, Loader2, Download, Sparkles, Wand2, Send, Copy, Check, Eraser } from 'lucide-react';
+import { ChevronLeft, Loader2, Download, Sparkles, Wand2, Send, Copy, Check, Eraser, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +29,35 @@ export function AdminForensicsSystemsPanel() {
   const [packageResult, setPackageResult] = useState<{ polished: string; email: { subject: string; body: string } } | null>(null);
   const [copied, setCopied] = useState<string>('');
 
+  // Simplify (plain-English) state
+  const [simplifying, setSimplifying] = useState(false);
+  const [simplified, setSimplified] = useState<string>('');
+
+  const runSimplify = async (source: string) => {
+    if (!active) return;
+    if (!source || source.trim().length < 40) {
+      toast({ title: 'Need more source content', variant: 'destructive' });
+      return;
+    }
+    setSimplifying(true);
+    setSimplified('');
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('forensics-simplify', {
+        body: { source, toolLabel: active.title },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSimplified(data.simplified || '');
+      toast({ title: 'Plain-English version ready' });
+    } catch (e: unknown) {
+      toast({ title: 'Simplify failed', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+    } finally {
+      setSimplifying(false);
+    }
+  };
+
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopied(key);
@@ -43,6 +72,7 @@ export function AdminForensicsSystemsPanel() {
     setResult(null);
     setPackageOpen(false);
     setPackageResult(null);
+    setSimplified('');
   };
 
   const autofillFromUrl = async () => {
