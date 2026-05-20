@@ -19,6 +19,7 @@ import {
 } from '@/lib/portalLeads';
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
+import { DetectiveMode } from './DetectiveMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
@@ -1131,6 +1132,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           {lead.why_fit && (
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
+
+          {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+          <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
 
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
