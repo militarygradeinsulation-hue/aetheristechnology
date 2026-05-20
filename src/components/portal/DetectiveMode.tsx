@@ -554,49 +554,81 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           </div>
         )}
 
-        {/* Verdict */}
+        {/* Verdict — stamped index card */}
         {r.best_angle && (
-          <div className="rounded-md bg-background/60 border border-amber/30 p-3">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-1">The verdict</p>
-            <p className="text-sm font-display font-semibold text-foreground">{r.best_angle.title || r.best_angle.leak_or_gap}</p>
+          <div className="relative rounded-md border-2 border-amber/60 bg-[hsl(var(--background))]/80 p-4 shadow-[0_4px_20px_-8px_hsl(var(--amber)/0.5)] -rotate-[0.6deg]">
+            {/* pin */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-crimson shadow-[0_0_8px_hsl(var(--crimson)/0.8)] border border-crimson-deep" />
+            {/* stamp */}
+            <div className="absolute -top-2 -right-2 rotate-12 px-2 py-0.5 border-2 border-crimson text-crimson font-case text-[9px] font-bold uppercase tracking-widest bg-background/70">
+              <span className="flex items-center gap-1"><Stamp className="w-2.5 h-2.5" /> prime suspect</span>
+            </div>
+            <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-amber/80 mb-1.5">Case verdict · {(lead as any)?.business_name || 'subject'}</p>
+            <p className="text-base font-forensic font-semibold text-foreground leading-tight">{r.best_angle.title || r.best_angle.leak_or_gap}</p>
             {r.best_angle.leak_or_gap && r.best_angle.title && r.best_angle.leak_or_gap !== r.best_angle.title && (
-              <p className="text-xs text-muted-foreground mt-0.5"><span className="text-amber/80">Leak:</span> {r.best_angle.leak_or_gap}{r.best_angle.estimated_cost ? <span className="text-amber/80"> · ~{r.best_angle.estimated_cost}/yr</span> : null}</p>
+              <p className="text-xs text-muted-foreground mt-1.5"><span className="text-crimson/90 font-mono uppercase tracking-wider text-[10px]">Leak:</span> {r.best_angle.leak_or_gap}{r.best_angle.estimated_cost ? <span className="text-crimson font-case"> · ~{r.best_angle.estimated_cost}/yr bleeding</span> : null}</p>
             )}
-            {r.best_angle.why_this_one && <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{r.best_angle.why_this_one}</p>}
+            {r.best_angle.why_this_one && <p className="text-xs text-muted-foreground/90 mt-2 leading-relaxed border-t border-amber/20 pt-2 italic">{r.best_angle.why_this_one}</p>}
           </div>
         )}
 
-        {/* Deduction chain */}
+        {/* Deduction trail — pinned clues connected by string */}
         {r.deduction_chain && r.deduction_chain.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Deduction — point A → point B</p>
-            <ol className="space-y-2">
-              {r.deduction_chain.map((s, i) => (
-                <li key={i} className="rounded-md border border-border/50 bg-card/40 p-2.5">
-                  <div className="flex items-start gap-2">
-                    <span className="text-[10px] font-mono text-amber bg-amber/10 border border-amber/30 rounded px-1.5 py-0.5 flex-shrink-0">{String(s.step || i + 1).padStart(2, '0')}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                        <span className="text-muted-foreground">{s.from}</span>
-                        <ArrowRight className="w-3 h-3 text-amber flex-shrink-0" />
-                        <span className="text-foreground font-medium">{s.to}</span>
-                      </div>
-                      {s.evidence && <p className="text-[11px] text-muted-foreground/80 italic mt-1 leading-relaxed">Evidence: {s.evidence}</p>}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-3.5 h-3.5 text-amber" />
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">The trail of clues</p>
+              <span className="text-[9px] font-mono text-muted-foreground/60">· follow the string</span>
+            </div>
+            <ol className="relative space-y-3 pl-6">
+              {/* the string */}
+              <div className="absolute left-[10px] top-2 bottom-2 w-px bg-gradient-to-b from-amber/60 via-amber/30 to-amber/60" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, hsl(var(--amber)/0.7) 0 4px, transparent 4px 8px)' }} />
+              {r.deduction_chain.map((s, i) => {
+                const tilt = i % 2 === 0 ? '-rotate-[0.4deg]' : 'rotate-[0.5deg]';
+                return (
+                  <li key={i} className="relative">
+                    {/* thumbtack on the string */}
+                    <div className="absolute -left-6 top-3 flex items-center justify-center w-5 h-5 rounded-full bg-amber/20 border border-amber/50 shadow-[0_0_6px_hsl(var(--amber)/0.4)]">
+                      <span className="text-[9px] font-case font-bold text-amber">{String(s.step || i + 1).padStart(2, '0')}</span>
                     </div>
-                  </div>
-                </li>
-              ))}
+                    <div className={`rounded-sm border border-border/60 bg-[hsl(var(--card))]/70 backdrop-blur-sm p-2.5 shadow-md ${tilt} hover:rotate-0 transition-transform`}>
+                      <p className="text-[9px] font-mono uppercase tracking-wider text-amber/70 mb-1">Clue #{String(s.step || i + 1).padStart(2, '0')}</p>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-[11px] text-muted-foreground/80 font-case">spotted: <span className="text-muted-foreground">{s.from}</span></p>
+                        <div className="flex items-center gap-1.5 text-[10px] text-amber/80">
+                          <ArrowDown className="w-3 h-3" /><span className="font-mono uppercase tracking-wider">therefore</span>
+                        </div>
+                        <p className="text-[12.5px] text-foreground font-display font-medium leading-snug">{s.to}</p>
+                      </div>
+                      {s.evidence && (
+                        <div className="mt-2 pt-2 border-t border-dashed border-border/50">
+                          <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60 mb-0.5">Evidence pinned</p>
+                          <p className="text-[11px] text-foreground/80 italic leading-relaxed">"{s.evidence}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </div>
         )}
 
-        {/* Deeper forensics */}
+        {/* Deeper forensics — pinned reserve notes */}
         {r.deeper_forensics && r.deeper_forensics.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Hold in reserve — bring these out on the reply</p>
-            <ul className="list-disc pl-5 space-y-1 marker:text-amber/60">
-              {r.deeper_forensics.map((b, i) => <li key={i} className="text-xs text-muted-foreground leading-relaxed">{b}</li>)}
-            </ul>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Pin className="w-3.5 h-3.5 text-amber" />
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">Hold in reserve · play these on the reply</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {r.deeper_forensics.map((b, i) => (
+                <div key={i} className={`relative rounded-sm border border-amber/25 bg-[hsl(var(--background))]/60 p-2.5 pl-3 ${i % 2 === 0 ? '-rotate-[0.5deg]' : 'rotate-[0.5deg]'} hover:rotate-0 transition-transform shadow-sm`}>
+                  <div className="absolute -top-1 left-3 w-2 h-2 rounded-full bg-amber/80 shadow-[0_0_4px_hsl(var(--amber)/0.7)]" />
+                  <p className="text-[11px] text-foreground/90 leading-relaxed font-case">{b}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
