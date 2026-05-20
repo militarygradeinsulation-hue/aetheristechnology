@@ -58,7 +58,16 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult((data as any).result || null);
+      const res = (data as any).result || null;
+      setResult(res);
+      // progressive reveal of monologue
+      setRevealed(0);
+      const beats = res?.monologue?.length || 0;
+      if (beats > 0) {
+        for (let i = 1; i <= beats; i++) {
+          setTimeout(() => setRevealed((r) => Math.max(r, i)), i * 650);
+        }
+      }
     } catch (e) {
       toast({ title: 'Detective failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
