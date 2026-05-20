@@ -7,6 +7,7 @@ import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
