@@ -3,11 +3,12 @@
 // single highest-leverage angle, shows a transparent chain of reasoning
 // (point A -> point B), then writes the perfect message in Aetheris voice.
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-portal-token",
+    "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
 };
 
 const SYSTEM_PROMPT = `You are the **Aetheris Detective** — a forensic sales operator working a single lead.
