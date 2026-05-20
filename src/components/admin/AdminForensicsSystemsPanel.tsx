@@ -258,14 +258,43 @@ export function AdminForensicsSystemsPanel() {
               <Download className="w-4 h-4 mr-1" /> Download Playbook PDF
             </Button>
             <Button
+              onClick={() => runSimplify(result.markdown)}
+              disabled={simplifying}
+              size="sm"
+              variant="outline"
+              className="border-amber/50 text-amber hover:bg-amber/10"
+            >
+              {simplifying
+                ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Simplifying…</>
+                : <><BookOpen className="w-4 h-4 mr-1" /> Simplify (plain English)</>}
+            </Button>
+            <Button
               onClick={() => setPackageOpen(o => !o)}
               size="sm"
               className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
             >
               <Send className="w-4 h-4 mr-1" /> {packageOpen ? 'Close lead package' : 'Package for a lead'}
             </Button>
-            <Button onClick={() => { setResult(null); setPackageResult(null); setPackageOpen(false); }} variant="ghost" size="sm">Run again</Button>
+            <Button onClick={() => { setResult(null); setPackageResult(null); setPackageOpen(false); setSimplified(''); }} variant="ghost" size="sm">Run again</Button>
           </div>
+
+          {simplified && (
+            <div className="glass p-5 rounded-xl border border-amber/40 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Plain-English Version</div>
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" onClick={() => copy(simplified, 'simple')} className="h-7 text-[10px]">
+                    {copied === 'simple' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSimplified('')} className="h-7 text-[10px]">Hide</Button>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Written so anyone — non-technical owners, new hires, a spouse — can read it on the first try.</p>
+              <div className="bg-background/40 border border-border rounded p-4 text-sm whitespace-pre-wrap text-foreground/90 max-h-[32rem] overflow-y-auto leading-relaxed">
+                {simplified}
+              </div>
+            </div>
+          )}
 
           {packageOpen && (
             <div className="glass p-5 rounded-xl border border-amber/40 space-y-3">
