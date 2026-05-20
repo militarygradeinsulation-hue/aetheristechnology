@@ -387,6 +387,16 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           </button>
           <button
             type="button"
+            onClick={() => setSnipping(true)}
+            disabled={isLoading || isRecording || isTranscribing}
+            aria-label="Snip an area of the screen"
+            title="Drag-select an area of the page and ask about it"
+            className="p-2 rounded-md border bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Crop className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
             onClick={toggleRecording}
             disabled={isLoading || isTranscribing}
             aria-label={isRecording ? 'Stop recording' : 'Record voice'}
