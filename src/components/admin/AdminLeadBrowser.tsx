@@ -485,6 +485,18 @@ export const AdminLeadBrowser: React.FC = () => {
                     </div>
                   </>
                 )}
+                {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+                <div className="pt-3 border-t border-border/30">
+                  <DetectiveMode
+                    auth="admin"
+                    lead={detail as any}
+                    scan={detail.enrichment?.scan || null}
+                    rr={detail.enrichment?.rocketreach || null}
+                    fc={detail.enrichment?.firecrawl || null}
+                    enrichment={detail.enrichment}
+                  />
+                </div>
+
 
                 {/* Assign */}
                 <div className="pt-3 border-t border-border/30 flex flex-wrap items-end gap-2">
