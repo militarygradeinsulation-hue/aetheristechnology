@@ -32,6 +32,7 @@ import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { InboxTab } from '@/components/portal/InboxTab';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Mail as MailIcon, Newspaper } from 'lucide-react';
+import { EasyModeWrapper } from '@/components/EasyModeBar';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Braden Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
