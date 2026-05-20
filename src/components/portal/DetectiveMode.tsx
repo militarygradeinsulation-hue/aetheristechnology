@@ -34,6 +34,9 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
   const [result, setResult] = useState<DetectiveResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const tileRef = useRef<HTMLDivElement>(null);
 
   const run = async (ch: 'email' | 'linkedin' = channel) => {
     const headers: Record<string, string> = {};
