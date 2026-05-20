@@ -4,6 +4,7 @@ import { Download, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { EasyReadButton } from '@/components/EasyReadButton';
 
 interface Props {
   toolType: string;
