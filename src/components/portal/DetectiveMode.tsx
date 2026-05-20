@@ -220,7 +220,48 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         </div>
       </div>
 
-      <div className="p-3 space-y-4">
+      <div className="p-3 space-y-4" ref={tileRef}>
+        {/* Detective monologue — the brain on display */}
+        {r.monologue && r.monologue.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Brain className="w-3.5 h-3.5 text-amber" />
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Inside the detective's head</p>
+            </div>
+            <div className="space-y-1.5">
+              {r.monologue.slice(0, revealed).map((b, i) => (
+                <div
+                  key={i}
+                  className={`flex items-start gap-2 rounded-md border p-2 animate-fade-in ${
+                    b.type === 'question'
+                      ? 'border-amber/30 bg-amber/5'
+                      : b.type === 'conclusion'
+                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      : b.type === 'observation'
+                      ? 'border-sky-500/20 bg-sky-500/5'
+                      : 'border-border/40 bg-card/30'
+                  }`}
+                >
+                  <div className="mt-0.5 flex-shrink-0">{beatIcon(b.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70 mb-0.5">
+                      {b.type === 'question' ? 'asks itself' : b.type}
+                    </p>
+                    <p className={`text-[12px] leading-relaxed ${b.type === 'question' ? 'text-amber italic' : 'text-foreground'}`}>
+                      {b.type === 'question' ? `"${b.text}"` : b.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {revealed < r.monologue.length && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground italic pl-1">
+                  <Loader2 className="w-3 h-3 animate-spin text-amber" /> thinking…
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Verdict */}
         {r.best_angle && (
           <div className="rounded-md bg-background/60 border border-amber/30 p-3">
