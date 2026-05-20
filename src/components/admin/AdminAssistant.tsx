@@ -35,6 +35,22 @@ const parseSuggestions = (text: string): { clean: string; suggestions?: string[]
   return { clean: text.replace(SUGGESTIONS_RE, '').trim() };
 };
 
+const POS_STORAGE_KEY = 'admin_assistant_position';
+const LAUNCHER_POS_STORAGE_KEY = 'admin_assistant_launcher_position';
+
+type Pos = { x: number; y: number };
+
+const loadPos = (key: string, fallback: Pos): Pos => {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const p = JSON.parse(raw);
+    if (typeof p?.x === 'number' && typeof p?.y === 'number') return p;
+  } catch { /* ignore */ }
+  return fallback;
+};
+
 export const AdminAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>(() => {
@@ -53,6 +69,54 @@ export const AdminAssistant: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Draggable positions — bottom-right defaults, persisted.
+  const defaultPanelPos: Pos = typeof window !== 'undefined'
+    ? { x: Math.max(16, window.innerWidth - 440), y: Math.max(16, window.innerHeight - 680) }
+    : { x: 24, y: 24 };
+  const defaultLauncherPos: Pos = typeof window !== 'undefined'
+    ? { x: Math.max(16, window.innerWidth - 180), y: Math.max(16, window.innerHeight - 80) }
+    : { x: 24, y: 24 };
+  const [panelPos, setPanelPos] = useState<Pos>(() => loadPos(POS_STORAGE_KEY, defaultPanelPos));
+  const [launcherPos, setLauncherPos] = useState<Pos>(() => loadPos(LAUNCHER_POS_STORAGE_KEY, defaultLauncherPos));
+  const dragRef = useRef<{ target: 'panel' | 'launcher'; dx: number; dy: number; moved: boolean } | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(POS_STORAGE_KEY, JSON.stringify(panelPos)); } catch { /* ignore */ }
+  }, [panelPos]);
+  useEffect(() => {
+    try { localStorage.setItem(LAUNCHER_POS_STORAGE_KEY, JSON.stringify(launcherPos)); } catch { /* ignore */ }
+  }, [launcherPos]);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      if (!dragRef.current) return;
+      const { target, dx, dy } = dragRef.current;
+      const w = target === 'panel' ? 420 : 160;
+      const h = target === 'panel' ? 640 : 48;
+      const x = Math.min(Math.max(8, e.clientX - dx), window.innerWidth - w + 40);
+      const y = Math.min(Math.max(8, e.clientY - dy), window.innerHeight - h + 20);
+      dragRef.current.moved = true;
+      if (target === 'panel') setPanelPos({ x, y }); else setLauncherPos({ x, y });
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, []);
+
+  const startDrag = (target: 'panel' | 'launcher') => (e: React.PointerEvent) => {
+    const pos = target === 'panel' ? panelPos : launcherPos;
+    dragRef.current = { target, dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false };
+    document.body.style.userSelect = 'none';
+  };
+
 
   useEffect(() => {
     try {
