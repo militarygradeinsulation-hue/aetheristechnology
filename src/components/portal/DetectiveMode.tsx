@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 import type { RepLead, LeadScan } from '@/lib/portalLeads';
 
 interface Props {
-  lead: RepLead;
+  lead: Partial<RepLead> & Record<string, any>;
   scan: LeadScan | null;
   rr: any | null;
   fc: any | null;
+  enrichment?: any | null;
+  auth?: 'portal' | 'admin';
 }
 
 interface DeductionStep { step: number; from: string; to: string; evidence: string }
