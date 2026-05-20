@@ -33,6 +33,16 @@ Then: write the message that uses the verdict.
 
 # Output — return ONLY valid JSON, no prose around it. Shape:
 {
+  "monologue": [
+    { "type": "question", "text": "What am I actually looking at here? (the detective asking themselves)" },
+    { "type": "thought", "text": "First impression — short, in-character. Talk like a detective muttering to themselves." },
+    { "type": "question", "text": "Next self-directed question that drills deeper into the data." },
+    { "type": "observation", "text": "What I'm seeing in the data (cite the actual number/fact)." },
+    { "type": "thought", "text": "What that probably means about how they run." },
+    { "type": "question", "text": "Another question — am I sure? what would prove me wrong?" },
+    { "type": "thought", "text": "Pressure-test, eliminate weaker angles." },
+    { "type": "conclusion", "text": "I've got it. Here's the leak that beats the others, and why." }
+  ],
   "best_angle": {
     "title": "Short label for the angle, max 6 words",
     "leak_or_gap": "Exact phrase pulled from the data",

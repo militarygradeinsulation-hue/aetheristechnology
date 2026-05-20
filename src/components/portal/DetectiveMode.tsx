@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
 import { getAdminToken } from '@/lib/adminAuth';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 import type { RepLead, LeadScan } from '@/lib/portalLeads';
 
 interface Props {
@@ -17,7 +18,9 @@ interface Props {
 }
 
 interface DeductionStep { step: number; from: string; to: string; evidence: string }
+interface MonologueBeat { type: 'question' | 'thought' | 'observation' | 'conclusion'; text: string }
 interface DetectiveResult {
+  monologue?: MonologueBeat[];
   best_angle?: { title?: string; leak_or_gap?: string; estimated_cost?: string | null; why_this_one?: string };
   deduction_chain?: DeductionStep[];
   deeper_forensics?: string[];
@@ -31,6 +34,9 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
   const [result, setResult] = useState<DetectiveResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const tileRef = useRef<HTMLDivElement>(null);
 
   const run = async (ch: 'email' | 'linkedin' = channel) => {
     const headers: Record<string, string> = {};
@@ -52,7 +58,16 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult((data as any).result || null);
+      const res = (data as any).result || null;
+      setResult(res);
+      // progressive reveal of monologue
+      setRevealed(0);
+      const beats = res?.monologue?.length || 0;
+      if (beats > 0) {
+        for (let i = 1; i <= beats; i++) {
+          setTimeout(() => setRevealed((r) => Math.max(r, i)), i * 650);
+        }
+      }
     } catch (e) {
       toast({ title: 'Detective failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
@@ -65,6 +80,84 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     navigator.clipboard.writeText(text);
     setCopied(key);
     setTimeout(() => setCopied(null), 1500);
+  };
+
+  const buildCaseText = (r: DetectiveResult): string => {
+    const L: string[] = [];
+    const who = (lead as any)?.business_name || (lead as any)?.contact_name || 'lead';
+    L.push(`AETHERIS — CASE FILE`);
+    L.push(`Subject: ${who}`);
+    L.push(`Channel: ${channel}`);
+    L.push(`Generated: ${new Date().toLocaleString()}`);
+    L.push('');
+    if (r.monologue?.length) {
+      L.push('── DETECTIVE MONOLOGUE ──');
+      r.monologue.forEach((b) => L.push(`[${b.type.toUpperCase()}] ${b.text}`));
+      L.push('');
+    }
+    if (r.best_angle) {
+      L.push('── VERDICT ──');
+      L.push(r.best_angle.title || r.best_angle.leak_or_gap || '');
+      if (r.best_angle.leak_or_gap) L.push(`Leak: ${r.best_angle.leak_or_gap}${r.best_angle.estimated_cost ? ` (~${r.best_angle.estimated_cost}/yr)` : ''}`);
+      if (r.best_angle.why_this_one) L.push(r.best_angle.why_this_one);
+      L.push('');
+    }
+    if (r.deduction_chain?.length) {
+      L.push('── DEDUCTION (A → B) ──');
+      r.deduction_chain.forEach((s, i) => {
+        L.push(`${String(s.step || i + 1).padStart(2, '0')}. ${s.from}  →  ${s.to}`);
+        if (s.evidence) L.push(`    Evidence: ${s.evidence}`);
+      });
+      L.push('');
+    }
+    if (r.deeper_forensics?.length) {
+      L.push('── HOLD IN RESERVE ──');
+      r.deeper_forensics.forEach((b) => L.push(`• ${b}`));
+      L.push('');
+    }
+    if (r.message?.body) {
+      L.push('── THE MESSAGE ──');
+      if (r.message.subject && channel === 'email') L.push(`Subject: ${r.message.subject}`);
+      L.push('');
+      L.push(r.message.body);
+      if (r.message.why_it_lands) { L.push(''); L.push(`Why it lands: ${r.message.why_it_lands}`); }
+    }
+    return L.join('\n');
+  };
+
+  const downloadCase = (r: DetectiveResult) => {
+    const text = buildCaseText(r);
+    const who = ((lead as any)?.business_name || 'case').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `case-file-${who}.txt`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const saveCase = async (r: DetectiveResult) => {
+    setSaving(true);
+    try {
+      await saveToolRun({
+        tool_type: 'detective_case',
+        title: `Case File — ${(lead as any)?.business_name || (lead as any)?.contact_name || 'lead'}`,
+        input_data: { lead_id: (lead as any)?.id, channel },
+        output_data: { ...r, _text: buildCaseText(r) },
+      });
+      toast({ title: 'Saved to library' });
+    } catch (e) {
+      toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const beatIcon = (t: MonologueBeat['type']) => {
+    if (t === 'question') return <HelpCircle className="w-3.5 h-3.5 text-amber" />;
+    if (t === 'observation') return <Eye className="w-3.5 h-3.5 text-sky-400" />;
+    if (t === 'conclusion') return <Gavel className="w-3.5 h-3.5 text-emerald-400" />;
+    return <Lightbulb className="w-3.5 h-3.5 text-amber/70" />;
   };
 
   if (!result && !loading) {
@@ -127,7 +220,48 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         </div>
       </div>
 
-      <div className="p-3 space-y-4">
+      <div className="p-3 space-y-4" ref={tileRef}>
+        {/* Detective monologue — the brain on display */}
+        {r.monologue && r.monologue.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Brain className="w-3.5 h-3.5 text-amber" />
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Inside the detective's head</p>
+            </div>
+            <div className="space-y-1.5">
+              {r.monologue.slice(0, revealed).map((b, i) => (
+                <div
+                  key={i}
+                  className={`flex items-start gap-2 rounded-md border p-2 animate-fade-in ${
+                    b.type === 'question'
+                      ? 'border-amber/30 bg-amber/5'
+                      : b.type === 'conclusion'
+                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      : b.type === 'observation'
+                      ? 'border-sky-500/20 bg-sky-500/5'
+                      : 'border-border/40 bg-card/30'
+                  }`}
+                >
+                  <div className="mt-0.5 flex-shrink-0">{beatIcon(b.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70 mb-0.5">
+                      {b.type === 'question' ? 'asks itself' : b.type}
+                    </p>
+                    <p className={`text-[12px] leading-relaxed ${b.type === 'question' ? 'text-amber italic' : 'text-foreground'}`}>
+                      {b.type === 'question' ? `"${b.text}"` : b.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {revealed < r.monologue.length && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground italic pl-1">
+                  <Loader2 className="w-3 h-3 animate-spin text-amber" /> thinking…
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Verdict */}
         {r.best_angle && (
           <div className="rounded-md bg-background/60 border border-amber/30 p-3">
@@ -206,6 +340,28 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             </div>
           </div>
         )}
+
+        {/* Save / Copy / Download — the case-file tile actions */}
+        <div className="rounded-md border-2 border-dashed border-amber/40 bg-background/40 p-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileSearch className="w-4 h-4 text-amber flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-display font-semibold text-foreground truncate">Keep this case file</p>
+              <p className="text-[10px] text-muted-foreground truncate">Save the full deduction + monologue + message</p>
+            </div>
+          </div>
+          <div className="flex gap-1.5 flex-shrink-0">
+            <Button size="sm" variant="outline" onClick={() => copy(buildCaseText(r), 'case')} className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10">
+              {copied === 'case' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => downloadCase(r)} className="h-7 text-[10px] border-amber/40 text-amber hover:bg-amber/10">
+              <Download className="w-3 h-3 mr-1" /> Download
+            </Button>
+            <Button size="sm" onClick={() => saveCase(r)} disabled={saving} className="h-7 text-[10px] bg-amber text-background hover:bg-amber/90">
+              {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />} Save
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
