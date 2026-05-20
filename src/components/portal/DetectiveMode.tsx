@@ -650,9 +650,16 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
               <p className="text-[10px] font-mono uppercase tracking-wider text-amber flex items-center gap-1">
                 {channel === 'email' ? <Mail className="w-3 h-3" /> : <Linkedin className="w-3 h-3" />} The message
               </p>
-              <Button size="sm" variant="ghost" onClick={() => copy(fullMsg, 'msg')} className="h-6 text-[10px] text-amber hover:text-amber">
-                {copied === 'msg' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
-              </Button>
+              <div className="flex items-center gap-1">
+                <ReadAloudButton
+                  text={[msg.subject ? `Subject: ${msg.subject}.` : '', msg.body || '', msg.why_it_lands ? `Why it lands: ${msg.why_it_lands}` : ''].filter(Boolean).join(' ')}
+                  label="Listen"
+                  className="h-6 text-[10px] border-amber/40 text-amber hover:bg-amber/10"
+                />
+                <Button size="sm" variant="ghost" onClick={() => copy(fullMsg, 'msg')} className="h-6 text-[10px] text-amber hover:text-amber">
+                  {copied === 'msg' ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
+                </Button>
+              </div>
             </div>
             {msg.subject && channel === 'email' && (
               <p className="text-xs"><span className="text-muted-foreground">Subject: </span><span className="text-foreground font-medium">{msg.subject}</span></p>
