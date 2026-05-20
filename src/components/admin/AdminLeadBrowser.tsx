@@ -12,6 +12,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { DetectiveMode } from '@/components/portal/DetectiveMode';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
   Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap,
