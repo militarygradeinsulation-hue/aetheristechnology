@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEasyMode } from '@/lib/easyMode';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Type, RotateCcw, Loader2, BookOpen, X } from 'lucide-react';
+import { Sparkles, Type, RotateCcw, Loader2, BookOpen, X, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
