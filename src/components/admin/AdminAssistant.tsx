@@ -209,7 +209,15 @@ export const AdminAssistant: React.FC = () => {
               <GripVertical className="w-4 h-4 opacity-80" />
             </button>
             <button
-              onClick={() => { if (!dragRef.current?.moved) setIsOpen(true); }}
+              onClick={() => {
+                if (dragRef.current?.moved) return;
+                // Open panel anchored to the launcher's current position, clamped on-screen.
+                const w = 420, h = 640;
+                const x = Math.min(Math.max(8, launcherPos.x), window.innerWidth - w - 8);
+                const y = Math.min(Math.max(8, launcherPos.y - h - 12 > 8 ? launcherPos.y - h - 12 : launcherPos.y + 56), window.innerHeight - h - 8);
+                setPanelPos({ x, y });
+                setIsOpen(true);
+              }}
               aria-label="Open Operator Assistant"
               className="flex items-center gap-2 pr-4 pl-1 py-3"
             >
