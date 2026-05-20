@@ -66,6 +66,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [snipping, setSnipping] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
