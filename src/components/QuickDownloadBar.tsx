@@ -54,16 +54,19 @@ export const QuickDownloadBar: React.FC<Props> = ({ toolType, title, outputData,
   };
 
   return (
-    <div className={`glass rounded-xl p-3 border border-amber/30 flex flex-wrap items-center gap-2 justify-between ${className || ''}`}>
-      <span className="text-xs font-bold uppercase tracking-wider text-amber px-1">Report ready · Quick download</span>
-      <div className="flex gap-2 flex-wrap">
-        <Button size="sm" onClick={handlePdf} className="bg-amber hover:bg-amber/90 text-background font-bold">
-          <Download className="w-4 h-4 mr-1" /> PDF
-        </Button>
-        <Button size="sm" variant="outline" onClick={handleCopy}>
-          {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />} Copy
-        </Button>
-        <Button size="sm" variant="ghost" onClick={handleTxt}>.txt</Button>
+    <div className={className}>
+      <div className="glass rounded-xl p-3 border border-amber/30 flex flex-wrap items-center gap-2 justify-between">
+        <span className="text-xs font-bold uppercase tracking-wider text-amber px-1">Report ready · Quick download</span>
+        <div className="flex gap-2 flex-wrap items-center">
+          <Button size="sm" onClick={handlePdf} className="bg-amber hover:bg-amber/90 text-background font-bold">
+            <Download className="w-4 h-4 mr-1" /> PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleCopy}>
+            {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />} Copy
+          </Button>
+          <Button size="sm" variant="ghost" onClick={handleTxt}>.txt</Button>
+          <EasyReadButton source={formatLibraryItemAsText(buildItem())} toolLabel={title} />
+        </div>
       </div>
     </div>
   );
