@@ -39,12 +39,55 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [revealed, setRevealed] = useState(0);
   const [saving, setSaving] = useState(false);
   const [prepSteps, setPrepSteps] = useState<PrepStep[]>([]);
+  const [selfTalk, setSelfTalk] = useState<string[]>([]);
   // Live data — starts from props, gets overwritten as we auto-run tools.
   const [liveScan, setLiveScan] = useState<any>(scan);
   const [liveRr, setLiveRr] = useState<any>(rr);
   const [liveFc, setLiveFc] = useState<any>(fc);
   const [liveEnrich, setLiveEnrich] = useState<any>(enrichment);
   const tileRef = useRef<HTMLDivElement>(null);
+  const talkScrollRef = useRef<HTMLDivElement>(null);
+
+  // Live detective self-talk while loading. Cycles a bank of lead-aware lines.
+  useEffect(() => {
+    if (!loading) return;
+    const who = (lead as any)?.business_name || (lead as any)?.contact_name || 'this one';
+    const site = (lead as any)?.website || 'their site';
+    const industry = (lead as any)?.industry || 'their space';
+    const runningLabel = prepSteps.find((s) => s.status === 'running')?.label;
+    const bank = [
+      `Alright… ${who}. What are you hiding?`,
+      `Pulling up ${site}. Let's see what the front door says about the back office.`,
+      `${industry}, huh. I've seen this pattern before.`,
+      `Where's the bleed? Has to be somewhere obvious if I just stop blinking.`,
+      `Three things people never fix until it's too late. Which one is theirs?`,
+      `If revenue's fine, then the leak is in time. If time's fine, it's in margin.`,
+      `Don't trust the homepage. Trust the careers page. That's where the truth lives.`,
+      `Who actually signs off here? Not the title — the person.`,
+      runningLabel ? `Running ${runningLabel.toLowerCase()}…` : `Cross-referencing what I've got.`,
+      `Okay. Connect the dots. From signal to dollar.`,
+      `If I were them, what would I be lying to myself about right now?`,
+      `One angle. Just one. The one they can't unsee.`,
+      `Cost it. Name it. Make it impossible to ignore.`,
+      `Almost there. Sharpening the hook.`,
+    ];
+    let i = 0;
+    setSelfTalk([bank[0]]);
+    const id = setInterval(() => {
+      i = (i + 1) % bank.length;
+      setSelfTalk((prev) => {
+        const next = [...prev, bank[i]];
+        return next.length > 20 ? next.slice(next.length - 20) : next;
+      });
+    }, 1700);
+    return () => clearInterval(id);
+  }, [loading, prepSteps, lead]);
+
+  useEffect(() => {
+    if (talkScrollRef.current) {
+      talkScrollRef.current.scrollTop = talkScrollRef.current.scrollHeight;
+    }
+  }, [selfTalk]);
 
   const updateStep = (key: string, patch: Partial<PrepStep>) =>
     setPrepSteps((s) => s.map((x) => (x.key === key ? { ...x, ...patch } : x)));
