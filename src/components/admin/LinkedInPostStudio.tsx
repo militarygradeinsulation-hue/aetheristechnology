@@ -128,6 +128,45 @@ export default function LinkedInPostStudio() {
   const [theirReply, setTheirReply] = useState('');
   const [replyOriginalPost, setReplyOriginalPost] = useState('');
 
+  // URL / YouTube → Post
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [sourceExtra, setSourceExtra] = useState('');
+  const [sourceLoading, setSourceLoading] = useState(false);
+
+  const clearPastedPost = () => {
+    setRespondText('');
+    setRespondExtra('');
+    setRespondOutput('');
+    toast({ title: 'Cleared' });
+  };
+
+  const generateFromUrl = async () => {
+    const u = sourceUrl.trim();
+    if (!u) { toast({ title: 'Paste a URL or YouTube link first', variant: 'destructive' }); return; }
+    setSourceLoading(true);
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
+        body: { url: u, extraPrompt: sourceExtra.trim() },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const post = (data.post || '').trim();
+      if (!post) throw new Error('Empty post');
+      const firstLine = post.split('\n').map((s: string) => s.trim()).find(Boolean) || u;
+      setTopic(firstLine.slice(0, 180));
+      setGenerated(post);
+      toast({ title: 'Post created from source', description: data.sourceKind === 'youtube' ? 'YouTube video processed' : 'URL scanned' });
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed';
+      toast({ title: 'URL post failed', description: msg, variant: 'destructive' });
+    } finally {
+      setSourceLoading(false);
+    }
+  };
+
 
   // Response library state
   const [responseLibrary, setResponseLibrary] = useState<AdminLibraryItem[]>([]);
