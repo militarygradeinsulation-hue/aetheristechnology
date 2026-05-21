@@ -5,7 +5,7 @@ import { verifyPortalToken } from "../_shared/portal-token.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-admin-token",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
 const SYSTEM_PROMPT = `You are the AETHERIS Plain-Language Translator. You take a forensic report or research breakdown and rewrite it so ANYONE — a non-technical owner, a spouse, a new hire, a 9th grader — can understand it on first read.
