@@ -125,7 +125,8 @@ export const ProblemPicker: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="columns-1 md:columns-2 gap-4 [column-fill:_balance] space-y-4">
+            <style>{`.problem-tile{break-inside:avoid;display:block;}`}</style>
             {problemGroups.map((group, idx) => {
               const meta = groupMeta[idx];
               const Icon = meta?.icon ?? Droplets;
