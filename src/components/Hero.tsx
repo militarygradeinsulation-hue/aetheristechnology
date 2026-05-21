@@ -100,7 +100,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                       Case File · Plain English
                     </div>
                     <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
-                      What the Hell Do You <span className="text-amber italic">Actually</span> Do?
+                      What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
                     </h3>
                     <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
                       <div className="font-case text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
