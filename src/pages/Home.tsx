@@ -13,7 +13,7 @@ import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 import { ThisIsForYou } from '@/components/ThisIsForYou';
 import { ProblemPicker } from '@/components/ProblemPicker';
-import { INFOGRAPHICS } from '@/lib/infographics';
+
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
