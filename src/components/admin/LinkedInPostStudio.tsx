@@ -334,8 +334,8 @@ export default function LinkedInPostStudio() {
       toast({ title: 'Paste the post text first (at least 20 chars)', variant: 'destructive' });
       return;
     }
-    if (isReply && (myComment.trim().length < 10 || theirReply.trim().length < 5)) {
-      toast({ title: 'Paste your comment AND their reply', variant: 'destructive' });
+    if (isReply && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage))) {
+      toast({ title: 'Provide your comment AND their reply (text or screenshot)', variant: 'destructive' });
       return;
     }
     setRespondLoading(true);
