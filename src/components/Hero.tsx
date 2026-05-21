@@ -80,6 +80,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <p className="font-forensic text-base md:text-lg text-foreground/90 leading-snug">
                 I see you on my site. <span className="text-amber italic">Actually do something about your problem</span> — instead of losing money and just leaving.
               </p>
+              <p className="font-forensic text-sm md:text-base text-foreground/85 leading-snug pt-1">
+                I can find your leaks — <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
+              </p>
             </div>
             <AnimatePresence initial={false}>
               {whatOpen && (
