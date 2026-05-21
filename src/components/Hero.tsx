@@ -122,7 +122,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </Link>
           </div>
 
+          <ProblemPicker />
+
           <div className="grid sm:grid-cols-3 gap-3 max-w-4xl mx-auto pt-2 text-left">
+
             {[
               { img: INFOGRAPHICS.heroWhatWeDo, alt: 'Stethoscope on a CRM dashboard, forensic audit infographic', label: 'What we do', body: 'Forensic audit of your revenue systems.', real: "I open up your business the way a mechanic opens a hood, and tell you the truth nobody on payroll will." },
               { img: INFOGRAPHICS.heroWhatWeLookFor, alt: 'Magnifying glass over a leaking sales funnel', label: 'What we look for', body: 'Lost leads, dead follow-up, broken handoffs, CRM rot.', real: "The quiet bleeds, the ones costing you a vacation, a hire, your weekends, that look 'fine' from the inside." },
