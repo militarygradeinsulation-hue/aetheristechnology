@@ -659,6 +659,19 @@ export default function LinkedInPostStudio() {
               value={respondExtra}
               onChange={(e) => setRespondExtra(e.target.value)}
             />
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <Select value={respondTone} onValueChange={setRespondTone}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Tone" /></SelectTrigger>
+                <SelectContent>{TONES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={respondStyle} onValueChange={setRespondStyle}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
+              Site link auto-appended: aetheris.technology
+            </div>
           </div>
         </div>
 
