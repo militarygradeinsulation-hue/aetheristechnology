@@ -705,7 +705,7 @@ export default function LinkedInPostStudio() {
               respondLoading ||
               (respondSourceType === 'image' && !respondImage) ||
               (respondSourceType === 'text' && respondText.trim().length < 20) ||
-              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+              (respondSourceType === 'reply' && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage)))
             }
             className="flex-1 bg-amber text-background hover:bg-amber/90"
           >
