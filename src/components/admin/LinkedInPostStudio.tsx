@@ -129,6 +129,20 @@ const appendSiteLink = (post: string): string => {
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
+const buildToneStyleDirective = (toneVal: string, styleVal: string): string => {
+  const parts: string[] = [];
+  if (toneVal && toneVal !== 'auto') {
+    const t = TONES.find(x => x.value === toneVal);
+    if (t) parts.push(`TONE LOCK: Write in a ${t.label.toLowerCase()} voice. Hold this tone the entire post.`);
+  }
+  if (styleVal && styleVal !== 'auto') {
+    const s = STYLES.find(x => x.value === styleVal);
+    if (s) parts.push(`STRUCTURE LOCK: Use this format — ${s.label}. Do not drift to another shape.`);
+  }
+  parts.push(`LINK REQUIREMENT: End the post with the line "${SITE_LINK}" on its own (no markdown, no label). If a CTA exists, place the link AFTER it.`);
+  return parts.length ? '\n\n' + parts.join('\n') : '';
+};
+
 export default function LinkedInPostStudio() {
   const [topic, setTopic] = useState('');
   const [pillar, setPillar] = useState<string>('auto');
