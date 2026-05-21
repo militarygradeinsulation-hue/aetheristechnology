@@ -11,7 +11,7 @@ import { SEOHead } from '@/components/SEOHead';
 
 import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
-import { ThisIsForYou } from '@/components/ThisIsForYou';
+
 import { ProblemPicker } from '@/components/ProblemPicker';
 
 
@@ -70,8 +70,6 @@ const Home = () => {
 
 
 
-          {/* This is for you if... */}
-          <ThisIsForYou />
 
           {/* THE CENTERPIECE — Pick your problem + what you actually get */}
           <ProblemPicker />
