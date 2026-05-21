@@ -187,6 +187,19 @@ export default function LinkedInPostStudio() {
   const [myComment, setMyComment] = useState('');
   const [theirReply, setTheirReply] = useState('');
   const [replyOriginalPost, setReplyOriginalPost] = useState('');
+  // Optional screenshot uploads for each reply-to-reply slot
+  const [myCommentImage, setMyCommentImage] = useState<string | null>(null);
+  const [theirReplyImage, setTheirReplyImage] = useState<string | null>(null);
+  const [replyOriginalImage, setReplyOriginalImage] = useState<string | null>(null);
+
+  const readImageToDataUrl = (file: File | null | undefined, setter: (v: string | null) => void) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast({ title: 'Please upload an image', variant: 'destructive' }); return; }
+    if (file.size > 10 * 1024 * 1024) { toast({ title: 'Image too large (max 10 MB)', variant: 'destructive' }); return; }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   // URL / YouTube → Post
   const [sourceUrl, setSourceUrl] = useState('');
