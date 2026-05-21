@@ -91,36 +91,38 @@ export const FreeTools: React.FC = () => {
                     />
                   </div>
                   <div className="p-6 flex flex-col flex-1">
-                    <div className="mb-3">
+                    <div className="mb-4">
                       <div className="font-case text-[9px] uppercase tracking-[0.2em] text-crimson mb-1.5">
-                        The Problem
+                        What it cures for you
                       </div>
                       <p className="text-[15px] text-foreground font-semibold leading-snug">
-                        {tool.problem}
+                        {tool.solves}
                       </p>
                     </div>
                     <div className="mb-4 pt-3 border-t border-amber/15">
                       <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
-                        What this tool does
+                        The problem it plugs
                       </div>
-                      <h3 className="text-lg font-bold text-foreground font-display leading-tight mb-1">
-                        {tool.title}
-                      </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {tool.solves}
+                        {tool.problem}
                       </p>
                     </div>
                     <div className="mb-5 pt-3 border-t border-amber/15 flex-1">
                       <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
-                        What it gives you back
+                        Real talk
                       </div>
                       <p className="text-[13px] text-foreground/85 leading-relaxed italic">
                         {tool.realTalk}
                       </p>
                     </div>
-                    <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:bg-amber after:w-0 group-hover:after:w-full after:transition-all after:duration-500">
-                      Run it free <ArrowRight className="w-4 h-4" />
-                    </span>
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-bold text-foreground font-display leading-tight">
+                        {tool.title}
+                      </h3>
+                      <span className="text-amber text-xs font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide shrink-0">
+                        Run it free <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
                   </div>
                 </Link>
               </ParallaxTilt>
