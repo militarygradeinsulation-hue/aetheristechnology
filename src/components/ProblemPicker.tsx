@@ -125,7 +125,8 @@ export const ProblemPicker: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="columns-1 md:columns-2 gap-4 [column-fill:_balance] space-y-4">
+            <style>{`.problem-tile{break-inside:avoid;display:block;}`}</style>
             {problemGroups.map((group, idx) => {
               const meta = groupMeta[idx];
               const Icon = meta?.icon ?? Droplets;
@@ -133,9 +134,9 @@ export const ProblemPicker: React.FC = () => {
               return (
                 <RevealOnScroll key={idx}>
                   <div
-                    className={`forensic-tile rounded-md transition-all duration-500 h-full ${
+                    className={`problem-tile forensic-tile rounded-md transition-all duration-500 mb-4 ${
                       isOpen
-                        ? 'border-amber/70 md:col-span-2 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
+                        ? 'border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
                         : 'border-border/60 hover:border-amber/50'
                     }`}
                   >
