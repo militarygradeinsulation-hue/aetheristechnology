@@ -73,8 +73,13 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Do?</span>
               <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 relative transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
             </motion.button>
-            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80 -mt-1">
-              ← Press this first. Seriously.
+            <div className="max-w-xl text-center space-y-1 -mt-1">
+              <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80">
+                ← Press this first. Seriously.
+              </div>
+              <p className="font-forensic text-base md:text-lg text-foreground/90 leading-snug">
+                I see you on my site. <span className="text-amber italic">Actually do something about your problem</span> — instead of losing money and just leaving.
+              </p>
             </div>
             <AnimatePresence initial={false}>
               {whatOpen && (
