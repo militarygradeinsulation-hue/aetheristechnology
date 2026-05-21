@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { generateMethodologyPdf } from '@/lib/generateMethodologyPdf';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 
 const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: string; humanWhy: string }> = {
   0: {
