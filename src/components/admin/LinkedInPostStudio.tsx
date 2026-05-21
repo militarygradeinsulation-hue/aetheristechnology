@@ -608,21 +608,38 @@ export default function LinkedInPostStudio() {
           </div>
         </div>
 
-        <Button
-          onClick={generateResponse}
-          disabled={
-            respondLoading ||
-            (respondSourceType === 'image' && !respondImage) ||
-            (respondSourceType === 'text' && respondText.trim().length < 20) ||
-            (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
-          }
-          className="w-full bg-amber text-background hover:bg-amber/90"
-        >
-          {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
-          {respondLoading
-            ? (respondSourceType === 'reply' ? 'Reading the thread & drafting reply…' : 'Reading post & drafting response…')
-            : (respondSourceType === 'reply' ? 'Reply to their comment' : 'Respond to this post')}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => generateResponse()}
+            disabled={
+              respondLoading ||
+              (respondSourceType === 'image' && !respondImage) ||
+              (respondSourceType === 'text' && respondText.trim().length < 20) ||
+              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+            }
+            className="flex-1 bg-amber text-background hover:bg-amber/90"
+          >
+            {respondLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquareReply className="w-4 h-4 mr-2" />}
+            {respondLoading
+              ? (respondSourceType === 'reply' ? 'Reading the thread & drafting reply…' : 'Reading post & drafting response…')
+              : (respondSourceType === 'reply' ? 'Reply to their comment' : 'Respond to this post')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => generateResponse({ freshen: true })}
+            disabled={
+              respondLoading ||
+              (respondSourceType === 'image' && !respondImage) ||
+              (respondSourceType === 'text' && respondText.trim().length < 20) ||
+              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+            }
+            title="Getting repetitive? Force fresh openings, fresh word choice, and a new angle."
+            className="border-amber/50 text-amber hover:bg-amber/10"
+          >
+            <Sparkles className="w-4 h-4 mr-2" /> Freshen Voice
+          </Button>
+        </div>
 
 
         {(respondLoading || respondOutput) && (
