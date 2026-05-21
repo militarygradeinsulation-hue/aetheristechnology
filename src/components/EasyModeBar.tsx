@@ -125,8 +125,8 @@ export const EasyModeBar: React.FC<EasyModeBarProps> = ({ tabKey, longCopy, clas
             <X className="w-4 h-4" />
           </button>
           <div className="text-[10px] uppercase tracking-widest font-bold text-amber mb-2">Plain-English version</div>
-          <div className="text-sm whitespace-pre-wrap text-foreground/90 max-h-72 overflow-y-auto leading-relaxed">
-            {aiText}
+          <div className="max-h-72 overflow-y-auto">
+            <PlainEnglishReport markdown={aiText} />
           </div>
         </div>
       )}
