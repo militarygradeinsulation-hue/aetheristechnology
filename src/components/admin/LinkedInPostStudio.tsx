@@ -648,8 +648,11 @@ export default function LinkedInPostStudio() {
               <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Forensic Response</div>
               {respondOutput && (
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={generateResponse} disabled={respondLoading} className="h-7 text-[10px]">
+                  <Button variant="outline" size="sm" onClick={() => generateResponse()} disabled={respondLoading} className="h-7 text-[10px]">
                     <RefreshCw className="w-3 h-3 mr-1" /> Redo
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => generateResponse({ freshen: true })} disabled={respondLoading} className="h-7 text-[10px] border-amber/50 text-amber hover:bg-amber/10">
+                    <Sparkles className="w-3 h-3 mr-1" /> Freshen
                   </Button>
                   <Button variant="outline" size="sm" onClick={copyResponse} className="h-7 text-[10px]">
                     {respondCopied ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
