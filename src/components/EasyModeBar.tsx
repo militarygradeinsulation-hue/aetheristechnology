@@ -255,8 +255,8 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
             </div>
           )}
           {!busy && simplified && (
-            <div className="bg-background/40 border border-border rounded p-4 text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed max-h-[60vh] overflow-y-auto">
-              {simplified}
+            <div className="max-h-[60vh] overflow-y-auto">
+              <PlainEnglishReport markdown={simplified} />
             </div>
           )}
           {!busy && !simplified && (
