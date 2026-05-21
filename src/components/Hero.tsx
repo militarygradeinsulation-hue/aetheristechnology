@@ -99,17 +99,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </p>
 
           <div className="max-w-5xl mx-auto pt-4 text-left space-y-3">
-            <ForensicInfographic
-              image={INFOGRAPHICS.heroLeakingGauge}
-              imageAlt="Cracked revenue pressure gauge bleeding crimson onto a charcoal desk"
-              caseNumber="001 · The Leak"
-              title="Your business is leaking. You can't see it from the inside."
-              summary="Aetheris is a revenue forensics firm for business owners who already know something is broken and are exhausted from chasing the fix. Manufacturers, service firms, SaaS, contractors, agencies, $1M–$50M. We audit your CRM, sales follow-up, and operations, put a dollar figure on every leak, and either hand you the roadmap or implement the fixes ourselves."
-              fullText={[
-                "78% of the owners we've audited already sensed the leak, they just couldn't name it or find it from inside the business.",
-                "Most are losing 8–22% of annual revenue to leaks they can't see: lost leads, dead follow-up, broken handoffs, CRM rot, founder bottlenecks.",
-              ]}
-            />
             <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 ml-1">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
                 Why I do it this way, Joseph
