@@ -398,6 +398,7 @@ export const LeadsManager: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
