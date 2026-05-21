@@ -250,6 +250,7 @@ const LeakAuditPage = () => {
               </p>
             </div>
           </div>
+          {step === 'intake' && <ThisIsForYou />}
           <div className="max-w-3xl mx-auto">
             {/* INTAKE */}
             {step === 'intake' && (
