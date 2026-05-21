@@ -222,14 +222,20 @@ serve(async (req) => {
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
     const originalPostText: string = (body?.originalPostText || "").toString().trim();
+    const myCommentImageDataUrl: string = (body?.myCommentImageDataUrl || "").toString();
+    const theirReplyImageDataUrl: string = (body?.theirReplyImageDataUrl || "").toString();
+    const originalPostImageDataUrl: string = (body?.originalPostImageDataUrl || "").toString();
+    const hasMyCommentImg = myCommentImageDataUrl.startsWith("data:image/");
+    const hasTheirReplyImg = theirReplyImageDataUrl.startsWith("data:image/");
+    const hasOriginalImg = originalPostImageDataUrl.startsWith("data:image/");
 
     const hasImage = imageDataUrl && imageDataUrl.startsWith("data:image/");
     const hasText = postText.length > 10;
     const isReplyToReply = conversationKind === "reply_to_reply";
 
     if (isReplyToReply) {
-      if (myComment.length < 10 || theirReply.length < 5) {
-        return new Response(JSON.stringify({ error: "myComment and theirReply required (paste both)" }), {
+      if ((myComment.length < 10 && !hasMyCommentImg) || (theirReply.length < 5 && !hasTheirReplyImg)) {
+        return new Response(JSON.stringify({ error: "myComment and theirReply required (text or screenshot)" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -241,14 +247,14 @@ serve(async (req) => {
 
     const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR (Joseph's) comment, and you are writing the next reply back to THEM directly.
 
-${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
+${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : hasOriginalImg ? `ORIGINAL POST: see the screenshot labeled "ORIGINAL POST SCREENSHOT" below (context only, do NOT re-litigate it).\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
 """
-${myComment}
+${myComment || (hasMyCommentImg ? "(see screenshot labeled YOUR PRIOR COMMENT SCREENSHOT)" : "")}
 """
 
 THEIR REPLY TO YOU (this is who you're now answering):
 """
-${theirReply}
+${theirReply || (hasTheirReplyImg ? "(see screenshot labeled THEIR REPLY SCREENSHOT — read the reply text in that image carefully)" : "")}
 """
 
 GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level comment):
@@ -296,15 +302,33 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
           model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: "You are Joseph Toney, CEO of Aetheris, writing in first person using THE AETHERIS LEXICON (Leak Audit™ vocabulary). Every response must (1) name a specific leak category — Follow-Up Failure, System Disconnect, Conversion Drop-Off, Brand Contradiction, Vocabulary Friction, Operational Waste, or Growth Ceiling; (2) anchor a concrete number in Cost of the Leak / COI framing; (3) close on Revenue Recovery or Revenue Loop language, not 'growth' or 'strategy'. ONE dense paragraph, no line breaks. Open with a VARIED forensic opener — rotate across 80+ shapes (audit observations, reframes, hidden-mechanism reveals, direct diagnoses, numeric/vertical anchors, autopsies). HARD ANTI-REPETITION RULE: the formulas 'What looks like X is Y', 'The part people miss…', 'What most operators get wrong…', 'It's not X it's Y', 'Strip the surface off…', 'Most companies don't have a…', 'The hidden variable…', and 'Diagnosis:' are ALL rare-use (combined cap: max 1 in every 10 responses). Never default to any of them. Invent fresh openers in Joseph's voice. Banned: em dashes, emojis, compliments, motivational language, 'mindset/hack/hustle/grind/unlock', closing questions, and the word 'consulting' (use Forensic Diagnostic). Use I/I've/I see/in my audits." },
-            {
-              role: "user",
-              content: hasImage
-                ? [
-                    { type: "text", text: userInstruction },
-                    { type: "image_url", image_url: { url: imageDataUrl } },
-                  ]
-                : userInstruction,
-            },
+            (() => {
+              if (isReplyToReply && (hasOriginalImg || hasMyCommentImg || hasTheirReplyImg)) {
+                const parts: any[] = [{ type: "text", text: userInstruction }];
+                if (hasOriginalImg) {
+                  parts.push({ type: "text", text: "ORIGINAL POST SCREENSHOT:" });
+                  parts.push({ type: "image_url", image_url: { url: originalPostImageDataUrl } });
+                }
+                if (hasMyCommentImg) {
+                  parts.push({ type: "text", text: "YOUR PRIOR COMMENT SCREENSHOT:" });
+                  parts.push({ type: "image_url", image_url: { url: myCommentImageDataUrl } });
+                }
+                if (hasTheirReplyImg) {
+                  parts.push({ type: "text", text: "THEIR REPLY SCREENSHOT (this is the one you're answering):" });
+                  parts.push({ type: "image_url", image_url: { url: theirReplyImageDataUrl } });
+                }
+                return { role: "user", content: parts };
+              }
+              return {
+                role: "user",
+                content: hasImage
+                  ? [
+                      { type: "text", text: userInstruction },
+                      { type: "image_url", image_url: { url: imageDataUrl } },
+                    ]
+                  : userInstruction,
+              };
+            })(),
 
           ],
         }),

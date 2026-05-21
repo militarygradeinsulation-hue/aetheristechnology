@@ -187,6 +187,19 @@ export default function LinkedInPostStudio() {
   const [myComment, setMyComment] = useState('');
   const [theirReply, setTheirReply] = useState('');
   const [replyOriginalPost, setReplyOriginalPost] = useState('');
+  // Optional screenshot uploads for each reply-to-reply slot
+  const [myCommentImage, setMyCommentImage] = useState<string | null>(null);
+  const [theirReplyImage, setTheirReplyImage] = useState<string | null>(null);
+  const [replyOriginalImage, setReplyOriginalImage] = useState<string | null>(null);
+
+  const readImageToDataUrl = (file: File | null | undefined, setter: (v: string | null) => void) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast({ title: 'Please upload an image', variant: 'destructive' }); return; }
+    if (file.size > 10 * 1024 * 1024) { toast({ title: 'Image too large (max 10 MB)', variant: 'destructive' }); return; }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   // URL / YouTube → Post
   const [sourceUrl, setSourceUrl] = useState('');
@@ -321,8 +334,8 @@ export default function LinkedInPostStudio() {
       toast({ title: 'Paste the post text first (at least 20 chars)', variant: 'destructive' });
       return;
     }
-    if (isReply && (myComment.trim().length < 10 || theirReply.trim().length < 5)) {
-      toast({ title: 'Paste your comment AND their reply', variant: 'destructive' });
+    if (isReply && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage))) {
+      toast({ title: 'Provide your comment AND their reply (text or screenshot)', variant: 'destructive' });
       return;
     }
     setRespondLoading(true);
@@ -338,6 +351,9 @@ export default function LinkedInPostStudio() {
             myComment: myComment.trim(),
             theirReply: theirReply.trim(),
             originalPostText: replyOriginalPost.trim(),
+            myCommentImageDataUrl: myCommentImage,
+            theirReplyImageDataUrl: theirReplyImage,
+            originalPostImageDataUrl: replyOriginalImage,
             mode: 'brief',
             extraContext: extraWithFreshness,
           }
@@ -612,38 +628,50 @@ export default function LinkedInPostStudio() {
           </div>
         ) : (
           <div className="space-y-3">
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Original post (optional context)</div>
-              <Textarea
-                rows={3}
-                placeholder="Optional: paste the original post you commented on. Helps anchor the thread."
-                value={replyOriginalPost}
-                onChange={(e) => setReplyOriginalPost(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Your prior comment</div>
-              <Textarea
-                rows={4}
-                placeholder="Paste the comment YOU wrote (the one they're replying to)."
-                value={myComment}
-                onChange={(e) => setMyComment(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-amber mb-1.5">Their reply to you</div>
-              <Textarea
-                rows={4}
-                placeholder="Paste their reply to your comment. This is what you're answering."
-                value={theirReply}
-                onChange={(e) => setTheirReply(e.target.value)}
-                className="text-sm"
-              />
-            </div>
+            {([
+              { label: 'Original post (optional context)', placeholder: 'Optional: paste the original post you commented on. Helps anchor the thread.', text: replyOriginalPost, setText: setReplyOriginalPost, image: replyOriginalImage, setImage: setReplyOriginalImage, rows: 3 },
+              { label: 'Your prior comment', placeholder: "Paste the comment YOU wrote (the one they're replying to).", text: myComment, setText: setMyComment, image: myCommentImage, setImage: setMyCommentImage, rows: 4 },
+              { label: 'Their reply to you', placeholder: "Paste their reply to your comment. This is what you're answering.", text: theirReply, setText: setTheirReply, image: theirReplyImage, setImage: setTheirReplyImage, rows: 4 },
+            ] as const).map((slot) => (
+              <div key={slot.label}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="text-[10px] uppercase tracking-widest text-amber">{slot.label}</div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber cursor-pointer inline-flex items-center gap-1">
+                    <Upload className="w-3 h-3" />
+                    {slot.image ? 'Replace screenshot' : 'Attach screenshot'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => readImageToDataUrl(e.target.files?.[0], slot.setImage)}
+                    />
+                  </label>
+                </div>
+                <Textarea
+                  rows={slot.rows}
+                  placeholder={slot.placeholder}
+                  value={slot.text}
+                  onChange={(e) => slot.setText(e.target.value)}
+                  className="text-sm"
+                />
+                {slot.image && (
+                  <div className="relative mt-2 rounded-lg border border-border bg-background/40 p-2">
+                    <button
+                      type="button"
+                      onClick={() => slot.setImage(null)}
+                      className="absolute top-1.5 right-1.5 bg-background/80 border border-border rounded-full p-1 hover:bg-background"
+                      aria-label="Remove screenshot"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <img src={slot.image} alt={slot.label} className="max-h-48 mx-auto rounded" />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
+
 
 
         <div className="grid sm:grid-cols-2 gap-3">
@@ -689,7 +717,7 @@ export default function LinkedInPostStudio() {
               respondLoading ||
               (respondSourceType === 'image' && !respondImage) ||
               (respondSourceType === 'text' && respondText.trim().length < 20) ||
-              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+              (respondSourceType === 'reply' && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage)))
             }
             className="flex-1 bg-amber text-background hover:bg-amber/90"
           >
@@ -706,7 +734,7 @@ export default function LinkedInPostStudio() {
               respondLoading ||
               (respondSourceType === 'image' && !respondImage) ||
               (respondSourceType === 'text' && respondText.trim().length < 20) ||
-              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+              (respondSourceType === 'reply' && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage)))
             }
             title="Getting repetitive? Force fresh openings, fresh word choice, and a new angle."
             className="border-amber/50 text-amber hover:bg-amber/10"
