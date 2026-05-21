@@ -2,6 +2,7 @@
 // Auth: admin token OR portal (rep/partner) token. Only admin can edit/delete/pin others.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { decodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
