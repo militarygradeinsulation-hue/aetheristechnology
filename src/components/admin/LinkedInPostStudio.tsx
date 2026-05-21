@@ -443,7 +443,7 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: (extraPrompt.trim() + buildToneStyleDirective(tone, postStyle)).trim(),
+          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
