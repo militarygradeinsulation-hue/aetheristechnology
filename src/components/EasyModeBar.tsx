@@ -7,6 +7,7 @@ import { Sparkles, Type, RotateCcw, Loader2, BookOpen, X, RefreshCw } from 'luci
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { getPortalToken } from '@/lib/portalAuth';
 
 interface EasyModeBarProps {
   tabKey: string;
