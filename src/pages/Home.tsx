@@ -75,7 +75,6 @@ const Home = () => {
 
           {/* THE CENTERPIECE — Pick your problem + what you actually get */}
           <ProblemPicker />
-          <WhatYouReallyGet />
 
           {/* Front-and-center booking */}
           <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
