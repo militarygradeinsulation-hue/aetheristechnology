@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { getPortalToken } from '@/lib/portalAuth';
+import { PlainEnglishReport } from '@/components/PlainEnglishReport';
 
 interface EasyModeBarProps {
   tabKey: string;
