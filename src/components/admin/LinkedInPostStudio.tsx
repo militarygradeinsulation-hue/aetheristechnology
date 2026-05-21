@@ -400,7 +400,7 @@ export default function LinkedInPostStudio() {
       const post = (data.post || '').trim();
       if (!post) throw new Error('Empty post');
       setTopic(firstLine.slice(0, 180));
-      setGenerated(post);
+      setGenerated(appendSiteLink(post));
       toast({ title: 'Standalone post created', description: 'Scroll down to copy or schedule it.' });
       // scroll to bottom-ish
       setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
