@@ -436,13 +436,13 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: extraPrompt.trim(),
+          extraPrompt: (extraPrompt.trim() + buildToneStyleDirective(tone, postStyle)).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setGenerated(data.post || '');
+      setGenerated(appendSiteLink(data.post || ''));
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Generation failed';
       toast({ title: 'Failed to generate', description: msg, variant: 'destructive' });
