@@ -192,12 +192,24 @@ export const ProblemPicker: React.FC = () => {
                       <div className="px-4 md:px-5 pb-5 pt-0 animate-fade-in">
                         <div className="h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent mb-5" />
 
+                        {meta?.backstory && (
+                          <div className="mb-5 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
+                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                              Why this tool exists · Joseph's file
+                            </div>
+                            <p className="text-sm text-foreground/85 leading-relaxed italic">
+                              "{meta.backstory}"
+                            </p>
+                          </div>
+                        )}
+
                         <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
                           The fix
                         </div>
                         <p className="text-sm text-foreground/85 mb-4">
                           {meta?.fix}
                         </p>
+
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {group.tools.map((tool) => (
