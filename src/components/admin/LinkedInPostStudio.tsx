@@ -1048,6 +1048,25 @@ export default function LinkedInPostStudio() {
             value={extraPrompt}
             onChange={(e) => setExtraPrompt(e.target.value)}
           />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Tone</div>
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Tone" /></SelectTrigger>
+                <SelectContent>{TONES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Style / Structure</div>
+              <Select value={postStyle} onValueChange={setPostStyle}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
+            Site link auto-appended to every post: aetheris.technology
+          </div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {PREMADE_PROMPTS.map((p) => (
               <button
