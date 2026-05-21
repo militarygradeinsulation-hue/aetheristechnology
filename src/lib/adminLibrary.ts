@@ -32,13 +32,21 @@ export async function saveToAdminLibrary(args: {
   return data?.item as AdminLibraryItem;
 }
 
-export async function listAdminLibrary(): Promise<AdminLibraryItem[]> {
-  const { data, error } = await supabase.functions.invoke("admin-library", {
-    body: { action: "list" },
-    headers: adminHeaders(),
-  });
-  if (error) throw error;
-  return (data?.items || []) as AdminLibraryItem[];
+export async function listAdminLibrary(opts?: { toolType?: string; maxPages?: number }): Promise<AdminLibraryItem[]> {
+  const pageSize = 50;
+  const maxPages = opts?.maxPages ?? 10; // up to 500 most recent
+  const out: AdminLibraryItem[] = [];
+  for (let page = 0; page < maxPages; page++) {
+    const { data, error } = await supabase.functions.invoke("admin-library", {
+      body: { action: "list", limit: pageSize, offset: page * pageSize, tool_type: opts?.toolType },
+      headers: adminHeaders(),
+    });
+    if (error) throw error;
+    const items = (data?.items || []) as AdminLibraryItem[];
+    out.push(...items);
+    if (!data?.hasMore || items.length < pageSize) break;
+  }
+  return out;
 }
 
 export async function updateAdminLibraryItem(id: string, output_data: unknown): Promise<AdminLibraryItem> {
