@@ -4,6 +4,7 @@ import { BookOpen, Loader2, Copy, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { getPortalToken } from '@/lib/portalAuth';
 
 interface Props {
   /** The raw text/markdown to rewrite in plain English. */
