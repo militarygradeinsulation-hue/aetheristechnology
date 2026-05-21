@@ -10,39 +10,44 @@ import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 
 interface Tool {
   thumbnail: string;
+  problem: string;
   title: string;
-  description: string;
+  solves: string;
   realTalk: string;
   path: string;
 }
 
-// Curated top 6, the rest live on /capabilities
+// Problem-first framing: lead with the leak, then the tool that plugs it.
 const tools: Tool[] = [
   {
     thumbnail: diagnosticThumb,
+    problem: "You can't tell which part of the business is actually broken.",
     title: 'Business Diagnostic',
-    description: '20-question assessment that scores your operational health.',
+    solves: 'Scores 20 operational pressure points and ranks what to fix first.',
     realTalk: "You'll finally see, in writing, what your gut has been telling you for months. No more lying awake guessing which part of the business is the one that's broken.",
     path: '/business-diagnostic',
   },
   {
     thumbnail: scannerThumb,
+    problem: 'Leads hit your website and quietly disappear.',
     title: 'Website Scanner',
-    description: "Instant audit of your site's SEO, speed, and conversion gaps.",
+    solves: 'Finds the SEO, speed, and conversion leaks killing your inbound.',
     realTalk: "I find the broken pipes between your site and your phone, so leads stop dying at 9pm while you're trying to eat dinner with your family.",
     path: '/scan',
   },
   {
     thumbnail: strategicQuestionsThumb,
+    problem: "You're too close to the business to see what's wrong.",
     title: 'Strategic Question Engine',
-    description: 'Expose blind spots across leadership, sales, and operations.',
+    solves: "Surfaces the blind spots your team won't name out loud.",
     realTalk: "The questions your team won't ask you, and the ones you've stopped asking yourself. The kind of honesty that turns a 3am spiral into a Monday morning plan.",
     path: '/strategic-questions',
   },
   {
     thumbnail: resumeForensicsThumb,
+    problem: "You're about to hire the wrong person — again.",
     title: 'Resume Forensics',
-    description: 'Upload a resume, get an Aetheris case file: fit score, red flags, and interview questions.',
+    solves: 'Turns a resume into a case file: fit score, red flags, interview traps.',
     realTalk: "Know who you're hiring before you sign the offer, so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
     path: '/resume-forensics',
   },
@@ -55,13 +60,13 @@ export const FreeTools: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12">
             <span className="text-amber/80 font-medium text-xs tracking-[0.22em] uppercase mb-4 block">
-              Built by an exhausted operator, for exhausted operators
+              Find the leak first. Then pick the tool.
             </span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground font-display mb-4 text-float">
-              The tools <span className="text-gradient-amber">I wish I'd had</span>
+              What's <span className="text-gradient-amber">bleeding you</span> right now?
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              I built every one of these because I needed it myself, when I was running a construction company in the mud, dragging trailers through job sites, with kids in hospital rooms. Run them free. Each one is a piece of pressure off your chest.
+              Every tool below starts with the problem it solves — not the feature list. Read the problem. If it sounds like your week, run the tool. Free.
             </p>
           </div>
         </RevealOnScroll>
@@ -86,15 +91,28 @@ export const FreeTools: React.FC = () => {
                     />
                   </div>
                   <div className="p-6 flex flex-col flex-1">
-                    <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
-                      {tool.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                      {tool.description}
-                    </p>
-                    <div className="mb-5 pt-4 border-t border-amber/15 flex-1">
+                    <div className="mb-3">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-crimson mb-1.5">
+                        The Problem
+                      </div>
+                      <p className="text-[15px] text-foreground font-semibold leading-snug">
+                        {tool.problem}
+                      </p>
+                    </div>
+                    <div className="mb-4 pt-3 border-t border-amber/15">
                       <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
-                        What this actually does for you
+                        What this tool does
+                      </div>
+                      <h3 className="text-lg font-bold text-foreground font-display leading-tight mb-1">
+                        {tool.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {tool.solves}
+                      </p>
+                    </div>
+                    <div className="mb-5 pt-3 border-t border-amber/15 flex-1">
+                      <div className="font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-1.5">
+                        What it gives you back
                       </div>
                       <p className="text-[13px] text-foreground/85 leading-relaxed italic">
                         {tool.realTalk}
@@ -116,7 +134,7 @@ export const FreeTools: React.FC = () => {
               to="/capabilities"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-amber/30 text-amber hover:bg-amber/10 hover:border-amber/60 transition-all font-semibold text-sm tracking-wide group"
             >
-              View All Capability Demonstrations
+              See every problem we solve
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
