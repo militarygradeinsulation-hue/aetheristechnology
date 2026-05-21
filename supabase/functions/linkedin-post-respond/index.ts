@@ -222,14 +222,20 @@ serve(async (req) => {
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
     const originalPostText: string = (body?.originalPostText || "").toString().trim();
+    const myCommentImageDataUrl: string = (body?.myCommentImageDataUrl || "").toString();
+    const theirReplyImageDataUrl: string = (body?.theirReplyImageDataUrl || "").toString();
+    const originalPostImageDataUrl: string = (body?.originalPostImageDataUrl || "").toString();
+    const hasMyCommentImg = myCommentImageDataUrl.startsWith("data:image/");
+    const hasTheirReplyImg = theirReplyImageDataUrl.startsWith("data:image/");
+    const hasOriginalImg = originalPostImageDataUrl.startsWith("data:image/");
 
     const hasImage = imageDataUrl && imageDataUrl.startsWith("data:image/");
     const hasText = postText.length > 10;
     const isReplyToReply = conversationKind === "reply_to_reply";
 
     if (isReplyToReply) {
-      if (myComment.length < 10 || theirReply.length < 5) {
-        return new Response(JSON.stringify({ error: "myComment and theirReply required (paste both)" }), {
+      if ((myComment.length < 10 && !hasMyCommentImg) || (theirReply.length < 5 && !hasTheirReplyImg)) {
+        return new Response(JSON.stringify({ error: "myComment and theirReply required (text or screenshot)" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
