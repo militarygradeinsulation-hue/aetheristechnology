@@ -60,17 +60,20 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 trackEvent('click', { label: 'what_the_hell_toggle', location: 'hero' });
               }}
               aria-expanded={whatOpen}
-              animate={{ boxShadow: ['0 0 0 0 hsl(var(--crimson) / 0.55)', '0 0 0 18px hsl(var(--crimson) / 0)', '0 0 0 0 hsl(var(--crimson) / 0)'] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+              animate={{ boxShadow: ['0 0 0 0 hsl(var(--crimson) / 0.45), inset 0 0 24px hsl(var(--crimson) / 0.15)', '0 0 0 14px hsl(var(--crimson) / 0), inset 0 0 32px hsl(var(--crimson) / 0.22)', '0 0 0 0 hsl(var(--crimson) / 0), inset 0 0 24px hsl(var(--crimson) / 0.15)'] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="group inline-flex items-center gap-3 rounded-sm border-2 border-crimson bg-crimson hover:bg-crimson/90 px-6 md:px-10 py-4 md:py-5 font-forensic text-xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white shadow-2xl shadow-crimson/40"
+              className="group relative inline-flex items-center gap-3 rounded-sm border border-crimson/60 bg-crimson/5 hover:bg-crimson/10 backdrop-blur-md px-6 md:px-10 py-4 md:py-5 font-forensic text-xl md:text-3xl lg:text-4xl font-bold uppercase tracking-tight text-crimson"
             >
-              <HelpCircle className="w-6 h-6 md:w-8 md:h-8" />
-              <span>What The Hell Do You Do?</span>
-              <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
+              <span aria-hidden className="absolute inset-0 rounded-sm bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+              <span aria-hidden className="absolute -top-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/60 to-transparent" />
+              <span aria-hidden className="absolute -bottom-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/40 to-transparent" />
+              <HelpCircle className="w-6 h-6 md:w-8 md:h-8 relative" />
+              <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Do?</span>
+              <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 relative transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
             </motion.button>
-            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/90 -mt-1">
+            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80 -mt-1">
               ← Press this first. Seriously.
             </div>
             <AnimatePresence initial={false}>
