@@ -17,6 +17,7 @@ import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import { ThisIsForYou } from '@/components/ThisIsForYou';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
