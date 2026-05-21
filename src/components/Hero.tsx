@@ -88,8 +88,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
           <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
-            <span className="text-foreground">You know something's wrong. You're tired of looking for the fix. </span>
-            <span className="text-crimson">We find it.</span>
+            <span className="text-foreground">Your business is </span>
+            <span className="text-crimson italic">leaking.</span>
+            <span className="text-foreground"> You just can't see it from </span>
+            <span className="text-amber italic">inside the building.</span>
           </h1>
 
           <p className="font-case text-sm md:text-base uppercase tracking-widest text-amber max-w-3xl mx-auto">
