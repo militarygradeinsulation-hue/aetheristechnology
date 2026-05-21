@@ -91,6 +91,41 @@ const PREMADE_PROMPTS = [
   'Founder-to-founder voice. Blunt. No buzzwords. End with "What\'s leaking in yours?"',
 ];
 
+const TONES = [
+  { value: 'auto', label: 'Auto (default operator voice)' },
+  { value: 'blunt-operator', label: 'Blunt Operator — direct, no fluff' },
+  { value: 'forensic-cold', label: 'Forensic / Cold — clinical case-file' },
+  { value: 'aggressive-callout', label: 'Aggressive Call-Out — name the leak' },
+  { value: 'mentor-calm', label: 'Calm Mentor — patient, teaching tone' },
+  { value: 'contrarian', label: 'Contrarian — flip the conventional take' },
+  { value: 'storyteller', label: 'Storyteller — 1st-person field story' },
+  { value: 'dry-witty', label: 'Dry / Witty — restrained humor' },
+  { value: 'empathetic-peer', label: 'Empathetic Peer — founder-to-founder' },
+  { value: 'data-driven', label: 'Data-Driven — stat-led, numeric proof' },
+];
+
+const STYLES = [
+  { value: 'auto', label: 'Auto (model picks structure)' },
+  { value: 'hook-list-close', label: 'Hook → numbered list → sharp close' },
+  { value: 'micro-story', label: 'Micro-story (200w) with one dollar figure' },
+  { value: 'case-file', label: 'Case-File format (Subject / Findings / Verdict)' },
+  { value: 'one-paragraph', label: 'One dense paragraph, no breaks' },
+  { value: 'carousel-5', label: '5-slide carousel structure' },
+  { value: 'stat-led', label: 'Stat-led open, 3 supporting points' },
+  { value: 'verdict-first', label: 'Verdict first, then the proof' },
+  { value: 'question-frame', label: 'Question frame → answer → twist' },
+  { value: 'before-after', label: 'Before / After / What changed' },
+];
+
+const SITE_LINK = 'https://aetheris.technology';
+
+const appendSiteLink = (post: string): string => {
+  if (!post) return post;
+  const trimmed = post.trim();
+  if (trimmed.includes('aetheris.technology') || trimmed.includes('businessforensics.tech')) return trimmed;
+  return `${trimmed}\n\n${SITE_LINK}`;
+};
+
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
