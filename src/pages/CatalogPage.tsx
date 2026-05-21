@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { Button } from '@/components/ui/button';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 const CatalogPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
