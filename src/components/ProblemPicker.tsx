@@ -247,7 +247,7 @@ export const ProblemPicker: React.FC = () => {
 
         <div className="text-center mt-6">
           <Link
-            to="/capabilities"
+            to="/catalog"
             className="text-sm text-amber hover:underline inline-flex items-center gap-1.5 font-semibold"
           >
             See every tool in the catalog <ArrowRight className="w-3.5 h-3.5" />
