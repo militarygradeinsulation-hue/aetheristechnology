@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { getPortalToken } from '@/lib/portalAuth';
+import { PlainEnglishReport } from '@/components/PlainEnglishReport';
 
 interface Props {
   /** The raw text/markdown to rewrite in plain English. */
@@ -86,8 +87,8 @@ export const EasyReadButton: React.FC<Props> = ({ source, toolLabel, size = 'sm'
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">Written so anyone — non-technical owners, new hires, a spouse — can read it on the first try.</p>
-          <div className="bg-background/40 border border-border rounded p-4 text-sm whitespace-pre-wrap text-foreground/90 max-h-[28rem] overflow-y-auto leading-relaxed">
-            {simplified}
+          <div className="max-h-[28rem] overflow-y-auto">
+            <PlainEnglishReport markdown={simplified} />
           </div>
         </div>
       )}

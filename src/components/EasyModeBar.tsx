@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { getPortalToken } from '@/lib/portalAuth';
+import { PlainEnglishReport } from '@/components/PlainEnglishReport';
 
 interface EasyModeBarProps {
   tabKey: string;
@@ -124,8 +125,8 @@ export const EasyModeBar: React.FC<EasyModeBarProps> = ({ tabKey, longCopy, clas
             <X className="w-4 h-4" />
           </button>
           <div className="text-[10px] uppercase tracking-widest font-bold text-amber mb-2">Plain-English version</div>
-          <div className="text-sm whitespace-pre-wrap text-foreground/90 max-h-72 overflow-y-auto leading-relaxed">
-            {aiText}
+          <div className="max-h-72 overflow-y-auto">
+            <PlainEnglishReport markdown={aiText} />
           </div>
         </div>
       )}
@@ -254,8 +255,8 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
             </div>
           )}
           {!busy && simplified && (
-            <div className="bg-background/40 border border-border rounded p-4 text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed max-h-[60vh] overflow-y-auto">
-              {simplified}
+            <div className="max-h-[60vh] overflow-y-auto">
+              <PlainEnglishReport markdown={simplified} />
             </div>
           )}
           {!busy && !simplified && (
