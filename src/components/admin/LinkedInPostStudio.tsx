@@ -351,6 +351,9 @@ export default function LinkedInPostStudio() {
             myComment: myComment.trim(),
             theirReply: theirReply.trim(),
             originalPostText: replyOriginalPost.trim(),
+            myCommentImageDataUrl: myCommentImage,
+            theirReplyImageDataUrl: theirReplyImage,
+            originalPostImageDataUrl: replyOriginalImage,
             mode: 'brief',
             extraContext: extraWithFreshness,
           }
