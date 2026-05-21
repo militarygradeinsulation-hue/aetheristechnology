@@ -407,6 +407,7 @@ const PortalPage: React.FC = () => {
     { id: 'catalog', label: 'Catalog & Pricing', icon: <ShoppingCart className="w-4 h-4" />, iconCmp: ShoppingCart },
     { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
+    { id: 'linkedin', label: 'Set Up LinkedIn', icon: <Linkedin className="w-4 h-4" />, iconCmp: Linkedin },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
