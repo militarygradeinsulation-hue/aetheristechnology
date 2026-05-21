@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { generateMethodologyPdf } from '@/lib/generateMethodologyPdf';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import { AudioBriefingPlayer } from '@/components/AudioBriefingPlayer';
 
 const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: string; humanWhy: string }> = {
   0: {
@@ -139,7 +140,21 @@ const MethodologyPage: React.FC = () => {
                     See the 21-Day Diagnostic <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
+            </div>
+
+            {/* Audio briefing — moved from Home */}
+            <div className="mb-10 forensic-tile rounded-sm border border-amber/40 p-6 md:p-7">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Listen · 5 min briefing
               </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-2">
+                Who we are. What we do for you. <span className="text-amber">In our own words.</span>
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Stopping revenue leaks with Aetheris forensics, an in-depth audio briefing on the methodology, the math, and what an engagement actually looks like.
+              </p>
+              <AudioBriefingPlayer src="/audio/stopping-revenue-leaks-aetheris-forensics.m4a" />
+            </div>
             </div>
 
             <div className="space-y-10">
