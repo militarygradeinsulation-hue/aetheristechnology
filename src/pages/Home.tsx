@@ -70,8 +70,6 @@ const Home = () => {
 
 
 
-          {/* This is for you if... */}
-          <ThisIsForYou />
 
           {/* THE CENTERPIECE — Pick your problem + what you actually get */}
           <ProblemPicker />
