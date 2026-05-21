@@ -138,10 +138,17 @@ serve(async (req) => {
       const contentType = String(body.content_type || "application/octet-stream");
       const b64 = String(body.content_base64 || "");
       if (!b64) return json(400, { error: "content_base64 required" });
-      // 20MB cap
-      if (b64.length > 28_000_000) return json(400, { error: "File too large (max 20MB)" });
+      // 10MB cap (base64 inflates ~33%, so ~14MB string)
+      if (b64.length > 14_000_000) return json(400, { error: "File too large (max 10MB)" });
 
-      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      // Strip any data-url prefix the client may have included.
+      const cleaned = b64.includes(",") ? b64.split(",", 2)[1] : b64;
+      let bytes: Uint8Array;
+      try {
+        bytes = decodeBase64(cleaned);
+      } catch {
+        return json(400, { error: "Invalid base64 payload" });
+      }
       const path = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${filename}`;
       const { error: upErr } = await supabase.storage
         .from("team-uploads")
