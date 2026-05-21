@@ -61,6 +61,13 @@ export const problemGroups: ProblemGroup[] = [
     ],
   },
   {
+    problem: "I'm about to hire and I can't afford to get it wrong.",
+    symptom: "The last bad hire cost you $40K and three months of sideways energy. You want to know before the offer.",
+    tools: [
+      { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', solves: 'Turns a resume into a case file: fit score, red flags, and the interview questions that expose them.', path: '/resume-forensics' },
+    ],
+  },
+  {
     problem: "I keep paying experts and walking away worse off than I started.",
     symptom: "Every consultant sells you a deck. Nobody puts a dollar number on anything, and nobody touches the work.",
     tools: [
