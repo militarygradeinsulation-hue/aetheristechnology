@@ -51,15 +51,18 @@ export const ProblemPicker: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-10 max-w-3xl mx-auto">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Start here · Free self-serve
+              Start here · I've been where you are
             </div>
             <h2 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
               Pick your <span className="text-crimson italic">problem</span>.
               <br className="hidden md:block" />
               <span className="text-amber"> Meet the tool that fixes it.</span>
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground mt-4">
-              Five things keeping owners up at night. Click the one that feels closest. We'll hand you the exact in-house tool that plugs that leak — free.
+            <p className="text-base md:text-lg text-foreground/85 mt-4">
+              I've sat in your chair — 11pm, spreadsheet open, knowing something was broken and not knowing what. So I built the tools I wish I'd had. Pick the one that hits closest. No email. No upsell. Just the fix.
+            </p>
+            <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-3">
+              {String(total).padStart(2, '0')} owner pressure points · Click any case to open the fix
             </p>
           </div>
         </RevealOnScroll>
