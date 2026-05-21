@@ -52,6 +52,64 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           transition={{ duration: 0.8 }}
           className="space-y-6"
         >
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setWhatOpen((v) => !v);
+                trackEvent('click', { label: 'what_the_hell_toggle', location: 'hero' });
+              }}
+              aria-expanded={whatOpen}
+              className="inline-flex items-center gap-2 rounded-sm border border-amber/40 bg-amber/10 hover:bg-amber/20 transition-colors px-5 py-2.5 font-case text-xs md:text-sm uppercase tracking-widest text-amber"
+            >
+              <HelpCircle className="w-4 h-4" />
+              What the Hell Do You Do?
+              <ChevronDown className={`w-4 h-4 transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence initial={false}>
+              {whatOpen && (
+                <motion.div
+                  key="what-panel"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-3xl overflow-hidden text-left"
+                >
+                  <div className="rounded-sm border border-amber/30 bg-background/70 px-5 md:px-6 py-5 md:py-6 space-y-3">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                      Case File · Plain English
+                    </div>
+                    <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                      What the Hell Do You <span className="text-amber italic">Actually</span> Do?
+                    </h3>
+                    <div className="space-y-2.5 text-[15px] leading-relaxed text-foreground/85">
+                      <p>Most consultants sell services.</p>
+                      <p className="text-foreground font-semibold">We solve problems.</p>
+                      <p>
+                        We investigate every part of your business to find hidden revenue leaks, operational bottlenecks, wasted effort, missed opportunities, and growth barriers.
+                      </p>
+                      <p>
+                        Then we quantify the impact, prioritize the fixes, and build the systems needed to solve them.
+                      </p>
+                      <p className="font-case text-xs uppercase tracking-widest text-amber/90">
+                        Marketing. AI. Automation. CRM. Websites. Operations. Sales.
+                      </p>
+                      <p className="italic text-foreground/75">Those are just tools.</p>
+                      <p>
+                        The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
+                      </p>
+                      <p className="border-l-2 border-crimson/60 pl-3 font-forensic text-base md:text-lg text-foreground">
+                        Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+
           <div className="flex justify-center">
             <button
               type="button"
