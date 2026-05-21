@@ -21,6 +21,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [whatOpen, setWhatOpen] = useState(false);
 
   const toggleVideo = () => {
     const v = videoRef.current;
