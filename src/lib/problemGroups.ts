@@ -67,4 +67,38 @@ export const problemGroups: ProblemGroup[] = [
       { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', solves: 'Turns a resume into a case file: fit score, red flags, and the interview questions that expose them.', path: '/resume-forensics' },
     ],
   },
+  {
+    problem: "I keep paying experts and walking away worse off than I started.",
+    symptom: "Every consultant sells you a deck. Nobody puts a dollar number on anything, and nobody touches the work.",
+    tools: [
+      { thumbnail: diagnosticThumb, title: 'Forensic Diagnostic ($2,500)', solves: 'Flat fee. Operator-led. A written leak ledger with a dollar amount on every wound — credit applies to any engagement.', path: '/leak-audit' },
+      { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', solves: "Asks the questions a real operator would, before you write another check to a 'strategist.'", path: '/strategic-questions' },
+    ],
+  },
+  {
+    problem: "I'm the bottleneck. Nothing moves unless I touch it.",
+    symptom: "You wanted a business. You built a job that pays worse and never clocks out. Vacations are a lie.",
+    tools: [
+      { thumbnail: diagnosticThumb, title: 'Business Diagnostic', solves: 'Names every decision still routed through you — and the ones you can hand off Monday.', path: '/business-diagnostic' },
+      { thumbnail: followUpThumb, title: 'Follow-Up System Plan', solves: 'Takes sales follow-up off your plate with a cadence the team runs without you.', path: '/follow-up-plan' },
+      { thumbnail: playbooksThumb, title: 'Free Playbooks', solves: 'SOPs you can hand a team member today so the work stops waiting on you.', path: '/resources' },
+    ],
+  },
+  {
+    problem: "My tech stack is a junk drawer of subscriptions doing nothing.",
+    symptom: "You're paying for tools nobody opens. Your CRM is half-built. Reports take a person, not a system.",
+    tools: [
+      { thumbnail: scannerThumb, title: 'Website Scanner', solves: 'Audits the public-facing tech stack — speed, SEO, broken signals — in 30 seconds.', path: '/scan' },
+      { thumbnail: diagnosticThumb, title: 'Business Diagnostic', solves: 'Maps your tooling spend against actual usage and flags what to kill.', path: '/business-diagnostic' },
+    ],
+  },
+  {
+    problem: "I haven't taken a real weekend in two years and I'm running out of gas.",
+    symptom: "The work isn't the problem anymore — the carrying it is. You can't remember the last Saturday you didn't check email.",
+    tools: [
+      { thumbnail: diagnosticThumb, title: 'Forensic Diagnostic ($2,500)', solves: 'Hand the audit to an operator. Get a written ledger back. Stop being the smartest person in your own room.', path: '/leak-audit' },
+      { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', solves: 'Strips the words on your site that quietly invite tire-kickers into your inbox.', path: '/friction-audit' },
+    ],
+  },
 ];
+

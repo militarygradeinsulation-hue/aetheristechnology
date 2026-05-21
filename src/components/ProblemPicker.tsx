@@ -8,38 +8,82 @@ import {
   PhoneOff,
   PenLine,
   UserSearch,
+  HandCoins,
+  Anchor,
+  Boxes,
+  BatteryLow,
 } from 'lucide-react';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { problemGroups } from '@/lib/problemGroups';
 
-// Maps each problem group → an icon + a humanized "you-feel-it" framing
+// Each problem → icon, humanized "you feel it" line, the fix in one sentence,
+// and a piece of Joseph's story explaining why the tool exists at all.
 const groupMeta = [
   {
     icon: Droplets,
     felt: "You keep asking yourself, 'where is it all going?'",
     fix: 'Three tools below put a name and a number on the leak.',
+    backstory:
+      "I went 18 months knowing money was bleeding out of my construction company and couldn't name where. I built the Diagnostic so no other owner has to guess that long.",
   },
   {
     icon: MessageSquareWarning,
     felt: 'You sound expensive on the call and cheap on the website.',
     fix: 'These two read your brand the way a prospect actually does.',
+    backstory:
+      "I watched a $25M aerospace client lose a seven-figure deal because the website undercut everything the sales team said. That call is why this exists.",
   },
   {
     icon: PhoneOff,
     felt: "Good leads keep going dark and nobody on your team can tell you why.",
     fix: 'Give your reps the words and the cadence that close the gap.',
+    backstory:
+      "I once found 142 quoted leads in a CRM that nobody followed up on. $1.4M sitting in a pipeline that everyone assumed was dead. Built the cadence so it never happens again.",
   },
   {
     icon: PenLine,
     felt: "It's 11pm on a Sunday and you still haven't posted anything this week.",
     fix: 'Stop staring at the blank page — these do the heavy lift.',
+    backstory:
+      "I missed three months of posting while my kids were in surgery. The content generator is what I built when I came back, so I never had to choose between visibility and showing up at the hospital again.",
   },
   {
     icon: UserSearch,
     felt: "The last bad hire cost you $40K and three months of sideways energy.",
     fix: 'Run the resume through the case file before you sign the offer.',
+    backstory:
+      "I hired a 'senior operator' off a polished resume who set the company back a quarter. Resume Forensics is the tool I wish I'd run that Tuesday morning.",
+  },
+  {
+    icon: HandCoins,
+    felt: "You've paid six figures to consultants and you're still asking the same questions.",
+    fix: 'Stop paying for decks. Get an operator-led ledger with dollar amounts on every leak.',
+    backstory:
+      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $2,500 Forensic Diagnostic is the opposite of that experience — flat fee, written ledger, credit toward the work.",
+  },
+  {
+    icon: Anchor,
+    felt: "You wanted a business. You built a job that pays worse and never clocks out.",
+    fix: 'Name every decision still routed through you, then hand the work off Monday.',
+    backstory:
+      "Marine Corps taught me to lead from the front. Running my own shop taught me that 'front' becomes a cage when every decision routes back to you. These tools are how I cut the cord.",
+  },
+  {
+    icon: Boxes,
+    felt: "You're paying for tools nobody opens and reports that take a person, not a system.",
+    fix: 'Audit what you actually use. Kill the rest. Make the stack do the work.',
+    backstory:
+      "I was paying $3,200/mo across 11 SaaS subscriptions. Six of them hadn't been opened in 90 days. That audit was the first leak I ever closed in my own business.",
+  },
+  {
+    icon: BatteryLow,
+    felt: "The work isn't the problem anymore — the carrying it is.",
+    fix: 'Hand the audit to an operator. Get the weekend back.',
+    backstory:
+      "I spent a winter freezing inside half-built houses with two kids in surgery and a company I couldn't put down. Nobody should have to carry it alone. That's the only reason Aetheris exists.",
   },
 ];
+
 
 export const ProblemPicker: React.FC = () => {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
@@ -148,12 +192,24 @@ export const ProblemPicker: React.FC = () => {
                       <div className="px-4 md:px-5 pb-5 pt-0 animate-fade-in">
                         <div className="h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent mb-5" />
 
+                        {meta?.backstory && (
+                          <div className="mb-5 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
+                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                              Why this tool exists · Joseph's file
+                            </div>
+                            <p className="text-sm text-foreground/85 leading-relaxed italic">
+                              "{meta.backstory}"
+                            </p>
+                          </div>
+                        )}
+
                         <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
                           The fix
                         </div>
                         <p className="text-sm text-foreground/85 mb-4">
                           {meta?.fix}
                         </p>
+
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {group.tools.map((tool) => (
