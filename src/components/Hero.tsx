@@ -8,6 +8,7 @@ import architectLogo from '@/assets/architect-logo.jpg';
 import heroLeakVideo from '@/assets/hero-leak.mp4';
 import { ForensicInfographic } from './ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import { ProblemPicker } from './ProblemPicker';
 
 interface HeroProps {
   onContactClick: () => void;
