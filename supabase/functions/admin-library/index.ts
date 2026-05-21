@@ -30,12 +30,18 @@ serve(async (req) => {
     const { action } = body;
 
     if (action === "list") {
-      const { data, error } = await supabase
+      const limit = Math.max(1, Math.min(200, Number(body.limit) || 50));
+      const offset = Math.max(0, Number(body.offset) || 0);
+      const toolType: string | undefined = typeof body.tool_type === "string" ? body.tool_type : undefined;
+      let q = supabase
         .from("admin_library")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
+      if (toolType) q = q.eq("tool_type", toolType);
+      const { data, error } = await q;
       if (error) throw error;
-      return new Response(JSON.stringify({ items: data || [] }), {
+      return new Response(JSON.stringify({ items: data || [], limit, offset, hasMore: (data?.length || 0) === limit }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
