@@ -91,8 +91,57 @@ const PREMADE_PROMPTS = [
   'Founder-to-founder voice. Blunt. No buzzwords. End with "What\'s leaking in yours?"',
 ];
 
+const TONES = [
+  { value: 'auto', label: 'Auto (default operator voice)' },
+  { value: 'blunt-operator', label: 'Blunt Operator — direct, no fluff' },
+  { value: 'forensic-cold', label: 'Forensic / Cold — clinical case-file' },
+  { value: 'aggressive-callout', label: 'Aggressive Call-Out — name the leak' },
+  { value: 'mentor-calm', label: 'Calm Mentor — patient, teaching tone' },
+  { value: 'contrarian', label: 'Contrarian — flip the conventional take' },
+  { value: 'storyteller', label: 'Storyteller — 1st-person field story' },
+  { value: 'dry-witty', label: 'Dry / Witty — restrained humor' },
+  { value: 'empathetic-peer', label: 'Empathetic Peer — founder-to-founder' },
+  { value: 'data-driven', label: 'Data-Driven — stat-led, numeric proof' },
+];
+
+const STYLES = [
+  { value: 'auto', label: 'Auto (model picks structure)' },
+  { value: 'hook-list-close', label: 'Hook → numbered list → sharp close' },
+  { value: 'micro-story', label: 'Micro-story (200w) with one dollar figure' },
+  { value: 'case-file', label: 'Case-File format (Subject / Findings / Verdict)' },
+  { value: 'one-paragraph', label: 'One dense paragraph, no breaks' },
+  { value: 'carousel-5', label: '5-slide carousel structure' },
+  { value: 'stat-led', label: 'Stat-led open, 3 supporting points' },
+  { value: 'verdict-first', label: 'Verdict first, then the proof' },
+  { value: 'question-frame', label: 'Question frame → answer → twist' },
+  { value: 'before-after', label: 'Before / After / What changed' },
+];
+
+const SITE_LINK = 'https://aetheris.technology';
+
+const appendSiteLink = (post: string): string => {
+  if (!post) return post;
+  const trimmed = post.trim();
+  if (trimmed.includes('aetheris.technology') || trimmed.includes('businessforensics.tech')) return trimmed;
+  return `${trimmed}\n\n${SITE_LINK}`;
+};
+
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+const buildToneStyleDirective = (toneVal: string, styleVal: string): string => {
+  const parts: string[] = [];
+  if (toneVal && toneVal !== 'auto') {
+    const t = TONES.find(x => x.value === toneVal);
+    if (t) parts.push(`TONE LOCK: Write in a ${t.label.toLowerCase()} voice. Hold this tone the entire post.`);
+  }
+  if (styleVal && styleVal !== 'auto') {
+    const s = STYLES.find(x => x.value === styleVal);
+    if (s) parts.push(`STRUCTURE LOCK: Use this format — ${s.label}. Do not drift to another shape.`);
+  }
+  parts.push(`LINK REQUIREMENT: End the post with the line "${SITE_LINK}" on its own (no markdown, no label). If a CTA exists, place the link AFTER it.`);
+  return parts.length ? '\n\n' + parts.join('\n') : '';
+};
 
 export default function LinkedInPostStudio() {
   const [topic, setTopic] = useState('');
@@ -100,6 +149,10 @@ export default function LinkedInPostStudio() {
   const [postType, setPostType] = useState<string>('auto');
   const [creator, setCreator] = useState<string>('auto');
   const [extraPrompt, setExtraPrompt] = useState('');
+  const [tone, setTone] = useState<string>('auto');
+  const [postStyle, setPostStyle] = useState<string>('auto');
+  const [respondTone, setRespondTone] = useState<string>('auto');
+  const [respondStyle, setRespondStyle] = useState<string>('auto');
   const [topicCategory, setTopicCategory] = useState<string>('All');
   const [generated, setGenerated] = useState('');
   const [loading, setLoading] = useState(false);
@@ -147,7 +200,7 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
-        body: { url: u, extraPrompt: sourceExtra.trim() },
+        body: { url: u, extraPrompt: (sourceExtra.trim() + buildToneStyleDirective(tone, postStyle)).trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -156,7 +209,7 @@ export default function LinkedInPostStudio() {
       if (!post) throw new Error('Empty post');
       const firstLine = post.split('\n').map((s: string) => s.trim()).find(Boolean) || u;
       setTopic(firstLine.slice(0, 180));
-      setGenerated(post);
+      setGenerated(appendSiteLink(post));
       toast({ title: 'Post created from source', description: data.sourceKind === 'youtube' ? 'YouTube video processed' : 'URL scanned' });
       setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
     } catch (e) {
@@ -270,7 +323,8 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
-      const extraWithFreshness = (respondExtra.trim() + freshnessTail).trim();
+      const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle);
+      const extraWithFreshness = (respondExtra.trim() + toneStyleTail + freshnessTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -289,7 +343,7 @@ export default function LinkedInPostStudio() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const post = data.post || '';
+      const post = appendSiteLink(data.post || '');
       setRespondOutput(post);
       // Auto-save to response library
       if (post.trim()) {
@@ -346,7 +400,7 @@ export default function LinkedInPostStudio() {
       const post = (data.post || '').trim();
       if (!post) throw new Error('Empty post');
       setTopic(firstLine.slice(0, 180));
-      setGenerated(post);
+      setGenerated(appendSiteLink(post));
       toast({ title: 'Standalone post created', description: 'Scroll down to copy or schedule it.' });
       // scroll to bottom-ish
       setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
@@ -382,13 +436,13 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: extraPrompt.trim(),
+          extraPrompt: (extraPrompt.trim() + buildToneStyleDirective(tone, postStyle)).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setGenerated(data.post || '');
+      setGenerated(appendSiteLink(data.post || ''));
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Generation failed';
       toast({ title: 'Failed to generate', description: msg, variant: 'destructive' });
@@ -605,6 +659,19 @@ export default function LinkedInPostStudio() {
               value={respondExtra}
               onChange={(e) => setRespondExtra(e.target.value)}
             />
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <Select value={respondTone} onValueChange={setRespondTone}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Tone" /></SelectTrigger>
+                <SelectContent>{TONES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={respondStyle} onValueChange={setRespondStyle}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
+              Site link auto-appended: aetheris.technology
+            </div>
           </div>
         </div>
 
@@ -981,6 +1048,25 @@ export default function LinkedInPostStudio() {
             value={extraPrompt}
             onChange={(e) => setExtraPrompt(e.target.value)}
           />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Tone</div>
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Tone" /></SelectTrigger>
+                <SelectContent>{TONES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Style / Structure</div>
+              <Select value={postStyle} onValueChange={setPostStyle}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
+            Site link auto-appended to every post: aetheris.technology
+          </div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {PREMADE_PROMPTS.map((p) => (
               <button
