@@ -189,9 +189,13 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
     setBusy(true);
     try {
       const adminToken = getAdminToken();
+      const portalToken = getPortalToken();
+      const headers: Record<string, string> = {};
+      if (adminToken) headers['x-admin-token'] = adminToken;
+      if (portalToken) headers['x-portal-token'] = portalToken;
       const { data, error } = await supabase.functions.invoke('forensics-simplify', {
         body: { source: src, toolLabel: `Portal section: ${tabKey}` },
-        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+        headers: Object.keys(headers).length ? headers : undefined,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
