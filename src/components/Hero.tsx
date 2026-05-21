@@ -155,50 +155,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             ))}
           </div>
 
-
-          <h2 className="font-case text-xs md:text-sm uppercase tracking-widest text-muted-foreground max-w-4xl mx-auto pt-2">
-            20 years building revenue systems · Marine Corps veteran · Former Director of Strategy, $25M aerospace firm with SpaceX accounts
-          </h2>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <a
-              href={HUBSPOT_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('click', { label: 'book_call_hero', location: 'hero' })}
-            >
-              <Button
-                size="lg"
-                className="bg-amber hover:bg-amber/90 text-primary-foreground group hover-lift font-bold"
-              >
-                Book a 15-minute call
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </a>
-            <Link to="/methodology" onClick={() => trackEvent('click', { label: 'methodology_hero', location: 'hero' })}>
-              <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber hover:text-amber hover-lift">
-                <FileText className="mr-2 w-4 h-4" />
-                Read the methodology
-              </Button>
-            </Link>
-            <Link to="/credentials" onClick={() => trackEvent('click', { label: 'credentials_hero', location: 'hero' })}>
-              <Button size="lg" variant="outline" className="glass-hover border-border hover-lift">
-                <BadgeCheck className="mr-2 w-4 h-4" />
-                See credentials
-              </Button>
-            </Link>
-          </div>
-
-          <div className="pt-3 flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <a
-              href="tel:+13173762110"
-              onClick={() => trackEvent('click', { label: 'call_hero', location: 'hero' })}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-amber transition-colors font-case uppercase tracking-wider"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              (317) 376-2110
-            </a>
-          </div>
         </motion.div>
       </div>
     </section>
