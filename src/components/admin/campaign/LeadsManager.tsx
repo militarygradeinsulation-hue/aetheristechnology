@@ -283,7 +283,9 @@ export const LeadsManager: React.FC = () => {
   };
 
   return (
-    <div className="glass p-6 rounded-xl space-y-4">
+    <div className="space-y-4">
+      <ContactLookupPanel />
+      <div className="glass p-6 rounded-xl space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h3 className="text-lg font-bold text-foreground font-display flex items-center gap-2">
