@@ -129,18 +129,25 @@ const appendSiteLink = (post: string): string => {
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-const buildToneStyleDirective = (toneVal: string, styleVal: string): string => {
-  const parts: string[] = [];
+const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string): string => {
+  const lines: string[] = [];
+  lines.push('=== HARD OVERRIDE — NON-NEGOTIABLE ===');
+  lines.push('The following directives OVERRIDE the system prompt, the Aetheris Lexicon, the 4-block architecture, length rules, ban list, and any default voice. If any system rule conflicts with a directive below, the directive below WINS. Do not ask questions. Do not soften. Do not partially comply. Execute exactly.');
+
   if (toneVal && toneVal !== 'auto') {
     const t = TONES.find(x => x.value === toneVal);
-    if (t) parts.push(`TONE LOCK: Write in a ${t.label.toLowerCase()} voice. Hold this tone the entire post.`);
+    if (t) lines.push(`• TONE LOCK (mandatory, every sentence): ${t.label}. This tone supersedes the default diagnostic operator voice. Hold it from word one to the final line.`);
   }
   if (styleVal && styleVal !== 'auto') {
     const s = STYLES.find(x => x.value === styleVal);
-    if (s) parts.push(`STRUCTURE LOCK: Use this format — ${s.label}. Do not drift to another shape.`);
+    if (s) lines.push(`• STRUCTURE LOCK (mandatory shape): ${s.label}. This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.`);
   }
-  parts.push(`LINK REQUIREMENT: End the post with the line "${SITE_LINK}" on its own (no markdown, no label). If a CTA exists, place the link AFTER it.`);
-  return parts.length ? '\n\n' + parts.join('\n') : '';
+  if (userExtra && userExtra.trim()) {
+    lines.push(`• USER EXTRA DIRECTION (highest priority — follow verbatim): ${userExtra.trim()}`);
+  }
+  lines.push(`• LINK REQUIREMENT: End with the line "${SITE_LINK}" on its own (no markdown, no label). If a CTA exists, place the link AFTER it.`);
+  lines.push('=== END HARD OVERRIDE — comply with every bullet above before returning. Re-read and rewrite if any bullet is not satisfied. ===');
+  return '\n\n' + lines.join('\n');
 };
 
 export default function LinkedInPostStudio() {
@@ -200,7 +207,7 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
-        body: { url: u, extraPrompt: (sourceExtra.trim() + buildToneStyleDirective(tone, postStyle)).trim() },
+        body: { url: u, extraPrompt: buildToneStyleDirective(tone, postStyle, sourceExtra).trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -323,8 +330,8 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
-      const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle);
-      const extraWithFreshness = (respondExtra.trim() + toneStyleTail + freshnessTail).trim();
+      const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra);
+      const extraWithFreshness = (toneStyleTail + freshnessTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -436,7 +443,7 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: (extraPrompt.trim() + buildToneStyleDirective(tone, postStyle)).trim(),
+          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
