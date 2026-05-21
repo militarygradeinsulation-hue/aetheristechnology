@@ -53,19 +53,26 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           className="space-y-6"
         >
           <div className="flex flex-col items-center gap-3">
-            <button
+            <motion.button
               type="button"
               onClick={() => {
                 setWhatOpen((v) => !v);
                 trackEvent('click', { label: 'what_the_hell_toggle', location: 'hero' });
               }}
               aria-expanded={whatOpen}
-              className="inline-flex items-center gap-2 rounded-sm border border-amber/40 bg-amber/10 hover:bg-amber/20 transition-colors px-5 py-2.5 font-case text-xs md:text-sm uppercase tracking-widest text-amber"
+              animate={{ boxShadow: ['0 0 0 0 hsl(var(--crimson) / 0.55)', '0 0 0 18px hsl(var(--crimson) / 0)', '0 0 0 0 hsl(var(--crimson) / 0)'] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group inline-flex items-center gap-3 rounded-sm border-2 border-crimson bg-crimson hover:bg-crimson/90 px-6 md:px-10 py-4 md:py-5 font-forensic text-xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white shadow-2xl shadow-crimson/40"
             >
-              <HelpCircle className="w-4 h-4" />
-              What the Hell Do You Do?
-              <ChevronDown className={`w-4 h-4 transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
-            </button>
+              <HelpCircle className="w-6 h-6 md:w-8 md:h-8" />
+              <span>What The Hell Do You Do?</span>
+              <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
+            </motion.button>
+            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/90 -mt-1">
+              ← Press this first. Seriously.
+            </div>
             <AnimatePresence initial={false}>
               {whatOpen && (
                 <motion.div
@@ -83,6 +90,18 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                     <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
                       What the Hell Do You <span className="text-amber italic">Actually</span> Do?
                     </h3>
+                    <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
+                        I know what you're thinking
+                      </div>
+                      <p className="text-[14px] leading-relaxed text-foreground/85 italic">
+                        "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
+                      </p>
+                      <p className="text-[14px] leading-relaxed text-foreground/90 mt-2">
+                        I'd think the same thing. I <span className="text-amber">did</span> think the same thing — every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
+                      </p>
+                    </div>
+
                     <div className="space-y-2.5 text-[15px] leading-relaxed text-foreground/85">
                       <p>Most consultants sell services.</p>
                       <p className="text-foreground font-semibold">We solve problems.</p>
