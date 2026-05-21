@@ -200,7 +200,7 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
-        body: { url: u, extraPrompt: sourceExtra.trim() },
+        body: { url: u, extraPrompt: (sourceExtra.trim() + buildToneStyleDirective(tone, postStyle)).trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
