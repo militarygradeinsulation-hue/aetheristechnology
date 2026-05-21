@@ -11,7 +11,7 @@ import { SEOHead } from '@/components/SEOHead';
 
 import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
-import { ThisIsForYou } from '@/components/ThisIsForYou';
+
 import { ProblemPicker } from '@/components/ProblemPicker';
 
 
