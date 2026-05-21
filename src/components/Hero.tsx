@@ -45,7 +45,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
   return (
     <section className="relative min-h-[78vh] flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="max-w-7xl mx-auto text-center">
+      <div className="max-w-[1600px] mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -178,7 +178,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             </span>
           </div>
 
-          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
+          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-[1500px] mx-auto">
             <span className="text-foreground">Your business is </span>
             <span className="text-crimson italic">leaking.</span>
             <span className="text-foreground"> You just can't see it from </span>
