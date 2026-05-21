@@ -73,8 +73,9 @@ const Home = () => {
           {/* This is for you if... */}
           <ThisIsForYou />
 
-          {/* THE CENTERPIECE — Pick your problem */}
+          {/* THE CENTERPIECE — Pick your problem + what you actually get */}
           <ProblemPicker />
+          <WhatYouReallyGet />
 
           {/* Front-and-center booking */}
           <section id="book" className="relative px-4 pt-6 pb-10 scroll-mt-24">
@@ -99,8 +100,6 @@ const Home = () => {
             </div>
           </section>
 
-          {/* What you're actually buying */}
-          <WhatYouReallyGet />
 
           {/* Upcoming events — anchor the bottom */}
           <UpcomingEvents />
