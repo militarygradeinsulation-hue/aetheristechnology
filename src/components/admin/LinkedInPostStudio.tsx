@@ -219,7 +219,38 @@ export default function LinkedInPostStudio() {
     reader.readAsDataURL(file);
   };
 
-  const generateResponse = async () => {
+  const buildFreshnessDirective = (): string => {
+    // Pull recent outputs from library to teach the model what NOT to repeat
+    const recent = responseLibrary.slice(0, 10)
+      .map(i => (i.output_data as any)?.body as string)
+      .filter(Boolean);
+    const openings = recent
+      .map(b => (b.split(/\n|\.|!|\?/)[0] || '').trim())
+      .filter(s => s.length > 0)
+      .slice(0, 8);
+    // Common overused words/phrases in past outputs (simple heuristic)
+    const wordFreq: Record<string, number> = {};
+    recent.join(' ').toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).forEach(w => {
+      if (w.length < 5) return;
+      wordFreq[w] = (wordFreq[w] || 0) + 1;
+    });
+    const overused = Object.entries(wordFreq)
+      .filter(([, n]) => n >= 3)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([w]) => w);
+    const seed = Math.floor(Math.random() * 9999);
+    return [
+      `\n\n=== FRESHNESS OVERRIDE (seed ${seed}) ===`,
+      `The operator has flagged recent outputs as REPETITIVE. You MUST refresh the voice on this draft.`,
+      openings.length ? `BANNED opening lines / phrasings (do NOT mimic structure, cadence, or first 5 words of ANY of these):\n- ${openings.join('\n- ')}` : '',
+      overused.length ? `OVERUSED words to AVOID or use sparingly (find sharper alternatives): ${overused.join(', ')}.` : '',
+      `Open with a structure you have NOT used in recent drafts. Vary cadence, sentence length, and verbs. Bring a different angle (numeric anchor, contrarian flip, micro-story, or blunt verdict) than the last few responses.`,
+      `Do NOT start with the same word, stat-format, or rhetorical move as the banned openings above.`,
+    ].filter(Boolean).join('\n');
+  };
+
+  const generateResponse = async (opts?: { freshen?: boolean }) => {
     const useImage = respondSourceType === 'image';
     const isReply = respondSourceType === 'reply';
     if (useImage && !respondImage) {
@@ -238,6 +269,8 @@ export default function LinkedInPostStudio() {
     setRespondOutput('');
     try {
       const adminToken = getAdminToken();
+      const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
+      const extraWithFreshness = (respondExtra.trim() + freshnessTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -245,11 +278,11 @@ export default function LinkedInPostStudio() {
             theirReply: theirReply.trim(),
             originalPostText: replyOriginalPost.trim(),
             mode: 'brief',
-            extraContext: respondExtra.trim(),
+            extraContext: extraWithFreshness,
           }
         : useImage
-        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: respondExtra.trim() }
-        : { postText: respondText.trim(), mode: respondMode, extraContext: respondExtra.trim() };
+        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: extraWithFreshness }
+        : { postText: respondText.trim(), mode: respondMode, extraContext: extraWithFreshness };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
         body,
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
