@@ -1,45 +1,62 @@
-## Add forensic infographics to remaining Home page tiles
+## Goal
 
-### Images to generate (12 total, all square forensic case-file style with "Aetheris AI Studio" watermark)
+Turn `/` into a clean, focused landing page. Keep the top (Hero + "This is for you"), drop the noise, and put a big **"Pick your problem"** picker front-and-center — modeled on the small tool cards in `/leak-audit`, but blown up to bold problem buttons that reveal matching solutions. Anchor the bottom with the upcoming events calendar.
 
-**Hero 3 mini-tiles** (small icons, ~512x512):
-1. `hero-what-we-do.jpg` — Stethoscope on a CRM dashboard, amber leak indicators
-2. `hero-what-we-look-for.jpg` — Magnifying glass over a sales funnel with crimson drip points
-3. `hero-what-you-get.jpg` — Stack of forensic report binders with amber tab
+## New Home page structure (top → bottom)
 
-**Diagnostic 3 steps** (small icons, ~512x512):
-4. `diagnostic-map.jpg` — Topographic map overlay on CRM data, leak points marked
-5. `diagnostic-quantify.jpg` — Calculator + ledger with crimson dollar tally
-6. `diagnostic-roadmap.jpg` — Sequenced repair checklist with amber priority flags
+1. **Hero** (unchanged)
+2. **This Is For You** (unchanged — the signals tile)
+3. **Audio briefing tile** — "Who we are. What we do for you. In our own words." (moved up to sit directly under the Aetheris video/audio explainer position)
+4. **NEW — "Pick your problem" picker** (front and center, see below)
+5. **Book a meeting** (HubSpot embed — kept, it's the conversion anchor)
+6. **What You Really Get** (kept)
+7. **Resume Forensics teaser** (kept — it's a single live tool spotlight, not noise)
+8. **Upcoming Events / Calendar** (moved to the bottom)
+9. Footer
 
-**Sample Case Files 3 cards** (small icons, ~512x512):
-7. `case-47-gmail.jpg` — Overflowing Gmail inbox, unread leads, crimson "$380K" stamp
-8. `case-62-proposals.jpg` — Stack of priced proposals, "NO FOLLOWUP" stamp
-9. `case-74-bottleneck.jpg` — Bottleneck diagram, owner icon choking the funnel
+## "Pick your problem" picker (the new centerpiece)
 
-**Standalone feature tiles** (larger ~1024x1024):
-10. `home-ai-gurus.jpg` — Snake-oil bottles labeled "AI", one crossed out with amber stamp
-11. `home-ai-operator.jpg` — AI agents inside a CRM running diagnostics, not a slide deck
-12. `home-resume-forensics.jpg` — Resume document under forensic light with fit-score gauge
+Big, bold, scannable. Headline: **"Pick your problem."** Subhead: "Tell us what's broken. We'll show you what plugs it."
 
-### Code changes
+Layout: a vertical stack of 5 large problem buttons (the same 5 problem groups already defined in `CapabilitiesPage.tsx`). Each button is a full-width forensic tile with:
+- Case-file micro-label ("Problem 01")
+- Big serif problem statement (e.g. *"I don't know where the business is actually leaking money."*)
+- One-line symptom underneath
 
-- **`src/lib/infographics.ts`** — register all 12 new entries
-- **`src/components/Hero.tsx`** — add small square image (aspect-square, w-full, rounded-sm, amber border) above each of the 3 mini tiles
-- **`src/pages/Home.tsx`**:
-  - Diagnostic steps: add small image above each step card
-  - Sample case files: pass image into `CaseFileCard` (extend component prop)
-  - AI-gurus tile: refactor into `ForensicInfographic` two-column with image left, copy/CTAs right
-  - AI-native operator tile: same treatment, image right / copy left (alternating)
-  - Resume Forensics tile: same treatment
-- **`src/components/CaseFileCard.tsx`** — add optional `image` prop rendered as a top thumbnail
-- **`src/components/ForensicInfographic.tsx`** — already exists, reuse; add an `align="left"|"right"` prop if not present for alternating layouts (currently confirmed supported from prior round)
+Click behavior: button expands inline (accordion) to reveal the matching solution tools as compact cards — title, "What it cures" line, and a "Run it free →" link. Only one open at a time. Single-page interaction, no navigation away.
 
-### Notes
-- No backend changes. Pure frontend + asset generation.
-- All images use `imagegen` with brand prompt wrapper (dark charcoal #1a1a1a bg, amber #d4a017 accents, crimson #c4302b reserved for leak signals only, JetBrains Mono micro-labels, "Aetheris AI Studio" watermark bottom-right).
-- Mini-tile images use `aspect-square` thumbnail, full standalone tiles use ForensicInfographic two-column.
-- Mobile: standalone infographics stack image-over-text; grid thumbnails remain square at full tile width.
+Source the 5 problem groups + their tools from the existing `problemGroups` array in `src/pages/CapabilitiesPage.tsx` (extract it into `src/lib/problemGroups.ts` so both pages share it).
 
-### QA
-After generation, visually inspect each image for: watermark present, no crimson misuse (only on leak signals), brand colors, no text errors. Regenerate any that miss.
+A small "See all tools →" link at the bottom of the picker points to `/capabilities` for users who want the full grid view.
+
+## Relocations
+
+| Section | From | To |
+|---|---|---|
+| "There's a ton of AI gurus out there..." trust tile | Home | **`/why-us`** (prepend to `WhyUs.tsx`) |
+| "Map. Quantify. Roadmap." 3-step diagnostic | Home | **REMOVE entirely** (per request) |
+| "Everyone else is selling you advice. We're an AI-native operator." | Home | **`/why-us`** (append after the gurus tile) |
+| "What we've found inside exhausted owner-led businesses" case files | Home | **`/leak-audit`** (append a new section after the intake CTA cards) |
+| "New Tech Launch Showcase" heading | Home | **`/catalog`** (the premium tech page — prepend as the page intro) |
+| Upcoming Events | Home (mid) | Home (**bottom**, just above footer) |
+
+Audio briefing tile stays on home but moves up directly under the Hero/explainer area so it reads as "Who we are / what we do / in our own words" right under the explainer.
+
+## Files
+
+**Create**
+- `src/lib/problemGroups.ts` — export the `problemGroups` array + `Tool` / `ProblemGroup` types, plus the thumbnail imports.
+- `src/components/ProblemPicker.tsx` — the new accordion-style picker component for Home (and reusable).
+
+**Edit**
+- `src/pages/Home.tsx` — delete relocated sections, reorder, mount `<ProblemPicker />` after the audio briefing, move `<UpcomingEvents />` to the end.
+- `src/pages/CapabilitiesPage.tsx` — import `problemGroups` from the new shared lib instead of defining inline.
+- `src/components/WhyUs.tsx` — prepend the "AI gurus" trust tile + "AI-native operator" section (copy markup from Home verbatim, keep `INFOGRAPHICS` imports).
+- `src/pages/LeakAuditPage.tsx` — append the "What we've found inside exhausted owner-led businesses" case-files section at the bottom of the result/intake flow (visible on all steps, after the main content).
+- `src/pages/CatalogPage.tsx` — prepend the "New Tech Launch Showcase" intro heading block above the existing catalog content.
+
+## Out of scope
+
+- No business-logic, backend, or routing changes.
+- No design-token changes — reuse existing `forensic-tile`, `font-forensic`, `font-case`, `amber`/`crimson` classes.
+- Copy is preserved verbatim wherever sections move; only placement and the new picker UI are new.
