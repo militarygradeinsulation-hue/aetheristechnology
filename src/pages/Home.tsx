@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { Background } from '@/components/Background';
 
 import { Navbar } from '@/components/Navbar';
