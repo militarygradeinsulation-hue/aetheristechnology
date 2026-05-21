@@ -343,7 +343,7 @@ export default function LinkedInPostStudio() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const post = data.post || '';
+      const post = appendSiteLink(data.post || '');
       setRespondOutput(post);
       // Auto-save to response library
       if (post.trim()) {
