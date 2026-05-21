@@ -32,17 +32,27 @@ const CatalogPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="px-4 max-w-7xl mx-auto text-center mb-8">
+          <div className="px-4 max-w-5xl mx-auto text-center mb-8">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Showcase
+            </div>
+            <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+              New Tech Launch <span className="text-amber">Showcase</span>
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto mb-6">
+              Every new system our company builds gets displayed here. Live, working, and yours to try.
+            </p>
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               Premium Tech Suite · One-time + Monthly
             </div>
-            <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
               Every tool, every package, every price.
-            </h1>
+            </h2>
             <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
               Buy à la carte, subscribe monthly and save 25–40%, or mix and match across categories. No login required.
             </p>
           </div>
+
           <ServicesPricing />
         </main>
         <Footer />
