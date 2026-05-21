@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Phone, Play, FileText, BadgeCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Phone, Play, FileText, BadgeCheck, ChevronDown, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
