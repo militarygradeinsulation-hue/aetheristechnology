@@ -171,15 +171,22 @@ const CapabilitiesPage = () => {
                               />
                             </div>
                             <div className="p-6 flex flex-col flex-1">
-                              <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
-                                {tool.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
-                                {tool.solves}
-                              </p>
-                              <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide">
-                                Run it free <ArrowRight className="w-4 h-4" />
-                              </span>
+                              <div className="mb-4">
+                                <div className="font-case text-[9px] uppercase tracking-[0.2em] text-crimson mb-1.5">
+                                  What it cures
+                                </div>
+                                <p className="text-[15px] text-foreground font-semibold leading-snug">
+                                  {tool.solves}
+                                </p>
+                              </div>
+                              <div className="mt-auto pt-3 border-t border-amber/15 flex items-center justify-between gap-3">
+                                <h3 className="text-sm font-bold text-foreground font-display leading-tight">
+                                  {tool.title}
+                                </h3>
+                                <span className="text-amber text-xs font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide shrink-0">
+                                  Run it free <ArrowRight className="w-3.5 h-3.5" />
+                                </span>
+                              </div>
                             </div>
                           </Link>
                         </ParallaxTilt>
