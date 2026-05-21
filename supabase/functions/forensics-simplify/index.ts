@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyPortalToken } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,8 +47,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const token = getAdminTokenFromRequest(req);
-    const ok = await verifyAdminToken(token, SERVICE);
-    if (!ok) {
+    const portalToken = req.headers.get("x-portal-token");
+    const adminOk = await verifyAdminToken(token, SERVICE);
+    const portalOk = portalToken ? !!(await verifyPortalToken(portalToken, SERVICE)) : false;
+    if (!adminOk && !portalOk) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

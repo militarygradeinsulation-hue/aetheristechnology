@@ -4,6 +4,7 @@ import { BookOpen, Loader2, Copy, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { getPortalToken } from '@/lib/portalAuth';
 
 interface Props {
   /** The raw text/markdown to rewrite in plain English. */
@@ -30,9 +31,13 @@ export const EasyReadButton: React.FC<Props> = ({ source, toolLabel, size = 'sm'
     setSimplified('');
     try {
       const adminToken = getAdminToken();
+      const portalToken = getPortalToken();
+      const headers: Record<string, string> = {};
+      if (adminToken) headers['x-admin-token'] = adminToken;
+      if (portalToken) headers['x-portal-token'] = portalToken;
       const { data, error } = await supabase.functions.invoke('forensics-simplify', {
         body: { source: src.slice(0, 12000), toolLabel: toolLabel || 'Report' },
-        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+        headers: Object.keys(headers).length ? headers : undefined,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
