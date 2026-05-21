@@ -5,7 +5,192 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Pencil, Trash2, RefreshCw, Search, Users } from 'lucide-react';
+import { Loader2, Pencil, Trash2, RefreshCw, Search, Users, Phone, Sparkles, Mail, Linkedin, Building2, ExternalLink } from 'lucide-react';
+import { getAdminToken } from '@/lib/adminAuth';
+
+interface LookupResult {
+  local_matches: { source: string; label: string; data: any }[];
+  rocketreach: any | null;
+  rocketreach_error?: string | null;
+}
+
+const ContactLookupPanel: React.FC = () => {
+  const { toast } = useToast();
+  const [q, setQ] = useState({ phone: '', email: '', name: '', company: '', linkedin: '' });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<LookupResult | null>(null);
+
+  const run = async () => {
+    if (!q.phone && !q.email && !q.name && !q.company && !q.linkedin) {
+      toast({ title: 'Enter at least one field', variant: 'destructive' });
+      return;
+    }
+    setLoading(true);
+    setResult(null);
+    try {
+      const token = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('admin-lookup-contact', {
+        body: q,
+        headers: token ? { 'x-admin-token': token } : {},
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setResult(data as LookupResult);
+    } catch (e: any) {
+      toast({ title: 'Lookup failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rr = result?.rocketreach;
+  return (
+    <div className="glass p-6 rounded-xl space-y-4">
+      <div>
+        <h3 className="text-lg font-bold text-foreground font-display flex items-center gap-2">
+          <Search className="w-5 h-5 text-amber" /> Contact Lookup
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          Paste a phone, email, name, company, or LinkedIn URL. Searches our database first, then RocketReach.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="relative">
+          <Phone className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-8" placeholder="Phone number" value={q.phone}
+            onChange={(e) => setQ({ ...q, phone: e.target.value })} />
+        </div>
+        <div className="relative">
+          <Mail className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-8" placeholder="Email" value={q.email}
+            onChange={(e) => setQ({ ...q, email: e.target.value })} />
+        </div>
+        <Input placeholder="Full name" value={q.name} onChange={(e) => setQ({ ...q, name: e.target.value })} />
+        <div className="relative">
+          <Building2 className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-8" placeholder="Company" value={q.company}
+            onChange={(e) => setQ({ ...q, company: e.target.value })} />
+        </div>
+        <div className="relative md:col-span-2">
+          <Linkedin className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-8" placeholder="LinkedIn profile URL (optional)" value={q.linkedin}
+            onChange={(e) => setQ({ ...q, linkedin: e.target.value })} />
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button onClick={run} disabled={loading}>
+          {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+          Look up
+        </Button>
+        {result && (
+          <Button variant="ghost" onClick={() => { setResult(null); setQ({ phone:'', email:'', name:'', company:'', linkedin:'' }); }}>
+            Clear
+          </Button>
+        )}
+      </div>
+
+      {result && (
+        <div className="space-y-4 pt-2 border-t border-border">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wide text-amber mb-2">
+              In our database ({result.local_matches.length})
+            </div>
+            {result.local_matches.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No matches in our data.</p>
+            ) : (
+              <div className="space-y-2">
+                {result.local_matches.map((m, i) => (
+                  <div key={i} className="bg-secondary/30 rounded-lg p-3 text-sm">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="font-semibold text-foreground">{m.label}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400">{m.source}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 space-x-2">
+                      {m.data.email && <span>📧 {m.data.email}</span>}
+                      {m.data.candidate_email && <span>📧 {m.data.candidate_email}</span>}
+                      {m.data.phone && <span>📞 {m.data.phone}</span>}
+                      {m.data.candidate_phone && <span>📞 {m.data.candidate_phone}</span>}
+                      {m.data.status && <span>· {m.data.status}</span>}
+                      {m.data.created_at && <span>· {new Date(m.data.created_at).toLocaleDateString()}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wide text-amber mb-2">RocketReach</div>
+            {result.rocketreach_error && (
+              <p className="text-sm text-red-400">{result.rocketreach_error}</p>
+            )}
+            {!rr && !result.rocketreach_error && (
+              <p className="text-sm text-muted-foreground">No RocketReach match found.</p>
+            )}
+            {rr && (
+              <div className="bg-secondary/30 rounded-lg p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  {rr.profile_pic && <img src={rr.profile_pic} alt="" className="w-12 h-12 rounded-full" />}
+                  <div className="flex-1">
+                    <div className="font-bold text-foreground">{rr.name}</div>
+                    <div className="text-sm text-muted-foreground">{rr.title}{rr.employer ? ` · ${rr.employer}` : ''}</div>
+                    {rr.location && <div className="text-xs text-muted-foreground">{rr.location}</div>}
+                    {rr.linkedin_url && (
+                      <a href={rr.linkedin_url} target="_blank" rel="noreferrer"
+                         className="inline-flex items-center gap-1 text-xs text-amber hover:underline mt-1">
+                        <Linkedin className="w-3 h-3" /> LinkedIn <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                {!!rr.emails?.length && (
+                  <div>
+                    <div className="text-xs font-bold text-foreground mb-1">Emails</div>
+                    {rr.emails.map((e: any, i: number) => (
+                      <div key={i} className="text-sm text-muted-foreground">
+                        {e.email} <span className="text-xs">({[e.type, e.grade, e.smtp_valid].filter(Boolean).join(' · ')})</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!!rr.phones?.length && (
+                  <div>
+                    <div className="text-xs font-bold text-foreground mb-1">Phones</div>
+                    {rr.phones.map((p: any, i: number) => (
+                      <div key={i} className="text-sm text-muted-foreground">{p.number} {p.type ? `(${p.type})` : ''}</div>
+                    ))}
+                  </div>
+                )}
+                {!!rr.job_history?.length && (
+                  <div>
+                    <div className="text-xs font-bold text-foreground mb-1">Work history</div>
+                    {rr.job_history.map((j: any, i: number) => (
+                      <div key={i} className="text-xs text-muted-foreground">
+                        {j.title} @ {j.company_name} {j.start_date ? `(${j.start_date}${j.end_date ? `–${j.end_date}` : '–present'})` : ''}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!!rr.additional?.length && (
+                  <div>
+                    <div className="text-xs font-bold text-foreground mb-1">Other people at this company</div>
+                    {rr.additional.map((p: any, i: number) => (
+                      <div key={i} className="text-xs text-muted-foreground py-1 border-t border-border/50">
+                        <div className="text-foreground font-semibold">{p.name} — {p.title}</div>
+                        {p.emails?.length > 0 && <div>{p.emails.join(', ')}</div>}
+                        {p.phones?.length > 0 && <div>{p.phones.join(', ')}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface Lead {
   id: string;
