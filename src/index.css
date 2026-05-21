@@ -24,7 +24,7 @@
     --secondary-foreground: 40 10% 80%;
 
     --muted: 220 12% 16%;
-    --muted-foreground: 220 10% 55%;
+    --muted-foreground: 220 14% 75%;
 
     --accent: 36 70% 45%;
     --accent-foreground: 220 15% 8%;
@@ -68,7 +68,18 @@
 
   body {
     @apply bg-background text-foreground overflow-x-hidden font-body;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+
+  /* Bump up small/legal text so it's still readable */
+  .text-xs { font-size: 0.8125rem; font-weight: 500; }
+  .text-sm { font-size: 0.9375rem; font-weight: 500; }
+  .text-base { font-weight: 500; }
+
+  /* Muted copy needs more weight to stay readable against dark bg */
+  .text-muted-foreground { font-weight: 500; }
 
   html {
     scroll-behavior: smooth;
@@ -76,6 +87,8 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 }
 
