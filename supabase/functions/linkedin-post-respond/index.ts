@@ -247,14 +247,14 @@ serve(async (req) => {
 
     const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR (Joseph's) comment, and you are writing the next reply back to THEM directly.
 
-${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
+${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : hasOriginalImg ? `ORIGINAL POST: see the screenshot labeled "ORIGINAL POST SCREENSHOT" below (context only, do NOT re-litigate it).\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
 """
-${myComment}
+${myComment || (hasMyCommentImg ? "(see screenshot labeled YOUR PRIOR COMMENT SCREENSHOT)" : "")}
 """
 
 THEIR REPLY TO YOU (this is who you're now answering):
 """
-${theirReply}
+${theirReply || (hasTheirReplyImg ? "(see screenshot labeled THEIR REPLY SCREENSHOT — read the reply text in that image carefully)" : "")}
 """
 
 GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level comment):
