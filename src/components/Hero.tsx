@@ -82,7 +82,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <span aria-hidden className="absolute -top-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/60 to-transparent" />
               <span aria-hidden className="absolute -bottom-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/40 to-transparent" />
               <HelpCircle className="w-6 h-6 md:w-8 md:h-8 relative" />
-              <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Do?</span>
+              <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Sell?</span>
               <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 relative transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
             </motion.button>
             <AnimatePresence initial={false}>
@@ -100,7 +100,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                       Case File · Plain English
                     </div>
                     <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
-                      What the Hell Do You <span className="text-amber italic">Actually</span> Do?
+                      What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
                     </h3>
                     <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
                       <div className="font-case text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
