@@ -56,6 +56,10 @@ export const ProblemPicker: React.FC = () => {
             <h2 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
               Pick your <span className="text-crimson italic">problem</span>.
               <br className="hidden md:block" />
+              <span className="text-foreground/90"> I've had </span>
+              <span className="text-amber italic">all of these</span>
+              <span className="text-foreground/90"> — and built the fix for each one.</span>
+              <br className="hidden md:block" />
               <span className="text-amber"> Meet the tool that fixes it.</span>
             </h2>
             <p className="text-base md:text-lg text-foreground/85 mt-4">
