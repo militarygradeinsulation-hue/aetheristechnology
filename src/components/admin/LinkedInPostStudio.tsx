@@ -722,7 +722,7 @@ export default function LinkedInPostStudio() {
               respondLoading ||
               (respondSourceType === 'image' && !respondImage) ||
               (respondSourceType === 'text' && respondText.trim().length < 20) ||
-              (respondSourceType === 'reply' && (myComment.trim().length < 10 || theirReply.trim().length < 5))
+              (respondSourceType === 'reply' && ((myComment.trim().length < 10 && !myCommentImage) || (theirReply.trim().length < 5 && !theirReplyImage)))
             }
             title="Getting repetitive? Force fresh openings, fresh word choice, and a new angle."
             className="border-amber/50 text-amber hover:bg-amber/10"
