@@ -52,7 +52,19 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           transition={{ duration: 0.8 }}
           className="space-y-6"
         >
+          <div className="w-full max-w-5xl mx-auto text-center space-y-2 pb-1">
+            <p className="font-forensic text-lg md:text-2xl lg:text-3xl text-foreground leading-tight">
+              I see you on my site. <span className="text-amber italic">Actually do something about your problem</span> — instead of losing money and just leaving.
+            </p>
+            <p className="font-forensic text-base md:text-lg lg:text-xl text-foreground/85 leading-snug">
+              I can find your leaks — <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
+            </p>
+          </div>
+
           <div className="flex flex-col items-center gap-3">
+            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80">
+              ↓ Press this first. Seriously.
+            </div>
             <motion.button
               type="button"
               onClick={() => {
@@ -73,17 +85,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Do?</span>
               <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 relative transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
             </motion.button>
-            <div className="max-w-xl text-center space-y-1 -mt-1">
-              <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80">
-                ← Press this first. Seriously.
-              </div>
-              <p className="font-forensic text-base md:text-lg text-foreground/90 leading-snug">
-                I see you on my site. <span className="text-amber italic">Actually do something about your problem</span> — instead of losing money and just leaving.
-              </p>
-              <p className="font-forensic text-sm md:text-base text-foreground/85 leading-snug pt-1">
-                I can find your leaks — <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
-              </p>
-            </div>
             <AnimatePresence initial={false}>
               {whatOpen && (
                 <motion.div
