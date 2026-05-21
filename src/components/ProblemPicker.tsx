@@ -134,9 +134,9 @@ export const ProblemPicker: React.FC = () => {
               return (
                 <RevealOnScroll key={idx}>
                   <div
-                    className={`forensic-tile rounded-md transition-all duration-500 h-full ${
+                    className={`problem-tile forensic-tile rounded-md transition-all duration-500 mb-4 ${
                       isOpen
-                        ? 'border-amber/70 md:col-span-2 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
+                        ? 'border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
                         : 'border-border/60 hover:border-amber/50'
                     }`}
                   >
