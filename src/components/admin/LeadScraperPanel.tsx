@@ -72,9 +72,19 @@ export const LeadScraperPanel: React.FC = () => {
 
   const remove = async (id: string) => {
     if (!confirm('Delete this lead?')) return;
-    const { error } = await supabase.from('rep_leads').delete().eq('id', id);
-    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
-    setRecent(prev => prev.filter(l => l.id !== id));
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'delete_lead', id },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setRecent(prev => prev.filter(l => l.id !== id));
+    } catch (e) {
+      toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    }
   };
 
   return (
