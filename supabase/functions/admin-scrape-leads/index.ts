@@ -163,6 +163,7 @@ serve(async (req) => {
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+    const blocked = await loadBlockedKeywords(supabase);
     let inserted = 0;
     if (leads.length > 0) {
       const rows = leads.map((l) => ({
@@ -178,7 +179,7 @@ serve(async (req) => {
         source: "firecrawl_indianapolis",
         external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
         status: "new",
-      })).filter((r) => r.business_name && r.website);
+      })).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
 
       const { data, error } = await supabase.from("rep_leads")
         .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
