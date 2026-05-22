@@ -778,7 +778,16 @@
   will-change: opacity;
 }
 
-/* Portal cursor preferences (per rep). Default leaves the system cursor alone. */
+/* Magnifying glass cursor — default across the entire site (front + back). */
+html, body, html *, body * {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'><circle cx='14' cy='14' r='9' fill='none' stroke='%23F5A623' stroke-width='3.5'/><circle cx='14' cy='14' r='9' fill='none' stroke='%23FFD580' stroke-width='1.5'/><line x1='21' y1='21' x2='31' y2='31' stroke='%23F5A623' stroke-width='4' stroke-linecap='round'/><line x1='21' y1='21' x2='31' y2='31' stroke='%23FFD580' stroke-width='1.5' stroke-linecap='round'/></svg>") 14 14, auto;
+}
+/* Keep text inputs as I-beam so typing feels natural */
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+}
+
+/* Portal cursor overrides (per rep). */
 .portal-cursor-magnifier, .portal-cursor-magnifier *, .portal-cursor-magnifier *::before, .portal-cursor-magnifier *::after {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'><circle cx='14' cy='14' r='9' fill='none' stroke='%23F5A623' stroke-width='3.5'/><circle cx='14' cy='14' r='9' fill='none' stroke='%23FFD580' stroke-width='1.5'/><line x1='21' y1='21' x2='31' y2='31' stroke='%23F5A623' stroke-width='4' stroke-linecap='round'/><line x1='21' y1='21' x2='31' y2='31' stroke='%23FFD580' stroke-width='1.5' stroke-linecap='round'/></svg>") 14 14, auto !important;
 }
