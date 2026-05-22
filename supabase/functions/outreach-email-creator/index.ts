@@ -79,6 +79,53 @@ const SUBJECT_TOOL = {
   },
 };
 
+const ANALYZE_TOOL = {
+  type: "function",
+  function: {
+    name: "analyze_email",
+    description: "Forensic critique of an email draft. Brutally honest. No flattery.",
+    parameters: {
+      type: "object",
+      properties: {
+        overall_grade: { type: "string", enum: ["A", "B", "C", "D", "F"] },
+        verdict: { type: "string", description: "One-sentence operator verdict. Blunt. No dashes." },
+        subject_critique: {
+          type: "object",
+          properties: {
+            current: { type: "string", description: "The subject line as written, or '(none detected)'." },
+            score: { type: "integer", minimum: 1, maximum: 10 },
+            problems: { type: "array", items: { type: "string" } },
+            rewrites: { type: "array", minItems: 3, maxItems: 5, items: { type: "string" } },
+          },
+          required: ["current", "score", "problems", "rewrites"],
+          additionalProperties: false,
+        },
+        problems: {
+          type: "array",
+          minItems: 3,
+          items: {
+            type: "object",
+            properties: {
+              severity: { type: "string", enum: ["critical", "major", "minor"] },
+              category: { type: "string", enum: ["voice", "opener", "specificity", "filler", "length", "ask", "formatting", "dashes", "emoji", "subject", "tone", "structure"] },
+              quote: { type: "string", description: "Exact offending text from the email." },
+              issue: { type: "string", description: "Why it fails." },
+              fix: { type: "string", description: "What to do instead. Concrete." },
+            },
+            required: ["severity", "category", "quote", "issue", "fix"],
+            additionalProperties: false,
+          },
+        },
+        what_works: { type: "array", items: { type: "string" } },
+        rewritten_body: { type: "string", description: "Full rewritten body in the Aetheris voice. No dashes. Under 140 words." },
+        next_moves: { type: "array", minItems: 2, maxItems: 5, items: { type: "string" } },
+      },
+      required: ["overall_grade", "verdict", "subject_critique", "problems", "what_works", "rewritten_body", "next_moves"],
+      additionalProperties: false,
+    },
+  },
+};
+
 function stripDashes(s: string): string {
   if (!s) return s;
   // Replace em / en dashes used as pauses with periods.
