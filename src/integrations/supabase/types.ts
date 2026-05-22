@@ -4006,6 +4006,74 @@ export type Database = {
           },
         ]
       }
+      rep_code_scan_leads: {
+        Row: {
+          company: string | null
+          created_at: string
+          critical_count: number | null
+          gap_count: number | null
+          grade: string | null
+          id: string
+          ip: string | null
+          prospect_email: string
+          prospect_name: string | null
+          prospect_phone: string | null
+          referrer: string | null
+          rep_code: string
+          scan_id: string | null
+          score: number | null
+          teaser: Json
+          user_agent: string | null
+          website_url: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          critical_count?: number | null
+          gap_count?: number | null
+          grade?: string | null
+          id?: string
+          ip?: string | null
+          prospect_email: string
+          prospect_name?: string | null
+          prospect_phone?: string | null
+          referrer?: string | null
+          rep_code: string
+          scan_id?: string | null
+          score?: number | null
+          teaser?: Json
+          user_agent?: string | null
+          website_url: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          critical_count?: number | null
+          gap_count?: number | null
+          grade?: string | null
+          id?: string
+          ip?: string | null
+          prospect_email?: string
+          prospect_name?: string | null
+          prospect_phone?: string | null
+          referrer?: string | null
+          rep_code?: string
+          scan_id?: string | null
+          score?: number | null
+          teaser?: Json
+          user_agent?: string | null
+          website_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_code_scan_leads_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "website_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_codes: {
         Row: {
           code: string
