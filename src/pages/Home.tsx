@@ -68,6 +68,10 @@ const Home = () => {
         <main>
           <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+          {/* Operator-code gated free website leak scan */}
+          <RepCodeFreeScan />
+
+
 
 
 
