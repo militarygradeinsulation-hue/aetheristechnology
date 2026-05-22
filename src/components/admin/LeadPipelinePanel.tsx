@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw } from 'lucide-react';
+import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw, Ban } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface DripSettings {
   id: string;
@@ -20,6 +21,7 @@ interface DripSettings {
   scraper_frequency: string;
   scraper_target_per_run: number;
   hold_hours: number;
+  blocked_keywords: string[];
 }
 
 interface PoolStats {
