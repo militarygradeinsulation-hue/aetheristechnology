@@ -72,23 +72,26 @@ export const AdminImageStudio: React.FC = () => {
       const prompt =
 `LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
 
-LAYOUT:
+LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
 - Background fills the entire banner: ${BG_DESC[bannerBg]}
-- LEFT-CENTER area (avoiding the bottom-left ~280px circle where the profile photo will sit) holds the typography
+- RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
+- Place ALL typography in the CENTER-RIGHT region of the banner, horizontally centered between roughly 38% and 92% of the width, vertically centered
+- Headline is center-aligned within that right zone
 - Big serif display headline in TWO COLORS on one or two lines:
   · "${bannerHeadline}" rendered in CRISP WHITE (#FFFFFF)
   · "${bannerAccent}" rendered in WARM AMBER GOLD (#E8A33D)
 - Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
-- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars:
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars, also center-aligned in the right zone:
   "${bannerSub}"
-- Tiny amber monospace eyebrow label above the headline: "AETHERIS · BUSINESS FORENSICS"
+- Tiny amber monospace eyebrow label above the headline (still in the right zone, center-aligned): "AETHERIS · BUSINESS FORENSICS"
 - Bottom-right corner: small amber monospace watermark "aetheris.technology"
 
 STYLE:
 - Aetheris forensic brand: dark, editorial, investigative — never corporate-glossy, never AI-guru gradient, never neon
 - High contrast typography, cinematic
 - Text must be perfectly legible, NO spelling errors, NO duplicated letters, NO garbled glyphs
-- Leave generous negative space on the right third of the banner
+- Keep the left third visually quiet so the profile picture lands cleanly on top of background only
+
 
 Exact text to render (do not change spelling):
 HEADLINE WHITE: "${bannerHeadline}"
