@@ -233,16 +233,20 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           disabled={loading}
           className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 font-bold uppercase tracking-wider"
         >
-          {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Writing...</> : <><Sparkles className="w-4 h-4 mr-2"/>{mode === 'create' ? 'Write the Email' : 'Rewrite It'}</>}
+          {loading
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Writing...</>
+            : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
+            : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
+            : <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>}
         </Button>
       </Card>
 
-      {/* Result */}
+      {/* Email result */}
       {result && (
         <Card className="glass p-5 space-y-4 border-amber/30">
           <div className="flex items-center justify-between">
             <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Draft</div>
-            <Button size="sm" variant="outline" onClick={() => copy('all')}>
+            <Button size="sm" variant="outline" onClick={() => copyText('all', `Subject: ${result.subject}\n\n${result.body}`)}>
               {copied === 'all' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
               Copy All
             </Button>
@@ -251,7 +255,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
-              <button onClick={() => copy('subject')} className="text-xs text-amber hover:underline flex items-center gap-1">
+              <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
                 {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
               </button>
             </div>
@@ -261,7 +265,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Body</label>
-              <button onClick={() => copy('body')} className="text-xs text-amber hover:underline flex items-center gap-1">
+              <button onClick={() => copyText('body', result.body)} className="text-xs text-amber hover:underline flex items-center gap-1">
                 {copied === 'body' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
               </button>
             </div>
@@ -276,6 +280,51 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
               <div className="text-sm text-muted-foreground italic">{result.why_it_works}</div>
             </div>
           )}
+        </Card>
+      )}
+
+      {/* Subject hooks result */}
+      {subjects && subjects.length > 0 && (
+        <Card className="glass p-5 space-y-3 border-amber/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Subject Hooks</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{subjects.length} options. Click any to copy.</div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => copyText('all-subjects', subjects.map((h, i) => `${i + 1}. ${h.subject}`).join('\n'))}
+            >
+              {copied === 'all-subjects' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
+              Copy All
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {subjects.map((h, i) => {
+              const k = `subj-${i}`;
+              return (
+                <button
+                  key={k}
+                  onClick={() => copyText(k, h.subject)}
+                  className="w-full text-left rounded-lg border border-border bg-background/40 p-3 hover:border-amber/50 transition group"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display font-bold text-foreground leading-snug">{h.subject}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        <span className="uppercase tracking-widest text-[10px] font-bold text-amber/80 mr-2">{h.angle}</span>
+                        {h.why}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground group-hover:text-amber shrink-0 pt-0.5">
+                      {copied === k ? <Check className="w-4 h-4"/> : <Copy className="w-4 h-4"/>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </Card>
       )}
     </div>
