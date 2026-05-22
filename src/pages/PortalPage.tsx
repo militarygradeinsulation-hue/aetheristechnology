@@ -515,6 +515,24 @@ const PortalPage: React.FC = () => {
                 ) : null;
               })()}
             </div>
+            {activeTool && REP_TOOL_TIPS[activeTool] && (
+              <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 sm:p-4 space-y-2">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Rep Playbook for this tool</p>
+                <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Use it for</p>
+                    <p className="text-foreground/90 leading-snug">{REP_TOOL_TIPS[activeTool].useFor}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Pair with</p>
+                    <p className="text-foreground/90 leading-snug">{REP_TOOL_TIPS[activeTool].pairWith}</p>
+                  </div>
+                </div>
+                {REP_TOOL_TIPS[activeTool].proTip && (
+                  <p className="text-xs text-amber/90 italic leading-snug pt-1 border-t border-amber/20">💡 {REP_TOOL_TIPS[activeTool].proTip}</p>
+                )}
+              </div>
+            )}
             <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
           </div>
         );
