@@ -86,6 +86,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
     setLoading(true);
     setResult(null);
     setSubjects(null);
+    setAnalysis(null);
     try {
       const headers: Record<string, string> = {};
       if (authMode === 'admin') headers['x-admin-token'] = token;
@@ -107,6 +108,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       if ((data as any)?.error) throw new Error((data as any).error);
       if (mode === 'subjects') {
         setSubjects(((data as SubjectsOut)?.hooks) || []);
+      } else if (mode === 'analyze') {
+        setAnalysis(((data as any)?.analysis) || null);
       } else {
         setResult(data as EmailOut);
       }
