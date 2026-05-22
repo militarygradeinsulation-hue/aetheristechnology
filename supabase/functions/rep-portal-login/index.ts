@@ -29,6 +29,32 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // ---- Brute-force protection: per-IP rate limit via admin_kv ----------
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const rlKey = `ratelimit:rep-portal-login:${ip}`;
+    const WINDOW_MS = 5 * 60 * 1000;
+    const MAX_FAILS = 10;
+    const nowMs = Date.now();
+    const { data: rlRow } = await sb
+      .from("admin_kv")
+      .select("value")
+      .eq("key", rlKey)
+      .maybeSingle();
+    const rlVal = (rlRow?.value as { count?: number; first?: number } | undefined) || { count: 0, first: nowMs };
+    if (nowMs - (rlVal.first || 0) > WINDOW_MS) {
+      rlVal.count = 0;
+      rlVal.first = nowMs;
+    }
+    if ((rlVal.count || 0) >= MAX_FAILS) {
+      return new Response(JSON.stringify({ ok: false, error: "Too many attempts. Try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data, error } = await sb.from("rep_codes")
       .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active")
       .eq("code", code)
@@ -36,11 +62,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (error || !data) {
+      await sb.from("admin_kv").upsert({
+        key: rlKey,
+        value: { count: (rlVal.count || 0) + 1, first: rlVal.first || nowMs },
+        updated_at: new Date().toISOString(),
+      });
       return new Response(JSON.stringify({ ok: false, error: "Invalid or inactive code" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Success — clear the rate-limit counter for this IP.
+    await sb.from("admin_kv").delete().eq("key", rlKey);
 
     const role: "rep" | "partner" = data.role === "partner" ? "partner" : "rep";
     const { token, exp } = await signPortalToken(data.code, role, SERVICE_KEY);

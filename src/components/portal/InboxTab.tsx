@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -378,7 +379,7 @@ const MessageView: React.FC<{
       )}
       <div className="border-t pt-3">
         {message.body_html
-          ? <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.body_html) }} />
+          ? <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html, { USE_PROFILES: { html: true }, FORBID_TAGS: ['style', 'iframe', 'object', 'embed', 'form'], FORBID_ATTR: ['style'] }) }} />
           : <pre className="whitespace-pre-wrap font-sans text-sm">{message.body_text}</pre>}
       </div>
     </div>
@@ -730,15 +731,7 @@ function relTime(iso: string): string {
   return d.toLocaleDateString();
 }
 
-// Minimal HTML sanitizer, strip script/style, event handlers, and javascript: urls.
-function sanitizeHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/ on[a-z]+="[^"]*"/gi, "")
-    .replace(/ on[a-z]+='[^']*'/gi, "")
-    .replace(/javascript:/gi, "");
-}
+// HTML sanitization is handled by DOMPurify inline above.
 
 const LeadFinderButton: React.FC<{ onPick: (lead: RepLead) => void }> = ({ onPick }) => {
   const { toast } = useToast();
