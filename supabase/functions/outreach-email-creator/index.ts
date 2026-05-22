@@ -49,6 +49,36 @@ const EMAIL_TOOL = {
   },
 };
 
+const SUBJECT_TOOL = {
+  type: "function",
+  function: {
+    name: "write_subject_hooks",
+    description: "Write 10 bold, direct subject line hooks in the Aetheris operator voice.",
+    parameters: {
+      type: "object",
+      properties: {
+        hooks: {
+          type: "array",
+          minItems: 8,
+          maxItems: 12,
+          items: {
+            type: "object",
+            properties: {
+              subject: { type: "string", description: "Under 7 words. Specific. No dashes. No emoji." },
+              angle: { type: "string", enum: ["leak", "number", "observation", "contrarian", "curiosity", "challenge"] },
+              why: { type: "string", description: "One short sentence on why it lands." },
+            },
+            required: ["subject", "angle", "why"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["hooks"],
+      additionalProperties: false,
+    },
+  },
+};
+
 function stripDashes(s: string): string {
   if (!s) return s;
   // Replace em / en dashes used as pauses with periods.
