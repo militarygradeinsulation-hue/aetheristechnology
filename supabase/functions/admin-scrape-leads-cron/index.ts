@@ -132,7 +132,7 @@ serve(async (req) => {
           source: "firecrawl_indianapolis_cron",
           external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
           status: "new",
-        })).filter(r => r.business_name);
+        })).filter(r => r.business_name && !isLeadBlocked(r, blocked));
 
         const { data, error } = await supabase.from("rep_leads")
           .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
