@@ -158,18 +158,20 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
                 {post.hashtags?.length > 0 && (
                   <p className="text-xs text-primary mt-3">{post.hashtags.map(h => `#${h.replace(/^#/, '')}`).join(' ')}</p>
                 )}
-                {adminMode && (
+                {(adminMode || repMode) && (
                   <div className="mt-4 space-y-2">
                     <PostImageGenerator
                       prompt={`${post.hook}. ${post.caption}`}
                       editablePrompt
                       onImageGenerated={() => {}}
                     />
-                    <ScheduleSocialButton
-                      content={`${post.hook}\n\n${post.caption}\n\n${(post.hashtags || []).map(h => `#${h.replace(/^#/, '')}`).join(' ')}`}
-                      source="post_from_source"
-                      className="w-full"
-                    />
+                    {adminMode && (
+                      <ScheduleSocialButton
+                        content={`${post.hook}\n\n${post.caption}\n\n${(post.hashtags || []).map(h => `#${h.replace(/^#/, '')}`).join(' ')}`}
+                        source="post_from_source"
+                        className="w-full"
+                      />
+                    )}
                   </div>
                 )}
               </div>
