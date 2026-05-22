@@ -76,6 +76,8 @@ import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalend
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
+import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
+import { usePortalCursor } from '@/lib/portalCursor';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
@@ -323,6 +325,7 @@ const PortalPage: React.FC = () => {
 
   // Hooks must run unconditionally, call before any early return.
   const { unread: unreadChat } = useUnreadTeamMessages(profile?.code || '', !!profile && tab === 'team');
+  const { className: cursorClassName } = usePortalCursor();
 
   // ============ LOGIN VIEW ============
   if (!profile) {
@@ -563,7 +566,7 @@ const PortalPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${cursorClassName}`}>
       {/* Header */}
       <header className="border-b border-border/50 bg-card/40 backdrop-blur sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
@@ -654,6 +657,7 @@ const PortalPage: React.FC = () => {
                 <Link to="/admin"><Shield className="w-4 h-4 mr-1" /> Admin</Link>
               </Button>
             )}
+            <PortalCursorPicker />
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Log out</span>
             </Button>
