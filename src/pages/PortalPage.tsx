@@ -62,7 +62,7 @@ import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
-  hasValidPortalSession, type PortalProfile,
+  hasValidPortalSession, getPortalToken, type PortalProfile,
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
@@ -81,11 +81,13 @@ import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
+import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
+  | 'outreach-email'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
