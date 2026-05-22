@@ -346,6 +346,123 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           </div>
         </Card>
       )}
+
+      {/* Analysis result */}
+      {analysis && (
+        <Card className="glass p-5 space-y-5 border-amber/30">
+          {/* Verdict + grade */}
+          <div className="flex items-start gap-4">
+            <div className={`shrink-0 w-16 h-16 rounded-xl flex items-center justify-center font-display font-bold text-3xl ${
+              ['A','B'].includes(analysis.overall_grade) ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                : analysis.overall_grade === 'C' ? 'bg-amber/15 text-amber border border-amber/30'
+                : 'bg-crimson/15 text-crimson border border-crimson/30'
+            }`}>{analysis.overall_grade}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Verdict</div>
+              <div className="font-display font-bold text-foreground text-lg leading-snug mt-1">{analysis.verdict}</div>
+            </div>
+          </div>
+
+          {/* Subject critique */}
+          <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject Line ({analysis.subject_critique.score}/10)</div>
+            </div>
+            {analysis.subject_critique.current && (
+              <div className="font-mono text-sm text-foreground">"{analysis.subject_critique.current}"</div>
+            )}
+            {analysis.subject_critique.problems.length > 0 && (
+              <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                {analysis.subject_critique.problems.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
+            )}
+            {analysis.subject_critique.rewrites.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber mb-1.5">Stronger options</div>
+                <div className="space-y-1.5">
+                  {analysis.subject_critique.rewrites.map((s, i) => {
+                    const k = `arew-${i}`;
+                    return (
+                      <button key={k} onClick={() => copyText(k, s)}
+                        className="w-full text-left text-sm rounded-md border border-border bg-background/60 px-3 py-2 hover:border-amber/50 flex items-center justify-between gap-2 group">
+                        <span className="font-semibold text-foreground">{s}</span>
+                        <span className="shrink-0 text-muted-foreground group-hover:text-amber">{copied === k ? <Check className="w-3.5 h-3.5"/> : <Copy className="w-3.5 h-3.5"/>}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Problems */}
+          <div className="space-y-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">What is wrong ({analysis.problems.length})</div>
+            {analysis.problems.map((p, i) => {
+              const sevStyle = p.severity === 'critical'
+                ? 'border-crimson/40 bg-crimson/5'
+                : p.severity === 'major' ? 'border-amber/40 bg-amber/5'
+                : 'border-border bg-background/40';
+              const Icon = p.severity === 'critical' ? AlertCircle : p.severity === 'major' ? AlertTriangle : Info;
+              const iconColor = p.severity === 'critical' ? 'text-crimson' : p.severity === 'major' ? 'text-amber' : 'text-muted-foreground';
+              return (
+                <div key={i} className={`rounded-lg border p-3 ${sevStyle}`}>
+                  <div className="flex items-start gap-2">
+                    <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${iconColor}`}/>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[10px] uppercase tracking-widest font-bold ${iconColor}`}>{p.severity}</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{p.category}</span>
+                      </div>
+                      {p.quote && (
+                        <div className="font-mono text-xs text-foreground/80 border-l-2 border-border pl-2 italic">"{p.quote}"</div>
+                      )}
+                      <div className="text-sm text-foreground"><span className="font-bold">Issue:</span> {p.issue}</div>
+                      <div className="text-sm text-emerald-400"><span className="font-bold">Fix:</span> {p.fix}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* What works */}
+          {analysis.what_works.length > 0 && (
+            <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <ThumbsUp className="w-3.5 h-3.5 text-emerald-400"/>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-emerald-400">What actually works</div>
+              </div>
+              <ul className="text-sm text-foreground space-y-1 list-disc list-inside">
+                {analysis.what_works.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {/* Rewritten body */}
+          {analysis.rewritten_body && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Rewrite</div>
+                <button onClick={() => copyText('arew-body', analysis.rewritten_body)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                  {copied === 'arew-body' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+                </button>
+              </div>
+              <pre className="whitespace-pre-wrap font-sans text-sm text-foreground bg-background/40 border border-border rounded-lg p-4 leading-relaxed">{analysis.rewritten_body}</pre>
+            </div>
+          )}
+
+          {/* Next moves */}
+          {analysis.next_moves.length > 0 && (
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">Next moves</div>
+              <ol className="text-sm text-foreground space-y-1 list-decimal list-inside">
+                {analysis.next_moves.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 };
