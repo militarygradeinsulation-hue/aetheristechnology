@@ -49,33 +49,38 @@ export const LeadPipelinePanel: React.FC = () => {
 
   const refreshStats = useCallback(async () => {
     try {
-      const [tot, un, dr, cl, wo, dd] = await Promise.all([
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).is('assigned_to_code', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).not('assigned_to_code', 'is', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).not('claimed_by_code', 'is', null).not('status', 'in', '(won,lost,dead)'),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['won']),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['lost', 'dead']),
-      ]);
-      setStats({
-        total: tot.count ?? 0,
-        unassigned: un.count ?? 0,
-        dripped: dr.count ?? 0,
-        claimed: cl.count ?? 0,
-        worked: wo.count ?? 0,
-        dead: dd.count ?? 0,
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'lead_pool_stats' },
+        headers: { 'x-admin-token': token },
       });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (data?.stats) setStats(data.stats as PoolStats);
     } catch (e) {
       console.error('stats error', e);
+      toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
-  }, []);
+  }, [toast]);
 
   const refreshSettings = useCallback(async () => {
-    const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
-    if (data) {
-      const s = data as DripSettings;
-      setSettings(s);
-      setBlockedText((s.blocked_keywords || []).join('\n'));
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'get_drip_settings' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const s = data?.settings as DripSettings | null;
+      if (s) {
+        setSettings(s);
+        setBlockedText((s.blocked_keywords || []).join('\n'));
+      }
+    } catch (e) {
+      console.error('settings load error', e);
     }
   }, []);
 
@@ -88,22 +93,31 @@ export const LeadPipelinePanel: React.FC = () => {
     if (!settings) return;
     setLoading(true);
     try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
       const parsedBlocked = blockedText
         .split(/[\n,]/)
         .map(s => s.trim().toLowerCase())
         .filter(Boolean);
-      const { error } = await supabase.from('lead_drip_settings').update({
-        daily_per_rep: settings.daily_per_rep,
-        enabled: settings.enabled,
-        require_email: settings.require_email,
-        indianapolis_only: settings.indianapolis_only,
-        scraper_enabled: settings.scraper_enabled,
-        scraper_target_per_run: settings.scraper_target_per_run,
-        hold_hours: settings.hold_hours,
-        blocked_keywords: parsedBlocked,
-        updated_at: new Date().toISOString(),
-      }).eq('id', settings.id);
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: {
+          action: 'update_drip_settings',
+          id: settings.id,
+          patch: {
+            daily_per_rep: settings.daily_per_rep,
+            enabled: settings.enabled,
+            require_email: settings.require_email,
+            indianapolis_only: settings.indianapolis_only,
+            scraper_enabled: settings.scraper_enabled,
+            scraper_target_per_run: settings.scraper_target_per_run,
+            hold_hours: settings.hold_hours,
+            blocked_keywords: parsedBlocked,
+          },
+        },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
       toast({ title: 'Drip settings saved' });
     } catch (e) {
       toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });

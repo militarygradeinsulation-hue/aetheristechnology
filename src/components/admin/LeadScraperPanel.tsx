@@ -33,12 +33,21 @@ export const LeadScraperPanel: React.FC = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('rep_leads')
-      .select('id,business_name,industry,location,website,score,why_fit,source,status,claimed_by_code,created_at')
-      .order('created_at', { ascending: false }).limit(50);
-    if (error) toast({ title: 'Failed to load leads', description: error.message, variant: 'destructive' });
-    setRecent((data || []) as AdminLead[]);
-    setLoading(false);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'lead_pool_recent', limit: 50 },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setRecent((data?.leads || []) as AdminLead[]);
+    } catch (e) {
+      toast({ title: 'Failed to load leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   }, [toast]);
 
   useEffect(() => { load(); }, [load]);
@@ -63,9 +72,19 @@ export const LeadScraperPanel: React.FC = () => {
 
   const remove = async (id: string) => {
     if (!confirm('Delete this lead?')) return;
-    const { error } = await supabase.from('rep_leads').delete().eq('id', id);
-    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
-    setRecent(prev => prev.filter(l => l.id !== id));
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'delete_lead', id },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setRecent(prev => prev.filter(l => l.id !== id));
+    } catch (e) {
+      toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    }
   };
 
   return (

@@ -169,6 +169,80 @@ serve(async (req) => {
       );
     }
 
+    if (action === "lead_pool_stats") {
+      const [tot, un, dr, cl, wo, dd] = await Promise.all([
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .is("claimed_by_code", null).is("assigned_to_code", null),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .is("claimed_by_code", null).not("assigned_to_code", "is", null),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .not("claimed_by_code", "is", null).not("status", "in", "(won,lost,dead)"),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }).in("status", ["won"]),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }).in("status", ["lost", "dead"]),
+      ]);
+      return new Response(JSON.stringify({
+        ok: true,
+        stats: {
+          total: tot.count ?? 0,
+          unassigned: un.count ?? 0,
+          dripped: dr.count ?? 0,
+          claimed: cl.count ?? 0,
+          worked: wo.count ?? 0,
+          dead: dd.count ?? 0,
+        },
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "lead_pool_recent") {
+      const limit = Math.min(Math.max(Number(body.limit) || 50, 1), 200);
+      const { data, error } = await supabase
+        .from("rep_leads")
+        .select("id,business_name,industry,location,website,score,why_fit,source,status,claimed_by_code,created_at")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, leads: data || [] }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "delete_lead") {
+      const id = String(body.id || "");
+      if (!id) {
+        return new Response(JSON.stringify({ error: "Missing id" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error } = await supabase.from("rep_leads").delete().eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "get_drip_settings") {
+      const { data, error } = await supabase.from("lead_drip_settings").select("*").maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, settings: data || null }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "update_drip_settings") {
+      const patch = (body.patch || {}) as Record<string, unknown>;
+      const allowed = [
+        "daily_per_rep", "enabled", "require_email", "indianapolis_only",
+        "scraper_enabled", "scraper_target_per_run", "hold_hours", "blocked_keywords",
+      ];
+      const clean: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      for (const k of allowed) if (k in patch) clean[k] = (patch as any)[k];
+      const id = String(body.id || "");
+      if (!id) return new Response(JSON.stringify({ error: "Missing id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const { error } = await supabase.from("lead_drip_settings").update(clean).eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
