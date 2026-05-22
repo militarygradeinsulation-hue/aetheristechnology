@@ -71,13 +71,15 @@ async function topUpRepDrop(supabase: any, repCode: string): Promise<number> {
     const needed = dailyPerRep - (openDrip ?? 0);
     if (needed <= 0) return 0;
 
-    const { data: candidates } = await supabase.from("rep_leads")
-      .select("id")
+    const { data: candidatesRaw } = await supabase.from("rep_leads")
+      .select("id,business_name,industry,website,location,contact_name,email,why_fit,notes")
       .is("claimed_by_code", null)
       .is("assigned_to_code", null)
       .order("score", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(needed);
+      .limit(needed * 4);
+    const blocked = await loadBlockedKeywords(supabase);
+    const candidates = (candidatesRaw || []).filter((c: any) => !isLeadBlocked(c, blocked)).slice(0, needed);
     if (!candidates || candidates.length === 0) return 0;
 
     const expiresAt = new Date(Date.now() + holdHours * 3600_000).toISOString();
