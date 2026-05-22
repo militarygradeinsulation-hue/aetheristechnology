@@ -450,6 +450,10 @@ export const ContentEngine: React.FC = () => {
         <LinkedInPostStudio />
       )}
 
+      {view === 'email' && (
+        <OutreachEmailCreator authMode="admin" token={getAdminToken()} />
+      )}
+
       {view === 'strategy' && (
         <StrategyView strategy={strategy} setStrategy={(s) => setStrategy(s)} />
       )}
