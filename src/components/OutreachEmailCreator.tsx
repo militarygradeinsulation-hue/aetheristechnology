@@ -180,6 +180,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
             {mode === 'create' ? 'Context / Angle'
               : mode === 'subjects' ? 'Context / Angle for the subject hooks'
+              : mode === 'analyze' ? 'Extra context (optional)'
               : 'Notes for the rewrite (optional)'}
           </label>
           <Textarea
@@ -190,21 +191,23 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
               ? "What you found on their site. The leak you want to name. What you want them to do."
               : mode === 'subjects'
                 ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
-                : "What you want changed. Tone, urgency, specific facts to add."}
+                : mode === 'analyze'
+                  ? "Who it is going to, what you want it to do. Helps the critique stay on-target."
+                  : "What you want changed. Tone, urgency, specific facts to add."}
             rows={4}
           />
         </div>
 
-        {mode === 'rewrite' && (
+        {(mode === 'rewrite' || mode === 'analyze') && (
           <div>
             <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-1.5">
-              <ClipboardPaste className="w-3 h-3"/> Paste your email here
+              <ClipboardPaste className="w-3 h-3"/> {mode === 'analyze' ? 'Paste the email text (or just upload a screenshot below)' : 'Paste your email here'}
             </label>
             <Textarea
               value={pasted}
               onChange={(e) => setPasted(e.target.value)}
               onPaste={handlePasteCapture}
-              placeholder="Paste the existing draft."
+              placeholder={mode === 'analyze' ? "Paste subject + body if you have the text. Otherwise rely on the screenshot." : "Paste the existing draft."}
               rows={6}
             />
           </div>
