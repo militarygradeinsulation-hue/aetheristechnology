@@ -13,6 +13,7 @@ import { UpcomingEvents } from '@/components/UpcomingEvents';
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 
 import { ProblemPicker } from '@/components/ProblemPicker';
+import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
 
 
 const Home = () => {
@@ -66,6 +67,10 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
           <Hero onContactClick={() => setIsContactModalOpen(true)} />
+
+          {/* Operator-code gated free website leak scan */}
+          <RepCodeFreeScan />
+
 
 
 
