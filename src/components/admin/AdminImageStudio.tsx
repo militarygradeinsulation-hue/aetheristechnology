@@ -32,6 +32,89 @@ export const AdminImageStudio: React.FC = () => {
   const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // LinkedIn Banner Creator state
+  const BANNER_PRESETS = [
+    { key: 'stop_guessing', headline: 'Stop Guessing.', accent: 'Start Understanding.', sub: 'I break down where your business is leaking money — with real numbers, real costs, real fixes.' },
+    { key: 'leak_audit',    headline: 'Your business is leaking.', accent: 'You just can\'t see it from the inside.', sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
+    { key: 'forensics',     headline: 'Business Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No retainers. No fluff.' },
+    { key: 'custom',        headline: '', accent: '', sub: '' },
+  ];
+  const [bannerPreset, setBannerPreset] = useState('stop_guessing');
+  const [bannerHeadline, setBannerHeadline] = useState(BANNER_PRESETS[0].headline);
+  const [bannerAccent, setBannerAccent] = useState(BANNER_PRESETS[0].accent);
+  const [bannerSub, setBannerSub] = useState(BANNER_PRESETS[0].sub);
+  const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
+  const [bannerBusy, setBannerBusy] = useState(false);
+
+  const applyPreset = (key: string) => {
+    setBannerPreset(key);
+    const p = BANNER_PRESETS.find(x => x.key === key);
+    if (p && key !== 'custom') {
+      setBannerHeadline(p.headline); setBannerAccent(p.accent); setBannerSub(p.sub);
+    }
+  };
+
+  const BG_DESC: Record<string, string> = {
+    network:   'dark charcoal background (#0a0a0a) with subtle amber/gold constellation network — thin connected dots and lines like a node graph, very faint',
+    matrix:    'dark charcoal background with faint vertical amber matrix-rain code streams, subtle, low opacity',
+    blueprint: 'dark charcoal background with faint amber blueprint grid lines, schematic ticks, technical drafting feel',
+    noir:      'pure black background with a single hard amber rim light from upper right, cinematic shadow, near-empty',
+    case_file: 'dark manila / charcoal background with redaction bars, case-file stamp marks in faint crimson, forensic dossier feel',
+  };
+
+  const generateBanner = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    setBannerBusy(true);
+    try {
+      const fullHeadline = bannerAccent
+        ? `${bannerHeadline} ${bannerAccent}`
+        : bannerHeadline;
+      const prompt =
+`LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
+
+LAYOUT:
+- Background fills the entire banner: ${BG_DESC[bannerBg]}
+- LEFT-CENTER area (avoiding the bottom-left ~280px circle where the profile photo will sit) holds the typography
+- Big serif display headline in TWO COLORS on one or two lines:
+  · "${bannerHeadline}" rendered in CRISP WHITE (#FFFFFF)
+  · "${bannerAccent}" rendered in WARM AMBER GOLD (#E8A33D)
+- Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars:
+  "${bannerSub}"
+- Tiny amber monospace eyebrow label above the headline: "AETHERIS · BUSINESS FORENSICS"
+- Bottom-right corner: small amber monospace watermark "aetheris.technology"
+
+STYLE:
+- Aetheris forensic brand: dark, editorial, investigative — never corporate-glossy, never AI-guru gradient, never neon
+- High contrast typography, cinematic
+- Text must be perfectly legible, NO spelling errors, NO duplicated letters, NO garbled glyphs
+- Leave generous negative space on the right third of the banner
+
+Exact text to render (do not change spelling):
+HEADLINE WHITE: "${bannerHeadline}"
+HEADLINE AMBER: "${bannerAccent}"
+SUBLINE: "${bannerSub}"
+EYEBROW: "AETHERIS · BUSINESS FORENSICS"
+WATERMARK: "aetheris.technology"`;
+
+      const { data, error } = await invoke({
+        action: 'generate',
+        prompt,
+        model: 'google/gemini-3-pro-image-preview', // best for legible typography
+        aetheris_style: false, // we already wrote brand styling in-prompt
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'LinkedIn banner generated', description: 'Saved to your library below.' });
+      load();
+    } catch (e: any) {
+      toast({ title: 'Banner generation failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBannerBusy(false);
+    }
+  };
+
+
   const invoke = async (body: Record<string, unknown>) => {
     const token = getAdminToken();
     return supabase.functions.invoke('admin-image-studio', {
