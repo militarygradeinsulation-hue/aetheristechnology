@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { LinkedInBannerCreator } from '@/components/LinkedInBannerCreator';
 
 interface StudioImage {
   id: string;
