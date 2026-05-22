@@ -151,8 +151,11 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               <img
                 src={architectLogo}
                 alt="Joseph Toney, Aetheris Operator"
+                width={384}
+                height={384}
+                fetchPriority="high"
+                decoding="async"
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
-                loading="eager"
               />
               <video
                 ref={videoRef}
