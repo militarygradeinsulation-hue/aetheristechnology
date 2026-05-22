@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type } from 'lucide-react';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
 
-type Mode = 'create' | 'rewrite' | 'subjects';
+type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
 
 interface Props {
   /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
@@ -20,6 +20,16 @@ interface Props {
 interface EmailOut { subject: string; body: string; why_it_works: string }
 interface SubjectHook { subject: string; angle: string; why: string }
 interface SubjectsOut { hooks: SubjectHook[] }
+interface AnalysisProblem { severity: 'critical' | 'major' | 'minor'; category: string; quote: string; issue: string; fix: string }
+interface Analysis {
+  overall_grade: string;
+  verdict: string;
+  subject_critique: { current: string; score: number; problems: string[]; rewrites: string[] };
+  problems: AnalysisProblem[];
+  what_works: string[];
+  rewritten_body: string;
+  next_moves: string[];
+}
 
 function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   return new Promise((resolve, reject) => {
