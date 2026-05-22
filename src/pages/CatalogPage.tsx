@@ -57,10 +57,8 @@ const CatalogPage: React.FC = () => {
             </p>
           </div>
 
-          <ServicesPricing />
-
-          {/* Resume Forensics teaser — moved from Home */}
-          <section className="px-4 py-12">
+          {/* Resume Forensics teaser — featured in showcase */}
+          <section className="px-4 pb-12">
             <div className="max-w-5xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10">
               <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] items-center">
                 <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square">
@@ -89,6 +87,9 @@ const CatalogPage: React.FC = () => {
               </div>
             </div>
           </section>
+
+          <ServicesPricing />
+
         </main>
         <Footer />
       </div>
