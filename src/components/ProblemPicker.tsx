@@ -175,8 +175,8 @@ export const ProblemPicker: React.FC = () => {
                         </div>
                       </div>
 
-                      <p className="text-xs text-foreground/70 leading-snug pl-[3.25rem]">
-                        <span className="font-case text-[9px] uppercase tracking-widest text-crimson">
+                      <p className="text-base md:text-lg text-foreground/80 leading-snug pl-[3.25rem]">
+                        <span className="font-case text-[10px] uppercase tracking-widest text-crimson">
                           You feel it as →{' '}
                         </span>
                         {meta?.felt ?? group.symptom}
