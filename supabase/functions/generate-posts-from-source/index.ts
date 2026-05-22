@@ -163,12 +163,20 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       result = JSON.parse(raw.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]"));
     }
 
+    const CTA_LINK = "https://businessforensics.tech/";
     if (Array.isArray(result?.posts)) {
-      result.posts = result.posts.map((p: any) => ({
-        ...p,
-        hook: typeof p.hook === "string" ? p.hook.replace(/[—–]/g, ".") : p.hook,
-        caption: typeof p.caption === "string" ? p.caption.replace(/[—–]/g, ".") : p.caption,
-      }));
+      result.posts = result.posts.map((p: any) => {
+        let caption = typeof p.caption === "string" ? p.caption.replace(/[—–]/g, ".") : p.caption;
+        if (typeof caption === "string") {
+          caption = caption.replace(/https?:\/\/\S+/gi, "").replace(/[ \t]{2,}/g, " ").trimEnd();
+          caption = `${caption}\n\n${CTA_LINK}`;
+        }
+        return {
+          ...p,
+          hook: typeof p.hook === "string" ? p.hook.replace(/[—–]/g, ".") : p.hook,
+          caption,
+        };
+      });
     }
     result.sourceLabel = sourceLabel;
 
