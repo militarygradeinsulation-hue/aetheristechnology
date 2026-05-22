@@ -41,6 +41,7 @@ export const PostImageGenerator: React.FC<Props> = ({
   onImageGenerated,
   compact = false,
   editablePrompt = false,
+  repMode = false,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
@@ -52,18 +53,31 @@ export const PostImageGenerator: React.FC<Props> = ({
     setGenerating(true);
     setStylePickerOpen(false);
     try {
-      const token = getAdminToken();
       const finalPrompt = editablePrompt ? (customPrompt.trim() || prompt) : prompt;
-      const { data, error } = await supabase.functions.invoke('generate-content-image', {
-        body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
-        headers: token ? { 'x-admin-token': token } : {},
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const url = data.image_url;
+      let url: string | undefined;
+      if (repMode) {
+        const token = getPortalToken();
+        const { data, error } = await supabase.functions.invoke('portal-image-studio', {
+          body: { action: 'generate', prompt: finalPrompt, aetheris_style: style !== 'free' },
+          headers: token ? { 'x-portal-token': token } : {},
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        url = data?.image?.url || data?.url;
+      } else {
+        const token = getAdminToken();
+        const { data, error } = await supabase.functions.invoke('generate-content-image', {
+          body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
+          headers: token ? { 'x-admin-token': token } : {},
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        url = data.image_url;
+      }
+      if (!url) throw new Error('No image returned');
       setImageUrl(url);
       onImageGenerated(url);
-      toast({ title: 'Image generated' });
+      toast({ title: repMode ? 'Image generated and saved to your studio' : 'Image generated' });
     } catch (e: any) {
       toast({ title: 'Image generation failed', description: e.message, variant: 'destructive' });
     } finally {
