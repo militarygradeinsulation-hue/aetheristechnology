@@ -325,6 +325,7 @@ const PortalPage: React.FC = () => {
 
   // Hooks must run unconditionally, call before any early return.
   const { unread: unreadChat } = useUnreadTeamMessages(profile?.code || '', !!profile && tab === 'team');
+  const { className: cursorClassName } = usePortalCursor();
 
   // ============ LOGIN VIEW ============
   if (!profile) {
