@@ -1058,6 +1058,21 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               )}
               {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || ', ')}
             </p>
+            {(() => {
+              const verdict = buildLeadVerdict(lead, scan);
+              if (!verdict) return null;
+              return (
+                <div className="mt-1.5 flex items-start gap-1.5">
+                  <span className={`mt-0.5 inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${verdict.tone === 'go' ? 'bg-green-400' : verdict.tone === 'maybe' ? 'bg-amber' : 'bg-muted-foreground/60'}`} />
+                  <p className="text-xs text-muted-foreground/90 italic line-clamp-2">
+                    <span className={`not-italic font-mono uppercase tracking-wider text-[10px] mr-1 ${verdict.tone === 'go' ? 'text-green-400' : verdict.tone === 'maybe' ? 'text-amber' : 'text-muted-foreground'}`}>
+                      {verdict.label}
+                    </span>
+                    {verdict.text}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
           <div className="text-right text-xs text-muted-foreground flex-shrink-0">
             {scan?.score != null && (
