@@ -163,6 +163,7 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
                     <PostImageGenerator
                       prompt={`${post.hook}. ${post.caption}`}
                       editablePrompt
+                      repMode={repMode}
                       onImageGenerated={() => {}}
                     />
                     {adminMode && (
