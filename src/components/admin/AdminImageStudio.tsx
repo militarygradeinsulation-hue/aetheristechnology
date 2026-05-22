@@ -35,9 +35,58 @@ export const AdminImageStudio: React.FC = () => {
   // LinkedIn Banner Creator state
   const BANNER_PRESETS = [
     { key: 'stop_guessing', headline: 'Stop Guessing.', accent: 'Start Understanding.', sub: 'I break down where your business is leaking money — with real numbers, real costs, real fixes.' },
-    { key: 'leak_audit',    headline: 'Your business is leaking.', accent: 'You just can\'t see it from the inside.', sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
+    { key: 'leak_audit',    headline: 'Your business is leaking.', accent: "You just can't see it from the inside.", sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
     { key: 'forensics',     headline: 'Business Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No retainers. No fluff.' },
+    { key: 'autopsy',       headline: 'Every dead deal', accent: 'has a cause of death.', sub: 'I run the autopsy. You get the receipts. Then we stop the bleed.' },
+    { key: 'silent_bleed',  headline: 'The silent bleed', accent: 'is the expensive one.', sub: 'The leaks you can see are cheap. The ones you can\'t are killing your margin.' },
+    { key: 'six_figures',   headline: 'Six figures', accent: 'are walking out the back door.', sub: 'Most owners are within 90 days of finding the leak. They just need someone outside the building.' },
+    { key: 'not_a_growth',  headline: "You don't have a growth problem.", accent: 'You have a leak problem.', sub: 'Scaling a broken system just bleeds faster. Plug the holes first.' },
+    { key: 'evidence',      headline: 'Opinions are cheap.', accent: 'Evidence is forensic.', sub: 'Every recommendation comes with the math, the source, and the cost of doing nothing.' },
+    { key: 'cant_see',      headline: "You can't read the label", accent: 'from inside the jar.', sub: 'Outside operator. Inside view. Real numbers in 14 days.' },
     { key: 'custom',        headline: '', accent: '', sub: '' },
+  ];
+
+  // Pools the Shuffle button samples from independently for each line.
+  const HEADLINE_POOL = [
+    'Stop Guessing.',
+    'Your business is leaking.',
+    'Business Forensics.',
+    'Every dead deal',
+    'The silent bleed',
+    'Six figures',
+    "You don't have a growth problem.",
+    'Opinions are cheap.',
+    "You can't read the label",
+    'The leak is real.',
+    'Most owners are bleeding.',
+    'Your P&L is lying to you.',
+  ];
+  const ACCENT_POOL = [
+    'Start Understanding.',
+    "You just can't see it from the inside.",
+    'Not Consulting.',
+    'has a cause of death.',
+    'is the expensive one.',
+    'are walking out the back door.',
+    'You have a leak problem.',
+    'Evidence is forensic.',
+    'from inside the jar.',
+    "They just can't see it yet.",
+    'Find it. Prove it. Plug it.',
+    'The receipts say otherwise.',
+  ];
+  const SUBLINE_POOL = [
+    'I break down where your business is leaking money — with real numbers, real costs, real fixes.',
+    'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.',
+    'I find the leak, prove it with math, and plug it. No retainers. No fluff.',
+    'I run the autopsy. You get the receipts. Then we stop the bleed.',
+    "The leaks you can see are cheap. The ones you can't are killing your margin.",
+    'Most owners are within 90 days of finding the leak. They just need someone outside the building.',
+    'Scaling a broken system just bleeds faster. Plug the holes first.',
+    'Every recommendation comes with the math, the source, and the cost of doing nothing.',
+    'Outside operator. Inside view. Real numbers in 14 days.',
+    '14-day forensic diagnostic. Ledger-grade evidence. No theater.',
+    'Operator, not consultant. Built on receipts, not slide decks.',
   ];
   const [bannerPreset, setBannerPreset] = useState('stop_guessing');
   const [bannerHeadline, setBannerHeadline] = useState(BANNER_PRESETS[0].headline);
@@ -53,6 +102,31 @@ export const AdminImageStudio: React.FC = () => {
       setBannerHeadline(p.headline); setBannerAccent(p.accent); setBannerSub(p.sub);
     }
   };
+
+  const pick = <T,>(arr: T[], avoid?: T): T => {
+    if (arr.length <= 1) return arr[0];
+    let v = arr[Math.floor(Math.random() * arr.length)];
+    let guard = 0;
+    while (v === avoid && guard++ < 6) v = arr[Math.floor(Math.random() * arr.length)];
+    return v;
+  };
+
+  const shuffleField = (field: 'headline' | 'accent' | 'sub') => {
+    setBannerPreset('custom');
+    if (field === 'headline') setBannerHeadline(pick(HEADLINE_POOL, bannerHeadline));
+    if (field === 'accent')   setBannerAccent(pick(ACCENT_POOL, bannerAccent));
+    if (field === 'sub')      setBannerSub(pick(SUBLINE_POOL, bannerSub));
+  };
+
+  const shuffleAll = () => {
+    setBannerPreset('custom');
+    setBannerHeadline(pick(HEADLINE_POOL, bannerHeadline));
+    setBannerAccent(pick(ACCENT_POOL, bannerAccent));
+    setBannerSub(pick(SUBLINE_POOL, bannerSub));
+    const bgs = ['network', 'matrix', 'blueprint', 'noir', 'case_file'] as const;
+    setBannerBg(pick(bgs as any, bannerBg));
+  };
+
 
   const BG_DESC: Record<string, string> = {
     network:   'dark charcoal background (#0a0a0a) with subtle amber/gold constellation network — thin connected dots and lines like a node graph, very faint',
