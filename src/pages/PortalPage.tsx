@@ -20,6 +20,7 @@ import { FileText, Search } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import { BookOpen, MessageSquare, GraduationCap, Palette, Film } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
