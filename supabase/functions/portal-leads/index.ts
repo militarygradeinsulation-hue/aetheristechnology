@@ -155,8 +155,12 @@ serve(async (req) => {
       const { data, error } = await query;
       if (error) throw error;
 
+      // Hide leads matching admin blocklist (schools, etc.) from the rep pool/drip.
+      const blockedKw = await loadBlockedKeywords(supabase);
+      const filtered = (data || []).filter((l: any) => !isLeadBlocked(l, blockedKw));
+
       // Prioritize leads that have a website URL (scannable businesses surface first)
-      const sorted = (data || []).slice().sort((a: any, b: any) => {
+      const sorted = filtered.slice().sort((a: any, b: any) => {
         const aw = a.website && String(a.website).trim() ? 1 : 0;
         const bw = b.website && String(b.website).trim() ? 1 : 0;
         return bw - aw;
