@@ -20,8 +20,9 @@ import { FileText, Search } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import { BookOpen, MessageSquare, GraduationCap, Palette, Film } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap, Palette, Film, PenSquare } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
@@ -79,7 +80,7 @@ import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import { usePortalCursor } from '@/lib/portalCursor';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -394,6 +395,7 @@ const PortalPage: React.FC = () => {
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
     { id: 'video', label: 'Video Studio', icon: <Film className="w-4 h-4" />, iconCmp: Film },
+    { id: 'poststudio', label: 'Post Studio', icon: <PenSquare className="w-4 h-4" />, iconCmp: PenSquare },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" />, iconCmp: Calculator },
     { id: 'companycal', label: 'Company Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
@@ -515,6 +517,7 @@ const PortalPage: React.FC = () => {
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
       case 'video': return <RepCreationStudio />;
+      case 'poststudio': return <PostFromSourceGenerator />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
