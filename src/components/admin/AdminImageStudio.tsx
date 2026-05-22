@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw, Maximize2, X } from 'lucide-react';
+import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw, Maximize2, X, Linkedin } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,89 @@ export const AdminImageStudio: React.FC = () => {
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // LinkedIn Banner Creator state
+  const BANNER_PRESETS = [
+    { key: 'stop_guessing', headline: 'Stop Guessing.', accent: 'Start Understanding.', sub: 'I break down where your business is leaking money — with real numbers, real costs, real fixes.' },
+    { key: 'leak_audit',    headline: 'Your business is leaking.', accent: 'You just can\'t see it from the inside.', sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
+    { key: 'forensics',     headline: 'Business Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No retainers. No fluff.' },
+    { key: 'custom',        headline: '', accent: '', sub: '' },
+  ];
+  const [bannerPreset, setBannerPreset] = useState('stop_guessing');
+  const [bannerHeadline, setBannerHeadline] = useState(BANNER_PRESETS[0].headline);
+  const [bannerAccent, setBannerAccent] = useState(BANNER_PRESETS[0].accent);
+  const [bannerSub, setBannerSub] = useState(BANNER_PRESETS[0].sub);
+  const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
+  const [bannerBusy, setBannerBusy] = useState(false);
+
+  const applyPreset = (key: string) => {
+    setBannerPreset(key);
+    const p = BANNER_PRESETS.find(x => x.key === key);
+    if (p && key !== 'custom') {
+      setBannerHeadline(p.headline); setBannerAccent(p.accent); setBannerSub(p.sub);
+    }
+  };
+
+  const BG_DESC: Record<string, string> = {
+    network:   'dark charcoal background (#0a0a0a) with subtle amber/gold constellation network — thin connected dots and lines like a node graph, very faint',
+    matrix:    'dark charcoal background with faint vertical amber matrix-rain code streams, subtle, low opacity',
+    blueprint: 'dark charcoal background with faint amber blueprint grid lines, schematic ticks, technical drafting feel',
+    noir:      'pure black background with a single hard amber rim light from upper right, cinematic shadow, near-empty',
+    case_file: 'dark manila / charcoal background with redaction bars, case-file stamp marks in faint crimson, forensic dossier feel',
+  };
+
+  const generateBanner = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    setBannerBusy(true);
+    try {
+      const fullHeadline = bannerAccent
+        ? `${bannerHeadline} ${bannerAccent}`
+        : bannerHeadline;
+      const prompt =
+`LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
+
+LAYOUT:
+- Background fills the entire banner: ${BG_DESC[bannerBg]}
+- LEFT-CENTER area (avoiding the bottom-left ~280px circle where the profile photo will sit) holds the typography
+- Big serif display headline in TWO COLORS on one or two lines:
+  · "${bannerHeadline}" rendered in CRISP WHITE (#FFFFFF)
+  · "${bannerAccent}" rendered in WARM AMBER GOLD (#E8A33D)
+- Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars:
+  "${bannerSub}"
+- Tiny amber monospace eyebrow label above the headline: "AETHERIS · BUSINESS FORENSICS"
+- Bottom-right corner: small amber monospace watermark "aetheris.technology"
+
+STYLE:
+- Aetheris forensic brand: dark, editorial, investigative — never corporate-glossy, never AI-guru gradient, never neon
+- High contrast typography, cinematic
+- Text must be perfectly legible, NO spelling errors, NO duplicated letters, NO garbled glyphs
+- Leave generous negative space on the right third of the banner
+
+Exact text to render (do not change spelling):
+HEADLINE WHITE: "${bannerHeadline}"
+HEADLINE AMBER: "${bannerAccent}"
+SUBLINE: "${bannerSub}"
+EYEBROW: "AETHERIS · BUSINESS FORENSICS"
+WATERMARK: "aetheris.technology"`;
+
+      const { data, error } = await invoke({
+        action: 'generate',
+        prompt,
+        model: 'google/gemini-3-pro-image-preview', // best for legible typography
+        aetheris_style: false, // we already wrote brand styling in-prompt
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'LinkedIn banner generated', description: 'Saved to your library below.' });
+      load();
+    } catch (e: any) {
+      toast({ title: 'Banner generation failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBannerBusy(false);
+    }
+  };
+
 
   const invoke = async (body: Record<string, unknown>) => {
     const token = getAdminToken();
@@ -196,6 +279,90 @@ export const AdminImageStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* LinkedIn Banner Creator */}
+      <div className="glass p-6 rounded-xl space-y-4 border border-amber/20">
+        <div className="flex items-center gap-2">
+          <Linkedin className="w-5 h-5 text-amber" />
+          <h2 className="text-xl font-bold text-foreground font-display">LinkedIn Banner Creator</h2>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70 ml-2">1584 × 396 · 4:1</span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          One-click Aetheris-branded LinkedIn cover banners. Pick a hook, choose a background, generate. Lands in your library below at the right ratio.
+        </p>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Hook preset</label>
+          <select
+            value={bannerPreset}
+            onChange={e => applyPreset(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            {BANNER_PRESETS.map(p => (
+              <option key={p.key} value={p.key}>
+                {p.key === 'custom' ? '— Custom (write your own)' : `${p.headline} ${p.accent}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Headline (white)</label>
+            <Input value={bannerHeadline} onChange={e => { setBannerHeadline(e.target.value); setBannerPreset('custom'); }} placeholder="Stop Guessing." />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Accent (amber)</label>
+            <Input value={bannerAccent} onChange={e => { setBannerAccent(e.target.value); setBannerPreset('custom'); }} placeholder="Start Understanding." />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Subline</label>
+          <Textarea
+            rows={2}
+            value={bannerSub}
+            onChange={e => { setBannerSub(e.target.value); setBannerPreset('custom'); }}
+            placeholder="One short line. Real numbers. Real fixes. No fluff."
+            className="resize-none"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Background style</label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {(['network', 'matrix', 'blueprint', 'noir', 'case_file'] as const).map(k => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setBannerBg(k)}
+                className={`text-xs font-mono uppercase tracking-wider px-2 py-2 rounded-md border transition-colors ${
+                  bannerBg === k
+                    ? 'border-amber bg-amber/15 text-amber'
+                    : 'border-border bg-background/50 text-muted-foreground hover:border-amber/40'
+                }`}
+              >
+                {k.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          onClick={generateBanner}
+          disabled={bannerBusy || !bannerHeadline.trim()}
+          className="w-full bg-amber text-background hover:bg-amber/90"
+        >
+          {bannerBusy
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Painting banner (~30s)...</>
+            : <><Linkedin className="w-4 h-4 mr-2" /> Generate LinkedIn Banner</>}
+        </Button>
+        <p className="text-[10px] text-muted-foreground/70 text-center">
+          Uses Gemini 3 Pro for legible typography. Saved automatically — download from the library below.
+        </p>
+      </div>
+
+
 
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
