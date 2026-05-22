@@ -65,11 +65,22 @@ export const LeadPipelinePanel: React.FC = () => {
   }, [toast]);
 
   const refreshSettings = useCallback(async () => {
-    const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
-    if (data) {
-      const s = data as DripSettings;
-      setSettings(s);
-      setBlockedText((s.blocked_keywords || []).join('\n'));
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'get_drip_settings' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const s = data?.settings as DripSettings | null;
+      if (s) {
+        setSettings(s);
+        setBlockedText((s.blocked_keywords || []).join('\n'));
+      }
+    } catch (e) {
+      console.error('settings load error', e);
     }
   }, []);
 
@@ -82,22 +93,31 @@ export const LeadPipelinePanel: React.FC = () => {
     if (!settings) return;
     setLoading(true);
     try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
       const parsedBlocked = blockedText
         .split(/[\n,]/)
         .map(s => s.trim().toLowerCase())
         .filter(Boolean);
-      const { error } = await supabase.from('lead_drip_settings').update({
-        daily_per_rep: settings.daily_per_rep,
-        enabled: settings.enabled,
-        require_email: settings.require_email,
-        indianapolis_only: settings.indianapolis_only,
-        scraper_enabled: settings.scraper_enabled,
-        scraper_target_per_run: settings.scraper_target_per_run,
-        hold_hours: settings.hold_hours,
-        blocked_keywords: parsedBlocked,
-        updated_at: new Date().toISOString(),
-      }).eq('id', settings.id);
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: {
+          action: 'update_drip_settings',
+          id: settings.id,
+          patch: {
+            daily_per_rep: settings.daily_per_rep,
+            enabled: settings.enabled,
+            require_email: settings.require_email,
+            indianapolis_only: settings.indianapolis_only,
+            scraper_enabled: settings.scraper_enabled,
+            scraper_target_per_run: settings.scraper_target_per_run,
+            hold_hours: settings.hold_hours,
+            blocked_keywords: parsedBlocked,
+          },
+        },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
       toast({ title: 'Drip settings saved' });
     } catch (e) {
       toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
