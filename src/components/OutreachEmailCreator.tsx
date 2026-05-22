@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2 } from 'lucide-react';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type } from 'lucide-react';
 
-type Mode = 'create' | 'rewrite';
+type Mode = 'create' | 'rewrite' | 'subjects';
 
 interface Props {
   /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
@@ -18,6 +18,8 @@ interface Props {
 }
 
 interface EmailOut { subject: string; body: string; why_it_works: string }
+interface SubjectHook { subject: string; angle: string; why: string }
+interface SubjectsOut { hooks: SubjectHook[] }
 
 function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   return new Promise((resolve, reject) => {
