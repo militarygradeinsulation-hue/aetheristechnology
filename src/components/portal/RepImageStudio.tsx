@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { LinkedInBannerCreator } from '@/components/LinkedInBannerCreator';
 
 interface StudioImage {
   id: string;
@@ -259,6 +260,10 @@ export const RepImageStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <LinkedInBannerCreator invoke={invoke} onSaved={load} />
+
+
 
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
