@@ -108,6 +108,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const blocked = await loadBlockedKeywords(supabase);
     let totalInserted = 0;
     const breakdown: Record<string, number> = {};
 
