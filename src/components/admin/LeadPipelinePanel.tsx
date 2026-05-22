@@ -72,7 +72,11 @@ export const LeadPipelinePanel: React.FC = () => {
 
   const refreshSettings = useCallback(async () => {
     const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
-    if (data) setSettings(data as DripSettings);
+    if (data) {
+      const s = data as DripSettings;
+      setSettings(s);
+      setBlockedText((s.blocked_keywords || []).join('\n'));
+    }
   }, []);
 
   useEffect(() => {
