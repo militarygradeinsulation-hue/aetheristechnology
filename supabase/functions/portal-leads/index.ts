@@ -184,6 +184,9 @@ serve(async (req) => {
     if (action === "skip_drip") {
       const id = sanitizeStr(body.id);
       if (!id) return jsonResp({ error: "Missing id" }, 400);
+      // Record the skip so this lead is not re-dropped to the same rep.
+      await supabase.from("rep_lead_skips")
+        .upsert({ rep_code: claims.code, lead_id: id }, { onConflict: "rep_code,lead_id" });
       const { error } = await supabase.from("rep_leads")
         .update({ assigned_to_code: null, assigned_at: null, assignment_expires_at: null })
         .eq("id", id).eq("assigned_to_code", claims.code).is("claimed_by_code", null);
