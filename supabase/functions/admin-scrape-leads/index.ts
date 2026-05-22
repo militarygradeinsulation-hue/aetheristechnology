@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -162,6 +163,7 @@ serve(async (req) => {
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+    const blocked = await loadBlockedKeywords(supabase);
     let inserted = 0;
     if (leads.length > 0) {
       const rows = leads.map((l) => ({
@@ -177,7 +179,7 @@ serve(async (req) => {
         source: "firecrawl_indianapolis",
         external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
         status: "new",
-      })).filter((r) => r.business_name && r.website);
+      })).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
 
       const { data, error } = await supabase.from("rep_leads")
         .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })

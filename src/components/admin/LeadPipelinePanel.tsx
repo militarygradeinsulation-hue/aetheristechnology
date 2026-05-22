@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw } from 'lucide-react';
+import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw, Ban } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface DripSettings {
   id: string;
@@ -20,6 +21,7 @@ interface DripSettings {
   scraper_frequency: string;
   scraper_target_per_run: number;
   hold_hours: number;
+  blocked_keywords: string[];
 }
 
 interface PoolStats {
@@ -42,6 +44,8 @@ export const LeadPipelinePanel: React.FC = () => {
   const [importProgress, setImportProgress] = useState<string | null>(null);
   const [importCursor, setImportCursor] = useState<string | null>(null);
   const [scrapeIndustry, setScrapeIndustry] = useState('professional services');
+  const [blockedText, setBlockedText] = useState('');
+  const [purging, setPurging] = useState(false);
 
   const refreshStats = useCallback(async () => {
     try {
@@ -68,7 +72,11 @@ export const LeadPipelinePanel: React.FC = () => {
 
   const refreshSettings = useCallback(async () => {
     const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
-    if (data) setSettings(data as DripSettings);
+    if (data) {
+      const s = data as DripSettings;
+      setSettings(s);
+      setBlockedText((s.blocked_keywords || []).join('\n'));
+    }
   }, []);
 
   useEffect(() => {
@@ -80,6 +88,10 @@ export const LeadPipelinePanel: React.FC = () => {
     if (!settings) return;
     setLoading(true);
     try {
+      const parsedBlocked = blockedText
+        .split(/[\n,]/)
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
       const { error } = await supabase.from('lead_drip_settings').update({
         daily_per_rep: settings.daily_per_rep,
         enabled: settings.enabled,
@@ -88,6 +100,7 @@ export const LeadPipelinePanel: React.FC = () => {
         scraper_enabled: settings.scraper_enabled,
         scraper_target_per_run: settings.scraper_target_per_run,
         hold_hours: settings.hold_hours,
+        blocked_keywords: parsedBlocked,
         updated_at: new Date().toISOString(),
       }).eq('id', settings.id);
       if (error) throw error;
@@ -148,6 +161,31 @@ export const LeadPipelinePanel: React.FC = () => {
     } catch (e) {
       toast({ title: 'Drip failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setDripping(false); }
+  };
+
+  const runPurge = async (dryRun: boolean) => {
+    const token = getAdminToken();
+    if (!token) return toast({ title: 'Admin session expired', variant: 'destructive' });
+    setPurging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-purge-blocked-leads', {
+        body: { dryRun },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (dryRun) {
+        toast({
+          title: `Preview: ${data.matched} leads match the blocklist`,
+          description: data.matched > 0 ? `e.g. ${(data.samples || []).slice(0, 3).map((s: any) => s.business_name).filter(Boolean).join(', ')}` : 'Nothing to purge.',
+        });
+      } else {
+        toast({ title: `Deleted ${data.deleted} blocked leads` });
+        refreshStats();
+      }
+    } catch (e) {
+      toast({ title: 'Purge failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setPurging(false); }
   };
 
   return (
@@ -258,6 +296,37 @@ export const LeadPipelinePanel: React.FC = () => {
                   <Switch checked={settings[opt.key]} onCheckedChange={v => setSettings({ ...settings, [opt.key]: v })} />
                 </div>
               ))}
+            </div>
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Ban className="w-4 h-4 text-red-400" />
+                <Label className="text-sm font-semibold">Blocked keywords (schools, etc.)</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                One per line (or comma-separated). Any lead whose name, industry, website, location, contact, email, or fit-reason contains one of these will be hidden from the rep pool and skipped by the scrapers. Case-insensitive substring match.
+              </p>
+              <Textarea
+                value={blockedText}
+                onChange={e => setBlockedText(e.target.value)}
+                rows={5}
+                className="font-mono text-xs"
+                placeholder="school&#10;university&#10;college&#10;k-12&#10;academy"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => runPurge(true)} disabled={purging}>
+                  {purging ? <Loader2 className="w-3 h-3 animate-spin" /> : <Ban className="w-3 h-3 mr-1" />}
+                  Preview matches
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  onClick={() => { if (confirm('Permanently delete all leads matching the blocklist?')) runPurge(false); }}
+                  disabled={purging}
+                >
+                  Purge matching leads
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={saveSettings} disabled={loading} className="bg-amber text-background hover:bg-amber/90">

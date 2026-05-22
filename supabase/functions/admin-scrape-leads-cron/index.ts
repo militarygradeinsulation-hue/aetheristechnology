@@ -2,6 +2,7 @@
 // Called by pg_cron daily — no admin token required (service-role context).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,6 +108,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const blocked = await loadBlockedKeywords(supabase);
     let totalInserted = 0;
     const breakdown: Record<string, number> = {};
 
@@ -130,7 +132,7 @@ serve(async (req) => {
           source: "firecrawl_indianapolis_cron",
           external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
           status: "new",
-        })).filter(r => r.business_name);
+        })).filter(r => r.business_name && !isLeadBlocked(r, blocked));
 
         const { data, error } = await supabase.from("rep_leads")
           .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })

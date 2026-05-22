@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
+import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,13 +71,15 @@ async function topUpRepDrop(supabase: any, repCode: string): Promise<number> {
     const needed = dailyPerRep - (openDrip ?? 0);
     if (needed <= 0) return 0;
 
-    const { data: candidates } = await supabase.from("rep_leads")
-      .select("id")
+    const { data: candidatesRaw } = await supabase.from("rep_leads")
+      .select("id,business_name,industry,website,location,contact_name,email,why_fit,notes")
       .is("claimed_by_code", null)
       .is("assigned_to_code", null)
       .order("score", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(needed);
+      .limit(needed * 4);
+    const blocked = await loadBlockedKeywords(supabase);
+    const candidates = (candidatesRaw || []).filter((c: any) => !isLeadBlocked(c, blocked)).slice(0, needed);
     if (!candidates || candidates.length === 0) return 0;
 
     const expiresAt = new Date(Date.now() + holdHours * 3600_000).toISOString();
@@ -152,8 +155,12 @@ serve(async (req) => {
       const { data, error } = await query;
       if (error) throw error;
 
+      // Hide leads matching admin blocklist (schools, etc.) from the rep pool/drip.
+      const blockedKw = await loadBlockedKeywords(supabase);
+      const filtered = (data || []).filter((l: any) => !isLeadBlocked(l, blockedKw));
+
       // Prioritize leads that have a website URL (scannable businesses surface first)
-      const sorted = (data || []).slice().sort((a: any, b: any) => {
+      const sorted = filtered.slice().sort((a: any, b: any) => {
         const aw = a.website && String(a.website).trim() ? 1 : 0;
         const bw = b.website && String(b.website).trim() ? 1 : 0;
         return bw - aw;
