@@ -18,7 +18,7 @@ interface GeneratedPost {
   hashtags: string[];
 }
 
-export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
+export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: boolean }> = ({ adminMode = false, repMode = false }) => {
   const [sourceType, setSourceType] = useState<SourceType>('idea');
   const [ideaPrompt, setIdeaPrompt] = useState('');
   const [count, setCount] = useState(3);
