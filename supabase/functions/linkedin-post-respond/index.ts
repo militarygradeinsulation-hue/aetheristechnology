@@ -371,13 +371,19 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     if (!post) throw new Error("Empty response from AI");
     post = post.replace(/[—–]/g, ".");
 
+    // Strip any model-generated URLs so we control the single CTA link at the end.
+    const CTA_LINK = "https://businessforensics.tech/";
+    post = post.replace(/https?:\/\/\S+/gi, "").replace(/\s{2,}/g, " ").trim();
+
     // Mode-aware character ceilings. LinkedIn truncates comments past ~1,250
     // chars, so we trim well below that and ALWAYS land on a sentence boundary
     // — never ship a half-thought, never blow past the platform limit.
+    // Reserve room for the appended CTA link.
     const isComment = mode === "brief" || isReplyToReply;
-    const HARD_CAP = isComment
-      ? (isReplyToReply ? 650 : 1150)   // reply-to-reply tighter than top-level comment
-      : 2900;                           // standalone repost (LinkedIn post limit is 3000)
+    const CTA_RESERVE = CTA_LINK.length + 2; // newline + link
+    const HARD_CAP = (isComment
+      ? (isReplyToReply ? 650 : 1150)
+      : 2900) - CTA_RESERVE;
     if (post.length > HARD_CAP) {
       const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
@@ -388,15 +394,16 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
         slice.lastIndexOf("!"),
         slice.lastIndexOf("?"),
       );
-      // Require we land on a real sentence boundary; if not, walk back to one.
       if (lastStop > 120) {
         post = slice.slice(0, lastStop + 1).trim();
       } else {
-        // Fallback: cut at last space so we don't slice a word in half.
         const lastSpace = slice.lastIndexOf(" ");
         post = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim().replace(/[,;:]+$/, "") + ".";
       }
     }
+
+    // Append the canonical CTA link on its own line.
+    post = `${post}\n\n${CTA_LINK}`;
 
 
     return new Response(JSON.stringify({ post }), {
