@@ -21,6 +21,7 @@ import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
+import { PortalReplyComposer } from '@/components/portal/PortalReplyComposer';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
 import { BookOpen, MessageSquare, GraduationCap, Palette, Film, PenSquare } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
@@ -517,7 +518,12 @@ const PortalPage: React.FC = () => {
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
       case 'video': return <RepCreationStudio />;
-      case 'poststudio': return <PostFromSourceGenerator />;
+      case 'poststudio': return (
+        <div className="space-y-8">
+          <PostFromSourceGenerator repMode />
+          <PortalReplyComposer />
+        </div>
+      );
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;

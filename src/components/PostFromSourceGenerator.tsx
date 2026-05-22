@@ -18,7 +18,7 @@ interface GeneratedPost {
   hashtags: string[];
 }
 
-export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adminMode = false }) => {
+export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: boolean }> = ({ adminMode = false, repMode = false }) => {
   const [sourceType, setSourceType] = useState<SourceType>('idea');
   const [ideaPrompt, setIdeaPrompt] = useState('');
   const [count, setCount] = useState(3);
@@ -158,18 +158,20 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean }> = ({ adm
                 {post.hashtags?.length > 0 && (
                   <p className="text-xs text-primary mt-3">{post.hashtags.map(h => `#${h.replace(/^#/, '')}`).join(' ')}</p>
                 )}
-                {adminMode && (
+                {(adminMode || repMode) && (
                   <div className="mt-4 space-y-2">
                     <PostImageGenerator
                       prompt={`${post.hook}. ${post.caption}`}
                       editablePrompt
                       onImageGenerated={() => {}}
                     />
-                    <ScheduleSocialButton
-                      content={`${post.hook}\n\n${post.caption}\n\n${(post.hashtags || []).map(h => `#${h.replace(/^#/, '')}`).join(' ')}`}
-                      source="post_from_source"
-                      className="w-full"
-                    />
+                    {adminMode && (
+                      <ScheduleSocialButton
+                        content={`${post.hook}\n\n${post.caption}\n\n${(post.hashtags || []).map(h => `#${h.replace(/^#/, '')}`).join(' ')}`}
+                        source="post_from_source"
+                        className="w-full"
+                      />
+                    )}
                   </div>
                 )}
               </div>
