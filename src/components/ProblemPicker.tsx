@@ -91,9 +91,9 @@ export const ProblemPicker: React.FC = () => {
 
   return (
     <section className="px-4 py-14">
-      <div className="max-w-[1500px] mx-auto">
+      <div className="max-w-[1800px] 2xl:max-w-[2000px] mx-auto">
         <RevealOnScroll>
-          <div className="text-center mb-10 max-w-3xl mx-auto">
+          <div className="text-center mb-10 max-w-5xl mx-auto">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               Start here · I've been where you are
             </div>
