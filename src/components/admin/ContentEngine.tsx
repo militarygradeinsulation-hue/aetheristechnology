@@ -184,7 +184,7 @@ async function callThumb(action: string, payload: Record<string, unknown> = {}) 
 
 export const ContentEngine: React.FC = () => {
   const { toast } = useToast();
-  const [view, setView] = useState<'calendar' | 'generator' | 'studio' | 'strategy'>('calendar');
+  const [view, setView] = useState<'calendar' | 'generator' | 'studio' | 'email' | 'strategy'>('calendar');
   const [strategy, setStrategy] = useState<Strategy | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
