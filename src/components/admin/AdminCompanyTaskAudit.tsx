@@ -52,13 +52,11 @@ export const AdminCompanyTaskAudit: React.FC = () => {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  // realtime: when reps check items, update live
+  // Polling fallback (rep_company_task_completions removed from Realtime
+  // publication to stop broadcasting completion events to anon subscribers).
   useEffect(() => {
-    const ch = supabase
-      .channel("rep-task-completions-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "rep_company_task_completions" }, () => void refresh())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const id = setInterval(() => { void refresh(); }, 15000);
+    return () => { clearInterval(id); };
   }, [refresh]);
 
   return (
