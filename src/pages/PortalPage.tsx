@@ -537,7 +537,7 @@ const PortalPage: React.FC = () => {
                 )}
               </div>
             )}
-            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
+            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {}, profile)}</div>
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
