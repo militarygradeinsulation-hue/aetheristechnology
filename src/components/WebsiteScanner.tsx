@@ -463,6 +463,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                     index={i}
                     onFixClick={() => handleFixClick(i < VISIBLE_GAPS)}
                     isLocked={!isUnlocked && i >= VISIBLE_GAPS}
+                    showRepSuggestions={staffUnlock}
                   />
                 ))}
               </div>
