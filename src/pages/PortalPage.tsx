@@ -517,6 +517,7 @@ const PortalPage: React.FC = () => {
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
       case 'video': return <RepCreationStudio />;
+      case 'poststudio': return <PostFromSourceGenerator />;
       case 'documents': return <PortalDocuments />;
       case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
