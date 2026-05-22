@@ -280,6 +280,90 @@ WATERMARK: "aetheris.technology"`;
         </div>
       </div>
 
+      {/* LinkedIn Banner Creator */}
+      <div className="glass p-6 rounded-xl space-y-4 border border-amber/20">
+        <div className="flex items-center gap-2">
+          <Linkedin className="w-5 h-5 text-amber" />
+          <h2 className="text-xl font-bold text-foreground font-display">LinkedIn Banner Creator</h2>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70 ml-2">1584 × 396 · 4:1</span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          One-click Aetheris-branded LinkedIn cover banners. Pick a hook, choose a background, generate. Lands in your library below at the right ratio.
+        </p>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Hook preset</label>
+          <select
+            value={bannerPreset}
+            onChange={e => applyPreset(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            {BANNER_PRESETS.map(p => (
+              <option key={p.key} value={p.key}>
+                {p.key === 'custom' ? '— Custom (write your own)' : `${p.headline} ${p.accent}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Headline (white)</label>
+            <Input value={bannerHeadline} onChange={e => { setBannerHeadline(e.target.value); setBannerPreset('custom'); }} placeholder="Stop Guessing." />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Accent (amber)</label>
+            <Input value={bannerAccent} onChange={e => { setBannerAccent(e.target.value); setBannerPreset('custom'); }} placeholder="Start Understanding." />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Subline</label>
+          <Textarea
+            rows={2}
+            value={bannerSub}
+            onChange={e => { setBannerSub(e.target.value); setBannerPreset('custom'); }}
+            placeholder="One short line. Real numbers. Real fixes. No fluff."
+            className="resize-none"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Background style</label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {(['network', 'matrix', 'blueprint', 'noir', 'case_file'] as const).map(k => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setBannerBg(k)}
+                className={`text-xs font-mono uppercase tracking-wider px-2 py-2 rounded-md border transition-colors ${
+                  bannerBg === k
+                    ? 'border-amber bg-amber/15 text-amber'
+                    : 'border-border bg-background/50 text-muted-foreground hover:border-amber/40'
+                }`}
+              >
+                {k.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          onClick={generateBanner}
+          disabled={bannerBusy || !bannerHeadline.trim()}
+          className="w-full bg-amber text-background hover:bg-amber/90"
+        >
+          {bannerBusy
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Painting banner (~30s)...</>
+            : <><Linkedin className="w-4 h-4 mr-2" /> Generate LinkedIn Banner</>}
+        </Button>
+        <p className="text-[10px] text-muted-foreground/70 text-center">
+          Uses Gemini 3 Pro for legible typography. Saved automatically — download from the library below.
+        </p>
+      </div>
+
+
+
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground font-display flex items-center gap-2">
