@@ -88,6 +88,10 @@ export const LeadPipelinePanel: React.FC = () => {
     if (!settings) return;
     setLoading(true);
     try {
+      const parsedBlocked = blockedText
+        .split(/[\n,]/)
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
       const { error } = await supabase.from('lead_drip_settings').update({
         daily_per_rep: settings.daily_per_rep,
         enabled: settings.enabled,
@@ -96,6 +100,7 @@ export const LeadPipelinePanel: React.FC = () => {
         scraper_enabled: settings.scraper_enabled,
         scraper_target_per_run: settings.scraper_target_per_run,
         hold_hours: settings.hold_hours,
+        blocked_keywords: parsedBlocked,
         updated_at: new Date().toISOString(),
       }).eq('id', settings.id);
       if (error) throw error;
