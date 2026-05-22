@@ -29,11 +29,11 @@ export const OperatorBio: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12 max-w-3xl mx-auto">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-              The Operator
+              The Architect
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
               Joseph Toney , {' '}
-              <span className="text-amber">Business Forensics Operator</span>
+              <span className="text-amber">Business Forensics Architect</span>
             </h2>
           </div>
         </RevealOnScroll>
@@ -66,7 +66,7 @@ export const OperatorBio: React.FC = () => {
                 </button>
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                Operator Profile
+                Architect Profile
               </div>
               <div className="font-forensic text-xl text-foreground mb-1">Joseph Toney</div>
               <div className="text-sm text-muted-foreground mb-4">Founder · Aetheris</div>
