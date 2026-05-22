@@ -163,6 +163,31 @@ export const LeadPipelinePanel: React.FC = () => {
     } finally { setDripping(false); }
   };
 
+  const runPurge = async (dryRun: boolean) => {
+    const token = getAdminToken();
+    if (!token) return toast({ title: 'Admin session expired', variant: 'destructive' });
+    setPurging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-purge-blocked-leads', {
+        body: { dryRun },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (dryRun) {
+        toast({
+          title: `Preview: ${data.matched} leads match the blocklist`,
+          description: data.matched > 0 ? `e.g. ${(data.samples || []).slice(0, 3).map((s: any) => s.business_name).filter(Boolean).join(', ')}` : 'Nothing to purge.',
+        });
+      } else {
+        toast({ title: `Deleted ${data.deleted} blocked leads` });
+        refreshStats();
+      }
+    } catch (e) {
+      toast({ title: 'Purge failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setPurging(false); }
+  };
+
   return (
     <div className="space-y-4">
       {/* Stats */}
