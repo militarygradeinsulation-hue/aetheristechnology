@@ -5,6 +5,7 @@ import { ImageIcon, Loader2, RefreshCw, ChevronDown, Wand2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { getPortalToken } from '@/lib/portalAuth';
 
 interface Props {
   prompt: string;
@@ -15,6 +16,8 @@ interface Props {
   compact?: boolean;
   /** Allow editing the prompt freely before generating (for content creator / calendar). */
   editablePrompt?: boolean;
+  /** When true, route generation through the rep portal-image-studio (saves to rep's library, uses portal token). */
+  repMode?: boolean;
 }
 
 export const STYLE_OPTIONS = [
