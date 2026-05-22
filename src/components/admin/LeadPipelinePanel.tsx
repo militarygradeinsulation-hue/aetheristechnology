@@ -44,6 +44,8 @@ export const LeadPipelinePanel: React.FC = () => {
   const [importProgress, setImportProgress] = useState<string | null>(null);
   const [importCursor, setImportCursor] = useState<string | null>(null);
   const [scrapeIndustry, setScrapeIndustry] = useState('professional services');
+  const [blockedText, setBlockedText] = useState('');
+  const [purging, setPurging] = useState(false);
 
   const refreshStats = useCallback(async () => {
     try {
