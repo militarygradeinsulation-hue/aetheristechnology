@@ -366,6 +366,20 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     if (!post) throw new Error("Empty response from AI");
     post = post.replace(/[—–]/g, ".");
 
+    // LinkedIn comment hard cap: 1,750 characters. Trim at last sentence
+    // boundary so we never ship a half-thought or blow past the limit.
+    const LINKEDIN_COMMENT_MAX = 1750;
+    if (post.length > LINKEDIN_COMMENT_MAX) {
+      const slice = post.slice(0, LINKEDIN_COMMENT_MAX);
+      const lastStop = Math.max(
+        slice.lastIndexOf(". "),
+        slice.lastIndexOf("! "),
+        slice.lastIndexOf("? "),
+        slice.lastIndexOf("."),
+      );
+      post = (lastStop > 200 ? slice.slice(0, lastStop + 1) : slice).trim();
+    }
+
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
