@@ -400,6 +400,7 @@ export const ContentEngine: React.FC = () => {
               { id: 'calendar', label: 'Calendar', Icon: Calendar },
               { id: 'generator', label: 'Generator', Icon: Sparkles },
               { id: 'studio', label: 'Post Studio', Icon: PenLine },
+              { id: 'email', label: 'Email', Icon: Mail },
               { id: 'strategy', label: 'Strategy', Icon: Settings },
             ] as const).map((t) => (
               <button
