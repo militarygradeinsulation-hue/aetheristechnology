@@ -79,7 +79,7 @@ import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import { usePortalCursor } from '@/lib/portalCursor';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
