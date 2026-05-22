@@ -163,7 +163,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
 
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-            {mode === 'create' ? 'Context / Angle' : 'Notes for the rewrite (optional)'}
+            {mode === 'create' ? 'Context / Angle'
+              : mode === 'subjects' ? 'Context / Angle for the subject hooks'
+              : 'Notes for the rewrite (optional)'}
           </label>
           <Textarea
             value={prompt}
@@ -171,7 +173,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             onPaste={handlePasteCapture}
             placeholder={mode === 'create'
               ? "What you found on their site. The leak you want to name. What you want them to do."
-              : "What you want changed. Tone, urgency, specific facts to add."}
+              : mode === 'subjects'
+                ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
+                : "What you want changed. Tone, urgency, specific facts to add."}
             rows={4}
           />
         </div>
