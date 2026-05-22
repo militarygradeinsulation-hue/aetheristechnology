@@ -215,7 +215,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
 
         {/* Image drop */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Screenshot of their site / post / ad (optional)</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{mode === 'analyze' ? 'Screenshot of YOUR email (required if no pasted text)' : 'Screenshot of their site / post / ad (optional)'}</label>
           {image ? (
             <div className="relative mt-2 inline-block">
               <img src={image.url} alt="reference" className="max-h-48 rounded-lg border border-border" />
