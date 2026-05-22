@@ -55,6 +55,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailOut | null>(null);
   const [subjects, setSubjects] = useState<SubjectHook[] | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [copied, setCopied] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
 
