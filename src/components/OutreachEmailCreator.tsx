@@ -74,6 +74,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
     }
     setLoading(true);
     setResult(null);
+    setSubjects(null);
     try {
       const headers: Record<string, string> = {};
       if (authMode === 'admin') headers['x-admin-token'] = token;
@@ -93,19 +94,19 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as EmailOut);
+      if (mode === 'subjects') {
+        setSubjects(((data as SubjectsOut)?.hooks) || []);
+      } else {
+        setResult(data as EmailOut);
+      }
     } catch (e) {
       toast({ title: 'Generation failed', description: String((e as Error).message), variant: 'destructive' });
     } finally { setLoading(false); }
   }
 
-  async function copy(kind: 'subject' | 'body' | 'all') {
-    if (!result) return;
-    const text = kind === 'subject' ? result.subject
-      : kind === 'body' ? result.body
-      : `Subject: ${result.subject}\n\n${result.body}`;
+  async function copyText(key: string, text: string) {
     await navigator.clipboard.writeText(text);
-    setCopied(kind);
+    setCopied(key);
     setTimeout(() => setCopied(''), 1500);
   }
 
