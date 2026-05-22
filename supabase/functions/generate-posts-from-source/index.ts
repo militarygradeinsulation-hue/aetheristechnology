@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -136,7 +137,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You are the AETHERIS forensic operator. Reframe → audit anchor → mechanism → verdict. No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON." },
+          { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are the AETHERIS forensic operator. Strictly enforce the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words). No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON.` },
           { role: "user", content: prompt },
         ],
       }),
