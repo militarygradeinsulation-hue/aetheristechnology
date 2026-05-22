@@ -58,6 +58,7 @@ const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
+const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
