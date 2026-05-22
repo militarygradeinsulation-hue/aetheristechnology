@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.scan-website]
 verify_jwt = false
 
+[functions.rep-code-scan]
+verify_jwt = false
+
 [functions.retrofit-blogs]
 verify_jwt = false
 
