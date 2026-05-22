@@ -80,6 +80,7 @@ import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import { usePortalCursor } from '@/lib/portalCursor';
+import { REP_TOOL_TIPS } from '@/lib/repToolTips';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
@@ -469,7 +470,9 @@ const PortalPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3">
-                {REP_TOOLS.map((t) => (
+                {REP_TOOLS.map((t) => {
+                  const tip = REP_TOOL_TIPS[t.key];
+                  return (
                   <div key={t.key} className="rounded-lg border border-border/50 bg-card/50 p-4 hover:border-amber/50 hover:bg-amber/5 transition-colors group">
                     {t.external ? (
                       <a href={t.href} target="_blank" rel="noopener noreferrer" className="w-full text-left block">
@@ -480,6 +483,15 @@ const PortalPage: React.FC = () => {
                         <div className="flex items-start gap-2"><Wrench className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" /><div className="min-w-0"><p className="font-semibold text-foreground group-hover:text-amber transition-colors">{t.name}</p><p className="text-sm text-muted-foreground mt-1">{t.desc}</p></div></div>
                       </button>
                     )}
+                    {tip && (
+                      <div className="mt-3 pt-3 border-t border-amber/20 space-y-1.5">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-amber/80">Use it for</p>
+                        <p className="text-xs text-muted-foreground leading-snug">{tip.useFor}</p>
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-amber/80 pt-1">Pair with</p>
+                        <p className="text-xs text-muted-foreground leading-snug">{tip.pairWith}</p>
+                        {tip.proTip && <p className="text-[11px] text-amber/90 italic leading-snug pt-1">💡 {tip.proTip}</p>}
+                      </div>
+                    )}
                     {t.href !== '#' && (
                       <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
                         <span className="text-xs font-mono text-amber/70 truncate">{t.href}</span>
@@ -487,7 +499,8 @@ const PortalPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -502,6 +515,24 @@ const PortalPage: React.FC = () => {
                 ) : null;
               })()}
             </div>
+            {activeTool && REP_TOOL_TIPS[activeTool] && (
+              <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 sm:p-4 space-y-2">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Rep Playbook for this tool</p>
+                <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Use it for</p>
+                    <p className="text-foreground/90 leading-snug">{REP_TOOL_TIPS[activeTool].useFor}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Pair with</p>
+                    <p className="text-foreground/90 leading-snug">{REP_TOOL_TIPS[activeTool].pairWith}</p>
+                  </div>
+                </div>
+                {REP_TOOL_TIPS[activeTool].proTip && (
+                  <p className="text-xs text-amber/90 italic leading-snug pt-1 border-t border-amber/20">💡 {REP_TOOL_TIPS[activeTool].proTip}</p>
+                )}
+              </div>
+            )}
             <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
           </div>
         );

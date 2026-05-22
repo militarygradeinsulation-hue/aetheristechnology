@@ -12,6 +12,9 @@ import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { hasValidAdminToken } from '@/lib/adminAuth';
+import { suggestToolsForGap } from '@/lib/repToolTips';
+import { Wrench } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Gap {
   category: string;
@@ -74,9 +77,23 @@ const ScoreGauge = ({ score, grade }: { score: number; grade?: string }) => {
   );
 };
 
-const GapCard = ({ gap, index, onFixClick, isLocked }: { gap: Gap; index: number; onFixClick: () => void; isLocked?: boolean }) => {
+const TOOL_HREF: Record<string, string> = {
+  'all-in-one': '#',
+  'leak-audit': '/leak-audit',
+  'scan': '/scan',
+  'business-diagnostic': '/business-diagnostic',
+  'sales-scripts': '/sales-scripts',
+  'follow-up-plan': '/follow-up-plan',
+  'strategic-questions': '/strategic-questions',
+  'brand-contradictions': '/brand-contradictions',
+  'friction-audit': '/friction-audit',
+  'business-post-analyst': 'https://businesspostanalyst.lovable.app/',
+};
+
+const GapCard = ({ gap, index, onFixClick, isLocked, showRepSuggestions }: { gap: Gap; index: number; onFixClick: () => void; isLocked?: boolean; showRepSuggestions?: boolean }) => {
   const config = severityConfig[gap.severity];
   const Icon = config.icon;
+  const suggestions = showRepSuggestions && !isLocked ? suggestToolsForGap(gap) : [];
 
   return (
     <motion.div
@@ -109,6 +126,30 @@ const GapCard = ({ gap, index, onFixClick, isLocked }: { gap: Gap; index: number
                 <DollarSign className="w-3 h-3" /> Est. Leak: {gap.annualCost}
               </span>
               {gap.projectedROI && <span className="text-primary font-medium">ROI: {gap.projectedROI}</span>}
+            </div>
+          )}
+          {suggestions.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-amber/20">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-1.5 flex items-center gap-1">
+                <Wrench className="w-3 h-3" /> Rep tools for this gap
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((s, i) => {
+                  const href = TOOL_HREF[s.key] || '#';
+                  const external = href.startsWith('http');
+                  const inner = (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-amber/40 bg-amber/10 hover:bg-amber/20 px-2 py-1 text-[11px] text-foreground transition-colors" title={s.why}>
+                      <Wrench className="w-3 h-3 text-amber" /> {s.name}
+                    </span>
+                  );
+                  return external ? (
+                    <a key={i} href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
+                  ) : (
+                    <Link key={i} to={href}>{inner}</Link>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5 italic">{suggestions[0].why}</p>
             </div>
           )}
         </div>
@@ -422,6 +463,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                     index={i}
                     onFixClick={() => handleFixClick(i < VISIBLE_GAPS)}
                     isLocked={!isUnlocked && i >= VISIBLE_GAPS}
+                    showRepSuggestions={staffUnlock}
                   />
                 ))}
               </div>
