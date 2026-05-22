@@ -252,10 +252,11 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 font-bold uppercase tracking-wider"
         >
           {loading
-            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Writing...</>
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>{mode === 'analyze' ? 'Critiquing...' : 'Writing...'}</>
             : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
             : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
-            : <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>}
+            : mode === 'subjects' ? <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>
+            : <><ScanSearch className="w-4 h-4 mr-2"/>Tear It Apart</>}
         </Button>
       </Card>
 
