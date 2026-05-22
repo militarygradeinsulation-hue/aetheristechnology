@@ -160,6 +160,7 @@ const App = () => (
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/portal" element={<PortalPage />} />
