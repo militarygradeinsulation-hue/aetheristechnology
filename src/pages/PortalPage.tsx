@@ -22,7 +22,7 @@ import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
 import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import { BookOpen, MessageSquare, GraduationCap, Palette, Film } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap, Palette, Film, PenSquare } from 'lucide-react';
 import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
