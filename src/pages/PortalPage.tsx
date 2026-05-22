@@ -62,7 +62,7 @@ import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
-  hasValidPortalSession, type PortalProfile,
+  hasValidPortalSession, getPortalToken, type PortalProfile,
 } from '@/lib/portalAuth';
 import { hasValidAdminToken, getAdminToken } from '@/lib/adminAuth';
 import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
@@ -81,16 +81,19 @@ import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
+import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
+  | 'outreach-email'
   | 'leak-audit' | 'scan' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
   { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL, runs every prospect tool at once.' },
+  { key: 'outreach-email',      name: 'Outreach Email Creator',              href: '#',                     desc: 'Bold, direct emails in the Aetheris voice. Paste, upload a screenshot, or describe the lead.' },
   { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post, instant prospect ammo.', external: true },
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
@@ -102,10 +105,11 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
   { key: 'friction-audit',      name: 'Friction Vocabulary Audit',           href: '/friction-audit',       desc: 'Find the words on their site costing them deals.' },
 ];
 
-const renderEmbeddedTool = (key: ToolKey, noop: () => void): React.ReactNode => {
+const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfile | null): React.ReactNode => {
   switch (key) {
     case 'business-post-analyst': return null;
     case 'all-in-one':           return <AllInOneGenerator />;
+    case 'outreach-email':       return <OutreachEmailCreator authMode="rep" token={getPortalToken()} defaultSenderName={profile?.rep_name} />;
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
     case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
     case 'business-diagnostic':  return <BusinessDiagnostic />;
@@ -533,7 +537,7 @@ const PortalPage: React.FC = () => {
                 )}
               </div>
             )}
-            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {})}</div>
+            <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {}, profile)}</div>
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
