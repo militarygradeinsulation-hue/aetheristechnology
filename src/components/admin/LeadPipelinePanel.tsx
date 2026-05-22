@@ -297,6 +297,37 @@ export const LeadPipelinePanel: React.FC = () => {
                 </div>
               ))}
             </div>
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Ban className="w-4 h-4 text-red-400" />
+                <Label className="text-sm font-semibold">Blocked keywords (schools, etc.)</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                One per line (or comma-separated). Any lead whose name, industry, website, location, contact, email, or fit-reason contains one of these will be hidden from the rep pool and skipped by the scrapers. Case-insensitive substring match.
+              </p>
+              <Textarea
+                value={blockedText}
+                onChange={e => setBlockedText(e.target.value)}
+                rows={5}
+                className="font-mono text-xs"
+                placeholder="school&#10;university&#10;college&#10;k-12&#10;academy"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => runPurge(true)} disabled={purging}>
+                  {purging ? <Loader2 className="w-3 h-3 animate-spin" /> : <Ban className="w-3 h-3 mr-1" />}
+                  Preview matches
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  onClick={() => { if (confirm('Permanently delete all leads matching the blocklist?')) runPurge(false); }}
+                  disabled={purging}
+                >
+                  Purge matching leads
+                </Button>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={saveSettings} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Settings'}
