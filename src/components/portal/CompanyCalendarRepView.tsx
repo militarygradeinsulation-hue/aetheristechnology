@@ -59,10 +59,10 @@ export const CompanyCalendarRepView: React.FC = () => {
 
   useEffect(() => {
     void refresh();
-    const ch = supabase.channel("company_calendar_live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "company_calendar" }, () => void refresh())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    // Polling fallback (company_calendar removed from Realtime publication to
+    // avoid broadcasting internal calendar events to anon subscribers).
+    const id = setInterval(() => { void refresh(); }, 15000);
+    return () => { clearInterval(id); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, anchor]);
 
