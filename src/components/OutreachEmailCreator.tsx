@@ -128,8 +128,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       </div>
 
       {/* Mode switch */}
-      <div className="flex gap-2">
-        {(['create','rewrite'] as Mode[]).map((m) => (
+      <div className="flex flex-wrap gap-2">
+        {(['create','rewrite','subjects'] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -137,7 +137,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
               mode === m ? 'bg-amber text-background' : 'glass text-muted-foreground hover:text-foreground'
             }`}
           >
-            {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New</> : <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>}
+            {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New Email</>
+              : m === 'rewrite' ? <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>
+              : <><Type className="w-3.5 h-3.5"/>Subject Hooks</>}
           </button>
         ))}
       </div>
