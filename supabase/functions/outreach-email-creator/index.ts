@@ -157,8 +157,11 @@ serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const mode: "create" | "rewrite" | "subjects" =
-      body.mode === "rewrite" ? "rewrite" : body.mode === "subjects" ? "subjects" : "create";
+    const mode: "create" | "rewrite" | "subjects" | "analyze" =
+      body.mode === "rewrite" ? "rewrite"
+        : body.mode === "subjects" ? "subjects"
+        : body.mode === "analyze" ? "analyze"
+        : "create";
     const prompt: string = (body.prompt || "").toString().slice(0, 4000);
     const pastedText: string = (body.pastedText || "").toString().slice(0, 8000);
     const recipientName: string = (body.recipientName || "").toString().slice(0, 80);
@@ -175,6 +178,8 @@ serve(async (req) => {
       userInstruction = `Rewrite the following email in the Aetheris operator voice. Keep the intent. Remove ALL dashes. Cut filler. Make it specific.\n\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
     } else if (mode === "subjects") {
       userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.\n\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
+    } else if (mode === "analyze") {
+      userInstruction = `Analyze this outreach email. Be brutally honest. The rep wants to know exactly what is wrong and what to do better. Read the image (a screenshot of the email) and/or the pasted text below. Extract subject and body. Critique every weak line. Quote the offending text verbatim. Grade it. Then give a full rewrite in the Aetheris operator voice (no dashes, short sentences, specific opener, low-friction ask, under 140 words).\n\n${pastedText ? `PASTED EMAIL:\n${pastedText}\n\n` : ""}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
     } else {
       userInstruction = `Write a cold outreach email.\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     }
@@ -190,7 +195,7 @@ serve(async (req) => {
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) throw new Error("LOVABLE_API_KEY missing");
 
-    const tool = mode === "subjects" ? SUBJECT_TOOL : EMAIL_TOOL;
+    const tool = mode === "subjects" ? SUBJECT_TOOL : mode === "analyze" ? ANALYZE_TOOL : EMAIL_TOOL;
     const res = await fetch(LOVABLE_AI_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -224,6 +229,31 @@ serve(async (req) => {
         why: stripDashes(h.why || ""),
       }));
       return json({ mode, hooks, by: authed.kind === "rep" ? authed.code : "admin" });
+    }
+
+    if (mode === "analyze") {
+      const sc = parsed.subject_critique || {};
+      const analysis = {
+        overall_grade: parsed.overall_grade || "C",
+        verdict: stripDashes(parsed.verdict || ""),
+        subject_critique: {
+          current: stripDashes(sc.current || ""),
+          score: typeof sc.score === "number" ? sc.score : 5,
+          problems: (sc.problems || []).map((p: string) => stripDashes(p)),
+          rewrites: (sc.rewrites || []).map((p: string) => stripDashes(p)),
+        },
+        problems: (parsed.problems || []).map((p: any) => ({
+          severity: p.severity || "minor",
+          category: p.category || "tone",
+          quote: stripDashes(p.quote || ""),
+          issue: stripDashes(p.issue || ""),
+          fix: stripDashes(p.fix || ""),
+        })),
+        what_works: (parsed.what_works || []).map((s: string) => stripDashes(s)),
+        rewritten_body: stripDashes(parsed.rewritten_body || ""),
+        next_moves: (parsed.next_moves || []).map((s: string) => stripDashes(s)),
+      };
+      return json({ mode, analysis, by: authed.kind === "rep" ? authed.code : "admin" });
     }
 
     return json({
