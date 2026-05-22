@@ -41,6 +41,34 @@ function scoreTier(score: number): { label: string; tone: string; advice: string
   return { label: 'LOW PRIORITY', tone: 'text-muted-foreground', advice: 'Weak signal. Only work if your queue is empty. Consider skipping back to pool.' };
 }
 
+type LeadVerdictTone = 'go' | 'maybe' | 'skip';
+function buildLeadVerdict(lead: RepLead, scan: any): { label: string; tone: LeadVerdictTone; text: string } | null {
+  // 1. Scan executive summary wins (the richest signal)
+  const exec: string | undefined = scan?.executiveSummary;
+  if (exec && typeof exec === 'string' && exec.trim().length > 0) {
+    const firstSentence = exec.split(/(?<=[.!?])\s+/)[0].slice(0, 220);
+    const s: number | undefined = typeof scan?.score === 'number' ? scan.score : undefined;
+    const tone: LeadVerdictTone = s == null ? 'maybe' : s >= 70 ? 'go' : s >= 45 ? 'maybe' : 'skip';
+    const label = tone === 'go' ? 'WORTH CHASING' : tone === 'maybe' ? 'WORTH A LOOK' : 'PROBABLY SKIP';
+    return { label, tone, text: firstSentence };
+  }
+  // 2. Why-fit blurb from intake
+  if (lead.why_fit && lead.why_fit.trim().length > 0) {
+    const s = lead.score ?? 0;
+    const tone: LeadVerdictTone = s >= 70 ? 'go' : s >= 45 ? 'maybe' : 'skip';
+    const label = tone === 'go' ? 'WORTH CHASING' : tone === 'maybe' ? 'WORTH A LOOK' : 'PROBABLY SKIP';
+    return { label, tone, text: lead.why_fit.slice(0, 220) };
+  }
+  // 3. Score-only fallback
+  if (typeof lead.score === 'number') {
+    if (lead.score >= 75) return { label: 'WORTH CHASING', tone: 'go', text: 'High match score. Phone first, email second — these close fastest.' };
+    if (lead.score >= 50) return { label: 'WORTH A LOOK', tone: 'maybe', text: 'Decent fit. Send a tailored note, follow up in 48h.' };
+    if (lead.score > 0)  return { label: 'PROBABLY SKIP', tone: 'skip', text: 'Weak signal. Only work if your queue is empty — otherwise skip back to pool.' };
+  }
+  // 4. Nothing scored yet
+  return { label: 'UNREAD', tone: 'maybe', text: 'No scan yet. Open the row and run a Deep Scan to see if it\'s worth your time.' };
+}
+
 const ScoreBadge: React.FC<{ lead: RepLead; tone?: 'amber' | 'amber-soft' }> = ({ lead, tone = 'amber' }) => {
   if (typeof lead.score !== 'number') return null;
   const t = scoreTier(lead.score);
@@ -1058,6 +1086,21 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               )}
               {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || ', ')}
             </p>
+            {(() => {
+              const verdict = buildLeadVerdict(lead, scan);
+              if (!verdict) return null;
+              return (
+                <div className="mt-1.5 flex items-start gap-1.5">
+                  <span className={`mt-0.5 inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${verdict.tone === 'go' ? 'bg-green-400' : verdict.tone === 'maybe' ? 'bg-amber' : 'bg-muted-foreground/60'}`} />
+                  <p className="text-xs text-muted-foreground/90 italic line-clamp-2">
+                    <span className={`not-italic font-mono uppercase tracking-wider text-[10px] mr-1 ${verdict.tone === 'go' ? 'text-green-400' : verdict.tone === 'maybe' ? 'text-amber' : 'text-muted-foreground'}`}>
+                      {verdict.label}
+                    </span>
+                    {verdict.text}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
           <div className="text-right text-xs text-muted-foreground flex-shrink-0">
             {scan?.score != null && (
