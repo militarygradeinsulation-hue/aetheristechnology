@@ -49,26 +49,20 @@ export const LeadPipelinePanel: React.FC = () => {
 
   const refreshStats = useCallback(async () => {
     try {
-      const [tot, un, dr, cl, wo, dd] = await Promise.all([
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).is('assigned_to_code', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).not('assigned_to_code', 'is', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).not('claimed_by_code', 'is', null).not('status', 'in', '(won,lost,dead)'),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['won']),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['lost', 'dead']),
-      ]);
-      setStats({
-        total: tot.count ?? 0,
-        unassigned: un.count ?? 0,
-        dripped: dr.count ?? 0,
-        claimed: cl.count ?? 0,
-        worked: wo.count ?? 0,
-        dead: dd.count ?? 0,
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'lead_pool_stats' },
+        headers: { 'x-admin-token': token },
       });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (data?.stats) setStats(data.stats as PoolStats);
     } catch (e) {
       console.error('stats error', e);
+      toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
-  }, []);
+  }, [toast]);
 
   const refreshSettings = useCallback(async () => {
     const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
