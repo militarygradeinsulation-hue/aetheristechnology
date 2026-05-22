@@ -178,9 +178,13 @@ NUMERIC ANCHORING (mandatory): At least ONE concrete number per response — dol
 
 FORMAT:
 - ONE PARAGRAPH. No line breaks between sentences. Dense prose, like Joseph's actual comments.
-- 160–240 words for a comment reply. 200–280 words for a standalone repost.
-- HARD CHARACTER CAP: 1,750 characters total (LinkedIn comment limit). Count as you write. If you near the cap, tighten — never exceed it.
+- LENGTH BUDGETS (STRICT — these are not suggestions, they are hard ceilings):
+  • Top-level COMMENT reply: 90–140 words AND under 900 characters total. Target ~700 chars. Never exceed 1,150 characters under any circumstance.
+  • Reply-to-reply: 50–90 words AND under 650 characters total. Target ~500 chars.
+  • Standalone POST (mode=full only): 180–260 words, under 2,800 characters.
+- LINKEDIN COMMENT HARD LIMIT: LinkedIn truncates comments at ~1,250 characters. You must stay well below that. COUNT characters as you write. If you are approaching 1,000 characters in a comment, STOP — finish the current sentence with the verdict and end. Do not add another mechanism, another example, or another caveat once you are past the budget.
 - No emojis. No em dashes (— or –). No hedging. No bullets. No numbered lists. No headers. No bold.
+
 - End with a tight one-sentence verdict that lands the diagnostic — under 22 words, declarative, no question. Signature verdict shapes:
   • "X is the vehicle. Y determines the destination."
   • "X without Y creates A, and Y without X creates B."
@@ -263,7 +267,7 @@ GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level com
 - This is conversational, not a fresh diagnosis. You already made the diagnosis upstream.
 - Acknowledge or engage their specific point in the first clause. Name what they got right OR sharpen where their framing slips. No compliments ("great point"), no "thanks for the thoughtful reply" — just engage the substance directly.
 - DO NOT re-open with one of the forensic "I see this in audits weekly" openers. That's for top-level comments. Here the opener is a direct hook into THEIR words: "Where I'd push back on that is…", "Right on the [X], but the [Y] piece is where it gets interesting…", "That's the version most people land on. The deeper read is…", "Agreed on [X]. Where it gets messy is [Y]."
-- Shorter than a top-level comment: 80–140 words. ONE dense paragraph. No line breaks.
+- Shorter than a top-level comment: 50–90 words AND under 650 characters total. ONE dense paragraph. No line breaks. If you hit ~500 characters, close it out — do not keep going.
 - Still first person ("I", "I've", "in my audits"). Still systems-first. Still one numeric anchor if it earns the line.
 - End with a tight verdict OR a single sharp clarifying line that hands the conversation back without asking a soft permission question. ("That's the line that separates X from Y." is fine. "Does that make sense?" is banned.)
 - All other HARD BANS still apply (no em dashes, no emojis, no motivational language, no compliments, no questions as closers unless it's a forensic challenge).`;
@@ -271,7 +275,7 @@ GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level com
     const topLevelTaskBlock = `${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
-2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (140–220 words)" : "standalone LinkedIn POST (180–260 words)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
+2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (90–140 words, UNDER 900 characters, hard cap 1,150 chars — LinkedIn truncates comments past ~1,250)" : "standalone LinkedIn POST (180–260 words, under 2,800 characters)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
 3. Open with a VARIED signature opener from the 80+ shapes in the style guide. ROTATE across categories (audit, reframe, hidden-mechanism, direct-diagnosis, numeric-anchor, autopsy, concession-pivot). HARD BAN on defaulting to the same formula: "What looks like X is Y", "The part people miss…", "What most operators get wrong…", "It's not X. It's Y.", "Strip the surface off…", "Most companies don't have a…", "The hidden variable…", and "Diagnosis:" are ALL rare-use (combined cap: max 1 in every 10 responses). Do not start with the same first word as a recent response. Invent fresh openers in Joseph's voice when possible. Never open with a compliment or agreement.
 4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor. This is a real operator speaking from real reps, not a brand voice.
 5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
@@ -367,19 +371,33 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     if (!post) throw new Error("Empty response from AI");
     post = post.replace(/[—–]/g, ".");
 
-    // LinkedIn comment hard cap: 1,750 characters. Trim at last sentence
-    // boundary so we never ship a half-thought or blow past the limit.
-    const LINKEDIN_COMMENT_MAX = 1750;
-    if (post.length > LINKEDIN_COMMENT_MAX) {
-      const slice = post.slice(0, LINKEDIN_COMMENT_MAX);
+    // Mode-aware character ceilings. LinkedIn truncates comments past ~1,250
+    // chars, so we trim well below that and ALWAYS land on a sentence boundary
+    // — never ship a half-thought, never blow past the platform limit.
+    const isComment = mode === "brief" || isReplyToReply;
+    const HARD_CAP = isComment
+      ? (isReplyToReply ? 650 : 1150)   // reply-to-reply tighter than top-level comment
+      : 2900;                           // standalone repost (LinkedIn post limit is 3000)
+    if (post.length > HARD_CAP) {
+      const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
         slice.lastIndexOf(". "),
         slice.lastIndexOf("! "),
         slice.lastIndexOf("? "),
         slice.lastIndexOf("."),
+        slice.lastIndexOf("!"),
+        slice.lastIndexOf("?"),
       );
-      post = (lastStop > 200 ? slice.slice(0, lastStop + 1) : slice).trim();
+      // Require we land on a real sentence boundary; if not, walk back to one.
+      if (lastStop > 120) {
+        post = slice.slice(0, lastStop + 1).trim();
+      } else {
+        // Fallback: cut at last space so we don't slice a word in half.
+        const lastSpace = slice.lastIndexOf(" ");
+        post = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim().replace(/[,;:]+$/, "") + ".";
+      }
     }
+
 
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
