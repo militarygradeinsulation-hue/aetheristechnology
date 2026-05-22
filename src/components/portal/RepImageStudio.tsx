@@ -261,6 +261,10 @@ export const RepImageStudio: React.FC = () => {
         </div>
       </div>
 
+      <LinkedInBannerCreator invoke={invoke} onSaved={load} />
+
+
+
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground font-display flex items-center gap-2">
