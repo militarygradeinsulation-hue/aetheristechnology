@@ -13,10 +13,11 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine,
+  PenLine, Mail,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
+import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
 type Strategy = {
