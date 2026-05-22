@@ -4263,6 +4263,35 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_lead_skips: {
+        Row: {
+          id: string
+          lead_id: string
+          rep_code: string
+          skipped_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          rep_code: string
+          skipped_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          rep_code?: string
+          skipped_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_lead_skips_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_leads: {
         Row: {
           assigned_at: string | null

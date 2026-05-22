@@ -71,15 +71,23 @@ async function topUpRepDrop(supabase: any, repCode: string): Promise<number> {
     const needed = dailyPerRep - (openDrip ?? 0);
     if (needed <= 0) return 0;
 
-    const { data: candidatesRaw } = await supabase.from("rep_leads")
+    // Leads this rep has already skipped — never re-drop them.
+    const { data: skippedRows } = await supabase.from("rep_lead_skips")
+      .select("lead_id").eq("rep_code", repCode);
+    const skippedIds = new Set<string>((skippedRows || []).map((r: any) => r.lead_id));
+
+    let candidatesQuery = supabase.from("rep_leads")
       .select("id,business_name,industry,website,location,contact_name,email,why_fit,notes")
       .is("claimed_by_code", null)
       .is("assigned_to_code", null)
       .order("score", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(needed * 4);
+      .limit(needed * 4 + skippedIds.size);
+    const { data: candidatesRaw } = await candidatesQuery;
     const blocked = await loadBlockedKeywords(supabase);
-    const candidates = (candidatesRaw || []).filter((c: any) => !isLeadBlocked(c, blocked)).slice(0, needed);
+    const candidates = (candidatesRaw || [])
+      .filter((c: any) => !skippedIds.has(c.id) && !isLeadBlocked(c, blocked))
+      .slice(0, needed);
     if (!candidates || candidates.length === 0) return 0;
 
     const expiresAt = new Date(Date.now() + holdHours * 3600_000).toISOString();
@@ -184,6 +192,9 @@ serve(async (req) => {
     if (action === "skip_drip") {
       const id = sanitizeStr(body.id);
       if (!id) return jsonResp({ error: "Missing id" }, 400);
+      // Record the skip so this lead is not re-dropped to the same rep.
+      await supabase.from("rep_lead_skips")
+        .upsert({ rep_code: claims.code, lead_id: id }, { onConflict: "rep_code,lead_id" });
       const { error } = await supabase.from("rep_leads")
         .update({ assigned_to_code: null, assigned_at: null, assignment_expires_at: null })
         .eq("id", id).eq("assigned_to_code", claims.code).is("claimed_by_code", null);
