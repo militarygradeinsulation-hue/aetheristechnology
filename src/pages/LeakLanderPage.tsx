@@ -12,7 +12,6 @@ const LeakLanderPage: React.FC = () => {
       <SEOHead
         title="Your Business Is Leaking — Aetheris Business Forensics"
         description="78% of leaks we find, the owner already felt — they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
-        canonical="https://aetheris.technology/lander"
       />
 
       {/* Subtle animated grain backdrop */}
