@@ -219,6 +219,30 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "get_drip_settings") {
+      const { data, error } = await supabase.from("lead_drip_settings").select("*").maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, settings: data || null }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "update_drip_settings") {
+      const patch = (body.patch || {}) as Record<string, unknown>;
+      const allowed = [
+        "daily_per_rep", "enabled", "require_email", "indianapolis_only",
+        "scraper_enabled", "scraper_target_per_run", "hold_hours", "blocked_keywords",
+      ];
+      const clean: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      for (const k of allowed) if (k in patch) clean[k] = (patch as any)[k];
+      const id = String(body.id || "");
+      if (!id) return new Response(JSON.stringify({ error: "Missing id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const { error } = await supabase.from("lead_drip_settings").update(clean).eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
