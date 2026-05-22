@@ -371,19 +371,33 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     if (!post) throw new Error("Empty response from AI");
     post = post.replace(/[—–]/g, ".");
 
-    // LinkedIn comment hard cap: 1,750 characters. Trim at last sentence
-    // boundary so we never ship a half-thought or blow past the limit.
-    const LINKEDIN_COMMENT_MAX = 1750;
-    if (post.length > LINKEDIN_COMMENT_MAX) {
-      const slice = post.slice(0, LINKEDIN_COMMENT_MAX);
+    // Mode-aware character ceilings. LinkedIn truncates comments past ~1,250
+    // chars, so we trim well below that and ALWAYS land on a sentence boundary
+    // — never ship a half-thought, never blow past the platform limit.
+    const isComment = mode === "brief" || isReplyToReply;
+    const HARD_CAP = isComment
+      ? (isReplyToReply ? 650 : 1150)   // reply-to-reply tighter than top-level comment
+      : 2900;                           // standalone repost (LinkedIn post limit is 3000)
+    if (post.length > HARD_CAP) {
+      const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
         slice.lastIndexOf(". "),
         slice.lastIndexOf("! "),
         slice.lastIndexOf("? "),
         slice.lastIndexOf("."),
+        slice.lastIndexOf("!"),
+        slice.lastIndexOf("?"),
       );
-      post = (lastStop > 200 ? slice.slice(0, lastStop + 1) : slice).trim();
+      // Require we land on a real sentence boundary; if not, walk back to one.
+      if (lastStop > 120) {
+        post = slice.slice(0, lastStop + 1).trim();
+      } else {
+        // Fallback: cut at last space so we don't slice a word in half.
+        const lastSpace = slice.lastIndexOf(" ");
+        post = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim().replace(/[,;:]+$/, "") + ".";
+      }
     }
+
 
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
