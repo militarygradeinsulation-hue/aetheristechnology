@@ -49,6 +49,36 @@ const EMAIL_TOOL = {
   },
 };
 
+const SUBJECT_TOOL = {
+  type: "function",
+  function: {
+    name: "write_subject_hooks",
+    description: "Write 10 bold, direct subject line hooks in the Aetheris operator voice.",
+    parameters: {
+      type: "object",
+      properties: {
+        hooks: {
+          type: "array",
+          minItems: 8,
+          maxItems: 12,
+          items: {
+            type: "object",
+            properties: {
+              subject: { type: "string", description: "Under 7 words. Specific. No dashes. No emoji." },
+              angle: { type: "string", enum: ["leak", "number", "observation", "contrarian", "curiosity", "challenge"] },
+              why: { type: "string", description: "One short sentence on why it lands." },
+            },
+            required: ["subject", "angle", "why"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["hooks"],
+      additionalProperties: false,
+    },
+  },
+};
+
 function stripDashes(s: string): string {
   if (!s) return s;
   // Replace em / en dashes used as pauses with periods.
@@ -80,7 +110,8 @@ serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const mode: "create" | "rewrite" = body.mode === "rewrite" ? "rewrite" : "create";
+    const mode: "create" | "rewrite" | "subjects" =
+      body.mode === "rewrite" ? "rewrite" : body.mode === "subjects" ? "subjects" : "create";
     const prompt: string = (body.prompt || "").toString().slice(0, 4000);
     const pastedText: string = (body.pastedText || "").toString().slice(0, 8000);
     const recipientName: string = (body.recipientName || "").toString().slice(0, 80);
@@ -95,6 +126,8 @@ serve(async (req) => {
     let userInstruction = "";
     if (mode === "rewrite") {
       userInstruction = `Rewrite the following email in the Aetheris operator voice. Keep the intent. Remove ALL dashes. Cut filler. Make it specific.\n\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
+    } else if (mode === "subjects") {
+      userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.\n\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     } else {
       userInstruction = `Write a cold outreach email.\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     }
@@ -110,6 +143,7 @@ serve(async (req) => {
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) throw new Error("LOVABLE_API_KEY missing");
 
+    const tool = mode === "subjects" ? SUBJECT_TOOL : EMAIL_TOOL;
     const res = await fetch(LOVABLE_AI_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -119,8 +153,8 @@ serve(async (req) => {
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
-        tools: [EMAIL_TOOL],
-        tool_choice: { type: "function", function: { name: "write_outreach_email" } },
+        tools: [tool],
+        tool_choice: { type: "function", function: { name: tool.function.name } },
       }),
     });
 
@@ -133,8 +167,17 @@ serve(async (req) => {
 
     const data = await res.json();
     const call = data?.choices?.[0]?.message?.tool_calls?.[0];
-    if (!call?.function?.arguments) throw new Error("No email returned");
+    if (!call?.function?.arguments) throw new Error("No result returned");
     const parsed = JSON.parse(call.function.arguments);
+
+    if (mode === "subjects") {
+      const hooks = (parsed.hooks || []).map((h: any) => ({
+        subject: stripDashes(h.subject || ""),
+        angle: h.angle || "observation",
+        why: stripDashes(h.why || ""),
+      }));
+      return json({ mode, hooks, by: authed.kind === "rep" ? authed.code : "admin" });
+    }
 
     return json({
       subject: stripDashes(parsed.subject || ""),

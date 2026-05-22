@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2 } from 'lucide-react';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type } from 'lucide-react';
 
-type Mode = 'create' | 'rewrite';
+type Mode = 'create' | 'rewrite' | 'subjects';
 
 interface Props {
   /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
@@ -18,6 +18,8 @@ interface Props {
 }
 
 interface EmailOut { subject: string; body: string; why_it_works: string }
+interface SubjectHook { subject: string; angle: string; why: string }
+interface SubjectsOut { hooks: SubjectHook[] }
 
 function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   return new Promise((resolve, reject) => {
@@ -42,7 +44,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [image, setImage] = useState<{ url: string; base64: string; mime: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailOut | null>(null);
-  const [copied, setCopied] = useState<'' | 'subject' | 'body' | 'all'>('');
+  const [subjects, setSubjects] = useState<SubjectHook[] | null>(null);
+  const [copied, setCopied] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
@@ -71,6 +74,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
     }
     setLoading(true);
     setResult(null);
+    setSubjects(null);
     try {
       const headers: Record<string, string> = {};
       if (authMode === 'admin') headers['x-admin-token'] = token;
@@ -90,19 +94,19 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as EmailOut);
+      if (mode === 'subjects') {
+        setSubjects(((data as SubjectsOut)?.hooks) || []);
+      } else {
+        setResult(data as EmailOut);
+      }
     } catch (e) {
       toast({ title: 'Generation failed', description: String((e as Error).message), variant: 'destructive' });
     } finally { setLoading(false); }
   }
 
-  async function copy(kind: 'subject' | 'body' | 'all') {
-    if (!result) return;
-    const text = kind === 'subject' ? result.subject
-      : kind === 'body' ? result.body
-      : `Subject: ${result.subject}\n\n${result.body}`;
+  async function copyText(key: string, text: string) {
     await navigator.clipboard.writeText(text);
-    setCopied(kind);
+    setCopied(key);
     setTimeout(() => setCopied(''), 1500);
   }
 
@@ -124,8 +128,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       </div>
 
       {/* Mode switch */}
-      <div className="flex gap-2">
-        {(['create','rewrite'] as Mode[]).map((m) => (
+      <div className="flex flex-wrap gap-2">
+        {(['create','rewrite','subjects'] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -133,29 +137,35 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
               mode === m ? 'bg-amber text-background' : 'glass text-muted-foreground hover:text-foreground'
             }`}
           >
-            {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New</> : <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>}
+            {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New Email</>
+              : m === 'rewrite' ? <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>
+              : <><Type className="w-3.5 h-3.5"/>Subject Hooks</>}
           </button>
         ))}
       </div>
 
       {/* Inputs */}
       <Card className="glass p-5 space-y-4">
-        {mode === 'create' && (
+        {(mode === 'create' || mode === 'subjects') && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Recipient (optional)</label>
               <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Jordan, COO at Acme" />
             </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">From (your name)</label>
-              <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
-            </div>
+            {mode === 'create' && (
+              <div>
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">From (your name)</label>
+                <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
+              </div>
+            )}
           </div>
         )}
 
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-            {mode === 'create' ? 'Context / Angle' : 'Notes for the rewrite (optional)'}
+            {mode === 'create' ? 'Context / Angle'
+              : mode === 'subjects' ? 'Context / Angle for the subject hooks'
+              : 'Notes for the rewrite (optional)'}
           </label>
           <Textarea
             value={prompt}
@@ -163,7 +173,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             onPaste={handlePasteCapture}
             placeholder={mode === 'create'
               ? "What you found on their site. The leak you want to name. What you want them to do."
-              : "What you want changed. Tone, urgency, specific facts to add."}
+              : mode === 'subjects'
+                ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
+                : "What you want changed. Tone, urgency, specific facts to add."}
             rows={4}
           />
         </div>
@@ -221,16 +233,20 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           disabled={loading}
           className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 font-bold uppercase tracking-wider"
         >
-          {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Writing...</> : <><Sparkles className="w-4 h-4 mr-2"/>{mode === 'create' ? 'Write the Email' : 'Rewrite It'}</>}
+          {loading
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Writing...</>
+            : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
+            : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
+            : <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>}
         </Button>
       </Card>
 
-      {/* Result */}
+      {/* Email result */}
       {result && (
         <Card className="glass p-5 space-y-4 border-amber/30">
           <div className="flex items-center justify-between">
             <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Draft</div>
-            <Button size="sm" variant="outline" onClick={() => copy('all')}>
+            <Button size="sm" variant="outline" onClick={() => copyText('all', `Subject: ${result.subject}\n\n${result.body}`)}>
               {copied === 'all' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
               Copy All
             </Button>
@@ -239,7 +255,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
-              <button onClick={() => copy('subject')} className="text-xs text-amber hover:underline flex items-center gap-1">
+              <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
                 {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
               </button>
             </div>
@@ -249,7 +265,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Body</label>
-              <button onClick={() => copy('body')} className="text-xs text-amber hover:underline flex items-center gap-1">
+              <button onClick={() => copyText('body', result.body)} className="text-xs text-amber hover:underline flex items-center gap-1">
                 {copied === 'body' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
               </button>
             </div>
@@ -264,6 +280,51 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
               <div className="text-sm text-muted-foreground italic">{result.why_it_works}</div>
             </div>
           )}
+        </Card>
+      )}
+
+      {/* Subject hooks result */}
+      {subjects && subjects.length > 0 && (
+        <Card className="glass p-5 space-y-3 border-amber/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Subject Hooks</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{subjects.length} options. Click any to copy.</div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => copyText('all-subjects', subjects.map((h, i) => `${i + 1}. ${h.subject}`).join('\n'))}
+            >
+              {copied === 'all-subjects' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
+              Copy All
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {subjects.map((h, i) => {
+              const k = `subj-${i}`;
+              return (
+                <button
+                  key={k}
+                  onClick={() => copyText(k, h.subject)}
+                  className="w-full text-left rounded-lg border border-border bg-background/40 p-3 hover:border-amber/50 transition group"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display font-bold text-foreground leading-snug">{h.subject}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        <span className="uppercase tracking-widest text-[10px] font-bold text-amber/80 mr-2">{h.angle}</span>
+                        {h.why}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground group-hover:text-amber shrink-0 pt-0.5">
+                      {copied === k ? <Check className="w-4 h-4"/> : <Copy className="w-4 h-4"/>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </Card>
       )}
     </div>
