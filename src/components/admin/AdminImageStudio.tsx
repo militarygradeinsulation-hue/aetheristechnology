@@ -369,7 +369,16 @@ WATERMARK: "aetheris.technology"`;
         </p>
 
         <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Hook preset</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Hook preset</label>
+            <button
+              type="button"
+              onClick={shuffleAll}
+              className="text-[10px] uppercase tracking-wider font-mono text-amber hover:text-amber/80 flex items-center gap-1"
+            >
+              <Shuffle className="w-3 h-3" /> Shuffle all
+            </button>
+          </div>
           <select
             value={bannerPreset}
             onChange={e => applyPreset(e.target.value)}
@@ -385,17 +394,32 @@ WATERMARK: "aetheris.technology"`;
 
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Headline (white)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Headline (white)</label>
+              <button type="button" onClick={() => shuffleField('headline')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+                <Shuffle className="w-3 h-3" /> Random
+              </button>
+            </div>
             <Input value={bannerHeadline} onChange={e => { setBannerHeadline(e.target.value); setBannerPreset('custom'); }} placeholder="Stop Guessing." />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Accent (amber)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Accent (amber)</label>
+              <button type="button" onClick={() => shuffleField('accent')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+                <Shuffle className="w-3 h-3" /> Random
+              </button>
+            </div>
             <Input value={bannerAccent} onChange={e => { setBannerAccent(e.target.value); setBannerPreset('custom'); }} placeholder="Start Understanding." />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Subline</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Subline</label>
+            <button type="button" onClick={() => shuffleField('sub')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+              <Shuffle className="w-3 h-3" /> Random
+            </button>
+          </div>
           <Textarea
             rows={2}
             value={bannerSub}
@@ -404,6 +428,7 @@ WATERMARK: "aetheris.technology"`;
             className="resize-none"
           />
         </div>
+
 
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Background style</label>
