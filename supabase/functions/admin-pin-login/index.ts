@@ -64,6 +64,33 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // ---- Brute-force protection: per-IP rate limit via admin_kv -----------
+    // Max 8 failed attempts per 15 minutes per IP. On hit, return 429.
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const rlKey = `ratelimit:admin-pin-login:${ip}`;
+    const WINDOW_MS = 15 * 60 * 1000;
+    const MAX_FAILS = 8;
+    const nowMs = Date.now();
+    const { data: rlRow } = await admin
+      .from("admin_kv")
+      .select("value")
+      .eq("key", rlKey)
+      .maybeSingle();
+    const rlVal = (rlRow?.value as { count?: number; first?: number } | undefined) || { count: 0, first: nowMs };
+    if (nowMs - (rlVal.first || 0) > WINDOW_MS) {
+      rlVal.count = 0;
+      rlVal.first = nowMs;
+    }
+    if ((rlVal.count || 0) >= MAX_FAILS) {
+      return new Response(
+        JSON.stringify({ error: "Too many attempts. Try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Accept either the master ADMIN_PIN or an active partner's portal code.
     let isPartnerPin = false;
     if (pin !== ADMIN_PIN) {
@@ -75,6 +102,12 @@ Deno.serve(async (req) => {
         .eq("is_active", true)
         .maybeSingle();
       if (!partner) {
+        // Increment failure counter.
+        await admin.from("admin_kv").upsert({
+          key: rlKey,
+          value: { count: (rlVal.count || 0) + 1, first: rlVal.first || nowMs },
+          updated_at: new Date().toISOString(),
+        });
         return new Response(JSON.stringify({ error: "Invalid PIN" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -82,6 +115,9 @@ Deno.serve(async (req) => {
       }
       isPartnerPin = true;
     }
+
+    // Successful auth — clear the rate-limit counter for this IP.
+    await admin.from("admin_kv").delete().eq("key", rlKey);
 
     // 1. PIN-token for admin-data edge function calls.
     const exp = Date.now() + TOKEN_TTL_MS;
