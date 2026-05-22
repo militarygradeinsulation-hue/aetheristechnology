@@ -2929,6 +2929,7 @@ export type Database = {
       }
       lead_drip_settings: {
         Row: {
+          blocked_keywords: string[]
           daily_per_rep: number
           enabled: boolean
           excluded_lifecycle_stages: string[]
@@ -2942,6 +2943,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blocked_keywords?: string[]
           daily_per_rep?: number
           enabled?: boolean
           excluded_lifecycle_stages?: string[]
@@ -2955,6 +2957,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blocked_keywords?: string[]
           daily_per_rep?: number
           enabled?: boolean
           excluded_lifecycle_stages?: string[]
