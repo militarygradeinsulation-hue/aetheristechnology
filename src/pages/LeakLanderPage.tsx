@@ -171,12 +171,12 @@ const LeakLanderPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setWhatOpen((v) => !v)}
-              className="w-full group relative inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-crimson/40 bg-crimson/[0.08] backdrop-blur hover:bg-crimson/15 hover:border-crimson/70 transition-all text-foreground font-mono uppercase tracking-wider text-xs shadow-[0_10px_30px_-15px_hsl(var(--crimson)/0.6)]"
+              className="relative overflow-hidden w-full group inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-crimson/40 bg-gradient-to-br from-crimson/[0.18] via-crimson/[0.08] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 hover:border-crimson/70 transition-all text-foreground font-mono uppercase tracking-wider text-xs shadow-[0_15px_40px_-15px_hsl(var(--crimson)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.18)] before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none"
               aria-expanded={whatOpen}
             >
-              <HelpCircle className="w-4 h-4 text-crimson" />
-              <span className="font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What The Hell Do We Do?</span>
-              <ChevronDown className={`w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
+              <HelpCircle className="w-4 h-4 text-crimson relative" />
+              <span className="relative font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What The Hell Do We Do?</span>
+              <ChevronDown className={`relative w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
             </button>
             {whatOpen && (
               <div className="mt-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5 animate-fade-in">
