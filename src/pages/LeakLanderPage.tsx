@@ -93,7 +93,7 @@ const LeakLanderPage: React.FC = () => {
               <img
                 src={heroBanner}
                 alt="Your business is leaking. You just can't see it from inside the building."
-                className={`w-full h-auto block max-h-[32vh] object-cover transition-opacity duration-300 ${playing ? "opacity-0" : "opacity-100"}`}
+                className={`w-full h-auto block max-h-[70vh] object-contain transition-opacity duration-300 ${playing ? "opacity-0" : "opacity-100"}`}
                 loading="eager"
                 draggable={false}
               />
