@@ -7,6 +7,7 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/leak-banner-hero.png";
 
 const LeakLanderPage: React.FC = () => {
+  const [whatOpen, setWhatOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
