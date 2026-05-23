@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
-import { Contact } from '@/components/Contact';
+import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
 import { HubSpotMeeting } from '@/components/HubSpotMeeting';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
@@ -13,8 +13,8 @@ const ContactPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Contact the Forensics Operator | Aetheris Indianapolis"
-        description="Find where your business is leaking. Call (317) 376-2110, email aetheris.technology@outlook.com, or run the free Leak Audit™. Indianapolis, US-wide."
+        title="Intake Form | Aetheris Business Forensics Indianapolis"
+        description="Drop your details and run the free Leak Audit™. Operator-led intake with no public list and no spam. Indianapolis, US-wide."
         path="/contact"
         jsonLd={{
           "@context": "https://schema.org",
@@ -32,7 +32,7 @@ const ContactPage = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24">
-          <Contact onContactClick={() => setIsContactModalOpen(true)} />
+          <RepCodeFreeScan />
         </div>
         <HubSpotMeeting />
         <Footer />
@@ -43,3 +43,4 @@ const ContactPage = () => {
 };
 
 export default ContactPage;
+
