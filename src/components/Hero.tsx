@@ -162,13 +162,13 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               type="button"
               onClick={toggleVideo}
               aria-label={playing ? 'Pause video' : 'Play video'}
-              className="group relative w-72 md:w-96 aspect-square rounded-full overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
+              className="group relative w-full max-w-5xl aspect-[16/10] rounded-sm overflow-hidden shadow-2xl border border-amber/30 focus:outline-none focus:ring-2 focus:ring-amber"
             >
               <img
                 src={architectLogo}
-                alt="Joseph Toney, Aetheris Operator"
-                width={384}
-                height={384}
+                alt="Your business is leaking — Aetheris business forensics"
+                width={1600}
+                height={1000}
                 fetchPriority="high"
                 decoding="async"
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
@@ -190,6 +190,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               )}
             </button>
           </div>
+
 
           <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
             <span className="font-case text-xs uppercase tracking-widest text-amber">
