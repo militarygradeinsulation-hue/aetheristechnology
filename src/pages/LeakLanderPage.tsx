@@ -142,7 +142,7 @@ const LeakLanderPage: React.FC = () => {
               </span>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Email</p>
-                <p className="text-lg font-bold text-foreground break-all">joseph@aetheris.technology</p>
+                <p className="text-lg font-bold text-foreground break-all">Aetheris.technology@outlook.com</p>
               </div>
             </a>
             <div className="flex items-start gap-4">
