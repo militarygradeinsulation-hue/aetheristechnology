@@ -65,8 +65,8 @@ const LeakLanderPage: React.FC = () => {
 
       <main className="relative flex-1 flex items-center justify-center max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
         <div className="w-full">
-          {/* Aetheris logo — top-right, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-2xl mx-auto flex justify-end mb-2">
+          {/* Aetheris logo — top-left, triple-tap to /staff (admins + reps) */}
+          <div className="max-w-2xl mx-auto flex justify-start mb-2">
             <button
               type="button"
               onClick={handleLogoTap}
@@ -76,7 +76,7 @@ const LeakLanderPage: React.FC = () => {
               <img
                 src={aetherisLogo}
                 alt="Aetheris"
-                className="h-12 sm:h-14 w-auto opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
+                className="h-24 sm:h-32 md:h-40 w-auto opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
                 draggable={false}
               />
             </button>
