@@ -176,7 +176,7 @@ export default function LinkedInPostStudio() {
   const [respondImage, setRespondImage] = useState<string | null>(null);
   const [respondFileName, setRespondFileName] = useState<string>('');
   const [respondText, setRespondText] = useState<string>('');
-  const [respondMode, setRespondMode] = useState<'brief' | 'full'>('brief');
+  const [respondMode, setRespondMode] = useState<'micro' | 'brief' | 'medium' | 'long' | 'full'>('brief');
   const [respondExtra, setRespondExtra] = useState('');
   const [respondLoading, setRespondLoading] = useState(false);
   const [respondOutput, setRespondOutput] = useState('');
