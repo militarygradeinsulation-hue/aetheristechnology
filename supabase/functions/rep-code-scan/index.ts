@@ -135,6 +135,45 @@ serve(async (req) => {
       .single();
     if (leadErr) console.error("lead insert error:", leadErr);
 
+    // Fan-out intake notification to operator inbox (Joseph + Braden).
+    const notifyTargets = [
+      "joseph@aetheris.technology",
+      "braden.aetheristechnology@outlook.com",
+    ];
+    const leadId = leadRow?.id || crypto.randomUUID();
+    const templateData = {
+      prospect_name: name || null,
+      prospect_email: email,
+      prospect_phone: phone || null,
+      company: company || null,
+      website_url: url,
+      rep_code: repCode,
+      operator: codeRow.rep_name || null,
+      score: typeof full?.score === "number" ? full.score : null,
+      grade: full?.grade || null,
+      gap_count: gaps.length,
+      critical_count: critical.length,
+      executive_summary: teaser.executiveSummary || "",
+    };
+    await Promise.allSettled(
+      notifyTargets.map((to) =>
+        fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SVC}`,
+            apikey: SVC,
+          },
+          body: JSON.stringify({
+            templateName: "lead-intake-notification",
+            recipientEmail: to,
+            idempotencyKey: `lead-intake-${leadId}-${to}`,
+            templateData,
+          }),
+        }).catch((err) => console.error("lead notify failed", to, err)),
+      ),
+    );
+
     return json(200, {
       ok: true,
       lead_id: leadRow?.id || null,
