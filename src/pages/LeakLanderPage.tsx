@@ -216,7 +216,7 @@ const LeakLanderPage: React.FC = () => {
               </div>
             </div>
             <p className="mt-3 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
-              Aetheris · Business Forensics · No Sugar
+              Aetheris · Business Forensics
             </p>
           </section>
         </div>
