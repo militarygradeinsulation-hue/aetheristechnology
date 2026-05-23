@@ -66,7 +66,7 @@ const LeakLanderPage: React.FC = () => {
           style={{ animationDelay: "320ms", animationFillMode: "both" }}
         >
           {/* Main site */}
-          <Link to="/" className="group">
+          <Link to="/home" className="group">
             <div className="h-full rounded-xl border border-border bg-card/60 backdrop-blur p-6 transition-all duration-300 hover:border-amber/60 hover:bg-card hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_hsl(var(--amber)/0.4)]">
               <div className="flex items-center justify-between mb-4">
                 <ExternalLink className="w-6 h-6 text-amber" />
