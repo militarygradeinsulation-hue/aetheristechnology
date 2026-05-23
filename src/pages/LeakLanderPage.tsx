@@ -103,7 +103,7 @@ const LeakLanderPage: React.FC = () => {
                 playsInline
                 onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
                 onPause={() => setPlaying(false)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
               />
               {/* Glossy top sheen */}
               <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 via-white/5 to-transparent" />
