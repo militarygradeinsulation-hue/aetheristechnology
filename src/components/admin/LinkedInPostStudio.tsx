@@ -641,6 +641,29 @@ export default function LinkedInPostStudio() {
             </div>
           </div>
         ) : (
+            <div className="flex justify-between items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => pasteFromClipboard(setRespondText, 'Post pasted')}
+                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
+              >
+                <ClipboardPaste className="w-3 h-3 mr-1" /> Paste
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearPastedPost}
+                disabled={!respondText && !respondExtra && !respondOutput}
+                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
+              >
+                <Eraser className="w-3 h-3 mr-1" /> Clear all
+              </Button>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-3">
             {([
               { label: 'Original post (optional context)', placeholder: 'Optional: paste the original post you commented on. Helps anchor the thread.', text: replyOriginalPost, setText: setReplyOriginalPost, image: replyOriginalImage, setImage: setReplyOriginalImage, rows: 3 },
@@ -650,9 +673,17 @@ export default function LinkedInPostStudio() {
               <div key={slot.label}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="text-[10px] uppercase tracking-widest text-amber">{slot.label}</div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber cursor-pointer inline-flex items-center gap-1">
-                    <Upload className="w-3 h-3" />
-                    {slot.image ? 'Replace screenshot' : 'Attach screenshot'}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => pasteFromClipboard(slot.setText, `${slot.label} pasted`)}
+                      className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber inline-flex items-center gap-1"
+                    >
+                      <ClipboardPaste className="w-3 h-3" /> Paste
+                    </button>
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber cursor-pointer inline-flex items-center gap-1">
+                      <Upload className="w-3 h-3" />
+                      {slot.image ? 'Replace screenshot' : 'Attach screenshot'}
                     <input
                       type="file"
                       accept="image/*"
