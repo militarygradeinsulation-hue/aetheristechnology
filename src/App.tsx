@@ -116,7 +116,8 @@ const App = () => (
                   <RetargetingPixel />
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
-                      <Route path="/" element={<Home />} />
+                      <Route path="/" element={<LeakLanderPage />} />
+                      <Route path="/home" element={<Home />} />
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<CatalogPage />} />
                       <Route path="/why-us" element={<WhyUsPage />} />
