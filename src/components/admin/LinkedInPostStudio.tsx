@@ -676,7 +676,8 @@ export default function LinkedInPostStudio() {
                       className="hidden"
                       onChange={(e) => readImageToDataUrl(e.target.files?.[0], slot.setImage)}
                     />
-                  </label>
+                    </label>
+                  </div>
                 </div>
                 <Textarea
                   rows={slot.rows}
