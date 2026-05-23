@@ -1,17 +1,22 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
+import heroLeakVideo from "@/assets/hero-leak.mp4";
+import aetherisLogo from "@/assets/aetheris-new-logo.png";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleHeroTap = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleLogoTap = () => {
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
     if (tapCountRef.current >= 3) {
@@ -21,6 +26,26 @@ const LeakLanderPage: React.FC = () => {
     }
     tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
   };
+
+  const toggleVideo = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.muted = false;
+      v.volume = 1;
+      v.play()
+        .then(() => setPlaying(true))
+        .catch(() => {
+          v.muted = true;
+          v.play().then(() => setPlaying(true)).catch(() => {});
+        });
+    } else {
+      v.pause();
+      v.currentTime = 0;
+      setPlaying(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
@@ -40,24 +65,56 @@ const LeakLanderPage: React.FC = () => {
 
       <main className="relative flex-1 flex items-center justify-center max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
         <div className="w-full">
-          {/* Hero banner — compact */}
+          {/* Aetheris logo — top-right, triple-tap to /staff (admins + reps) */}
+          <div className="max-w-2xl mx-auto flex justify-end mb-2">
+            <button
+              type="button"
+              onClick={handleLogoTap}
+              aria-label="Aetheris"
+              className="rounded-full focus:outline-none focus:ring-2 focus:ring-amber/60 select-none"
+            >
+              <img
+                src={aetherisLogo}
+                alt="Aetheris"
+                className="h-12 sm:h-14 w-auto opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
+                draggable={false}
+              />
+            </button>
+          </div>
+
+          {/* Hero banner with playable video overlay */}
           <div className="animate-fade-in max-w-2xl mx-auto">
-            <div
-              onClick={handleHeroTap}
-              role="button"
-              tabIndex={-1}
-              aria-label="Aetheris hero"
-              className="rounded-2xl overflow-hidden border border-amber/20 shadow-2xl shadow-black/60 cursor-pointer select-none"
+            <button
+              type="button"
+              onClick={toggleVideo}
+              aria-label={playing ? "Pause video" : "Play video"}
+              className="group relative w-full block rounded-2xl overflow-hidden border border-amber/20 shadow-2xl shadow-black/60 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-amber"
             >
               <img
                 src={heroBanner}
                 alt="Your business is leaking. You just can't see it from inside the building."
-                className="w-full h-auto block max-h-[32vh] object-cover pointer-events-none"
+                className={`w-full h-auto block max-h-[32vh] object-cover transition-opacity duration-300 ${playing ? "opacity-0" : "opacity-100"}`}
                 loading="eager"
                 draggable={false}
               />
-            </div>
+              <video
+                ref={videoRef}
+                src={heroLeakVideo}
+                playsInline
+                onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
+                onPause={() => setPlaying(false)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
+              />
+              {!playing && (
+                <span className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
+                  <span className="rounded-full bg-amber/90 text-background p-4 shadow-xl group-hover:scale-110 transition-transform">
+                    <Play className="w-7 h-7 fill-current" />
+                  </span>
+                </span>
+              )}
+            </button>
           </div>
+
 
           {/* Catch phrase */}
           <section
