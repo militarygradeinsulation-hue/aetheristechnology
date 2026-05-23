@@ -4,7 +4,7 @@ import { ArrowRight, Phone, Play, FileText, BadgeCheck, ChevronDown, HelpCircle 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import architectLogo from '@/assets/hero-leaking-building.jpg';
+import architectLogo from '@/assets/architect-logo.jpg';
 import heroLeakVideo from '@/assets/hero-leak.mp4';
 
 import { ForensicInfographic } from './ForensicInfographic';

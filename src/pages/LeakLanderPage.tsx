@@ -4,7 +4,7 @@ import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, Help
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
-import heroBanner from "@/assets/leak-banner-hero.png";
+import heroBanner from "@/assets/hero-leaking-building.jpg";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
