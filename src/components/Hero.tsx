@@ -29,6 +29,16 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
 
   const toggleVideo = () => {
+    // Triple-tap → staff/login
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      navigate('/staff');
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
@@ -47,6 +57,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
       setPlaying(false);
     }
   };
+
 
   return (
     <section className="relative min-h-[78vh] flex items-center justify-center px-4 pt-24 pb-12">
