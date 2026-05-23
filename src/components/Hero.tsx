@@ -20,9 +20,13 @@ const HUBSPOT_MEETING_URL =
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [whatOpen, setWhatOpen] = useState(false);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   const toggleVideo = () => {
     const v = videoRef.current;
