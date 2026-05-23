@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/leak-banner-hero.png";
 
 const LeakLanderPage: React.FC = () => {
+  const [whatOpen, setWhatOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
@@ -78,6 +79,35 @@ const LeakLanderPage: React.FC = () => {
                 <ArrowRight className="ml-2 w-3.5 h-3.5" />
               </a>
             </Button>
+          </section>
+
+          {/* What the hell do we do — instant answer */}
+          <section
+            className="mt-4 max-w-2xl mx-auto animate-fade-in"
+            style={{ animationDelay: "300ms", animationFillMode: "both" }}
+          >
+            <button
+              type="button"
+              onClick={() => setWhatOpen((v) => !v)}
+              className="w-full group relative inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-crimson/40 bg-crimson/[0.08] backdrop-blur hover:bg-crimson/15 hover:border-crimson/70 transition-all text-foreground font-mono uppercase tracking-wider text-xs shadow-[0_10px_30px_-15px_hsl(var(--crimson)/0.6)]"
+              aria-expanded={whatOpen}
+            >
+              <HelpCircle className="w-4 h-4 text-crimson" />
+              <span className="font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What The Hell Do We Do?</span>
+              <ChevronDown className={`w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
+            </button>
+            {whatOpen && (
+              <div className="mt-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5 animate-fade-in">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Plain English</div>
+                <p className="font-forensic text-lg leading-snug text-foreground">
+                  We're <span className="text-amber italic">business forensics operators.</span> We pull your books, your CRM, your ops, and your sales motion apart and show you exactly where the money is{" "}
+                  <span className="text-crimson italic font-bold">leaking out</span> — usually $50K–$500K a year you can't see from the inside.
+                </p>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                  No fluff decks. No "strategy sessions." A real diagnostic with a written report, exact dollar figures, and a fix list ranked by ROI. Then we help you plug them — or hand it off clean.
+                </p>
+              </div>
+            )}
           </section>
 
           {/* Contact info — compact glass row */}
