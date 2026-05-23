@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          <Link to="/" className="flex items-center shrink-0" onClick={handleLogoTap}>
+          <Link to="/home" className="flex items-center shrink-0" onClick={handleLogoTap}>
             <img
               src={aetherisLogo}
               alt="Aetheris Business Forensics"
