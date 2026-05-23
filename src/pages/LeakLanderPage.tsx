@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
@@ -8,6 +8,19 @@ import heroBanner from "@/assets/leak-banner-hero.png";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
+  const navigate = useNavigate();
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleHeroTap = () => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      navigate("/staff");
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+  };
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
@@ -29,12 +42,19 @@ const LeakLanderPage: React.FC = () => {
         <div className="w-full">
           {/* Hero banner — compact */}
           <div className="animate-fade-in max-w-2xl mx-auto">
-            <div className="rounded-2xl overflow-hidden border border-amber/20 shadow-2xl shadow-black/60">
+            <div
+              onClick={handleHeroTap}
+              role="button"
+              tabIndex={-1}
+              aria-label="Aetheris hero"
+              className="rounded-2xl overflow-hidden border border-amber/20 shadow-2xl shadow-black/60 cursor-pointer select-none"
+            >
               <img
                 src={heroBanner}
                 alt="Your business is leaking. You just can't see it from inside the building."
-                className="w-full h-auto block max-h-[32vh] object-cover"
+                className="w-full h-auto block max-h-[32vh] object-cover pointer-events-none"
                 loading="eager"
+                draggable={false}
               />
             </div>
           </div>
