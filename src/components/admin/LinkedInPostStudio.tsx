@@ -213,6 +213,20 @@ export default function LinkedInPostStudio() {
     toast({ title: 'Cleared' });
   };
 
+  const pasteFromClipboard = async (setter: (v: string) => void, label = 'Pasted') => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        toast({ title: 'Clipboard is empty', variant: 'destructive' });
+        return;
+      }
+      setter(text);
+      toast({ title: label, description: `${text.length} characters` });
+    } catch {
+      toast({ title: 'Paste blocked', description: 'Allow clipboard access or paste manually (Cmd/Ctrl+V).', variant: 'destructive' });
+    }
+  };
+
   const generateFromUrl = async () => {
     const u = sourceUrl.trim();
     if (!u) { toast({ title: 'Paste a URL or YouTube link first', variant: 'destructive' }); return; }
