@@ -627,20 +627,6 @@ export default function LinkedInPostStudio() {
               onChange={(e) => setRespondText(e.target.value)}
               className="text-sm"
             />
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={clearPastedPost}
-                disabled={!respondText && !respondExtra && !respondOutput}
-                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
-              >
-                <Eraser className="w-3 h-3 mr-1" /> Clear all
-              </Button>
-            </div>
-          </div>
-        ) : (
             <div className="flex justify-between items-center">
               <Button
                 type="button"
