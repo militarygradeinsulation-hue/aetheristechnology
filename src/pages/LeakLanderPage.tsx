@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
+import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
@@ -47,7 +48,8 @@ const LeakLanderPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
+    <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
+      <Background />
       <SEOHead
         title="Your Business Is Leaking — Aetheris Business Forensics"
         description="78% of leaks we find, the owner already felt — they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
