@@ -1,11 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Phone, Play, FileText, BadgeCheck, ChevronDown, HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import architectLogo from '@/assets/architect-logo.jpg';
+import architectLogo from '@/assets/hero-leaking-building.jpg';
 import heroLeakVideo from '@/assets/hero-leak.mp4';
+
 import { ForensicInfographic } from './ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
 import { ProblemPicker } from './ProblemPicker';
