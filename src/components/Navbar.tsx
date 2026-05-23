@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   // The Leak Audit gets the forensic case-file treatment; everything else is a quiet link.
   const navItems: NavItem[] = [
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
-    { label: 'Home', href: '/', blood: true },
+    { label: 'Home', href: '/home', blood: true },
     { label: 'Methodology', href: '/methodology' },
     { label: 'Premium Tech Suite', href: '/catalog', accent: true },
     { label: 'Industries', href: '/industries' },
