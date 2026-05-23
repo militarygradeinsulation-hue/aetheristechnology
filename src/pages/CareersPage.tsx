@@ -184,11 +184,17 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="max-w-md mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
         <video
           src={careersIntroVideo}
-          poster={careersIntroPoster}
+          poster={careersHero}
           controls
           muted
           playsInline
           preload="metadata"
+          onEnded={(e) => {
+            const v = e.currentTarget;
+            v.pause();
+            v.currentTime = 0;
+            v.load(); // re-show the poster (careersHero) after playback ends
+          }}
           className="w-full h-auto block"
         >
           Your browser does not support the video tag.
