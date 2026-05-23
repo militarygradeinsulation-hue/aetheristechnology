@@ -82,13 +82,13 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Hero banner with playable video overlay */}
+          {/* Hero banner with playable video overlay — glossy glass tile */}
           <div className="animate-fade-in max-w-2xl mx-auto">
             <button
               type="button"
               onClick={toggleVideo}
               aria-label={playing ? "Pause video" : "Play video"}
-              className="group relative w-full block rounded-2xl overflow-hidden border border-amber/20 shadow-2xl shadow-black/60 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-amber"
+              className="group relative w-full block rounded-2xl overflow-hidden border border-white/15 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.15)] cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-amber transition-all hover:border-amber/40 hover:shadow-[0_30px_80px_-15px_rgba(0,0,0,0.8),0_0_40px_-10px_hsl(var(--amber)/0.35),inset_0_1px_0_0_rgba(255,255,255,0.2)]"
             >
               <img
                 src={heroBanner}
@@ -105,10 +105,15 @@ const LeakLanderPage: React.FC = () => {
                 onPause={() => setPlaying(false)}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
               />
+              {/* Glossy top sheen */}
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 via-white/5 to-transparent" />
+              {/* Subtle inner edge highlight */}
+              <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
               {!playing && (
                 <span className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
-                  <span className="rounded-full bg-amber/90 text-background p-4 shadow-xl group-hover:scale-110 transition-transform">
-                    <Play className="w-7 h-7 fill-current" />
+                  <span className="relative rounded-full bg-gradient-to-br from-amber via-amber to-amber/70 text-background p-4 shadow-[0_15px_40px_-5px_hsl(var(--amber)/0.6),inset_0_1px_0_0_rgba(255,255,255,0.4)] ring-1 ring-white/30 group-hover:scale-110 transition-transform">
+                    <span aria-hidden className="absolute inset-0 rounded-full bg-gradient-to-b from-white/40 via-transparent to-transparent opacity-60" />
+                    <Play className="relative w-7 h-7 fill-current" />
                   </span>
                 </span>
               )}
