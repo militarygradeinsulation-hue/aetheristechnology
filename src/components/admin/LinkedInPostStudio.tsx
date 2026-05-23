@@ -678,11 +678,14 @@ export default function LinkedInPostStudio() {
           {respondSourceType !== 'reply' && (
             <div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Response Format</div>
-              <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'brief' | 'full')}>
+              <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'micro' | 'brief' | 'medium' | 'long' | 'full')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="brief">Comment Reply (60-110 words)</SelectItem>
-                  <SelectItem value="full">Standalone Repost (120-180 words)</SelectItem>
+                  <SelectItem value="micro">Micro Reply (40-70 words)</SelectItem>
+                  <SelectItem value="brief">Short Comment (90-140 words)</SelectItem>
+                  <SelectItem value="medium">Medium Comment (150-210 words)</SelectItem>
+                  <SelectItem value="long">Long Comment (220-300 words)</SelectItem>
+                  <SelectItem value="full">Standalone Repost (180-260 words)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
