@@ -223,7 +223,18 @@ serve(async (req) => {
     const imageDataUrl: string = body?.imageDataUrl || "";
     const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
-    const mode: string = body?.mode === "brief" ? "brief" : "full"; // "brief" = comment, "full" = standalone repost
+    const ALLOWED_MODES = ["micro", "brief", "medium", "long", "full"] as const;
+    type Mode = typeof ALLOWED_MODES[number];
+    const mode: Mode = (ALLOWED_MODES as readonly string[]).includes(body?.mode) ? body.mode as Mode : "brief";
+    const isStandalonePost = mode === "full";
+    const MODE_SPECS: Record<Mode, { label: string; spec: string }> = {
+      micro:  { label: "MICRO COMMENT reply",   spec: "40–70 words, UNDER 450 characters. ONE tight paragraph. Cut all setup. One reframe, one mechanism beat, one verdict." },
+      brief:  { label: "COMMENT reply",          spec: "90–140 words, UNDER 900 characters, hard cap 1,150 chars. ONE dense paragraph." },
+      medium: { label: "MEDIUM COMMENT reply",   spec: "150–210 words, UNDER 1,500 characters. ONE dense paragraph. Room for a fuller mechanism walk before the verdict." },
+      long:   { label: "LONG COMMENT reply",     spec: "220–300 words, UNDER 2,100 characters. ONE dense paragraph. Full 4-part architecture with extended mechanism cascade." },
+      full:   { label: "standalone LinkedIn POST", spec: "180–260 words, UNDER 2,800 characters." },
+    };
+    const modeSpec = MODE_SPECS[mode];
     const conversationKind: string = body?.conversationKind === "reply_to_reply" ? "reply_to_reply" : "comment_on_post";
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
