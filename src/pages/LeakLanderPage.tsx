@@ -136,7 +136,7 @@ const LeakLanderPage: React.FC = () => {
                 <p className="text-lg font-bold text-foreground">(317) 376-2110</p>
               </div>
             </a>
-            <a href="mailto:joseph@aetheris.technology" className="group flex items-start gap-4 hover-scale">
+            <a href="mailto:Aetheris.technology@outlook.com" className="group flex items-start gap-4 hover-scale">
               <span className="shrink-0 w-11 h-11 rounded-full border border-amber/40 grid place-items-center bg-amber/5 group-hover:bg-amber/20 transition-colors">
                 <Mail className="w-5 h-5 text-amber" />
               </span>
