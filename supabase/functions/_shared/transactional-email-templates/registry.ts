@@ -14,6 +14,7 @@ import { template as contactNotification } from './contact-notification.tsx'
 import { template as repApplicationNotification } from './rep-application-notification.tsx'
 import { template as monthlyDelivery } from './monthly-delivery.tsx'
 import { template as deliverableMagicLink } from './deliverable-magic-link.tsx'
+import { template as leadIntakeNotification } from './lead-intake-notification.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-welcome': repWelcome,
@@ -21,4 +22,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-application-notification': repApplicationNotification,
   'monthly-delivery': monthlyDelivery,
   'deliverable-magic-link': deliverableMagicLink,
+  'lead-intake-notification': leadIntakeNotification,
 }
