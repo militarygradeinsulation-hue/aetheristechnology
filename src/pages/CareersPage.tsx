@@ -129,19 +129,6 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
   loading: boolean;
 }) => (
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
-    {/* HERO — clean image + video, no duplicated overlay copy */}
-    <div className="relative rounded-2xl overflow-hidden border border-amber/30 mb-6 shadow-[0_0_60px_-20px_rgba(245,166,35,0.35)]">
-      <img
-        src={careersHero}
-        alt="Aetheris business forensics operator at work, dark room, amber data, dollar-leak signals"
-        width={1920}
-        height={1080}
-        className="w-full h-[480px] sm:h-[640px] md:h-[760px] lg:h-[820px] object-cover"
-      />
-      <div className="absolute top-4 right-4 font-mono text-[10px] tracking-[0.3em] text-amber/70 uppercase">
-        CASE-FILE · OPS/2026 · INDY-01
-      </div>
-    </div>
 
     {/* OPERATOR INTRO VIDEO — larger, sits right under the hero image */}
     <div className="mb-12">
