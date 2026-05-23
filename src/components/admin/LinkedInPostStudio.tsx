@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand, Link as LinkIcon, Eraser } from 'lucide-react';
+import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand, Link as LinkIcon, Eraser, ClipboardPaste } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -211,6 +211,20 @@ export default function LinkedInPostStudio() {
     setRespondExtra('');
     setRespondOutput('');
     toast({ title: 'Cleared' });
+  };
+
+  const pasteFromClipboard = async (setter: (v: string) => void, label = 'Pasted') => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        toast({ title: 'Clipboard is empty', variant: 'destructive' });
+        return;
+      }
+      setter(text);
+      toast({ title: label, description: `${text.length} characters` });
+    } catch {
+      toast({ title: 'Paste blocked', description: 'Allow clipboard access or paste manually (Cmd/Ctrl+V).', variant: 'destructive' });
+    }
   };
 
   const generateFromUrl = async () => {
@@ -613,7 +627,16 @@ export default function LinkedInPostStudio() {
               onChange={(e) => setRespondText(e.target.value)}
               className="text-sm"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => pasteFromClipboard(setRespondText, 'Post pasted')}
+                className="h-7 text-[10px] text-muted-foreground hover:text-amber"
+              >
+                <ClipboardPaste className="w-3 h-3 mr-1" /> Paste
+              </Button>
               <Button
                 type="button"
                 variant="ghost"
@@ -636,16 +659,25 @@ export default function LinkedInPostStudio() {
               <div key={slot.label}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="text-[10px] uppercase tracking-widest text-amber">{slot.label}</div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber cursor-pointer inline-flex items-center gap-1">
-                    <Upload className="w-3 h-3" />
-                    {slot.image ? 'Replace screenshot' : 'Attach screenshot'}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => pasteFromClipboard(slot.setText, `${slot.label} pasted`)}
+                      className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber inline-flex items-center gap-1"
+                    >
+                      <ClipboardPaste className="w-3 h-3" /> Paste
+                    </button>
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber cursor-pointer inline-flex items-center gap-1">
+                      <Upload className="w-3 h-3" />
+                      {slot.image ? 'Replace screenshot' : 'Attach screenshot'}
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
                       onChange={(e) => readImageToDataUrl(e.target.files?.[0], slot.setImage)}
                     />
-                  </label>
+                    </label>
+                  </div>
                 </div>
                 <Textarea
                   rows={slot.rows}
