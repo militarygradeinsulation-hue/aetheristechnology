@@ -223,7 +223,18 @@ serve(async (req) => {
     const imageDataUrl: string = body?.imageDataUrl || "";
     const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
-    const mode: string = body?.mode === "brief" ? "brief" : "full"; // "brief" = comment, "full" = standalone repost
+    const ALLOWED_MODES = ["micro", "brief", "medium", "long", "full"] as const;
+    type Mode = typeof ALLOWED_MODES[number];
+    const mode: Mode = (ALLOWED_MODES as readonly string[]).includes(body?.mode) ? body.mode as Mode : "brief";
+    const isStandalonePost = mode === "full";
+    const MODE_SPECS: Record<Mode, { label: string; spec: string }> = {
+      micro:  { label: "MICRO COMMENT reply",   spec: "40–70 words, UNDER 450 characters. ONE tight paragraph. Cut all setup. One reframe, one mechanism beat, one verdict." },
+      brief:  { label: "COMMENT reply",          spec: "90–140 words, UNDER 900 characters, hard cap 1,150 chars. ONE dense paragraph." },
+      medium: { label: "MEDIUM COMMENT reply",   spec: "150–210 words, UNDER 1,500 characters. ONE dense paragraph. Room for a fuller mechanism walk before the verdict." },
+      long:   { label: "LONG COMMENT reply",     spec: "220–300 words, UNDER 2,100 characters. ONE dense paragraph. Full 4-part architecture with extended mechanism cascade." },
+      full:   { label: "standalone LinkedIn POST", spec: "180–260 words, UNDER 2,800 characters." },
+    };
+    const modeSpec = MODE_SPECS[mode];
     const conversationKind: string = body?.conversationKind === "reply_to_reply" ? "reply_to_reply" : "comment_on_post";
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
@@ -275,7 +286,7 @@ GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level com
     const topLevelTaskBlock = `${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
 
 1. Read the post carefully. Identify the author's core claim and the surface framing.
-2. Write a ${mode === "brief" ? "LinkedIn COMMENT reply (90–140 words, UNDER 900 characters, hard cap 1,150 chars — LinkedIn truncates comments past ~1,250)" : "standalone LinkedIn POST (180–260 words, under 2,800 characters)"} AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
+2. Write a ${modeSpec.label} (${modeSpec.spec}) AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
 3. Open with a VARIED signature opener from the 80+ shapes in the style guide. ROTATE across categories (audit, reframe, hidden-mechanism, direct-diagnosis, numeric-anchor, autopsy, concession-pivot). HARD BAN on defaulting to the same formula: "What looks like X is Y", "The part people miss…", "What most operators get wrong…", "It's not X. It's Y.", "Strip the surface off…", "Most companies don't have a…", "The hidden variable…", and "Diagnosis:" are ALL rare-use (combined cap: max 1 in every 10 responses). Do not start with the same first word as a recent response. Invent fresh openers in Joseph's voice when possible. Never open with a compliment or agreement.
 4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor. This is a real operator speaking from real reps, not a brand voice.
 5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
@@ -379,11 +390,9 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     // chars, so we trim well below that and ALWAYS land on a sentence boundary
     // — never ship a half-thought, never blow past the platform limit.
     // Reserve room for the appended CTA link.
-    const isComment = mode === "brief" || isReplyToReply;
     const CTA_RESERVE = CTA_LINK.length + 2; // newline + link
-    const HARD_CAP = (isComment
-      ? (isReplyToReply ? 650 : 1150)
-      : 2900) - CTA_RESERVE;
+    const MODE_CAP: Record<Mode, number> = { micro: 470, brief: 1150, medium: 1550, long: 2150, full: 2900 };
+    const HARD_CAP = (isReplyToReply ? 650 : MODE_CAP[mode]) - CTA_RESERVE;
     if (post.length > HARD_CAP) {
       const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
