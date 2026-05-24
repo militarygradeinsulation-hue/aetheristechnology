@@ -26,6 +26,35 @@ export const PlaybookCreator: React.FC = () => {
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<{ fileUrl: string; title: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [published, setPublished] = useState(false);
+
+  const handlePublish = async () => {
+    if (!result) return;
+    setPublishing(true);
+    try {
+      const tagArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+      const res = await publishPlaybookToWebsite({
+        title: result.title,
+        subtitle: form.subtitle,
+        description: form.subtitle || result.title,
+        tags: tagArray,
+        file_url: result.fileUrl,
+        icon_name: 'BookOpen',
+      });
+      setPublished(true);
+      toast({
+        title: res.alreadyPublished ? 'Already live' : 'Published to website',
+        description: res.alreadyPublished
+          ? 'This playbook is already in the free reads library.'
+          : 'Visitors can now read this on the Resources page.',
+      });
+    } catch (e: any) {
+      toast({ title: 'Publish failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!form.title.trim() || !form.subtitle.trim()) {
