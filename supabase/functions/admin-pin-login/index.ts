@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
     try {
       tokenHash = await Promise.race<string | null>([
         bootstrap,
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 800)),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
       ]);
     } catch (sessionErr) {
       console.error("admin-pin-login session-issue error:", sessionErr);

@@ -130,12 +130,11 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Avoid duplicates by file_url OR title (case-insensitive)
+      // Avoid duplicates by file_url
       const { data: existing } = await supabase
         .from("playbooks")
-        .select("id,title,file_url")
-        .or(`file_url.eq.${file_url},title.ilike.${title}`)
-        .limit(1)
+        .select("id")
+        .eq("file_url", file_url)
         .maybeSingle();
       if (existing) {
         return new Response(JSON.stringify({ item: existing, alreadyPublished: true }), {
