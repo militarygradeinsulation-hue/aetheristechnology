@@ -191,7 +191,20 @@ export const PlaybookCreator: React.FC = () => {
               {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
               Copy Link
             </Button>
-            <Button variant="ghost" onClick={() => { setResult(null); setForm({ title: '', subtitle: '', pillar: 'Strategy', tags: '' }); }}>
+            <Button
+              onClick={handlePublish}
+              disabled={publishing || published}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+            >
+              {publishing ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing…</>
+              ) : published ? (
+                <><Check className="w-4 h-4 mr-2" /> Live on Website</>
+              ) : (
+                <><Globe className="w-4 h-4 mr-2" /> Push to Website (Free Read)</>
+              )}
+            </Button>
+            <Button variant="ghost" onClick={() => { setResult(null); setPublished(false); setForm({ title: '', subtitle: '', pillar: 'Strategy', tags: '' }); }}>
               Create Another
             </Button>
           </div>
