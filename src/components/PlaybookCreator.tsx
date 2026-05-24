@@ -4,10 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Loader2, ExternalLink, Copy, Check } from 'lucide-react';
+import { BookOpen, Loader2, ExternalLink, Copy, Check, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToAdminLibrary, publishPlaybookToWebsite } from '@/lib/adminLibrary';
 
 const PILLARS = ['Sales', 'Marketing', 'AI', 'Strategy', 'Operations', 'Leadership'];
 
