@@ -147,13 +147,30 @@ export const PortalReplyComposer: React.FC = () => {
         )}
 
         <div className="mb-4">
-          <Label>Extra context (optional)</Label>
+          <Label>Extra direction (optional)</Label>
+          <div className="mt-1 mb-2 flex flex-wrap gap-2">
+            {[
+              { label: 'Agree, go deeper', value: "Agree with the post's core point, then go one layer deeper — add the forensic angle they missed (the actual mechanism, the dollar leak, the system failure behind it)." },
+              { label: 'Put them in their place', value: "Respectfully dismantle the post. Call out where the logic breaks, what they're missing, and what an operator would actually do. No insults — just sharper truth." },
+              { label: 'Sound more human', value: "Drop the polish. Write like a real operator texting a peer — contractions, short sentences, plain words, zero LinkedIn-guru voice." },
+              { label: 'Add a hard stat', value: "Anchor the reply with one concrete number or dollar figure that makes the leak undeniable." },
+              { label: 'Ask a sharper question', value: "End with one disarming question that forces the OP (or readers) to confront the leak they're ignoring." },
+            ].map(p => (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => setExtraContext(prev => prev ? `${prev}\n${p.value}` : p.value)}
+                className="px-2.5 py-1 rounded-md border border-border text-xs font-semibold text-muted-foreground hover:text-amber hover:border-amber/50 transition"
+              >
+                + {p.label}
+              </button>
+            ))}
+          </div>
           <Textarea
             value={extraContext}
             onChange={(e) => setExtraContext(e.target.value)}
-            rows={2}
+            rows={3}
             placeholder="e.g. They're a CRM founder, target Indianapolis ops crowd, push on follow-up failure..."
-            className="mt-1"
           />
         </div>
 
