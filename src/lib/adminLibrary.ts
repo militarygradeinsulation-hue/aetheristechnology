@@ -89,6 +89,8 @@ export async function publishPlaybookToWebsite(args: {
   });
   if (error) throw error;
   return { alreadyPublished: !!data?.alreadyPublished };
+}
+
 
 
 /** Convert a tool result into plain text for copy/download. */
