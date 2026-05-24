@@ -180,7 +180,29 @@ export const PortalReplyComposer: React.FC = () => {
         )}
 
         <div className="mb-4">
-          <Label>Extra direction (optional)</Label>
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <Label>Extra direction (optional)</Label>
+            <button
+              type="button"
+              onClick={thinkForMe}
+              disabled={thinking}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-amber/40 bg-amber/10 text-amber text-xs font-bold hover:bg-amber/20 transition disabled:opacity-50"
+            >
+              {thinking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Brain className="w-3.5 h-3.5" />}
+              {thinking ? 'Thinking…' : 'Think for me'}
+            </button>
+          </div>
+          {thinkSummary && (
+            <div className="mb-2 rounded-md border border-amber/30 bg-amber/5 p-2.5 text-xs">
+              <div className="font-bold text-amber uppercase tracking-wide">
+                Stance: {thinkSummary.stance.replace('_', ' ')}
+              </div>
+              {thinkSummary.rationale && <div className="text-foreground/80 mt-1">{thinkSummary.rationale}</div>}
+              {thinkSummary.labels.length > 0 && (
+                <div className="text-muted-foreground mt-1">Applied: {thinkSummary.labels.join(' · ')}</div>
+              )}
+            </div>
+          )}
           <Select
             value=""
             onValueChange={(val) => {
