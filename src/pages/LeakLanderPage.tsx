@@ -56,6 +56,21 @@ const LeakLanderPage: React.FC = () => {
         path="/lander"
       />
 
+      {/* LinkedIn premium offer banner */}
+      <a
+        href="https://www.linkedin.com/in/thejosephtoney"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative z-20 block w-full bg-amber-900/90 hover:bg-amber-900 text-amber-50 border-b border-amber/40 transition-colors"
+        style={{ backgroundColor: 'hsl(36 75% 18%)' }}
+      >
+        <div className="max-w-5xl mx-auto px-4 py-2.5 text-center text-xs sm:text-sm font-medium">
+          <span className="font-case uppercase tracking-widest text-amber mr-2">Limited Offer</span>
+          Follow &amp; connect with me on LinkedIn — I'll run a one-time <span className="text-amber font-semibold">premium analysis free</span>. See why I'm different than everyone else. <span className="underline underline-offset-2">Connect →</span>
+        </div>
+      </a>
+
+
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 opacity-[0.06] mix-blend-overlay"
