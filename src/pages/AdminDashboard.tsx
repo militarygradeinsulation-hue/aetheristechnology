@@ -576,7 +576,7 @@ const AdminDashboard: React.FC = () => {
         {layout === 'tabs' ? (
           <>
             <div className="flex gap-2 mb-8 flex-wrap">
-              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }, tabIdx) => {
                 const active = activeTab === tab;
                 return (
                   <Button
