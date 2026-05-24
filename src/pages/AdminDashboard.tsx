@@ -50,6 +50,8 @@ import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPan
 import NotificationBell from '@/components/admin/NotificationBell';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
+import TabColorToggle from '@/components/TabColorToggle';
+import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
