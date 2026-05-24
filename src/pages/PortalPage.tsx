@@ -79,6 +79,8 @@ import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/componen
 import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
+import TabColorToggle from '@/components/TabColorToggle';
+import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
