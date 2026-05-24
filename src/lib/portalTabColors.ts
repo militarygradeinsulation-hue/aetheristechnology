@@ -41,6 +41,8 @@ export function getTabColorClasses(key: string, active: boolean, mode: TabColorM
   return active ? pair[0] : pair[1];
 }
 
+const CHANGE_EVENT = 'aetheris:tabColorMode:change';
+
 export function useTabColorMode(): { mode: TabColorMode; toggle: () => void; setMode: (m: TabColorMode) => void } {
   const [mode, setModeState] = useState<TabColorMode>(() => {
     try {
@@ -52,14 +54,25 @@ export function useTabColorMode(): { mode: TabColorMode; toggle: () => void; set
   const setMode = useCallback((m: TabColorMode) => {
     setModeState(m);
     try { localStorage.setItem(STORAGE_KEY, m); } catch {}
+    try {
+      window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: m }));
+    } catch {}
   }, []);
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) setModeState(e.newValue === 'rainbow' ? 'rainbow' : 'uniform');
     };
+    const onCustom = (e: Event) => {
+      const next = (e as CustomEvent).detail;
+      if (next === 'rainbow' || next === 'uniform') setModeState(next);
+    };
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener(CHANGE_EVENT, onCustom as EventListener);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(CHANGE_EVENT, onCustom as EventListener);
+    };
   }, []);
 
   const toggle = useCallback(() => setMode(mode === 'rainbow' ? 'uniform' : 'rainbow'), [mode, setMode]);
