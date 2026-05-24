@@ -28,7 +28,39 @@ export const PortalReplyComposer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
+  const [thinking, setThinking] = useState(false);
+  const [thinkSummary, setThinkSummary] = useState<{ stance: string; rationale: string; labels: string[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const thinkForMe = async () => {
+    if (sourceType === 'text' && postText.trim().length < 10) {
+      toast({ title: 'Paste the post first (at least 10 chars)', variant: 'destructive' });
+      return;
+    }
+    if (sourceType === 'image' && !imageDataUrl) {
+      toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    setThinking(true);
+    setThinkSummary(null);
+    try {
+      const body = sourceType === 'image' ? { imageDataUrl } : { postText: postText.trim() };
+      const { data, error } = await supabase.functions.invoke('linkedin-reply-direction', { body });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setExtraContext(data.extraContext || '');
+      setThinkSummary({
+        stance: data.stance,
+        rationale: data.rationale,
+        labels: data.preset_labels || [],
+      });
+      toast({ title: 'Direction set', description: `Stance: ${data.stance.replace('_', ' ')}` });
+    } catch (e: any) {
+      toast({ title: 'Think for me failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setThinking(false);
+    }
+  };
 
   const onFile = async (file: File | null) => {
     if (!file) return;
