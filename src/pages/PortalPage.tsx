@@ -739,11 +739,7 @@ const PortalPage: React.FC = () => {
                               ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
                               : 'bg-sky-500/15 border-sky-400 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200'
                           }`
-                        : `h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${
-                            active
-                              ? 'bg-amber text-background hover:bg-amber/90 border-amber'
-                              : 'border-amber/40 text-amber hover:bg-amber/10 hover:text-amber'
-                          }`
+                        : `h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
                     }
                   >
                     <Icon className={isStevenInbox ? 'w-5 h-5' : 'w-4 h-4'} />
