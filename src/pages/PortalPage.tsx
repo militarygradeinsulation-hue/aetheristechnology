@@ -716,7 +716,7 @@ const PortalPage: React.FC = () => {
         {layout === 'tabs' && (
           <div className="max-w-7xl mx-auto px-4 pb-3 pt-1">
             <div className="flex gap-2 flex-wrap">
-              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t, tabIdx) => {
                 const active = tab === t.id;
                 const Icon = t.iconCmp;
                 // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
@@ -739,7 +739,7 @@ const PortalPage: React.FC = () => {
                               ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
                               : 'bg-sky-500/15 border-sky-400 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200'
                           }`
-                        : `h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
+                        : `h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(t.id, active, tabColorMode, tabIdx)}`
                     }
                   >
                     <Icon className={isStevenInbox ? 'w-5 h-5' : 'w-4 h-4'} />

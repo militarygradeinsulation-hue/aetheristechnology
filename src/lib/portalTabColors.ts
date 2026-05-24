@@ -36,8 +36,17 @@ function hash(str: string): number {
   return Math.abs(h);
 }
 
-export function getTabColorClasses(key: string, active: boolean, mode: TabColorMode): string {
-  const pair = mode === 'rainbow' ? PALETTE[hash(key) % PALETTE.length] : PALETTE[0];
+export function getTabColorClasses(
+  key: string,
+  active: boolean,
+  mode: TabColorMode,
+  index?: number,
+): string {
+  // When an explicit index is provided, walk the palette sequentially so
+  // adjacent tabs are guaranteed to be distinctly different colors. Fall back
+  // to a deterministic hash when no index is available.
+  const idx = typeof index === 'number' ? index : hash(key);
+  const pair = mode === 'rainbow' ? PALETTE[idx % PALETTE.length] : PALETTE[0];
   return active ? pair[0] : pair[1];
 }
 

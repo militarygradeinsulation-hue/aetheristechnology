@@ -576,7 +576,7 @@ const AdminDashboard: React.FC = () => {
         {layout === 'tabs' ? (
           <>
             <div className="flex gap-2 mb-8 flex-wrap">
-              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }, tabIdx) => {
                 const active = activeTab === tab;
                 return (
                   <Button
@@ -589,7 +589,7 @@ const AdminDashboard: React.FC = () => {
                       if (tab !== 'tools') setActiveTool(null);
                     }}
                     variant={active ? 'default' : 'outline'}
-                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(tab, active, tabColorMode, tabIdx)}`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
