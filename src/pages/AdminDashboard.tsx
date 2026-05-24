@@ -589,7 +589,7 @@ const AdminDashboard: React.FC = () => {
                       if (tab !== 'tools') setActiveTool(null);
                     }}
                     variant={active ? 'default' : 'outline'}
-                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(tab, active, tabColorMode, tabIdx)}`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
