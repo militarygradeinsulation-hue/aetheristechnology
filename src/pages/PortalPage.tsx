@@ -716,7 +716,7 @@ const PortalPage: React.FC = () => {
         {layout === 'tabs' && (
           <div className="max-w-7xl mx-auto px-4 pb-3 pt-1">
             <div className="flex gap-2 flex-wrap">
-              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t, tabIdx) => {
                 const active = tab === t.id;
                 const Icon = t.iconCmp;
                 // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
