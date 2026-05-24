@@ -75,6 +75,23 @@ export async function deleteFromAdminLibrary(id: string) {
   if (error) throw error;
 }
 
+export async function publishPlaybookToWebsite(args: {
+  title: string;
+  subtitle?: string;
+  description?: string;
+  tags?: string[];
+  file_url: string;
+  icon_name?: string;
+}): Promise<{ alreadyPublished?: boolean }> {
+  const { data, error } = await supabase.functions.invoke("admin-library", {
+    body: { action: "publish_playbook", ...args },
+    headers: adminHeaders(),
+  });
+  if (error) throw error;
+  return { alreadyPublished: !!data?.alreadyPublished };
+}
+
+
 
 /** Convert a tool result into plain text for copy/download. */
 export function formatLibraryItemAsText(item: AdminLibraryItem): string {

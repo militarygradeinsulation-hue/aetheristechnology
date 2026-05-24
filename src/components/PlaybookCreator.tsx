@@ -4,10 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Loader2, ExternalLink, Copy, Check } from 'lucide-react';
+import { BookOpen, Loader2, ExternalLink, Copy, Check, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { saveToAdminLibrary, publishPlaybookToWebsite } from '@/lib/adminLibrary';
 
 const PILLARS = ['Sales', 'Marketing', 'AI', 'Strategy', 'Operations', 'Leadership'];
 
@@ -26,6 +26,35 @@ export const PlaybookCreator: React.FC = () => {
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<{ fileUrl: string; title: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [published, setPublished] = useState(false);
+
+  const handlePublish = async () => {
+    if (!result) return;
+    setPublishing(true);
+    try {
+      const tagArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+      const res = await publishPlaybookToWebsite({
+        title: result.title,
+        subtitle: form.subtitle,
+        description: form.subtitle || result.title,
+        tags: tagArray,
+        file_url: result.fileUrl,
+        icon_name: 'BookOpen',
+      });
+      setPublished(true);
+      toast({
+        title: res.alreadyPublished ? 'Already live' : 'Published to website',
+        description: res.alreadyPublished
+          ? 'This playbook is already in the free reads library.'
+          : 'Visitors can now read this on the Resources page.',
+      });
+    } catch (e: any) {
+      toast({ title: 'Publish failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!form.title.trim() || !form.subtitle.trim()) {
@@ -162,7 +191,20 @@ export const PlaybookCreator: React.FC = () => {
               {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
               Copy Link
             </Button>
-            <Button variant="ghost" onClick={() => { setResult(null); setForm({ title: '', subtitle: '', pillar: 'Strategy', tags: '' }); }}>
+            <Button
+              onClick={handlePublish}
+              disabled={publishing || published}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+            >
+              {publishing ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing…</>
+              ) : published ? (
+                <><Check className="w-4 h-4 mr-2" /> Live on Website</>
+              ) : (
+                <><Globe className="w-4 h-4 mr-2" /> Push to Website (Free Read)</>
+              )}
+            </Button>
+            <Button variant="ghost" onClick={() => { setResult(null); setPublished(false); setForm({ title: '', subtitle: '', pillar: 'Strategy', tags: '' }); }}>
               Create Another
             </Button>
           </div>

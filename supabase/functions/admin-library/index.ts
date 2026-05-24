@@ -122,6 +122,43 @@ serve(async (req) => {
       });
     }
 
+    if (action === "publish_playbook") {
+      const { title, subtitle, description, tags, file_url, icon_name } = body;
+      if (!title || !file_url) {
+        return new Response(JSON.stringify({ error: "title and file_url required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Avoid duplicates by file_url
+      const { data: existing } = await supabase
+        .from("playbooks")
+        .select("id")
+        .eq("file_url", file_url)
+        .maybeSingle();
+      if (existing) {
+        return new Response(JSON.stringify({ item: existing, alreadyPublished: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data, error } = await supabase
+        .from("playbooks")
+        .insert({
+          title,
+          subtitle: subtitle || null,
+          description: description || subtitle || title,
+          tags: Array.isArray(tags) ? tags : [],
+          file_url,
+          icon_name: icon_name || "BookOpen",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return new Response(JSON.stringify({ item: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
