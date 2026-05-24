@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon } from 'lucide-react';
+import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon, Brain } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -28,7 +28,39 @@ export const PortalReplyComposer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
+  const [thinking, setThinking] = useState(false);
+  const [thinkSummary, setThinkSummary] = useState<{ stance: string; rationale: string; labels: string[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const thinkForMe = async () => {
+    if (sourceType === 'text' && postText.trim().length < 10) {
+      toast({ title: 'Paste the post first (at least 10 chars)', variant: 'destructive' });
+      return;
+    }
+    if (sourceType === 'image' && !imageDataUrl) {
+      toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    setThinking(true);
+    setThinkSummary(null);
+    try {
+      const body = sourceType === 'image' ? { imageDataUrl } : { postText: postText.trim() };
+      const { data, error } = await supabase.functions.invoke('linkedin-reply-direction', { body });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setExtraContext(data.extraContext || '');
+      setThinkSummary({
+        stance: data.stance,
+        rationale: data.rationale,
+        labels: data.preset_labels || [],
+      });
+      toast({ title: 'Direction set', description: `Stance: ${data.stance.replace('_', ' ')}` });
+    } catch (e: any) {
+      toast({ title: 'Think for me failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setThinking(false);
+    }
+  };
 
   const onFile = async (file: File | null) => {
     if (!file) return;
@@ -148,7 +180,29 @@ export const PortalReplyComposer: React.FC = () => {
         )}
 
         <div className="mb-4">
-          <Label>Extra direction (optional)</Label>
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <Label>Extra direction (optional)</Label>
+            <button
+              type="button"
+              onClick={thinkForMe}
+              disabled={thinking}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-amber/40 bg-amber/10 text-amber text-xs font-bold hover:bg-amber/20 transition disabled:opacity-50"
+            >
+              {thinking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Brain className="w-3.5 h-3.5" />}
+              {thinking ? 'Thinking…' : 'Think for me'}
+            </button>
+          </div>
+          {thinkSummary && (
+            <div className="mb-2 rounded-md border border-amber/30 bg-amber/5 p-2.5 text-xs">
+              <div className="font-bold text-amber uppercase tracking-wide">
+                Stance: {thinkSummary.stance.replace('_', ' ')}
+              </div>
+              {thinkSummary.rationale && <div className="text-foreground/80 mt-1">{thinkSummary.rationale}</div>}
+              {thinkSummary.labels.length > 0 && (
+                <div className="text-muted-foreground mt-1">Applied: {thinkSummary.labels.join(' · ')}</div>
+              )}
+            </div>
+          )}
           <Select
             value=""
             onValueChange={(val) => {
