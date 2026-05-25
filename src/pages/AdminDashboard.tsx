@@ -461,6 +461,7 @@ const AdminDashboard: React.FC = () => {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
       case 'interviews': return <InterviewsPanel me="admin" />;
       case 'briefing': return <InterviewBriefingPanel />;
+      case 'briefings': return <BriefingsPanel />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
       case 'systems': return <AdminForensicsSystemsPanel />;
