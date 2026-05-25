@@ -238,6 +238,149 @@ const SampleEditor: React.FC<{
   );
 };
 
+// ---------- Easy Read ----------
+function verdictPlain(v: Verdict): string {
+  switch (v) {
+    case 'HUMAN': return 'almost certainly written by a human';
+    case 'LIKELY_HUMAN': return 'most likely written by a human';
+    case 'MIXED': return 'a mix of human and AI signals — unclear';
+    case 'LIKELY_AI': return 'most likely written by AI';
+    case 'AI': return 'almost certainly written by AI';
+  }
+}
+
+function buildEasyReadText(result: DetectResult, subject: string): string {
+  const lines: string[] = [];
+  const isMulti = (result.samples?.length || 0) > 1;
+  const overallScore = isMulti
+    ? Math.round(result.comparison?.overall_score ?? 0)
+    : Math.round(result.samples?.[0]?.score ?? 0);
+  const overallVerdict = isMulti
+    ? result.comparison?.overall_verdict
+    : result.samples?.[0]?.verdict;
+
+  lines.push(`AI Writing Detector — Plain English Report`);
+  if (subject) lines.push(`Subject: ${subject}`);
+  lines.push(`Date: ${new Date().toLocaleString()}`);
+  lines.push('');
+  lines.push(`Overall score: ${overallScore} out of 100`);
+  if (overallVerdict) lines.push(`Verdict: This writing is ${verdictPlain(overallVerdict)}.`);
+  lines.push('');
+
+  if (isMulti && result.comparison) {
+    const c = result.comparison;
+    lines.push(`Bottom line: ${c.bottom_line}`);
+    lines.push('');
+    lines.push(`Same author across all samples? ${c.same_author.toUpperCase()}.`);
+    if (c.same_author_reasoning) lines.push(c.same_author_reasoning);
+    lines.push('');
+    if (c.repeated_patterns?.length) {
+      lines.push(`Patterns that repeated across samples:`);
+      c.repeated_patterns.forEach((p) => lines.push(`  • ${p}`));
+      lines.push('');
+    }
+  }
+
+  (result.samples || []).forEach((s) => {
+    lines.push(`— Sample ${s.index} —`);
+    lines.push(`Score: ${Math.round(s.score)}/100. ${verdictPlain(s.verdict)}.`);
+    if (s.summary) lines.push(s.summary);
+    if (s.clues?.length) {
+      lines.push(`Things we found (${s.clues.length}):`);
+      s.clues.forEach((c, i) => {
+        lines.push(`  ${i + 1}. ${c.pattern}`);
+        if (c.highlight) lines.push(`     Quote: "${c.highlight}"`);
+        if (c.fact) lines.push(`     Why it matters: ${c.fact}`);
+        if (c.source) lines.push(`     Source: ${c.source}`);
+      });
+    }
+    lines.push('');
+  });
+
+  return lines.join('\n').trim();
+}
+
+const EasyReadPanel: React.FC<{ result: DetectResult; subject: string }> = ({ result, subject }) => {
+  const text = useMemo(() => buildEasyReadText(result, subject), [result, subject]);
+  const [speaking, setSpeaking] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: 'Copied to clipboard' });
+    } catch {
+      toast({ title: 'Copy blocked', variant: 'destructive' });
+    }
+  };
+
+  const download = () => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safe = (subject || 'ai-detector-report').replace(/[^a-z0-9-_]+/gi, '-').toLowerCase();
+    a.download = `${safe}-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const speak = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      toast({ title: 'Read-aloud not supported in this browser', variant: 'destructive' });
+      return;
+    }
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+    setSpeaking(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  return (
+    <div className="rounded-sm border border-emerald-400/30 bg-emerald-400/5 p-4 space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <BookOpen className="w-4 h-4 text-emerald-400" />
+        <div className="text-[10px] uppercase tracking-widest font-bold text-emerald-400">Easy Read Mode</div>
+        <div className="text-[10px] text-muted-foreground">Plain English summary — copy, download, or read aloud.</div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <Button variant="outline" size="sm" onClick={copy} className="h-7 text-[11px]">
+            <Copy className="w-3 h-3 mr-1" /> Copy
+          </Button>
+          <Button variant="outline" size="sm" onClick={download} className="h-7 text-[11px]">
+            <Download className="w-3 h-3 mr-1" /> Download
+          </Button>
+          <Button variant="outline" size="sm" onClick={speak} className="h-7 text-[11px]">
+            {speaking ? <Square className="w-3 h-3 mr-1" /> : <Volume2 className="w-3 h-3 mr-1" />}
+            {speaking ? 'Stop' : 'Read aloud'}
+          </Button>
+        </div>
+      </div>
+      <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans text-foreground/90 max-h-[360px] overflow-y-auto">
+        {text}
+      </pre>
+    </div>
+  );
+};
+
+
+
 const SampleResultPanel: React.FC<{ sample: SampleResult; isOutlier: boolean }> = ({ sample, isOutlier }) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const highlighted = useMemo(() => renderHighlighted(sample.transcript || '', sample.clues || [], activeIdx), [sample, activeIdx]);
