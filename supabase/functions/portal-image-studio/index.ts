@@ -36,12 +36,13 @@ serve(async (req) => {
     const action = body.action as string;
 
     if (action === "list") {
+      // Include this rep's images PLUS shared admin-pushed banners (rep_code='SHARED')
       const { data, error } = await supabase
         .from("rep_image_studio")
         .select("*")
-        .eq("rep_code", repCode)
+        .in("rep_code", [repCode, "SHARED"])
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(300);
       if (error) throw error;
       return json({ images: data || [] });
     }
