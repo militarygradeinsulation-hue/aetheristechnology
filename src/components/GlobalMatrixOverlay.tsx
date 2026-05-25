@@ -16,10 +16,10 @@ export const GlobalMatrixOverlay: React.FC = () => {
     return (
       <div
         className="fixed inset-0 pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.9 }}
+        style={{ zIndex: 0, opacity: 1 }}
         aria-hidden="true"
       >
-        <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
+        <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={1} />
       </div>
     );
   }
