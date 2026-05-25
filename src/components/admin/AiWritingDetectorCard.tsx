@@ -287,11 +287,61 @@ const SampleResultPanel: React.FC<{ sample: SampleResult; isOutlier: boolean }> 
   );
 };
 
+type LibraryEntry = {
+  id: string;
+  subject_name: string;
+  notes: string | null;
+  sample_count: number;
+  overall_score: number | null;
+  overall_verdict: Verdict | null;
+  same_author: string | null;
+  samples: any;
+  result: DetectResult;
+  created_at: string;
+};
+
 export const AiWritingDetectorCard: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([newSample()]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DetectResult | null>(null);
   const [expanded, setExpanded] = useState(true);
+  const [subjectName, setSubjectName] = useState('');
+  const [notes, setNotes] = useState('');
+  const [library, setLibrary] = useState<LibraryEntry[]>([]);
+  const [libBusy, setLibBusy] = useState(false);
+  const [libFilter, setLibFilter] = useState('');
+  const [showLibrary, setShowLibrary] = useState(false);
+
+  const loadLibrary = async () => {
+    setLibBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_detection_scans')
+        .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      setLibrary((data || []) as any);
+    } catch (e: any) {
+      toast({ title: 'Could not load library', description: e?.message, variant: 'destructive' });
+    } finally {
+      setLibBusy(false);
+    }
+  };
+
+  useEffect(() => { loadLibrary(); }, []);
+
+  const subjectMatches = useMemo(() => {
+    if (!subjectName.trim()) return [];
+    const q = subjectName.trim().toLowerCase();
+    return library.filter((l) => l.subject_name.toLowerCase().includes(q)).slice(0, 5);
+  }, [subjectName, library]);
+
+  const filteredLibrary = useMemo(() => {
+    const q = libFilter.trim().toLowerCase();
+    if (!q) return library;
+    return library.filter((l) => l.subject_name.toLowerCase().includes(q) || (l.notes || '').toLowerCase().includes(q));
+  }, [libFilter, library]);
 
   const updateSample = (id: string, next: Sample) =>
     setSamples((prev) => prev.map((s) => (s.id === id ? next : s)));
@@ -301,6 +351,38 @@ export const AiWritingDetectorCard: React.FC = () => {
     setSamples((prev) => (prev.length >= MAX_SAMPLES ? prev : [...prev, newSample()]));
 
   const filledCount = samples.filter((s) => s.text.trim() || s.imageDataUrl).length;
+
+  const saveToLibrary = async (data: DetectResult) => {
+    const name = subjectName.trim();
+    if (!name) return;
+    try {
+      const samplesMeta = samples
+        .filter((s) => s.text.trim() || s.imageDataUrl)
+        .map((s) => ({
+          text: s.text.trim() || null,
+          has_image: !!s.imageDataUrl,
+          chars: s.text.trim().length,
+        }));
+      const overall = data.samples?.length === 1
+        ? { score: data.samples[0].score, verdict: data.samples[0].verdict, same_author: null }
+        : { score: data.comparison?.overall_score ?? null, verdict: data.comparison?.overall_verdict ?? null, same_author: data.comparison?.same_author ?? null };
+      const { error } = await supabase.from('ai_detection_scans').insert({
+        subject_name: name,
+        notes: notes.trim() || null,
+        sample_count: samplesMeta.length,
+        overall_score: overall.score,
+        overall_verdict: overall.verdict,
+        same_author: overall.same_author,
+        samples: samplesMeta,
+        result: data as any,
+      });
+      if (error) throw error;
+      toast({ title: `Saved scan for ${name}` });
+      loadLibrary();
+    } catch (e: any) {
+      toast({ title: 'Could not save scan', description: e?.message, variant: 'destructive' });
+    }
+  };
 
   const run = async () => {
     const payload = samples
@@ -320,6 +402,7 @@ export const AiWritingDetectorCard: React.FC = () => {
       if ((data as any)?.error) throw new Error((data as any).error);
       setResult(data as DetectResult);
       setExpanded(true);
+      if (subjectName.trim()) await saveToLibrary(data as DetectResult);
     } catch (e: any) {
       toast({ title: 'Scan failed', description: e?.message || 'Try again', variant: 'destructive' });
     } finally {
@@ -330,6 +413,23 @@ export const AiWritingDetectorCard: React.FC = () => {
   const clear = () => {
     setSamples([newSample()]);
     setResult(null);
+    setSubjectName('');
+    setNotes('');
+  };
+
+  const deleteEntry = async (id: string) => {
+    if (!confirm('Delete this saved scan?')) return;
+    const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
+    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
+    setLibrary((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const openEntry = (entry: LibraryEntry) => {
+    setResult(entry.result);
+    setSubjectName(entry.subject_name);
+    setNotes(entry.notes || '');
+    setExpanded(true);
+    setShowLibrary(false);
   };
 
   const sameAuthorBadge = (s: Comparison['same_author']) => {
