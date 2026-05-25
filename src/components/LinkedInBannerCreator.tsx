@@ -274,15 +274,26 @@ WATERMARK: "aetheris.technology"`;
 
       <Button
         onClick={generateBanner}
-        disabled={bannerBusy || !bannerHeadline.trim()}
+        disabled={bannerBusy || packBusy || !bannerHeadline.trim()}
         className="w-full bg-amber text-background hover:bg-amber/90"
       >
         {bannerBusy
           ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Painting banner (~30s)...</>
           : <><Linkedin className="w-4 h-4 mr-2" /> Generate LinkedIn Banner</>}
       </Button>
+
+      <Button
+        onClick={generateVariationPack}
+        disabled={bannerBusy || packBusy || !bannerHeadline.trim()}
+        variant="outline"
+        className="w-full border-amber/40 text-amber hover:bg-amber/10"
+      >
+        {packBusy
+          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating pack {packProgress ? `(${packProgress.done}/${packProgress.total})` : ''}...</>
+          : <><Layers className="w-4 h-4 mr-2" /> Generate Variation Pack (5 backgrounds)</>}
+      </Button>
       <p className="text-[10px] text-muted-foreground/70 text-center">
-        Uses Gemini 3 Pro for legible typography. Saved automatically — download from the library below.
+        Single banner: ~30s. Variation pack: ~2.5 min for 5 on-brand backgrounds. All saved to your library below.
       </p>
     </div>
   );
