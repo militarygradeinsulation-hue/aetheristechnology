@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon, Brain, Library, Trash2, RefreshCw } from 'lucide-react';
+import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon, Brain, Library, Trash2, RefreshCw, ScanLine } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -51,6 +51,43 @@ export const PortalReplyComposer: React.FC = () => {
   const [libLoading, setLibLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  type AiDetect = { score: number; verdict: string; summary: string; clues: { pattern: string; evidence: string }[] };
+  const [aiDetect, setAiDetect] = useState<AiDetect | null>(null);
+  const [aiDetecting, setAiDetecting] = useState(false);
+
+  const runAiDetect = async (opts?: { silent?: boolean }) => {
+    if (sourceType === 'text' && postText.trim().length < 30) {
+      if (!opts?.silent) toast({ title: 'Paste at least 30 chars first', variant: 'destructive' });
+      return;
+    }
+    if (sourceType === 'image' && !imageDataUrl) {
+      if (!opts?.silent) toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    setAiDetecting(true);
+    try {
+      const body = sourceType === 'image' ? { imageDataUrl } : { postText: postText.trim() };
+      const { data, error } = await supabase.functions.invoke('linkedin-ai-detect', { body });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiDetect(data as AiDetect);
+    } catch (e: any) {
+      if (!opts?.silent) toast({ title: 'AI scan failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setAiDetecting(false);
+    }
+  };
+
+  // Auto-run AI detection (debounced) when source content changes
+  useEffect(() => {
+    setAiDetect(null);
+    if (sourceType === 'text' && postText.trim().length < 30) return;
+    if (sourceType === 'image' && !imageDataUrl) return;
+    const t = setTimeout(() => { runAiDetect({ silent: true }); }, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postText, imageDataUrl, sourceType]);
 
   const loadLibrary = async () => {
     setLibLoading(true);
@@ -262,6 +299,69 @@ export const PortalReplyComposer: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* AI-written detection */}
+        <div className="mb-4 rounded-lg border border-border bg-background/40 p-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <ScanLine className="w-4 h-4 text-amber" />
+              <span className="text-xs uppercase font-bold tracking-wide text-foreground/80">AI-written scan</span>
+              {aiDetecting && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+            </div>
+            <button
+              type="button"
+              onClick={() => runAiDetect()}
+              disabled={aiDetecting}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border text-[11px] font-semibold hover:bg-amber/10 hover:text-amber transition disabled:opacity-50"
+            >
+              {aiDetecting ? 'Scanning…' : 'Rescan'}
+            </button>
+          </div>
+          {!aiDetect && !aiDetecting && (
+            <p className="text-xs text-muted-foreground">
+              Paste a post or drop a screenshot — we'll auto-scan it for AI-writing tells (em-dash overuse, triadic parallelism, guru cadence, etc.).
+            </p>
+          )}
+          {aiDetect && (() => {
+            const v = aiDetect.verdict;
+            const color =
+              v === 'AI' ? 'text-rose-400 border-rose-400/40 bg-rose-400/10'
+              : v === 'LIKELY_AI' ? 'text-orange-400 border-orange-400/40 bg-orange-400/10'
+              : v === 'MIXED' ? 'text-amber border-amber/40 bg-amber/10'
+              : v === 'LIKELY_HUMAN' ? 'text-emerald-400/80 border-emerald-400/40 bg-emerald-400/10'
+              : 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10';
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${color}`}>
+                    {v.replace('_', ' ')}
+                  </span>
+                  <span className="text-xs font-mono text-foreground/80">{Math.round(aiDetect.score)}% AI</span>
+                  <div className="flex-1 min-w-[80px] h-1.5 rounded bg-background/60 overflow-hidden border border-border">
+                    <div
+                      className={`h-full ${aiDetect.score >= 70 ? 'bg-rose-400' : aiDetect.score >= 40 ? 'bg-amber' : 'bg-emerald-400'}`}
+                      style={{ width: `${Math.min(100, Math.max(0, aiDetect.score))}%` }}
+                    />
+                  </div>
+                </div>
+                {aiDetect.summary && (
+                  <p className="text-xs text-foreground/80">{aiDetect.summary}</p>
+                )}
+                {aiDetect.clues?.length > 0 && (
+                  <ul className="space-y-1 mt-1">
+                    {aiDetect.clues.map((c, i) => (
+                      <li key={i} className="text-xs">
+                        <span className="font-bold text-amber">{c.pattern}:</span>{' '}
+                        <span className="text-foreground/75">{c.evidence}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+
 
         <div className="mb-4">
           <div className="flex items-center justify-between gap-3 mb-1">
