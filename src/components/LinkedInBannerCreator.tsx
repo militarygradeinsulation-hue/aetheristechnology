@@ -100,22 +100,27 @@ export const LinkedInBannerCreator: React.FC<Props> = ({ invoke, onSaved }) => {
     setBannerBg(pick(bgs as any, bannerBg));
   };
 
+  const LOGO_URL = 'https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/content-images/brand/aetheris-badge.png';
+
   const buildPrompt = (headline: string, accent: string, sub: string, bg: keyof typeof BG_DESC) =>
 `LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
+
+A reference image of the AETHERIS BADGE LOGO is attached. You MUST composite that exact badge — unchanged, do NOT redraw it, do NOT alter its text, do NOT recolor it — into the TOP-RIGHT corner of the banner at roughly 140-180px tall, with ~24px padding from top and right edges. Preserve the badge's circular shape, magnifying glass, eye, "AETHERIS" arc, "BUSINESS FORENSICS. REAL FINDINGS. NO SUGAR." text and red ACTIVE stamp exactly as shown.
 
 LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
 - Background fills the entire banner: ${BG_DESC[bg]}
 - RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
-- Place ALL typography in the CENTER-RIGHT region of the banner, horizontally centered between roughly 38% and 92% of the width, vertically centered
-- Headline is center-aligned within that right zone
+- The AETHERIS badge logo lives in the TOP-RIGHT corner (see above)
+- Place ALL typography in the CENTER region of the banner, horizontally centered between roughly 35% and 78% of the width (leaving room for the badge), vertically centered
+- Headline is center-aligned within that center zone
 - Big serif display headline in TWO COLORS on one or two lines:
   · "${headline}" rendered in CRISP WHITE (#FFFFFF)
   · "${accent}" rendered in WARM AMBER GOLD (#E8A33D)
 - Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
-- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars, also center-aligned in the right zone:
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars, also center-aligned:
   "${sub}"
-- Tiny amber monospace eyebrow label above the headline (still in the right zone, center-aligned): "AETHERIS · BUSINESS FORENSICS"
-- Bottom-right corner: small amber monospace watermark "aetheris.technology"
+- Tiny amber monospace eyebrow label above the headline (center-aligned): "AETHERIS · BUSINESS FORENSICS"
+- Bottom-right corner (below the badge): small amber monospace watermark "aetheris.technology"
 
 STYLE:
 - Aetheris forensic brand: dark, editorial, investigative — never corporate-glossy, never AI-guru gradient, never neon
@@ -135,14 +140,15 @@ WATERMARK: "aetheris.technology"`;
     setBannerBusy(true);
     try {
       const { data, error } = await invoke({
-        action: 'generate',
+        action: 'edit',
+        source_image_url: LOGO_URL,
         prompt: buildPrompt(bannerHeadline, bannerAccent, bannerSub, bannerBg),
         model: 'google/gemini-3-pro-image-preview',
         aetheris_style: false,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: 'LinkedIn banner generated', description: 'Saved to your library below.' });
+      toast({ title: 'LinkedIn banner generated', description: 'Logo embedded. Saved to your library below.' });
       onSaved?.();
     } catch (e: any) {
       toast({ title: 'Banner generation failed', description: e.message, variant: 'destructive' });
@@ -162,7 +168,8 @@ WATERMARK: "aetheris.technology"`;
         const bg = bgs[i];
         try {
           const { data, error } = await invoke({
-            action: 'generate',
+            action: 'edit',
+            source_image_url: LOGO_URL,
             prompt: buildPrompt(bannerHeadline, bannerAccent, bannerSub, bg),
             model: 'google/gemini-3-pro-image-preview',
             aetheris_style: false,
@@ -176,7 +183,7 @@ WATERMARK: "aetheris.technology"`;
         }
         setPackProgress({ done: i + 1, total: bgs.length });
       }
-      toast({ title: `Variation pack done`, description: `${succeeded}/${bgs.length} banners saved to your library.` });
+      toast({ title: `Variation pack done`, description: `${succeeded}/${bgs.length} banners saved.` });
     } finally {
       setPackBusy(false);
       setTimeout(() => setPackProgress(null), 2500);
