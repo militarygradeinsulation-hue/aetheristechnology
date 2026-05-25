@@ -401,7 +401,8 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     // Reserve room for the appended CTA link.
     const CTA_RESERVE = CTA_LINK.length + 2; // newline + link
     const MODE_CAP: Record<Mode, number> = { micro: 470, brief: 1150, medium: 1550, long: 2150, full: 2900 };
-    const HARD_CAP = (isReplyToReply ? 650 : MODE_CAP[mode]) - CTA_RESERVE;
+    const baseCap = maxCharsOverride ?? (isReplyToReply ? 650 : MODE_CAP[mode]);
+    const HARD_CAP = baseCap - CTA_RESERVE;
     if (post.length > HARD_CAP) {
       const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
