@@ -141,7 +141,7 @@ serve(async (req) => {
       if (minScore !== null) q = q.gte("score", minScore);
 
       const nowIso = new Date().toISOString();
-      const [leadsR, repsR, dripR] = await Promise.all([
+      const [leadsR, repsR, dripR, claimedR] = await Promise.all([
         q,
         supabase.from("rep_codes").select("code,rep_name,is_active,role").order("rep_name"),
         supabase
@@ -151,6 +151,11 @@ serve(async (req) => {
           .not("assigned_to_code", "is", null)
           .gt("assignment_expires_at", nowIso)
           .limit(5000),
+        supabase
+          .from("rep_leads")
+          .select("claimed_by_code")
+          .not("claimed_by_code", "is", null)
+          .limit(10000),
       ]);
 
       if (leadsR.error) throw leadsR.error;
@@ -158,12 +163,22 @@ serve(async (req) => {
       (dripR.data || []).forEach((r: any) => {
         if (r.assigned_to_code) dripCounts[r.assigned_to_code] = (dripCounts[r.assigned_to_code] || 0) + 1;
       });
+      const claimedCounts: Record<string, number> = {};
+      (claimedR.data || []).forEach((r: any) => {
+        if (r.claimed_by_code) claimedCounts[r.claimed_by_code] = (claimedCounts[r.claimed_by_code] || 0) + 1;
+      });
+      const totalCounts: Record<string, number> = {};
+      for (const code of new Set([...Object.keys(dripCounts), ...Object.keys(claimedCounts)])) {
+        totalCounts[code] = (dripCounts[code] || 0) + (claimedCounts[code] || 0);
+      }
 
       return new Response(
         JSON.stringify({
           leads: leadsR.data || [],
           reps: repsR.data || [],
           dripCounts,
+          claimedCounts,
+          totalCounts,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
