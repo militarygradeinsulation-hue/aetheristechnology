@@ -958,6 +958,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
         {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
+        {activeTool === 'ai_detect' && <AiWritingDetectorCard />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
