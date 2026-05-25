@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Linkedin, Shuffle } from 'lucide-react';
+import { Loader2, Linkedin, Shuffle, Layers } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Props {
