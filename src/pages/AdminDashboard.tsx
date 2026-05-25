@@ -67,6 +67,7 @@ import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
 import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
 import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
 import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
+import { BriefingsPanel } from '@/components/admin/BriefingsPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
