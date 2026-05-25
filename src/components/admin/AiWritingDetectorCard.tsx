@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare, Library, Trash2, User, RefreshCw } from 'lucide-react';
+import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare, Library, Trash2, User, RefreshCw, Copy, Download, Volume2, Square } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
