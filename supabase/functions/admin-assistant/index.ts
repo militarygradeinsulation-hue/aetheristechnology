@@ -224,12 +224,20 @@ const TOOLS = [
   },
 ];
 
+  // Smart-connection tools (live web, HubSpot mirror, content library, safe writes)
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
+  SHARED_TOOL_SCHEMAS.mark_contact_read,
+  SHARED_TOOL_SCHEMAS.add_drip_prospect,
+];
+
 const COUNTABLE_TABLES = new Set([
   "accounts", "assessment_leads", "diagnostic_leads", "blog_posts", "contact_submissions",
   "drip_prospects", "drip_emails", "rep_codes", "rep_signups", "audit_runs", "hygiene_actions",
   "site_events", "crm_contacts", "crm_companies", "crm_deals", "email_send_log",
   "content_posting_schedule", "content_engine_posts", "claim_codes", "generated_playbooks",
-  "campaign_assets",
+  "campaign_assets", "mirror_contacts", "mirror_deals", "mirror_engagements",
 ]);
 
 // ---------- Tool executor ----------
