@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToAdminLibrary, listAdminLibrary, deleteFromAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { AiWritingDetectorCard } from './AiWritingDetectorCard';
 
 const PILLARS = [
   'Revenue Leak Diagnosis',
@@ -547,6 +548,9 @@ export default function LinkedInPostStudio() {
           Cycle through premade topics + prompts or write your own.
         </p>
       </div>
+
+      {/* AI Writing Detector — separate scan-only tool */}
+      <AiWritingDetectorCard />
 
       {/* Respond to a LinkedIn post */}
       <Card className="p-5 glass border-amber/40 space-y-4">
