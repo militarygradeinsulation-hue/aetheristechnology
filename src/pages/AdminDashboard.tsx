@@ -67,6 +67,7 @@ import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
 import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
 import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
 import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
+import { BriefingsPanel } from '@/components/admin/BriefingsPanel';
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
@@ -197,6 +198,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
     { key: 'interviews', label: 'Interviews', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
@@ -217,7 +219,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'workspace', label: 'Workspace', icon: Handshake },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['briefing', 'hires']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['briefing', 'hires', 'briefings']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -459,6 +461,7 @@ const AdminDashboard: React.FC = () => {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
       case 'interviews': return <InterviewsPanel me="admin" />;
       case 'briefing': return <InterviewBriefingPanel />;
+      case 'briefings': return <BriefingsPanel />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
       case 'systems': return <AdminForensicsSystemsPanel />;
