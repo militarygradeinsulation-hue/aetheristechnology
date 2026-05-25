@@ -189,23 +189,33 @@ export const AdminLeadBrowser: React.FC = () => {
     } finally { setRefreshBusy(null); }
   };
 
-  const autoAssign = async () => {
-    const codes = Array.from(autoCodes);
+  const autoAssign = async (codesArg?: string[], perRepArg?: number) => {
+    const codes = codesArg ?? Array.from(autoCodes);
+    const perRep = perRepArg ?? autoPerRep;
     if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
     setAutoBusy(true);
     try {
       const res = await callAdmin('admin-assign-lead', {
-        action: 'auto_assign', codes, per_rep: autoPerRep, hold_hours: holdHours,
+        action: 'auto_assign', codes, per_rep: perRep, hold_hours: holdHours,
         industry: autoIndustry || undefined,
         min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
         respect_current: true,
       });
-      const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
-      toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
+      setResultDialog({
+        title: res.assigned > 0 ? `✓ Assigned ${res.assigned} leads` : 'No new leads assigned',
+        assigned: res.assigned || 0,
+        perRep: (res.per_rep || {}) as Record<string, number>,
+        message: res.message,
+      });
       load();
     } catch (e) {
       toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAutoBusy(false); }
+  };
+
+  const requestPush = (codes: string[], perRep: number) => {
+    if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
+    setConfirmPush({ codes, perRep });
   };
 
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
