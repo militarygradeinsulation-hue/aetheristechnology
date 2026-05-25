@@ -77,6 +77,9 @@ const Home = () => {
               <p className="text-sm text-foreground/90 leading-snug">
                 All technology in this suite is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
               </p>
+              <p className="text-sm text-foreground/90 leading-snug mt-2">
+                We aren't a marketing, consulting, or brand agency. We do not sell software, AI, or systems. We are <span className="text-amber font-semibold">strictly Business Forensics</span>.
+              </p>
             </div>
           </div>
 
