@@ -208,6 +208,10 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     const { data, error } = await sb.from("contact_submissions")
       .select("name,email,company,phone,service_interest,message,is_read,created_at")
       .order("created_at", { ascending: false }).limit(lim);
+    if (error) throw error;
+    return data || [];
+  }
+
   if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
   if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
   if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
