@@ -291,6 +291,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_detection_scans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          overall_score: number | null
+          overall_verdict: string | null
+          result: Json
+          same_author: string | null
+          sample_count: number
+          samples: Json
+          subject_name: string
+          subject_name_lower: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          overall_score?: number | null
+          overall_verdict?: string | null
+          result?: Json
+          same_author?: string | null
+          sample_count?: number
+          samples?: Json
+          subject_name: string
+          subject_name_lower?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          overall_score?: number | null
+          overall_verdict?: string | null
+          result?: Json
+          same_author?: string | null
+          sample_count?: number
+          samples?: Json
+          subject_name?: string
+          subject_name_lower?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assessment_leads: {
         Row: {
           answers: Json
