@@ -456,6 +456,106 @@ export const AiWritingDetectorCard: React.FC = () => {
         Compare up to {MAX_SAMPLES} writing samples (text or screenshots). Get per-sample AI scores, cross-sample patterns, and a same-author analysis.
       </p>
 
+      {/* Subject / library row */}
+      <div className="rounded-sm border border-amber/20 bg-background/30 p-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <User className="w-3.5 h-3.5 text-amber" />
+          <label className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Subject (for the library)</label>
+          <button
+            onClick={() => { setShowLibrary((v) => !v); if (!showLibrary) loadLibrary(); }}
+            className="ml-auto text-[10px] uppercase tracking-widest font-bold text-foreground/80 hover:text-amber inline-flex items-center gap-1"
+          >
+            <Library className="w-3 h-3" />
+            Library ({library.length})
+          </button>
+        </div>
+        <div className="grid md:grid-cols-[1fr_2fr] gap-2">
+          <Input
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value)}
+            placeholder="Name (e.g. Jane Doe, Acme CEO)"
+            className="h-8 text-xs"
+          />
+          <Input
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optional notes (source, role, context)"
+            className="h-8 text-xs"
+          />
+        </div>
+        {subjectMatches.length > 0 && (
+          <div className="text-[10px] text-muted-foreground">
+            <span className="font-mono uppercase tracking-widest mr-1">Prior scans:</span>
+            {subjectMatches.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => openEntry(m)}
+                className="inline-flex items-center gap-1 mr-2 underline decoration-amber/40 hover:text-amber"
+              >
+                {m.subject_name} · {new Date(m.created_at).toLocaleDateString()} · {m.overall_verdict || '—'}
+              </button>
+            ))}
+          </div>
+        )}
+        {!subjectName.trim() && (
+          <div className="text-[10px] text-muted-foreground italic">
+            Add a name to auto-save this scan to the library for future comparisons.
+          </div>
+        )}
+      </div>
+
+      {showLibrary && (
+        <div className="rounded-sm border border-border bg-background/40 p-3 space-y-3">
+          <div className="flex items-center gap-2">
+            <Library className="w-4 h-4 text-amber" />
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Scan library</div>
+            <button onClick={loadLibrary} disabled={libBusy} className="ml-auto text-muted-foreground hover:text-amber">
+              <RefreshCw className={`w-3.5 h-3.5 ${libBusy ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          <Input
+            value={libFilter}
+            onChange={(e) => setLibFilter(e.target.value)}
+            placeholder="Filter by name or notes…"
+            className="h-8 text-xs"
+          />
+          <div className="max-h-[320px] overflow-y-auto space-y-1.5">
+            {filteredLibrary.length === 0 ? (
+              <div className="text-[11px] text-muted-foreground italic py-4 text-center">
+                {libBusy ? 'Loading…' : 'No saved scans yet.'}
+              </div>
+            ) : (
+              filteredLibrary.map((l) => (
+                <div key={l.id} className="rounded-sm border border-border bg-background/30 p-2.5 flex items-center gap-3 hover:border-amber/40">
+                  <button onClick={() => openEntry(l)} className="flex-1 text-left min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-foreground truncate">{l.subject_name}</span>
+                      {l.overall_verdict && (
+                        <span className={`px-1.5 py-0.5 rounded-sm border text-[9px] font-bold uppercase tracking-widest ${verdictColor(l.overall_verdict as Verdict)}`}>
+                          {l.overall_verdict.replace('_', ' ')}
+                        </span>
+                      )}
+                      {typeof l.overall_score === 'number' && (
+                        <span className="text-[10px] font-mono text-amber">{Math.round(l.overall_score)}/100</span>
+                      )}
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
+                        {l.sample_count} sample{l.sample_count === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                      {new Date(l.created_at).toLocaleString()}{l.notes ? ` · ${l.notes}` : ''}
+                    </div>
+                  </button>
+                  <button onClick={() => deleteEntry(l.id)} className="text-muted-foreground hover:text-crimson shrink-0" aria-label="Delete">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-3">
         {samples.map((s, i) => (
           <SampleEditor
