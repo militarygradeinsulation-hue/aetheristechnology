@@ -428,6 +428,12 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
     return { table: t, count: count || 0 };
   }
 
+  if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
+  if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
+  if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
+  if (name === "mark_contact_read") return markContactRead(sb, String(args.id || ""));
+  if (name === "add_drip_prospect") return addDripProspect(sb, args as any);
+
   return { error: `Unknown tool: ${name}` };
 }
 
