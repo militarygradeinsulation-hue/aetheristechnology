@@ -51,6 +51,8 @@ import NotificationBell from '@/components/admin/NotificationBell';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
+import TabSizeSlider from '@/components/TabSizeSlider';
+import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
@@ -161,6 +163,7 @@ const AdminDashboard: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const { mode: tabColorMode } = useTabColorMode();
+  const { scale: tabScale } = useTabSize();
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
@@ -568,6 +571,7 @@ const AdminDashboard: React.FC = () => {
             onWidgetSizeChange={setWidgetSize}
           />
           <TabColorToggle />
+          <TabSizeSlider />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {visibleTabs.length} / {ALL_TAB_DEFS.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
           </span>
@@ -589,9 +593,10 @@ const AdminDashboard: React.FC = () => {
                       if (tab !== 'tools') setActiveTool(null);
                     }}
                     variant={active ? 'default' : 'outline'}
-                    className={`h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                    style={tabButtonStyle(tabScale)}
+                    className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
                     <span>{label}</span>
                   </Button>
                 );

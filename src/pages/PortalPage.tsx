@@ -80,6 +80,8 @@ import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import TabColorToggle from '@/components/TabColorToggle';
+import TabSizeSlider from '@/components/TabSizeSlider';
+import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
@@ -134,6 +136,7 @@ const PortalPage: React.FC = () => {
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
   const { mode: tabColorMode } = useTabColorMode();
+  const { scale: tabScale } = useTabSize();
 
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
@@ -732,6 +735,7 @@ const PortalPage: React.FC = () => {
                       logPortalActivity('tab_view', { tab: t.id });
                     }}
                     variant={active ? 'default' : 'outline'}
+                    style={isStevenInbox ? undefined : tabButtonStyle(tabScale)}
                     className={
                       isStevenInbox
                         ? `h-14 px-6 gap-2.5 whitespace-nowrap text-base font-bold uppercase tracking-wide rounded-xl shadow-[0_0_24px_rgba(56,189,248,0.45)] ring-2 ring-sky-400/60 transition-transform hover:scale-[1.03] ${
@@ -739,10 +743,12 @@ const PortalPage: React.FC = () => {
                               ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
                               : 'bg-sky-500/15 border-sky-400 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200'
                           }`
-                        : `h-10 px-4 gap-2 whitespace-nowrap text-sm font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
+                        : `gap-2 whitespace-nowrap font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
                     }
                   >
-                    <Icon className={isStevenInbox ? 'w-5 h-5' : 'w-4 h-4'} />
+                    {isStevenInbox
+                      ? <Icon className="w-5 h-5" />
+                      : <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />}
                     <span>{isStevenInbox ? "Steven's Inbox" : t.label}</span>
                     {t.badge && t.badge > 0 ? (
                       <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
@@ -772,6 +778,7 @@ const PortalPage: React.FC = () => {
             onWidgetSizeChange={setWidgetSize}
           />
           <TabColorToggle />
+          <TabSizeSlider />
 
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board · drag headers to reorder · ☆ to pin · 1/4–4/4 to resize' : 'Tab view'}
