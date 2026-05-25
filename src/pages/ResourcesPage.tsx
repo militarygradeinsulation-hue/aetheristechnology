@@ -65,11 +65,13 @@ const ResourcesPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('playbooks')
-        .select('*')
+        .select('id, title, subtitle, description, tags, file_url, icon_name, published_at')
         .order('published_at', { ascending: true });
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   // Check which playbooks the user has purchased
