@@ -198,6 +198,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
     { key: 'interviews', label: 'Interviews', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
