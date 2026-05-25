@@ -4,6 +4,7 @@
 // - Partners: same coach + small set of read-only company-wide tools.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -129,6 +130,13 @@ const PARTNER_TOOLS = [
       },
     },
   },
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+];
+
+// Tools every authenticated portal user (rep or partner) can use for live info.
+const REP_LIVE_TOOLS = [
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
 ];
 
 const limit = (n: unknown, def: number, max: number) => {
@@ -204,6 +212,10 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     return data || [];
   }
 
+  if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
+  if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
+  if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
+
   return { error: `Unknown tool: ${name}` };
 }
 
@@ -236,17 +248,15 @@ Deno.serve(async (req) => {
       ...body.messages,
     ];
 
-    const tools = isPartner ? PARTNER_TOOLS : undefined;
+    const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
 
     for (let round = 0; round < 4; round++) {
       const aiBody: Record<string, unknown> = {
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: convo,
+        tools,
+        tool_choice: "auto",
       };
-      if (tools) {
-        aiBody.tools = tools;
-        aiBody.tool_choice = "auto";
-      }
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -284,7 +294,7 @@ Deno.serve(async (req) => {
       }
 
       const toolCalls = msg.tool_calls;
-      if (isPartner && toolCalls && toolCalls.length > 0) {
+      if (toolCalls && toolCalls.length > 0) {
         convo.push({ role: "assistant", content: msg.content || "", tool_calls: toolCalls });
         for (const call of toolCalls) {
           let parsedArgs: Record<string, unknown> = {};
@@ -320,3 +330,6 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+
+

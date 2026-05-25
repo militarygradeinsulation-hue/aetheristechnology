@@ -889,7 +889,11 @@ const PortalPage: React.FC = () => {
         })()}
 
       </main>
+
+      {/* Global floating Operator dock — live on every portal page/tab */}
+      <SalesCoachChat />
     </div>
+
   );
 };
 

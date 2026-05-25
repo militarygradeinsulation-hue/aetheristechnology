@@ -4,6 +4,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import {
+  SHARED_TOOL_SCHEMAS,
+  webSearch,
+  hubspotMirrorSearch,
+  searchContentLibrary,
+  markContactRead,
+  addDripProspect,
+} from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -214,6 +222,12 @@ const TOOLS = [
       },
     },
   },
+  // Smart-connection tools (live web, HubSpot mirror, content library, safe writes)
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
+  SHARED_TOOL_SCHEMAS.mark_contact_read,
+  SHARED_TOOL_SCHEMAS.add_drip_prospect,
 ];
 
 const COUNTABLE_TABLES = new Set([
@@ -221,7 +235,7 @@ const COUNTABLE_TABLES = new Set([
   "drip_prospects", "drip_emails", "rep_codes", "rep_signups", "audit_runs", "hygiene_actions",
   "site_events", "crm_contacts", "crm_companies", "crm_deals", "email_send_log",
   "content_posting_schedule", "content_engine_posts", "claim_codes", "generated_playbooks",
-  "campaign_assets",
+  "campaign_assets", "mirror_contacts", "mirror_deals", "mirror_engagements",
 ]);
 
 // ---------- Tool executor ----------
@@ -414,6 +428,12 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
     return { table: t, count: count || 0 };
   }
 
+  if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
+  if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
+  if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
+  if (name === "mark_contact_read") return markContactRead(sb, String(args.id || ""));
+  if (name === "add_drip_prospect") return addDripProspect(sb, args as any);
+
   return { error: `Unknown tool: ${name}` };
 }
 
@@ -449,7 +469,7 @@ serve(async (req) => {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-3-flash-preview",
           messages: convo,
           tools: TOOLS,
           tool_choice: "auto",
