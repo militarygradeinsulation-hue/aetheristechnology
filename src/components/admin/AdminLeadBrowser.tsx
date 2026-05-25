@@ -375,7 +375,7 @@ export const AdminLeadBrowser: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={autoAssign} disabled={autoBusy || autoCodes.size === 0}>
+                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => requestPush(Array.from(autoCodes), autoPerRep)} disabled={autoBusy || autoCodes.size === 0}>
                   {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
                   Auto-assign to {autoCodes.size || 0} rep{autoCodes.size === 1 ? '' : 's'}
                 </Button>
