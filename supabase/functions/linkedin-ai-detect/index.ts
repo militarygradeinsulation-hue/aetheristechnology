@@ -52,9 +52,9 @@ serve(async (req) => {
 
     const clueProps = {
       pattern: { type: "string" },
-      highlight: { type: "string", description: "Verbatim phrase from THIS sample's transcript" },
+      highlight: { type: "string" },
       fact: { type: "string" },
-      source: { type: "string", description: "Named study/tool/principle" },
+      source: { type: "string" },
       confidence: { type: "number" },
     };
 
@@ -64,7 +64,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM },
+          { role: "system", content: SYSTEM + `\n\nVerdict values MUST be one of: HUMAN, LIKELY_HUMAN, MIXED, LIKELY_AI, AI.\nsame_author MUST be one of: yes, no, mixed, unknown.\nEach sample needs 2-6 clues. Highlight must be a verbatim phrase from that sample.` },
           { role: "user", content: userContent },
         ],
         tools: [{
@@ -77,44 +77,37 @@ serve(async (req) => {
               properties: {
                 samples: {
                   type: "array",
-                  minItems: 1,
-                  maxItems: 5,
                   items: {
                     type: "object",
                     properties: {
-                      index: { type: "number", description: "1-based sample index" },
-                      score: { type: "number", description: "0-100 probability that AI wrote THIS sample" },
-                      verdict: { type: "string", enum: ["HUMAN", "LIKELY_HUMAN", "MIXED", "LIKELY_AI", "AI"] },
+                      index: { type: "number" },
+                      score: { type: "number" },
+                      verdict: { type: "string" },
                       summary: { type: "string" },
-                      transcript: { type: "string", description: "Verbatim text of this sample (transcribed from image if needed)" },
+                      transcript: { type: "string" },
                       clues: {
                         type: "array",
-                        minItems: 2,
-                        maxItems: 6,
-                        items: { type: "object", properties: clueProps, required: ["pattern", "highlight", "fact", "source", "confidence"], additionalProperties: false },
+                        items: { type: "object", properties: clueProps, required: ["pattern", "highlight", "fact", "source", "confidence"] },
                       },
                     },
                     required: ["index", "score", "verdict", "summary", "transcript", "clues"],
-                    additionalProperties: false,
                   },
                 },
                 comparison: {
                   type: "object",
                   properties: {
-                    overall_score: { type: "number", description: "0-100 aggregate AI probability across all samples" },
-                    overall_verdict: { type: "string", enum: ["HUMAN", "LIKELY_HUMAN", "MIXED", "LIKELY_AI", "AI"] },
-                    same_author: { type: "string", enum: ["yes", "no", "mixed", "unknown"] },
+                    overall_score: { type: "number" },
+                    overall_verdict: { type: "string" },
+                    same_author: { type: "string" },
                     same_author_reasoning: { type: "string" },
-                    repeated_patterns: { type: "array", items: { type: "string" }, description: "AI tells that appear across multiple samples" },
-                    outlier_index: { type: "number", description: "1-based index of the most-different sample, or 0 if none" },
-                    bottom_line: { type: "string", description: "One blunt forensic sentence." },
+                    repeated_patterns: { type: "array", items: { type: "string" } },
+                    outlier_index: { type: "number" },
+                    bottom_line: { type: "string" },
                   },
                   required: ["overall_score", "overall_verdict", "same_author", "same_author_reasoning", "repeated_patterns", "outlier_index", "bottom_line"],
-                  additionalProperties: false,
                 },
               },
               required: ["samples", "comparison"],
-              additionalProperties: false,
             },
           },
         }],
