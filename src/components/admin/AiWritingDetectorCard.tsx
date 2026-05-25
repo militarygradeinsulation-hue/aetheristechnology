@@ -241,64 +241,149 @@ const SampleEditor: React.FC<{
 // ---------- Easy Read ----------
 function verdictPlain(v: Verdict): string {
   switch (v) {
-    case 'HUMAN': return 'almost certainly written by a human';
-    case 'LIKELY_HUMAN': return 'most likely written by a human';
-    case 'MIXED': return 'a mix of human and AI signals — unclear';
-    case 'LIKELY_AI': return 'most likely written by AI';
-    case 'AI': return 'almost certainly written by AI';
+    case 'HUMAN': return 'Authored by a human. No meaningful AI signal detected.';
+    case 'LIKELY_HUMAN': return 'Likely human-authored. Minor patterns present, but not enough to call AI.';
+    case 'MIXED': return 'Mixed signal. Sample contains both human voice traits and AI patterns — likely edited or partially generated.';
+    case 'LIKELY_AI': return 'Likely AI-generated or heavily AI-assisted. Multiple model fingerprints present.';
+    case 'AI': return 'Machine-generated with high confidence. Sample matches known LLM output patterns.';
   }
+}
+
+function hr(char = '─', len = 64): string {
+  return char.repeat(len);
 }
 
 function buildEasyReadText(result: DetectResult, subject: string): string {
   const lines: string[] = [];
   const isMulti = (result.samples?.length || 0) > 1;
+  const sampleCount = result.samples?.length || 0;
   const overallScore = isMulti
     ? Math.round(result.comparison?.overall_score ?? 0)
     : Math.round(result.samples?.[0]?.score ?? 0);
   const overallVerdict = isMulti
     ? result.comparison?.overall_verdict
     : result.samples?.[0]?.verdict;
+  const totalClues = (result.samples || []).reduce((n, s) => n + (s.clues?.length || 0), 0);
+  const caseId = `AET-AID-${Date.now().toString(36).toUpperCase()}`;
 
-  lines.push(`AI Writing Detector — Plain English Report`);
-  if (subject) lines.push(`Subject: ${subject}`);
-  lines.push(`Date: ${new Date().toLocaleString()}`);
+  // ─── HEADER ───
+  lines.push(hr('═'));
+  lines.push('AETHERIS TECHNOLOGY  ·  BUSINESS FORENSICS DIVISION');
+  lines.push('AI Writing Detector — Forensic Findings Report');
+  lines.push(hr('═'));
   lines.push('');
-  lines.push(`Overall score: ${overallScore} out of 100`);
-  if (overallVerdict) lines.push(`Verdict: This writing is ${verdictPlain(overallVerdict)}.`);
+  lines.push(`Case File:    ${caseId}`);
+  if (subject) lines.push(`Subject:      ${subject}`);
+  lines.push(`Issued:       ${new Date().toLocaleString()}`);
+  lines.push(`Samples:      ${sampleCount} analyzed`);
+  lines.push(`Evidence:     ${totalClues} forensic marker${totalClues === 1 ? '' : 's'} catalogued`);
+  lines.push(`Methodology:  The Leak Audit™ — Authorship Forensics module`);
+  lines.push('');
+  lines.push(hr());
+  lines.push('EXECUTIVE FINDING');
+  lines.push(hr());
+  lines.push('');
+  lines.push(`AI-Authorship Score:  ${overallScore} / 100`);
+  if (overallVerdict) {
+    lines.push(`Verdict:              ${overallVerdict.replace('_', ' ')}`);
+    lines.push('');
+    lines.push(verdictPlain(overallVerdict));
+  }
   lines.push('');
 
+  // ─── CROSS-SAMPLE ANALYSIS ───
   if (isMulti && result.comparison) {
     const c = result.comparison;
-    lines.push(`Bottom line: ${c.bottom_line}`);
+    lines.push(hr());
+    lines.push('CROSS-SAMPLE ANALYSIS');
+    lines.push(hr());
     lines.push('');
-    lines.push(`Same author across all samples? ${c.same_author.toUpperCase()}.`);
-    if (c.same_author_reasoning) lines.push(c.same_author_reasoning);
+    if (c.bottom_line) {
+      lines.push('Operator Assessment:');
+      lines.push(`  ${c.bottom_line}`);
+      lines.push('');
+    }
+    lines.push(`Single Author Across All Samples:  ${c.same_author.toUpperCase()}`);
+    if (c.same_author_reasoning) {
+      lines.push(`  ${c.same_author_reasoning}`);
+    }
     lines.push('');
     if (c.repeated_patterns?.length) {
-      lines.push(`Patterns that repeated across samples:`);
+      lines.push('Repeated AI Fingerprints (signal strength increases when patterns recur):');
       c.repeated_patterns.forEach((p) => lines.push(`  • ${p}`));
       lines.push('');
     }
   }
 
-  (result.samples || []).forEach((s) => {
-    lines.push(`— Sample ${s.index} —`);
-    lines.push(`Score: ${Math.round(s.score)}/100. ${verdictPlain(s.verdict)}.`);
-    if (s.summary) lines.push(s.summary);
+  // ─── PER-SAMPLE BREAKDOWN ───
+  lines.push(hr());
+  lines.push('PER-SAMPLE BREAKDOWN');
+  lines.push(hr());
+  lines.push('');
+
+  (result.samples || []).forEach((s, idx) => {
+    lines.push(`SAMPLE ${String(s.index).padStart(2, '0')}`);
+    lines.push(hr('·', 48));
+    lines.push(`Score:    ${Math.round(s.score)} / 100`);
+    lines.push(`Verdict:  ${s.verdict.replace('_', ' ')}`);
+    if (s.summary) {
+      lines.push('');
+      lines.push('Summary:');
+      lines.push(`  ${s.summary}`);
+    }
     if (s.clues?.length) {
-      lines.push(`Things we found (${s.clues.length}):`);
+      lines.push('');
+      lines.push(`Evidence catalogued (${s.clues.length}):`);
       s.clues.forEach((c, i) => {
-        lines.push(`  ${i + 1}. ${c.pattern}`);
-        if (c.highlight) lines.push(`     Quote: "${c.highlight}"`);
-        if (c.fact) lines.push(`     Why it matters: ${c.fact}`);
-        if (c.source) lines.push(`     Source: ${c.source}`);
+        lines.push('');
+        lines.push(`  [${String(i + 1).padStart(2, '0')}] ${c.pattern}`);
+        if (typeof c.confidence === 'number') {
+          lines.push(`       Confidence:  ${Math.round(c.confidence * 100)}%`);
+        }
+        if (c.highlight) lines.push(`       Quoted:      "${c.highlight}"`);
+        if (c.fact) lines.push(`       Analysis:    ${c.fact}`);
+        if (c.source) lines.push(`       Reference:   ${c.source}`);
       });
     }
-    lines.push('');
+    if (idx < (result.samples?.length || 0) - 1) {
+      lines.push('');
+      lines.push('');
+    } else {
+      lines.push('');
+    }
   });
 
-  return lines.join('\n').trim();
+  // ─── METHODOLOGY ───
+  lines.push(hr());
+  lines.push('METHODOLOGY NOTES');
+  lines.push(hr());
+  lines.push('');
+  lines.push('Scoring is additive and evidence-driven. Each forensic marker contributes');
+  lines.push('points scaled by confidence; the total is capped at 100. Verdicts are derived');
+  lines.push('from the resulting score (0–19 Human, 20–39 Likely Human, 40–59 Mixed,');
+  lines.push('60–79 Likely AI, 80–100 AI). Cross-sample analysis weights recurring');
+  lines.push('patterns more heavily — the same fingerprint across multiple samples is a');
+  lines.push('stronger signal than any single tell in isolation.');
+  lines.push('');
+  lines.push(hr());
+  lines.push('PREPARED BY');
+  lines.push(hr());
+  lines.push('');
+  lines.push('Aetheris Technology  ·  Business Forensics Division');
+  lines.push('Indianapolis, IN  ·  https://aetheris.technology');
+  lines.push('');
+  lines.push('This report is operator-grade forensic analysis, not a legal determination.');
+  lines.push('Findings reflect observable patterns at the time of scan and should be');
+  lines.push('weighed alongside context, intent, and supporting evidence.');
+  lines.push('');
+  lines.push(hr('═'));
+  lines.push(`END OF REPORT  ·  ${caseId}`);
+  lines.push(hr('═'));
+
+  return lines.join('\n');
 }
+
+
 
 const EasyReadPanel: React.FC<{ result: DetectResult; subject: string }> = ({ result, subject }) => {
   const text = useMemo(() => buildEasyReadText(result, subject), [result, subject]);
