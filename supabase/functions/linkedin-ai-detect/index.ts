@@ -27,7 +27,12 @@ Human tells (lower the score):
 - Rant energy, run-on sentences, asides in parens
 - Idiosyncratic voice ticks
 
-Output a probability (0-100), a verdict label, and 2-5 specific clues quoting or pointing at the exact patterns you saw. Be blunt and forensic.`;
+For EVERY clue you find, you MUST:
+1. Quote the EXACT phrase/word(s) from the post (verbatim, so we can highlight it)
+2. Explain WHY that pattern is an AI tell (the fact/reason)
+3. Cite a SOURCE backing up that pattern (a study, article, linguistic principle, tool report, or named research — e.g. "Stanford CRFM 2023 GPT detection study", "OpenAI watermark paper 2022", "Inside Higher Ed analysis of ChatGPT cadence", "GPTZero perplexity/burstiness metric", "Originality.ai em-dash frequency report"). If no exact citation exists, name the principle (e.g. "Low burstiness — Gehrmann et al. GLTR 2019").
+
+Output a probability (0-100), a verdict label, a one-sentence summary, and 3-6 highlighted clues. Be blunt and forensic.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -44,7 +49,7 @@ serve(async (req) => {
     const userContent: any[] = [];
     if (postText) userContent.push({ type: "text", text: `Post to analyze:\n\n${postText}` });
     if (imageDataUrl) {
-      userContent.push({ type: "text", text: "Post screenshot to analyze:" });
+      userContent.push({ type: "text", text: "Post screenshot to analyze. First transcribe the visible text, then analyze." });
       userContent.push({ type: "image_url", image_url: { url: imageDataUrl } });
     }
 
@@ -61,29 +66,33 @@ serve(async (req) => {
           type: "function",
           function: {
             name: "report_detection",
-            description: "Report AI-writing likelihood with specific clues.",
+            description: "Report AI-writing likelihood with highlighted clues, facts, and sources.",
             parameters: {
               type: "object",
               properties: {
                 score: { type: "number", description: "0-100 probability that AI wrote this." },
                 verdict: { type: "string", enum: ["HUMAN", "LIKELY_HUMAN", "MIXED", "LIKELY_AI", "AI"] },
                 summary: { type: "string", description: "One blunt sentence forensic verdict." },
+                transcript: { type: "string", description: "If image input, the verbatim transcribed text. If text input, echo it back exactly. Used for highlighting." },
                 clues: {
                   type: "array",
-                  minItems: 1,
+                  minItems: 3,
                   maxItems: 6,
                   items: {
                     type: "object",
                     properties: {
                       pattern: { type: "string", description: "Short label of the AI tell (e.g. 'Triadic parallelism', 'Em-dash overuse')." },
-                      evidence: { type: "string", description: "Quote the exact phrase from the post that demonstrates the pattern, or describe what you saw." },
+                      highlight: { type: "string", description: "EXACT verbatim phrase or word from the post that demonstrates this tell. Must appear character-for-character in the transcript so the UI can highlight it." },
+                      fact: { type: "string", description: "Why this is an AI tell — the underlying linguistic/statistical fact." },
+                      source: { type: "string", description: "Named study, paper, tool, or principle that documents this pattern (e.g. 'GPTZero burstiness metric', 'Gehrmann et al., GLTR 2019', 'Originality.ai em-dash frequency study 2024')." },
+                      confidence: { type: "number", description: "0-100 how confident this specific clue indicates AI." },
                     },
-                    required: ["pattern", "evidence"],
+                    required: ["pattern", "highlight", "fact", "source", "confidence"],
                     additionalProperties: false,
                   },
                 },
               },
-              required: ["score", "verdict", "summary", "clues"],
+              required: ["score", "verdict", "summary", "transcript", "clues"],
               additionalProperties: false,
             },
           },
