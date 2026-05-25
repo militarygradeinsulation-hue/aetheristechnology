@@ -80,6 +80,8 @@ import { Maximize2 } from 'lucide-react';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import TabColorToggle from '@/components/TabColorToggle';
+import TabSizeSlider from '@/components/TabSizeSlider';
+import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
