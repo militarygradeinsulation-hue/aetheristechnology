@@ -1,8 +1,9 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare, Library, Trash2, User, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -286,11 +287,61 @@ const SampleResultPanel: React.FC<{ sample: SampleResult; isOutlier: boolean }> 
   );
 };
 
+type LibraryEntry = {
+  id: string;
+  subject_name: string;
+  notes: string | null;
+  sample_count: number;
+  overall_score: number | null;
+  overall_verdict: Verdict | null;
+  same_author: string | null;
+  samples: any;
+  result: DetectResult;
+  created_at: string;
+};
+
 export const AiWritingDetectorCard: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([newSample()]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DetectResult | null>(null);
   const [expanded, setExpanded] = useState(true);
+  const [subjectName, setSubjectName] = useState('');
+  const [notes, setNotes] = useState('');
+  const [library, setLibrary] = useState<LibraryEntry[]>([]);
+  const [libBusy, setLibBusy] = useState(false);
+  const [libFilter, setLibFilter] = useState('');
+  const [showLibrary, setShowLibrary] = useState(false);
+
+  const loadLibrary = async () => {
+    setLibBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_detection_scans')
+        .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      setLibrary((data || []) as any);
+    } catch (e: any) {
+      toast({ title: 'Could not load library', description: e?.message, variant: 'destructive' });
+    } finally {
+      setLibBusy(false);
+    }
+  };
+
+  useEffect(() => { loadLibrary(); }, []);
+
+  const subjectMatches = useMemo(() => {
+    if (!subjectName.trim()) return [];
+    const q = subjectName.trim().toLowerCase();
+    return library.filter((l) => l.subject_name.toLowerCase().includes(q)).slice(0, 5);
+  }, [subjectName, library]);
+
+  const filteredLibrary = useMemo(() => {
+    const q = libFilter.trim().toLowerCase();
+    if (!q) return library;
+    return library.filter((l) => l.subject_name.toLowerCase().includes(q) || (l.notes || '').toLowerCase().includes(q));
+  }, [libFilter, library]);
 
   const updateSample = (id: string, next: Sample) =>
     setSamples((prev) => prev.map((s) => (s.id === id ? next : s)));
@@ -300,6 +351,38 @@ export const AiWritingDetectorCard: React.FC = () => {
     setSamples((prev) => (prev.length >= MAX_SAMPLES ? prev : [...prev, newSample()]));
 
   const filledCount = samples.filter((s) => s.text.trim() || s.imageDataUrl).length;
+
+  const saveToLibrary = async (data: DetectResult) => {
+    const name = subjectName.trim();
+    if (!name) return;
+    try {
+      const samplesMeta = samples
+        .filter((s) => s.text.trim() || s.imageDataUrl)
+        .map((s) => ({
+          text: s.text.trim() || null,
+          has_image: !!s.imageDataUrl,
+          chars: s.text.trim().length,
+        }));
+      const overall = data.samples?.length === 1
+        ? { score: data.samples[0].score, verdict: data.samples[0].verdict, same_author: null }
+        : { score: data.comparison?.overall_score ?? null, verdict: data.comparison?.overall_verdict ?? null, same_author: data.comparison?.same_author ?? null };
+      const { error } = await supabase.from('ai_detection_scans').insert({
+        subject_name: name,
+        notes: notes.trim() || null,
+        sample_count: samplesMeta.length,
+        overall_score: overall.score,
+        overall_verdict: overall.verdict,
+        same_author: overall.same_author,
+        samples: samplesMeta,
+        result: data as any,
+      });
+      if (error) throw error;
+      toast({ title: `Saved scan for ${name}` });
+      loadLibrary();
+    } catch (e: any) {
+      toast({ title: 'Could not save scan', description: e?.message, variant: 'destructive' });
+    }
+  };
 
   const run = async () => {
     const payload = samples
@@ -319,6 +402,7 @@ export const AiWritingDetectorCard: React.FC = () => {
       if ((data as any)?.error) throw new Error((data as any).error);
       setResult(data as DetectResult);
       setExpanded(true);
+      if (subjectName.trim()) await saveToLibrary(data as DetectResult);
     } catch (e: any) {
       toast({ title: 'Scan failed', description: e?.message || 'Try again', variant: 'destructive' });
     } finally {
@@ -329,6 +413,23 @@ export const AiWritingDetectorCard: React.FC = () => {
   const clear = () => {
     setSamples([newSample()]);
     setResult(null);
+    setSubjectName('');
+    setNotes('');
+  };
+
+  const deleteEntry = async (id: string) => {
+    if (!confirm('Delete this saved scan?')) return;
+    const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
+    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
+    setLibrary((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const openEntry = (entry: LibraryEntry) => {
+    setResult(entry.result);
+    setSubjectName(entry.subject_name);
+    setNotes(entry.notes || '');
+    setExpanded(true);
+    setShowLibrary(false);
   };
 
   const sameAuthorBadge = (s: Comparison['same_author']) => {
@@ -354,6 +455,106 @@ export const AiWritingDetectorCard: React.FC = () => {
       <p className="text-xs text-muted-foreground -mt-2">
         Compare up to {MAX_SAMPLES} writing samples (text or screenshots). Get per-sample AI scores, cross-sample patterns, and a same-author analysis.
       </p>
+
+      {/* Subject / library row */}
+      <div className="rounded-sm border border-amber/20 bg-background/30 p-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <User className="w-3.5 h-3.5 text-amber" />
+          <label className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Subject (for the library)</label>
+          <button
+            onClick={() => { setShowLibrary((v) => !v); if (!showLibrary) loadLibrary(); }}
+            className="ml-auto text-[10px] uppercase tracking-widest font-bold text-foreground/80 hover:text-amber inline-flex items-center gap-1"
+          >
+            <Library className="w-3 h-3" />
+            Library ({library.length})
+          </button>
+        </div>
+        <div className="grid md:grid-cols-[1fr_2fr] gap-2">
+          <Input
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value)}
+            placeholder="Name (e.g. Jane Doe, Acme CEO)"
+            className="h-8 text-xs"
+          />
+          <Input
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optional notes (source, role, context)"
+            className="h-8 text-xs"
+          />
+        </div>
+        {subjectMatches.length > 0 && (
+          <div className="text-[10px] text-muted-foreground">
+            <span className="font-mono uppercase tracking-widest mr-1">Prior scans:</span>
+            {subjectMatches.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => openEntry(m)}
+                className="inline-flex items-center gap-1 mr-2 underline decoration-amber/40 hover:text-amber"
+              >
+                {m.subject_name} · {new Date(m.created_at).toLocaleDateString()} · {m.overall_verdict || '—'}
+              </button>
+            ))}
+          </div>
+        )}
+        {!subjectName.trim() && (
+          <div className="text-[10px] text-muted-foreground italic">
+            Add a name to auto-save this scan to the library for future comparisons.
+          </div>
+        )}
+      </div>
+
+      {showLibrary && (
+        <div className="rounded-sm border border-border bg-background/40 p-3 space-y-3">
+          <div className="flex items-center gap-2">
+            <Library className="w-4 h-4 text-amber" />
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber font-mono">Scan library</div>
+            <button onClick={loadLibrary} disabled={libBusy} className="ml-auto text-muted-foreground hover:text-amber">
+              <RefreshCw className={`w-3.5 h-3.5 ${libBusy ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          <Input
+            value={libFilter}
+            onChange={(e) => setLibFilter(e.target.value)}
+            placeholder="Filter by name or notes…"
+            className="h-8 text-xs"
+          />
+          <div className="max-h-[320px] overflow-y-auto space-y-1.5">
+            {filteredLibrary.length === 0 ? (
+              <div className="text-[11px] text-muted-foreground italic py-4 text-center">
+                {libBusy ? 'Loading…' : 'No saved scans yet.'}
+              </div>
+            ) : (
+              filteredLibrary.map((l) => (
+                <div key={l.id} className="rounded-sm border border-border bg-background/30 p-2.5 flex items-center gap-3 hover:border-amber/40">
+                  <button onClick={() => openEntry(l)} className="flex-1 text-left min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-foreground truncate">{l.subject_name}</span>
+                      {l.overall_verdict && (
+                        <span className={`px-1.5 py-0.5 rounded-sm border text-[9px] font-bold uppercase tracking-widest ${verdictColor(l.overall_verdict as Verdict)}`}>
+                          {l.overall_verdict.replace('_', ' ')}
+                        </span>
+                      )}
+                      {typeof l.overall_score === 'number' && (
+                        <span className="text-[10px] font-mono text-amber">{Math.round(l.overall_score)}/100</span>
+                      )}
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
+                        {l.sample_count} sample{l.sample_count === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                      {new Date(l.created_at).toLocaleString()}{l.notes ? ` · ${l.notes}` : ''}
+                    </div>
+                  </button>
+                  <button onClick={() => deleteEntry(l.id)} className="text-muted-foreground hover:text-crimson shrink-0" aria-label="Delete">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3">
         {samples.map((s, i) => (
