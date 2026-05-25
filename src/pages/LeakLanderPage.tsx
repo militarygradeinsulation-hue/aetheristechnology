@@ -48,8 +48,7 @@ const LeakLanderPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden flex flex-col">
-      <Background />
+    <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
         title="Your Business Is Leaking — Aetheris Business Forensics"
         description="78% of leaks we find, the owner already felt — they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
