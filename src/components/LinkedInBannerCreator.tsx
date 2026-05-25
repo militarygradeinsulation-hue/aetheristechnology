@@ -100,24 +100,20 @@ export const LinkedInBannerCreator: React.FC<Props> = ({ invoke, onSaved }) => {
     setBannerBg(pick(bgs as any, bannerBg));
   };
 
-  const generateBanner = async () => {
-    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
-    setBannerBusy(true);
-    try {
-      const prompt =
+  const buildPrompt = (headline: string, accent: string, sub: string, bg: keyof typeof BG_DESC) =>
 `LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
 
 LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
-- Background fills the entire banner: ${BG_DESC[bannerBg]}
+- Background fills the entire banner: ${BG_DESC[bg]}
 - RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
 - Place ALL typography in the CENTER-RIGHT region of the banner, horizontally centered between roughly 38% and 92% of the width, vertically centered
 - Headline is center-aligned within that right zone
 - Big serif display headline in TWO COLORS on one or two lines:
-  · "${bannerHeadline}" rendered in CRISP WHITE (#FFFFFF)
-  · "${bannerAccent}" rendered in WARM AMBER GOLD (#E8A33D)
+  · "${headline}" rendered in CRISP WHITE (#FFFFFF)
+  · "${accent}" rendered in WARM AMBER GOLD (#E8A33D)
 - Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
 - Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars, also center-aligned in the right zone:
-  "${bannerSub}"
+  "${sub}"
 - Tiny amber monospace eyebrow label above the headline (still in the right zone, center-aligned): "AETHERIS · BUSINESS FORENSICS"
 - Bottom-right corner: small amber monospace watermark "aetheris.technology"
 
@@ -128,15 +124,19 @@ STYLE:
 - Keep the left third visually quiet so the profile picture lands cleanly on top of background only
 
 Exact text to render (do not change spelling):
-HEADLINE WHITE: "${bannerHeadline}"
-HEADLINE AMBER: "${bannerAccent}"
-SUBLINE: "${bannerSub}"
+HEADLINE WHITE: "${headline}"
+HEADLINE AMBER: "${accent}"
+SUBLINE: "${sub}"
 EYEBROW: "AETHERIS · BUSINESS FORENSICS"
 WATERMARK: "aetheris.technology"`;
 
+  const generateBanner = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    setBannerBusy(true);
+    try {
       const { data, error } = await invoke({
         action: 'generate',
-        prompt,
+        prompt: buildPrompt(bannerHeadline, bannerAccent, bannerSub, bannerBg),
         model: 'google/gemini-3-pro-image-preview',
         aetheris_style: false,
       });
@@ -150,6 +150,39 @@ WATERMARK: "aetheris.technology"`;
       setBannerBusy(false);
     }
   };
+
+  const generateVariationPack = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    const bgs: Array<keyof typeof BG_DESC> = ['network', 'matrix', 'blueprint', 'noir', 'case_file'];
+    setPackBusy(true);
+    setPackProgress({ done: 0, total: bgs.length });
+    let succeeded = 0;
+    try {
+      for (let i = 0; i < bgs.length; i++) {
+        const bg = bgs[i];
+        try {
+          const { data, error } = await invoke({
+            action: 'generate',
+            prompt: buildPrompt(bannerHeadline, bannerAccent, bannerSub, bg),
+            model: 'google/gemini-3-pro-image-preview',
+            aetheris_style: false,
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          succeeded++;
+          onSaved?.();
+        } catch (e: any) {
+          toast({ title: `Variation "${bg.replace('_',' ')}" failed`, description: e.message, variant: 'destructive' });
+        }
+        setPackProgress({ done: i + 1, total: bgs.length });
+      }
+      toast({ title: `Variation pack done`, description: `${succeeded}/${bgs.length} banners saved to your library.` });
+    } finally {
+      setPackBusy(false);
+      setTimeout(() => setPackProgress(null), 2500);
+    }
+  };
+
 
   return (
     <div className="glass p-6 rounded-xl space-y-4 border border-amber/20">
