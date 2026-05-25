@@ -244,17 +244,15 @@ Deno.serve(async (req) => {
       ...body.messages,
     ];
 
-    const tools = isPartner ? PARTNER_TOOLS : undefined;
+    const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
 
     for (let round = 0; round < 4; round++) {
       const aiBody: Record<string, unknown> = {
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: convo,
+        tools,
+        tool_choice: "auto",
       };
-      if (tools) {
-        aiBody.tools = tools;
-        aiBody.tool_choice = "auto";
-      }
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
