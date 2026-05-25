@@ -461,7 +461,7 @@ export const AiWritingDetectorCard: React.FC = () => {
   };
 
   const openEntry = (entry: LibraryEntry) => {
-    setResult(entry.result);
+    setResult(normalizeResult(entry.result));
     setSubjectName(entry.subject_name);
     setNotes(entry.notes || '');
     setExpanded(true);
