@@ -70,6 +70,10 @@ export const AdminLeadBrowser: React.FC = () => {
   const [autoBusy, setAutoBusy] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState<string | null>(null);
   const [dripCounts, setDripCounts] = useState<Record<string, number>>({});
+  const [claimedCounts, setClaimedCounts] = useState<Record<string, number>>({});
+  const [totalCounts, setTotalCounts] = useState<Record<string, number>>({});
+  const [confirmPush, setConfirmPush] = useState<null | { codes: string[]; perRep: number }>(null);
+  const [resultDialog, setResultDialog] = useState<null | { title: string; assigned: number; perRep: Record<string, number>; message?: string }>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -90,6 +94,8 @@ export const AdminLeadBrowser: React.FC = () => {
       setLeads((data?.leads || []) as Lead[]);
       setReps(((data?.reps || []) as Rep[]).filter(r => r.is_active));
       setDripCounts((data?.dripCounts || {}) as Record<string, number>);
+      setClaimedCounts((data?.claimedCounts || {}) as Record<string, number>);
+      setTotalCounts((data?.totalCounts || {}) as Record<string, number>);
       setSelected(new Set());
     } catch (e) {
       toast({ title: 'Failed to load leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -183,23 +189,33 @@ export const AdminLeadBrowser: React.FC = () => {
     } finally { setRefreshBusy(null); }
   };
 
-  const autoAssign = async () => {
-    const codes = Array.from(autoCodes);
+  const autoAssign = async (codesArg?: string[], perRepArg?: number) => {
+    const codes = codesArg ?? Array.from(autoCodes);
+    const perRep = perRepArg ?? autoPerRep;
     if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
     setAutoBusy(true);
     try {
       const res = await callAdmin('admin-assign-lead', {
-        action: 'auto_assign', codes, per_rep: autoPerRep, hold_hours: holdHours,
+        action: 'auto_assign', codes, per_rep: perRep, hold_hours: holdHours,
         industry: autoIndustry || undefined,
         min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
         respect_current: true,
       });
-      const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
-      toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
+      setResultDialog({
+        title: res.assigned > 0 ? `✓ Assigned ${res.assigned} leads` : 'No new leads assigned',
+        assigned: res.assigned || 0,
+        perRep: (res.per_rep || {}) as Record<string, number>,
+        message: res.message,
+      });
       load();
     } catch (e) {
       toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAutoBusy(false); }
+  };
+
+  const requestPush = (codes: string[], perRep: number) => {
+    if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
+    setConfirmPush({ codes, perRep });
   };
 
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
@@ -295,7 +311,7 @@ export const AdminLeadBrowser: React.FC = () => {
                     size="sm"
                     className="bg-amber text-background hover:bg-amber/90"
                     disabled={autoBusy || reps.length === 0}
-                    onClick={() => { setAutoCodes(new Set(reps.map(r => r.code))); setTimeout(autoAssign, 0); }}
+                    onClick={() => requestPush(reps.map(r => r.code), autoPerRep)}
                   >
                     {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
                     Push {autoPerRep} to ALL {reps.length} reps
@@ -324,7 +340,9 @@ export const AdminLeadBrowser: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {reps.map(r => {
                     const active = autoCodes.has(r.code);
-                    const cur = dripCounts[r.code] || 0;
+                    const drip = dripCounts[r.code] || 0;
+                    const claimed = claimedCounts[r.code] || 0;
+                    const total = totalCounts[r.code] || (drip + claimed);
                     return (
                       <button
                         key={r.code}
@@ -333,9 +351,13 @@ export const AdminLeadBrowser: React.FC = () => {
                         className={`px-2.5 py-1.5 rounded border text-xs flex items-center gap-2 transition-colors ${
                           active ? 'border-amber bg-amber/15 text-amber' : 'border-border/50 text-muted-foreground hover:border-amber/40'
                         }`}
+                        title={`Drip ${drip} • Claimed ${claimed} • Total ${total}`}
                       >
                         <span className="font-semibold">{r.rep_name || r.code}</span>
-                        <span className="font-mono text-[10px] opacity-70">{cur}/{autoPerRep}</span>
+                        <span className="font-mono text-[10px] opacity-80">
+                          <span className="text-amber">{drip}</span>/<span>{claimed}</span>
+                          <span className="opacity-60"> · {total} total</span>
+                        </span>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); refreshRep(r.code, autoPerRep); }}
@@ -353,7 +375,7 @@ export const AdminLeadBrowser: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={autoAssign} disabled={autoBusy || autoCodes.size === 0}>
+                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => requestPush(Array.from(autoCodes), autoPerRep)} disabled={autoBusy || autoCodes.size === 0}>
                   {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
                   Auto-assign to {autoCodes.size || 0} rep{autoCodes.size === 1 ? '' : 's'}
                 </Button>
@@ -567,6 +589,86 @@ export const AdminLeadBrowser: React.FC = () => {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm push dialog */}
+      <Dialog open={!!confirmPush} onOpenChange={(o) => !o && setConfirmPush(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber" /> Confirm push
+            </DialogTitle>
+            <DialogDescription>
+              Top up <span className="text-amber font-mono">{confirmPush?.codes.length}</span> rep{confirmPush?.codes.length === 1 ? '' : 's'} to <span className="text-amber font-mono">{confirmPush?.perRep}</span> active drip leads each. Reps already at target are skipped.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-60 overflow-auto rounded border border-border/40 p-2 space-y-1">
+            {(confirmPush?.codes || []).map(code => {
+              const r = reps.find(x => x.code === code);
+              const drip = dripCounts[code] || 0;
+              const claimed = claimedCounts[code] || 0;
+              const total = totalCounts[code] || 0;
+              const need = Math.max(0, (confirmPush?.perRep || 0) - drip);
+              return (
+                <div key={code} className="flex items-center justify-between text-xs">
+                  <span className="font-semibold">{r?.rep_name || code}</span>
+                  <span className="font-mono text-muted-foreground">
+                    drip {drip} · claimed {claimed} · total {total}
+                    {need > 0 && <span className="text-amber"> → +{need}</span>}
+                    {need === 0 && <span className="text-green-400"> ✓ full</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setConfirmPush(null)}>Cancel</Button>
+            <Button
+              size="sm"
+              className="bg-amber text-background hover:bg-amber/90"
+              disabled={autoBusy}
+              onClick={async () => {
+                const c = confirmPush;
+                setConfirmPush(null);
+                if (c) await autoAssign(c.codes, c.perRep);
+              }}
+            >
+              {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+              Push now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Result dialog */}
+      <Dialog open={!!resultDialog} onOpenChange={(o) => !o && setResultDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">{resultDialog?.title}</DialogTitle>
+            {resultDialog?.message && <DialogDescription>{resultDialog.message}</DialogDescription>}
+          </DialogHeader>
+          <div className="max-h-72 overflow-auto rounded border border-border/40 p-2 space-y-1">
+            {Object.entries(resultDialog?.perRep || {}).map(([code, n]) => {
+              const r = reps.find(x => x.code === code);
+              const total = totalCounts[code] || 0;
+              return (
+                <div key={code} className="flex items-center justify-between text-xs">
+                  <span className="font-semibold">{r?.rep_name || code}</span>
+                  <span className="font-mono">
+                    <span className={n > 0 ? 'text-amber' : 'text-muted-foreground'}>+{n} new</span>
+                    <span className="text-muted-foreground"> · {total} total</span>
+                  </span>
+                </div>
+              );
+            })}
+            {Object.keys(resultDialog?.perRep || {}).length === 0 && (
+              <div className="text-xs text-muted-foreground">No per-rep breakdown returned.</div>
+            )}
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button size="sm" onClick={() => setResultDialog(null)}>Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>
