@@ -773,12 +773,14 @@ export const AiWritingDetectorCard: React.FC = () => {
 
       {result && result.samples && result.samples.length === 1 && (
         <div className="space-y-3 pt-2 border-t border-border">
+          <EasyReadPanel result={result} subject={subjectName} />
           <SampleResultPanel sample={result.samples[0]} isOutlier={false} />
         </div>
       )}
 
       {result && result.comparison && result.samples && result.samples.length > 1 && (
         <div className="space-y-4 pt-2 border-t border-border">
+          <EasyReadPanel result={result} subject={subjectName} />
           {/* Overall summary */}
           <div className="rounded-sm border border-amber/30 bg-background/40 p-4 space-y-3">
             <div className="flex items-center gap-3 flex-wrap">
