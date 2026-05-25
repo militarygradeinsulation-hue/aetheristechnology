@@ -18,11 +18,14 @@ export const BlogList: React.FC = () => {
         .from('blog_posts')
         .select('id, title, slug, excerpt, author, published_at, tags, location_focus, featured_image')
         .eq('is_published', true)
-        .order('published_at', { ascending: false });
+        .order('published_at', { ascending: false })
+        .limit(60);
 
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   // Top tags for filter chips
