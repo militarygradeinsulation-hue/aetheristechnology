@@ -154,6 +154,18 @@ const LeakLanderPage: React.FC = () => {
             </h1>
           </section>
 
+          {/* Proprietary banner */}
+          <div className="mt-5 max-w-3xl mx-auto">
+            <div className="glass rounded-sm border border-amber/40 px-4 py-3 text-center">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                Proprietary · Built In-House
+              </div>
+              <p className="text-sm text-foreground/90 leading-snug">
+                All technology in this suite is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
+              </p>
+            </div>
+          </div>
+
           {/* Buttons */}
           <section
             className="mt-6 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
