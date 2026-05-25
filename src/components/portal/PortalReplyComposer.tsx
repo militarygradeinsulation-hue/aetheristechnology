@@ -52,6 +52,43 @@ export const PortalReplyComposer: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  type AiDetect = { score: number; verdict: string; summary: string; clues: { pattern: string; evidence: string }[] };
+  const [aiDetect, setAiDetect] = useState<AiDetect | null>(null);
+  const [aiDetecting, setAiDetecting] = useState(false);
+
+  const runAiDetect = async (opts?: { silent?: boolean }) => {
+    if (sourceType === 'text' && postText.trim().length < 30) {
+      if (!opts?.silent) toast({ title: 'Paste at least 30 chars first', variant: 'destructive' });
+      return;
+    }
+    if (sourceType === 'image' && !imageDataUrl) {
+      if (!opts?.silent) toast({ title: 'Upload a screenshot first', variant: 'destructive' });
+      return;
+    }
+    setAiDetecting(true);
+    try {
+      const body = sourceType === 'image' ? { imageDataUrl } : { postText: postText.trim() };
+      const { data, error } = await supabase.functions.invoke('linkedin-ai-detect', { body });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiDetect(data as AiDetect);
+    } catch (e: any) {
+      if (!opts?.silent) toast({ title: 'AI scan failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setAiDetecting(false);
+    }
+  };
+
+  // Auto-run AI detection (debounced) when source content changes
+  useEffect(() => {
+    setAiDetect(null);
+    if (sourceType === 'text' && postText.trim().length < 30) return;
+    if (sourceType === 'image' && !imageDataUrl) return;
+    const t = setTimeout(() => { runAiDetect({ silent: true }); }, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postText, imageDataUrl, sourceType]);
+
   const loadLibrary = async () => {
     setLibLoading(true);
     try {
