@@ -311,7 +311,7 @@ export const AdminLeadBrowser: React.FC = () => {
                     size="sm"
                     className="bg-amber text-background hover:bg-amber/90"
                     disabled={autoBusy || reps.length === 0}
-                    onClick={() => { setAutoCodes(new Set(reps.map(r => r.code))); setTimeout(autoAssign, 0); }}
+                    onClick={() => requestPush(reps.map(r => r.code), autoPerRep)}
                   >
                     {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
                     Push {autoPerRep} to ALL {reps.length} reps
