@@ -43,6 +43,41 @@ const MAX_SAMPLES = 5;
 
 const newSample = (): Sample => ({ id: Math.random().toString(36).slice(2), text: '', imageDataUrl: null });
 
+// Each clue contributes points based on its confidence. Floor of 6 per clue
+// so even low-confidence findings count, capped at 100. This replaces the
+// AI's single number (which often collapsed to 1/100) with an additive,
+// evidence-driven score the user can trace clue-by-clue.
+const POINTS_PER_CLUE_BASE = 6;
+const POINTS_PER_CLUE_MAX = 14;
+function scoreFromClues(clues: Clue[] | undefined): number {
+  if (!clues || !clues.length) return 0;
+  let total = 0;
+  for (const c of clues) {
+    const conf = Math.max(0, Math.min(1, Number(c?.confidence) || 0.5));
+    total += POINTS_PER_CLUE_BASE + (POINTS_PER_CLUE_MAX - POINTS_PER_CLUE_BASE) * conf;
+  }
+  return Math.round(Math.min(100, total));
+}
+function verdictFromScore(s: number): Verdict {
+  if (s >= 80) return 'AI';
+  if (s >= 60) return 'LIKELY_AI';
+  if (s >= 40) return 'MIXED';
+  if (s >= 20) return 'LIKELY_HUMAN';
+  return 'HUMAN';
+}
+function normalizeResult(data: DetectResult): DetectResult {
+  if (!data?.samples) return data;
+  const samples = data.samples.map((s) => {
+    const score = scoreFromClues(s.clues);
+    return { ...s, score, verdict: verdictFromScore(score) };
+  });
+  const avg = samples.length ? Math.round(samples.reduce((a, b) => a + b.score, 0) / samples.length) : 0;
+  const comparison = data.comparison
+    ? { ...data.comparison, overall_score: avg, overall_verdict: verdictFromScore(avg) }
+    : data.comparison;
+  return { ...data, samples, comparison };
+}
+
 const verdictColor = (v: Verdict) => {
   switch (v) {
     case 'HUMAN':
