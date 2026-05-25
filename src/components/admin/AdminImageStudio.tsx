@@ -177,7 +177,7 @@ WATERMARK: "aetheris.technology"`;
       const { data, error } = await invoke({
         action: 'generate',
         prompt,
-        model: 'google/gemini-3-pro-image-preview', // best for legible typography
+        model: 'google/gemini-3.1-flash-image-preview', // fast + pro-quality typography
         aetheris_style: false, // we already wrote brand styling in-prompt
       });
       if (error) throw error;
