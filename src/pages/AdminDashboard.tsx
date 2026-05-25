@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SocialContentGenerator } from '@/components/SocialContentGenerator';
 import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
@@ -66,25 +66,38 @@ import { SocialSchedulerPanel } from '@/components/admin/SocialSchedulerPanel';
 import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
 import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
 import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
+import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
+type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
-const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
-  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
-  { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search },
-  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
-  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
-  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
-  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail },
-  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
-  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
-  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
-  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen },
-  { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock },
-  { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp },
-  { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock },
-  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp },
+// Category color tokens — uses theme tokens, not raw colors
+const CATEGORY_STYLE: Record<ToolCategory, { label: string; ring: string; bg: string; iconBg: string; iconColor: string; chipBg: string; chipText: string }> = {
+  core:         { label: 'Core',         ring: 'border-amber/50 hover:border-amber',                bg: 'bg-amber/5',         iconBg: 'bg-amber/15 group-hover:bg-amber/25',         iconColor: 'text-amber',         chipBg: 'bg-amber/15',         chipText: 'text-amber' },
+  content:      { label: 'Content',      ring: 'border-sky-500/40 hover:border-sky-400',            bg: 'bg-sky-500/5',       iconBg: 'bg-sky-500/15 group-hover:bg-sky-500/25',     iconColor: 'text-sky-400',       chipBg: 'bg-sky-500/15',       chipText: 'text-sky-400' },
+  sales:        { label: 'Sales',        ring: 'border-emerald-500/40 hover:border-emerald-400',    bg: 'bg-emerald-500/5',   iconBg: 'bg-emerald-500/15 group-hover:bg-emerald-500/25', iconColor: 'text-emerald-400', chipBg: 'bg-emerald-500/15', chipText: 'text-emerald-400' },
+  forensics:    { label: 'Forensics',    ring: 'border-crimson/40 hover:border-crimson',            bg: 'bg-crimson/5',       iconBg: 'bg-crimson/15 group-hover:bg-crimson/25',     iconColor: 'text-crimson',       chipBg: 'bg-crimson/15',       chipText: 'text-crimson' },
+  integrations: { label: 'Integrations', ring: 'border-violet-500/40 hover:border-violet-400',      bg: 'bg-violet-500/5',    iconBg: 'bg-violet-500/15 group-hover:bg-violet-500/25', iconColor: 'text-violet-400', chipBg: 'bg-violet-500/15', chipText: 'text-violet-400' },
+  hr:           { label: 'People',       ring: 'border-orange-500/40 hover:border-orange-400',      bg: 'bg-orange-500/5',    iconBg: 'bg-orange-500/15 group-hover:bg-orange-500/25', iconColor: 'text-orange-400', chipBg: 'bg-orange-500/15', chipText: 'text-orange-400' },
+};
+
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean; category: ToolCategory }[] = [
+  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true, category: 'core' },
+  { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search, category: 'forensics' },
+  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone, category: 'content' },
+  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone, category: 'sales' },
+  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar, category: 'content' },
+  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail, category: 'sales' },
+  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain, category: 'sales' },
+  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle, category: 'forensics' },
+  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText, category: 'forensics' },
+  { key: 'ai_detect', label: 'AI Writing Detector', description: 'Compare up to 5 writing samples (text or screenshots) for AI authorship, same-author analysis, and forensic clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
+  { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
+  { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
+  { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
+  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
 ];
 
 interface ContactSubmission {
@@ -863,22 +876,39 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
           <span className="text-xs text-muted-foreground ml-2">Full access, no paywall</span>
         </div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {(Object.keys(CATEGORY_STYLE) as ToolCategory[]).map((cat) => {
+            const s = CATEGORY_STYLE[cat];
+            const count = ADMIN_TOOLS.filter(t => t.category === cat).length;
+            return (
+              <span key={cat} className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm border ${s.chipBg} ${s.chipText} border-current/30`}>
+                {s.label} <span className="opacity-60 ml-1">{count}</span>
+              </span>
+            );
+          })}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ADMIN_TOOLS.map(tool => (
-            <button key={tool.key} onClick={() => setActiveTool(tool.key)}
-              className={`glass p-6 rounded-xl text-left border transition-colors group ${
-                tool.featured ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3' : 'border-border hover:border-amber/40'
-              }`}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'}`}>
-                  <tool.icon className="w-5 h-5 text-amber" />
+          {ADMIN_TOOLS.map(tool => {
+            const s = CATEGORY_STYLE[tool.category];
+            return (
+              <button key={tool.key} onClick={() => setActiveTool(tool.key)}
+                className={`glass p-6 rounded-xl text-left border transition-colors group ${s.ring} ${s.bg} ${
+                  tool.featured ? 'sm:col-span-2 lg:col-span-3' : ''
+                }`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${s.iconBg}`}>
+                    <tool.icon className={`w-5 h-5 ${s.iconColor}`} />
+                  </div>
+                  <h3 className="font-bold text-foreground font-display text-base flex-1">{tool.label}</h3>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-sm ${s.chipBg} ${s.chipText}`}>
+                    {s.label}
+                  </span>
+                  {tool.featured && (<span className="text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
                 </div>
-                <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
-                {tool.featured && (<span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
-              </div>
-              <p className="text-sm text-muted-foreground">{tool.description}</p>
-            </button>
-          ))}
+                <p className="text-sm text-muted-foreground">{tool.description}</p>
+              </button>
+            );
+          })}
         </div>
 
         <div id="tool-history" className="pt-8 mt-4 border-t border-border scroll-mt-24">
@@ -928,6 +958,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
         {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
+        {activeTool === 'ai_detect' && <AiWritingDetectorCard />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
