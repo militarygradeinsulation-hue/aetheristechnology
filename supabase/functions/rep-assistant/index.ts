@@ -290,7 +290,7 @@ Deno.serve(async (req) => {
       }
 
       const toolCalls = msg.tool_calls;
-      if (isPartner && toolCalls && toolCalls.length > 0) {
+      if (toolCalls && toolCalls.length > 0) {
         convo.push({ role: "assistant", content: msg.content || "", tool_calls: toolCalls });
         for (const call of toolCalls) {
           let parsedArgs: Record<string, unknown> = {};
