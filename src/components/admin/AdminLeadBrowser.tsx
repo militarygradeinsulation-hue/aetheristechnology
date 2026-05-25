@@ -96,6 +96,7 @@ export const AdminLeadBrowser: React.FC = () => {
       setDripCounts((data?.dripCounts || {}) as Record<string, number>);
       setClaimedCounts((data?.claimedCounts || {}) as Record<string, number>);
       setTotalCounts((data?.totalCounts || {}) as Record<string, number>);
+      setSelected(new Set());
     } catch (e) {
       toast({ title: 'Failed to load leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
