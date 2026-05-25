@@ -340,7 +340,9 @@ export const AdminLeadBrowser: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {reps.map(r => {
                     const active = autoCodes.has(r.code);
-                    const cur = dripCounts[r.code] || 0;
+                    const drip = dripCounts[r.code] || 0;
+                    const claimed = claimedCounts[r.code] || 0;
+                    const total = totalCounts[r.code] || (drip + claimed);
                     return (
                       <button
                         key={r.code}
@@ -349,9 +351,13 @@ export const AdminLeadBrowser: React.FC = () => {
                         className={`px-2.5 py-1.5 rounded border text-xs flex items-center gap-2 transition-colors ${
                           active ? 'border-amber bg-amber/15 text-amber' : 'border-border/50 text-muted-foreground hover:border-amber/40'
                         }`}
+                        title={`Drip ${drip} • Claimed ${claimed} • Total ${total}`}
                       >
                         <span className="font-semibold">{r.rep_name || r.code}</span>
-                        <span className="font-mono text-[10px] opacity-70">{cur}/{autoPerRep}</span>
+                        <span className="font-mono text-[10px] opacity-80">
+                          <span className="text-amber">{drip}</span>/<span>{claimed}</span>
+                          <span className="opacity-60"> · {total} total</span>
+                        </span>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); refreshRep(r.code, autoPerRep); }}
