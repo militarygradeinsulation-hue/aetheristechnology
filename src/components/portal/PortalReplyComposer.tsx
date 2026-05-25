@@ -1,14 +1,29 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon, Brain } from 'lucide-react';
+import { Loader2, Copy, Check, MessageSquare, ImagePlus, X, FileText, ImageIcon, Brain, Library, Trash2, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 type SourceType = 'text' | 'image';
 type Mode = 'brief' | 'full';
+
+interface LibraryItem {
+  id: string;
+  source_type: SourceType;
+  post_text: string | null;
+  image_url: string | null;
+  post_summary: string | null;
+  stance: string | null;
+  rationale: string | null;
+  preset_labels: string[] | null;
+  extra_context: string | null;
+  generated_reply: string;
+  mode: Mode;
+  created_at: string;
+}
 
 const fileToDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -31,6 +46,27 @@ export const PortalReplyComposer: React.FC = () => {
   const [thinking, setThinking] = useState(false);
   const [thinkSummary, setThinkSummary] = useState<{ stance: string; rationale: string; labels: string[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [library, setLibrary] = useState<LibraryItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const loadLibrary = async () => {
+    setLibLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('linkedin-reply-library', { body: { action: 'list' } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setLibrary(data.items || []);
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setLibLoading(false);
+    }
+  };
+
+  useEffect(() => { loadLibrary(); }, []);
 
   const thinkForMe = async () => {
     if (sourceType === 'text' && postText.trim().length < 10) {
@@ -73,6 +109,29 @@ export const PortalReplyComposer: React.FC = () => {
     setImageName(file.name);
   };
 
+  const saveToLibrary = async (reply: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('linkedin-reply-library', {
+        body: {
+          action: 'save',
+          source_type: sourceType,
+          post_text: sourceType === 'text' ? postText.trim() : null,
+          image_data_url: sourceType === 'image' ? imageDataUrl : null,
+          stance: thinkSummary?.stance || null,
+          rationale: thinkSummary?.rationale || null,
+          preset_labels: thinkSummary?.labels || [],
+          extra_context: extraContext.trim() || null,
+          generated_reply: reply,
+          mode,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || 'save failed');
+      if (data?.item) setLibrary(prev => [data.item, ...prev]);
+    } catch (e: any) {
+      console.error('library save failed', e);
+    }
+  };
+
   const generate = async () => {
     if (sourceType === 'text' && postText.trim().length < 10) {
       toast({ title: 'Paste the LinkedIn post (at least 10 chars)', variant: 'destructive' });
@@ -92,8 +151,10 @@ export const PortalReplyComposer: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', { body });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setOutput(data.post || '');
+      const reply = data.post || '';
+      setOutput(reply);
       toast({ title: 'Response generated' });
+      if (reply) saveToLibrary(reply);
     } catch (e: any) {
       toast({ title: 'Failed', description: e.message, variant: 'destructive' });
     } finally {
@@ -108,8 +169,31 @@ export const PortalReplyComposer: React.FC = () => {
     toast({ title: 'Copied!' });
   };
 
+  const copyItem = (item: LibraryItem) => {
+    navigator.clipboard.writeText(item.generated_reply);
+    setCopiedId(item.id);
+    setTimeout(() => setCopiedId(null), 1500);
+    toast({ title: 'Copied!' });
+  };
+
+  const deleteItem = async (id: string) => {
+    if (!confirm('Delete this entry?')) return;
+    try {
+      await supabase.functions.invoke('linkedin-reply-library', { body: { action: 'delete', id } });
+      setLibrary(prev => prev.filter(i => i.id !== id));
+    } catch (e: any) {
+      toast({ title: 'Delete failed', description: e.message, variant: 'destructive' });
+    }
+  };
+
+  const stanceColor = (s: string | null) => {
+    if (s === 'AGREE_DEEPER') return 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10';
+    if (s === 'DISAGREE') return 'text-rose-400 border-rose-400/40 bg-rose-400/10';
+    return 'text-amber border-amber/40 bg-amber/10';
+  };
+
   return (
-    <div className="max-w-4xl mx-auto mt-8">
+    <div className="max-w-4xl mx-auto mt-8 space-y-6">
       <div className="glass rounded-xl p-6 md:p-8 border border-border">
         <div className="flex items-center gap-3 mb-2">
           <MessageSquare className="w-6 h-6 text-amber" />
@@ -272,6 +356,136 @@ export const PortalReplyComposer: React.FC = () => {
             <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">{output}</p>
           </div>
         )}
+      </div>
+
+      {/* ===== Library of saved posts + replies ===== */}
+      <div className="glass rounded-xl p-6 md:p-8 border border-border">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Library className="w-5 h-5 text-amber" />
+            <h3 className="text-xl font-bold font-display">Your Reply Library</h3>
+            <span className="text-xs text-muted-foreground">({library.length})</span>
+          </div>
+          <button
+            onClick={loadLibrary}
+            disabled={libLoading}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border text-xs hover:bg-amber/10 hover:text-amber transition"
+          >
+            {libLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            Refresh
+          </button>
+        </div>
+
+        {library.length === 0 && !libLoading && (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No replies yet. Every reply you generate above is auto-saved here with a summary of the post and why that comment was used.
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {library.map((item) => {
+            const expanded = expandedId === item.id;
+            return (
+              <div key={item.id} className="rounded-lg border border-border bg-background/40 overflow-hidden">
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    {item.source_type === 'image' && item.image_url ? (
+                      <img src={item.image_url} alt="Post" className="w-16 h-16 rounded object-cover border border-border flex-shrink-0" />
+                    ) : (
+                      <div className="w-16 h-16 rounded border border-border bg-background/60 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {item.stance && (
+                          <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${stanceColor(item.stance)}`}>
+                            {item.stance.replace('_', ' ')}
+                          </span>
+                        )}
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground border border-border px-1.5 py-0.5 rounded">
+                          {item.mode === 'brief' ? 'Comment' : 'Repost'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(item.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground/90 line-clamp-2">
+                        {item.post_summary || (item.post_text ? item.post_text.slice(0, 200) : 'Screenshot post')}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => copyItem(item)}
+                        className="p-1.5 rounded hover:bg-amber/10 hover:text-amber transition"
+                        title="Copy reply"
+                      >
+                        {copiedId === item.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => deleteItem(item.id)}
+                        className="p-1.5 rounded hover:bg-rose-500/10 hover:text-rose-400 transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setExpandedId(expanded ? null : item.id)}
+                    className="text-xs text-amber hover:underline mt-2"
+                  >
+                    {expanded ? 'Hide details' : 'Show full post, reasoning & reply →'}
+                  </button>
+                </div>
+
+                {expanded && (
+                  <div className="border-t border-border bg-background/60 p-4 space-y-3 text-sm">
+                    {item.post_summary && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Post summary</div>
+                        <p className="text-foreground/90">{item.post_summary}</p>
+                      </div>
+                    )}
+                    {item.post_text && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Original post</div>
+                        <p className="text-foreground/80 whitespace-pre-line max-h-48 overflow-auto">{item.post_text}</p>
+                      </div>
+                    )}
+                    {item.image_url && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Screenshot</div>
+                        <img src={item.image_url} alt="Post" className="max-h-72 rounded border border-border" />
+                      </div>
+                    )}
+                    {(item.rationale || (item.preset_labels && item.preset_labels.length > 0)) && (
+                      <div className="rounded-md border border-amber/30 bg-amber/5 p-3">
+                        <div className="text-[10px] uppercase font-bold text-amber mb-1">Why this comment was used</div>
+                        {item.rationale && <p className="text-foreground/90">{item.rationale}</p>}
+                        {item.preset_labels && item.preset_labels.length > 0 && (
+                          <p className="text-muted-foreground mt-1 text-xs">
+                            Angles applied: {item.preset_labels.join(' · ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {item.extra_context && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Direction used</div>
+                        <p className="text-foreground/80 whitespace-pre-line">{item.extra_context}</p>
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Generated reply</div>
+                      <p className="text-foreground/90 whitespace-pre-line bg-background/40 border border-border rounded p-3">{item.generated_reply}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

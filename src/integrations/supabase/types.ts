@@ -3011,6 +3011,60 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_reply_library: {
+        Row: {
+          created_at: string
+          extra_context: string | null
+          generated_reply: string
+          id: string
+          image_url: string | null
+          mode: string
+          post_summary: string | null
+          post_text: string | null
+          preset_labels: string[] | null
+          rationale: string | null
+          rep_code: string
+          source_type: string
+          stance: string | null
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          extra_context?: string | null
+          generated_reply: string
+          id?: string
+          image_url?: string | null
+          mode?: string
+          post_summary?: string | null
+          post_text?: string | null
+          preset_labels?: string[] | null
+          rationale?: string | null
+          rep_code: string
+          source_type: string
+          stance?: string | null
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          extra_context?: string | null
+          generated_reply?: string
+          id?: string
+          image_url?: string | null
+          mode?: string
+          post_summary?: string | null
+          post_text?: string | null
+          preset_labels?: string[] | null
+          rationale?: string | null
+          rep_code?: string
+          source_type?: string
+          stance?: string | null
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_tokens: {
         Row: {
           access_token: string | null
