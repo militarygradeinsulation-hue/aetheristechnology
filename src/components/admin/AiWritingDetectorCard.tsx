@@ -435,9 +435,10 @@ export const AiWritingDetectorCard: React.FC = () => {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as DetectResult);
+      const normalized = normalizeResult(data as DetectResult);
+      setResult(normalized);
       setExpanded(true);
-      if (subjectName.trim()) await saveToLibrary(data as DetectResult);
+      if (subjectName.trim()) await saveToLibrary(normalized);
     } catch (e: any) {
       toast({ title: 'Scan failed', description: e?.message || 'Try again', variant: 'destructive' });
     } finally {
