@@ -136,6 +136,7 @@ const PortalPage: React.FC = () => {
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
   const { mode: tabColorMode } = useTabColorMode();
+  const { scale: tabScale } = useTabSize();
 
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
