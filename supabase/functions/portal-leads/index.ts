@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token",
 };
 
-const MAX_ACTIVE_CLAIMED = 25;
+const MAX_ACTIVE_CLAIMED = 100;
 const MAX_UPLOAD_ROWS = 500;
 const VALID_STATUS = new Set(["new","outreach","touched","replied","meeting","won","lost","dead"]);
 
