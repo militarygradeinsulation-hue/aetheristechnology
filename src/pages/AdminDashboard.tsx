@@ -876,22 +876,39 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
           <span className="text-xs text-muted-foreground ml-2">Full access, no paywall</span>
         </div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {(Object.keys(CATEGORY_STYLE) as ToolCategory[]).map((cat) => {
+            const s = CATEGORY_STYLE[cat];
+            const count = ADMIN_TOOLS.filter(t => t.category === cat).length;
+            return (
+              <span key={cat} className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm border ${s.chipBg} ${s.chipText} border-current/30`}>
+                {s.label} <span className="opacity-60 ml-1">{count}</span>
+              </span>
+            );
+          })}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ADMIN_TOOLS.map(tool => (
-            <button key={tool.key} onClick={() => setActiveTool(tool.key)}
-              className={`glass p-6 rounded-xl text-left border transition-colors group ${
-                tool.featured ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3' : 'border-border hover:border-amber/40'
-              }`}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'}`}>
-                  <tool.icon className="w-5 h-5 text-amber" />
+          {ADMIN_TOOLS.map(tool => {
+            const s = CATEGORY_STYLE[tool.category];
+            return (
+              <button key={tool.key} onClick={() => setActiveTool(tool.key)}
+                className={`glass p-6 rounded-xl text-left border transition-colors group ${s.ring} ${s.bg} ${
+                  tool.featured ? 'sm:col-span-2 lg:col-span-3' : ''
+                }`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${s.iconBg}`}>
+                    <tool.icon className={`w-5 h-5 ${s.iconColor}`} />
+                  </div>
+                  <h3 className="font-bold text-foreground font-display text-base flex-1">{tool.label}</h3>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-sm ${s.chipBg} ${s.chipText}`}>
+                    {s.label}
+                  </span>
+                  {tool.featured && (<span className="text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
                 </div>
-                <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
-                {tool.featured && (<span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
-              </div>
-              <p className="text-sm text-muted-foreground">{tool.description}</p>
-            </button>
-          ))}
+                <p className="text-sm text-muted-foreground">{tool.description}</p>
+              </button>
+            );
+          })}
         </div>
 
         <div id="tool-history" className="pt-8 mt-4 border-t border-border scroll-mt-24">
