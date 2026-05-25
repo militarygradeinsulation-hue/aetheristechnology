@@ -814,6 +814,8 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
         </div>
       </Card>
 
+      <HashtagGeneratorCard strategy={strategy} topicHint={userPrompt || topicSeeds.join('; ')} />
+
       <Card className="p-5 glass border-border">
         <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-3">Batch Size</div>
         <div className="flex items-center gap-4 mb-4">
