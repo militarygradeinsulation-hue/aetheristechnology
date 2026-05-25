@@ -222,8 +222,6 @@ const TOOLS = [
       },
     },
   },
-];
-
   // Smart-connection tools (live web, HubSpot mirror, content library, safe writes)
   SHARED_TOOL_SCHEMAS.web_search,
   SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
