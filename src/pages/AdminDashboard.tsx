@@ -571,6 +571,7 @@ const AdminDashboard: React.FC = () => {
             onWidgetSizeChange={setWidgetSize}
           />
           <TabColorToggle />
+          <TabSizeSlider />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {visibleTabs.length} / {ALL_TAB_DEFS.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
           </span>
