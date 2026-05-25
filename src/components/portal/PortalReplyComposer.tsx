@@ -184,8 +184,8 @@ export const PortalReplyComposer: React.FC = () => {
     try {
       const body =
         sourceType === 'image'
-          ? { imageDataUrl, mode, extraContext: extraContext.trim() }
-          : { postText: postText.trim(), mode, extraContext: extraContext.trim() };
+          ? { imageDataUrl, mode, maxChars, extraContext: extraContext.trim() }
+          : { postText: postText.trim(), mode, maxChars, extraContext: extraContext.trim() };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', { body });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
