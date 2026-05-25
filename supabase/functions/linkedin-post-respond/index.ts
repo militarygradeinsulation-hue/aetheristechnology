@@ -234,7 +234,16 @@ serve(async (req) => {
       long:   { label: "LONG COMMENT reply",     spec: "220–300 words, UNDER 2,100 characters. ONE dense paragraph. Full 4-part architecture with extended mechanism cascade." },
       full:   { label: "standalone LinkedIn POST", spec: "180–260 words, UNDER 2,800 characters." },
     };
-    const modeSpec = MODE_SPECS[mode];
+    // Optional user-provided character cap overrides the mode spec.
+    const rawMaxChars = Number(body?.maxChars);
+    const maxCharsOverride = Number.isFinite(rawMaxChars) && rawMaxChars >= 100 && rawMaxChars <= 2900
+      ? Math.round(rawMaxChars) : null;
+    const modeSpec = maxCharsOverride
+      ? {
+          label: MODE_SPECS[mode].label,
+          spec: `STRICT LENGTH: UNDER ${maxCharsOverride} characters TOTAL. Target ~${Math.round(maxCharsOverride * 0.85)} characters. ONE dense paragraph, no line breaks. COUNT characters as you write — stop at the verdict before hitting the cap. Approx ${Math.max(20, Math.round(maxCharsOverride / 6.5))} words or fewer.`,
+        }
+      : MODE_SPECS[mode];
     const conversationKind: string = body?.conversationKind === "reply_to_reply" ? "reply_to_reply" : "comment_on_post";
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
@@ -392,7 +401,8 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     // Reserve room for the appended CTA link.
     const CTA_RESERVE = CTA_LINK.length + 2; // newline + link
     const MODE_CAP: Record<Mode, number> = { micro: 470, brief: 1150, medium: 1550, long: 2150, full: 2900 };
-    const HARD_CAP = (isReplyToReply ? 650 : MODE_CAP[mode]) - CTA_RESERVE;
+    const baseCap = maxCharsOverride ?? (isReplyToReply ? 650 : MODE_CAP[mode]);
+    const HARD_CAP = baseCap - CTA_RESERVE;
     if (post.length > HARD_CAP) {
       const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(

@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 type SourceType = 'text' | 'image';
-type Mode = 'brief' | 'full';
+type Mode = 'micro' | 'brief' | 'medium' | 'long' | 'full';
 
 interface LibraryItem {
   id: string;
@@ -40,6 +40,7 @@ export const PortalReplyComposer: React.FC = () => {
   const [imageName, setImageName] = useState('');
   const [extraContext, setExtraContext] = useState('');
   const [mode, setMode] = useState<Mode>('brief');
+  const [maxChars, setMaxChars] = useState<number>(900);
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
@@ -183,8 +184,8 @@ export const PortalReplyComposer: React.FC = () => {
     try {
       const body =
         sourceType === 'image'
-          ? { imageDataUrl, mode, extraContext: extraContext.trim() }
-          : { postText: postText.trim(), mode, extraContext: extraContext.trim() };
+          ? { imageDataUrl, mode, maxChars, extraContext: extraContext.trim() }
+          : { postText: postText.trim(), mode, maxChars, extraContext: extraContext.trim() };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', { body });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -436,6 +437,46 @@ export const PortalReplyComposer: React.FC = () => {
                   {label}
                 </button>
               ))}
+            </div>
+          </div>
+          <div className="flex-1 sm:flex-initial">
+            <Label>Character limit</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <div className="flex gap-1">
+                {[450, 900, 1500, 2100, 2800].map(n => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => {
+                      setMaxChars(n);
+                      // Sync mode so length-aware system prompt stays coherent
+                      if (n <= 470) setMode('micro');
+                      else if (n <= 1150) setMode('brief');
+                      else if (n <= 1550) setMode('medium');
+                      else if (n <= 2150) setMode('long');
+                      else setMode('full');
+                    }}
+                    className={`px-2 py-1 rounded text-xs font-mono border transition ${
+                      maxChars === n ? 'border-amber bg-amber/15 text-amber' : 'border-border text-muted-foreground hover:border-amber/50'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                min={100}
+                max={2900}
+                step={50}
+                value={maxChars}
+                onChange={e => {
+                  const v = Math.max(100, Math.min(2900, Number(e.target.value) || 900));
+                  setMaxChars(v);
+                }}
+                className="w-20 h-8 px-2 rounded border border-border bg-background text-xs font-mono"
+              />
+              <span className="text-[10px] text-muted-foreground">chars</span>
             </div>
           </div>
           <Button onClick={generate} disabled={loading} className="bg-amber hover:bg-amber/90 text-background font-bold flex-1 sm:flex-none">
