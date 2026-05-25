@@ -234,7 +234,16 @@ serve(async (req) => {
       long:   { label: "LONG COMMENT reply",     spec: "220–300 words, UNDER 2,100 characters. ONE dense paragraph. Full 4-part architecture with extended mechanism cascade." },
       full:   { label: "standalone LinkedIn POST", spec: "180–260 words, UNDER 2,800 characters." },
     };
-    const modeSpec = MODE_SPECS[mode];
+    // Optional user-provided character cap overrides the mode spec.
+    const rawMaxChars = Number(body?.maxChars);
+    const maxCharsOverride = Number.isFinite(rawMaxChars) && rawMaxChars >= 100 && rawMaxChars <= 2900
+      ? Math.round(rawMaxChars) : null;
+    const modeSpec = maxCharsOverride
+      ? {
+          label: MODE_SPECS[mode].label,
+          spec: `STRICT LENGTH: UNDER ${maxCharsOverride} characters TOTAL. Target ~${Math.round(maxCharsOverride * 0.85)} characters. ONE dense paragraph, no line breaks. COUNT characters as you write — stop at the verdict before hitting the cap. Approx ${Math.max(20, Math.round(maxCharsOverride / 6.5))} words or fewer.`,
+        }
+      : MODE_SPECS[mode];
     const conversationKind: string = body?.conversationKind === "reply_to_reply" ? "reply_to_reply" : "comment_on_post";
     const myComment: string = (body?.myComment || "").toString().trim();
     const theirReply: string = (body?.theirReply || "").toString().trim();
