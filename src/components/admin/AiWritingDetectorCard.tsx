@@ -399,7 +399,8 @@ const EasyReadPanel: React.FC<{ result: DetectResult; subject: string }> = ({ re
   };
 
   const download = () => {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    // Prepend UTF-8 BOM so Windows Notepad / Android viewers render unicode (em-dash, ™, ·) correctly
+    const blob = new Blob(["\uFEFF", text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
