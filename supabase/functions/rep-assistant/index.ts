@@ -4,6 +4,7 @@
 // - Partners: same coach + small set of read-only company-wide tools.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
