@@ -130,6 +130,13 @@ const PARTNER_TOOLS = [
       },
     },
   },
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+];
+
+// Tools every authenticated portal user (rep or partner) can use for live info.
+const REP_LIVE_TOOLS = [
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
 ];
 
 const limit = (n: unknown, def: number, max: number) => {
