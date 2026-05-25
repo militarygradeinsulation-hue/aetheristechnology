@@ -844,6 +844,132 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ----------------- Hashtag Generator -----------------
+type HashtagItem = { tag: string; reason: string; category: 'trending' | 'niche' | 'industry'; popularity: 'high' | 'medium' | 'low' };
+
+function HashtagGeneratorCard({ strategy, topicHint }: { strategy: Strategy; topicHint: string }) {
+  const { toast } = useToast();
+  const [industry, setIndustry] = useState<string>('');
+  const [topic, setTopic] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<HashtagItem[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => { setTopic(topicHint.slice(0, 300)); }, [topicHint]);
+
+  const run = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-hashtags', {
+        body: {
+          niche: strategy.niche,
+          industry: industry || strategy.target_buyer,
+          topic,
+          platform: 'LinkedIn',
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setTags((data as any)?.hashtags || []);
+    } catch (e) {
+      toast({ title: 'Hashtag generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyOne = async (t: string) => {
+    await navigator.clipboard.writeText(t);
+    setCopied(t);
+    setTimeout(() => setCopied(null), 1200);
+  };
+
+  const copyAll = async () => {
+    if (!tags.length) return;
+    await navigator.clipboard.writeText(tags.map(t => t.tag).join(' '));
+    toast({ title: 'Copied all 5 hashtags' });
+  };
+
+  const popDot = (p: HashtagItem['popularity']) =>
+    p === 'high' ? 'bg-emerald-500' : p === 'medium' ? 'bg-amber' : 'bg-muted-foreground';
+
+  const catIcon = (c: HashtagItem['category']) =>
+    c === 'trending' ? <TrendingUp className="w-3 h-3" /> : c === 'industry' ? <Building2 className="w-3 h-3" /> : <Target className="w-3 h-3" />;
+
+  return (
+    <Card className="p-5 glass border-border">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-amber to-orange-500 flex items-center justify-center">
+            <Hash className="w-4 h-4 text-background" strokeWidth={2.5} />
+          </div>
+          <div>
+            <div className="text-sm font-bold font-display leading-none">Hashtag Engine</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Trends · Niche · Industry</div>
+          </div>
+        </div>
+        {tags.length > 0 && (
+          <button onClick={copyAll} className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1">
+            <Copy className="w-3 h-3" /> Copy all
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 mb-3">
+        <Input
+          placeholder={`Industry (defaults to "${strategy.target_buyer || 'target buyer'}")`}
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+        />
+        <Input
+          placeholder="Optional: topic / post angle (auto-filled from your prompt)"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
+      </div>
+
+      <Button onClick={run} disabled={loading} className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 mb-3">
+        {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+        Generate 5 Hashtags
+      </Button>
+
+      {tags.length === 0 && !loading && (
+        <div className="text-[11px] text-muted-foreground text-center py-3 border border-dashed border-border rounded-md">
+          Mix of 1 trending · 2 niche · 2 industry tags, ranked by popularity.
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div className="space-y-1.5">
+          {tags.map((h) => (
+            <button
+              key={h.tag}
+              onClick={() => copyOne(h.tag)}
+              className="w-full text-left flex items-start gap-2 p-2 rounded-md border border-border/60 bg-background/40 hover:border-amber/60 transition group"
+            >
+              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full ${popDot(h.popularity)}`} title={`Popularity: ${h.popularity}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-amber font-bold truncate">{h.tag}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center gap-0.5">
+                    {catIcon(h.category)} {h.category}
+                  </span>
+                </div>
+                <div className="text-[11px] text-muted-foreground line-clamp-1">{h.reason}</div>
+              </div>
+              <span className="text-muted-foreground group-hover:text-amber transition">
+                {copied === h.tag ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+
+
 // ----------------- Strategy View -----------------
 
 function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrategy: (s: Strategy) => void }) {
