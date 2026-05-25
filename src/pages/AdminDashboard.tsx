@@ -68,24 +68,36 @@ import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
 import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
 import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
+type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
-const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
-  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
-  { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search },
-  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
-  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
-  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
-  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail },
-  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
-  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
-  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
-  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen },
-  { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock },
-  { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp },
-  { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock },
-  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp },
+// Category color tokens — uses theme tokens, not raw colors
+const CATEGORY_STYLE: Record<ToolCategory, { label: string; ring: string; bg: string; iconBg: string; iconColor: string; chipBg: string; chipText: string }> = {
+  core:         { label: 'Core',         ring: 'border-amber/50 hover:border-amber',                bg: 'bg-amber/5',         iconBg: 'bg-amber/15 group-hover:bg-amber/25',         iconColor: 'text-amber',         chipBg: 'bg-amber/15',         chipText: 'text-amber' },
+  content:      { label: 'Content',      ring: 'border-sky-500/40 hover:border-sky-400',            bg: 'bg-sky-500/5',       iconBg: 'bg-sky-500/15 group-hover:bg-sky-500/25',     iconColor: 'text-sky-400',       chipBg: 'bg-sky-500/15',       chipText: 'text-sky-400' },
+  sales:        { label: 'Sales',        ring: 'border-emerald-500/40 hover:border-emerald-400',    bg: 'bg-emerald-500/5',   iconBg: 'bg-emerald-500/15 group-hover:bg-emerald-500/25', iconColor: 'text-emerald-400', chipBg: 'bg-emerald-500/15', chipText: 'text-emerald-400' },
+  forensics:    { label: 'Forensics',    ring: 'border-crimson/40 hover:border-crimson',            bg: 'bg-crimson/5',       iconBg: 'bg-crimson/15 group-hover:bg-crimson/25',     iconColor: 'text-crimson',       chipBg: 'bg-crimson/15',       chipText: 'text-crimson' },
+  integrations: { label: 'Integrations', ring: 'border-violet-500/40 hover:border-violet-400',      bg: 'bg-violet-500/5',    iconBg: 'bg-violet-500/15 group-hover:bg-violet-500/25', iconColor: 'text-violet-400', chipBg: 'bg-violet-500/15', chipText: 'text-violet-400' },
+  hr:           { label: 'People',       ring: 'border-orange-500/40 hover:border-orange-400',      bg: 'bg-orange-500/5',    iconBg: 'bg-orange-500/15 group-hover:bg-orange-500/25', iconColor: 'text-orange-400', chipBg: 'bg-orange-500/15', chipText: 'text-orange-400' },
+};
+
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean; category: ToolCategory }[] = [
+  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true, category: 'core' },
+  { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search, category: 'forensics' },
+  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone, category: 'content' },
+  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone, category: 'sales' },
+  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar, category: 'content' },
+  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail, category: 'sales' },
+  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain, category: 'sales' },
+  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle, category: 'forensics' },
+  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText, category: 'forensics' },
+  { key: 'ai_detect', label: 'AI Writing Detector', description: 'Compare up to 5 writing samples (text or screenshots) for AI authorship, same-author analysis, and forensic clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
+  { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
+  { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
+  { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
+  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
 ];
 
 interface ContactSubmission {
