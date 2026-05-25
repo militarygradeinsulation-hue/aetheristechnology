@@ -40,6 +40,7 @@ export const PortalReplyComposer: React.FC = () => {
   const [imageName, setImageName] = useState('');
   const [extraContext, setExtraContext] = useState('');
   const [mode, setMode] = useState<Mode>('brief');
+  const [maxChars, setMaxChars] = useState<number>(900);
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
