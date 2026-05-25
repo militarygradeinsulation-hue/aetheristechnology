@@ -548,6 +548,9 @@ export default function LinkedInPostStudio() {
         </p>
       </div>
 
+      {/* AI Writing Detector — separate scan-only tool */}
+      <AiWritingDetectorCard />
+
       {/* Respond to a LinkedIn post */}
       <Card className="p-5 glass border-amber/40 space-y-4">
         <div className="flex items-center gap-2">
