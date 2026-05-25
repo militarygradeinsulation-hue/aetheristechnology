@@ -130,7 +130,7 @@ export const LeadsBoard: React.FC = () => {
   const [pool, setPool] = useState<RepLead[]>([]);
   const [mine, setMine] = useState<RepLead[]>([]);
   const [activeCount, setActiveCount] = useState(0);
-  const [maxActive, setMaxActive] = useState(25);
+  const [maxActive, setMaxActive] = useState(100);
   const [dripCount, setDripCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
