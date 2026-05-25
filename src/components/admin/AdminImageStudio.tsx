@@ -94,6 +94,10 @@ export const AdminImageStudio: React.FC = () => {
   const [bannerSub, setBannerSub] = useState(BANNER_PRESETS[0].sub);
   const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
   const [bannerBusy, setBannerBusy] = useState(false);
+  const [packBusy, setPackBusy] = useState(false);
+  const [packProgress, setPackProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const LOGO_URL = 'https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/content-images/brand/aetheris-badge.png';
 
   const applyPreset = (key: string) => {
     setBannerPreset(key);
