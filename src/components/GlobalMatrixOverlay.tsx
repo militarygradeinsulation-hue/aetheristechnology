@@ -3,14 +3,27 @@ import { useLocation } from 'react-router-dom';
 import { MatrixRain } from './MatrixRain';
 
 /**
- * Site-wide subtle amber matrix rain layered above each page's particle Background.
- * pointer-events-none so it never blocks UI. zIndex 1 sits above Background (0)
- * and below page content (z-10+).
- * Disabled on the landing page ("/").
+ * Site-wide amber matrix rain layered above each page's particle Background.
+ * pointer-events-none so it never blocks UI.
+ * Landing page ("/") shows full-brightness matrix (admin-login look).
+ * All other pages use a subtle, screen-blended overlay.
  */
 export const GlobalMatrixOverlay: React.FC = () => {
   const { pathname } = useLocation();
-  if (pathname === '/') return null;
+  const isLanding = pathname === '/';
+
+  if (isLanding) {
+    return (
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{ zIndex: 1, opacity: 1 }}
+        aria-hidden="true"
+      >
+        <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 pointer-events-none"
