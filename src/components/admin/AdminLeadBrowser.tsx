@@ -253,11 +253,59 @@ export const AdminLeadBrowser: React.FC = () => {
           </button>
           {autoOpen && (
             <div className="p-3 space-y-3 border-t border-border/40">
-              <div className="grid sm:grid-cols-4 gap-2">
-                <div>
-                  <Label className="text-[10px]">Per-rep target</Label>
-                  <Input type="number" min={1} max={200} value={autoPerRep} onChange={e => setAutoPerRep(Number(e.target.value) || 10)} className="h-8" />
+              {/* Quick count control */}
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Label className="text-[11px] font-mono uppercase tracking-wider text-amber">Leads per rep</Label>
+                  <div className="flex items-center gap-1">
+                    {[5, 10, 25, 50, 100].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setAutoPerRep(n)}
+                        className={`px-2 py-1 rounded text-xs font-mono border transition-colors ${
+                          autoPerRep === n ? 'border-amber bg-amber text-background' : 'border-border/50 hover:border-amber/60'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={Math.min(autoPerRep, 100)}
+                    onChange={e => setAutoPerRep(Number(e.target.value))}
+                    className="flex-1 accent-amber"
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={autoPerRep}
+                    onChange={e => setAutoPerRep(Number(e.target.value) || 1)}
+                    className="h-8 w-20"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    className="bg-amber text-background hover:bg-amber/90"
+                    disabled={autoBusy || reps.length === 0}
+                    onClick={() => { setAutoCodes(new Set(reps.map(r => r.code))); setTimeout(autoAssign, 0); }}
+                  >
+                    {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+                    Push {autoPerRep} to ALL {reps.length} reps
+                  </Button>
+                  <span className="text-[11px] text-muted-foreground">
+                    Tops each rep up to {autoPerRep}. Already-met reps skipped.
+                  </span>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="text-[10px]">Hold hrs</Label>
                   <Input type="number" min={1} max={720} value={holdHours} onChange={e => setHoldHours(Number(e.target.value) || 72)} className="h-8" />
