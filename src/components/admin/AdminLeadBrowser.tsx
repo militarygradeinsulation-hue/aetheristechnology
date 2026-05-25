@@ -70,6 +70,10 @@ export const AdminLeadBrowser: React.FC = () => {
   const [autoBusy, setAutoBusy] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState<string | null>(null);
   const [dripCounts, setDripCounts] = useState<Record<string, number>>({});
+  const [claimedCounts, setClaimedCounts] = useState<Record<string, number>>({});
+  const [totalCounts, setTotalCounts] = useState<Record<string, number>>({});
+  const [confirmPush, setConfirmPush] = useState<null | { codes: string[]; perRep: number }>(null);
+  const [resultDialog, setResultDialog] = useState<null | { title: string; assigned: number; perRep: Record<string, number>; message?: string }>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
