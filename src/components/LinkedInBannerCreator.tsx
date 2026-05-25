@@ -73,6 +73,8 @@ export const LinkedInBannerCreator: React.FC<Props> = ({ invoke, onSaved }) => {
   const [bannerSub, setBannerSub] = useState(BANNER_PRESETS[0].sub);
   const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
   const [bannerBusy, setBannerBusy] = useState(false);
+  const [packBusy, setPackBusy] = useState(false);
+  const [packProgress, setPackProgress] = useState<{ done: number; total: number } | null>(null);
 
   const applyPreset = (key: string) => {
     setBannerPreset(key);
