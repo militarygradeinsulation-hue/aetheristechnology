@@ -140,53 +140,50 @@ export const AdminImageStudio: React.FC = () => {
     case_file: 'dark manila / charcoal background with redaction bars, case-file stamp marks in faint crimson, forensic dossier feel',
   };
 
+  const buildBannerPrompt = (headline: string, accent: string, sub: string, bg: keyof typeof BG_DESC) =>
+`LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
+
+A reference image of the AETHERIS BADGE LOGO is attached. You MUST composite that exact badge — unchanged, do NOT redraw it, do NOT alter its text, do NOT recolor it — into the TOP-RIGHT corner of the banner at roughly 140-180px tall, with ~24px padding from top and right edges. Preserve the badge's circular shape, magnifying glass, eye, "AETHERIS" arc, "BUSINESS FORENSICS. REAL FINDINGS. NO SUGAR." text and red ACTIVE stamp exactly as shown.
+
+LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
+- Background fills the entire banner: ${BG_DESC[bg]}
+- RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
+- The AETHERIS badge logo lives in the TOP-RIGHT corner (see above)
+- Place ALL typography in the CENTER region, horizontally centered between roughly 35% and 78% of the width, vertically centered
+- Big serif display headline in TWO COLORS on one or two lines:
+  · "${headline}" rendered in CRISP WHITE (#FFFFFF)
+  · "${accent}" rendered in WARM AMBER GOLD (#E8A33D)
+- Use a high-end serif similar to Fraunces / Playfair — bold, elegant
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif, max ~110 chars, center-aligned:
+  "${sub}"
+- Tiny amber monospace eyebrow label above the headline (center-aligned): "AETHERIS · BUSINESS FORENSICS"
+- Bottom-right corner (below the badge): small amber monospace watermark "aetheris.technology"
+
+STYLE: Aetheris forensic brand — dark, editorial, investigative, cinematic. Text perfectly legible, NO spelling errors, NO duplicated letters.
+
+Exact text to render (do not change spelling):
+HEADLINE WHITE: "${headline}"
+HEADLINE AMBER: "${accent}"
+SUBLINE: "${sub}"
+EYEBROW: "AETHERIS · BUSINESS FORENSICS"
+WATERMARK: "aetheris.technology"`;
+
   const generateBanner = async () => {
     if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
     setBannerBusy(true);
     try {
-      const fullHeadline = bannerAccent
-        ? `${bannerHeadline} ${bannerAccent}`
-        : bannerHeadline;
-      const prompt =
-`LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
-
-LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
-- Background fills the entire banner: ${BG_DESC[bannerBg]}
-- RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
-- Place ALL typography in the CENTER-RIGHT region of the banner, horizontally centered between roughly 38% and 92% of the width, vertically centered
-- Headline is center-aligned within that right zone
-- Big serif display headline in TWO COLORS on one or two lines:
-  · "${bannerHeadline}" rendered in CRISP WHITE (#FFFFFF)
-  · "${bannerAccent}" rendered in WARM AMBER GOLD (#E8A33D)
-- Use a high-end serif similar to Fraunces / Playfair — bold, elegant, italic on the amber portion if natural
-- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif (Inter-like), max ~110 chars, also center-aligned in the right zone:
-  "${bannerSub}"
-- Tiny amber monospace eyebrow label above the headline (still in the right zone, center-aligned): "AETHERIS · BUSINESS FORENSICS"
-- Bottom-right corner: small amber monospace watermark "aetheris.technology"
-
-STYLE:
-- Aetheris forensic brand: dark, editorial, investigative — never corporate-glossy, never AI-guru gradient, never neon
-- High contrast typography, cinematic
-- Text must be perfectly legible, NO spelling errors, NO duplicated letters, NO garbled glyphs
-- Keep the left third visually quiet so the profile picture lands cleanly on top of background only
-
-
-Exact text to render (do not change spelling):
-HEADLINE WHITE: "${bannerHeadline}"
-HEADLINE AMBER: "${bannerAccent}"
-SUBLINE: "${bannerSub}"
-EYEBROW: "AETHERIS · BUSINESS FORENSICS"
-WATERMARK: "aetheris.technology"`;
-
       const { data, error } = await invoke({
-        action: 'generate',
-        prompt,
-        model: 'google/gemini-3.1-flash-image-preview', // fast + pro-quality typography
-        aetheris_style: false, // we already wrote brand styling in-prompt
+        action: 'edit',
+        source_image_url: LOGO_URL,
+        prompt: buildBannerPrompt(bannerHeadline, bannerAccent, bannerSub, bannerBg),
+        model: 'google/gemini-3.1-flash-image-preview',
+        aetheris_style: false,
+        share_to_reps: true,
+        is_banner: true,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: 'LinkedIn banner generated', description: 'Saved to your library below.' });
+      toast({ title: 'Banner generated', description: 'Logo embedded. Also pushed to reps shared library.' });
       load();
     } catch (e: any) {
       toast({ title: 'Banner generation failed', description: e.message, variant: 'destructive' });
@@ -194,6 +191,41 @@ WATERMARK: "aetheris.technology"`;
       setBannerBusy(false);
     }
   };
+
+  const generateBannerPack = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    const bgs: Array<keyof typeof BG_DESC> = ['network', 'matrix', 'blueprint', 'noir', 'case_file'];
+    setPackBusy(true);
+    setPackProgress({ done: 0, total: bgs.length });
+    let ok = 0;
+    try {
+      for (let i = 0; i < bgs.length; i++) {
+        try {
+          const { data, error } = await invoke({
+            action: 'edit',
+            source_image_url: LOGO_URL,
+            prompt: buildBannerPrompt(bannerHeadline, bannerAccent, bannerSub, bgs[i]),
+            model: 'google/gemini-3.1-flash-image-preview',
+            aetheris_style: false,
+            share_to_reps: true,
+            is_banner: true,
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          ok++;
+          load();
+        } catch (e: any) {
+          toast({ title: `Variation "${bgs[i].replace('_',' ')}" failed`, description: e.message, variant: 'destructive' });
+        }
+        setPackProgress({ done: i + 1, total: bgs.length });
+      }
+      toast({ title: 'Variation pack done', description: `${ok}/${bgs.length} banners pushed to reps shared library.` });
+    } finally {
+      setPackBusy(false);
+      setTimeout(() => setPackProgress(null), 2500);
+    }
+  };
+
 
 
   const invoke = async (body: Record<string, unknown>) => {
