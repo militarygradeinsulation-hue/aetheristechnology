@@ -4,6 +4,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import {
+  SHARED_TOOL_SCHEMAS,
+  webSearch,
+  hubspotMirrorSearch,
+  searchContentLibrary,
+  markContactRead,
+  addDripProspect,
+} from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
