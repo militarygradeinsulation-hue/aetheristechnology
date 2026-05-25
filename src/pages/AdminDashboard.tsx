@@ -51,6 +51,8 @@ import NotificationBell from '@/components/admin/NotificationBell';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
+import TabSizeSlider from '@/components/TabSizeSlider';
+import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
 import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
