@@ -41,24 +41,43 @@ export const AdminLibrary: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  const hydrate = async (item: AdminLibraryItem): Promise<AdminLibraryItem> => {
+    const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+    if (!needs) return item;
+    try {
+      const full = await getAdminLibraryItem(item.id);
+      return full || item;
+    } catch {
+      return item;
+    }
+  };
+
+  const handleView = async (item: AdminLibraryItem) => {
+    const full = await hydrate(item);
+    setViewItem(full);
+  };
+
   const handleCopy = async (item: AdminLibraryItem) => {
-    await navigator.clipboard.writeText(formatLibraryItemAsText(item));
+    const full = await hydrate(item);
+    await navigator.clipboard.writeText(formatLibraryItemAsText(full));
     toast({ title: 'Copied to clipboard' });
   };
 
-  const handleDownloadPdf = (item: AdminLibraryItem) => {
+  const handleDownloadPdf = async (item: AdminLibraryItem) => {
     try {
-      downloadLibraryItemAsPdf(item);
+      const full = await hydrate(item);
+      downloadLibraryItemAsPdf(full);
       toast({ title: 'PDF downloaded' });
     } catch (e: any) {
       toast({ title: 'Download failed', description: e.message, variant: 'destructive' });
     }
   };
 
-  const handleDownloadText = (item: AdminLibraryItem) => {
-    const safeTitle = item.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
-    const ext = item.tool_type === 'playbook' ? 'md' : 'txt';
-    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(item));
+  const handleDownloadText = async (item: AdminLibraryItem) => {
+    const full = await hydrate(item);
+    const safeTitle = full.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
+    const ext = full.tool_type === 'playbook' ? 'md' : 'txt';
+    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(full));
   };
 
   const handleDelete = async (item: AdminLibraryItem) => {
