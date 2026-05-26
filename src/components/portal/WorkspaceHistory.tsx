@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, Copy, Download, Trash2, Eye, X, ExternalLink, Search } from 'lucide-react';
 import {
-  listRepLibrary, deleteFromRepLibrary, type RepLibraryItem,
+  listRepLibrary, deleteFromRepLibrary, getRepLibraryItem, type RepLibraryItem,
 } from '@/lib/portalWorkspace';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
