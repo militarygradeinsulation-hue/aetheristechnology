@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare, Library, Trash2, User, RefreshCw, Copy, Download, Volume2, Square } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { listRepLibrary, saveToRepLibrary, deleteFromRepLibrary, getRepLibraryItem } from '@/lib/portalWorkspace';
 
 type Clue = {
   pattern: string;
@@ -564,7 +565,7 @@ type LibraryEntry = {
   created_at: string;
 };
 
-export const AiWritingDetectorCard: React.FC = () => {
+export const AiWritingDetectorCard: React.FC<{ repMode?: boolean }> = ({ repMode = false }) => {
   const [samples, setSamples] = useState<Sample[]>([newSample()]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DetectResult | null>(null);
@@ -579,13 +580,31 @@ export const AiWritingDetectorCard: React.FC = () => {
   const loadLibrary = async () => {
     setLibBusy(true);
     try {
-      const { data, error } = await supabase
-        .from('ai_detection_scans')
-        .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      setLibrary((data || []) as any);
+      if (repMode) {
+        const items = await listRepLibrary({ tool_type: 'ai_detect' });
+        // Map rep_library rows into LibraryEntry shape (full row stored in input_data/output_data)
+        const mapped: LibraryEntry[] = items.map((r: any) => ({
+          id: r.id,
+          subject_name: r.title || 'Untitled',
+          notes: r.input_data?.notes || null,
+          sample_count: r.input_data?.sample_count || 0,
+          overall_score: r.input_data?.overall_score ?? null,
+          overall_verdict: r.input_data?.overall_verdict ?? null,
+          same_author: r.input_data?.same_author ?? null,
+          samples: r.input_data?.samples || [],
+          result: (r.output_data?.result || r.output_data) as DetectResult,
+          created_at: r.created_at,
+        }));
+        setLibrary(mapped);
+      } else {
+        const { data, error } = await supabase
+          .from('ai_detection_scans')
+          .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (error) throw error;
+        setLibrary((data || []) as any);
+      }
     } catch (e: any) {
       toast({ title: 'Could not load library', description: e?.message, variant: 'destructive' });
     } finally {
@@ -630,17 +649,33 @@ export const AiWritingDetectorCard: React.FC = () => {
       const overall = data.samples?.length === 1
         ? { score: data.samples[0].score, verdict: data.samples[0].verdict, same_author: null }
         : { score: data.comparison?.overall_score ?? null, verdict: data.comparison?.overall_verdict ?? null, same_author: data.comparison?.same_author ?? null };
-      const { error } = await supabase.from('ai_detection_scans').insert({
-        subject_name: name,
-        notes: notes.trim() || null,
-        sample_count: samplesMeta.length,
-        overall_score: overall.score,
-        overall_verdict: overall.verdict,
-        same_author: overall.same_author,
-        samples: samplesMeta,
-        result: data as any,
-      });
-      if (error) throw error;
+      if (repMode) {
+        await saveToRepLibrary({
+          tool_type: 'ai_detect',
+          title: name,
+          input_data: {
+            notes: notes.trim() || null,
+            sample_count: samplesMeta.length,
+            overall_score: overall.score,
+            overall_verdict: overall.verdict,
+            same_author: overall.same_author,
+            samples: samplesMeta,
+          },
+          output_data: { result: data },
+        });
+      } else {
+        const { error } = await supabase.from('ai_detection_scans').insert({
+          subject_name: name,
+          notes: notes.trim() || null,
+          sample_count: samplesMeta.length,
+          overall_score: overall.score,
+          overall_verdict: overall.verdict,
+          same_author: overall.same_author,
+          samples: samplesMeta,
+          result: data as any,
+        });
+        if (error) throw error;
+      }
       toast({ title: `Saved scan for ${name}` });
       loadLibrary();
     } catch (e: any) {
@@ -684,18 +719,34 @@ export const AiWritingDetectorCard: React.FC = () => {
 
   const deleteEntry = async (id: string) => {
     if (!confirm('Delete this saved scan?')) return;
-    const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
-    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
-    setLibrary((prev) => prev.filter((l) => l.id !== id));
+    try {
+      if (repMode) {
+        await deleteFromRepLibrary(id);
+      } else {
+        const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
+        if (error) throw error;
+      }
+      setLibrary((prev) => prev.filter((l) => l.id !== id));
+    } catch (e: any) {
+      toast({ title: 'Delete failed', description: e?.message, variant: 'destructive' });
+    }
   };
 
-  const openEntry = (entry: LibraryEntry) => {
-    setResult(normalizeResult(entry.result));
-    setSubjectName(entry.subject_name);
-    setNotes(entry.notes || '');
+  const openEntry = async (entry: LibraryEntry) => {
+    let full = entry;
+    if (repMode && (!entry.result || !entry.result.samples)) {
+      try {
+        const row = await getRepLibraryItem(entry.id);
+        full = { ...entry, result: ((row as any).output_data?.result || (row as any).output_data) as DetectResult };
+      } catch { /* fall through */ }
+    }
+    setResult(normalizeResult(full.result));
+    setSubjectName(full.subject_name);
+    setNotes(full.notes || '');
     setExpanded(true);
     setShowLibrary(false);
   };
+
 
   const sameAuthorBadge = (s: Comparison['same_author']) => {
     switch (s) {

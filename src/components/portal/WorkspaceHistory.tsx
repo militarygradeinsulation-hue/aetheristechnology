@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, Copy, Download, Trash2, Eye, X, ExternalLink, Search } from 'lucide-react';
 import {
-  listRepLibrary, deleteFromRepLibrary, type RepLibraryItem,
+  listRepLibrary, deleteFromRepLibrary, getRepLibraryItem, type RepLibraryItem,
 } from '@/lib/portalWorkspace';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
@@ -21,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   playbook: 'Playbook',
   website_scan: 'Website Scan',
   business_diagnostic: 'Business Diagnostic',
+  ai_detect: 'AI Writing Detector',
 };
 
 interface Props {
@@ -114,12 +115,27 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                 <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="View" onClick={async () => {
+                  try { const full = await getRepLibraryItem(item.id); setViewItem(full); }
+                  catch { setViewItem(item); }
+                }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
-                  await navigator.clipboard.writeText(formatLibraryItemAsText(item as any));
-                  toast({ title: 'Copied' });
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    await navigator.clipboard.writeText(formatLibraryItemAsText(full as any));
+                    toast({ title: 'Copied' });
+                  } catch (e: any) {
+                    toast({ title: 'Copy failed', description: e?.message, variant: 'destructive' });
+                  }
                 }}><Copy className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => downloadLibraryItemAsPdf(item as any)}><Download className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="Download PDF" onClick={async () => {
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    downloadLibraryItemAsPdf(full as any);
+                  } catch (e: any) {
+                    toast({ title: 'Download failed', description: e?.message, variant: 'destructive' });
+                  }
+                }}><Download className="w-4 h-4" /></Button>
                 {item.file_url && (
                   <a href={item.file_url} target="_blank" rel="noopener noreferrer">
                     <Button variant="ghost" size="icon" title="Open PDF"><ExternalLink className="w-4 h-4" /></Button>

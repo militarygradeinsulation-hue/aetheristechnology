@@ -146,8 +146,15 @@ serve(async (req) => {
       const q = clean(body.q, 200);
       const toolType = clean(body.tool_type, 64);
       const leadId = clean(body.lead_id, 64);
+      // Default to lightweight payload (no input_data / output_data) so the
+      // history view loads fast even when reps have hundreds of saved runs.
+      // Callers that need full rows pass { full: true } or use library_get.
+      const full = body.full === true;
+      const cols = full
+        ? "id, tool_type, title, input_data, output_data, file_url, lead_id, created_at"
+        : "id, tool_type, title, file_url, lead_id, created_at";
       let query = supabase.from("rep_library")
-        .select("id, tool_type, title, input_data, output_data, file_url, lead_id, created_at")
+        .select(cols)
         .eq("code", claims.code)
         .order("created_at", { ascending: false })
         .limit(MAX_LIBRARY);
@@ -156,7 +163,24 @@ serve(async (req) => {
       if (q) query = query.ilike("title", `%${q}%`);
       const { data, error } = await query;
       if (error) throw error;
-      return jsonResp({ ok: true, items: data || [] });
+      const items = (data || []).map((r: any) => ({
+        input_data: {},
+        output_data: {},
+        ...r,
+      }));
+      return jsonResp({ ok: true, items });
+    }
+
+    if (action === "library_get") {
+      const id = clean(body.id, 64);
+      if (!id) return jsonResp({ error: "Missing id" }, 400);
+      const { data, error } = await supabase.from("rep_library")
+        .select("id, tool_type, title, input_data, output_data, file_url, lead_id, created_at")
+        .eq("id", id).eq("code", claims.code)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return jsonResp({ error: "Not found" }, 404);
+      return jsonResp({ ok: true, item: data });
     }
 
     if (action === "library_save") {
