@@ -629,7 +629,7 @@ const AdminDashboard: React.FC = () => {
               })}
             </div>
 
-            <EasyModeWrapper tabKey={activeTab}>{renderTabBody(activeTab)}</EasyModeWrapper>
+            <EasyModeWrapper tabKey={activeTab}><Suspense fallback={<PanelFallback />}>{renderTabBody(activeTab)}</Suspense></EasyModeWrapper>
           </>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
