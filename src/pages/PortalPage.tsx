@@ -95,7 +95,7 @@ type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
   | 'outreach-email'
-  | 'leak-audit' | 'scan' | 'scam-check' | 'detective' | 'business-diagnostic' | 'sales-scripts'
+  | 'leak-audit' | 'scan' | 'scam-check' | 'detective' | 'ai-detect' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
