@@ -89,12 +89,12 @@ async function generateScript(topic: string, source: string, durationMin: number
 
   const expressiveAddendum = expressive ? `
 
-EXPRESSIVE MODE (ElevenLabs v3 audio tags):
-- Weave in inline audio tags to give the voice real emotion + personality.
-- Allowed tags (use sparingly, max ~1 every 2-3 sentences): [excited], [serious], [whispers], [sarcastic], [laughs], [sighs], [pause], [exhales], [angry], [thoughtful].
-- Use ELLIPSES for natural pauses ("...") and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
-- Tags should match the line: cold open hook = [serious] or [excited]; the leak reveal = [pause] then a CAPS dollar number; the close = [serious] hard line.
-- Do NOT label sections, do NOT use stage directions in parentheses, do NOT use [music] or [intro]. Tags ONLY from the allowed list.` : "";
+EXPRESSIVE DELIVERY (text-only, no tags):
+- Convey emotion through word choice, rhythm, and punctuation ONLY.
+- Use ELLIPSES ("...") for natural pauses and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
+- Do NOT use bracketed audio tags like [excited], [pause], [laughs], [sighs], [music], etc.
+- Do NOT use parenthetical stage directions like (pauses) or (softly).
+- Do NOT use speaker labels. Plain spoken prose only.` : "";
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
