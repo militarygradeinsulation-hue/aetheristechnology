@@ -219,6 +219,11 @@ const LeakLanderPage: React.FC = () => {
             </a>
           </section>
 
+          {/* Forensic Revenue Recovery deck — carousel */}
+          <ForensicDeckCarousel />
+
+
+
           {/* What the hell do we do — instant answer */}
           <section
             className="mt-4 max-w-2xl mx-auto animate-fade-in"
