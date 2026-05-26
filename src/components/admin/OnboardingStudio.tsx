@@ -100,7 +100,7 @@ export const OnboardingStudio: React.FC = () => {
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <CardTitle className="font-display flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-amber" /> New-Rep Onboarding Studio
+                <GraduationCap className="w-5 h-5 text-amber" /> Aetheris Academy Studio
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Generate the narrated onboarding video curriculum reps watch when they join. Each module = 4–6 narrated slides with voiceover.
