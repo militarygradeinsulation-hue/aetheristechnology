@@ -124,6 +124,7 @@ const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfi
     case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
     case 'scam-check':           return <ScamCheckCard />;
     case 'detective':            return <DetectiveModeStandalone />;
+    case 'ai-detect':            return <AiWritingDetectorCard repMode />;
     case 'business-diagnostic':  return <BusinessDiagnostic />;
     case 'sales-scripts':        return <SalesScriptGenerator adminMode />;
     case 'follow-up-plan':       return <FollowUpPlanGenerator adminMode />;
