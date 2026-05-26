@@ -80,12 +80,21 @@ Return ONLY JSON: { "topics": ["...", ...] }` }
     .filter((s) => s.length > 8 && s.length < 240);
 }
 
-async function generateScript(topic: string, source: string, durationMin: number) {
+async function generateScript(topic: string, source: string, durationMin: number, expressive: boolean) {
   const target = Math.max(2, Math.min(15, durationMin || 5));
   const words = target * 150; // ~150 wpm
   const userMsg = source
     ? `TOPIC: ${topic || "(derive from source)"}\n\nSOURCE MATERIAL:\n${source.slice(0, 12000)}\n\nWrite a ~${words}-word solo podcast monologue grounded in the source.`
     : `TOPIC: ${topic}\n\nWrite a ~${words}-word solo podcast monologue.`;
+
+  const expressiveAddendum = expressive ? `
+
+EXPRESSIVE MODE (ElevenLabs v3 audio tags):
+- Weave in inline audio tags to give the voice real emotion + personality.
+- Allowed tags (use sparingly, max ~1 every 2-3 sentences): [excited], [serious], [whispers], [sarcastic], [laughs], [sighs], [pause], [exhales], [angry], [thoughtful].
+- Use ELLIPSES for natural pauses ("...") and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
+- Tags should match the line: cold open hook = [serious] or [excited]; the leak reveal = [pause] then a CAPS dollar number; the close = [serious] hard line.
+- Do NOT label sections, do NOT use stage directions in parentheses, do NOT use [music] or [intro]. Tags ONLY from the allowed list.` : "";
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
@@ -100,7 +109,7 @@ You write short-form solo podcast scripts. Structure:
 3. Why owners can't see it from the inside.
 4. The forensic move — 2-3 concrete steps.
 5. Close with a hard line and a single call-to-action (visit aetheris.technology / book the Forensic Diagnostic).
-Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose — no stage directions, no [music], no speaker labels.` },
+Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose — no stage directions, no [music], no speaker labels.${expressiveAddendum}` },
         { role: "user", content: userMsg },
       ],
       response_format: { type: "json_object" },
