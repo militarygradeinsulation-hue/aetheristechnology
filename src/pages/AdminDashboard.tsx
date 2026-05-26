@@ -1,52 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { SocialContentGenerator } from '@/components/SocialContentGenerator';
-import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
-import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
-import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
-import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
-import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
-import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
-import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
-import { PlaybookCreator } from '@/components/PlaybookCreator';
-import { AllInOneGenerator } from '@/components/AllInOneGenerator';
-import { AdminLibrary } from '@/components/AdminLibrary';
-import { ContentCalendar, type ViewMode } from '@/components/admin/ContentCalendar';
-import { ContentEngine } from '@/components/admin/ContentEngine';
-import { ServicesPricing } from '@/components/ServicesPricing';
-import { AdminCrm } from '@/components/crm/AdminCrm';
-import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
-import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
+import { type ViewMode } from '@/components/admin/ContentCalendar';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
-import { AdminAssistant } from '@/components/admin/AdminAssistant';
-import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
-import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
-import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
-import { AdminCareersTest } from '@/components/admin/AdminCareersTest';
-import { AdminCareersPanel } from '@/components/admin/AdminCareersPanel';
-import AdminHiresOnboardingPanel from '@/components/admin/AdminHiresOnboardingPanel';
-import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
-import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
-import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
-import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
-import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
-import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
-import { AdminOnboardingStudio } from '@/components/admin/AdminOnboardingStudio';
-import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
-import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
-
-import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
-import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSystemsPanel';
-import SharedWorkspace from '@/components/admin/SharedWorkspace';
-import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
-import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import NotificationBell from '@/components/admin/NotificationBell';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
@@ -54,20 +15,69 @@ import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
 import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
-import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
-import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
-import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
-import { AdminCompanyTaskAudit } from '@/components/admin/AdminCompanyTaskAudit';
-import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
-import { AdminCreationStudio } from '@/components/admin/AdminCreationStudio';
-import { AdminLiveEventsPanel } from '@/components/admin/AdminLiveEventsPanel';
-import { WebsiteScanner } from '@/components/WebsiteScanner';
-import { SocialSchedulerPanel } from '@/components/admin/SocialSchedulerPanel';
-import { HubSpotBlogPanel } from '@/components/admin/HubSpotBlogPanel';
-import { HubSpotMeetingsPanel } from '@/components/admin/HubSpotMeetingsPanel';
-import { AdminResumeAnalyzer } from '@/components/admin/AdminResumeAnalyzer';
-import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
-import { BriefingsPanel } from '@/components/admin/BriefingsPanel';
+
+// Heavy panels — lazy-loaded so the initial admin bundle stays small and the
+// post-login navigation to /admin feels instant. Only the active tab's code
+// is fetched/parsed; other tabs load on demand when clicked.
+const SocialContentGenerator = lazy(() => import('@/components/SocialContentGenerator').then(m => ({ default: m.SocialContentGenerator })));
+const SalesScriptGenerator = lazy(() => import('@/components/SalesScriptGenerator').then(m => ({ default: m.SalesScriptGenerator })));
+const ContentCalendarGenerator = lazy(() => import('@/components/ContentCalendarGenerator').then(m => ({ default: m.ContentCalendarGenerator })));
+const PostFromSourceGenerator = lazy(() => import('@/components/PostFromSourceGenerator').then(m => ({ default: m.PostFromSourceGenerator })));
+const FollowUpPlanGenerator = lazy(() => import('@/components/FollowUpPlanGenerator').then(m => ({ default: m.FollowUpPlanGenerator })));
+const StrategicQuestionEngine = lazy(() => import('@/components/StrategicQuestionEngine').then(m => ({ default: m.StrategicQuestionEngine })));
+const BrandContradictionFinder = lazy(() => import('@/components/BrandContradictionFinder').then(m => ({ default: m.BrandContradictionFinder })));
+const FrictionVocabularyAudit = lazy(() => import('@/components/FrictionVocabularyAudit').then(m => ({ default: m.FrictionVocabularyAudit })));
+const PlaybookCreator = lazy(() => import('@/components/PlaybookCreator').then(m => ({ default: m.PlaybookCreator })));
+const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').then(m => ({ default: m.AllInOneGenerator })));
+const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
+const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
+const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
+const ServicesPricing = lazy(() => import('@/components/ServicesPricing').then(m => ({ default: m.ServicesPricing })));
+const AdminCrm = lazy(() => import('@/components/crm/AdminCrm').then(m => ({ default: m.AdminCrm })));
+const CampaignControlCenter = lazy(() => import('@/components/admin/CampaignControlCenter').then(m => ({ default: m.CampaignControlCenter })));
+const SEOOptimizer = lazy(() => import('@/components/admin/SEOOptimizer').then(m => ({ default: m.SEOOptimizer })));
+const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').then(m => ({ default: m.AdminAssistant })));
+const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
+const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
+const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
+const AdminCareersTest = lazy(() => import('@/components/admin/AdminCareersTest').then(m => ({ default: m.AdminCareersTest })));
+const AdminCareersPanel = lazy(() => import('@/components/admin/AdminCareersPanel').then(m => ({ default: m.AdminCareersPanel })));
+const AdminHiresOnboardingPanel = lazy(() => import('@/components/admin/AdminHiresOnboardingPanel'));
+const RepActivityPanel = lazy(() => import('@/components/admin/RepActivityPanel').then(m => ({ default: m.RepActivityPanel })));
+const ForecastSettingsPanel = lazy(() => import('@/components/admin/ForecastSettingsPanel').then(m => ({ default: m.ForecastSettingsPanel })));
+const CompanyPortalPreview = lazy(() => import('@/components/admin/CompanyPortalPreview').then(m => ({ default: m.CompanyPortalPreview })));
+const ManageRepsPanel = lazy(() => import('@/components/admin/ManageRepsPanel'));
+const RepPlaybookPanel = lazy(() => import('@/components/admin/RepPlaybookPanel').then(m => ({ default: m.RepPlaybookPanel })));
+const AdminTrainingPanel = lazy(() => import('@/components/admin/AdminTrainingPanel').then(m => ({ default: m.AdminTrainingPanel })));
+const AdminOnboardingStudio = lazy(() => import('@/components/admin/AdminOnboardingStudio').then(m => ({ default: m.AdminOnboardingStudio })));
+const AdminRepCalendarPanel = lazy(() => import('@/components/admin/AdminRepCalendarPanel').then(m => ({ default: m.AdminRepCalendarPanel })));
+const SalesCrmPanel = lazy(() => import('@/components/admin/SalesCrmPanel'));
+const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard'));
+const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
+const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
+const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
+const InterviewsPanel = lazy(() => import('@/components/admin/InterviewsPanel').then(m => ({ default: m.InterviewsPanel })));
+const InterviewBriefingPanel = lazy(() => import('@/components/portal/InterviewBriefingPanel').then(m => ({ default: m.InterviewBriefingPanel })));
+const AdminImageStudio = lazy(() => import('@/components/admin/AdminImageStudio').then(m => ({ default: m.AdminImageStudio })));
+const AdminDocumentsPanel = lazy(() => import('@/components/admin/AdminDocumentsPanel').then(m => ({ default: m.AdminDocumentsPanel })));
+const AdminCompanyCalendarPanel = lazy(() => import('@/components/admin/AdminCompanyCalendarPanel').then(m => ({ default: m.AdminCompanyCalendarPanel })));
+const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompanyTaskAudit').then(m => ({ default: m.AdminCompanyTaskAudit })));
+const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
+const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
+const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
+const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
+const SocialSchedulerPanel = lazy(() => import('@/components/admin/SocialSchedulerPanel').then(m => ({ default: m.SocialSchedulerPanel })));
+const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel').then(m => ({ default: m.HubSpotBlogPanel })));
+const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
+const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
+const AiWritingDetectorCard = lazy(() => import('@/components/admin/AiWritingDetectorCard').then(m => ({ default: m.AiWritingDetectorCard })));
+const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
+
+const PanelFallback = () => (
+  <div className="flex items-center justify-center py-12 text-muted-foreground">
+    <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading…
+  </div>
+);
 
 type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
@@ -619,7 +629,7 @@ const AdminDashboard: React.FC = () => {
               })}
             </div>
 
-            <EasyModeWrapper tabKey={activeTab}>{renderTabBody(activeTab)}</EasyModeWrapper>
+            <EasyModeWrapper tabKey={activeTab}><Suspense fallback={<PanelFallback />}>{renderTabBody(activeTab)}</Suspense></EasyModeWrapper>
           </>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -667,7 +677,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
-                    {renderTabBody(tab)}
+                    <Suspense fallback={<PanelFallback />}>{renderTabBody(tab)}</Suspense>
                   </div>
                 </div>
               );
@@ -675,7 +685,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-      <AdminAssistant />
+      <Suspense fallback={null}><AdminAssistant /></Suspense>
     </div>
   );
 };
