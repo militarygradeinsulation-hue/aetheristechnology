@@ -392,15 +392,17 @@ export default function LinkedInPostStudio() {
             tool_type: 'linkedin_response',
             title: (titlePrefix + firstLine).slice(0, 90),
             input_data: {
-              imageDataUrl: useImage ? respondImage : null,
+              // imageDataUrl intentionally NOT persisted — base64 bloats the row
+              // (single rows reached 5MB). The preview is only useful in-session.
+              hasImage: useImage && !!respondImage,
               fileName: useImage ? respondFileName : null,
               postText: respondSourceType === 'text' ? respondText.trim() : null,
               sourceType: respondSourceType,
               mode: isReply ? 'reply' : respondMode,
-              extraContext: respondExtra.trim(),
-              myComment: isReply ? myComment.trim() : null,
-              theirReply: isReply ? theirReply.trim() : null,
-              originalPostText: isReply ? replyOriginalPost.trim() : null,
+              extraContext: respondExtra.trim().slice(0, 4000),
+              myComment: isReply ? myComment.trim().slice(0, 4000) : null,
+              theirReply: isReply ? theirReply.trim().slice(0, 4000) : null,
+              originalPostText: isReply ? replyOriginalPost.trim().slice(0, 4000) : null,
             },
             output_data: { body: post, mode: isReply ? 'reply' : respondMode },
           });
