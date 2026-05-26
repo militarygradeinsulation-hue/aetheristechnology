@@ -39,7 +39,7 @@ export const OnboardingLibrary: React.FC = () => {
       <Card className="border-amber-500/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <GraduationCap className="w-5 h-5 text-amber-500" /> New Rep Onboarding Library
+          <GraduationCap className="w-5 h-5 text-amber-500" /> Aetheris Academy Library
         </CardTitle>
         <p className="text-sm text-muted-foreground">Narrated walkthroughs of every part of this system. Watch in order.</p>
       </CardHeader>
