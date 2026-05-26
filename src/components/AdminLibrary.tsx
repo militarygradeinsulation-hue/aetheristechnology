@@ -142,7 +142,7 @@ export const AdminLibrary: React.FC = () => {
         <div className="space-y-2">
           {filtered.map(item => (
             <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4 group hover:border-amber/30 transition-colors">
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(item)}>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="text-[10px] font-bold uppercase text-amber bg-amber/10 px-2 py-0.5 rounded">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
                   {item.file_url && <span className="text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">PDF</span>}
@@ -161,10 +161,10 @@ export const AdminLibrary: React.FC = () => {
                         <BookOpen className="w-3.5 h-3.5 mr-1" /> View PDF
                       </Button>
                     </a>
-                    <Button variant="ghost" size="icon" title="View details" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon" title="View details" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
                   </>
                 ) : (
-                  <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" title="View" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
                 )}
                 <Button variant="ghost" size="icon" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-4 h-4" /></Button>
