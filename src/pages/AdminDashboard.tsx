@@ -980,6 +980,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'ai_detect' && <AiWritingDetectorCard />}
         {activeTool === 'scam_check' && <ScamCheckCard />}
         {activeTool === 'detective' && <DetectiveModeStandalone />}
+        {activeTool === 'podcast' && <AdminPodcastStudio />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
