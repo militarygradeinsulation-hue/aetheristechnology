@@ -747,13 +747,6 @@ export const AiWritingDetectorCard: React.FC<{ repMode?: boolean }> = ({ repMode
     setShowLibrary(false);
   };
 
-  const openEntry = (entry: LibraryEntry) => {
-    setResult(normalizeResult(entry.result));
-    setSubjectName(entry.subject_name);
-    setNotes(entry.notes || '');
-    setExpanded(true);
-    setShowLibrary(false);
-  };
 
   const sameAuthorBadge = (s: Comparison['same_author']) => {
     switch (s) {
