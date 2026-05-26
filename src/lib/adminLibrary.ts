@@ -64,6 +64,15 @@ export async function listAdminLibrary(opts?: { toolType?: string; maxPages?: nu
   return out;
 }
 
+export async function getAdminLibraryItem(id: string): Promise<AdminLibraryItem | null> {
+  const { data, error } = await supabase.functions.invoke("admin-library", {
+    body: { action: "get", id },
+    headers: adminHeaders(),
+  });
+  if (error) throw error;
+  return (data?.item as AdminLibraryItem) || null;
+}
+
 
 export async function updateAdminLibraryItem(id: string, output_data: unknown): Promise<AdminLibraryItem> {
   const { data, error } = await supabase.functions.invoke("admin-library", {
