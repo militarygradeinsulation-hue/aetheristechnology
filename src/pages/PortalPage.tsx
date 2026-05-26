@@ -94,7 +94,7 @@ type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
   | 'outreach-email'
-  | 'leak-audit' | 'scan' | 'scam-check' | 'business-diagnostic' | 'sales-scripts'
+  | 'leak-audit' | 'scan' | 'scam-check' | 'detective' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
@@ -104,6 +104,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
   { key: 'scam-check',          name: 'Scam / Legit Forensics',              href: '#',                     desc: 'Investigate any site for scam signals. Live RDAP, redirects, SSL, page copy + cited forensic clues.' },
+  { key: 'detective',           name: 'Detective Mode',                      href: '#',                     desc: 'Drop a site. Auto-runs scan, RDAP, scrape, enrichment, then writes the opener.' },
   { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF, perfect demo asset.' },
   { key: 'sales-scripts',       name: 'Sales Script Generator',              href: '/sales-scripts',        desc: 'Custom cold-call & email scripts in seconds.' },
   { key: 'follow-up-plan',      name: 'Follow-Up Plan',                      href: '/follow-up-plan',       desc: '7-touch sequences tuned to a specific prospect.' },
@@ -120,6 +121,7 @@ const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfi
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
     case 'scan':                 return <WebsiteScanner onContactClick={noop} hideHeader staffUnlock />;
     case 'scam-check':           return <ScamCheckCard />;
+    case 'detective':            return <DetectiveModeStandalone />;
     case 'business-diagnostic':  return <BusinessDiagnostic />;
     case 'sales-scripts':        return <SalesScriptGenerator adminMode />;
     case 'follow-up-plan':       return <FollowUpPlanGenerator adminMode />;
