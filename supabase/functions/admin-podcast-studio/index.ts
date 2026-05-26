@@ -234,6 +234,7 @@ serve(async (req) => {
       const voiceName = body.voiceName ? String(body.voiceName) : null;
       const sourceType = body.sourceType ? String(body.sourceType) : null;
       const sourceText = body.sourceText ? String(body.sourceText).slice(0, 20000) : null;
+      const expressive = body.expressive !== false;
       if (!script) return json({ error: "script required" }, 400);
       if (!voiceId) return json({ error: "voiceId required" }, 400);
 
@@ -254,7 +255,7 @@ serve(async (req) => {
 
       const work = (async () => {
         try {
-          const audioBytes = await ttsToBytes(script, voiceId);
+          const audioBytes = await ttsToBytes(script, voiceId, expressive);
           const audioUrl = await uploadToBucket(supabase, `${stamp}-${slug}.mp3`, audioBytes, "audio/mpeg");
           await supabase.from("admin_podcasts").update({ audio_url: audioUrl }).eq("id", episodeId);
 
