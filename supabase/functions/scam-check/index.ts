@@ -248,17 +248,31 @@ serve(async (req) => {
       parsed = m ? JSON.parse(m[0]) : { error: "AI returned invalid JSON" };
     }
 
-    // Re-score from clues for transparency (same approach as AI Writing Detector)
+    // Re-score from clues using signed direction so trust signals lower the score
+    // and red flags raise it. Start from a neutral baseline of 30.
     const clues: Clue[] = Array.isArray(parsed.clues) ? parsed.clues : [];
-    let computed = 0;
+    const trustText = (Array.isArray(parsed.trust_signals) ? parsed.trust_signals : []).join(" ").toLowerCase();
+    const riskText = (Array.isArray(parsed.red_flags) ? parsed.red_flags : []).join(" ").toLowerCase();
+
+    let computed = 30; // neutral baseline
     for (const c of clues) {
       const conf = Math.max(0, Math.min(1, Number(c?.confidence) || 0.5));
-      computed += 6 + (14 - 6) * conf;
+      const weight = 6 + (14 - 6) * conf;
+      let dir: "risk" | "trust" | null =
+        c?.direction === "trust" ? "trust" :
+        c?.direction === "risk" ? "risk" : null;
+      // Fallback: infer direction by matching the clue against trust/red-flag arrays
+      if (!dir) {
+        const needle = `${c?.pattern || ""} ${c?.highlight || ""}`.toLowerCase().trim();
+        if (needle && trustText.includes(needle.slice(0, 24))) dir = "trust";
+        else if (needle && riskText.includes(needle.slice(0, 24))) dir = "risk";
+        else dir = "risk"; // legacy default
+      }
+      computed += dir === "trust" ? -weight : weight;
     }
-    computed = Math.round(Math.min(100, computed));
-    const score = clues.length ? computed : Math.max(0, Math.min(100, Number(parsed.score) || 0));
-    const verdict =
-      score >= 80 ? "SCAM" :
+    computed = Math.round(Math.max(0, Math.min(100, computed)));
+    const aiScore = Number(parsed.score);
+    const score = clues.length ? computed : Math.max(0, Math.min(100, Number.isFinite(aiScore) ? aiScore : 30));
       score >= 60 ? "LIKELY_SCAM" :
       score >= 40 ? "MIXED" :
       score >= 20 ? "LIKELY_LEGIT" : "LEGIT";
