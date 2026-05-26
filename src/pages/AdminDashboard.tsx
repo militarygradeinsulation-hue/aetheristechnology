@@ -74,6 +74,7 @@ const AiWritingDetectorCard = lazy(() => import('@/components/admin/AiWritingDet
 const ScamCheckCard = lazy(() => import('@/components/admin/ScamCheckCard').then(m => ({ default: m.ScamCheckCard })));
 const DetectiveModeStandalone = lazy(() => import('@/components/DetectiveModeStandalone').then(m => ({ default: m.DetectiveModeStandalone })));
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
+const AdminPodcastStudio = lazy(() => import('@/components/admin/AdminPodcastStudio').then(m => ({ default: m.AdminPodcastStudio })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-12 text-muted-foreground">
