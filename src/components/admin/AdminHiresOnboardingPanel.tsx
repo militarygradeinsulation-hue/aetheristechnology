@@ -337,7 +337,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
         <Card className="bg-card/60 border-border/60">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <GraduationCap className="w-4 h-4 text-amber" /> New-Rep Onboarding Studio
+              <GraduationCap className="w-4 h-4 text-amber" /> Aetheris Academy Studio
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
               Generate, edit, and assign the full onboarding curriculum. Pulls from the same library powering the Rep portal.
