@@ -649,17 +649,33 @@ export const AiWritingDetectorCard: React.FC<{ repMode?: boolean }> = ({ repMode
       const overall = data.samples?.length === 1
         ? { score: data.samples[0].score, verdict: data.samples[0].verdict, same_author: null }
         : { score: data.comparison?.overall_score ?? null, verdict: data.comparison?.overall_verdict ?? null, same_author: data.comparison?.same_author ?? null };
-      const { error } = await supabase.from('ai_detection_scans').insert({
-        subject_name: name,
-        notes: notes.trim() || null,
-        sample_count: samplesMeta.length,
-        overall_score: overall.score,
-        overall_verdict: overall.verdict,
-        same_author: overall.same_author,
-        samples: samplesMeta,
-        result: data as any,
-      });
-      if (error) throw error;
+      if (repMode) {
+        await saveToRepLibrary({
+          tool_type: 'ai_detect',
+          title: name,
+          input_data: {
+            notes: notes.trim() || null,
+            sample_count: samplesMeta.length,
+            overall_score: overall.score,
+            overall_verdict: overall.verdict,
+            same_author: overall.same_author,
+            samples: samplesMeta,
+          },
+          output_data: { result: data },
+        });
+      } else {
+        const { error } = await supabase.from('ai_detection_scans').insert({
+          subject_name: name,
+          notes: notes.trim() || null,
+          sample_count: samplesMeta.length,
+          overall_score: overall.score,
+          overall_verdict: overall.verdict,
+          same_author: overall.same_author,
+          samples: samplesMeta,
+          result: data as any,
+        });
+        if (error) throw error;
+      }
       toast({ title: `Saved scan for ${name}` });
       loadLibrary();
     } catch (e: any) {
