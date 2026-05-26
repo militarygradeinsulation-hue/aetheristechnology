@@ -116,7 +116,7 @@ export const AdminPodcastStudio: React.FC = () => {
     if (!topic && !source) { toast({ title: 'Pick a topic or paste source text', variant: 'destructive' }); return; }
     setScriptLoading(true);
     try {
-      const out = await call<{ title: string; script: string }>('generate_script', { topic, source, durationMin });
+      const out = await call<{ title: string; script: string }>('generate_script', { topic, source, durationMin, expressive });
       setTitle(out.title); setScript(out.script);
       toast({ title: 'Script ready', description: 'Edit it, then generate the episode.' });
     } catch (e) {
