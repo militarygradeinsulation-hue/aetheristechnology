@@ -36,12 +36,18 @@ Return ONLY valid JSON in this exact shape:
     {
       "pattern": "Short forensic label (e.g. 'Domain registered 11 days ago')",
       "highlight": "Exact phrase or value from the evidence to highlight",
-      "fact": "Plain-English explanation of why this matters for scam risk",
+      "fact": "Plain-English explanation of why this matters",
       "source": "Where this came from (RDAP, page copy, DNS, redirect chain, SSL, metadata)",
+      "direction": "risk" | "trust",
       "confidence": 0.0
     }
   ]
 }
+
+CRITICAL: Every clue MUST include a "direction" field.
+- "risk" = this clue increases scam likelihood (raises score)
+- "trust" = this clue decreases scam likelihood (lowers score)
+Do NOT mark legitimate findings (old domain, real address, HTTPS valid, recognizable infra) as "risk". Mark them as "trust".
 
 Scoring rubric (additive — clues drive the score, be generous with findings):
 - Domain age < 90 days on a "money-making" site → strong scam signal
