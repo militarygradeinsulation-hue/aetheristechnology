@@ -89,12 +89,12 @@ async function generateScript(topic: string, source: string, durationMin: number
 
   const expressiveAddendum = expressive ? `
 
-EXPRESSIVE MODE (ElevenLabs v3 audio tags):
-- Weave in inline audio tags to give the voice real emotion + personality.
-- Allowed tags (use sparingly, max ~1 every 2-3 sentences): [excited], [serious], [whispers], [sarcastic], [laughs], [sighs], [pause], [exhales], [angry], [thoughtful].
-- Use ELLIPSES for natural pauses ("...") and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
-- Tags should match the line: cold open hook = [serious] or [excited]; the leak reveal = [pause] then a CAPS dollar number; the close = [serious] hard line.
-- Do NOT label sections, do NOT use stage directions in parentheses, do NOT use [music] or [intro]. Tags ONLY from the allowed list.` : "";
+EXPRESSIVE DELIVERY (text-only, no tags):
+- Convey emotion through word choice, rhythm, and punctuation ONLY.
+- Use ELLIPSES ("...") for natural pauses and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
+- Do NOT use bracketed audio tags like [excited], [pause], [laughs], [sighs], [music], etc.
+- Do NOT use parenthetical stage directions like (pauses) or (softly).
+- Do NOT use speaker labels. Plain spoken prose only.` : "";
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
@@ -120,7 +120,29 @@ Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose —
   let parsed: { title?: string; script?: string } = {};
   try { parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}"); } catch { /* ignore */ }
   if (!parsed.script) throw new Error("AI returned no script");
-  return { title: parsed.title || topic || "Untitled Episode", script: parsed.script };
+  return { title: parsed.title || topic || "Untitled Episode", script: sanitizeScript(parsed.script) };
+}
+
+// Strip ElevenLabs audio tags, stage directions, and speaker labels so downstream
+// consumers (video TTS, transcripts, captions) don't read them aloud.
+function sanitizeScript(raw: string): string {
+  let s = String(raw || "");
+  // Remove [bracketed] audio/emotion tags like [excited], [pause], [laughs], [music], etc.
+  s = s.replace(/\[[^\]\n]{1,40}\]/g, "");
+  // Remove (parenthetical) stage directions only when they look like cues
+  // (short, lowercase verbs like "(pauses)", "(sighs)", "(laughs softly)").
+  s = s.replace(/\(([^)\n]{1,40})\)/g, (m, inner) => {
+    const t = String(inner).trim();
+    if (/^[a-z][a-z\s,'-]{0,40}$/.test(t) && /\b(pause|pauses|paused|sigh|sighs|laugh|laughs|whisper|whispers|exhale|exhales|inhale|inhales|beat|breath|breathes|chuckle|chuckles|serious|excited|sarcastic|thoughtful|angry|softly|quietly|loudly)\b/.test(t)) {
+      return "";
+    }
+    return m;
+  });
+  // Remove leading speaker labels like "HOST:", "NARRATOR:" at line starts.
+  s = s.replace(/^\s*[A-Z][A-Z0-9 _-]{1,20}:\s*/gm, "");
+  // Collapse whitespace artifacts left behind.
+  s = s.replace(/[ \t]{2,}/g, " ").replace(/\s+([,.!?;:])/g, "$1").replace(/\n{3,}/g, "\n\n").trim();
+  return s;
 }
 
 async function ttsToBytes(text: string, voiceId: string, expressive: boolean): Promise<Uint8Array> {
