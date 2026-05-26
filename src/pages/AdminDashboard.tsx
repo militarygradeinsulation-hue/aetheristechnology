@@ -105,6 +105,7 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle, category: 'forensics' },
   { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText, category: 'forensics' },
   { key: 'ai_detect', label: 'AI Writing Detector', description: 'Compare up to 5 writing samples (text or screenshots) for AI authorship, same-author analysis, and forensic clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'scam_check', label: 'Scam / Legit Forensics', description: 'Investigate any website + business for scam signals. Pulls live RDAP domain age, redirect chain, SSL, and page copy, then returns a forensic verdict with cited clues.', icon: ScanSearch, category: 'forensics' },
   { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
   { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
