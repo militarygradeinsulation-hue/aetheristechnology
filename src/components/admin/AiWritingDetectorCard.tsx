@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, ScanSearch, Upload, X, ClipboardPaste, Eye, EyeOff, BookOpen, Plus, Users, GitCompare, Library, Trash2, User, RefreshCw, Copy, Download, Volume2, Square } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { listRepLibrary, saveToRepLibrary, deleteFromRepLibrary, getRepLibraryItem } from '@/lib/portalWorkspace';
 
 type Clue = {
   pattern: string;
