@@ -41,27 +41,30 @@ export function getTabColorClasses(key: string, active: boolean, mode: TabColorM
   return active ? pair[0] : pair[1];
 }
 
-export function useTabColorMode(): { mode: TabColorMode; toggle: () => void; setMode: (m: TabColorMode) => void } {
-  const [mode, setModeState] = useState<TabColorMode>(() => {
-    try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      return v === 'rainbow' ? 'rainbow' : 'uniform';
-    } catch { return 'uniform'; }
+const listeners = new Set<() => void>();
+function readMode(): TabColorMode {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'rainbow' ? 'rainbow' : 'uniform';
+  } catch { return 'uniform'; }
+}
+function writeMode(m: TabColorMode) {
+  try { localStorage.setItem(STORAGE_KEY, m); } catch {}
+  listeners.forEach(l => l());
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY) listeners.forEach(l => l());
   });
+}
 
-  const setMode = useCallback((m: TabColorMode) => {
-    setModeState(m);
-    try { localStorage.setItem(STORAGE_KEY, m); } catch {}
-  }, []);
-
+export function useTabColorMode(): { mode: TabColorMode; toggle: () => void; setMode: (m: TabColorMode) => void } {
+  const [mode, setModeState] = useState<TabColorMode>(readMode);
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setModeState(e.newValue === 'rainbow' ? 'rainbow' : 'uniform');
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    const update = () => setModeState(readMode());
+    listeners.add(update);
+    return () => { listeners.delete(update); };
   }, []);
-
-  const toggle = useCallback(() => setMode(mode === 'rainbow' ? 'uniform' : 'rainbow'), [mode, setMode]);
+  const setMode = useCallback((m: TabColorMode) => writeMode(m), []);
+  const toggle = useCallback(() => writeMode(readMode() === 'rainbow' ? 'uniform' : 'rainbow'), []);
   return { mode, toggle, setMode };
 }
