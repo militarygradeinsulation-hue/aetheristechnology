@@ -55,6 +55,7 @@ export const AdminPodcastStudio: React.FC = () => {
   const [script, setScript] = useState('');
   const [source, setSource] = useState('');
   const [durationMin, setDurationMin] = useState(5);
+  const [expressive, setExpressive] = useState(true);
   const [scriptLoading, setScriptLoading] = useState(false);
   const [episodeLoading, setEpisodeLoading] = useState(false);
 
