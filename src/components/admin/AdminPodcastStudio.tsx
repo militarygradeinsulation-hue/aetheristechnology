@@ -90,10 +90,11 @@ export const AdminPodcastStudio: React.FC = () => {
   const refreshTopics = async () => {
     setTopicsLoading(true);
     try {
-      const { topics } = await call<{ topics: string[] }>('suggest_topics', {
-        category: category === 'All' ? '' : category, count: 10, exclude: topics,
+      const exclude = topics;
+      const res = await call<{ topics: string[] }>('suggest_topics', {
+        category: category === 'All' ? '' : category, count: 10, exclude,
       });
-      setTopics(topics);
+      setTopics(res.topics);
     } catch (e) {
       toast({ title: 'Topic refresh failed', description: (e as Error).message, variant: 'destructive' });
     } finally { setTopicsLoading(false); }
