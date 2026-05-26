@@ -15,6 +15,7 @@ interface Episode {
   voice_id: string | null; voice_name: string | null;
   audio_url: string | null; image_url: string | null;
   duration_seconds: number | null; created_at: string;
+  status?: string | null; error?: string | null;
 }
 
 const CATEGORIES = ['All', 'Revenue Leaks', 'Systems & Ops', 'AI / Practical', 'Sales & Pipeline', 'Founder POV', 'Industry-Specific'];
@@ -134,9 +135,31 @@ export const AdminPodcastStudio: React.FC = () => {
         sourceType: source ? 'paste/upload' : 'topic',
         sourceText: source || null,
       });
-      toast({ title: 'Episode created', description: episode.title });
+      toast({ title: 'Generating episode…', description: 'Audio + cover art are rendering in the background.' });
       setScript(''); setTitle(''); setSource('');
       setEpisodes(prev => [episode, ...prev]);
+
+      // Poll until ready or failed (max ~5 min).
+      const id = episode.id;
+      let tries = 0;
+      const poll = async () => {
+        tries++;
+        try {
+          const { episode: ep } = await call<{ episode: Episode }>('get', { id });
+          if (!ep) return;
+          setEpisodes(prev => prev.map(p => p.id === id ? ep : p));
+          if (ep.status === 'ready') {
+            toast({ title: 'Episode ready', description: ep.title });
+            return;
+          }
+          if (ep.status === 'failed') {
+            toast({ title: 'Episode failed', description: ep.error || 'Unknown error', variant: 'destructive' });
+            return;
+          }
+        } catch { /* ignore transient */ }
+        if (tries < 150) setTimeout(poll, 2000);
+      };
+      setTimeout(poll, 2000);
     } catch (e) {
       toast({ title: 'Episode failed', description: (e as Error).message, variant: 'destructive' });
     } finally { setEpisodeLoading(false); }
@@ -329,9 +352,15 @@ export const AdminPodcastStudio: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  {ep.audio_url && (
+                  {ep.audio_url ? (
                     <audio src={ep.audio_url} controls className="w-full mt-3" />
-                  )}
+                  ) : ep.status === 'processing' ? (
+                    <div className="mt-3 text-xs text-amber flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering voice + cover art… (1–3 min)
+                    </div>
+                  ) : ep.status === 'failed' ? (
+                    <div className="mt-3 text-xs text-destructive">Failed: {ep.error || 'Unknown error'}</div>
+                  ) : null}
                   <details className="mt-3">
                     <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">Show script</summary>
                     <pre className="text-xs text-muted-foreground whitespace-pre-wrap mt-2 max-h-60 overflow-auto">{ep.script}</pre>

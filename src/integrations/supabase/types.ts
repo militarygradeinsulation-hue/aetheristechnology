@@ -278,11 +278,13 @@ export type Database = {
           audio_url: string | null
           created_at: string
           duration_seconds: number | null
+          error: string | null
           id: string
           image_url: string | null
           script: string
           source_text: string | null
           source_type: string | null
+          status: string
           title: string
           topic: string | null
           updated_at: string
@@ -293,11 +295,13 @@ export type Database = {
           audio_url?: string | null
           created_at?: string
           duration_seconds?: number | null
+          error?: string | null
           id?: string
           image_url?: string | null
           script: string
           source_text?: string | null
           source_type?: string | null
+          status?: string
           title: string
           topic?: string | null
           updated_at?: string
@@ -308,11 +312,13 @@ export type Database = {
           audio_url?: string | null
           created_at?: string
           duration_seconds?: number | null
+          error?: string | null
           id?: string
           image_url?: string | null
           script?: string
           source_text?: string | null
           source_type?: string | null
+          status?: string
           title?: string
           topic?: string | null
           updated_at?: string
