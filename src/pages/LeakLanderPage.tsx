@@ -194,6 +194,30 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
+          {/* Free PDF download */}
+          <section
+            className="mt-4 max-w-2xl mx-auto animate-fade-in"
+            style={{ animationDelay: "260ms", animationFillMode: "both" }}
+          >
+            <a
+              href="/downloads/How-Aetheris-Can-Help-You.pdf"
+              download
+              className="relative overflow-hidden group flex items-center gap-3 px-4 py-3 rounded-xl border border-amber/40 bg-gradient-to-br from-amber/[0.12] via-amber/[0.05] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 hover:border-amber/70 transition-all shadow-[0_15px_40px_-15px_hsl(var(--amber)/0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none"
+            >
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/15 ring-1 ring-amber/40">
+                <Download className="w-5 h-5 text-amber" />
+              </div>
+              <div className="relative flex-1 text-left">
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
+                <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                  How Aetheris Can Help You
+                </div>
+                <div className="text-[11px] text-muted-foreground">No email required. Tap to download.</div>
+              </div>
+              <ArrowRight className="relative w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </section>
+
           {/* What the hell do we do — instant answer */}
           <section
             className="mt-4 max-w-2xl mx-auto animate-fade-in"
