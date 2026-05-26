@@ -119,10 +119,22 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                   catch { setViewItem(item); }
                 }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
-                  await navigator.clipboard.writeText(formatLibraryItemAsText(item as any));
-                  toast({ title: 'Copied' });
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    await navigator.clipboard.writeText(formatLibraryItemAsText(full as any));
+                    toast({ title: 'Copied' });
+                  } catch (e: any) {
+                    toast({ title: 'Copy failed', description: e?.message, variant: 'destructive' });
+                  }
                 }}><Copy className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => downloadLibraryItemAsPdf(item as any)}><Download className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="Download PDF" onClick={async () => {
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    downloadLibraryItemAsPdf(full as any);
+                  } catch (e: any) {
+                    toast({ title: 'Download failed', description: e?.message, variant: 'destructive' });
+                  }
+                }}><Download className="w-4 h-4" /></Button>
                 {item.file_url && (
                   <a href={item.file_url} target="_blank" rel="noopener noreferrer">
                     <Button variant="ghost" size="icon" title="Open PDF"><ExternalLink className="w-4 h-4" /></Button>
