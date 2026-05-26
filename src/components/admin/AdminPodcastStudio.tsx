@@ -352,9 +352,15 @@ export const AdminPodcastStudio: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  {ep.audio_url && (
+                  {ep.audio_url ? (
                     <audio src={ep.audio_url} controls className="w-full mt-3" />
-                  )}
+                  ) : ep.status === 'processing' ? (
+                    <div className="mt-3 text-xs text-amber flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering voice + cover art… (1–3 min)
+                    </div>
+                  ) : ep.status === 'failed' ? (
+                    <div className="mt-3 text-xs text-destructive">Failed: {ep.error || 'Unknown error'}</div>
+                  ) : null}
                   <details className="mt-3">
                     <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">Show script</summary>
                     <pre className="text-xs text-muted-foreground whitespace-pre-wrap mt-2 max-h-60 overflow-auto">{ep.script}</pre>
