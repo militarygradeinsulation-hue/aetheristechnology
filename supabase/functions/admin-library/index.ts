@@ -33,15 +33,36 @@ serve(async (req) => {
       const limit = Math.max(1, Math.min(200, Number(body.limit) || 50));
       const offset = Math.max(0, Number(body.offset) || 0);
       const toolType: string | undefined = typeof body.tool_type === "string" ? body.tool_type : undefined;
+      // Lightweight: exclude heavy input_data/output_data to avoid CPU/memory limits.
       let q = supabase
         .from("admin_library")
-        .select("*")
+        .select("id, tool_type, title, file_url, created_at")
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
       if (toolType) q = q.eq("tool_type", toolType);
       const { data, error } = await q;
       if (error) throw error;
-      return new Response(JSON.stringify({ items: data || [], limit, offset, hasMore: (data?.length || 0) === limit }), {
+      const items = (data || []).map((r: any) => ({ ...r, input_data: {}, output_data: {} }));
+      return new Response(JSON.stringify({ items, limit, offset, hasMore: items.length === limit }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "get") {
+      const { id } = body;
+      if (!id) {
+        return new Response(JSON.stringify({ error: "id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data, error } = await supabase
+        .from("admin_library")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({ item: data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
