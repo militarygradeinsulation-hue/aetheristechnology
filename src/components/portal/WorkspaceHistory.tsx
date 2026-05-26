@@ -21,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   playbook: 'Playbook',
   website_scan: 'Website Scan',
   business_diagnostic: 'Business Diagnostic',
+  ai_detect: 'AI Writing Detector',
 };
 
 interface Props {
