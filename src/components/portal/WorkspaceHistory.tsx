@@ -114,7 +114,10 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                 <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="View" onClick={async () => {
+                  try { const full = await getRepLibraryItem(item.id); setViewItem(full); }
+                  catch { setViewItem(item); }
+                }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
                   await navigator.clipboard.writeText(formatLibraryItemAsText(item as any));
                   toast({ title: 'Copied' });
