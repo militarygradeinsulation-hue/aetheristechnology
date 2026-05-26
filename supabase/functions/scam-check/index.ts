@@ -16,6 +16,7 @@ type Clue = {
   fact: string;
   source: string;
   confidence: number; // 0..1
+  direction?: "risk" | "trust"; // risk = raises scam score, trust = lowers it
   evidence?: string;
 };
 
