@@ -60,6 +60,7 @@ import { BrandContradictionFinder } from '@/components/BrandContradictionFinder'
 import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
 import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ScamCheckCard } from '@/components/admin/ScamCheckCard';
+import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
 import { DetectiveModeStandalone } from '@/components/DetectiveModeStandalone';
 import { ExternalLink } from 'lucide-react';
 import {
