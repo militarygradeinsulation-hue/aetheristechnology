@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb } from 'lucide-react';
+import { Loader2, Copy, Check, Sparkles, FileText, BookOpen, Lightbulb, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { PostImageGenerator } from './admin/PostImageGenerator';
@@ -133,13 +133,28 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
           </div>
         )}
 
-        <div className="flex items-end gap-3 mb-5">
+        <div className="flex items-end gap-3 mb-5 flex-wrap">
           <div className="w-32">
             <Label>How many?</Label>
             <Input type="number" min={1} max={10} value={count} onChange={(e) => setCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))} className="mt-1" />
           </div>
           <Button onClick={handleGenerate} disabled={loading} className="bg-amber hover:bg-amber/90 text-background font-bold flex-1 sm:flex-none">
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating…</> : 'Generate Posts'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setPosts([]);
+              setIdeaPrompt('');
+              setSourceId('');
+              setCopiedIdx(null);
+              toast({ title: 'Cleared' });
+            }}
+            disabled={loading}
+            title="Clear inputs and generated posts"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" /> Clear All
           </Button>
         </div>
 

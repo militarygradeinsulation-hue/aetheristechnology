@@ -1,5 +1,5 @@
-import React from 'react';
-import { FileText, Search, AlertTriangle, ListChecks, Quote } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { FileText, Search, AlertTriangle, ListChecks, Quote, Copy, Check } from 'lucide-react';
 
 interface ParsedReport {
   summary: string;
@@ -81,13 +81,38 @@ const SectionShell: React.FC<{
     primary: 'text-primary',
     cyan: 'text-cyan-400',
   }[tone];
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    const t = (bodyRef.current?.innerText || '').trim();
+    if (!t) return;
+    try {
+      await navigator.clipboard.writeText(`${label}\n\n${t}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // silent
+    }
+  };
   return (
     <div className={`rounded-lg border ${ring} p-4 space-y-2`}>
-      <div className={`flex items-center gap-2 ${text}`}>
-        <span className="w-4 h-4">{icon}</span>
-        <span className="text-[10px] uppercase tracking-widest font-bold">{label}</span>
+      <div className={`flex items-center justify-between gap-2 ${text}`}>
+        <div className="flex items-center gap-2">
+          <span className="w-4 h-4">{icon}</span>
+          <span className="text-[10px] uppercase tracking-widest font-bold">{label}</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          title={`Copy "${label}"`}
+          aria-label={`Copy ${label}`}
+          className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold opacity-70 hover:opacity-100 transition ${text}`}
+        >
+          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
+        </button>
       </div>
-      <div className="text-sm text-foreground/90 leading-relaxed">{children}</div>
+      <div ref={bodyRef} className="text-sm text-foreground/90 leading-relaxed">{children}</div>
     </div>
   );
 };
