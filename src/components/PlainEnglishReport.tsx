@@ -1,5 +1,5 @@
-import React from 'react';
-import { FileText, Search, AlertTriangle, ListChecks, Quote } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { FileText, Search, AlertTriangle, ListChecks, Quote, Copy, Check } from 'lucide-react';
 
 interface ParsedReport {
   summary: string;
