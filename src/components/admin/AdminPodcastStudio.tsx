@@ -55,6 +55,7 @@ export const AdminPodcastStudio: React.FC = () => {
   const [script, setScript] = useState('');
   const [source, setSource] = useState('');
   const [durationMin, setDurationMin] = useState(5);
+  const [expressive, setExpressive] = useState(true);
   const [scriptLoading, setScriptLoading] = useState(false);
   const [episodeLoading, setEpisodeLoading] = useState(false);
 
@@ -115,7 +116,7 @@ export const AdminPodcastStudio: React.FC = () => {
     if (!topic && !source) { toast({ title: 'Pick a topic or paste source text', variant: 'destructive' }); return; }
     setScriptLoading(true);
     try {
-      const out = await call<{ title: string; script: string }>('generate_script', { topic, source, durationMin });
+      const out = await call<{ title: string; script: string }>('generate_script', { topic, source, durationMin, expressive });
       setTitle(out.title); setScript(out.script);
       toast({ title: 'Script ready', description: 'Edit it, then generate the episode.' });
     } catch (e) {
@@ -134,6 +135,7 @@ export const AdminPodcastStudio: React.FC = () => {
         topic, script, voiceId, voiceName: v?.name || null,
         sourceType: source ? 'paste/upload' : 'topic',
         sourceText: source || null,
+        expressive,
       });
       toast({ title: 'Generating episode…', description: 'Audio + cover art are rendering in the background.' });
       setScript(''); setTitle(''); setSource('');
@@ -219,6 +221,22 @@ export const AdminPodcastStudio: React.FC = () => {
           <Input type="number" min={2} max={15} value={durationMin}
             onChange={(e) => setDurationMin(Math.max(2, Math.min(15, Number(e.target.value) || 5)))}
             className="mt-1" />
+        </div>
+        <div className="md:col-span-3">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={expressive}
+              onChange={(e) => setExpressive(e.target.checked)}
+              className="mt-1 h-4 w-4 accent-amber"
+            />
+            <span className="text-sm">
+              <span className="text-foreground font-medium">Expressive voice (ElevenLabs v3)</span>
+              <span className="block text-xs text-muted-foreground mt-0.5">
+                Uses the v3 model with emotion + audio tags ([excited], [whispers], [laughs], [pause]) woven into the script. Falls back to v2 automatically if v3 isn't enabled on your ElevenLabs plan.
+              </span>
+            </span>
+          </label>
         </div>
       </div>
 

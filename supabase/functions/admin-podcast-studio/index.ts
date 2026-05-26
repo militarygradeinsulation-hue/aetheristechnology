@@ -80,12 +80,21 @@ Return ONLY JSON: { "topics": ["...", ...] }` }
     .filter((s) => s.length > 8 && s.length < 240);
 }
 
-async function generateScript(topic: string, source: string, durationMin: number) {
+async function generateScript(topic: string, source: string, durationMin: number, expressive: boolean) {
   const target = Math.max(2, Math.min(15, durationMin || 5));
   const words = target * 150; // ~150 wpm
   const userMsg = source
     ? `TOPIC: ${topic || "(derive from source)"}\n\nSOURCE MATERIAL:\n${source.slice(0, 12000)}\n\nWrite a ~${words}-word solo podcast monologue grounded in the source.`
     : `TOPIC: ${topic}\n\nWrite a ~${words}-word solo podcast monologue.`;
+
+  const expressiveAddendum = expressive ? `
+
+EXPRESSIVE MODE (ElevenLabs v3 audio tags):
+- Weave in inline audio tags to give the voice real emotion + personality.
+- Allowed tags (use sparingly, max ~1 every 2-3 sentences): [excited], [serious], [whispers], [sarcastic], [laughs], [sighs], [pause], [exhales], [angry], [thoughtful].
+- Use ELLIPSES for natural pauses ("...") and ALL-CAPS WORDS for emphasis on 1-3 words at a time.
+- Tags should match the line: cold open hook = [serious] or [excited]; the leak reveal = [pause] then a CAPS dollar number; the close = [serious] hard line.
+- Do NOT label sections, do NOT use stage directions in parentheses, do NOT use [music] or [intro]. Tags ONLY from the allowed list.` : "";
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
@@ -100,7 +109,7 @@ You write short-form solo podcast scripts. Structure:
 3. Why owners can't see it from the inside.
 4. The forensic move — 2-3 concrete steps.
 5. Close with a hard line and a single call-to-action (visit aetheris.technology / book the Forensic Diagnostic).
-Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose — no stage directions, no [music], no speaker labels.` },
+Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose — no stage directions, no [music], no speaker labels.${expressiveAddendum}` },
         { role: "user", content: userMsg },
       ],
       response_format: { type: "json_object" },
@@ -114,10 +123,16 @@ Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose —
   return { title: parsed.title || topic || "Untitled Episode", script: parsed.script };
 }
 
-async function ttsToBytes(text: string, voiceId: string): Promise<Uint8Array> {
-  // ElevenLabs caps ~5000 chars per request — chunk on sentence boundaries
+async function ttsToBytes(text: string, voiceId: string, expressive: boolean): Promise<Uint8Array> {
+  // ElevenLabs v3 (expressive) prefers shorter chunks (~3000 chars) and uses
+  // different voice_settings ranges. v2 caps ~5000 chars.
+  const model = expressive ? "eleven_v3" : "eleven_multilingual_v2";
+  const maxLen = expressive ? 2800 : 4500;
+  const voiceSettings = expressive
+    ? { stability: 0.35, similarity_boost: 0.75, style: 0.55, use_speaker_boost: true }
+    : { stability: 0.5,  similarity_boost: 0.8,  style: 0.3,  use_speaker_boost: true };
+
   const chunks: string[] = [];
-  const maxLen = 4500;
   let cur = "";
   const sentences = text.replace(/\s+/g, " ").match(/[^.!?]+[.!?]+|\S+$/g) || [text];
   for (const s of sentences) {
@@ -130,8 +145,8 @@ async function ttsToBytes(text: string, voiceId: string): Promise<Uint8Array> {
   for (let i = 0; i < chunks.length; i++) {
     const body: Record<string, unknown> = {
       text: chunks[i],
-      model_id: "eleven_multilingual_v2",
-      voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
+      model_id: model,
+      voice_settings: voiceSettings,
     };
     if (i > 0) body.previous_text = chunks[i - 1].slice(-400);
     if (i < chunks.length - 1) body.next_text = chunks[i + 1].slice(0, 400);
@@ -141,7 +156,15 @@ async function ttsToBytes(text: string, voiceId: string): Promise<Uint8Array> {
       headers: { "xi-api-key": elevenKey(), "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`TTS ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    if (!res.ok) {
+      const errText = (await res.text()).slice(0, 300);
+      // If v3 isn't enabled on the workspace, transparently fall back to v2.
+      if (expressive && (res.status === 400 || res.status === 403 || res.status === 404 || /model/i.test(errText))) {
+        console.warn(`v3 unavailable, falling back to v2: ${errText}`);
+        return ttsToBytes(text, voiceId, false);
+      }
+      throw new Error(`TTS ${res.status}: ${errText}`);
+    }
     parts.push(new Uint8Array(await res.arrayBuffer()));
   }
   const total = parts.reduce((n, p) => n + p.length, 0);
@@ -199,7 +222,7 @@ serve(async (req) => {
     }
 
     if (action === "generate_script") {
-      const out = await generateScript(String(body.topic || ""), String(body.source || ""), Number(body.durationMin) || 5);
+      const out = await generateScript(String(body.topic || ""), String(body.source || ""), Number(body.durationMin) || 5, body.expressive !== false);
       return json(out);
     }
 
@@ -211,6 +234,7 @@ serve(async (req) => {
       const voiceName = body.voiceName ? String(body.voiceName) : null;
       const sourceType = body.sourceType ? String(body.sourceType) : null;
       const sourceText = body.sourceText ? String(body.sourceText).slice(0, 20000) : null;
+      const expressive = body.expressive !== false;
       if (!script) return json({ error: "script required" }, 400);
       if (!voiceId) return json({ error: "voiceId required" }, 400);
 
@@ -231,7 +255,7 @@ serve(async (req) => {
 
       const work = (async () => {
         try {
-          const audioBytes = await ttsToBytes(script, voiceId);
+          const audioBytes = await ttsToBytes(script, voiceId, expressive);
           const audioUrl = await uploadToBucket(supabase, `${stamp}-${slug}.mp3`, audioBytes, "audio/mpeg");
           await supabase.from("admin_podcasts").update({ audio_url: audioUrl }).eq("id", episodeId);
 
