@@ -80,7 +80,16 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   const fullUrl = `${SITE_URL}${path}`;
   const fullTitle = finalizeTitle(effectiveTitle);
   const fullDescription = truncate(effectiveDescription, MAX_DESC);
-  const ogImage = image || OG_IMAGE;
+  // Ensure og:image / twitter:image are always absolute URLs.
+  // Social crawlers (LinkedIn, Slack, Facebook) fail on relative paths.
+  const toAbsolute = (src: string) => {
+    if (!src) return OG_IMAGE;
+    if (/^https?:\/\//i.test(src)) return src;
+    if (src.startsWith('//')) return `https:${src}`;
+    if (src.startsWith('/')) return `${SITE_URL}${src}`;
+    return `${SITE_URL}/${src.replace(/^\.?\/?/, '')}`;
+  };
+  const ogImage = toAbsolute(image || OG_IMAGE);
   const ogImageAlt = imageAlt || DEFAULT_IMAGE_ALT;
 
   // Build combined JSON-LD graph
