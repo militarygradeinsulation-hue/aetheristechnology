@@ -120,7 +120,29 @@ Return ONLY JSON: { "title": "...", "script": "..." }. Script is plain prose —
   let parsed: { title?: string; script?: string } = {};
   try { parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}"); } catch { /* ignore */ }
   if (!parsed.script) throw new Error("AI returned no script");
-  return { title: parsed.title || topic || "Untitled Episode", script: parsed.script };
+  return { title: parsed.title || topic || "Untitled Episode", script: sanitizeScript(parsed.script) };
+}
+
+// Strip ElevenLabs audio tags, stage directions, and speaker labels so downstream
+// consumers (video TTS, transcripts, captions) don't read them aloud.
+function sanitizeScript(raw: string): string {
+  let s = String(raw || "");
+  // Remove [bracketed] audio/emotion tags like [excited], [pause], [laughs], [music], etc.
+  s = s.replace(/\[[^\]\n]{1,40}\]/g, "");
+  // Remove (parenthetical) stage directions only when they look like cues
+  // (short, lowercase verbs like "(pauses)", "(sighs)", "(laughs softly)").
+  s = s.replace(/\(([^)\n]{1,40})\)/g, (m, inner) => {
+    const t = String(inner).trim();
+    if (/^[a-z][a-z\s,'-]{0,40}$/.test(t) && /\b(pause|pauses|paused|sigh|sighs|laugh|laughs|whisper|whispers|exhale|exhales|inhale|inhales|beat|breath|breathes|chuckle|chuckles|serious|excited|sarcastic|thoughtful|angry|softly|quietly|loudly)\b/.test(t)) {
+      return "";
+    }
+    return m;
+  });
+  // Remove leading speaker labels like "HOST:", "NARRATOR:" at line starts.
+  s = s.replace(/^\s*[A-Z][A-Z0-9 _-]{1,20}:\s*/gm, "");
+  // Collapse whitespace artifacts left behind.
+  s = s.replace(/[ \t]{2,}/g, " ").replace(/\s+([,.!?;:])/g, "$1").replace(/\n{3,}/g, "\n\n").trim();
+  return s;
 }
 
 async function ttsToBytes(text: string, voiceId: string, expressive: boolean): Promise<Uint8Array> {
