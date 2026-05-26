@@ -135,6 +135,7 @@ export const AdminPodcastStudio: React.FC = () => {
         topic, script, voiceId, voiceName: v?.name || null,
         sourceType: source ? 'paste/upload' : 'topic',
         sourceText: source || null,
+        expressive,
       });
       toast({ title: 'Generating episode…', description: 'Audio + cover art are rendering in the background.' });
       setScript(''); setTitle(''); setSource('');
