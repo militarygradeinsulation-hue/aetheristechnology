@@ -34,6 +34,7 @@ export const OnboardingLibrary: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <RepBootcamp6Week />
       <RepBootcamp3Day />
       <Card className="border-amber-500/30">
       <CardHeader>
