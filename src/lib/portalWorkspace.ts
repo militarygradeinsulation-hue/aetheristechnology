@@ -70,8 +70,10 @@ export const upsertRepNote = (note: Partial<RepNote>): Promise<RepNote> =>
 export const deleteRepNote = (id: string) => call('notes_delete', { id });
 
 // Library
-export const listRepLibrary = (opts: { q?: string; tool_type?: string; lead_id?: string } = {}): Promise<RepLibraryItem[]> =>
+export const listRepLibrary = (opts: { q?: string; tool_type?: string; lead_id?: string; full?: boolean } = {}): Promise<RepLibraryItem[]> =>
   call('library_list', opts).then(d => d.items);
+export const getRepLibraryItem = (id: string): Promise<RepLibraryItem> =>
+  call('library_get', { id }).then(d => d.item);
 export const saveToRepLibrary = (args: {
   tool_type: string;
   title: string;
