@@ -685,7 +685,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-      <AdminAssistant />
+      <Suspense fallback={null}><AdminAssistant /></Suspense>
     </div>
   );
 };
