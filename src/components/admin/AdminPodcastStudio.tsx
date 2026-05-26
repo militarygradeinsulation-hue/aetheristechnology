@@ -222,6 +222,22 @@ export const AdminPodcastStudio: React.FC = () => {
             onChange={(e) => setDurationMin(Math.max(2, Math.min(15, Number(e.target.value) || 5)))}
             className="mt-1" />
         </div>
+        <div className="md:col-span-3">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={expressive}
+              onChange={(e) => setExpressive(e.target.checked)}
+              className="mt-1 h-4 w-4 accent-amber"
+            />
+            <span className="text-sm">
+              <span className="text-foreground font-medium">Expressive voice (ElevenLabs v3)</span>
+              <span className="block text-xs text-muted-foreground mt-0.5">
+                Uses the v3 model with emotion + audio tags ([excited], [whispers], [laughs], [pause]) woven into the script. Falls back to v2 automatically if v3 isn't enabled on your ElevenLabs plan.
+              </span>
+            </span>
+          </label>
+        </div>
       </div>
 
       <div className="glass p-6 rounded-xl">
