@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { listAdminLibrary, deleteFromAdminLibrary, getAdminLibraryItem, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from './LibraryItemRenderer';
 import { EasyReadButton } from './EasyReadButton';
@@ -41,24 +41,43 @@ export const AdminLibrary: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  const hydrate = async (item: AdminLibraryItem): Promise<AdminLibraryItem> => {
+    const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+    if (!needs) return item;
+    try {
+      const full = await getAdminLibraryItem(item.id);
+      return full || item;
+    } catch {
+      return item;
+    }
+  };
+
+  const handleView = async (item: AdminLibraryItem) => {
+    const full = await hydrate(item);
+    setViewItem(full);
+  };
+
   const handleCopy = async (item: AdminLibraryItem) => {
-    await navigator.clipboard.writeText(formatLibraryItemAsText(item));
+    const full = await hydrate(item);
+    await navigator.clipboard.writeText(formatLibraryItemAsText(full));
     toast({ title: 'Copied to clipboard' });
   };
 
-  const handleDownloadPdf = (item: AdminLibraryItem) => {
+  const handleDownloadPdf = async (item: AdminLibraryItem) => {
     try {
-      downloadLibraryItemAsPdf(item);
+      const full = await hydrate(item);
+      downloadLibraryItemAsPdf(full);
       toast({ title: 'PDF downloaded' });
     } catch (e: any) {
       toast({ title: 'Download failed', description: e.message, variant: 'destructive' });
     }
   };
 
-  const handleDownloadText = (item: AdminLibraryItem) => {
-    const safeTitle = item.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
-    const ext = item.tool_type === 'playbook' ? 'md' : 'txt';
-    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(item));
+  const handleDownloadText = async (item: AdminLibraryItem) => {
+    const full = await hydrate(item);
+    const safeTitle = full.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
+    const ext = full.tool_type === 'playbook' ? 'md' : 'txt';
+    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(full));
   };
 
   const handleDelete = async (item: AdminLibraryItem) => {
@@ -123,7 +142,7 @@ export const AdminLibrary: React.FC = () => {
         <div className="space-y-2">
           {filtered.map(item => (
             <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4 group hover:border-amber/30 transition-colors">
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setViewItem(item)}>
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(item)}>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="text-[10px] font-bold uppercase text-amber bg-amber/10 px-2 py-0.5 rounded">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
                   {item.file_url && <span className="text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">PDF</span>}
@@ -142,10 +161,10 @@ export const AdminLibrary: React.FC = () => {
                         <BookOpen className="w-3.5 h-3.5 mr-1" /> View PDF
                       </Button>
                     </a>
-                    <Button variant="ghost" size="icon" title="View details" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon" title="View details" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
                   </>
                 ) : (
-                  <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" title="View" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
                 )}
                 <Button variant="ghost" size="icon" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-4 h-4" /></Button>
