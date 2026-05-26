@@ -106,6 +106,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
   { key: 'scam-check',          name: 'Scam / Legit Forensics',              href: '#',                     desc: 'Investigate any site for scam signals. Live RDAP, redirects, SSL, page copy + cited forensic clues.' },
   { key: 'detective',           name: 'Detective Mode',                      href: '#',                     desc: 'Drop a site. Auto-runs scan, RDAP, scrape, enrichment, then writes the opener.' },
+  { key: 'ai-detect',           name: 'AI Writing Detector',                 href: '#',                     desc: 'Compare up to 5 writing samples. Per-sample AI scores, repeated patterns, same-author analysis. Auto-saves to your library.' },
   { key: 'business-diagnostic', name: 'Business Diagnostic Quiz',            href: '/business-diagnostic',  desc: '20 questions, score, full PDF, perfect demo asset.' },
   { key: 'sales-scripts',       name: 'Sales Script Generator',              href: '/sales-scripts',        desc: 'Custom cold-call & email scripts in seconds.' },
   { key: 'follow-up-plan',      name: 'Follow-Up Plan',                      href: '/follow-up-plan',       desc: '7-touch sequences tuned to a specific prospect.' },
