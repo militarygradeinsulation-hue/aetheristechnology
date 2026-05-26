@@ -15,6 +15,7 @@ interface Episode {
   voice_id: string | null; voice_name: string | null;
   audio_url: string | null; image_url: string | null;
   duration_seconds: number | null; created_at: string;
+  status?: string | null; error?: string | null;
 }
 
 const CATEGORIES = ['All', 'Revenue Leaks', 'Systems & Ops', 'AI / Practical', 'Sales & Pipeline', 'Founder POV', 'Industry-Specific'];
