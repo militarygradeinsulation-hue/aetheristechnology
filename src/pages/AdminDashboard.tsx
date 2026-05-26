@@ -677,7 +677,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
-                    {renderTabBody(tab)}
+                    <Suspense fallback={<PanelFallback />}>{renderTabBody(tab)}</Suspense>
                   </div>
                 </div>
               );
