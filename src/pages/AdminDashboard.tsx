@@ -114,6 +114,7 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
   { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
   { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
+  { key: 'podcast', label: 'Podcast Studio', description: 'Generate short-form podcast episodes in your ElevenLabs voice with auto-generated cover art. Topic ideas, paste/upload source, rewrite, save.', icon: Mic, featured: true, category: 'content' },
 ];
 
 interface ContactSubmission {
