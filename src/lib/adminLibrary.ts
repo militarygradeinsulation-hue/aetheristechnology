@@ -33,21 +33,37 @@ export async function saveToAdminLibrary(args: {
 }
 
 export async function listAdminLibrary(opts?: { toolType?: string; maxPages?: number }): Promise<AdminLibraryItem[]> {
-  const pageSize = 50;
-  const maxPages = opts?.maxPages ?? 10; // up to 500 most recent
-  const out: AdminLibraryItem[] = [];
-  for (let page = 0; page < maxPages; page++) {
+  const pageSize = 200; // server caps at 200
+  const maxPages = opts?.maxPages ?? 5; // up to 1000 most recent
+
+  // First page determines whether more exist
+  const fetchPage = async (page: number) => {
     const { data, error } = await supabase.functions.invoke("admin-library", {
       body: { action: "list", limit: pageSize, offset: page * pageSize, tool_type: opts?.toolType },
       headers: adminHeaders(),
     });
     if (error) throw error;
-    const items = (data?.items || []) as AdminLibraryItem[];
-    out.push(...items);
-    if (!data?.hasMore || items.length < pageSize) break;
+    return (data?.items || []) as AdminLibraryItem[];
+  };
+
+  const first = await fetchPage(0);
+  if (first.length < pageSize) return first;
+
+  // Fetch remaining pages in parallel; tolerate individual page failures so one
+  // slow/timed-out page can't stall the whole library.
+  const rest = await Promise.allSettled(
+    Array.from({ length: maxPages - 1 }, (_, i) => fetchPage(i + 1)),
+  );
+  const out = [...first];
+  for (const r of rest) {
+    if (r.status === "fulfilled") {
+      out.push(...r.value);
+      if (r.value.length < pageSize) break;
+    }
   }
   return out;
 }
+
 
 export async function updateAdminLibraryItem(id: string, output_data: unknown): Promise<AdminLibraryItem> {
   const { data, error } = await supabase.functions.invoke("admin-library", {
