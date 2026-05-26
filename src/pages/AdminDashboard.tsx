@@ -71,6 +71,7 @@ const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel'
 const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
 const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
 const AiWritingDetectorCard = lazy(() => import('@/components/admin/AiWritingDetectorCard').then(m => ({ default: m.AiWritingDetectorCard })));
+const ScamCheckCard = lazy(() => import('@/components/admin/ScamCheckCard').then(m => ({ default: m.ScamCheckCard })));
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
 
 const PanelFallback = () => (
