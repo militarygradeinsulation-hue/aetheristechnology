@@ -719,9 +719,32 @@ export const AiWritingDetectorCard: React.FC<{ repMode?: boolean }> = ({ repMode
 
   const deleteEntry = async (id: string) => {
     if (!confirm('Delete this saved scan?')) return;
-    const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
-    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
-    setLibrary((prev) => prev.filter((l) => l.id !== id));
+    try {
+      if (repMode) {
+        await deleteFromRepLibrary(id);
+      } else {
+        const { error } = await supabase.from('ai_detection_scans').delete().eq('id', id);
+        if (error) throw error;
+      }
+      setLibrary((prev) => prev.filter((l) => l.id !== id));
+    } catch (e: any) {
+      toast({ title: 'Delete failed', description: e?.message, variant: 'destructive' });
+    }
+  };
+
+  const openEntry = async (entry: LibraryEntry) => {
+    let full = entry;
+    if (repMode && (!entry.result || !entry.result.samples)) {
+      try {
+        const row = await getRepLibraryItem(entry.id);
+        full = { ...entry, result: ((row as any).output_data?.result || (row as any).output_data) as DetectResult };
+      } catch { /* fall through */ }
+    }
+    setResult(normalizeResult(full.result));
+    setSubjectName(full.subject_name);
+    setNotes(full.notes || '');
+    setExpanded(true);
+    setShowLibrary(false);
   };
 
   const openEntry = (entry: LibraryEntry) => {
