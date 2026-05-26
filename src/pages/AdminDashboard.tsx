@@ -71,6 +71,7 @@ const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel'
 const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
 const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
 const AiWritingDetectorCard = lazy(() => import('@/components/admin/AiWritingDetectorCard').then(m => ({ default: m.AiWritingDetectorCard })));
+const ScamCheckCard = lazy(() => import('@/components/admin/ScamCheckCard').then(m => ({ default: m.ScamCheckCard })));
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
 
 const PanelFallback = () => (
@@ -79,7 +80,7 @@ const PanelFallback = () => (
   </div>
 );
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect';
+type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
@@ -104,6 +105,7 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle, category: 'forensics' },
   { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText, category: 'forensics' },
   { key: 'ai_detect', label: 'AI Writing Detector', description: 'Compare up to 5 writing samples (text or screenshots) for AI authorship, same-author analysis, and forensic clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'scam_check', label: 'Scam / Legit Forensics', description: 'Investigate any website + business for scam signals. Pulls live RDAP domain age, redirect chain, SSL, and page copy, then returns a forensic verdict with cited clues.', icon: ScanSearch, category: 'forensics' },
   { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
   { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
@@ -972,6 +974,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
         {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
         {activeTool === 'ai_detect' && <AiWritingDetectorCard />}
+        {activeTool === 'scam_check' && <ScamCheckCard />}
 
         <div className="pt-8 mt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
