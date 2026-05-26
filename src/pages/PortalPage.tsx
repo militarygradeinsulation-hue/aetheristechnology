@@ -432,7 +432,7 @@ const PortalPage: React.FC = () => {
     { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
     { id: 'catalog', label: 'Catalog & Pricing', icon: <ShoppingCart className="w-4 h-4" />, iconCmp: ShoppingCart },
-    { id: 'onboarding', label: 'New-Rep Onboarding', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
+    { id: 'onboarding', label: 'Aetheris Academy', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'linkedin', label: 'Set Up LinkedIn', icon: <Linkedin className="w-4 h-4" />, iconCmp: Linkedin },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
