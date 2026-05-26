@@ -214,33 +214,62 @@ serve(async (req) => {
       if (!script) return json({ error: "script required" }, 400);
       if (!voiceId) return json({ error: "voiceId required" }, 400);
 
-      const audioBytes = await ttsToBytes(script, voiceId);
-      const stamp = Date.now();
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "episode";
-      const audioPath = `${stamp}-${slug}.mp3`;
-      const audioUrl = await uploadToBucket(supabase, audioPath, audioBytes, "audio/mpeg");
-
-      let imageUrl: string | null = null;
-      try {
-        const imgBytes = await generateCoverImage(title, topic || "");
-        const imgPath = `${stamp}-${slug}.png`;
-        imageUrl = await uploadToBucket(supabase, imgPath, imgBytes, "image/png");
-      } catch (e) {
-        console.error("cover image failed", e);
-      }
-
-      // Rough duration estimate: ~150 wpm
+      // Insert immediately with status='processing', then do TTS + image in background.
+      // This avoids hitting the edge-function CPU/wall-time limit on long episodes.
       const words = script.split(/\s+/).length;
       const duration = Math.round((words / 150) * 60);
-
       const { data: row, error } = await supabase.from("admin_podcasts").insert({
         title, topic, script, voice_id: voiceId, voice_name: voiceName,
-        audio_url: audioUrl, image_url: imageUrl, duration_seconds: duration,
-        source_type: sourceType, source_text: sourceText,
+        duration_seconds: duration, source_type: sourceType, source_text: sourceText,
+        status: "processing",
       }).select("*").single();
       if (error) throw new Error(`DB insert failed: ${error.message}`);
 
+      const episodeId = row.id as string;
+      const stamp = Date.now();
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "episode";
+
+      const work = (async () => {
+        try {
+          const audioBytes = await ttsToBytes(script, voiceId);
+          const audioUrl = await uploadToBucket(supabase, `${stamp}-${slug}.mp3`, audioBytes, "audio/mpeg");
+          await supabase.from("admin_podcasts").update({ audio_url: audioUrl }).eq("id", episodeId);
+
+          let imageUrl: string | null = null;
+          try {
+            const imgBytes = await generateCoverImage(title, topic || "");
+            imageUrl = await uploadToBucket(supabase, `${stamp}-${slug}.png`, imgBytes, "image/png");
+          } catch (e) { console.error("cover image failed", e); }
+
+          await supabase.from("admin_podcasts").update({
+            image_url: imageUrl, status: "ready", error: null,
+          }).eq("id", episodeId);
+        } catch (e) {
+          console.error("create_episode background failed", e);
+          await supabase.from("admin_podcasts").update({
+            status: "failed", error: e instanceof Error ? e.message : String(e),
+          }).eq("id", episodeId);
+        }
+      })();
+
+      // @ts-ignore EdgeRuntime is available in Supabase edge runtime
+      if (typeof EdgeRuntime !== "undefined" && (EdgeRuntime as any).waitUntil) {
+        // @ts-ignore
+        EdgeRuntime.waitUntil(work);
+      } else {
+        // fallback (shouldn't happen in prod)
+        work.catch(() => {});
+      }
+
       return json({ episode: row });
+    }
+
+    if (action === "get") {
+      const id = String(body.id || "");
+      if (!id) return json({ error: "id required" }, 400);
+      const { data, error } = await supabase.from("admin_podcasts").select("*").eq("id", id).maybeSingle();
+      if (error) throw new Error(error.message);
+      return json({ episode: data });
     }
 
     if (action === "list") {
