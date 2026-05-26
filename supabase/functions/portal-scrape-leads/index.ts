@@ -172,11 +172,19 @@ serve(async (req) => {
         } : {}),
       })).filter((r) => r.business_name && r.website);
 
-      const { data, error } = await supabase.from("rep_leads")
-        .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
-        .select("id");
-      if (error) throw error;
-      inserted = data?.length || 0;
+      // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
+      const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
+      let fresh = rows;
+      if (extIds.length > 0) {
+        const { data: existing } = await supabase.from("rep_leads").select("external_id").in("external_id", extIds);
+        const have = new Set((existing || []).map((r: any) => r.external_id));
+        fresh = rows.filter(r => !r.external_id || !have.has(r.external_id));
+      }
+      if (fresh.length > 0) {
+        const { data, error } = await supabase.from("rep_leads").insert(fresh).select("id");
+        if (error) throw error;
+        inserted = data?.length || 0;
+      }
 
       try {
         const { data: rep } = await supabase.from("rep_codes").select("rep_name").eq("code", claims.code).maybeSingle();

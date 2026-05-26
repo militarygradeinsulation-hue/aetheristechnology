@@ -176,16 +176,23 @@ serve(async (req) => {
         location: l.location?.slice(0, 200) || location,
         score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
         why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: "firecrawl_indianapolis",
+        source: "admin_scrape",
         external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
         status: "new",
       })).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
 
-      const { data, error } = await supabase.from("rep_leads")
-        .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
-        .select("id");
-      if (error) throw error;
-      inserted = data?.length || 0;
+      // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
+      const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
+      if (extIds.length > 0) {
+        const { data: existing } = await supabase.from("rep_leads").select("external_id").in("external_id", extIds);
+        const have = new Set((existing || []).map((r: any) => r.external_id));
+        const fresh = rows.filter(r => r.external_id && !have.has(r.external_id));
+        if (fresh.length > 0) {
+          const { data, error } = await supabase.from("rep_leads").insert(fresh).select("id");
+          if (error) throw error;
+          inserted = data?.length || 0;
+        }
+      }
     }
 
     return new Response(JSON.stringify({ ok: true, inserted, leads }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
