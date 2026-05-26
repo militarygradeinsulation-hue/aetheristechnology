@@ -222,7 +222,7 @@ serve(async (req) => {
     }
 
     if (action === "generate_script") {
-      const out = await generateScript(String(body.topic || ""), String(body.source || ""), Number(body.durationMin) || 5);
+      const out = await generateScript(String(body.topic || ""), String(body.source || ""), Number(body.durationMin) || 5, body.expressive !== false);
       return json(out);
     }
 
