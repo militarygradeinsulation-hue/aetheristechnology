@@ -8,6 +8,7 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
@@ -217,6 +218,11 @@ const LeakLanderPage: React.FC = () => {
               <ArrowRight className="relative w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
             </a>
           </section>
+
+          {/* Forensic Revenue Recovery deck — carousel */}
+          <ForensicDeckCarousel />
+
+
 
           {/* What the hell do we do — instant answer */}
           <section
