@@ -40,7 +40,7 @@ const Home = () => {
       <SEOHead
         title="Revenue Systems for Specialty Manufacturers | Aetheris"
         description="For business owners who know something's wrong and are exhausted chasing the fix. Fixed-fee 21-day forensic diagnostic finds the $200K–$2M leaking from your CRM, sales follow-up, and operations."
-        path="/"
+        path="/home"
         keywords="business forensics, revenue diagnostic, exhausted business owner, CRM audit, sales operations, HubSpot Salesforce audit, Indianapolis, business owner burnout fix"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         faqs={faqs}
