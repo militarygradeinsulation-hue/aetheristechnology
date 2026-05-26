@@ -1,5 +1,8 @@
 project_id = "ihdjpxhcaiaixmqxyqoe"
 
+[functions.detective-prep]
+verify_jwt = false
+
 [functions.voice-chat]
 verify_jwt = false
 
