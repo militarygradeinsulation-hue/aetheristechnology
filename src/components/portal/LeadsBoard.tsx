@@ -801,6 +801,10 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
   const [assignToMe, setAssignToMe] = useState(true);
   const [running, setRunning] = useState(false);
 
+  // Paste-a-URL → instant lead
+  const [pasteUrl, setPasteUrl] = useState('');
+  const [pasteRunning, setPasteRunning] = useState(false);
+
   const run = async () => {
     setRunning(true);
     try {
@@ -825,88 +829,187 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
     } finally { setRunning(false); }
   };
 
+  const runPasteUrl = async () => {
+    const raw = pasteUrl.trim();
+    if (!raw) return;
+    setPasteRunning(true);
+    try {
+      const token = getPortalToken();
+      if (!token) throw new Error('Portal session expired, sign in again.');
+      const websiteUrl = raw.startsWith('http') ? raw : `https://${raw}`;
+      let host = '';
+      try { host = new URL(websiteUrl).hostname.replace(/^www\./, ''); } catch { /* noop */ }
+      const fallbackName = host.split('.').slice(0, -1).join('.').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || host || raw;
+
+      // 1) Pull whatever Firecrawl + RocketReach can find so we prefill the lead.
+      let prefill: any = {};
+      try {
+        const { data: prepData } = await supabase.functions.invoke('detective-prep', {
+          body: { website: websiteUrl, scan: false, firecrawl: true, rocketreach: true },
+          headers: { 'x-portal-token': token },
+        });
+        const fc = (prepData as any)?.firecrawl;
+        const rr = (prepData as any)?.rocketreach;
+        const fj = fc?.json || {};
+        prefill = {
+          business_name: fj.legal_name || fc?.metadata?.title || rr?.employer || fallbackName,
+          contact_name: rr?.name || (Array.isArray(fj.leadership) ? fj.leadership[0]?.name : null) || null,
+          email: rr?.best_email || (Array.isArray(fj.emails) ? fj.emails[0] : null) || null,
+          phone: rr?.phones?.[0]?.number || (Array.isArray(fj.phones) ? fj.phones[0] : null) || null,
+          industry: Array.isArray(fj.industries) ? fj.industries[0] : (industry || null),
+          location: fj.headquarters || (Array.isArray(fj.locations) ? fj.locations[0] : null) || location || null,
+          notes: fc?.summary || fj.description || null,
+        };
+      } catch {
+        prefill = { business_name: fallbackName };
+      }
+
+      const row = {
+        ...prefill,
+        website: websiteUrl,
+      };
+
+      const res = await portalLeads.upload([row]);
+      const inserted = (res as any)?.inserted || 0;
+      toast({
+        title: inserted > 0 ? `Lead created from ${host || 'URL'}` : 'Could not create lead',
+        description: inserted > 0
+          ? 'Prefilled with company info + contact. Open it to run a Deep Scan or Detective Mode.'
+          : 'The site may already exist as a lead, or the row was missing a name and email.',
+      });
+      if (inserted > 0) {
+        setPasteUrl('');
+        onScraped(true);
+      }
+    } catch (e) {
+      toast({ title: 'Could not create lead', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setPasteRunning(false);
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-display flex items-center gap-2">
-          <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode, AI Web Scraper
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label className="text-xs text-muted-foreground">Quick industries</Label>
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            {INDUSTRY_PRESETS.map(p => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setIndustry(p)}
-                className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
-                  industry === p
-                    ? 'bg-amber text-background border-amber'
-                    : 'border-border/50 text-muted-foreground hover:border-amber/40 hover:text-amber'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+    <div className="space-y-4">
+      {/* Paste a URL → instant lead */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display flex items-center gap-2">
+            <ExternalLink className="w-5 h-5 text-amber" /> Paste a URL, instant lead
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Drop any company website. We'll scrape it with Firecrawl + RocketReach, pull contact info,
+            and create a lead in your queue so the deep-scan and detective tools have something to chew on.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              value={pasteUrl}
+              onChange={(e) => setPasteUrl(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !pasteRunning && pasteUrl.trim()) runPasteUrl(); }}
+              placeholder="https://company.com"
+              className="flex-1"
+            />
+            <Button
+              onClick={runPasteUrl}
+              disabled={pasteRunning || !pasteUrl.trim()}
+              className="bg-amber text-background hover:bg-amber/90"
+            >
+              {pasteRunning
+                ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping…</>
+                : <><Sparkles className="w-4 h-4 mr-1" /> Scrape & create lead</>
+              }
+            </Button>
           </div>
-        </div>
+          <p className="text-xs text-muted-foreground italic">
+            Tip: works with any URL. We'll auto-fill business name, contact, email, phone and industry when we can find them.
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="grid sm:grid-cols-3 gap-3">
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display flex items-center gap-2">
+            <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode, AI Web Scraper
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <Label className="text-xs">Industry (optional)</Label>
-            <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+            <Label className="text-xs text-muted-foreground">Quick industries</Label>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {INDUSTRY_PRESETS.map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setIndustry(p)}
+                  className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                    industry === p
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border/50 text-muted-foreground hover:border-amber/40 hover:text-amber'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <Label className="text-xs">Location</Label>
-            <Input value={location} onChange={e => setLocation(e.target.value)} />
+
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div>
+              <Label className="text-xs">Industry (optional)</Label>
+              <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+            </div>
+            <div>
+              <Label className="text-xs">Location</Label>
+              <Input value={location} onChange={e => setLocation(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-xs">Count (3–25)</Label>
+              <Input type="number" min={3} max={25} value={count}
+                onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
+            </div>
           </div>
-          <div>
-            <Label className="text-xs">Count (3–25)</Label>
-            <Input type="number" min={3} max={25} value={count}
-              onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAssignToMe(true)}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Drop into my queue
+            </button>
+            <button
+              type="button"
+              onClick={() => setAssignToMe(false)}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                !assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Push to shared pool
+            </button>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setAssignToMe(true)}
-            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-              assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Drop into my queue
-          </button>
-          <button
-            type="button"
-            onClick={() => setAssignToMe(false)}
-            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-              !assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Push to shared pool
-          </button>
-        </div>
+          <Button onClick={run} disabled={running} className="bg-amber text-background hover:bg-amber/90">
+            {running
+              ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping & scoring...</>
+              : <><Crosshair className="w-4 h-4 mr-1" /> Run scrape</>
+            }
+          </Button>
 
-        <Button onClick={run} disabled={running} className="bg-amber text-background hover:bg-amber/90">
-          {running
-            ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping & scoring...</>
-            : <><Crosshair className="w-4 h-4 mr-1" /> Run scrape</>
-          }
-        </Button>
-
-        <p className="text-xs text-muted-foreground italic">
-          Tip: leave industry blank for a broad sweep of HubSpot/Salesforce-using SMBs in your location.
-        </p>
-      </CardContent>
-    </Card>
+          <p className="text-xs text-muted-foreground italic">
+            Tip: leave industry blank for a broad sweep of HubSpot/Salesforce-using SMBs in your location.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
+
 
 // ============================================================
 const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onChanged }) => {
