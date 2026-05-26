@@ -206,19 +206,48 @@ const LeakLanderPage: React.FC = () => {
               aria-expanded={whatOpen}
             >
               <HelpCircle className="w-4 h-4 text-crimson relative" />
-              <span className="relative font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What The Hell Do We Do?</span>
+              <span className="relative font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What the Hell Do You Actually Sell?</span>
               <ChevronDown className={`relative w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
             </button>
             {whatOpen && (
-              <div className="mt-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5 animate-fade-in">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Plain English</div>
-                <p className="font-forensic text-lg leading-snug text-foreground">
-                  We're <span className="text-amber italic">business forensics operators.</span> We pull your books, your CRM, your ops, and your sales motion apart and show you exactly where the money is{" "}
-                  <span className="text-crimson italic font-bold">leaking out</span> — usually $50K–$500K a year you can't see from the inside.
-                </p>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  No fluff decks. No "strategy sessions." A real diagnostic with a written report, exact dollar figures, and a fix list ranked by ROI. Then we help you plug them — or hand it off clean.
-                </p>
+              <div className="mt-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5 animate-fade-in text-left space-y-4">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Case File · Plain English</div>
+                <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                  What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
+                </h3>
+
+                <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
+                    I know what you're thinking
+                  </div>
+                  <p className="text-[14px] leading-relaxed text-foreground/85 italic">
+                    "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
+                  </p>
+                  <p className="text-[14px] leading-relaxed text-foreground/90 mt-2">
+                    I'd think the same thing. I <span className="text-amber">did</span> think the same thing — every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
+                  </p>
+                </div>
+
+                <div className="space-y-2.5 text-[15px] leading-relaxed text-foreground/85">
+                  <p>Most consultants sell services.</p>
+                  <p className="text-foreground font-semibold">We solve problems.</p>
+                  <p>
+                    We investigate every part of your business to find hidden revenue leaks, operational bottlenecks, wasted effort, missed opportunities, and growth barriers.
+                  </p>
+                  <p>
+                    Then we quantify the impact, prioritize the fixes, and build the systems needed to solve them.
+                  </p>
+                  <p className="font-mono text-xs uppercase tracking-widest text-amber/90">
+                    Marketing. AI. Automation. CRM. Websites. Operations. Sales.
+                  </p>
+                  <p className="italic text-foreground/75">Those are just tools.</p>
+                  <p>
+                    The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
+                  </p>
+                  <p className="border-l-2 border-crimson/60 pl-3 font-forensic text-base md:text-lg text-foreground">
+                    Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
+                  </p>
+                </div>
               </div>
             )}
           </section>
