@@ -135,9 +135,31 @@ export const AdminPodcastStudio: React.FC = () => {
         sourceType: source ? 'paste/upload' : 'topic',
         sourceText: source || null,
       });
-      toast({ title: 'Episode created', description: episode.title });
+      toast({ title: 'Generating episode…', description: 'Audio + cover art are rendering in the background.' });
       setScript(''); setTitle(''); setSource('');
       setEpisodes(prev => [episode, ...prev]);
+
+      // Poll until ready or failed (max ~5 min).
+      const id = episode.id;
+      let tries = 0;
+      const poll = async () => {
+        tries++;
+        try {
+          const { episode: ep } = await call<{ episode: Episode }>('get', { id });
+          if (!ep) return;
+          setEpisodes(prev => prev.map(p => p.id === id ? ep : p));
+          if (ep.status === 'ready') {
+            toast({ title: 'Episode ready', description: ep.title });
+            return;
+          }
+          if (ep.status === 'failed') {
+            toast({ title: 'Episode failed', description: ep.error || 'Unknown error', variant: 'destructive' });
+            return;
+          }
+        } catch { /* ignore transient */ }
+        if (tries < 150) setTimeout(poll, 2000);
+      };
+      setTimeout(poll, 2000);
     } catch (e) {
       toast({ title: 'Episode failed', description: (e as Error).message, variant: 'destructive' });
     } finally { setEpisodeLoading(false); }
