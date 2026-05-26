@@ -273,6 +273,54 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_podcasts: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          image_url: string | null
+          script: string
+          source_text: string | null
+          source_type: string | null
+          title: string
+          topic: string | null
+          updated_at: string
+          voice_id: string | null
+          voice_name: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          script: string
+          source_text?: string | null
+          source_type?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string
+          voice_id?: string | null
+          voice_name?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          script?: string
+          source_text?: string | null
+          source_type?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          voice_id?: string | null
+          voice_name?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
