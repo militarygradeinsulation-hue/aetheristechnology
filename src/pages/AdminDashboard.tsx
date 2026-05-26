@@ -220,7 +220,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'submissions', label: 'Leads', icon: Inbox },
     { key: 'library', label: 'Library', icon: Library },
     { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
-    { key: 'onboarding', label: 'New-Rep Onboarding', icon: GraduationCap },
+    { key: 'onboarding', label: 'Aetheris Academy', icon: GraduationCap },
     { key: 'news', label: 'News', icon: Newspaper },
     { key: 'outlook', label: 'Outlook Sync', icon: Send },
     { key: 'overview', label: 'Overview', icon: BarChart3 },

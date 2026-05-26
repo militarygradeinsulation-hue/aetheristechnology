@@ -223,7 +223,7 @@ export const AdminOnboardingStudio: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5" /> New Rep Onboarding Studio
+              <GraduationCap className="w-5 h-5" /> Aetheris Academy Studio
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               Auto-generate {ONBOARDING_CURRICULUM.length} narrated training videos. Edit transcripts, save, delete, or download per-module.
