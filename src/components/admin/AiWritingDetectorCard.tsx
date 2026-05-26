@@ -565,7 +565,7 @@ type LibraryEntry = {
   created_at: string;
 };
 
-export const AiWritingDetectorCard: React.FC = () => {
+export const AiWritingDetectorCard: React.FC<{ repMode?: boolean }> = ({ repMode = false }) => {
   const [samples, setSamples] = useState<Sample[]>([newSample()]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DetectResult | null>(null);
@@ -580,13 +580,31 @@ export const AiWritingDetectorCard: React.FC = () => {
   const loadLibrary = async () => {
     setLibBusy(true);
     try {
-      const { data, error } = await supabase
-        .from('ai_detection_scans')
-        .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      setLibrary((data || []) as any);
+      if (repMode) {
+        const items = await listRepLibrary({ tool_type: 'ai_detect' });
+        // Map rep_library rows into LibraryEntry shape (full row stored in input_data/output_data)
+        const mapped: LibraryEntry[] = items.map((r: any) => ({
+          id: r.id,
+          subject_name: r.title || 'Untitled',
+          notes: r.input_data?.notes || null,
+          sample_count: r.input_data?.sample_count || 0,
+          overall_score: r.input_data?.overall_score ?? null,
+          overall_verdict: r.input_data?.overall_verdict ?? null,
+          same_author: r.input_data?.same_author ?? null,
+          samples: r.input_data?.samples || [],
+          result: (r.output_data?.result || r.output_data) as DetectResult,
+          created_at: r.created_at,
+        }));
+        setLibrary(mapped);
+      } else {
+        const { data, error } = await supabase
+          .from('ai_detection_scans')
+          .select('id,subject_name,notes,sample_count,overall_score,overall_verdict,same_author,samples,result,created_at')
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (error) throw error;
+        setLibrary((data || []) as any);
+      }
     } catch (e: any) {
       toast({ title: 'Could not load library', description: e?.message, variant: 'destructive' });
     } finally {
