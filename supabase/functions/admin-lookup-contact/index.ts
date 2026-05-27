@@ -1,245 +1,209 @@
-// Admin: look up a contact by phone, email, name, or company.
-// Searches local tables first, then RocketReach as a fallback.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token",
 };
-const json = (b: unknown, s = 200) =>
-  new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const RR_BASE = "https://api.rocketreach.co/api/v2";
+async function verifyAdminToken(token: string | null, secret: string): Promise<boolean> {
+  if (!token) return false;
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+  const [expStr, sig] = parts;
+  const exp = Number(expStr);
+  if (!Number.isFinite(exp) || exp < Date.now()) return false;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const adminPin = Deno.env.get("ADMIN_PIN");
+  if (!adminPin) return false;
+  const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(`${adminPin}.${exp}`));
+  const expected = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  if (expected.length !== sig.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+  return mismatch === 0;
+}
 
-function normPhone(p: string): string {
-  return (p || "").replace(/\D/g, "");
+interface Candidate {
+  business_name?: string;
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  title?: string;
+  linkedin?: string;
+  confidence: number;
+  why: string;
+  sources: string[];
+}
+
+async function firecrawlSearch(query: string, apiKey: string, limit = 8) {
+  const res = await fetch("https://api.firecrawl.dev/v2/search", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query, limit, scrapeOptions: { formats: ["markdown"] } }),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const items = Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.web) ? data.data.web : [];
+  return items.map((r: any) => ({
+    url: r?.url || "",
+    title: r?.title || "",
+    description: r?.description || "",
+    markdown: (r?.markdown || "").substring(0, 3500),
+  }));
+}
+
+async function aiExtract(searchResults: any[], rawQuery: string, apiKey: string): Promise<Candidate[]> {
+  if (!searchResults.length) return [];
+  const context = searchResults
+    .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.description}\n${r.markdown}`)
+    .join("\n\n---\n\n")
+    .substring(0, 28000);
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        {
+          role: "system",
+          content: "You are a B2B contact research analyst. Given a raw query (could be a name, email, phone, company, or fragment) and web search results, extract the most likely real-person contact match(es). Be conservative — return only candidates with reasonable evidence in the sources. Never fabricate emails or phones; only include them if they appear in the source text.",
+        },
+        {
+          role: "user",
+          content: `Raw query: "${rawQuery}"\n\nFrom these search results, identify up to 3 candidate contacts that match. For each: include contact_name, business_name, email, phone, website, title (job title), linkedin URL, industry, location, confidence (0-100), why (one sentence citing evidence), and sources (array of result URLs that support this match).\n\n${context}`,
+        },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "return_candidates",
+          description: "Return matched contact candidates",
+          parameters: {
+            type: "object",
+            properties: {
+              candidates: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    business_name: { type: "string" },
+                    contact_name: { type: "string" },
+                    email: { type: "string" },
+                    phone: { type: "string" },
+                    website: { type: "string" },
+                    title: { type: "string" },
+                    linkedin: { type: "string" },
+                    industry: { type: "string" },
+                    location: { type: "string" },
+                    confidence: { type: "number" },
+                    why: { type: "string" },
+                    sources: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["confidence", "why"],
+                },
+              },
+            },
+            required: ["candidates"],
+          },
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "return_candidates" } },
+    }),
+  });
+
+  if (!res.ok) {
+    console.error("AI gateway error:", res.status, await res.text());
+    return [];
+  }
+  const data = await res.json();
+  const call = data?.choices?.[0]?.message?.tool_calls?.[0];
+  if (!call) return [];
+  try {
+    const args = JSON.parse(call.function.arguments);
+    return Array.isArray(args.candidates) ? args.candidates : [];
+  } catch {
+    return [];
+  }
 }
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
-    const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const ok = await verifyAdminToken(getAdminTokenFromRequest(req), secret);
-    if (!ok) return json({ error: "Unauthorized" }, 401);
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminToken = req.headers.get("x-admin-token");
+    if (!await verifyAdminToken(adminToken, serviceKey)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     const body = await req.json().catch(() => ({}));
-    const phoneRaw = String(body.phone || "").trim();
-    const email = String(body.email || "").trim().toLowerCase();
-    const name = String(body.name || "").trim();
-    const company = String(body.company || "").trim();
-    const linkedin = String(body.linkedin || "").trim();
-    const useRocketReach = body.skipRocketReach !== true;
+    const action = String(body.action || "lookup");
+    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
 
-    if (!phoneRaw && !email && !name && !company && !linkedin) {
-      return json({ error: "Provide phone, email, name, company, or linkedin." }, 400);
-    }
-
-    const phoneDigits = normPhone(phoneRaw);
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, secret);
-
-    const matches: any[] = [];
-    const seen = new Set<string>();
-    const addMatch = (source: string, row: any, label: string) => {
-      const key = `${source}:${row.id || row.email || row.phone || JSON.stringify(row).slice(0, 80)}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      matches.push({ source, label, data: row });
-    };
-
-    // Build OR filters per table
-    const phoneLike = phoneDigits ? `%${phoneDigits.slice(-7)}%` : null;
-
-    // customers
-    {
-      const filters: string[] = [];
-      if (email) filters.push(`email.ilike.${email}`);
-      if (phoneLike) filters.push(`phone.ilike.${phoneLike}`);
-      if (name) filters.push(`name.ilike.%${name}%`);
-      if (filters.length) {
-        const { data } = await supabase.from("customers").select("*").or(filters.join(",")).limit(10);
-        (data || []).forEach((r: any) => addMatch("customers", r, r.name || r.email || "Customer"));
+    if (action === "lookup") {
+      const query = String(body.query || "").trim();
+      if (!query) return new Response(JSON.stringify({ error: "query required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (!firecrawlKey || !lovableKey) {
+        return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-    }
-    // drip_prospects
-    {
-      const filters: string[] = [];
-      if (email) filters.push(`email.ilike.${email}`);
-      if (name) filters.push(`business_name.ilike.%${name}%`);
-      if (company) filters.push(`business_name.ilike.%${company}%`);
-      if (filters.length) {
-        const { data } = await supabase.from("drip_prospects").select("*").or(filters.join(",")).limit(10);
-        (data || []).forEach((r: any) => addMatch("drip_prospects", r, r.business_name || r.email || "Drip lead"));
+
+      const isEmail = /@/.test(query);
+      const isPhone = /^[\d\s()+\-.]{7,}$/.test(query);
+      const queries = isEmail
+        ? [`"${query}"`, `"${query}" linkedin`, `"${query}" company`]
+        : isPhone
+        ? [`"${query}"`, `"${query}" business contact`]
+        : [`"${query}" contact email`, `"${query}" linkedin`, `"${query}" company`];
+
+      const allResults: any[] = [];
+      for (const q of queries) {
+        const r = await firecrawlSearch(q, firecrawlKey, 5);
+        allResults.push(...r);
+        if (allResults.length >= 12) break;
       }
-    }
-    // rep_leads
-    {
-      const filters: string[] = [];
-      if (email) filters.push(`email.ilike.${email}`);
-      if (phoneLike) filters.push(`phone.ilike.${phoneLike}`);
-      if (name) filters.push(`contact_name.ilike.%${name}%`);
-      if (company) filters.push(`business_name.ilike.%${company}%`);
-      if (filters.length) {
-        const { data } = await supabase.from("rep_leads").select("*").or(filters.join(",")).limit(10);
-        (data || []).forEach((r: any) => addMatch("rep_leads", r, r.business_name || r.contact_name || r.email || "Rep lead"));
-      }
-    }
-    // crm_contacts
-    {
-      const filters: string[] = [];
-      if (email) filters.push(`email.ilike.${email}`);
-      if (phoneLike) filters.push(`phone.ilike.${phoneLike}`);
-      if (name) filters.push(`full_name.ilike.%${name}%`);
-      if (filters.length) {
-        const { data } = await supabase.from("crm_contacts").select("*").or(filters.join(",")).limit(10);
-        (data || []).forEach((r: any) => addMatch("crm_contacts", r, r.full_name || r.email || "CRM contact"));
-      }
-    }
-    // careers_applications
-    {
-      const filters: string[] = [];
-      if (email) filters.push(`candidate_email.ilike.${email}`);
-      if (phoneLike) filters.push(`candidate_phone.ilike.${phoneLike}`);
-      if (name) filters.push(`candidate_name.ilike.%${name}%`);
-      if (filters.length) {
-        const { data } = await supabase
-          .from("careers_applications")
-          .select("id,candidate_name,candidate_email,candidate_phone,position,status,created_at")
-          .or(filters.join(","))
-          .limit(10);
-        (data || []).forEach((r: any) => addMatch("careers_applications", r, `Applicant: ${r.candidate_name || r.candidate_email}`));
-      }
-    }
-    // webinar_registrations
-    if (email || name) {
-      const filters: string[] = [];
-      if (email) filters.push(`email.ilike.${email}`);
-      if (name) filters.push(`name.ilike.%${name}%`);
-      const { data } = await supabase
-        .from("webinar_registrations")
-        .select("id,name,email,rep_code,created_at,webinar_id")
-        .or(filters.join(","))
-        .limit(10);
-      (data || []).forEach((r: any) => addMatch("webinar_registrations", r, `Webinar: ${r.name || r.email}`));
+      // dedupe by url
+      const seen = new Set<string>();
+      const unique = allResults.filter(r => r.url && !seen.has(r.url) && seen.add(r.url));
+
+      const candidates = await aiExtract(unique, query, lovableKey);
+      return new Response(JSON.stringify({ ok: true, candidates, searched: unique.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // RocketReach lookup
-    let rocketreach: any = null;
-    let rrError: string | null = null;
-    if (useRocketReach) {
-      const RR_KEY = Deno.env.get("ROCKETREACH_API_KEY");
-      if (!RR_KEY) {
-        rrError = "RocketReach not configured";
-      } else {
-        const headers = { "Api-Key": RR_KEY, "Content-Type": "application/json" };
-        try {
-          let person: any = null;
-          // 1. Email lookup (most precise)
-          if (email) {
-            const r = await fetch(`${RR_BASE}/person/lookup?email=${encodeURIComponent(email)}`, { headers });
-            const raw = await r.json().catch(() => null);
-            if (r.ok && raw && (raw.id || raw.name)) person = raw;
-          }
-          // 2. LinkedIn URL lookup
-          if (!person && linkedin) {
-            const r = await fetch(`${RR_BASE}/person/lookup?li_url=${encodeURIComponent(linkedin)}`, { headers });
-            const raw = await r.json().catch(() => null);
-            if (r.ok && raw && (raw.id || raw.name)) person = raw;
-          }
-          // 3. Name + company
-          if (!person && name && company) {
-            const params = new URLSearchParams({ name, current_employer: company });
-            const r = await fetch(`${RR_BASE}/person/lookup?${params.toString()}`, { headers });
-            const raw = await r.json().catch(() => null);
-            if (r.ok && raw && (raw.id || raw.name)) person = raw;
-          }
-          // 4. Phone search (RocketReach search supports phone in query)
-          let phoneResults: any[] = [];
-          if (phoneDigits.length >= 7) {
-            const r = await fetch(`${RR_BASE}/search`, {
-              method: "POST",
-              headers,
-              body: JSON.stringify({
-                query: { phone: [phoneDigits] },
-                start: 1,
-                page_size: 5,
-              }),
-            });
-            const sraw = await r.json().catch(() => null);
-            if (r.ok && Array.isArray(sraw?.profiles)) {
-              phoneResults = sraw.profiles;
-              if (!person && phoneResults[0]) person = phoneResults[0];
-            }
-          }
-          // 5. Generic name/company search
-          let otherProfiles: any[] = [];
-          if (!person && (name || company)) {
-            const r = await fetch(`${RR_BASE}/search`, {
-              method: "POST",
-              headers,
-              body: JSON.stringify({
-                query: {
-                  ...(name ? { name: [name] } : {}),
-                  ...(company ? { current_employer: [company] } : {}),
-                },
-                start: 1,
-                page_size: 5,
-              }),
-            });
-            const sraw = await r.json().catch(() => null);
-            if (r.ok && Array.isArray(sraw?.profiles)) {
-              otherProfiles = sraw.profiles;
-              if (!person && otherProfiles[0]) person = otherProfiles[0];
-            }
-          }
-
-          if (person) {
-            rocketreach = {
-              id: person.id,
-              name: person.name,
-              title: person.current_title || person.normalized_title,
-              employer: person.current_employer,
-              location: [person.city, person.region, person.country].filter(Boolean).join(", "),
-              linkedin_url: person.linkedin_url,
-              profile_pic: person.profile_pic,
-              emails: (person.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid })),
-              phones: (person.phones || []).map((p: any) => ({ number: p.number, type: p.type })),
-              job_history: (person.job_history || []).slice(0, 5).map((j: any) => ({
-                title: j.title, company_name: j.company_name, start_date: j.start_date, end_date: j.end_date,
-              })),
-              links: person.links || {},
-              additional: [...phoneResults, ...otherProfiles]
-                .filter((p) => p && p.id !== person.id)
-                .slice(0, 4)
-                .map((p: any) => ({
-                  id: p.id,
-                  name: p.name,
-                  title: p.current_title,
-                  employer: p.current_employer,
-                  linkedin_url: p.linkedin_url,
-                  emails: (p.emails || []).slice(0, 2).map((e: any) => e.email),
-                  phones: (p.phones || []).slice(0, 2).map((ph: any) => ph.number),
-                })),
-            };
-          }
-        } catch (e) {
-          rrError = e instanceof Error ? e.message : String(e);
-        }
+    if (action === "add") {
+      const c = body.candidate || {};
+      if (!c.business_name && !c.contact_name && !c.email) {
+        return new Response(JSON.stringify({ error: "candidate needs at least business_name, contact_name, or email" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
+      const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+      const row = {
+        business_name: (c.business_name || c.contact_name || "Unknown").slice(0, 200),
+        contact_name: c.contact_name?.slice(0, 200) || null,
+        email: c.email?.toLowerCase().slice(0, 200) || null,
+        phone: c.phone?.slice(0, 50) || null,
+        website: c.website?.slice(0, 500) || null,
+        industry: c.industry?.slice(0, 100) || null,
+        location: c.location?.slice(0, 200) || null,
+        score: Math.max(0, Math.min(100, Math.round(Number(c.confidence) || 50))),
+        why_fit: (c.why || "Manual contact lookup").slice(0, 1000),
+        source: "admin_lookup",
+        status: "new",
+        notes: c.title || c.linkedin ? `${c.title || ""}${c.title && c.linkedin ? " · " : ""}${c.linkedin || ""}`.slice(0, 1000) : null,
+      };
+      const { data, error } = await supabase.from("rep_leads").insert(row).select("id").single();
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, id: data.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    return json({
-      ok: true,
-      query: { phone: phoneRaw, email, name, company, linkedin },
-      local_matches: matches,
-      rocketreach,
-      rocketreach_error: rrError,
-    });
+    return new Response(JSON.stringify({ error: "unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("admin-lookup-contact error:", e);
-    return json({ error: e instanceof Error ? e.message : "Server error" }, 500);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

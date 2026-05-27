@@ -6,7 +6,22 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Sparkles, Trash2, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, Trash2, RefreshCw, Search, UserPlus, ExternalLink } from 'lucide-react';
+
+interface LookupCandidate {
+  business_name?: string;
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  title?: string;
+  linkedin?: string;
+  industry?: string;
+  location?: string;
+  confidence: number;
+  why: string;
+  sources?: string[];
+}
 
 interface AdminLead {
   id: string;
@@ -30,6 +45,59 @@ export const LeadScraperPanel: React.FC = () => {
   const [running, setRunning] = useState(false);
   const [recent, setRecent] = useState<AdminLead[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Contact lookup state
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupRunning, setLookupRunning] = useState(false);
+  const [lookupResults, setLookupResults] = useState<LookupCandidate[] | null>(null);
+  const [addingIdx, setAddingIdx] = useState<number | null>(null);
+
+  const runLookup = async () => {
+    const q = lookupQuery.trim();
+    if (!q) return;
+    setLookupRunning(true);
+    setLookupResults(null);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-lookup-contact', {
+        body: { action: 'lookup', query: q },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setLookupResults((data?.candidates || []) as LookupCandidate[]);
+      if (!data?.candidates?.length) toast({ title: 'No matches found', description: 'Try a different name, email, or company.' });
+    } catch (e) {
+      toast({ title: 'Lookup failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setLookupRunning(false);
+    }
+  };
+
+  const addCandidate = async (idx: number) => {
+    const c = lookupResults?.[idx];
+    if (!c) return;
+    setAddingIdx(idx);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-lookup-contact', {
+        body: { action: 'add', candidate: c },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Added to lead pool' });
+      setLookupResults(prev => (prev ? prev.filter((_, i) => i !== idx) : prev));
+      load();
+    } catch (e) {
+      toast({ title: 'Add failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setAddingIdx(null);
+    }
+  };
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -89,7 +157,87 @@ export const LeadScraperPanel: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Contact Lookup */}
+      <Card className="border-amber/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-display">
+            <Search className="w-5 h-5 text-amber" /> Find a Contact
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Paste a name, email, phone number, or company. AI scrapes the web for their contact info — review the matches, then add the ones you want to the lead pool.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              value={lookupQuery}
+              onChange={e => setLookupQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !lookupRunning) runLookup(); }}
+              placeholder="e.g. Jane Smith Acme Corp, jane@acme.com, (317) 555-1234"
+              className="flex-1"
+            />
+            <Button onClick={runLookup} disabled={lookupRunning || !lookupQuery.trim()} className="bg-amber text-background hover:bg-amber/90">
+              {lookupRunning ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Searching...</> : <><Search className="w-4 h-4 mr-1" /> Search web</>}
+            </Button>
+          </div>
+
+          {lookupResults && lookupResults.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground font-mono">
+                {lookupResults.length} candidate{lookupResults.length === 1 ? '' : 's'} found
+              </p>
+              {lookupResults.map((c, idx) => (
+                <div key={idx} className="p-3 rounded-lg border border-border bg-secondary/30 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-foreground">{c.contact_name || c.business_name || 'Unknown'}</span>
+                        {c.title && <span className="text-xs text-muted-foreground">· {c.title}</span>}
+                        <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-amber/15 text-amber">conf {c.confidence}</span>
+                      </div>
+                      {c.business_name && c.contact_name && (
+                        <div className="text-sm text-muted-foreground">{c.business_name}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                        {c.email && <div>📧 {c.email}</div>}
+                        {c.phone && <div>📞 {c.phone}</div>}
+                        {c.website && <div>🌐 {c.website}</div>}
+                        {(c.industry || c.location) && <div>{[c.industry, c.location].filter(Boolean).join(' · ')}</div>}
+                        {c.linkedin && (
+                          <a href={c.linkedin} target="_blank" rel="noreferrer" className="text-amber hover:underline inline-flex items-center gap-1">
+                            LinkedIn <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                      <p className="text-xs text-foreground/80 mt-2 italic">{c.why}</p>
+                      {c.sources && c.sources.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {c.sources.slice(0, 3).map((s, i) => (
+                            <a key={i} href={s} target="_blank" rel="noreferrer" className="text-[10px] text-muted-foreground hover:text-amber underline truncate max-w-[200px]">
+                              src {i + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => addCandidate(idx)}
+                      disabled={addingIdx === idx}
+                      className="bg-amber text-background hover:bg-amber/90 shrink-0"
+                    >
+                      {addingIdx === idx ? <Loader2 className="w-4 h-4 animate-spin" /> : <><UserPlus className="w-4 h-4 mr-1" /> Add to leads</>}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-display">
             <Sparkles className="w-5 h-5 text-amber" /> Lead Scraper → Rep Pool
