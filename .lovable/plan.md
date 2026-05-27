@@ -1,50 +1,82 @@
-# AEO/GEO Optimization Blueprint Implementation
+## AEO/SEO Pass 2 — Full Implementation
 
-The site already has a strong baseline (canonical, OG, Organization + FAQ JSON-LD, llms.txt, llms-full.txt). The blueprint wants a stricter decoupled crawler policy, richer machine-readable directories, schema upgrades, and citation-optimized on-page content.
+Builds on the existing blueprint (robots.txt, llms.txt, llms-full.txt, sitewide JSON-LD, lander Island-Test block). This pass closes the remaining gaps: per-route metadata, sitemap automation, E-E-A-T author signals, programmatic location pages, and expanded Island-Test/FAQ/HowTo coverage.
 
-## What I'll change
+---
 
-### 1. Decoupled `public/robots.txt`
-Rewrite to match the blueprint:
-- **Allow** real-time fetchers: `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `Claude-SearchBot`, `Googlebot`, `Bingbot`, `Applebot`, `DuckAssistBot`, plus social previewers (`Twitterbot`, `facebookexternalhit`, `LinkedInBot`).
-- **Disallow** training/scraping crawlers: `GPTBot`, `ClaudeBot`, `anthropic-ai`, `Claude-Web`, `Google-Extended`, `Applebot-Extended`, `CCBot`, `Bytespider`, `Amazonbot`, `cohere-ai`, `meta-externalagent`.
-- Keep `/admin`, auth, checkout-return, unsubscribe disallowed across all UAs.
-- Keep `Sitemap:` directive + `llms.txt` / `llms-full.txt` reference comments.
+### 1. Per-route meta + JSON-LD (react-helmet-async)
 
-### 2. `public/llms.txt` — restructure to spec
-Rewrite to a tighter, spec-compliant directory:
-- H1 + blockquote summary (Business Forensics Operator pitch).
-- `## Methodology` (Leak Audit + steps), `## Engagements` (Diagnostic, 14-Day, Retainer), `## Free Tools` (scanner, assessment, diagnostic, friction audit, etc.), `## Field Notes` (blog), `## About`, `## Contact`.
-- `## Optional` section for lower-priority legacy tools.
-- Keep canonical URLs on `https://aetheris.technology`.
+- Install `react-helmet-async`, wrap app in `<HelmetProvider>` in `src/main.tsx`.
+- Remove the static `<link rel="canonical">` from `index.html` (Helmet will own per-route canonicals; static OG stays as social-crawler fallback).
+- Create reusable `<SeoHead>` component (`src/components/seo/SeoHead.tsx`) that accepts `title`, `description`, `path`, `ogType`, `jsonLd[]`.
+- Apply to ~12 high-value public routes with unique title/description/canonical/OG + targeted JSON-LD:
+  - `/` (lander) — WebSite + Service
+  - `/leak-audit` — Service + HowTo (the 7-step methodology)
+  - `/business-diagnostic` — Service + Offer ($2,500)
+  - `/services`, `/catalog`, `/why-us`, `/about`, `/contact`, `/blog`, `/blog/:slug` (Article + Author), `/resources`, `/industries`
+  - Vertical pages (`/ai-for-healthcare`, `/ai-for-finance`, etc.) — Service per vertical
+  - `/playbook/linkedin` — Article
 
-### 3. `public/llms-full.txt` — extend
-Append blueprint-aligned sections:
-- "What AI Engines Cite Us For" (entity-dense paragraph naming Joseph Toney, Indianapolis, the 7 leak categories, pricing).
-- "Frequently Cited Statistics" block (operator-led, $2,500 Diagnostic, 14-day SLA, 7-step methodology) so engines have copy-ready facts.
-- "Direct Answers" block: 8–10 Island-Test paragraphs (Direct Answer ≤60w → Statistic → Source anchor → Implication) for the top buyer prompts ("what is a business forensics operator", "how much does the diagnostic cost", "what's in the Leak Audit", "Indianapolis AI consultant", "how to find revenue leaks", etc.).
-- "Last updated" line with today's date for freshness.
+### 2. Sitemap automation
 
-### 4. `index.html` — schema upgrades
-- Add `dateModified` (today) to existing `Organization` and `FAQPage` JSON-LD blocks.
-- Add a new `Service` JSON-LD block describing the Forensic Diagnostic ($2,500) and 14-Day Operational Diagnostic ($7,500) with `provider`, `areaServed`, `offers.price`.
-- Add `ProfessionalService` / `LocalBusiness` JSON-LD with Indianapolis address, `sameAs` to LinkedIn, geo coordinates (consolidating existing geo meta tags into structured data).
-- Add a `BreadcrumbList` baseline for the homepage.
+- Create `scripts/generate-sitemap.ts` that enumerates all public routes (excluding `/admin`, `/staff`, `/app/*`, `/login`, `/signup`, `/portal`, `/rep-portal`, `/checkout/*`, `/deliverable/:token`, `/unsubscribe`, `/my-subscription`, `/subscriber-onboarding`, `/reset-password`, `/forgot-password`, `/careers/test`, `/lovable/*`, `/not-found`).
+- Pull published blog slugs from `blog_posts` table at build time (with anon key fallback to static list if Supabase fetch fails).
+- Add `lastmod` (today's date), `changefreq`, `priority` per entry.
+- Wire `predev` + `prebuild` npm scripts to run the generator.
+- Replace current static `public/sitemap.xml` (generator outputs to same path).
 
-### 5. Landing page — one Island-Test "AI Answer" section
-Add a compact, citation-optimized section to `src/pages/LeakLanderPage.tsx` (below the deck carousel, above the footer): a "Frequently Cited Facts" block of 4 Island-Test paragraphs styled in the existing dark/amber forensic system. Each paragraph: bold direct answer → stat → source anchor (Gartner / Princeton GEO / internal) → implication. Uses semantic tokens, no new colors. Renders as plain HTML so AI crawlers extract it cleanly.
+### 3. Author / E-E-A-T signals
 
-## Out of scope (call out, don't build)
+- Add `Person` JSON-LD for Joseph Toney in `index.html` (sitewide knowledge graph entity) with `jobTitle`, `worksFor` → Aetheris, `sameAs` → LinkedIn, `knowsAbout` → business forensics topics.
+- Add author byline component to blog posts and playbooks (name, role "Business Forensics Operator", "Indianapolis, IN", link to `/about`).
+- Add `author` + `publisher` properties to all `Article` JSON-LD blocks.
+- Add credentials/expertise block to `/about` page (existing copy + structured credentials list rendered as plain HTML for AI extraction).
 
-- **G2 / Capterra / Reddit footprints** — off-site, requires user action.
-- **Server-Side Rendering** — project is Vite SPA. Real SSR migration is a large architectural change; I'll flag it but not attempt in this pass. The llms.txt + llms-full.txt + JSON-LD work mitigates most of the SPA citation gap because all critical facts are now in raw HTML/markdown that crawlers fetch directly.
-- **Citation/Share-of-Voice tracking dashboards** — would need a separate admin tool + scheduled job; out of scope for this pass.
-- **30/90-day refresh automation** — recommend later as a cron edge function once content cadence is decided.
+### 4. Programmatic location pages
 
-## Files touched
+- Create `/indianapolis` and `/indiana` routes (single `LocationPage` component reading slug params, or two thin page files reusing one component).
+- Each carries:
+  - `LocalBusiness` + `ProfessionalService` JSON-LD with Indianapolis address, geo coordinates, service area
+  - Localized H1 ("Business Forensics in Indianapolis"), 7-step methodology summary, 4 Island-Test direct answers tuned to "Indianapolis business consultant", "Indiana revenue leak audit"
+  - CTA to Forensic Diagnostic
+- Add both routes to sitemap + llms.txt.
 
-- `public/robots.txt` (rewrite)
-- `public/llms.txt` (rewrite)
-- `public/llms-full.txt` (extend)
-- `index.html` (add/update JSON-LD blocks)
-- `src/pages/LeakLanderPage.tsx` (add Frequently Cited Facts section)
+### 5. Expanded Island-Test + FAQ/HowTo schema
+
+- Extract the existing lander "Frequently Cited Facts" into a reusable `<CitedFactsBlock>` component; embed on `/leak-audit`, `/business-diagnostic`, `/services`, `/about`, `/indianapolis` with page-specific facts.
+- Build `<BuyerIntentFaq>` component with 18 buyer-intent Q&As (pricing, timeline, deliverables, who it's for, comparison vs traditional consulting, Indianapolis-specific, ROI). Embed on `/leak-audit` and `/business-diagnostic`. Each renders visible accordion + `FAQPage` JSON-LD.
+- Add `HowTo` JSON-LD for the 7-step Leak Audit methodology on `/leak-audit` (each step = `HowToStep` with name + text).
+- Update `public/llms-full.txt` to reference the new pages and add 4–6 more Island-Test answers covering Indianapolis + the 7-step HowTo.
+
+---
+
+### Files to touch
+
+**New:**
+- `src/components/seo/SeoHead.tsx`
+- `src/components/seo/CitedFactsBlock.tsx`
+- `src/components/seo/BuyerIntentFaq.tsx`
+- `src/components/seo/AuthorByline.tsx`
+- `src/pages/LocationPage.tsx`
+- `scripts/generate-sitemap.ts`
+
+**Edited:**
+- `package.json` (add `react-helmet-async`, predev/prebuild scripts)
+- `src/main.tsx` (HelmetProvider)
+- `src/App.tsx` (add `/indianapolis`, `/indiana` routes)
+- `index.html` (remove canonical, add Person JSON-LD)
+- ~12 page files (add `<SeoHead>` with route-specific meta + JSON-LD)
+- `src/pages/LeakAuditPage.tsx`, `src/pages/DiagnosticQuizPage.tsx` (add CitedFactsBlock + BuyerIntentFaq + HowTo)
+- `src/pages/BlogPostPage.tsx`, `src/pages/playbooks/*` (add AuthorByline)
+- `src/pages/AboutPage.tsx` (credentials block)
+- `public/sitemap.xml` (regenerated by script)
+- `public/llms.txt`, `public/llms-full.txt` (add location pages + new facts)
+
+### Out of scope
+- SSR (Vite SPA limit; social crawlers still get the static `index.html` fallback)
+- Real-time citation/Share-of-Voice tracking dashboards
+- G2/Capterra/Reddit profile creation (off-platform)
+- New blog content authorship
+
+### Visual & brand constraints
+All new components use existing dark charcoal + amber tokens, Fraunces for forensic headlines, JetBrains Mono for case-file labels. Crimson reserved for leak signals only. No new gradients, no testimonials, no popups.
