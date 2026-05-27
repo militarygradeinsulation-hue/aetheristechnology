@@ -104,6 +104,8 @@ export async function publishPlaybookToWebsite(args: {
   title: string;
   subtitle?: string;
   description?: string;
+  summary?: string;
+  toc?: string[];
   tags?: string[];
   file_url: string;
   icon_name?: string;

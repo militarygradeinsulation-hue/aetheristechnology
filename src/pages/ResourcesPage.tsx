@@ -32,6 +32,8 @@ const ResourcesPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
   const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
+  const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number>(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const { user } = useAuth();
@@ -65,7 +67,7 @@ const ResourcesPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('playbooks')
-        .select('id, title, subtitle, description, tags, file_url, icon_name, published_at')
+        .select('id, title, subtitle, description, summary, toc, tags, file_url, icon_name, published_at')
         .order('published_at', { ascending: true });
       if (error) throw error;
       return data;
@@ -262,11 +264,15 @@ const ResourcesPage = () => {
 
                   return (
                     <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                      <div className={`forensic-tile rounded-2xl p-8 border transition-all group h-full flex flex-col ${
-                        isUnlocked
-                          ? 'border-border hover:border-amber/30'
-                          : 'border-border/50 hover:border-primary/30'
-                      }`}>
+                      <button
+                        type="button"
+                        onClick={() => { setPreviewPlaybook(resource); setPreviewIndex(index); }}
+                        className={`forensic-tile rounded-2xl p-8 border transition-all group h-full w-full flex flex-col text-left ${
+                          isUnlocked
+                            ? 'border-border hover:border-amber/30'
+                            : 'border-border/50 hover:border-primary/30'
+                        }`}
+                      >
                         <div className="flex items-start gap-4 mb-4">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                             isUnlocked
@@ -280,7 +286,7 @@ const ResourcesPage = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
                               {isFree && (
                                 <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
@@ -301,21 +307,10 @@ const ResourcesPage = () => {
                             <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                           ))}
                         </div>
-                        <Button
-                          onClick={() => handlePlaybookAction(resource, index)}
-                          className={`w-full gap-2 ${
-                            isUnlocked
-                              ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                              : 'bg-secondary hover:bg-secondary/80 text-foreground border border-border'
-                          }`}
-                        >
-                          {isUnlocked ? (
-                            <><Download className="w-4 h-4" /> Download PDF</>
-                          ) : (
-                            <><ShoppingCart className="w-4 h-4" /> Unlock, $25</>
-                          )}
-                        </Button>
-                      </div>
+                        <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
+                          Preview what's inside <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </button>
                     </RevealOnScroll>
                   );
                 })}
@@ -324,8 +319,102 @@ const ResourcesPage = () => {
           </div>
         </section>
 
+        {/* Preview Modal */}
+        {previewPlaybook && (() => {
+          const pb: any = previewPlaybook;
+          const isFree = previewIndex < FREE_PLAYBOOK_COUNT;
+          const isPurchased = purchasedPlaybookIds?.has(pb.id);
+          const isUnlocked = isFree || isPurchased;
+          const IconC = ICON_MAP[pb.icon_name || 'FileText'] || FileText;
+          const toc: string[] = Array.isArray(pb.toc) ? pb.toc : [];
+          const summary: string = pb.summary || pb.description || '';
+          return (
+            <div
+              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setPreviewPlaybook(null)}
+            >
+              <div
+                className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-3 p-5 border-b border-border">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <IconC className="w-5 h-5 text-amber" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Playbook Preview</div>
+                      <h3 className="text-lg font-bold text-foreground font-display leading-tight">{pb.title}</h3>
+                      {pb.subtitle && <p className="text-sm text-muted-foreground mt-0.5">{pb.subtitle}</p>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setPreviewPlaybook(null)}
+                    aria-label="Close preview"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-auto p-5 space-y-5">
+                  <div>
+                    <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">What's Inside</h4>
+                    <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{summary}</p>
+                  </div>
+
+                  {toc.length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Table of Contents</h4>
+                      <ol className="space-y-1.5 list-decimal list-inside text-sm text-foreground/90">
+                        {toc.map((t, i) => (
+                          <li key={i} className="leading-snug">{t}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {(pb.tags || []).length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Topics</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(pb.tags || []).map((tag: string) => (
+                          <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-5 border-t border-border bg-background/40">
+                  <Button
+                    onClick={() => { handlePlaybookAction(pb, previewIndex); if (isUnlocked) setPreviewPlaybook(null); }}
+                    className={`w-full gap-2 ${
+                      isUnlocked
+                        ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                        : 'bg-amber hover:bg-amber/90 text-background font-semibold'
+                    }`}
+                  >
+                    {isUnlocked ? (
+                      <><Download className="w-4 h-4" /> Download Full PDF</>
+                    ) : (
+                      <><ShoppingCart className="w-4 h-4" /> Unlock Full Playbook, $25</>
+                    )}
+                  </Button>
+                  {!isUnlocked && (
+                    <p className="text-[11px] text-muted-foreground text-center mt-2">
+                      Instant download after checkout. One-time payment.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* On-Demand Playbook Generator */}
         <PlaybookTopicBrowser existingTitles={existingTitles} />
+
 
         <section className="pb-24 px-4">
           <div className="max-w-4xl mx-auto">
