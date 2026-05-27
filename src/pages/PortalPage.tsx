@@ -304,7 +304,7 @@ const PortalPage: React.FC = () => {
         setActiveTool(null);
       }
     }
-  }, [typeof window !== 'undefined' ? window.location.search : '']);
+  }, [location.search]);
 
 
   useEffect(() => {
