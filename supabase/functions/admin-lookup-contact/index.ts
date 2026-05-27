@@ -57,6 +57,33 @@ async function firecrawlSearch(query: string, apiKey: string, limit = 8) {
   }));
 }
 
+async function firecrawlScrape(url: string, apiKey: string) {
+  const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const md = data?.data?.markdown || data?.markdown || "";
+  const meta = data?.data?.metadata || data?.metadata || {};
+  if (!md) return null;
+  return {
+    url,
+    title: meta.title || "",
+    description: meta.description || "",
+    markdown: md.substring(0, 12000),
+  };
+}
+
+const URL_RE = /^(https?:\/\/|www\.)|\.(com|net|org|io|co|ai|us|biz|app|dev|tech|info|me|tv)(\/|$)/i;
+function isUrlLike(s: string) { return URL_RE.test(s.trim()); }
+function normalizeUrl(s: string) {
+  let u = s.trim();
+  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+  return u;
+}
+
 async function aiExtract(searchResults: any[], rawQuery: string, apiKey: string): Promise<Candidate[]> {
   if (!searchResults.length) return [];
   const context = searchResults
@@ -154,23 +181,39 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      const isEmail = /@/.test(query);
+      const isEmail = /@/.test(query) && !isUrlLike(query);
       const isPhone = /^[\d\s()+\-.]{7,}$/.test(query);
-      const queries = isEmail
-        ? [`"${query}"`, `"${query}" linkedin`, `"${query}" company`]
-        : isPhone
-        ? [`"${query}"`, `"${query}" business contact`]
-        : [`"${query}" contact email`, `"${query}" linkedin`, `"${query}" company`];
+      const isUrl = isUrlLike(query);
 
-      const allResults: any[] = [];
-      for (const q of queries) {
-        const r = await firecrawlSearch(q, firecrawlKey, 5);
-        allResults.push(...r);
-        if (allResults.length >= 12) break;
+      let unique: any[] = [];
+
+      if (isUrl) {
+        // Direct scrape — paste a URL, instant lead from that page
+        const scraped = await firecrawlScrape(normalizeUrl(query), firecrawlKey);
+        if (scraped) unique = [scraped];
+        // also pull a small search to enrich with linkedin/contact info
+        const domain = normalizeUrl(query).replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0];
+        if (domain) {
+          const extra = await firecrawlSearch(`"${domain}" contact email linkedin`, firecrawlKey, 4);
+          unique.push(...extra);
+        }
+      } else {
+        const queries = isEmail
+          ? [`"${query}"`, `"${query}" linkedin`, `"${query}" company`]
+          : isPhone
+          ? [`"${query}"`, `"${query}" business contact`]
+          : [`"${query}" contact email`, `"${query}" linkedin`, `"${query}" company`];
+
+        const allResults: any[] = [];
+        for (const q of queries) {
+          const r = await firecrawlSearch(q, firecrawlKey, 5);
+          allResults.push(...r);
+          if (allResults.length >= 12) break;
+        }
+        const seen = new Set<string>();
+        unique = allResults.filter(r => r.url && !seen.has(r.url) && seen.add(r.url));
       }
-      // dedupe by url
-      const seen = new Set<string>();
-      const unique = allResults.filter(r => r.url && !seen.has(r.url) && seen.add(r.url));
+
 
       const candidates = await aiExtract(unique, query, lovableKey);
       return new Response(JSON.stringify({ ok: true, candidates, searched: unique.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
