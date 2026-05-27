@@ -479,10 +479,19 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
 
     const description = `A forensic playbook covering ${topic.tags.join(", ")} within the ${topic.pillar} domain. Includes proprietary diagnostic frameworks, implementation roadmaps, ROI projections, and anonymized case studies from real forensic engagements.`;
 
+    // Extract preview summary + table of contents from generated markdown
+    const tocMatches = Array.from(content.matchAll(/^##\s+(?!#)(.+?)$/gm)).map((m: any) => String(m[1]).trim());
+    const toc = tocMatches.slice(0, 12);
+    const execMatch = content.match(/##\s*Executive Summary[\s\S]*?\n([\s\S]*?)(?=\n##\s|$)/i);
+    const rawSummary = (execMatch ? execMatch[1] : content).replace(/[#*_`>|-]+/g, " ").replace(/\s+/g, " ").trim();
+    const summary = rawSummary.slice(0, 900) || description;
+
     const { error: insertError } = await supabase.from("playbooks").insert({
       title: topic.title,
       subtitle: topic.subtitle,
       description,
+      summary,
+      toc,
       tags: topic.tags,
       file_url: urlData.publicUrl,
       icon_name: topic.icon,
