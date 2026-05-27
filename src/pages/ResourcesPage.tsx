@@ -32,6 +32,8 @@ const ResourcesPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
   const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
+  const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number>(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const { user } = useAuth();
