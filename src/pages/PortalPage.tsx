@@ -79,7 +79,7 @@ import { LinkedInSetupGuide } from '@/components/portal/LinkedInSetupGuide';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
-import { Maximize2 } from 'lucide-react';
+// Maximize2 imported above
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import TabColorToggle from '@/components/TabColorToggle';
