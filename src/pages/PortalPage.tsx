@@ -136,6 +136,7 @@ const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfi
 
 const PortalPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
