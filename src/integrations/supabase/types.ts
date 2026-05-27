@@ -3854,6 +3854,8 @@ export type Database = {
       }
       playbooks: {
         Row: {
+          best_for_industries: string[] | null
+          best_for_who: string | null
           created_at: string
           description: string
           file_url: string
@@ -3867,6 +3869,8 @@ export type Database = {
           toc: string[] | null
         }
         Insert: {
+          best_for_industries?: string[] | null
+          best_for_who?: string | null
           created_at?: string
           description: string
           file_url: string
@@ -3880,6 +3884,8 @@ export type Database = {
           toc?: string[] | null
         }
         Update: {
+          best_for_industries?: string[] | null
+          best_for_who?: string | null
           created_at?: string
           description?: string
           file_url?: string
