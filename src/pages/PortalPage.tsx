@@ -181,6 +181,17 @@ const PortalPage: React.FC = () => {
     setLayoutState(l);
     try { localStorage.setItem(LAYOUT_KEY, l); } catch {}
   };
+  const TABS_COLLAPSED_KEY = 'portal.tabsCollapsed.v1';
+  const [tabsCollapsed, setTabsCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem(TABS_COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const toggleTabsCollapsed = () => {
+    setTabsCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem(TABS_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* noop */ }
+      return next;
+    });
+  };
   const [widgetSizes, setWidgetSizesState] = useState<Record<string, WidgetSize>>(() => {
     try { return JSON.parse(localStorage.getItem(SIZES_KEY) || '{}'); } catch { return {}; }
   });
