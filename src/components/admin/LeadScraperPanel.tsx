@@ -164,7 +164,7 @@ export const LeadScraperPanel: React.FC = () => {
             <Search className="w-5 h-5 text-amber" /> Find a Contact
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Paste a name, email, phone number, or company. AI scrapes the web for their contact info — review the matches, then add the ones you want to the lead pool.
+            Paste a name, email, phone, company, <span className="text-amber">or a website URL</span>. AI scrapes the web (or that page) for contact info — review the matches, then add the ones you want to the lead pool.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -173,7 +173,7 @@ export const LeadScraperPanel: React.FC = () => {
               value={lookupQuery}
               onChange={e => setLookupQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !lookupRunning) runLookup(); }}
-              placeholder="e.g. Jane Smith Acme Corp, jane@acme.com, (317) 555-1234"
+              placeholder="e.g. acmecorp.com, jane@acme.com, Jane Smith, (317) 555-1234"
               className="flex-1"
             />
             <Button onClick={runLookup} disabled={lookupRunning || !lookupQuery.trim()} className="bg-amber text-background hover:bg-amber/90">
