@@ -68,6 +68,7 @@ const NewsPostPage = lazy(() => import("./pages/NewsPostPage"));
 const CredentialsPage = lazy(() => import("./pages/CredentialsPage"));
 const ImplementationPage = lazy(() => import("./pages/ImplementationPage"));
 const CatalogPage = lazy(() => import("./pages/CatalogPage"));
+const LocationPage = lazy(() => import("./pages/LocationPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 
 const queryClient = new QueryClient({
@@ -174,6 +175,8 @@ const App = () => (
                       <Route path="/credentials" element={<Navigate to="/about" replace />} />
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
+                      <Route path="/indianapolis" element={<LocationPage />} />
+                      <Route path="/indiana" element={<LocationPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

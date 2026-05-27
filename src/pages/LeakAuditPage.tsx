@@ -18,6 +18,10 @@ import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
 import { ThisIsForYou } from '@/components/ThisIsForYou';
+import { CitedFactsBlock } from '@/components/seo/CitedFactsBlock';
+import { BuyerIntentFaq } from '@/components/seo/BuyerIntentFaq';
+import { LeakAuditHowToSchema } from '@/components/seo/LeakAuditHowToSchema';
+import { CORE_LEAK_FACTS, LEAK_AUDIT_FAQS } from '@/components/seo/seoContent';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -589,7 +593,11 @@ const LeakAuditPage = () => {
               </div>
             </div>
           </section>
+
+          <CitedFactsBlock facts={CORE_LEAK_FACTS} pageUrl="https://aetheris.technology/leak-audit" />
+          <BuyerIntentFaq faqs={LEAK_AUDIT_FAQS} pageUrl="https://aetheris.technology/leak-audit" />
         </main>
+        <LeakAuditHowToSchema pageUrl="https://aetheris.technology/leak-audit" />
 
         <Footer />
 

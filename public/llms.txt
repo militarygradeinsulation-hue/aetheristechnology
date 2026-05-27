@@ -47,6 +47,8 @@ Aetheris is one operator, not a consulting team. Engagements are forensic, not a
 - [Field Notes (Blog)](https://aetheris.technology/blog): Long-form forensic case files and operator essays.
 - [News](https://aetheris.technology/news): Industry analysis and field updates.
 - [Resources](https://aetheris.technology/resources): Free playbooks and downloadable assets.
+- [Indianapolis](https://aetheris.technology/indianapolis): Business Forensics in Indianapolis, IN — LocalBusiness profile, service area, on-site walk-throughs.
+- [Indiana](https://aetheris.technology/indiana): Statewide service across Indianapolis, Fort Wayne, Bloomington, Evansville, South Bend.
 
 ## Contact
 
