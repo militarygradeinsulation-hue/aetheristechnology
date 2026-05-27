@@ -264,11 +264,15 @@ const ResourcesPage = () => {
 
                   return (
                     <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                      <div className={`forensic-tile rounded-2xl p-8 border transition-all group h-full flex flex-col ${
-                        isUnlocked
-                          ? 'border-border hover:border-amber/30'
-                          : 'border-border/50 hover:border-primary/30'
-                      }`}>
+                      <button
+                        type="button"
+                        onClick={() => { setPreviewPlaybook(resource); setPreviewIndex(index); }}
+                        className={`forensic-tile rounded-2xl p-8 border transition-all group h-full w-full flex flex-col text-left ${
+                          isUnlocked
+                            ? 'border-border hover:border-amber/30'
+                            : 'border-border/50 hover:border-primary/30'
+                        }`}
+                      >
                         <div className="flex items-start gap-4 mb-4">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                             isUnlocked
@@ -282,7 +286,7 @@ const ResourcesPage = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
                               {isFree && (
                                 <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
@@ -303,21 +307,10 @@ const ResourcesPage = () => {
                             <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                           ))}
                         </div>
-                        <Button
-                          onClick={() => handlePlaybookAction(resource, index)}
-                          className={`w-full gap-2 ${
-                            isUnlocked
-                              ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                              : 'bg-secondary hover:bg-secondary/80 text-foreground border border-border'
-                          }`}
-                        >
-                          {isUnlocked ? (
-                            <><Download className="w-4 h-4" /> Download PDF</>
-                          ) : (
-                            <><ShoppingCart className="w-4 h-4" /> Unlock, $25</>
-                          )}
-                        </Button>
-                      </div>
+                        <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
+                          Preview what's inside <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </button>
                     </RevealOnScroll>
                   );
                 })}
