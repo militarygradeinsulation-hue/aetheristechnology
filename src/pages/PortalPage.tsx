@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -136,6 +136,7 @@ const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfi
 
 const PortalPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -285,6 +286,26 @@ const PortalPage: React.FC = () => {
     setPortalSession(syntheticToken, syntheticProfile);
     setProfile(syntheticProfile);
   }, [profile]);
+
+  // Deep-link support: /portal?tab=tools&tool=sales-scripts jumps directly to the tool,
+  // no extra click on the Tools tab. Runs whenever the URL changes.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const toolParam = params.get('tool');
+    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin'];
+    const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
+    if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
+      setTab(tabParam as Tab);
+      if (tabParam === 'tools' && toolParam && (VALID_TOOLS as string[]).includes(toolParam)) {
+        setActiveTool(toolParam as ToolKey);
+      } else if (tabParam !== 'tools') {
+        setActiveTool(null);
+      }
+    }
+  }, [location.search]);
+
 
   useEffect(() => {
     if (hasValidPortalSession() && !profile) {

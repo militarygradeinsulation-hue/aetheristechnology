@@ -75,8 +75,8 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
     // 4. Tools to use
     const tools: { name: string; why: string; href: string }[] = [];
     if (!hasScan) tools.push({ name: 'Company Scan (above)', why: 'Always start here, gives you score + top gaps for the opener.', href: '#' });
-    tools.push({ name: 'Sales Script Generator', why: `Generate a 5-touch script tailored to ${company} + ${role || 'their role'}. Auto-saves to your Workspace.`, href: '/portal?tab=tools&tool=sales-script' });
-    tools.push({ name: 'Follow-Up Plan', why: 'Build a 14-day cadence so you don\'t lose them after touch #2.', href: '/portal?tab=tools&tool=follow-up' });
+    tools.push({ name: 'Sales Script Generator', why: `Generate a 5-touch script tailored to ${company} + ${role || 'their role'}. Auto-saves to your Workspace.`, href: '/portal?tab=tools&tool=sales-scripts' });
+    tools.push({ name: 'Follow-Up Plan', why: 'Build a 14-day cadence so you don\'t lose them after touch #2.', href: '/portal?tab=tools&tool=follow-up-plan' });
     tools.push({ name: 'Strategic Question Engine', why: 'Generates the 5 questions that make this prospect say "how did you know that?"', href: '/portal?tab=tools&tool=strategic-questions' });
     tools.push({ name: 'Brand Contradiction Finder', why: 'Pull 1 brand contradiction from their site, drop it in the email subject line. Devastating.', href: '/portal?tab=tools&tool=brand-contradictions' });
     tools.push({ name: 'Friction Vocabulary Audit', why: 'Finds the corporate jargon on their site that\'s costing them conversions. Great mid-funnel proof.', href: '/portal?tab=tools&tool=friction-audit' });
