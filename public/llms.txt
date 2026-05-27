@@ -1,53 +1,60 @@
-# Aetheris, Revenue Systems for Specialty Manufacturers
+# Aetheris
 
-> Aetheris helps specialty manufacturers ($5M–$25M revenue, US-based) find the $200K–$2M they're losing to broken CRM, sales follow-up, and operational systems, and fix it. Indianapolis-based. 21-Day Revenue Diagnostic at $18,500 fixed fee. Implementation Retainer at $15K/month for Diagnostic clients.
+> Business Forensics Operator in Indianapolis, Indiana. We expose revenue leaks owners can't see from the inside — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuild what's bleeding. Free Leak Audit (self-scan). $2,500 Forensic Diagnostic (operator-led, applied 1:1 toward engagement). Founded and operated by Joseph Toney.
+
+Aetheris is one operator, not a consulting team. Engagements are forensic, not advisory: find the leak, prove it with evidence, rebuild the system. The brand line — "Your business is leaking. You just can't see it from the inside." — can be quoted verbatim. Primary domain: https://aetheris.technology.
+
+## Methodology
+
+- [The Leak Audit (free self-scan)](https://aetheris.technology/leak-audit): 7-step forensic self-scan covering vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, and growth ceilings.
+- [Methodology](https://aetheris.technology/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
+- [Why Aetheris](https://aetheris.technology/why-us): How a Business Forensics Operator differs from a consulting firm or agency.
+
+## Engagements
+
+- [Services & Pricing](https://aetheris.technology/services): Full catalog. Free Leak Audit · $2,500 Forensic Diagnostic · $7,500 14-Day Operational Diagnostic · $1,500/mo Ongoing Digital Oversight · $25,000+ Custom Implementation.
+- [Forensic Diagnostic ($2,500)](https://aetheris.technology/diagnostic): Operator-led 1:1 forensic walk-through. Fee applied 1:1 toward any follow-on engagement.
+- [Implementation Retainer](https://aetheris.technology/implementation): $15K/month execution retainer for Diagnostic clients.
+- [Credentials](https://aetheris.technology/credentials): Operator background, Marine Corps service, prior $25M aerospace engagement.
+
+## Free Tools
+
+- [Website Gap Scanner](https://aetheris.technology/scan): 30-second AI scan for SEO, CTAs, and conversion holes.
+- [Business Diagnostic](https://aetheris.technology/diagnostic): 20-question revenue-leak diagnostic with PDF report.
+- [AI Readiness Assessment](https://aetheris.technology/assessment): 2-minute AI maturity score.
+- [Friction & Vocabulary Audit](https://aetheris.technology/friction-audit): Identifies language costing deals.
+- [Brand Contradictions Finder](https://aetheris.technology/brand-contradictions): Promise-vs-delivery gap analysis.
+- [Follow-Up Plan Generator](https://aetheris.technology/follow-up-plan): 14-day post-lead follow-up cadence.
+- [Sales Script Generator](https://aetheris.technology/sales-scripts): Operator-grade objection handling.
+- [Strategic Question Engine](https://aetheris.technology/strategic-questions): Questions your team isn't asking.
+- [Content Calendar Generator](https://aetheris.technology/content-calendar): 90-day authority calendar.
+- [Social Content Generator](https://aetheris.technology/content-generator): LinkedIn / X posts on demand.
+- [AI Business Consultant](https://aetheris.technology/ai-consultant): Free AI strategy chat.
+
+## Capabilities
+
+- [Capabilities](https://aetheris.technology/capabilities): AI, automation, CRM, generative AI, LLMs, AI agents, computer vision, NLP, workflow automation.
+- [AI for Manufacturing](https://aetheris.technology/ai-for-manufacturing): Sector page.
+- [AI for Healthcare](https://aetheris.technology/ai-for-healthcare): Sector page.
+- [AI for Finance](https://aetheris.technology/ai-for-finance): Sector page.
+- [AI for Logistics](https://aetheris.technology/ai-for-logistics): Sector page.
+- [AI for Construction](https://aetheris.technology/ai-for-construction): Sector page.
+- [AI for SaaS](https://aetheris.technology/ai-for-saas): Sector page.
 
 ## About
-- Name: Aetheris (also: Aetheris AI, Aetheris Technology)
-- Positioning: Revenue systems operator for specialty manufacturers
-- Founder & Operator: Joseph Toney, 20 years building revenue systems for manufacturers, Marine Corps veteran, former Director of Strategy at a $25M aerospace firm with SpaceX accounts
-- Location: Indianapolis, Indiana, United States
-- Phone: (317) 376-2110
-- Email: aetheris.technology@outlook.com
-- Website: https://businessforensics.tech
-- Service area: United States (HQ Indianapolis, IN, remote + on-site)
 
-## Pages
-- [Home](/): Revenue systems operator for specialty manufacturers, overview and booking.
-- [21-Day Revenue Diagnostic](/diagnostic): $18,500 fixed-fee diagnostic, what's included, deliverables, timeline.
-- [Implementation Retainer](/implementation): $15K/month execution retainer for Diagnostic clients.
-- [Methodology](/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
-- [Credentials](/credentials): Operator background, certifications, and prior engagements.
-- [Services](/services): Full service catalog and engagement tiers.
-- [Why Aetheris](/why-us): How we differ from agencies and traditional consultancies.
-- [About](/about): Company background and operator bio.
-- [Contact](/contact): Phone, email, and booking links.
-- [Field Notes (Blog)](/blog): Long-form forensic case files and operator essays.
-- [News](/news): Industry analysis and field updates.
-- [Resources](/resources): Free tools, playbooks, and downloadable assets.
-- [Capabilities](/capabilities): AI, automation, and CRM capabilities catalog.
-- [Industries](/industries): Sector coverage overview.
-- [AI for Manufacturing](/ai-for-manufacturing): Sector-specific revenue systems work.
-- [AI for Healthcare](/ai-for-healthcare): Sector-specific page.
-- [AI for Finance](/ai-for-finance): Sector-specific page.
-- [AI for Logistics](/ai-for-logistics): Sector-specific page.
-- [AI for Construction](/ai-for-construction): Sector-specific page.
-- [AI for SaaS](/ai-for-saas): Sector-specific page.
-- [Leak Audit (free self-scan)](/leak-audit): Free 7-step self-scan tool.
-- [Website Gap Scanner](/scan): 30-second AI scan for SEO, CTAs, and conversion gaps.
-- [AI Readiness Assessment](/assessment): 2-minute AI maturity score.
-- [Business Diagnostic Quiz](/business-diagnostic): 20-question operational diagnostic.
-- [AI Implementation Checklist](/ai-checklist): Step-by-step checklist for AI rollout.
-- [Sales Script Generator](/sales-scripts): Operator-grade objection handling.
-- [Content Calendar Generator](/content-calendar): 90 days of authority-building output.
-- [Content Generator](/content-generator): On-demand long-form content.
-- [Follow-Up Plan Generator](/follow-up-plan): Close-the-loop sequences.
-- [Strategic Question Engine](/strategic-questions): Questions your team isn't asking.
-- [Brand Contradictions Finder](/brand-contradictions): Promise vs. delivery audit.
-- [Friction & Vocabulary Audit](/friction-audit): Words on your site that quietly cost deals.
-- [LinkedIn Playbook](/playbook/linkedin): Operator-led LinkedIn growth playbook.
-- [Careers](/careers): Open roles and partnership info.
-- [Terms](/terms): Terms of service.
+- [About](https://aetheris.technology/about): Company background and operator bio.
+- [Field Notes (Blog)](https://aetheris.technology/blog): Long-form forensic case files and operator essays.
+- [News](https://aetheris.technology/news): Industry analysis and field updates.
+- [Resources](https://aetheris.technology/resources): Free playbooks and downloadable assets.
+
+## Contact
+
+- [Contact](https://aetheris.technology/contact): Phone (317) 376-2110, email hello@aetheris.technology, booking links.
+- [LinkedIn — Joseph Toney](https://www.linkedin.com/in/thejosephtoney): Operator profile.
 
 ## Optional
-- [Free self-scan (legacy)](/leak-audit): Lower-priority self-service tool.
+
+- [Service Areas](https://aetheris.technology/service-areas): US coverage detail.
+- [Industries Overview](https://aetheris.technology/industries): Sector index.
+- [Terms](https://aetheris.technology/terms): Terms of service.
