@@ -374,6 +374,24 @@ const ResourcesPage = () => {
                     </div>
                   )}
 
+                  {pb.best_for_who && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Best For</h4>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{pb.best_for_who}</p>
+                    </div>
+                  )}
+
+                  {Array.isArray(pb.best_for_industries) && pb.best_for_industries.length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Industries</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {pb.best_for_industries.map((ind: string) => (
+                          <span key={ind} className="text-xs px-2 py-1 rounded-full border border-amber/40 text-amber bg-amber/5">{ind}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {(pb.tags || []).length > 0 && (
                     <div>
                       <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Topics</h4>
