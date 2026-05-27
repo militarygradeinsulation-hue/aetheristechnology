@@ -144,7 +144,7 @@ serve(async (req) => {
     }
 
     if (action === "publish_playbook") {
-      const { title, subtitle, description, tags, file_url, icon_name } = body;
+      const { title, subtitle, description, tags, file_url, icon_name, summary, toc } = body;
       if (!title || !file_url) {
         return new Response(JSON.stringify({ error: "title and file_url required" }), {
           status: 400,
@@ -168,6 +168,8 @@ serve(async (req) => {
           title,
           subtitle: subtitle || null,
           description: description || subtitle || title,
+          summary: summary || description || subtitle || null,
+          toc: Array.isArray(toc) ? toc : [],
           tags: Array.isArray(tags) ? tags : [],
           file_url,
           icon_name: icon_name || "BookOpen",
