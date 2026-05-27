@@ -279,6 +279,18 @@ const AdminDashboard: React.FC = () => {
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
+  const TABS_COLLAPSED_KEY = 'admin.tabsCollapsed.v1';
+  const [tabsCollapsed, setTabsCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem(TABS_COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const toggleTabsCollapsed = useCallback(() => {
+    setTabsCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem(TABS_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* noop */ }
+      return next;
+    });
+  }, []);
+
   const tabSearchResults = tabSearch.trim()
     ? ALL_TAB_DEFS.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
     : [];
