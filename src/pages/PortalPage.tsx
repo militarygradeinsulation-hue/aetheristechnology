@@ -286,6 +286,26 @@ const PortalPage: React.FC = () => {
     setProfile(syntheticProfile);
   }, [profile]);
 
+  // Deep-link support: /portal?tab=tools&tool=sales-scripts jumps directly to the tool,
+  // no extra click on the Tools tab. Runs whenever the URL changes.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const toolParam = params.get('tool');
+    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin'];
+    const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
+    if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
+      setTab(tabParam as Tab);
+      if (tabParam === 'tools' && toolParam && (VALID_TOOLS as string[]).includes(toolParam)) {
+        setActiveTool(toolParam as ToolKey);
+      } else if (tabParam !== 'tools') {
+        setActiveTool(null);
+      }
+    }
+  }, [typeof window !== 'undefined' ? window.location.search : '']);
+
+
   useEffect(() => {
     if (hasValidPortalSession() && !profile) {
       const p = getPortalProfile();
