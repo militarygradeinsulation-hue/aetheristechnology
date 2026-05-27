@@ -593,7 +593,11 @@ const LeakAuditPage = () => {
               </div>
             </div>
           </section>
+
+          <CitedFactsBlock facts={CORE_LEAK_FACTS} pageUrl="https://aetheris.technology/leak-audit" />
+          <BuyerIntentFaq faqs={LEAK_AUDIT_FAQS} pageUrl="https://aetheris.technology/leak-audit" />
         </main>
+        <LeakAuditHowToSchema pageUrl="https://aetheris.technology/leak-audit" />
 
         <Footer />
 
