@@ -3861,8 +3861,10 @@ export type Database = {
           id: string
           published_at: string | null
           subtitle: string | null
+          summary: string | null
           tags: string[] | null
           title: string
+          toc: string[] | null
         }
         Insert: {
           created_at?: string
@@ -3872,8 +3874,10 @@ export type Database = {
           id?: string
           published_at?: string | null
           subtitle?: string | null
+          summary?: string | null
           tags?: string[] | null
           title: string
+          toc?: string[] | null
         }
         Update: {
           created_at?: string
@@ -3883,8 +3887,10 @@ export type Database = {
           id?: string
           published_at?: string | null
           subtitle?: string | null
+          summary?: string | null
           tags?: string[] | null
           title?: string
+          toc?: string[] | null
         }
         Relationships: []
       }
