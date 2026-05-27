@@ -623,33 +623,56 @@ const AdminDashboard: React.FC = () => {
 
         {layout === 'tabs' ? (
           <>
-            <div className="flex gap-2 mb-8 flex-wrap">
-              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
-                const active = activeTab === tab;
-                return (
-                  <Button
-                    key={tab}
-                    id={`admin-tab-btn-${tab}`}
-                    type="button"
-                    onClick={() => {
-                      setActiveTab(tab as typeof activeTab);
-                      ensureTabData(tab);
-                      if (tab !== 'tools') setActiveTool(null);
-                    }}
-                    variant={active ? 'default' : 'outline'}
-                    style={tabButtonStyle(tabScale)}
-                    className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
-                  >
-                    <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
-                    <span>{label}</span>
-                  </Button>
-                );
-              })}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={toggleTabsCollapsed}
+                className="text-xs text-muted-foreground hover:text-amber gap-1.5"
+                title={tabsCollapsed ? 'Show tabs bar' : 'Hide tabs bar for more screen space'}
+              >
+                {tabsCollapsed
+                  ? <><Maximize2 className="w-3.5 h-3.5" /> Show tabs</>
+                  : <><Minimize2 className="w-3.5 h-3.5" /> Hide tabs</>}
+              </Button>
+              {tabsCollapsed && (
+                <span className="text-xs font-mono uppercase tracking-wide text-amber/80 truncate">
+                  {ALL_TAB_DEFS.find(t => t.key === activeTab)?.label || activeTab}
+                </span>
+              )}
             </div>
+
+            {!tabsCollapsed && (
+              <div className="flex gap-2 mb-8 flex-wrap">
+                {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+                  const active = activeTab === tab;
+                  return (
+                    <Button
+                      key={tab}
+                      id={`admin-tab-btn-${tab}`}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab as typeof activeTab);
+                        ensureTabData(tab);
+                        if (tab !== 'tools') setActiveTool(null);
+                      }}
+                      variant={active ? 'default' : 'outline'}
+                      style={tabButtonStyle(tabScale)}
+                      className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                    >
+                      <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                      <span>{label}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
 
             <EasyModeWrapper tabKey={activeTab}><Suspense fallback={<PanelFallback />}>{renderTabBody(activeTab)}</Suspense></EasyModeWrapper>
           </>
         ) : (
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
               const size = widgetSizes[tab] || 2;
