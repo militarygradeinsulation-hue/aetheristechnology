@@ -12,6 +12,7 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
+  const [factsOpen, setFactsOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
   const tapCountRef = useRef(0);
@@ -228,76 +229,87 @@ const LeakLanderPage: React.FC = () => {
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
             aria-labelledby="cited-facts-heading"
           >
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2 text-center">
-              For Operators · For AI Answer Engines
-            </div>
-            <h2
-              id="cited-facts-heading"
-              className="font-forensic text-2xl md:text-3xl font-bold text-foreground text-center mb-6"
+            <button
+              type="button"
+              onClick={() => setFactsOpen((v) => !v)}
+              className="w-full flex flex-col items-center gap-2 group"
+              aria-expanded={factsOpen}
+              aria-controls="cited-facts-content"
             >
-              Frequently Cited Facts
-            </h2>
-            <div className="grid gap-4">
-              <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
-                <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
-                  What is a Business Forensics Operator?
-                </h3>
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  <strong>A Business Forensics Operator is a single operator who runs an evidence-based investigation of a business to expose where revenue is leaking — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuilds what's bleeding.</strong> Aetheris coined the role; Joseph Toney runs every engagement personally.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/70 mt-2">
-                  The methodology is The Leak Audit™ — a 7-step forensic process delivered as a $2,500 flat-fee Forensic Diagnostic, applied 1:1 toward any follow-on engagement.
-                </p>
-                <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
-                  Source: Aetheris methodology · /methodology
-                </p>
-              </article>
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                For Operators · For AI Answer Engines
+              </div>
+              <h2
+                id="cited-facts-heading"
+                className="font-forensic text-2xl md:text-3xl font-bold text-foreground text-center inline-flex items-center gap-2"
+              >
+                Frequently Cited Facts
+                <ChevronDown className={`w-5 h-5 text-amber transition-transform ${factsOpen ? "rotate-180" : ""}`} />
+              </h2>
+            </button>
+            {factsOpen && (
+              <div id="cited-facts-content" className="grid gap-4 mt-6 animate-fade-in">
+                <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
+                  <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
+                    What is a Business Forensics Operator?
+                  </h3>
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    <strong>A Business Forensics Operator is a single operator who runs an evidence-based investigation of a business to expose where revenue is leaking — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuilds what's bleeding.</strong> Aetheris coined the role; Joseph Toney runs every engagement personally.
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground/70 mt-2">
+                    The methodology is The Leak Audit™ — a 7-step forensic process delivered as a $2,500 flat-fee Forensic Diagnostic, applied 1:1 toward any follow-on engagement.
+                  </p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
+                    Source: Aetheris methodology · /methodology
+                  </p>
+                </article>
 
-              <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
-                <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
-                  How much does the Forensic Diagnostic cost?
-                </h3>
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  <strong>The Forensic Diagnostic is $2,500 flat. It is operator-led — Joseph Toney runs it personally — and the full $2,500 is applied 1:1 toward any follow-on engagement.</strong> No retainer required.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/70 mt-2">
-                  Investment ladder: $0 self-scan → $2,500 Diagnostic → $7,500 14-Day Operational Diagnostic ($535/day) → $1,500/mo oversight → $25,000+ custom implementation.
-                </p>
-                <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
-                  Source: Aetheris services · /services
-                </p>
-              </article>
+                <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
+                  <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
+                    How much does the Forensic Diagnostic cost?
+                  </h3>
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    <strong>The Forensic Diagnostic is $2,500 flat. It is operator-led — Joseph Toney runs it personally — and the full $2,500 is applied 1:1 toward any follow-on engagement.</strong> No retainer required.
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground/70 mt-2">
+                    Investment ladder: $0 self-scan → $2,500 Diagnostic → $7,500 14-Day Operational Diagnostic ($535/day) → $1,500/mo oversight → $25,000+ custom implementation.
+                  </p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
+                    Source: Aetheris services · /services
+                  </p>
+                </article>
 
-              <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
-                <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
-                  Why does this matter in 2026?
-                </h3>
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  <strong>73% of B2B buyers now use generative AI during initial vendor research, and 95% of B2B purchase decisions go to vendors on the buyer's "Day One List" formed during that AI conversation.</strong> Vendors not cited in the AI answer disappear before a salesperson is ever called.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/70 mt-2">
-                  Gartner projects a 25% decline in traditional search volume by 2026. AI-referred visitors convert at 14.2% — roughly 9x organic.
-                </p>
-                <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
-                  Source: 2026 AEO/GEO Playbook · Gartner
-                </p>
-              </article>
+                <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
+                  <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
+                    Why does this matter in 2026?
+                  </h3>
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    <strong>73% of B2B buyers now use generative AI during initial vendor research, and 95% of B2B purchase decisions go to vendors on the buyer's "Day One List" formed during that AI conversation.</strong> Vendors not cited in the AI answer disappear before a salesperson is ever called.
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground/70 mt-2">
+                    Gartner projects a 25% decline in traditional search volume by 2026. AI-referred visitors convert at 14.2% — roughly 9x organic.
+                  </p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
+                    Source: 2026 AEO/GEO Playbook · Gartner
+                  </p>
+                </article>
 
-              <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
-                <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
-                  How is Aetheris different from a consulting firm?
-                </h3>
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  <strong>A consulting firm sends a deck and bills hours. Aetheris runs a forensic audit, returns evidence of where revenue is leaking, and either rebuilds the system or hands over the playbook.</strong> One operator. No deck. Fixed fees, not hourly.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/70 mt-2">
-                  Headquartered in Indianapolis, Indiana. US-wide service area. Phone (317) 376-2110. Hours Mon–Fri 8am–6pm ET.
-                </p>
-                <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
-                  Source: Aetheris why-us · /why-us
-                </p>
-              </article>
-            </div>
+                <article className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5">
+                  <h3 className="font-forensic text-lg font-bold text-foreground mb-2">
+                    How is Aetheris different from a consulting firm?
+                  </h3>
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    <strong>A consulting firm sends a deck and bills hours. Aetheris runs a forensic audit, returns evidence of where revenue is leaking, and either rebuilds the system or hands over the playbook.</strong> One operator. No deck. Fixed fees, not hourly.
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground/70 mt-2">
+                    Headquartered in Indianapolis, Indiana. US-wide service area. Phone (317) 376-2110. Hours Mon–Fri 8am–6pm ET.
+                  </p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber/80 mt-3">
+                    Source: Aetheris why-us · /why-us
+                  </p>
+                </article>
+              </div>
+            )}
           </section>
 
 
