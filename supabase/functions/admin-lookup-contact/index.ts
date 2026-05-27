@@ -57,6 +57,33 @@ async function firecrawlSearch(query: string, apiKey: string, limit = 8) {
   }));
 }
 
+async function firecrawlScrape(url: string, apiKey: string) {
+  const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const md = data?.data?.markdown || data?.markdown || "";
+  const meta = data?.data?.metadata || data?.metadata || {};
+  if (!md) return null;
+  return {
+    url,
+    title: meta.title || "",
+    description: meta.description || "",
+    markdown: md.substring(0, 12000),
+  };
+}
+
+const URL_RE = /^(https?:\/\/|www\.)|\.(com|net|org|io|co|ai|us|biz|app|dev|tech|info|me|tv)(\/|$)/i;
+function isUrlLike(s: string) { return URL_RE.test(s.trim()); }
+function normalizeUrl(s: string) {
+  let u = s.trim();
+  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+  return u;
+}
+
 async function aiExtract(searchResults: any[], rawQuery: string, apiKey: string): Promise<Candidate[]> {
   if (!searchResults.length) return [];
   const context = searchResults
