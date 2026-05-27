@@ -738,49 +738,71 @@ const PortalPage: React.FC = () => {
         {/* Tab nav (only in 'tabs' layout), admin-style amber pill buttons */}
         {layout === 'tabs' && (
           <div className="max-w-7xl mx-auto px-4 pb-3 pt-1">
-            <div className="flex gap-2 flex-wrap">
-              {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
-                const active = tab === t.id;
-                const Icon = t.iconCmp;
-                // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
-                const isStevenInbox = t.id === 'inbox' && profile?.code === '317469';
-                return (
-                  <Button
-                    key={t.id}
-                    id={`portal-tab-btn-${t.id}`}
-                    type="button"
-                    onClick={() => {
-                      setTab(t.id);
-                      setActiveTool(null);
-                      logPortalActivity('tab_view', { tab: t.id });
-                    }}
-                    variant={active ? 'default' : 'outline'}
-                    style={isStevenInbox ? undefined : tabButtonStyle(tabScale)}
-                    className={
-                      isStevenInbox
-                        ? `h-14 px-6 gap-2.5 whitespace-nowrap text-base font-bold uppercase tracking-wide rounded-xl shadow-[0_0_24px_rgba(56,189,248,0.45)] ring-2 ring-sky-400/60 transition-transform hover:scale-[1.03] ${
-                            active
-                              ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
-                              : 'bg-sky-500/15 border-sky-400 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200'
-                          }`
-                        : `gap-2 whitespace-nowrap font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
-                    }
-                  >
-                    {isStevenInbox
-                      ? <Icon className="w-5 h-5" />
-                      : <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />}
-                    <span>{isStevenInbox ? "Steven's Inbox" : t.label}</span>
-                    {t.badge && t.badge > 0 ? (
-                      <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
-                        {t.badge > 99 ? '99+' : t.badge}
-                      </span>
-                    ) : null}
-                  </Button>
-                );
-              })}
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={toggleTabsCollapsed}
+                className="text-xs text-muted-foreground hover:text-amber gap-1.5"
+                title={tabsCollapsed ? 'Show tabs bar' : 'Hide tabs bar for more screen space'}
+              >
+                {tabsCollapsed
+                  ? <><Maximize2 className="w-3.5 h-3.5" /> Show tabs</>
+                  : <><Minimize2 className="w-3.5 h-3.5" /> Hide tabs</>}
+              </Button>
+              {tabsCollapsed && (
+                <span className="text-xs font-mono uppercase tracking-wide text-amber/80 truncate">
+                  {availableTabs.find(t => t.id === tab)?.label || tab}
+                </span>
+              )}
             </div>
+            {!tabsCollapsed && (
+              <div className="flex gap-2 flex-wrap">
+                {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
+                  const active = tab === t.id;
+                  const Icon = t.iconCmp;
+                  // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
+                  const isStevenInbox = t.id === 'inbox' && profile?.code === '317469';
+                  return (
+                    <Button
+                      key={t.id}
+                      id={`portal-tab-btn-${t.id}`}
+                      type="button"
+                      onClick={() => {
+                        setTab(t.id);
+                        setActiveTool(null);
+                        logPortalActivity('tab_view', { tab: t.id });
+                      }}
+                      variant={active ? 'default' : 'outline'}
+                      style={isStevenInbox ? undefined : tabButtonStyle(tabScale)}
+                      className={
+                        isStevenInbox
+                          ? `h-14 px-6 gap-2.5 whitespace-nowrap text-base font-bold uppercase tracking-wide rounded-xl shadow-[0_0_24px_rgba(56,189,248,0.45)] ring-2 ring-sky-400/60 transition-transform hover:scale-[1.03] ${
+                              active
+                                ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
+                                : 'bg-sky-500/15 border-sky-400 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200'
+                            }`
+                          : `gap-2 whitespace-nowrap font-medium ${getTabColorClasses(t.id, active, tabColorMode)}`
+                      }
+                    >
+                      {isStevenInbox
+                        ? <Icon className="w-5 h-5" />
+                        : <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />}
+                      <span>{isStevenInbox ? "Steven's Inbox" : t.label}</span>
+                      {t.badge && t.badge > 0 ? (
+                        <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
+                          {t.badge > 99 ? '99+' : t.badge}
+                        </span>
+                      ) : null}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
+
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
