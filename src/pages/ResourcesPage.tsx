@@ -67,7 +67,7 @@ const ResourcesPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('playbooks')
-        .select('id, title, subtitle, description, summary, toc, tags, file_url, icon_name, published_at')
+        .select('id, title, subtitle, description, summary, toc, best_for_who, best_for_industries, tags, file_url, icon_name, published_at')
         .order('published_at', { ascending: true });
       if (error) throw error;
       return data;
