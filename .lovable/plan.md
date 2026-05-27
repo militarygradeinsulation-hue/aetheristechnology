@@ -1,62 +1,50 @@
-## Goal
+# AEO/GEO Optimization Blueprint Implementation
 
-Turn `/` into a clean, focused landing page. Keep the top (Hero + "This is for you"), drop the noise, and put a big **"Pick your problem"** picker front-and-center — modeled on the small tool cards in `/leak-audit`, but blown up to bold problem buttons that reveal matching solutions. Anchor the bottom with the upcoming events calendar.
+The site already has a strong baseline (canonical, OG, Organization + FAQ JSON-LD, llms.txt, llms-full.txt). The blueprint wants a stricter decoupled crawler policy, richer machine-readable directories, schema upgrades, and citation-optimized on-page content.
 
-## New Home page structure (top → bottom)
+## What I'll change
 
-1. **Hero** (unchanged)
-2. **This Is For You** (unchanged — the signals tile)
-3. **Audio briefing tile** — "Who we are. What we do for you. In our own words." (moved up to sit directly under the Aetheris video/audio explainer position)
-4. **NEW — "Pick your problem" picker** (front and center, see below)
-5. **Book a meeting** (HubSpot embed — kept, it's the conversion anchor)
-6. **What You Really Get** (kept)
-7. **Resume Forensics teaser** (kept — it's a single live tool spotlight, not noise)
-8. **Upcoming Events / Calendar** (moved to the bottom)
-9. Footer
+### 1. Decoupled `public/robots.txt`
+Rewrite to match the blueprint:
+- **Allow** real-time fetchers: `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `Claude-SearchBot`, `Googlebot`, `Bingbot`, `Applebot`, `DuckAssistBot`, plus social previewers (`Twitterbot`, `facebookexternalhit`, `LinkedInBot`).
+- **Disallow** training/scraping crawlers: `GPTBot`, `ClaudeBot`, `anthropic-ai`, `Claude-Web`, `Google-Extended`, `Applebot-Extended`, `CCBot`, `Bytespider`, `Amazonbot`, `cohere-ai`, `meta-externalagent`.
+- Keep `/admin`, auth, checkout-return, unsubscribe disallowed across all UAs.
+- Keep `Sitemap:` directive + `llms.txt` / `llms-full.txt` reference comments.
 
-## "Pick your problem" picker (the new centerpiece)
+### 2. `public/llms.txt` — restructure to spec
+Rewrite to a tighter, spec-compliant directory:
+- H1 + blockquote summary (Business Forensics Operator pitch).
+- `## Methodology` (Leak Audit + steps), `## Engagements` (Diagnostic, 14-Day, Retainer), `## Free Tools` (scanner, assessment, diagnostic, friction audit, etc.), `## Field Notes` (blog), `## About`, `## Contact`.
+- `## Optional` section for lower-priority legacy tools.
+- Keep canonical URLs on `https://aetheris.technology`.
 
-Big, bold, scannable. Headline: **"Pick your problem."** Subhead: "Tell us what's broken. We'll show you what plugs it."
+### 3. `public/llms-full.txt` — extend
+Append blueprint-aligned sections:
+- "What AI Engines Cite Us For" (entity-dense paragraph naming Joseph Toney, Indianapolis, the 7 leak categories, pricing).
+- "Frequently Cited Statistics" block (operator-led, $2,500 Diagnostic, 14-day SLA, 7-step methodology) so engines have copy-ready facts.
+- "Direct Answers" block: 8–10 Island-Test paragraphs (Direct Answer ≤60w → Statistic → Source anchor → Implication) for the top buyer prompts ("what is a business forensics operator", "how much does the diagnostic cost", "what's in the Leak Audit", "Indianapolis AI consultant", "how to find revenue leaks", etc.).
+- "Last updated" line with today's date for freshness.
 
-Layout: a vertical stack of 5 large problem buttons (the same 5 problem groups already defined in `CapabilitiesPage.tsx`). Each button is a full-width forensic tile with:
-- Case-file micro-label ("Problem 01")
-- Big serif problem statement (e.g. *"I don't know where the business is actually leaking money."*)
-- One-line symptom underneath
+### 4. `index.html` — schema upgrades
+- Add `dateModified` (today) to existing `Organization` and `FAQPage` JSON-LD blocks.
+- Add a new `Service` JSON-LD block describing the Forensic Diagnostic ($2,500) and 14-Day Operational Diagnostic ($7,500) with `provider`, `areaServed`, `offers.price`.
+- Add `ProfessionalService` / `LocalBusiness` JSON-LD with Indianapolis address, `sameAs` to LinkedIn, geo coordinates (consolidating existing geo meta tags into structured data).
+- Add a `BreadcrumbList` baseline for the homepage.
 
-Click behavior: button expands inline (accordion) to reveal the matching solution tools as compact cards — title, "What it cures" line, and a "Run it free →" link. Only one open at a time. Single-page interaction, no navigation away.
+### 5. Landing page — one Island-Test "AI Answer" section
+Add a compact, citation-optimized section to `src/pages/LeakLanderPage.tsx` (below the deck carousel, above the footer): a "Frequently Cited Facts" block of 4 Island-Test paragraphs styled in the existing dark/amber forensic system. Each paragraph: bold direct answer → stat → source anchor (Gartner / Princeton GEO / internal) → implication. Uses semantic tokens, no new colors. Renders as plain HTML so AI crawlers extract it cleanly.
 
-Source the 5 problem groups + their tools from the existing `problemGroups` array in `src/pages/CapabilitiesPage.tsx` (extract it into `src/lib/problemGroups.ts` so both pages share it).
+## Out of scope (call out, don't build)
 
-A small "See all tools →" link at the bottom of the picker points to `/capabilities` for users who want the full grid view.
+- **G2 / Capterra / Reddit footprints** — off-site, requires user action.
+- **Server-Side Rendering** — project is Vite SPA. Real SSR migration is a large architectural change; I'll flag it but not attempt in this pass. The llms.txt + llms-full.txt + JSON-LD work mitigates most of the SPA citation gap because all critical facts are now in raw HTML/markdown that crawlers fetch directly.
+- **Citation/Share-of-Voice tracking dashboards** — would need a separate admin tool + scheduled job; out of scope for this pass.
+- **30/90-day refresh automation** — recommend later as a cron edge function once content cadence is decided.
 
-## Relocations
+## Files touched
 
-| Section | From | To |
-|---|---|---|
-| "There's a ton of AI gurus out there..." trust tile | Home | **`/why-us`** (prepend to `WhyUs.tsx`) |
-| "Map. Quantify. Roadmap." 3-step diagnostic | Home | **REMOVE entirely** (per request) |
-| "Everyone else is selling you advice. We're an AI-native operator." | Home | **`/why-us`** (append after the gurus tile) |
-| "What we've found inside exhausted owner-led businesses" case files | Home | **`/leak-audit`** (append a new section after the intake CTA cards) |
-| "New Tech Launch Showcase" heading | Home | **`/catalog`** (the premium tech page — prepend as the page intro) |
-| Upcoming Events | Home (mid) | Home (**bottom**, just above footer) |
-
-Audio briefing tile stays on home but moves up directly under the Hero/explainer area so it reads as "Who we are / what we do / in our own words" right under the explainer.
-
-## Files
-
-**Create**
-- `src/lib/problemGroups.ts` — export the `problemGroups` array + `Tool` / `ProblemGroup` types, plus the thumbnail imports.
-- `src/components/ProblemPicker.tsx` — the new accordion-style picker component for Home (and reusable).
-
-**Edit**
-- `src/pages/Home.tsx` — delete relocated sections, reorder, mount `<ProblemPicker />` after the audio briefing, move `<UpcomingEvents />` to the end.
-- `src/pages/CapabilitiesPage.tsx` — import `problemGroups` from the new shared lib instead of defining inline.
-- `src/components/WhyUs.tsx` — prepend the "AI gurus" trust tile + "AI-native operator" section (copy markup from Home verbatim, keep `INFOGRAPHICS` imports).
-- `src/pages/LeakAuditPage.tsx` — append the "What we've found inside exhausted owner-led businesses" case-files section at the bottom of the result/intake flow (visible on all steps, after the main content).
-- `src/pages/CatalogPage.tsx` — prepend the "New Tech Launch Showcase" intro heading block above the existing catalog content.
-
-## Out of scope
-
-- No business-logic, backend, or routing changes.
-- No design-token changes — reuse existing `forensic-tile`, `font-forensic`, `font-case`, `amber`/`crimson` classes.
-- Copy is preserved verbatim wherever sections move; only placement and the new picker UI are new.
+- `public/robots.txt` (rewrite)
+- `public/llms.txt` (rewrite)
+- `public/llms-full.txt` (extend)
+- `index.html` (add/update JSON-LD blocks)
+- `src/pages/LeakLanderPage.tsx` (add Frequently Cited Facts section)

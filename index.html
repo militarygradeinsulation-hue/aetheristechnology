@@ -243,6 +243,64 @@
             "text": "Yes. Headquartered in Indianapolis, Indiana, Aetheris serves US businesses nationwide via remote and on-site engagements."
           }
         }
+      ],
+      "dateModified": "2026-05-27"
+    }
+    </script>
+
+    <!-- Service Schema — Forensic Diagnostic + 14-Day Operational Diagnostic -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Service",
+          "@id": "https://aetheris.technology/diagnostic#service",
+          "name": "Forensic Diagnostic",
+          "alternateName": "Operator-Led Leak Audit",
+          "serviceType": "Business Forensics",
+          "description": "Operator-led 1:1 forensic walk-through. Joseph Toney runs the audit personally. Output: flagged leak list, prioritization, and rebuild order. $2,500 flat, applied 1:1 toward any follow-on engagement.",
+          "provider": { "@id": "https://aetheris.technology/#organization" },
+          "areaServed": { "@type": "Country", "name": "United States" },
+          "url": "https://aetheris.technology/diagnostic",
+          "offers": {
+            "@type": "Offer",
+            "price": "2500",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://aetheris.technology/diagnostic"
+          },
+          "dateModified": "2026-05-27"
+        },
+        {
+          "@type": "Service",
+          "@id": "https://aetheris.technology/implementation#service",
+          "name": "14-Day Operational Systems Diagnostic",
+          "serviceType": "Operational Diagnostics",
+          "description": "14-day operational breakdown identifying workflow inefficiencies, disconnected systems, manual waste, and automation opportunities. If meaningful gaps are not identified, the engagement continues at no extra cost. $7,500 flat ($535/day).",
+          "provider": { "@id": "https://aetheris.technology/#organization" },
+          "areaServed": { "@type": "Country", "name": "United States" },
+          "url": "https://aetheris.technology/implementation",
+          "offers": {
+            "@type": "Offer",
+            "price": "7500",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://aetheris.technology/implementation"
+          },
+          "dateModified": "2026-05-27"
+        }
+      ]
+    }
+    </script>
+
+    <!-- BreadcrumbList — homepage baseline -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://aetheris.technology/" }
       ]
     }
     </script>

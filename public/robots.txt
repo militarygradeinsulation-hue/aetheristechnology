@@ -1,25 +1,76 @@
+# Aetheris Business Forensics — Decoupled Crawler Policy
+# Purpose: maximize real-time AI citation (Perplexity, ChatGPT browse, Claude,
+# Gemini, Google, Bing) while blocking offline training data harvesters.
+# Spec reference: 2026 AEO/GEO Playbook.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1 — ALLOW: real-time fetchers, citation bots, search indexers
+# These bots fetch on-demand to answer user prompts. Blocking them removes us
+# from the AI answer surface. Googlebot powers Gemini; Bingbot powers ChatGPT
+# real-time browse. Both are mandatory.
+# ─────────────────────────────────────────────────────────────────────────────
+
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
-Disallow: /admin/login
+Disallow: /staff
 Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
-Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
-Disallow: /admin/login
+Disallow: /staff
 Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
-Crawl-delay: 1
 
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /admin
+Disallow: /staff
+
+# Social preview crawlers (link unfurls)
 User-agent: Twitterbot
 Allow: /
 Disallow: /admin
@@ -32,92 +83,71 @@ User-agent: LinkedInBot
 Allow: /
 Disallow: /admin
 
-# AI / Answer Engines (AEO), explicitly allow citation
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2 — DISALLOW: offline training & bulk-scraping crawlers
+# These bots harvest content for offline model training rather than real-time
+# citation. Blocking protects IP without sacrificing AI visibility.
+# ─────────────────────────────────────────────────────────────────────────────
+
 User-agent: GPTBot
-Allow: /
-Disallow: /admin
-
-User-agent: OAI-SearchBot
-Allow: /
-Disallow: /admin
-
-User-agent: ChatGPT-User
-Allow: /
-Disallow: /admin
-
-User-agent: PerplexityBot
-Allow: /
-Disallow: /admin
-
-User-agent: Perplexity-User
-Allow: /
-Disallow: /admin
-
-User-agent: Google-Extended
-Allow: /
-Disallow: /admin
-
-User-agent: GoogleOther
-Allow: /
-Disallow: /admin
+Disallow: /
 
 User-agent: ClaudeBot
-Allow: /
-Disallow: /admin
+Disallow: /
 
 User-agent: anthropic-ai
-Allow: /
-Disallow: /admin
+Disallow: /
 
 User-agent: Claude-Web
-Allow: /
-Disallow: /admin
+Disallow: /
 
-User-agent: Applebot
-Allow: /
-Disallow: /admin
+User-agent: Google-Extended
+Disallow: /
 
 User-agent: Applebot-Extended
-Allow: /
-Disallow: /admin
-
-User-agent: Amazonbot
-Allow: /
-Disallow: /admin
-
-User-agent: Bytespider
-Allow: /
-Disallow: /admin
+Disallow: /
 
 User-agent: CCBot
-Allow: /
-Disallow: /admin
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
 
 User-agent: cohere-ai
-Allow: /
-Disallow: /admin
-
-User-agent: DuckAssistBot
-Allow: /
-Disallow: /admin
+Disallow: /
 
 User-agent: meta-externalagent
-Allow: /
-Disallow: /admin
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3 — Default policy for all other crawlers
+# ─────────────────────────────────────────────────────────────────────────────
 
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /admin/login
+Disallow: /staff
 Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
 
-Sitemap: https://businessforensics.tech/sitemap.xml
+Sitemap: https://aetheris.technology/sitemap.xml
 
-# LLM / AEO citation files
-# https://llmstxt.org
-# llms.txt: https://businessforensics.tech/llms.txt
-# llms-full.txt: https://businessforensics.tech/llms-full.txt
+# AEO directories (llmstxt.org spec)
+# llms.txt:      https://aetheris.technology/llms.txt
+# llms-full.txt: https://aetheris.technology/llms-full.txt
