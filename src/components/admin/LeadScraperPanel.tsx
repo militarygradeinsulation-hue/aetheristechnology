@@ -46,6 +46,59 @@ export const LeadScraperPanel: React.FC = () => {
   const [recent, setRecent] = useState<AdminLead[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Contact lookup state
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupRunning, setLookupRunning] = useState(false);
+  const [lookupResults, setLookupResults] = useState<LookupCandidate[] | null>(null);
+  const [addingIdx, setAddingIdx] = useState<number | null>(null);
+
+  const runLookup = async () => {
+    const q = lookupQuery.trim();
+    if (!q) return;
+    setLookupRunning(true);
+    setLookupResults(null);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-lookup-contact', {
+        body: { action: 'lookup', query: q },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setLookupResults((data?.candidates || []) as LookupCandidate[]);
+      if (!data?.candidates?.length) toast({ title: 'No matches found', description: 'Try a different name, email, or company.' });
+    } catch (e) {
+      toast({ title: 'Lookup failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setLookupRunning(false);
+    }
+  };
+
+  const addCandidate = async (idx: number) => {
+    const c = lookupResults?.[idx];
+    if (!c) return;
+    setAddingIdx(idx);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const { data, error } = await supabase.functions.invoke('admin-lookup-contact', {
+        body: { action: 'add', candidate: c },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Added to lead pool' });
+      setLookupResults(prev => (prev ? prev.filter((_, i) => i !== idx) : prev));
+      load();
+    } catch (e) {
+      toast({ title: 'Add failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setAddingIdx(null);
+    }
+  };
+
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
