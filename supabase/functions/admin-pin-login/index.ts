@@ -28,8 +28,22 @@ async function signToken(exp: number, secret: string): Promise<string> {
   return `${exp}.${hex}`;
 }
 
+const ADMIN_USER_CACHE_KEY = "admin:user_id";
+
 async function ensureAdminUser(admin: any): Promise<string> {
-  // Try to find the existing admin user by email.
+  // Fast path: cached admin user_id in admin_kv. Avoids the slow
+  // auth.admin.listUsers() call on every login.
+  try {
+    const { data: cached } = await admin
+      .from("admin_kv")
+      .select("value")
+      .eq("key", ADMIN_USER_CACHE_KEY)
+      .maybeSingle();
+    const cachedId = (cached?.value as { user_id?: string } | undefined)?.user_id;
+    if (cachedId) return cachedId;
+  } catch { /* fall through */ }
+
+  // Slow path (first login or cache miss): look up by email, then cache.
   const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
   if (listErr) throw listErr;
   let user = list.users.find((u: { email?: string | null }) => (u.email || "").toLowerCase() === ADMIN_EMAIL);
@@ -49,6 +63,13 @@ async function ensureAdminUser(admin: any): Promise<string> {
     { user_id: user.id },
     { onConflict: "user_id", ignoreDuplicates: true },
   );
+
+  // Cache for future logins.
+  await admin.from("admin_kv").upsert({
+    key: ADMIN_USER_CACHE_KEY,
+    value: { user_id: user.id },
+    updated_at: new Date().toISOString(),
+  });
 
   return user.id;
 }
