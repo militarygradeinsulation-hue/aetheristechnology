@@ -6,7 +6,22 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Sparkles, Trash2, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, Trash2, RefreshCw, Search, UserPlus, ExternalLink } from 'lucide-react';
+
+interface LookupCandidate {
+  business_name?: string;
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  title?: string;
+  linkedin?: string;
+  industry?: string;
+  location?: string;
+  confidence: number;
+  why: string;
+  sources?: string[];
+}
 
 interface AdminLead {
   id: string;
