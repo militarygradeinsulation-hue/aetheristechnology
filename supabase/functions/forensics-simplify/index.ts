@@ -46,15 +46,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // Easy Read is available from public tool pages too; admin/portal tokens are optional.
     const token = getAdminTokenFromRequest(req);
     const portalToken = req.headers.get("x-portal-token");
-    const adminOk = await verifyAdminToken(token, SERVICE);
-    const portalOk = portalToken ? !!(await verifyPortalToken(portalToken, SERVICE)) : false;
-    if (!adminOk && !portalOk) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (token) await verifyAdminToken(token, SERVICE).catch(() => false);
+    if (portalToken) await verifyPortalToken(portalToken, SERVICE).catch(() => null);
 
     const body = await req.json();
     const source: string = (body?.source || "").toString().trim();
