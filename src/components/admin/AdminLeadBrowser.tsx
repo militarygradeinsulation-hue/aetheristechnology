@@ -550,6 +550,7 @@ export const AdminLeadBrowser: React.FC = () => {
                   <div className="font-semibold text-foreground truncate flex items-center gap-1">
                     {l.business_name || ', '}
                     {l.enriched_at && <Sparkles className="w-3 h-3 text-amber shrink-0" />}
+                    {l.low_hanging_fruit && <Flame className="w-3 h-3 text-red-400 shrink-0" />}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || ', '}
