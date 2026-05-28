@@ -115,7 +115,16 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "playbook", label: "Playbook Creator", group: "Content", icon: BookOpen,
     render: () => wrap(<PlaybookCreator />) },
   { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
+  { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
     render: () => wrap(<SocialContentGenerator adminMode />) },
+  { id: "content-engine", label: "Content Engine", group: "Content", icon: Zap, fullPagePath: "/admin",
+    render: () => wrap(<ContentEngine />) },
+  { id: "admin-image-studio", label: "Image Studio (Admin)", group: "Content", icon: Wand2, fullPagePath: "/admin",
+    render: () => wrap(<AdminImageStudio />) },
+  { id: "rep-image-studio", label: "Image Studio (Rep)", group: "Content", icon: ImageIcon, fullPagePath: "/portal",
+    render: () => wrap(<RepImageStudio />) },
+  { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
+    render: () => wrap(<AdminCreationStudio />) },
 ];
 
 export const TOOL_BY_ID = Object.fromEntries(TOOL_REGISTRY.map(t => [t.id, t]));
