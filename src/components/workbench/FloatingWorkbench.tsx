@@ -260,9 +260,38 @@ export const FloatingWorkbench: React.FC = () => {
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {showTips && (
+              <div className="forensic-tile rounded-lg p-4 border border-amber/30 bg-amber/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <HelpCircle className="w-4 h-4 text-amber" />
+                  <h3 className="font-display text-sm font-semibold">How the Workbench works</h3>
+                </div>
+                <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5">
+                  <li><span className="text-foreground font-semibold">Add tool</span> stacks any tool as a widget. Multiple tools can run side by side.</li>
+                  <li><span className="text-foreground font-semibold">Panel width</span> (Small/Medium/Large/Full) resizes the whole Workbench drawer.</li>
+                  <li>Each widget has its own <span className="text-amber font-mono">S / M / L / XL</span> button — that controls how tall the widget body is before it scrolls.</li>
+                  <li>Drag the <GripVertical className="inline w-3 h-3 -mt-0.5" /> grip handle to reorder widgets.</li>
+                  <li><ChevronDown className="inline w-3 h-3 -mt-0.5" /> collapses a widget so you can keep many tools loaded without scrolling forever.</li>
+                  <li><ExternalLink className="inline w-3 h-3 -mt-0.5" /> opens the tool's dedicated full-page version in a new view.</li>
+                  <li><span className="text-foreground font-semibold">Layouts</span>: type a name and hit save — recall any saved combo of tools later from the dropdown.</li>
+                  <li>Everything (open widgets, sizes, layouts, panel width) auto-saves to this device.</li>
+                </ul>
+                <button
+                  onClick={() => setShowTips(false)}
+                  className="mt-3 text-[10px] font-mono uppercase tracking-wider text-amber hover:underline"
+                >
+                  Got it — hide tips
+                </button>
+              </div>
+            )}
             {stack.length === 0 ? (
               <div className="text-center py-12 text-sm text-muted-foreground font-mono">
                 Empty workbench. Click <span className="text-amber">+ Add tool</span> to stack widgets.
+                <div className="mt-3">
+                  <button onClick={() => setShowTips(true)} className="text-amber underline text-xs">
+                    Show me how this works
+                  </button>
+                </div>
               </div>
             ) : (
               stack.map((w, idx) => (
@@ -270,8 +299,10 @@ export const FloatingWorkbench: React.FC = () => {
                   key={w.toolId}
                   toolId={w.toolId}
                   collapsed={!!w.collapsed}
+                  size={(w.size || "md") as "sm" | "md" | "lg" | "xl"}
                   onToggle={() => toggleAt(idx)}
                   onRemove={() => removeAt(idx)}
+                  onCycleSize={() => cycleSizeAt(idx)}
                   onDragStart={onDragStart(idx)}
                   onDragOver={onDragOver}
                   onDrop={onDrop(idx)}
