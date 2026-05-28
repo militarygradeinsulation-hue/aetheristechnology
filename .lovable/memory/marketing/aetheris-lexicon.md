@@ -23,7 +23,14 @@ Use these terms verbatim. They are the source-of-truth language for Joseph's for
 - **Follow-Up Failure** — lost deals from weak, late, or non-existent response cycles. CAC already incurred.
 - **System Disconnect** — communication failure between core tools (CRM, email, sales platforms). Creates **data debt**.
 - **Operational Waste** — time/capital burned on manual processes that don't create value. Compounds daily as **manual drag**.
-- **Brand Contradiction** — gap between marketing promise and actual customer experience. Erodes trust, kills LTV.
+- **Brand Contradiction** — gap between marketing/internal promise and actual lived reality. Erodes trust, kills LTV. Drives up to **30% drag on internal mobility and decision velocity** when present in the talent operating model.
+- **Governance Vacuum** — no owner for the orchestration layer between teams/tools. Patchwork inherited from month-two CRM config becomes the operating system for a team of 40.
+- **Signal Compression** — when only quota/activity data flows upward, every human signal (career trajectory, energy decay, role misalignment) gets compressed into silence. Retention collapses while numbers look healthy.
+- **Decision Latency** — reps wait 36–48 hours for approvals, pricing exceptions, demo access that should be automated at the infrastructure level. Upstream revenue leak.
+- **Process Debt** — compounds faster than pipeline. The cost of inherited un-audited workflows.
+- **Information Architecture Failure** — when retention/performance/feedback systems were never designed to surface the data leadership needs. Asking is a patch; architecture is the fix.
+- **Handoff Gap** — drop between marketing attribution and sales orchestration that nobody owns. Traces directly to close-rate compression in 7/10 audits.
+- **Single Point of Failure Dressed in Revenue** — a $10K/month cash flow running on one technician's tribal knowledge, paper calendar, un-digitized customers. Not a business — a liability.
 - **Vocabulary Friction** — brand/sales language that doesn't match the buyer's mental model. Signals lack of fit.
 - **Growth Ceiling** — the limit when systems max out, capacity breaks, documentation fails.
 
