@@ -300,7 +300,11 @@ export const AdminLeadBrowser: React.FC = () => {
   };
 
   const submitAddLeads = async () => {
-    const rows = addTab === 'csv' ? parseAddCsv(addCsv) : addRows.filter(r => r.business_name.trim());
+    const rows = addTab === 'csv'
+      ? parseAddCsv(addCsv)
+      : addTab === 'excel'
+        ? addExcelRows.filter(r => r.business_name.trim())
+        : addRows.filter(r => r.business_name.trim());
     if (rows.length === 0) return toast({ title: 'Add at least one lead (business name required)', variant: 'destructive' });
     if (addDest === 'rep' && !addRepCode) return toast({ title: 'Pick a rep for the daily drop', variant: 'destructive' });
     setAddBusy(true);
