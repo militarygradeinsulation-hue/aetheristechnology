@@ -95,6 +95,17 @@ export const AdminLeadBrowser: React.FC = () => {
   const [totalCounts, setTotalCounts] = useState<Record<string, number>>({});
   const [confirmPush, setConfirmPush] = useState<null | { codes: string[]; perRep: number }>(null);
   const [resultDialog, setResultDialog] = useState<null | { title: string; assigned: number; perRep: Record<string, number>; message?: string }>(null);
+  // Add Leads dialog
+  const [addOpen, setAddOpen] = useState(false);
+  const [addBusy, setAddBusy] = useState(false);
+  const [addRows, setAddRows] = useState<ManualLeadRow[]>([{ ...EMPTY_ROW }]);
+  const [addCsv, setAddCsv] = useState('');
+  const [addTab, setAddTab] = useState<'manual' | 'csv'>('manual');
+  const [addDest, setAddDest] = useState<'pool' | 'rep'>('pool');
+  const [addRepCode, setAddRepCode] = useState('');
+  const [addHoldHours, setAddHoldHours] = useState(72);
+  const [addLHF, setAddLHF] = useState(false);
+  const [addNotes, setAddNotes] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
