@@ -358,6 +358,9 @@ export const AdminLeadBrowser: React.FC = () => {
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           </Button>
+          <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => setAddOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Add leads
+          </Button>
         </div>
 
         {/* Auto-assign panel */}
