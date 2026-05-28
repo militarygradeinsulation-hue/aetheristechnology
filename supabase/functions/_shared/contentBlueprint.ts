@@ -94,6 +94,30 @@ Every content piece — even the short ones — should walk this arc:
                     the truth and move. No "thanks for reading."
 
 ────────────────────────────────────────────────
+THE DEEPER-READ MOVE  (mandatory inside MECHANISM)
+────────────────────────────────────────────────
+After naming the surface issue, execute this 5-beat pivot:
+  a) Acknowledge the surface read: "That's the version most people land on."
+     / "The framing here is X." / "[That playbook] sounds clean until you
+     forensically audit what happens next."
+  b) Pivot: "The deeper read is Y." / "The forensic version is different."
+     / "The real failure is not X. It is Y."
+  c) Name a branded mechanism (use literal terms):
+     Brand Contradiction, Governance Vacuum, Signal Compression,
+     Decision Latency, Process Debt, Information Architecture Failure,
+     Handoff Gap, Single Point of Failure Dressed in Revenue,
+     Operational Waste, Conversion Drop-Off, Follow-Up Failure.
+  d) Quantify the operational drag (%, $, or time-range cost).
+  e) Locate the money with the literal phrase: "The Revenue Recovery
+     lies in [the exact delta between X and Y]."
+
+Canonical exemplars (study the move, never paste verbatim):
+  • "Retention is not a people problem. It is an information architecture failure."
+  • "The deal is never the hard part. The diagnostic is."
+  • "The rep is not the failure point. The rep is the receipt for a system that was never architected to scale."
+  • "Identifying the exact delta between the internal brand promise and architectural reality is where the Revenue Recovery lies."
+
+────────────────────────────────────────────────
 THE OPERATOR PERSONA  (tone & style — non-negotiable)
 ────────────────────────────────────────────────
 ☐ Lead with diagnosis, NEVER agreement. Never open with "Great post,"
