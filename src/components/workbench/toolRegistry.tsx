@@ -79,7 +79,7 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "post-from-source", label: "Post From Source", group: "Outreach", icon: MessageSquare,
     render: () => wrap(<PostFromSourceGenerator repMode />) },
   { id: "linkedin-banner", label: "LinkedIn Banner", group: "Outreach", icon: ImageIcon,
-    render: () => wrap(<LinkedInBannerCreator />) },
+    render: () => wrap(<LinkedInBannerCreator invoke={bannerInvoke} />) },
   { id: "sales-scripts", label: "Sales Script", group: "Outreach", icon: ScrollText, fullPagePath: "/sales-scripts",
     render: () => wrap(<SalesScriptGenerator adminMode />) },
   { id: "follow-up-plan", label: "Follow-Up Plan", group: "Outreach", icon: Target, fullPagePath: "/follow-up-plan",
