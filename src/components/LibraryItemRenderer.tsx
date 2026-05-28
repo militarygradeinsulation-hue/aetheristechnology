@@ -1127,12 +1127,21 @@ const PlaybookView = ({ data, fileUrl }: any) => (
 // ────────────────────────────────────────────────────────────────────────────
 export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const data = item.output_data as any;
+  const data = (item.output_data || {}) as any;
   const props = { data, copiedId, setCopiedId };
 
-  if (!data || typeof data !== 'object') {
-    return <p className="text-sm text-muted-foreground">No content to display.</p>;
+  const isEmpty = !data || typeof data !== 'object' || Object.keys(data).length === 0;
+  if (isEmpty) {
+    return (
+      <div className="glass rounded-lg p-6 border border-amber/30 text-center">
+        <p className="text-sm text-foreground font-bold mb-1">No saved content for this entry.</p>
+        <p className="text-xs text-muted-foreground">
+          The record exists but its output payload is empty. This usually means the original generation failed to persist. You can safely delete this entry.
+        </p>
+      </div>
+    );
   }
+
 
   switch (item.tool_type) {
     case 'social_content': return <SocialContentView {...props} />;
