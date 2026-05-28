@@ -187,7 +187,14 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
               }}>Download .txt</Button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem as any} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem as any} />
+              )}
             </div>
           </div>
         </div>
