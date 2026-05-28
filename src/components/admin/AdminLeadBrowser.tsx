@@ -253,6 +253,77 @@ export const AdminLeadBrowser: React.FC = () => {
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
   const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : ', ';
 
+  // ---- Add Leads helpers ----
+  const parseAddCsv = (text: string): ManualLeadRow[] => {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return [];
+    const splitRow = (line: string) => {
+      const out: string[] = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQ) {
+          if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+          else if (ch === '"') inQ = false;
+          else cur += ch;
+        } else {
+          if (ch === ',' || ch === '\t') { out.push(cur); cur = ''; }
+          else if (ch === '"') inQ = true;
+          else cur += ch;
+        }
+      }
+      out.push(cur); return out.map(s => s.trim());
+    };
+    const headers = splitRow(lines[0]).map(h => h.toLowerCase().replace(/\s+/g, '_'));
+    const hasHeader = headers.some(h => ['business_name','business','company','name','email','website','phone'].includes(h));
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+    const map = (cols: string[]): ManualLeadRow => {
+      if (hasHeader) {
+        const o: any = { ...EMPTY_ROW };
+        headers.forEach((h, i) => {
+          const v = cols[i] || '';
+          if (h === 'business_name' || h === 'business' || h === 'company' || h === 'name') o.business_name = v;
+          else if (h in EMPTY_ROW) o[h] = v;
+        });
+        return o;
+      }
+      // positional: business, contact, email, phone, website, industry, location, score, notes
+      return {
+        business_name: cols[0] || '', contact_name: cols[1] || '', email: cols[2] || '',
+        phone: cols[3] || '', website: cols[4] || '', industry: cols[5] || '',
+        location: cols[6] || '', score: cols[7] || '', notes: cols[8] || '',
+      };
+    };
+    return dataLines.map(l => map(splitRow(l))).filter(r => r.business_name);
+  };
+
+  const submitAddLeads = async () => {
+    const rows = addTab === 'csv' ? parseAddCsv(addCsv) : addRows.filter(r => r.business_name.trim());
+    if (rows.length === 0) return toast({ title: 'Add at least one lead (business name required)', variant: 'destructive' });
+    if (addDest === 'rep' && !addRepCode) return toast({ title: 'Pick a rep for the daily drop', variant: 'destructive' });
+    setAddBusy(true);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'create_leads',
+        rows,
+        destination: addDest,
+        assign_to_code: addDest === 'rep' ? addRepCode : undefined,
+        hold_hours: addHoldHours,
+        low_hanging_fruit: addLHF,
+        notes: addNotes,
+      });
+      toast({
+        title: `Added ${res.inserted} lead${res.inserted === 1 ? '' : 's'}`,
+        description: addDest === 'rep' ? `Dropped to ${repName(addRepCode)} for ${addHoldHours}h` : 'Dropped to unassigned pool',
+      });
+      setAddOpen(false);
+      setAddRows([{ ...EMPTY_ROW }]);
+      setAddCsv(''); setAddLHF(false); setAddNotes('');
+      load();
+    } catch (e) {
+      toast({ title: 'Failed to add leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAddBusy(false); }
+  };
+
   return (
     <Card>
       <CardHeader>
