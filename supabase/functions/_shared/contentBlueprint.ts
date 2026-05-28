@@ -279,6 +279,31 @@ compounding / poisoning effect. Fuse vocabularies:
   • Ops: unit economics, conversion drop-off, follow-up failure,
     distribution governance, decision architecture, cash flow architecture
 
+PART 3.5 — THE DEEPER-READ MOVE (MANDATORY pivot inside MECHANISM)
+Every piece must execute this 5-beat pivot. It is the Aetheris signature.
+  a) Surface-read acknowledgment (1 sentence). Name the obvious read
+     without endorsing it. Patterns:
+       • "That's the version most people land on."
+       • "The framing here is [X]."
+       • "[The acquisition playbook / The retention story / The pipeline fix]
+          sounds clean until you forensically audit what happens next."
+  b) Deeper-read pivot (1 sentence). Patterns:
+       • "The deeper read is [Y]."
+       • "The forensic version of this is different."
+       • "The real failure is not [X]. It is [Y]."
+  c) Named branded mechanism. MUST name one of:
+     Brand Contradiction · Governance Vacuum · Signal Compression ·
+     Decision Latency · Process Debt · Information Architecture Failure ·
+     Handoff Gap · Single Point of Failure Dressed in Revenue ·
+     Operational Waste · Conversion Drop-Off · Follow-Up Failure.
+  d) Quantified operational drag. MUST include a %, $, or time-range
+     cost ("up to 30% drag on internal mobility", "36 to 48 hours of
+     decision latency", "6 to 9 months discovering the leak",
+     "7 out of 10 audits").
+  e) Revenue Recovery location. Close the pivot by locating where the
+     money is hiding: "The Revenue Recovery lies in [the exact delta
+     between X and Y]." Use the literal phrase "Revenue Recovery".
+
 PART 4 — VERDICT (1 sentence, ≤15 WORDS — NON-NEGOTIABLE)
 Quotable kill-shot. Encapsulates the mechanism reveal. Choose one shape:
   1. Identity:        "That's not [surface]. That's [mechanism]."
@@ -286,6 +311,12 @@ Quotable kill-shot. Encapsulates the mechanism reveal. Choose one shape:
   3. Location:        "The leak isn't in [obvious]. It's in [hidden]."
   4. Inversion:       "You don't have a [X] problem. You have a [Y] problem."
   5. Architectural:   "Architecture decides outcome. Everything else is theater."
+
+CANONICAL DEEPER-READ EXEMPLARS (study the move, don't copy verbatim)
+  • "Retention is not a people problem. It is an information architecture failure."
+  • "The deal is never the hard part. The diagnostic is."
+  • "The rep is not the failure point. The rep is the receipt for a system that was never architected to scale."
+  • "Identifying the exact delta between the internal brand promise and architectural reality is where the Revenue Recovery lies."
 
 SENTENCE RHYTHM (THE WHIPSAW)
 Avg 11–13 words. Variance is the weapon.
