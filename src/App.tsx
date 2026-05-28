@@ -103,9 +103,11 @@ const App = () => (
               element={
                 <AuthProvider>
                   <AdminDashboard />
+                  <FloatingWorkbench />
                 </AuthProvider>
               }
             />
+
             {/* Revenue Recovery Engine, isolated SaaS area */}
             <Route path="/app/*" element={<AppRouter />} />
             {/* All other routes use the shared AuthProvider */}
