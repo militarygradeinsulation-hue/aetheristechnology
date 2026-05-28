@@ -39,7 +39,26 @@ interface Lead {
   enrichment: any;
   enriched_at: string | null;
   created_at: string;
+  notes: string | null;
+  low_hanging_fruit?: boolean | null;
 }
+
+interface ManualLeadRow {
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  website: string;
+  industry: string;
+  location: string;
+  score: string;
+  notes: string;
+}
+
+const EMPTY_ROW: ManualLeadRow = {
+  business_name: '', contact_name: '', email: '', phone: '',
+  website: '', industry: '', location: '', score: '', notes: '',
+};
 
 interface Rep { code: string; rep_name: string | null; is_active: boolean; role: string | null; }
 
