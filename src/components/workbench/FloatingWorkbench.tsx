@@ -77,11 +77,19 @@ export const FloatingWorkbench: React.FC = () => {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
     }
-    setStack(s => [...s, { toolId, collapsed: false }]);
+    setStack(s => [...s, { toolId, collapsed: false, size: "md" }]);
   };
   const removeAt = (idx: number) => setStack(s => s.filter((_, i) => i !== idx));
   const toggleAt = (idx: number) =>
     setStack(s => s.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w));
+  const cycleSizeAt = (idx: number) => {
+    const order: Array<"sm" | "md" | "lg" | "xl"> = ["sm", "md", "lg", "xl"];
+    setStack(s => s.map((w, i) => {
+      if (i !== idx) return w;
+      const cur = (w.size || "md") as "sm" | "md" | "lg" | "xl";
+      return { ...w, size: order[(order.indexOf(cur) + 1) % order.length] };
+    }));
+  };
 
   const onDragStart = (idx: number) => (e: React.DragEvent) => {
     dragIndex.current = idx;
