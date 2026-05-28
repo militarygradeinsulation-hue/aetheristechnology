@@ -33,6 +33,7 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<RepLibraryItem | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
