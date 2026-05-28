@@ -325,6 +325,7 @@ export const AdminLeadBrowser: React.FC = () => {
       setAddOpen(false);
       setAddRows([{ ...EMPTY_ROW }]);
       setAddCsv(''); setAddLHF(false); setAddNotes('');
+      setAddExcelRows([]); setAddExcelFileName('');
       load();
     } catch (e) {
       toast({ title: 'Failed to add leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
