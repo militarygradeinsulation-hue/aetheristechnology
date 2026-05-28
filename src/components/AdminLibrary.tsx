@@ -33,6 +33,7 @@ export const AdminLibrary: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,15 +54,29 @@ export const AdminLibrary: React.FC = () => {
     if (!needs) return item;
     try {
       const full = await getAdminLibraryItem(item.id);
-      return full || item;
-    } catch {
+      if (!full) {
+        toast({ title: 'Could not load full content', description: 'The record was not found.', variant: 'destructive' });
+        return item;
+      }
+      return full;
+    } catch (e: any) {
+      toast({ title: 'Failed to load content', description: e?.message || 'Network error', variant: 'destructive' });
       return item;
     }
   };
 
   const handleView = async (item: AdminLibraryItem) => {
-    const full = await hydrate(item);
-    setViewItem(full);
+    // Open modal immediately so the user sees feedback while we hydrate.
+    setViewItem(item);
+    const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+    if (!needs) return;
+    setViewLoading(true);
+    try {
+      const full = await hydrate(item);
+      setViewItem(full);
+    } finally {
+      setViewLoading(false);
+    }
   };
 
   const handleCopy = async (item: AdminLibraryItem) => {
@@ -210,7 +225,14 @@ export const AdminLibrary: React.FC = () => {
               <EasyReadButton source={formatLibraryItemAsText(viewItem)} toolLabel={TOOL_LABELS[viewItem.tool_type] || viewItem.tool_type} />
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem} />
+              )}
             </div>
           </div>
         </div>

@@ -33,6 +33,7 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<RepLibraryItem | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -116,8 +117,19 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Button variant="ghost" size="icon" title="View" onClick={async () => {
-                  try { const full = await getRepLibraryItem(item.id); setViewItem(full); }
-                  catch { setViewItem(item); }
+                  setViewItem(item);
+                  const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+                  if (!needs) return;
+                  setViewLoading(true);
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    if (full) setViewItem(full);
+                    else toast({ title: 'Could not load full content', variant: 'destructive' });
+                  } catch (e: any) {
+                    toast({ title: 'Failed to load', description: e?.message, variant: 'destructive' });
+                  } finally {
+                    setViewLoading(false);
+                  }
                 }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
                   try {
@@ -175,7 +187,14 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
               }}>Download .txt</Button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem as any} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem as any} />
+              )}
             </div>
           </div>
         </div>
