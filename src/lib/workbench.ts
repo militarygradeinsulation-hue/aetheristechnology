@@ -1,7 +1,8 @@
 // Floating Workbench persistence (localStorage only, per-rep).
 import { getPortalProfile } from "@/lib/portalAuth";
 
-export type WidgetEntry = { toolId: string; collapsed?: boolean };
+export type WidgetSize = "sm" | "md" | "lg" | "xl";
+export type WidgetEntry = { toolId: string; collapsed?: boolean; size?: WidgetSize };
 export type WorkbenchLayout = { name: string; stack: WidgetEntry[] };
 
 function ns(): string {
