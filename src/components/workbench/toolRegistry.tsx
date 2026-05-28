@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
+  Film, Wand2, Zap,
 } from "lucide-react";
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +58,15 @@ const PlaybookCreator = lazy(() =>
 const SocialContentGenerator = lazy(() =>
   import("@/components/SocialContentGenerator").then(m => ({ default: m.SocialContentGenerator })));
 
+const ContentEngine = lazy(() =>
+  import("@/components/admin/ContentEngine").then(m => ({ default: m.ContentEngine })));
+const AdminImageStudio = lazy(() =>
+  import("@/components/admin/AdminImageStudio").then(m => ({ default: m.AdminImageStudio })));
+const AdminCreationStudio = lazy(() =>
+  import("@/components/admin/AdminCreationStudio").then(m => ({ default: m.AdminCreationStudio })));
+const RepImageStudio = lazy(() =>
+  import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
+
 const wrap = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-xs font-mono text-muted-foreground">Loading tool…</div>}>
     {node}
@@ -106,6 +116,14 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<PlaybookCreator />) },
   { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
     render: () => wrap(<SocialContentGenerator adminMode />) },
+  { id: "content-engine", label: "Content Engine", group: "Content", icon: Zap, fullPagePath: "/admin",
+    render: () => wrap(<ContentEngine />) },
+  { id: "admin-image-studio", label: "Image Studio (Admin)", group: "Content", icon: Wand2, fullPagePath: "/admin",
+    render: () => wrap(<AdminImageStudio />) },
+  { id: "rep-image-studio", label: "Image Studio (Rep)", group: "Content", icon: ImageIcon, fullPagePath: "/portal",
+    render: () => wrap(<RepImageStudio />) },
+  { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
+    render: () => wrap(<AdminCreationStudio />) },
 ];
 
 export const TOOL_BY_ID = Object.fromEntries(TOOL_REGISTRY.map(t => [t.id, t]));
