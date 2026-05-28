@@ -4549,6 +4549,7 @@ export type Database = {
           lead_status: string | null
           lifecycle_stage: string | null
           location: string | null
+          low_hanging_fruit: boolean
           notes: string | null
           phone: string | null
           score: number | null
@@ -4579,6 +4580,7 @@ export type Database = {
           lead_status?: string | null
           lifecycle_stage?: string | null
           location?: string | null
+          low_hanging_fruit?: boolean
           notes?: string | null
           phone?: string | null
           score?: number | null
@@ -4609,6 +4611,7 @@ export type Database = {
           lead_status?: string | null
           lifecycle_stage?: string | null
           location?: string | null
+          low_hanging_fruit?: boolean
           notes?: string | null
           phone?: string | null
           score?: number | null

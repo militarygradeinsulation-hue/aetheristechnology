@@ -125,7 +125,7 @@ serve(async (req) => {
       let q = supabase
         .from("rep_leads")
         .select(
-          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at",
+          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at,notes,low_hanging_fruit",
         )
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
