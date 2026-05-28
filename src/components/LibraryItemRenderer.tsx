@@ -1127,12 +1127,21 @@ const PlaybookView = ({ data, fileUrl }: any) => (
 // ────────────────────────────────────────────────────────────────────────────
 export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const data = item.output_data as any;
+  const data = (item.output_data || {}) as any;
   const props = { data, copiedId, setCopiedId };
 
-  if (!data || typeof data !== 'object') {
-    return <p className="text-sm text-muted-foreground">No content to display.</p>;
+  const isEmpty = !data || typeof data !== 'object' || Object.keys(data).length === 0;
+  if (isEmpty) {
+    return (
+      <div className="glass rounded-lg p-6 border border-amber/30 text-center">
+        <p className="text-sm text-foreground font-bold mb-1">No saved content for this entry.</p>
+        <p className="text-xs text-muted-foreground">
+          The record exists but its output payload is empty. This usually means the original generation failed to persist. You can safely delete this entry.
+        </p>
+      </div>
+    );
   }
+
 
   switch (item.tool_type) {
     case 'social_content': return <SocialContentView {...props} />;
@@ -1207,6 +1216,43 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
         </pre>
       </div>
     );
+    case 'linkedin_response':
+    case 'linkedin_reply':
+    case 'linkedin_comment': {
+      const body = String(data.body || data.text || data.reply || data.content || '');
+      const sourceUrl = data.sourceUrl || data.source_url || data.url;
+      const sourcePost = data.sourcePost || data.source_post || data.original;
+      return (
+        <div className="space-y-4">
+          {sourceUrl && (
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber underline">
+              Source post ↗
+            </a>
+          )}
+          {sourcePost && (
+            <div className="rounded-lg bg-muted/20 border border-border p-3">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Original</p>
+              <p className="text-xs text-muted-foreground whitespace-pre-wrap">{String(sourcePost)}</p>
+            </div>
+          )}
+          <div className="relative">
+            {body && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-0 right-0 h-7 w-7 p-0"
+                onClick={() => copyText(body, setCopiedId, 'linkedin-resp')}
+              >
+                {copiedId === 'linkedin-resp' ? <Check className="w-3.5 h-3.5 text-amber" /> : <Copy className="w-3.5 h-3.5" />}
+              </Button>
+            )}
+            <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed bg-transparent p-0 m-0 border-0 pr-10">
+              {body || '(empty reply)'}
+            </pre>
+          </div>
+        </div>
+      );
+    }
     default:
       return (
         <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">

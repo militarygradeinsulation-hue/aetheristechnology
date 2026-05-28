@@ -18,6 +18,13 @@ const TOOL_LABELS: Record<string, string> = {
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
   video: 'Video',
+  linkedin_response: 'LinkedIn Reply',
+  linkedin_reply: 'LinkedIn Reply',
+  linkedin_comment: 'LinkedIn Comment',
+  linkedin_post: 'LinkedIn Post',
+  day_post: 'Daily Post',
+  website_scan: 'Website Scan',
+  whats_wrong: "What's Wrong",
 };
 
 export const AdminLibrary: React.FC = () => {
