@@ -56,7 +56,17 @@ const ContentCalendarGenerator = lazy(() =>
 const PlaybookCreator = lazy(() =>
   import("@/components/PlaybookCreator").then(m => ({ default: m.PlaybookCreator })));
 const SocialContentGenerator = lazy(() =>
+const SocialContentGenerator = lazy(() =>
   import("@/components/SocialContentGenerator").then(m => ({ default: m.SocialContentGenerator })));
+
+const ContentEngine = lazy(() =>
+  import("@/components/admin/ContentEngine").then(m => ({ default: m.ContentEngine })));
+const AdminImageStudio = lazy(() =>
+  import("@/components/admin/AdminImageStudio").then(m => ({ default: m.AdminImageStudio })));
+const AdminCreationStudio = lazy(() =>
+  import("@/components/admin/AdminCreationStudio").then(m => ({ default: m.AdminCreationStudio })));
+const RepImageStudio = lazy(() =>
+  import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
 
 const wrap = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-xs font-mono text-muted-foreground">Loading tool…</div>}>
