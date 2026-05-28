@@ -161,7 +161,7 @@ export const FloatingWorkbench: React.FC = () => {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="right"
-          className={`${widthClass[width]} w-full p-0 flex flex-col bg-background border-l border-amber/20`}
+          className={`${widthClass[width]} p-0 flex flex-col bg-background border-l border-amber/20`}
         >
           <SheetHeader className="px-4 py-3 border-b border-border/40 bg-card/40">
             <div className="flex items-center justify-between gap-2">
@@ -170,13 +170,29 @@ export const FloatingWorkbench: React.FC = () => {
                 Workbench
               </SheetTitle>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cycleWidth} title={`Width: ${width}`}>
-                  {width === "full" ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                <Select value={width} onValueChange={(v) => setWidth(v as typeof width)}>
+                  <SelectTrigger className="h-8 w-[88px]" title="Panel width">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sm">Small</SelectItem>
+                    <SelectItem value="md">Medium</SelectItem>
+                    <SelectItem value="lg">Large</SelectItem>
+                    <SelectItem value="full">Full</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost" size="icon" className="h-8 w-8"
+                  onClick={() => setShowTips(t => !t)}
+                  title="How the Workbench works"
+                >
+                  <HelpCircle className={`w-4 h-4 ${showTips ? "text-amber" : ""}`} />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(false)}>
                   <X className="w-4 h-4" />
                 </Button>
               </div>
+            </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap pt-2">
