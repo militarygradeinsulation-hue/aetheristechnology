@@ -351,11 +351,6 @@ const PortalPage: React.FC = () => {
           if (adm?.ok && adm?.token) {
             const { setAdminToken } = await import('@/lib/adminAuth');
             setAdminToken(adm.token);
-            if (adm.tokenHash) {
-              try {
-                await supabase.auth.verifyOtp({ token_hash: adm.tokenHash, type: 'magiclink' });
-              } catch { /* noop */ }
-            }
             navigate('/admin', { replace: true });
             return;
           }

@@ -1,7 +1,5 @@
-// PIN-only admin login. Validates the PIN, returns a short HMAC-signed token
-// (used by admin-data edge function), AND issues a one-time magic-link
-// `token_hash` that the client exchanges for a real Supabase Auth session
-// so direct PostgREST queries gated by `is_admin(auth.uid())` work.
+// PIN-only admin login. The master admin PIN path intentionally avoids all DB
+// and auth-admin calls so the login response stays near-instant on live.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 
 const corsHeaders = {
@@ -11,7 +9,6 @@ const corsHeaders = {
 };
 
 const ADMIN_PIN = Deno.env.get("ADMIN_PIN");
-const ADMIN_EMAIL = "admin@aetheris.technology";
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 async function signToken(exp: number, secret: string): Promise<string> {
@@ -28,59 +25,32 @@ async function signToken(exp: number, secret: string): Promise<string> {
   return `${exp}.${hex}`;
 }
 
-const ADMIN_USER_CACHE_KEY = "admin:user_id";
-
-async function ensureAdminUser(admin: any): Promise<string> {
-  // Fast path: cached admin user_id in admin_kv. Avoids the slow
-  // auth.admin.listUsers() call on every login.
-  try {
-    const { data: cached } = await admin
-      .from("admin_kv")
-      .select("value")
-      .eq("key", ADMIN_USER_CACHE_KEY)
-      .maybeSingle();
-    const cachedId = (cached?.value as { user_id?: string } | undefined)?.user_id;
-    if (cachedId) return cachedId;
-  } catch { /* fall through */ }
-
-  // Slow path (first login or cache miss): look up by email, then cache.
-  const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (listErr) throw listErr;
-  let user = list.users.find((u: { email?: string | null }) => (u.email || "").toLowerCase() === ADMIN_EMAIL);
-
-  if (!user) {
-    const { data: created, error: createErr } = await admin.auth.admin.createUser({
-      email: ADMIN_EMAIL,
-      password: crypto.randomUUID() + crypto.randomUUID(),
-      email_confirm: true,
-    });
-    if (createErr) throw createErr;
-    user = created.user!;
-  }
-
-  // Ensure the user is in admin_users so is_admin() returns true.
-  await (admin.from("admin_users") as any).upsert(
-    { user_id: user.id },
-    { onConflict: "user_id", ignoreDuplicates: true },
-  );
-
-  // Cache for future logins.
-  await admin.from("admin_kv").upsert({
-    key: ADMIN_USER_CACHE_KEY,
-    value: { user_id: user.id },
-    updated_at: new Date().toISOString(),
-  });
-
-  return user.id;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { pin } = await req.json().catch(() => ({}));
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    if (!ADMIN_PIN) {
+      return new Response(JSON.stringify({ error: "Admin PIN not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fast path: the actual admin PIN must never wait on database, auth-admin,
+    // rate-limit cleanup, or partner-code lookups.
+    if (String(pin || "") === ADMIN_PIN) {
+      const exp = Date.now() + TOKEN_TTL_MS;
+      const pinToken = await signToken(exp, SUPABASE_SERVICE_ROLE_KEY);
+      return new Response(
+        JSON.stringify({ ok: true, token: pinToken }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
@@ -112,29 +82,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Accept either the master ADMIN_PIN or an active partner's portal code.
-    let isPartnerPin = false;
-    if (pin !== ADMIN_PIN) {
-      const { data: partner } = await admin
-        .from("rep_codes")
-        .select("code, role, is_active")
-        .eq("code", String(pin || ""))
-        .eq("role", "partner")
-        .eq("is_active", true)
-        .maybeSingle();
-      if (!partner) {
-        // Increment failure counter.
-        await admin.from("admin_kv").upsert({
-          key: rlKey,
-          value: { count: (rlVal.count || 0) + 1, first: rlVal.first || nowMs },
-          updated_at: new Date().toISOString(),
-        });
-        return new Response(JSON.stringify({ error: "Invalid PIN" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      isPartnerPin = true;
+    // Accept an active partner's portal code as a slower fallback path.
+    const { data: partner } = await admin
+      .from("rep_codes")
+      .select("code, role, is_active")
+      .eq("code", String(pin || ""))
+      .eq("role", "partner")
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!partner) {
+      // Increment failure counter.
+      await admin.from("admin_kv").upsert({
+        key: rlKey,
+        value: { count: (rlVal.count || 0) + 1, first: rlVal.first || nowMs },
+        updated_at: new Date().toISOString(),
+      });
+      return new Response(JSON.stringify({ error: "Invalid PIN" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Successful auth — clear the rate-limit counter for this IP.
@@ -144,35 +110,8 @@ Deno.serve(async (req) => {
     const exp = Date.now() + TOKEN_TTL_MS;
     const pinToken = await signToken(exp, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 2. Magic-link token_hash for a real Supabase Auth session.
-    // Race against a short timeout — Supabase auth admin endpoints
-    // (listUsers + generateLink) can take 10s+ under load and were
-    // making PIN login feel broken. The admin UI works without this
-    // (admin-data edge function uses the pin-token), so we treat the
-    // session bootstrap as best-effort.
-    let tokenHash: string | null = null;
-    const bootstrap = (async () => {
-      await ensureAdminUser(admin);
-      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
-        type: "magiclink",
-        email: ADMIN_EMAIL,
-      });
-      if (linkErr) throw linkErr;
-      return (linkData?.properties as any)?.hashed_token || null;
-    })();
-    try {
-      tokenHash = await Promise.race<string | null>([
-        bootstrap,
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
-      ]);
-    } catch (sessionErr) {
-      console.error("admin-pin-login session-issue error:", sessionErr);
-    }
-    // Don't await leftover bootstrap — let it finish in the background.
-    bootstrap.catch((e) => console.error("admin-pin-login bg bootstrap error:", e));
-
     return new Response(
-      JSON.stringify({ ok: true, token: pinToken, tokenHash, email: ADMIN_EMAIL }),
+      JSON.stringify({ ok: true, token: pinToken }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
