@@ -116,8 +116,19 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Button variant="ghost" size="icon" title="View" onClick={async () => {
-                  try { const full = await getRepLibraryItem(item.id); setViewItem(full); }
-                  catch { setViewItem(item); }
+                  setViewItem(item);
+                  const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+                  if (!needs) return;
+                  setViewLoading(true);
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    if (full) setViewItem(full);
+                    else toast({ title: 'Could not load full content', variant: 'destructive' });
+                  } catch (e: any) {
+                    toast({ title: 'Failed to load', description: e?.message, variant: 'destructive' });
+                  } finally {
+                    setViewLoading(false);
+                  }
                 }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
                   try {
