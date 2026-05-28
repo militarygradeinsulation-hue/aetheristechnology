@@ -4,6 +4,14 @@ import {
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
 } from "lucide-react";
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
+import { supabase } from "@/integrations/supabase/client";
+
+const bannerInvoke = async (body: Record<string, unknown>) => {
+  const token = getPortalToken();
+  return supabase.functions.invoke("portal-image-studio", {
+    body, headers: token ? { "x-portal-token": token } : {},
+  });
+};
 
 export type ToolGroup = "Outreach" | "Diagnostics" | "Content" | "Briefs";
 
