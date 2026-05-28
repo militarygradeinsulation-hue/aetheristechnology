@@ -100,7 +100,10 @@ export const AdminLeadBrowser: React.FC = () => {
   const [addBusy, setAddBusy] = useState(false);
   const [addRows, setAddRows] = useState<ManualLeadRow[]>([{ ...EMPTY_ROW }]);
   const [addCsv, setAddCsv] = useState('');
-  const [addTab, setAddTab] = useState<'manual' | 'csv'>('manual');
+  const [addTab, setAddTab] = useState<'manual' | 'csv' | 'excel'>('manual');
+  const [addExcelRows, setAddExcelRows] = useState<ManualLeadRow[]>([]);
+  const [addExcelFileName, setAddExcelFileName] = useState<string>('');
+  const [addExcelParsing, setAddExcelParsing] = useState(false);
   const [addDest, setAddDest] = useState<'pool' | 'rep'>('pool');
   const [addRepCode, setAddRepCode] = useState('');
   const [addHoldHours, setAddHoldHours] = useState(72);
