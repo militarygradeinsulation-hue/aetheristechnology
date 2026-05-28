@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check, Music, X } from 'lucide-react';
+import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check, Music, X, Library, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { listRepLibrary, deleteFromRepLibrary, type RepLibraryItem } from '@/lib/portalWorkspace';
 
 interface StudioImage {
   id: string;
