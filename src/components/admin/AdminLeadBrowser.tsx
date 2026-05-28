@@ -944,6 +944,108 @@ export const AdminLeadBrowser: React.FC = () => {
                 </div>
               )}
             </TabsContent>
+
+            <TabsContent value="excel" className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Upload an <code className="font-mono">.xlsx</code>, <code className="font-mono">.xls</code>, or <code className="font-mono">.csv</code> file. Header row required. Recognized columns: <code className="font-mono">business_name (or name/company), contact_name, email, phone, website, industry, location, score, notes</code>. Extra columns are merged into notes.
+              </p>
+              <label className="flex items-center gap-3 px-4 py-6 rounded border-2 border-dashed border-border/60 hover:border-amber/60 cursor-pointer">
+                <Upload className="w-5 h-5 text-amber" />
+                <div className="flex-1">
+                  <div className="text-sm font-mono uppercase tracking-wider">
+                    {addExcelFileName || 'Click to choose Excel / CSV file'}
+                  </div>
+                  {addExcelRows.length > 0 && (
+                    <div className="text-xs text-amber font-mono mt-1">
+                      Parsed {addExcelRows.length} valid lead{addExcelRows.length === 1 ? '' : 's'} (rows with a business name).
+                    </div>
+                  )}
+                  {addExcelParsing && <div className="text-xs text-muted-foreground mt-1">Parsing…</div>}
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setAddExcelParsing(true);
+                    setAddExcelFileName(file.name);
+                    try {
+                      const XLSX = await import('xlsx');
+                      const buf = await file.arrayBuffer();
+                      const wb = XLSX.read(buf, { type: 'array' });
+                      const ws = wb.Sheets[wb.SheetNames[0]];
+                      const json: any[] = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+                      const norm = (k: string) => k.toLowerCase().trim().replace(/[\s\-]+/g, '_');
+                      const knownKeys = ['business_name','contact_name','email','phone','website','industry','location','score','notes'];
+                      const aliases: Record<string, string> = {
+                        business: 'business_name', company: 'business_name', name: 'business_name', business_name: 'business_name',
+                        contact: 'contact_name', contact_name: 'contact_name', dm: 'contact_name', decision_maker: 'contact_name',
+                        email: 'email', email_address: 'email',
+                        phone: 'phone', phone_number: 'phone', telephone: 'phone',
+                        website: 'website', url: 'website', site: 'website',
+                        industry: 'industry', svc: 'industry', services: 'industry', service: 'industry',
+                        location: 'location', loc: 'location', city: 'location', address: 'location',
+                        score: 'score', rating: 'score', fit: 'score',
+                        notes: 'notes', note: 'notes', comment: 'notes', comments: 'notes', pain: 'notes', pitch: 'notes',
+                      };
+                      const parsed: ManualLeadRow[] = json.map((raw) => {
+                        const row: any = { ...EMPTY_ROW };
+                        const extras: string[] = [];
+                        for (const [k, v] of Object.entries(raw)) {
+                          const val = v == null ? '' : String(v).trim();
+                          if (!val) continue;
+                          const nk = norm(k);
+                          const target = aliases[nk];
+                          if (target) {
+                            row[target] = row[target] ? `${row[target]} ${val}`.trim() : val;
+                          } else {
+                            extras.push(`${k}: ${val}`);
+                          }
+                        }
+                        if (extras.length) row.notes = [row.notes, extras.join(' | ')].filter(Boolean).join(' | ');
+                        if (row.score) {
+                          const n = Number(row.score);
+                          row.score = Number.isFinite(n) ? String(Math.min(100, Math.max(0, n <= 5 ? Math.round(n * 20) : Math.round(n)))) : '';
+                        }
+                        return row as ManualLeadRow;
+                      }).filter(r => r.business_name);
+                      setAddExcelRows(parsed);
+                      if (parsed.length === 0) {
+                        toast({ title: 'No leads found', description: 'Make sure your file has a header row and a business_name column.', variant: 'destructive' });
+                      }
+                    } catch (err) {
+                      toast({ title: 'Failed to parse file', description: err instanceof Error ? err.message : '', variant: 'destructive' });
+                      setAddExcelRows([]);
+                    } finally {
+                      setAddExcelParsing(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </label>
+              {addExcelRows.length > 0 && (
+                <div className="rounded border border-border/40 max-h-48 overflow-auto">
+                  <table className="w-full text-xs font-mono">
+                    <thead className="bg-muted/30 sticky top-0">
+                      <tr><th className="text-left px-2 py-1">Business</th><th className="text-left px-2 py-1">Email</th><th className="text-left px-2 py-1">Phone</th><th className="text-left px-2 py-1">Score</th></tr>
+                    </thead>
+                    <tbody>
+                      {addExcelRows.slice(0, 50).map((r, i) => (
+                        <tr key={i} className="border-t border-border/30">
+                          <td className="px-2 py-1">{r.business_name}</td>
+                          <td className="px-2 py-1 text-muted-foreground">{r.email}</td>
+                          <td className="px-2 py-1 text-muted-foreground">{r.phone}</td>
+                          <td className="px-2 py-1 text-amber">{r.score}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {addExcelRows.length > 50 && <div className="px-2 py-1 text-[10px] text-muted-foreground">…and {addExcelRows.length - 50} more</div>}
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
 
           <DialogFooter>
