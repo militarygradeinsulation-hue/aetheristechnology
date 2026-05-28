@@ -127,6 +127,30 @@ export const RepCreationStudio: React.FC = () => {
   const [musicUrl, setMusicUrl] = useState('');
   const musicBufferRef = useRef<ArrayBuffer | null>(null);
 
+  // Video library (auto-saved past renders)
+  const [videoLibrary, setVideoLibrary] = useState<RepLibraryItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
+  const [libDeletingId, setLibDeletingId] = useState<string | null>(null);
+
+  const loadVideoLibrary = async () => {
+    setLibLoading(true);
+    try {
+      const items = await listRepLibrary({ tool_type: 'video' });
+      setVideoLibrary(items);
+    } catch (e) {
+      console.error('[RepCreationStudio] load library failed', e);
+    } finally { setLibLoading(false); }
+  };
+  const deleteLibraryVideo = async (id: string) => {
+    if (!window.confirm('Delete this video from your library? This cannot be undone.')) return;
+    setLibDeletingId(id);
+    const prev = videoLibrary;
+    setVideoLibrary(p => p.filter(v => v.id !== id));
+    try { await deleteFromRepLibrary(id); toast({ title: 'Removed from library' }); }
+    catch (e: any) { setVideoLibrary(prev); toast({ title: 'Delete failed', description: e.message, variant: 'destructive' }); }
+    finally { setLibDeletingId(null); }
+  };
+
   const invoke = (action: string, body: Record<string, unknown> = {}) => {
     const token = getPortalToken();
     return supabase.functions.invoke('portal-creation-studio', {
