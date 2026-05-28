@@ -1,82 +1,48 @@
-## AEO/SEO Pass 2 — Full Implementation
 
-Builds on the existing blueprint (robots.txt, llms.txt, llms-full.txt, sitewide JSON-LD, lander Island-Test block). This pass closes the remaining gaps: per-route metadata, sitemap automation, E-E-A-T author signals, programmatic location pages, and expanded Island-Test/FAQ/HowTo coverage.
+## Goal
 
----
+Bake the reasoning style shown in the user's example + 3 screenshots into every piece of Aetheris-generated writing (posts, comments, replies, blogs, emails, rep coaching). The pattern is consistent: surface read → deeper forensic reframe → named mechanism → quantified operational drag → revenue recovery verdict.
 
-### 1. Per-route meta + JSON-LD (react-helmet-async)
+## What changes
 
-- Install `react-helmet-async`, wrap app in `<HelmetProvider>` in `src/main.tsx`.
-- Remove the static `<link rel="canonical">` from `index.html` (Helmet will own per-route canonicals; static OG stays as social-crawler fallback).
-- Create reusable `<SeoHead>` component (`src/components/seo/SeoHead.tsx`) that accepts `title`, `description`, `path`, `ogType`, `jsonLd[]`.
-- Apply to ~12 high-value public routes with unique title/description/canonical/OG + targeted JSON-LD:
-  - `/` (lander) — WebSite + Service
-  - `/leak-audit` — Service + HowTo (the 7-step methodology)
-  - `/business-diagnostic` — Service + Offer ($2,500)
-  - `/services`, `/catalog`, `/why-us`, `/about`, `/contact`, `/blog`, `/blog/:slug` (Article + Author), `/resources`, `/industries`
-  - Vertical pages (`/ai-for-healthcare`, `/ai-for-finance`, etc.) — Service per vertical
-  - `/playbook/linkedin` — Article
+### 1. Update the master voice spec
+`supabase/functions/_shared/contentBlueprint.ts` → extend `AETHERIS_FORENSIC_OPERATOR_VOICE` with a new section: **"THE DEEPER-READ MOVE"**.
 
-### 2. Sitemap automation
+Add this as a required reasoning layer on top of the existing 4-Part Architecture (REFRAME → ANCHOR → MECHANISM → VERDICT):
 
-- Create `scripts/generate-sitemap.ts` that enumerates all public routes (excluding `/admin`, `/staff`, `/app/*`, `/login`, `/signup`, `/portal`, `/rep-portal`, `/checkout/*`, `/deliverable/:token`, `/unsubscribe`, `/my-subscription`, `/subscriber-onboarding`, `/reset-password`, `/forgot-password`, `/careers/test`, `/lovable/*`, `/not-found`).
-- Pull published blog slugs from `blog_posts` table at build time (with anon key fallback to static list if Supabase fetch fails).
-- Add `lastmod` (today's date), `changefreq`, `priority` per entry.
-- Wire `predev` + `prebuild` npm scripts to run the generator.
-- Replace current static `public/sitemap.xml` (generator outputs to same path).
+- **Surface read acknowledgment** (1 sentence): "That's the version most people land on." / "The framing here is X." / "The acquisition playbook sounds clean until…" — names the obvious read without endorsing it.
+- **Deeper read pivot** (1 sentence): "The deeper read is…" / "The forensic version of this is different." / "The real failure is not X. It is Y." — pivots to the structural diagnosis.
+- **Named contradiction/mechanism**: must name a *branded concept* — Brand Contradiction, Governance Vacuum, Signal Compression, Decision Latency, Process Debt, Single Point of Failure Dressed in Revenue, Information Architecture Failure, Handoff Gap.
+- **Quantified drag**: every deeper-read must include a % or $ or time-range cost ("up to 30% drag on internal mobility," "36 to 48 hours of decision latency," "6 to 9 months discovering the leak").
+- **Revenue Recovery close**: verdict locates where the money is hiding — "the Revenue Recovery lies in [delta]."
 
-### 3. Author / E-E-A-T signals
+### 2. Update the writing blueprint memory
+`.lovable/memory/marketing/aetheris-writing-blueprint.md` → add a "Deeper-Read Move" subsection under the 4-Part Architecture, with the 4 example reframes from the screenshots as canonical exemplars:
 
-- Add `Person` JSON-LD for Joseph Toney in `index.html` (sitewide knowledge graph entity) with `jobTitle`, `worksFor` → Aetheris, `sameAs` → LinkedIn, `knowsAbout` → business forensics topics.
-- Add author byline component to blog posts and playbooks (name, role "Business Forensics Operator", "Indianapolis, IN", link to `/about`).
-- Add `author` + `publisher` properties to all `Article` JSON-LD blocks.
-- Add credentials/expertise block to `/about` page (existing copy + structured credentials list rendered as plain HTML for AI extraction).
+- VP/retention → "Retention is not a people problem. It is an information architecture failure."
+- Acquisition → "The deal is never the hard part. The diagnostic is."
+- Sales drag → "The rep is not the failure point. The rep is the receipt for a system that was never architected to scale."
+- Talent/VP role → "Identifying the exact delta between internal brand promise and architectural reality is where the Revenue Recovery lies."
 
-### 4. Programmatic location pages
+### 3. Expand the lexicon
+`.lovable/memory/marketing/aetheris-lexicon.md` → add the new named mechanisms so generators reuse them: Brand Contradiction, Governance Vacuum, Signal Compression, Decision Latency, Process Debt, Single Point of Failure Dressed in Revenue, Information Architecture Failure, Operational Waste, Revenue Recovery.
 
-- Create `/indianapolis` and `/indiana` routes (single `LocationPage` component reading slug params, or two thin page files reusing one component).
-- Each carries:
-  - `LocalBusiness` + `ProfessionalService` JSON-LD with Indianapolis address, geo coordinates, service area
-  - Localized H1 ("Business Forensics in Indianapolis"), 7-step methodology summary, 4 Island-Test direct answers tuned to "Indianapolis business consultant", "Indiana revenue leak audit"
-  - CTA to Forensic Diagnostic
-- Add both routes to sitemap + llms.txt.
+### 4. Update the index
+`.lovable/memory/index.md` → bump the "LinkedIn Voice Playbook" Core line to mention the Deeper-Read Move + Revenue Recovery close, so it's enforced on every generation.
 
-### 5. Expanded Island-Test + FAQ/HowTo schema
+## What does NOT change
 
-- Extract the existing lander "Frequently Cited Facts" into a reusable `<CitedFactsBlock>` component; embed on `/leak-audit`, `/business-diagnostic`, `/services`, `/about`, `/indianapolis` with page-specific facts.
-- Build `<BuyerIntentFaq>` component with 18 buyer-intent Q&As (pricing, timeline, deliverables, who it's for, comparison vs traditional consulting, Indianapolis-specific, ROI). Embed on `/leak-audit` and `/business-diagnostic`. Each renders visible accordion + `FAQPage` JSON-LD.
-- Add `HowTo` JSON-LD for the 7-step Leak Audit methodology on `/leak-audit` (each step = `HowToStep` with name + text).
-- Update `public/llms-full.txt` to reference the new pages and add 4–6 more Island-Test answers covering Indianapolis + the 7-step HowTo.
+- No UI changes.
+- No new edge functions. The blueprint is imported by every existing generator (`generate-posts-from-source`, blog generator, playbook, drip emails, rep coach), so updating the shared constant propagates everywhere automatically.
+- No DB migrations.
 
----
+## Files touched
 
-### Files to touch
+- `supabase/functions/_shared/contentBlueprint.ts` (edit `AETHERIS_FORENSIC_OPERATOR_VOICE` + `FORENSIC_BLUEPRINT_PROMPT`)
+- `.lovable/memory/marketing/aetheris-writing-blueprint.md`
+- `.lovable/memory/marketing/aetheris-lexicon.md`
+- `.lovable/memory/index.md`
 
-**New:**
-- `src/components/seo/SeoHead.tsx`
-- `src/components/seo/CitedFactsBlock.tsx`
-- `src/components/seo/BuyerIntentFaq.tsx`
-- `src/components/seo/AuthorByline.tsx`
-- `src/pages/LocationPage.tsx`
-- `scripts/generate-sitemap.ts`
+## Verification
 
-**Edited:**
-- `package.json` (add `react-helmet-async`, predev/prebuild scripts)
-- `src/main.tsx` (HelmetProvider)
-- `src/App.tsx` (add `/indianapolis`, `/indiana` routes)
-- `index.html` (remove canonical, add Person JSON-LD)
-- ~12 page files (add `<SeoHead>` with route-specific meta + JSON-LD)
-- `src/pages/LeakAuditPage.tsx`, `src/pages/DiagnosticQuizPage.tsx` (add CitedFactsBlock + BuyerIntentFaq + HowTo)
-- `src/pages/BlogPostPage.tsx`, `src/pages/playbooks/*` (add AuthorByline)
-- `src/pages/AboutPage.tsx` (credentials block)
-- `public/sitemap.xml` (regenerated by script)
-- `public/llms.txt`, `public/llms-full.txt` (add location pages + new facts)
-
-### Out of scope
-- SSR (Vite SPA limit; social crawlers still get the static `index.html` fallback)
-- Real-time citation/Share-of-Voice tracking dashboards
-- G2/Capterra/Reddit profile creation (off-platform)
-- New blog content authorship
-
-### Visual & brand constraints
-All new components use existing dark charcoal + amber tokens, Fraunces for forensic headlines, JetBrains Mono for case-file labels. Crimson reserved for leak signals only. No new gradients, no testimonials, no popups.
+After the edit, generate one test post via the admin Post Studio using a generic source and confirm the output contains: (1) surface-read acknowledgment, (2) "deeper read" pivot, (3) a named branded mechanism, (4) a quantified drag figure, (5) a Revenue Recovery verdict ≤15 words.

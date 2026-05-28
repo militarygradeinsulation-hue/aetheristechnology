@@ -19,7 +19,7 @@
 - [Brand Strategy](mem://business/brand-strategy) — Specialty-manufacturer wedge, credentials-first positioning, two-offer surface
 - [Content Strategy](mem://marketing/content-strategy) — Automated blog/playbook schedules, LinkedIn 360 Brew
 - [Aetheris Lexicon](mem://marketing/aetheris-lexicon) — REQUIRED Leak Audit™ vocabulary + structural rules for ALL LinkedIn posts/comments/replies (enforced in linkedin-post-respond + linkedin-post-studio)
-- [Aetheris Writing Blueprint](mem://marketing/aetheris-writing-blueprint) — 4-Part Architecture (REFRAME→ANCHOR→MECHANISM→VERDICT), opener database, ≤15-word verdict structures, whipsaw sentence rhythm. Enforced in contentBlueprint.ts AETHERIS_FORENSIC_OPERATOR_VOICE.
+- [Aetheris Writing Blueprint](mem://marketing/aetheris-writing-blueprint) — 4-Part Architecture (REFRAME→ANCHOR→MECHANISM→VERDICT) + **mandatory Deeper-Read Move** (surface read → "deeper read is" pivot → named branded mechanism → quantified drag % / $ / time → "Revenue Recovery lies in [delta]" close). Enforced in contentBlueprint.ts AETHERIS_FORENSIC_OPERATOR_VOICE + FORENSIC_BLUEPRINT_PROMPT.
 - [Visual Identity](mem://style/visual-identity) — Dark theme aesthetics, typography, Vimeo demo rules
 - [Forensic Identity](mem://style/forensic-identity) — Case-file aesthetics, crimson rules (long-form content only)
 - [UI Constraints](mem://style/ui-constraints) — Forbidden UX patterns, floating contact system rules
