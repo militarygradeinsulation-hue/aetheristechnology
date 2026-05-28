@@ -193,7 +193,6 @@ export const FloatingWorkbench: React.FC = () => {
                 </Button>
               </div>
             </div>
-            </div>
 
             <div className="flex items-center gap-2 flex-wrap pt-2">
               <DropdownMenu>
