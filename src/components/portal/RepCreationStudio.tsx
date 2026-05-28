@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check, Music, X } from 'lucide-react';
+import { Loader2, Sparkles, Download, Film, Wand2, RefreshCw, Check, Music, X, Library, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { listRepLibrary, deleteFromRepLibrary, type RepLibraryItem } from '@/lib/portalWorkspace';
 
 interface StudioImage {
   id: string;
@@ -125,6 +127,30 @@ export const RepCreationStudio: React.FC = () => {
   const [musicUrl, setMusicUrl] = useState('');
   const musicBufferRef = useRef<ArrayBuffer | null>(null);
 
+  // Video library (auto-saved past renders)
+  const [videoLibrary, setVideoLibrary] = useState<RepLibraryItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
+  const [libDeletingId, setLibDeletingId] = useState<string | null>(null);
+
+  const loadVideoLibrary = async () => {
+    setLibLoading(true);
+    try {
+      const items = await listRepLibrary({ tool_type: 'video' });
+      setVideoLibrary(items);
+    } catch (e) {
+      console.error('[RepCreationStudio] load library failed', e);
+    } finally { setLibLoading(false); }
+  };
+  const deleteLibraryVideo = async (id: string) => {
+    if (!window.confirm('Delete this video from your library? This cannot be undone.')) return;
+    setLibDeletingId(id);
+    const prev = videoLibrary;
+    setVideoLibrary(p => p.filter(v => v.id !== id));
+    try { await deleteFromRepLibrary(id); toast({ title: 'Removed from library' }); }
+    catch (e: any) { setVideoLibrary(prev); toast({ title: 'Delete failed', description: e.message, variant: 'destructive' }); }
+    finally { setLibDeletingId(null); }
+  };
+
   const invoke = (action: string, body: Record<string, unknown> = {}) => {
     const token = getPortalToken();
     return supabase.functions.invoke('portal-creation-studio', {
@@ -156,7 +182,7 @@ export const RepCreationStudio: React.FC = () => {
     setVoices(data.voices || []);
     if (!voiceId && data.voices?.[0]) setVoiceId(data.voices[0].voice_id);
   };
-  useEffect(() => { loadImages(); loadVoices(); }, []);
+  useEffect(() => { loadImages(); loadVoices(); loadVideoLibrary(); }, []);
 
   const toggleSel = (id: string) => {
     setSelectedIds(prev => {
@@ -408,6 +434,40 @@ export const RepCreationStudio: React.FC = () => {
       const mb = (blob.size / 1024 / 1024).toFixed(1);
       setStep(`Done, ${mb} MB`);
       toast({ title: 'Video ready', description: `${mb} MB` });
+
+      // Auto-save to rep library so it can be revisited
+      try {
+        const path = `rep-videos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const upload = await supabase.storage
+          .from('workspace-files')
+          .upload(path, blob, { contentType: mime, upsert: false });
+        if (upload.error) throw upload.error;
+        const { data: pub } = supabase.storage.from('workspace-files').getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        await saveToolRun({
+          tool_type: 'video',
+          title: active.title || `Video, ${new Date().toLocaleString()}`,
+          input_data: { prompt, aspect, scenes: active.scenes.length },
+          output_data: {
+            title: active.title,
+            video_url: publicUrl,
+            ext,
+            size_mb: Number(mb),
+            aspect,
+            scenes: active.scenes,
+          },
+          file_url: publicUrl,
+        });
+        toast({ title: 'Saved to your Library' });
+        loadVideoLibrary();
+      } catch (saveErr: any) {
+        console.error('[RepCreationStudio] save to library failed', saveErr);
+        toast({
+          title: 'Saved locally only',
+          description: saveErr?.message || 'Could not upload to library.',
+          variant: 'destructive',
+        });
+      }
     } catch (e: any) {
       toast({ title: 'Render failed', description: e.message, variant: 'destructive' });
       setStep('');
@@ -650,6 +710,65 @@ export const RepCreationStudio: React.FC = () => {
           </a>
         </div>
       )}
+
+      {/* Video Library, every video you've made, auto-saved */}
+      <div className="glass p-6 rounded-xl">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <h3 className="font-bold font-display text-lg flex items-center gap-2">
+            <Library className="w-5 h-5 text-amber" /> Your Video Library
+            <span className="text-xs text-muted-foreground font-normal">({videoLibrary.length})</span>
+          </h3>
+          <Button size="sm" variant="outline" onClick={loadVideoLibrary} disabled={libLoading}>
+            {libLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+            Refresh
+          </Button>
+        </div>
+        {libLoading && videoLibrary.length === 0 ? (
+          <div className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>
+        ) : videoLibrary.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            No videos yet. Render one above and it'll auto-save here.
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {videoLibrary.map(v => {
+              const url = v.file_url || (v.output_data as any)?.video_url || '';
+              const ext = (v.output_data as any)?.ext || 'mp4';
+              const sizeMb = (v.output_data as any)?.size_mb;
+              return (
+                <div key={v.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 flex flex-col gap-2">
+                  {url ? (
+                    <video src={url} controls preload="metadata" className="w-full aspect-video rounded bg-black" />
+                  ) : (
+                    <div className="w-full aspect-video rounded bg-black/40 flex items-center justify-center text-xs text-muted-foreground">
+                      No file
+                    </div>
+                  )}
+                  <div className="text-xs font-bold leading-tight line-clamp-2">{v.title || 'Untitled video'}</div>
+                  <div className="text-[10px] text-muted-foreground font-mono">
+                    {new Date(v.created_at).toLocaleString()}{sizeMb ? ` · ${sizeMb} MB` : ''}
+                  </div>
+                  <div className="flex gap-2 mt-auto">
+                    {url && (
+                      <a href={url} download={`aetheris-${v.id}.${ext}`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full h-8">
+                          <Download className="w-3 h-3 mr-1" /> Download
+                        </Button>
+                      </a>
+                    )}
+                    <Button size="sm" variant="outline"
+                      onClick={() => deleteLibraryVideo(v.id)}
+                      disabled={libDeletingId === v.id}
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10 h-8 px-2">
+                      {libDeletingId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
