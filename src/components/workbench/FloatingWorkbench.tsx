@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Wrench, Plus, Save, Trash2, Maximize2, Minimize2, X } from "lucide-react";
+import { Wrench, Plus, Save, Trash2, Maximize2, Minimize2, X, HelpCircle, GripVertical, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { wb, type WidgetEntry, type WorkbenchLayout } from "@/lib/workbench";
 import { TOOL_REGISTRY, type ToolGroup } from "./toolRegistry";
 import { WorkbenchWidget } from "./WorkbenchWidget";
@@ -17,11 +17,14 @@ import { hasValidPortalSession } from "@/lib/portalAuth";
 import { hasValidAdminToken } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 
+// Widths applied at ALL viewports (no sm: prefix) so mobile users can
+// resize too. Sheet base has w-3/4 + sm:max-w-sm — we override both via
+// tailwind-merge by passing these in className.
 const widthClass: Record<"sm" | "md" | "lg" | "full", string> = {
-  sm: "sm:max-w-md",
-  md: "sm:max-w-2xl",
-  lg: "sm:max-w-4xl",
-  full: "sm:max-w-[100vw]",
+  sm:   "w-full max-w-md sm:max-w-md",
+  md:   "w-full max-w-2xl sm:max-w-2xl",
+  lg:   "w-full max-w-4xl sm:max-w-4xl",
+  full: "w-screen max-w-[100vw] sm:max-w-[100vw]",
 };
 const widthOrder: Array<"sm" | "md" | "lg" | "full"> = ["sm", "md", "lg", "full"];
 
