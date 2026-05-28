@@ -777,6 +777,175 @@ export const AdminLeadBrowser: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Add Leads dialog */}
+      <Dialog open={addOpen} onOpenChange={(o) => !addBusy && setAddOpen(o)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Upload className="w-5 h-5 text-amber" /> Add leads
+            </DialogTitle>
+            <DialogDescription>
+              Drop new leads straight into the unassigned pool, or push them as a daily drop to a specific rep. Mark them as low-hanging fruit and add shared notes so reps know how to play them.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Destination */}
+          <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setAddDest('pool')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'pool' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Shuffle className="w-4 h-4 text-amber" /> Drop to pool</div>
+                <div className="text-xs text-muted-foreground">Any rep can claim. Auto-assign/refresh can pull from it later.</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddDest('rep')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'rep' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Send className="w-4 h-4 text-amber" /> Daily drop to rep</div>
+                <div className="text-xs text-muted-foreground">Held exclusively for one rep until the hold expires.</div>
+              </button>
+            </div>
+            {addDest === 'rep' && (
+              <div className="grid sm:grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px]">Rep</Label>
+                  <Select value={addRepCode} onValueChange={setAddRepCode}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Pick rep" /></SelectTrigger>
+                    <SelectContent>
+                      {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code} {r.role === 'partner' ? '(P)' : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Hold hours</Label>
+                  <Input type="number" min={1} max={720} value={addHoldHours} onChange={e => setAddHoldHours(Number(e.target.value) || 72)} className="h-9" />
+                </div>
+              </div>
+            )}
+            <div className="grid sm:grid-cols-[auto_1fr] gap-2 items-start">
+              <label className="flex items-center gap-2 px-3 py-2 rounded border border-border/50 cursor-pointer hover:border-amber/60">
+                <Checkbox checked={addLHF} onCheckedChange={(v) => setAddLHF(!!v)} />
+                <Flame className="w-4 h-4 text-red-400" />
+                <span className="text-sm font-mono uppercase tracking-wider">Low-hanging fruit</span>
+              </label>
+              <div>
+                <Label className="text-[10px]">Shared notes (applied to every lead in this batch)</Label>
+                <Textarea
+                  value={addNotes}
+                  onChange={e => setAddNotes(e.target.value)}
+                  placeholder="e.g. Referred by Joe at Acme — already warm. Mention the leak audit."
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Lead entry */}
+          <Tabs value={addTab} onValueChange={(v) => setAddTab(v as any)}>
+            <TabsList>
+              <TabsTrigger value="manual">Manual entry</TabsTrigger>
+              <TabsTrigger value="csv">Paste CSV</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="manual" className="space-y-3">
+              {addRows.map((row, idx) => (
+                <div key={idx} className="rounded border border-border/40 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase text-muted-foreground">Lead {idx + 1}</span>
+                    {addRows.length > 1 && (
+                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setAddRows(rs => rs.filter((_, i) => i !== idx))}>
+                        <X className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px]">Business name *</Label>
+                      <Input value={row.business_name} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, business_name: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Contact name</Label>
+                      <Input value={row.contact_name} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, contact_name: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Email</Label>
+                      <Input value={row.email} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, email: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Phone</Label>
+                      <Input value={row.phone} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, phone: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Website</Label>
+                      <Input value={row.website} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, website: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Industry</Label>
+                      <Input value={row.industry} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, industry: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Location</Label>
+                      <Input value={row.location} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, location: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Score (0–100)</Label>
+                      <Input type="number" min={0} max={100} value={row.score} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, score: e.target.value } : r))} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px]">Per-lead notes</Label>
+                    <Textarea
+                      rows={2}
+                      value={row.notes}
+                      onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, notes: e.target.value } : r))}
+                      placeholder="Specific intel for this lead only"
+                    />
+                  </div>
+                </div>
+              ))}
+              <Button size="sm" variant="outline" onClick={() => setAddRows(rs => [...rs, { ...EMPTY_ROW }])}>
+                <Plus className="w-3 h-3 mr-1" /> Add another lead
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="csv" className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Paste rows from a spreadsheet. First row can be headers (<code className="font-mono">business_name, contact_name, email, phone, website, industry, location, score, notes</code>) or just data in that order. One lead per line.
+              </p>
+              <Textarea
+                rows={10}
+                className="font-mono text-xs"
+                value={addCsv}
+                onChange={e => setAddCsv(e.target.value)}
+                placeholder={`business_name,contact_name,email,phone,website,industry,location,score,notes\nAcme Roofing,Joe Smith,joe@acme.com,317-555-1212,acme.com,Roofing,"Indianapolis, IN",75,Met at trade show`}
+              />
+              {addCsv.trim() && (
+                <div className="text-xs text-amber font-mono">
+                  Detected {parseAddCsv(addCsv).length} valid lead{parseAddCsv(addCsv).length === 1 ? '' : 's'}.
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)} disabled={addBusy}>Cancel</Button>
+            <Button className="bg-amber text-background hover:bg-amber/90" onClick={submitAddLeads} disabled={addBusy}>
+              {addBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+              {addDest === 'rep' ? 'Drop to rep' : 'Drop to pool'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
+
   );
 };
