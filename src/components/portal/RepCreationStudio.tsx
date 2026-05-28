@@ -434,6 +434,40 @@ export const RepCreationStudio: React.FC = () => {
       const mb = (blob.size / 1024 / 1024).toFixed(1);
       setStep(`Done, ${mb} MB`);
       toast({ title: 'Video ready', description: `${mb} MB` });
+
+      // Auto-save to rep library so it can be revisited
+      try {
+        const path = `rep-videos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const upload = await supabase.storage
+          .from('workspace-files')
+          .upload(path, blob, { contentType: mime, upsert: false });
+        if (upload.error) throw upload.error;
+        const { data: pub } = supabase.storage.from('workspace-files').getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        await saveToolRun({
+          tool_type: 'video',
+          title: active.title || `Video, ${new Date().toLocaleString()}`,
+          input_data: { prompt, aspect, scenes: active.scenes.length },
+          output_data: {
+            title: active.title,
+            video_url: publicUrl,
+            ext,
+            size_mb: Number(mb),
+            aspect,
+            scenes: active.scenes,
+          },
+          file_url: publicUrl,
+        });
+        toast({ title: 'Saved to your Library' });
+        loadVideoLibrary();
+      } catch (saveErr: any) {
+        console.error('[RepCreationStudio] save to library failed', saveErr);
+        toast({
+          title: 'Saved locally only',
+          description: saveErr?.message || 'Could not upload to library.',
+          variant: 'destructive',
+        });
+      }
     } catch (e: any) {
       toast({ title: 'Render failed', description: e.message, variant: 'destructive' });
       setStep('');
