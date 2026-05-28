@@ -115,7 +115,6 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "playbook", label: "Playbook Creator", group: "Content", icon: BookOpen,
     render: () => wrap(<PlaybookCreator />) },
   { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
-  { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
     render: () => wrap(<SocialContentGenerator adminMode />) },
   { id: "content-engine", label: "Content Engine", group: "Content", icon: Zap, fullPagePath: "/admin",
     render: () => wrap(<ContentEngine />) },
