@@ -710,6 +710,65 @@ export const RepCreationStudio: React.FC = () => {
           </a>
         </div>
       )}
+
+      {/* Video Library, every video you've made, auto-saved */}
+      <div className="glass p-6 rounded-xl">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <h3 className="font-bold font-display text-lg flex items-center gap-2">
+            <Library className="w-5 h-5 text-amber" /> Your Video Library
+            <span className="text-xs text-muted-foreground font-normal">({videoLibrary.length})</span>
+          </h3>
+          <Button size="sm" variant="outline" onClick={loadVideoLibrary} disabled={libLoading}>
+            {libLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+            Refresh
+          </Button>
+        </div>
+        {libLoading && videoLibrary.length === 0 ? (
+          <div className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>
+        ) : videoLibrary.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            No videos yet. Render one above and it'll auto-save here.
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {videoLibrary.map(v => {
+              const url = v.file_url || (v.output_data as any)?.video_url || '';
+              const ext = (v.output_data as any)?.ext || 'mp4';
+              const sizeMb = (v.output_data as any)?.size_mb;
+              return (
+                <div key={v.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 flex flex-col gap-2">
+                  {url ? (
+                    <video src={url} controls preload="metadata" className="w-full aspect-video rounded bg-black" />
+                  ) : (
+                    <div className="w-full aspect-video rounded bg-black/40 flex items-center justify-center text-xs text-muted-foreground">
+                      No file
+                    </div>
+                  )}
+                  <div className="text-xs font-bold leading-tight line-clamp-2">{v.title || 'Untitled video'}</div>
+                  <div className="text-[10px] text-muted-foreground font-mono">
+                    {new Date(v.created_at).toLocaleString()}{sizeMb ? ` · ${sizeMb} MB` : ''}
+                  </div>
+                  <div className="flex gap-2 mt-auto">
+                    {url && (
+                      <a href={url} download={`aetheris-${v.id}.${ext}`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full h-8">
+                          <Download className="w-3 h-3 mr-1" /> Download
+                        </Button>
+                      </a>
+                    )}
+                    <Button size="sm" variant="outline"
+                      onClick={() => deleteLibraryVideo(v.id)}
+                      disabled={libDeletingId === v.id}
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10 h-8 px-2">
+                      {libDeletingId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
