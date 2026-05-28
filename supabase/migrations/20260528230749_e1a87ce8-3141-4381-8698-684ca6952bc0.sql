@@ -1,0 +1,2 @@
+ALTER TABLE public.rep_leads ADD COLUMN IF NOT EXISTS low_hanging_fruit boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_rep_leads_lhf ON public.rep_leads (low_hanging_fruit) WHERE low_hanging_fruit = true;
