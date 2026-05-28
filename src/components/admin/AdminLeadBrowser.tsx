@@ -863,6 +863,7 @@ export const AdminLeadBrowser: React.FC = () => {
             <TabsList>
               <TabsTrigger value="manual">Manual entry</TabsTrigger>
               <TabsTrigger value="csv">Paste CSV</TabsTrigger>
+              <TabsTrigger value="excel">Upload Excel</TabsTrigger>
             </TabsList>
 
             <TabsContent value="manual" className="space-y-3">
