@@ -118,6 +118,7 @@ const App = () => (
                   <GlobalMatrixOverlay />
                   <PageViewTracker />
                   <RetargetingPixel />
+                  <FloatingWorkbench />
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                       <Route path="/" element={<LeakLanderPage />} />
