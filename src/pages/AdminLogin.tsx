@@ -34,17 +34,6 @@ const AdminLogin: React.FC = () => {
         throw new Error(data?.error || error?.message || 'Invalid PIN');
       }
       setAdminToken(data.token);
-
-      // Establish a real Supabase Auth session so direct PostgREST queries
-      // gated by `is_admin(auth.uid())` work in the admin UI.
-      if (data.tokenHash) {
-        const { error: otpErr } = await supabase.auth.verifyOtp({
-          token_hash: data.tokenHash,
-          type: 'magiclink',
-        });
-        if (otpErr) console.warn('Admin session bootstrap failed:', otpErr.message);
-      }
-
       navigate('/admin', { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'PIN login failed.';
