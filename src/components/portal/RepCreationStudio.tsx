@@ -182,7 +182,7 @@ export const RepCreationStudio: React.FC = () => {
     setVoices(data.voices || []);
     if (!voiceId && data.voices?.[0]) setVoiceId(data.voices[0].voice_id);
   };
-  useEffect(() => { loadImages(); loadVoices(); }, []);
+  useEffect(() => { loadImages(); loadVoices(); loadVideoLibrary(); }, []);
 
   const toggleSel = (id: string) => {
     setSelectedIds(prev => {
