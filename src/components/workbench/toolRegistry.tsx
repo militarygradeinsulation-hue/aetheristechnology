@@ -56,7 +56,6 @@ const ContentCalendarGenerator = lazy(() =>
 const PlaybookCreator = lazy(() =>
   import("@/components/PlaybookCreator").then(m => ({ default: m.PlaybookCreator })));
 const SocialContentGenerator = lazy(() =>
-const SocialContentGenerator = lazy(() =>
   import("@/components/SocialContentGenerator").then(m => ({ default: m.SocialContentGenerator })));
 
 const ContentEngine = lazy(() =>
