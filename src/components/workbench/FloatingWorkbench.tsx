@@ -37,6 +37,7 @@ export const FloatingWorkbench: React.FC = () => {
   const [active, setActive] = useState("default");
   const [width, setWidth] = useState<"sm" | "md" | "lg" | "full">("md");
   const [saveName, setSaveName] = useState("");
+  const [showTips, setShowTips] = useState(false);
   const dragIndex = useRef<number | null>(null);
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
