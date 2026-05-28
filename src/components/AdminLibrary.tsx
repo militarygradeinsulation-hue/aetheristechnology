@@ -225,7 +225,14 @@ export const AdminLibrary: React.FC = () => {
               <EasyReadButton source={formatLibraryItemAsText(viewItem)} toolLabel={TOOL_LABELS[viewItem.tool_type] || viewItem.tool_type} />
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem} />
+              )}
             </div>
           </div>
         </div>
