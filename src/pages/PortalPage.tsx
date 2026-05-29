@@ -790,6 +790,7 @@ const PortalPage: React.FC = () => {
                       id={`portal-tab-btn-${t.id}`}
                       type="button"
                       onClick={() => {
+                        if (t.href) { window.location.href = t.href; return; }
                         setTab(t.id);
                         setActiveTool(null);
                         logPortalActivity('tab_view', { tab: t.id });
