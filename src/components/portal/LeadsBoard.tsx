@@ -1354,7 +1354,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           </div>
 
           {/* Company Scan */}
-          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+          <div id={`lead-tool-${lead.id}-website-scanner`} className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2 transition-shadow">
+
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
                 <Search className="w-3 h-3" /> Company Scan
