@@ -452,6 +452,12 @@ export default function LinkedInPostStudio() {
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
 
+  // Repetition lock state — populated by the two "scan" buttons
+  const [structureReport, setStructureReport] = useState<import('@/lib/repetitionScan').ScanReport | null>(null);
+  const [personaReports, setPersonaReports] = useState<Record<string, import('@/lib/repetitionScan').ScanReport>>({});
+  const [scanningStructure, setScanningStructure] = useState(false);
+  const [scanningPersona, setScanningPersona] = useState(false);
+
   // Respond-to-post (image upload OR pasted text OR reply-to-reply) state
   const [respondSourceType, setRespondSourceType] = useState<'image' | 'text' | 'reply'>('image');
   const [respondImage, setRespondImage] = useState<string | null>(null);
