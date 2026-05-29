@@ -64,10 +64,12 @@ interface Rep { code: string; rep_name: string | null; is_active: boolean; role:
 
 const STATUS_FILTERS = [
   { value: 'pool', label: 'Unassigned pool' },
+  { value: 'holding', label: 'My holdings' },
   { value: 'assigned', label: 'Dripped (held for rep)' },
   { value: 'claimed', label: 'Claimed / working' },
   { value: 'all', label: 'All leads' },
 ];
+
 
 export const AdminLeadBrowser: React.FC = () => {
   const { toast } = useToast();
