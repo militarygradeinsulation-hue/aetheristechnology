@@ -98,13 +98,37 @@ serve(async (req) => {
       if (!rep || !rep.is_active) return new Response(JSON.stringify({ error: "Rep code not found or inactive" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
       const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
+      const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
       const { error } = await admin.from("rep_leads").update({
         assigned_to_code: code,
         assigned_at: new Date().toISOString(),
         assignment_expires_at: expires,
+        admin_holding: false,
       }).in("id", ids).is("claimed_by_code", null);
       if (error) throw error;
       return new Response(JSON.stringify({ ok: true, assigned: ids.length, code, expires }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE FROM HOLDING → POOL (admin distributes their personal stash) ----------
+    if (action === "move_to_pool") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: false,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE TO HOLDING (admin pulls a pool lead back into personal stash) ----------
+    if (action === "move_to_holding") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: true,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids).is("claimed_by_code", null);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     }
 
     if (action === "unassign") {
