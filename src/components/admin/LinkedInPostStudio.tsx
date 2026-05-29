@@ -398,7 +398,9 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
     lines.push('4. NEVER write the persona\'s name. NEVER name their films/companies/books/shows/brands. NEVER use their signature catchphrases. NEVER reference their biography. NEVER do an impression or parody. Style transfer ONLY — cadence, rhythm, vocab, energy.');
     lines.push('5. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it is said, not WHAT is said.');
     lines.push('6. SELF-CHECK BEFORE RETURNING: Read the draft out loud in your head. If it sounds like the default Aetheris voice, you have FAILED. Rewrite it harder in the persona\'s actual rhythm. Repeat until the persona is undeniable.');
-    lines.push('');
+    lines.push('7. FRESHNESS LOCK: Honor every pick inside the LIVE PERSONA FRESHNESS DIAL block below. Those picks are randomized for THIS draft only and exist to keep the persona alive and unrepeatable across generations. Do not default to your usual shape for this persona — commit to the dialed-in mood, lens, opener, pivot, closer, rhythm twist, energy dial, entry angle, and texture move.');
+    lines.push(buildPersonaFreshnessBlock(personaVal!));
+
   }
 
   if (toneVal && toneVal !== 'auto') {
