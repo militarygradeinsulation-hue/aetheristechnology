@@ -259,6 +259,9 @@ const tierCards = [
 
 export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock = false }: { onContactClick: () => void; hideHeader?: boolean; staffUnlock?: boolean }) => {
   const [url, setUrl] = useState('');
+  useActiveLeadAutofill('website-scanner', (lead) => {
+    if (lead.website) setUrl(lead.website);
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [scanPhase, setScanPhase] = useState(0);
   const [result, setResult] = useState<ScanResult | null>(null);
