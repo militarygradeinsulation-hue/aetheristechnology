@@ -648,7 +648,7 @@ export const AdminLeadBrowser: React.FC = () => {
       </CardContent>
 
       {/* Detail dialog */}
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o && detail && busy[detail.id] === 'scan') return; if (!o) setDetail(null); }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           {detail && (
             <>
