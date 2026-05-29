@@ -754,18 +754,30 @@ export default function LinkedInPostStudio() {
     return parts.join('');
   };
 
-  // Pull every saved post + response (across the full library), extract bodies
+  // Pull every saved draft/comment we can find across the full library, regardless
+  // of tool/persona. Repetition prevention must use the whole archive, not only
+  // the currently selected personality or one tool_type.
   const collectAllPastBodies = async (): Promise<Array<{ body: string; personas: string[]; type: string }>> => {
     const items = await listAdminLibrary();
+    const textKeys = ['body', 'post', 'content', 'caption', 'draft', 'response', 'comment', 'text', 'generated', 'linkedinPost', 'copy', 'output'];
+    const extractBody = (out: unknown): string => {
+      if (typeof out === 'string') return out;
+      if (!out || typeof out !== 'object') return '';
+      const rec = out as Record<string, unknown>;
+      for (const key of textKeys) {
+        const val = rec[key];
+        if (typeof val === 'string' && val.trim().length > 20) return val;
+      }
+      return Object.values(rec).find(v => typeof v === 'string' && v.trim().length > 80 && v.length < 6000) as string || '';
+    };
     return items
-      .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
       .map(i => {
         const raw = (i.input_data as any)?.persona;
         const personas: string[] = Array.isArray(raw)
           ? raw.filter(Boolean)
           : (raw && raw !== 'none' ? [raw] : []);
         return {
-          body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+          body: extractBody(i.output_data),
           personas,
           type: i.tool_type,
         };
@@ -841,10 +853,22 @@ export default function LinkedInPostStudio() {
     setRespondOutput('');
     try {
       const adminToken = getAdminToken();
+      const activePersonas = normalizePersonas(respondPersona);
+      let allPastBodies: string[] = [];
+      let liveLibraryLockTail = '';
+      try {
+        const all = await collectAllPastBodies();
+        allPastBodies = all.map(a => a.body).filter(Boolean);
+        const liveReport = scanRepetition(allPastBodies);
+        if (liveReport.totalSamples > 0) {
+          liveLibraryLockTail = `${reportToDirective('Live full-library comments/drafts', liveReport)}\n\nFULL-LIBRARY MEMORY RULE: You just scanned ${liveReport.totalSamples} saved drafts/comments across every personality and tool. Never claim no drafts were scanned. Treat every saved output as prior voice memory and make this reply structurally different from them.`;
+        }
+      } catch { /* non-fatal: generation still works */ }
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
       const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra, respondPersona);
       const lockTail = buildLockDirective(respondPersona);
-      const extraWithFreshness = (toneStyleTail + freshnessTail + lockTail).trim();
+      const recentDrafts = [respondOutput, ...allPastBodies].filter(s => s && s.trim().length > 20).slice(0, 30);
+      const extraWithFreshness = (toneStyleTail + freshnessTail + liveLibraryLockTail + lockTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -856,10 +880,13 @@ export default function LinkedInPostStudio() {
             originalPostImageDataUrl: replyOriginalImage,
             mode: 'brief',
             extraContext: extraWithFreshness,
+            personaActive: activePersonas.length > 0,
+            personaKeys: activePersonas,
+            recentDrafts,
           }
         : useImage
-        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: extraWithFreshness }
-        : { postText: respondText.trim(), mode: respondMode, extraContext: extraWithFreshness };
+        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: extraWithFreshness, personaActive: activePersonas.length > 0, personaKeys: activePersonas, recentDrafts }
+        : { postText: respondText.trim(), mode: respondMode, extraContext: extraWithFreshness, personaActive: activePersonas.length > 0, personaKeys: activePersonas, recentDrafts };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
         body,
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
