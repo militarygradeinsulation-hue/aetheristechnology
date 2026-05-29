@@ -16,6 +16,7 @@ import { hasValidPortalSession } from "@/lib/portalAuth";
 import { hasValidAdminToken } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 import { PinnableFloater } from "@/components/ui/PinnableFloater";
+import { useActiveLead, clearActiveLead } from "@/lib/activeLead";
 
 // Widths applied at ALL viewports (no sm: prefix) so mobile users can
 // resize too. Sheet base has w-3/4 + sm:max-w-sm — we override both via
