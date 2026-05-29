@@ -21,11 +21,22 @@ export interface ToolDef {
   id: string;
   label: string;
   group: ToolGroup;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  /** HSL string like "210 90% 60%" used for accent (icon, border, badge). */
+  accent: string;
   fullPagePath?: string;
   /** Renders the tool. Receives nothing; widgets must self-contain. */
   render: () => React.ReactNode;
 }
+
+/** Hue palette per tool — distinct enough to scan visually, still on-brand. */
+export const GROUP_HUE: Record<ToolGroup, string> = {
+  Outreach: "32 95% 60%",      // amber
+  Diagnostics: "0 78% 62%",    // crimson
+  Content: "260 85% 68%",      // violet
+  Briefs: "190 85% 55%",       // cyan
+};
+
 
 // Lazy-load heavy components so the workbench bundle stays small.
 const OutreachEmailCreator = lazy(() =>
@@ -78,10 +89,10 @@ const wrap = (node: React.ReactNode) => (
 );
 
 export const TOOL_REGISTRY: ToolDef[] = [
-  // Outreach
+  // Outreach (warm hues)
   {
     id: "outreach-email", label: "Outreach Email", group: "Outreach", icon: Mail,
-    fullPagePath: "/portal",
+    accent: "32 95% 60%", fullPagePath: "/portal",
     render: () => wrap(
       <OutreachEmailCreator
         authMode="rep"
@@ -91,46 +102,65 @@ export const TOOL_REGISTRY: ToolDef[] = [
     ),
   },
   { id: "post-from-source", label: "Post From Source", group: "Outreach", icon: MessageSquare,
+    accent: "22 90% 58%",
     render: () => wrap(<PostFromSourceGenerator repMode />) },
   { id: "linkedin-banner", label: "LinkedIn Banner", group: "Outreach", icon: ImageIcon,
+    accent: "45 95% 60%",
     render: () => wrap(<LinkedInBannerCreator invoke={bannerInvoke} />) },
   { id: "sales-scripts", label: "Sales Script", group: "Outreach", icon: ScrollText, fullPagePath: "/sales-scripts",
+    accent: "12 88% 60%",
     render: () => wrap(<SalesScriptGenerator adminMode />) },
   { id: "follow-up-plan", label: "Follow-Up Plan", group: "Outreach", icon: Target, fullPagePath: "/follow-up-plan",
+    accent: "55 92% 58%",
     render: () => wrap(<FollowUpPlanGenerator adminMode />) },
 
-  // Diagnostics
+  // Diagnostics (crimson/red spectrum)
   { id: "scan", label: "Website Scanner", group: "Diagnostics", icon: Globe, fullPagePath: "/scan",
+    accent: "0 78% 62%",
     render: () => wrap(<WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />) },
   { id: "brand-contradictions", label: "Brand Contradictions", group: "Diagnostics", icon: AlertTriangle, fullPagePath: "/brand-contradictions",
+    accent: "350 82% 60%",
     render: () => wrap(<BrandContradictionFinder adminMode />) },
   { id: "friction-audit", label: "Friction Vocabulary Audit", group: "Diagnostics", icon: Search, fullPagePath: "/friction-audit",
+    accent: "8 80% 58%",
     render: () => wrap(<FrictionVocabularyAudit adminMode />) },
   { id: "strategic-questions", label: "Strategic Questions", group: "Diagnostics", icon: Sparkles, fullPagePath: "/strategic-questions",
+    accent: "335 78% 62%",
     render: () => wrap(<StrategicQuestionEngine adminMode />) },
   { id: "detective", label: "Detective Mode", group: "Diagnostics", icon: Eye,
+    accent: "320 70% 60%",
     render: () => wrap(<DetectiveModeStandalone />) },
 
-  // Content
+  // Content (cool spectrum — violet/cyan/teal/green)
   { id: "all-in-one", label: "All-In-One Generator", group: "Content", icon: Sparkles, fullPagePath: "/content-generator",
+    accent: "260 85% 68%",
     render: () => wrap(<AllInOneGenerator />) },
   { id: "content-calendar", label: "Content Calendar", group: "Content", icon: Calendar, fullPagePath: "/content-calendar",
+    accent: "190 85% 55%",
     render: () => wrap(<ContentCalendarGenerator adminMode />) },
   { id: "playbook", label: "Playbook Creator", group: "Content", icon: BookOpen,
+    accent: "165 70% 50%",
     render: () => wrap(<PlaybookCreator />) },
   { id: "social-content", label: "Social Content", group: "Content", icon: FileText,
+    accent: "210 90% 62%",
     render: () => wrap(<SocialContentGenerator adminMode />) },
   { id: "content-engine", label: "Content Engine", group: "Content", icon: Zap, fullPagePath: "/admin",
+    accent: "280 80% 65%",
     render: () => wrap(<ContentEngine />) },
   { id: "admin-image-studio", label: "Image Studio (Admin)", group: "Content", icon: Wand2, fullPagePath: "/admin",
+    accent: "295 75% 62%",
     render: () => wrap(<AdminImageStudio />) },
   { id: "rep-image-studio", label: "Image Studio (Rep)", group: "Content", icon: ImageIcon, fullPagePath: "/portal",
+    accent: "175 78% 50%",
     render: () => wrap(<RepImageStudio />) },
   { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
+    accent: "230 85% 68%",
     render: () => wrap(<AdminCreationStudio />) },
   { id: "easy-mode", label: "Easy Mode Translator", group: "Content", icon: Languages,
+    accent: "145 65% 52%",
     render: () => wrap(<EasyModeTool />) },
 ];
+
 
 
 export const TOOL_BY_ID = Object.fromEntries(TOOL_REGISTRY.map(t => [t.id, t]));

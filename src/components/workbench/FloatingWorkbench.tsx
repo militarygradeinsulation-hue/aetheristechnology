@@ -270,19 +270,22 @@ export const FloatingWorkbench: React.FC = () => {
                       {grouped[group].map(t => {
                         const Icon = t.icon;
                         const already = stack.some(s => s.toolId === t.id);
+                        const accent = `hsl(${t.accent})`;
                         return (
                           <DropdownMenuItem
                             key={t.id}
                             disabled={already}
                             onClick={() => addTool(t.id)}
-                            className="gap-2"
+                            className="gap-2 border-l-2"
+                            style={{ borderLeftColor: accent }}
                           >
-                            <Icon className="w-3.5 h-3.5 text-amber" />
+                            <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
                             <span className="flex-1">{t.label}</span>
                             {already && <span className="text-[10px] text-muted-foreground">added</span>}
                           </DropdownMenuItem>
                         );
                       })}
+
                       <DropdownMenuSeparator />
                     </React.Fragment>
                   ))}
