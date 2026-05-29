@@ -552,6 +552,16 @@ export const AdminLeadBrowser: React.FC = () => {
             </div>
             <Button size="sm" variant="outline" onClick={() => unassign(selectedIds)}>Unassign</Button>
             <Button size="sm" variant="outline" onClick={() => release(selectedIds)}>Release</Button>
+            {filter === 'holding' ? (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToPool(selectedIds)}>
+                <Shuffle className="w-3 h-3 mr-1" /> Push to pool
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToHolding(selectedIds)}>
+                <Archive className="w-3 h-3 mr-1" /> Hold for me
+              </Button>
+            )}
+
             <Button size="sm" variant="outline" className="text-red-400" onClick={() => remove(selectedIds)}>
               <Trash2 className="w-3 h-3 mr-1" /> Delete
             </Button>
