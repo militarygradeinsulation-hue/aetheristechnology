@@ -1146,7 +1146,8 @@ export const AdminLeadBrowser: React.FC = () => {
             <Button variant="outline" onClick={() => setAddOpen(false)} disabled={addBusy}>Cancel</Button>
             <Button className="bg-amber text-background hover:bg-amber/90" onClick={submitAddLeads} disabled={addBusy}>
               {addBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-              {addDest === 'rep' ? 'Drop to rep' : 'Drop to pool'}
+              {addDest === 'rep' ? 'Drop to rep' : addDest === 'holding' ? 'Hold for me' : 'Drop to pool'}
+
             </Button>
           </DialogFooter>
         </DialogContent>
