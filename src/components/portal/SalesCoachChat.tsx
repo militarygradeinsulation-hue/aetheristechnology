@@ -449,17 +449,23 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   return (
     <>
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open Sales Coach"
-          className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
-        >
-          <Target className="w-4 h-4" />
-          <span className="font-mono text-xs uppercase tracking-wider font-bold">Coach</span>
-          <MessageCircle className="w-4 h-4" />
-        </button>
+        <PinnableFloater storageKey="floater.salescoach.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={50}>
+          <button
+            onClick={() => setIsOpen(true)}
+            aria-label="Open Sales Coach"
+            className="group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
+          >
+            <Target className="w-4 h-4" />
+            <span className="font-mono text-xs uppercase tracking-wider font-bold">Coach</span>
+            <MessageCircle className="w-4 h-4" />
+          </button>
+        </PinnableFloater>
       )}
-      {isOpen && Panel}
+      {isOpen && (
+        <PinnableFloater storageKey="floater.salescoach.panel" defaultCorner="bottom-right" width={420} height={640} zIndex={50}>
+          {Panel}
+        </PinnableFloater>
+      )}
       {snipOverlay}
     </>
   );
