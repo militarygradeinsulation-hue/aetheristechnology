@@ -76,7 +76,8 @@ export const AdminLeadBrowser: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'pool' | 'assigned' | 'claimed' | 'all'>('pool');
+  const [filter, setFilter] = useState<'pool' | 'holding' | 'assigned' | 'claimed' | 'all'>('pool');
+
   const [search, setSearch] = useState('');
   const [minScore, setMinScore] = useState<number | ''>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
