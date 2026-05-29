@@ -106,17 +106,23 @@ export const TOOL_REGISTRY: ToolDef[] = [
   {
     id: "outreach-email", label: "Outreach Email", group: "Outreach", icon: Mail,
     accent: "32 95% 60%", fullPagePath: "/portal",
-    render: () => wrap(
-      <OutreachEmailCreator
-        authMode="rep"
-        token={getPortalToken() || ""}
-        defaultSenderName={getPortalProfile()?.rep_name}
-      />
-    ),
+    render: () => {
+      const auth = activeAuth();
+      return wrap(
+        <OutreachEmailCreator
+          authMode={auth.mode}
+          token={auth.token}
+          defaultSenderName={auth.mode === "rep" ? getPortalProfile()?.rep_name : undefined}
+        />
+      );
+    },
   },
   { id: "post-from-source", label: "Post From Source", group: "Outreach", icon: MessageSquare,
     accent: "22 90% 58%",
-    render: () => wrap(<PostFromSourceGenerator repMode />) },
+    render: () => {
+      const isAdmin = !!getAdminToken();
+      return wrap(<PostFromSourceGenerator adminMode={isAdmin} repMode={!isAdmin} />);
+    } },
   { id: "linkedin-banner", label: "LinkedIn Banner", group: "Outreach", icon: ImageIcon,
     accent: "45 95% 60%",
     render: () => wrap(<LinkedInBannerCreator invoke={bannerInvoke} />) },
