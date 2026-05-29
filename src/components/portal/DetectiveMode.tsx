@@ -136,8 +136,8 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     if (auth === 'admin') {
       const steps: PrepStep[] = [];
       if (!curEnrich && hasLeadId) steps.push({ key: 'enrich', label: 'AI enrichment (weak points, talking points, decision makers)', status: 'pending' });
-      const needsDeep = !curRr || !curFc || (!curScan && hasWebsite);
-      if (needsDeep) steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+      if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
+      steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
       setPrepSteps(steps);
 
       if (!curEnrich && hasLeadId) {
@@ -167,16 +167,24 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         }
       }
 
-      // Always backfill rr/fc/scan via detective-prep if still missing (admin lead may
-      // not have run rep deep-scan yet, and standalone admin runs have no lead id).
-      if (!curRr || !curFc || (!curScan && hasWebsite)) {
-        updateStep('deep', { status: 'running' });
+      // Always run company website scan + deep scan (Firecrawl + RocketReach) every time
+      // Detective Mode runs — even if cached data exists, we re-pull for freshness.
+      if (hasWebsite) {
+        updateStep('scan', { status: 'running' });
         try {
-          await runDetectivePrep('Firecrawl + RocketReach');
-          updateStep('deep', { status: 'done', note: 'fresh pull' });
+          await runDetectivePrep('website scan');
+          updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'fresh pull' });
         } catch (e) {
-          updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+          updateStep('scan', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
         }
+      }
+
+      updateStep('deep', { status: 'running' });
+      try {
+        await runDetectivePrep('Firecrawl + RocketReach');
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
+      } catch (e) {
+        updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
       }
       return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
     }
