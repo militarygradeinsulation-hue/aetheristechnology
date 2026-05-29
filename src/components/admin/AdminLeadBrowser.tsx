@@ -947,8 +947,9 @@ export const AdminLeadBrowser: React.FC = () => {
 
             <TabsContent value="excel" className="space-y-2">
               <p className="text-xs text-muted-foreground">
-                Upload an <code className="font-mono">.xlsx</code>, <code className="font-mono">.xls</code>, or <code className="font-mono">.csv</code> file. Header row required. Recognized columns: <code className="font-mono">business_name (or name/company), contact_name, email, phone, website, industry, location, score, notes</code>. Extra columns are merged into notes.
+                Upload any <code className="font-mono">.xlsx</code>, <code className="font-mono">.xls</code>, or <code className="font-mono">.csv</code>. Columns are auto-detected — works with headers like <span className="text-foreground">Company, Business, Contact, Email, Phone, Website, Industry, City, Notes, Pain, Leak</span> and variants. Header row is auto-located, all sheets are scanned, and unmapped columns are merged into notes.
               </p>
+
               <label className="flex items-center gap-3 px-4 py-6 rounded border-2 border-dashed border-border/60 hover:border-amber/60 cursor-pointer">
                 <Upload className="w-5 h-5 text-amber" />
                 <div className="flex-1">
