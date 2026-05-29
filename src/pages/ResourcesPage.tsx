@@ -32,7 +32,6 @@ const ResourcesPage = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (iframeRef.current) {
