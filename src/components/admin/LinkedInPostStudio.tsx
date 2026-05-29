@@ -798,7 +798,7 @@ export default function LinkedInPostStudio() {
     setScanningPersona(true);
     try {
       const all = await collectAllPastBodies();
-      const filtered = all.filter(a => a.persona === personaVal).map(a => a.body);
+      const filtered = all.filter(a => a.personas.includes(personaVal)).map(a => a.body);
       if (filtered.length === 0) {
         toast({ title: 'No saved drafts for this personality yet', description: 'Generate at least 2 drafts with this persona, then re-scan.' });
         setPersonaReports(prev => ({ ...prev, [personaVal]: { totalSamples: 0, bannedPhrases: [], bannedOpeners: [], bannedClosers: [], bannedOpenerStarts: [] } }));
