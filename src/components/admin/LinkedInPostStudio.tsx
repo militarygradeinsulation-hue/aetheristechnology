@@ -958,6 +958,14 @@ export default function LinkedInPostStudio() {
     setSavedId(null);
     try {
       const adminToken = getAdminToken();
+      const activePersonas = normalizePersonas(persona);
+      // Pull the most recent past drafts so the LIVE persona AI can audit itself
+      // against actual prior outputs (not a static lexicon checklist).
+      let recentDrafts: string[] = [];
+      try {
+        const all = await collectAllPastBodies();
+        recentDrafts = all.slice(0, 8).map(a => a.body).filter(Boolean);
+      } catch { /* non-fatal */ }
       const { data, error } = await supabase.functions.invoke('linkedin-post-studio', {
         body: {
           topic: topic.trim(),
@@ -965,6 +973,9 @@ export default function LinkedInPostStudio() {
           postType: postType === 'auto' ? '' : postType,
           creator,
           extraPrompt: (buildToneStyleDirective(tone, postStyle, extraPrompt, persona) + buildLockDirective(persona)).trim(),
+          personaActive: activePersonas.length > 0,
+          personaKeys: activePersonas,
+          recentDrafts,
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
