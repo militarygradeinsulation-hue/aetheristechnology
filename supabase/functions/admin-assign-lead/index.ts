@@ -19,9 +19,20 @@ serve(async (req) => {
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, SERVICE);
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "assign");
-    const ids: string[] = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
+    const ids: string[] = Array.isArray(body.ids)
+      ? body.ids.filter((x: unknown) => typeof x === "string" && x.length > 0)
+      : (body.id && typeof body.id === "string" ? [body.id] : []);
     const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign", "create_leads"]);
-    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Guard runs AFTER no-id actions are handled below — see early returns.
+    const requireIds = () => {
+      if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) {
+        return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      return null;
+    };
+    const idErr = requireIds();
+    if (idErr) return idErr;
+
 
     // ---------- CREATE LEADS: manual admin entry / bulk paste, optionally drop to pool or to a specific rep ----------
     if (action === "create_leads") {
