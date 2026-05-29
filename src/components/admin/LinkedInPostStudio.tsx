@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToAdminLibrary, listAdminLibrary, deleteFromAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { scanRepetition, reportToDirective } from '@/lib/repetitionScan';
+import { RepetitionLockBar } from './RepetitionLockBar';
 import { AiWritingDetectorCard } from './AiWritingDetectorCard';
 
 const PILLARS = [
