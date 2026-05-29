@@ -264,7 +264,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     <div className={
       embedded
         ? 'flex flex-col h-[640px] rounded-xl border border-amber/40 bg-background/95 backdrop-blur overflow-hidden'
-        : 'fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden'
+        : 'w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden'
     }>
       <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
