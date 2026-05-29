@@ -17,7 +17,8 @@ import { getAdminToken } from '@/lib/adminAuth';
 import { DetectiveMode } from '@/components/portal/DetectiveMode';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
-  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap, Plus, Flame, Upload,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap, Plus, Flame, Upload, Archive, ArrowRightLeft,
+
 } from 'lucide-react';
 
 interface Lead {
