@@ -6,12 +6,25 @@ import {
 } from "lucide-react";
 
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
+import { getAdminToken } from "@/lib/adminAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+/** Prefer admin session if present, else fall back to rep/portal session. */
+function activeAuth(): { mode: "admin" | "rep"; token: string } {
+  const admin = getAdminToken();
+  if (admin) return { mode: "admin", token: admin };
+  return { mode: "rep", token: getPortalToken() || "" };
+}
+
 const bannerInvoke = async (body: Record<string, unknown>) => {
-  const token = getPortalToken();
+  const auth = activeAuth();
+  if (auth.mode === "admin") {
+    return supabase.functions.invoke("admin-image-studio", {
+      body, headers: auth.token ? { "x-admin-token": auth.token } : {},
+    });
+  }
   return supabase.functions.invoke("portal-image-studio", {
-    body, headers: token ? { "x-portal-token": token } : {},
+    body, headers: auth.token ? { "x-portal-token": auth.token } : {},
   });
 };
 
@@ -93,17 +106,23 @@ export const TOOL_REGISTRY: ToolDef[] = [
   {
     id: "outreach-email", label: "Outreach Email", group: "Outreach", icon: Mail,
     accent: "32 95% 60%", fullPagePath: "/portal",
-    render: () => wrap(
-      <OutreachEmailCreator
-        authMode="rep"
-        token={getPortalToken() || ""}
-        defaultSenderName={getPortalProfile()?.rep_name}
-      />
-    ),
+    render: () => {
+      const auth = activeAuth();
+      return wrap(
+        <OutreachEmailCreator
+          authMode={auth.mode}
+          token={auth.token}
+          defaultSenderName={auth.mode === "rep" ? getPortalProfile()?.rep_name : undefined}
+        />
+      );
+    },
   },
   { id: "post-from-source", label: "Post From Source", group: "Outreach", icon: MessageSquare,
     accent: "22 90% 58%",
-    render: () => wrap(<PostFromSourceGenerator repMode />) },
+    render: () => {
+      const isAdmin = !!getAdminToken();
+      return wrap(<PostFromSourceGenerator adminMode={isAdmin} repMode={!isAdmin} />);
+    } },
   { id: "linkedin-banner", label: "LinkedIn Banner", group: "Outreach", icon: ImageIcon,
     accent: "45 95% 60%",
     render: () => wrap(<LinkedInBannerCreator invoke={bannerInvoke} />) },
@@ -152,7 +171,7 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<AdminImageStudio />) },
   { id: "rep-image-studio", label: "Image Studio (Rep)", group: "Content", icon: ImageIcon, fullPagePath: "/portal",
     accent: "175 78% 50%",
-    render: () => wrap(<RepImageStudio />) },
+    render: () => wrap(getAdminToken() ? <AdminImageStudio /> : <RepImageStudio />) },
   { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
     accent: "230 85% 68%",
     render: () => wrap(<AdminCreationStudio />) },
