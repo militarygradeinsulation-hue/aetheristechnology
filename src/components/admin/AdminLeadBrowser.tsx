@@ -41,6 +41,8 @@ interface Lead {
   created_at: string;
   notes: string | null;
   low_hanging_fruit?: boolean | null;
+  admin_holding?: boolean | null;
+
 }
 
 interface ManualLeadRow {
