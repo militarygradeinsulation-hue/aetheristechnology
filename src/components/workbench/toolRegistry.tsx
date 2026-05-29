@@ -21,11 +21,22 @@ export interface ToolDef {
   id: string;
   label: string;
   group: ToolGroup;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  /** HSL string like "210 90% 60%" used for accent (icon, border, badge). */
+  accent: string;
   fullPagePath?: string;
   /** Renders the tool. Receives nothing; widgets must self-contain. */
   render: () => React.ReactNode;
 }
+
+/** Hue palette per tool — distinct enough to scan visually, still on-brand. */
+export const GROUP_HUE: Record<ToolGroup, string> = {
+  Outreach: "32 95% 60%",      // amber
+  Diagnostics: "0 78% 62%",    // crimson
+  Content: "260 85% 68%",      // violet
+  Briefs: "190 85% 55%",       // cyan
+};
+
 
 // Lazy-load heavy components so the workbench bundle stays small.
 const OutreachEmailCreator = lazy(() =>
