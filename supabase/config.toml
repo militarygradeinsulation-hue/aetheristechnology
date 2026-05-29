@@ -184,3 +184,7 @@ verify_jwt = false
 
 [functions.outlook-status]
 verify_jwt = false
+
+[functions.easy-mode]
+verify_jwt = false
+
