@@ -223,9 +223,6 @@ const ResourcesPage = () => {
         {/* Preview Modal */}
         {previewPlaybook && (() => {
           const pb: any = previewPlaybook;
-          const isFree = previewIndex < FREE_PLAYBOOK_COUNT;
-          const isPurchased = purchasedPlaybookIds?.has(pb.id);
-          const isUnlocked = isFree || isPurchased;
           const IconC = ICON_MAP[pb.icon_name || 'FileText'] || FileText;
           const toc: string[] = Array.isArray(pb.toc) ? pb.toc : [];
           const summary: string = pb.summary || pb.description || '';
@@ -307,24 +304,11 @@ const ResourcesPage = () => {
 
                 <div className="p-5 border-t border-border bg-background/40">
                   <Button
-                    onClick={() => { handlePlaybookAction(pb, previewIndex); if (isUnlocked) setPreviewPlaybook(null); }}
-                    className={`w-full gap-2 ${
-                      isUnlocked
-                        ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                        : 'bg-amber hover:bg-amber/90 text-background font-semibold'
-                    }`}
+                    onClick={() => { handlePlaybookAction(pb); setPreviewPlaybook(null); }}
+                    className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
-                    {isUnlocked ? (
-                      <><Download className="w-4 h-4" /> Download Full PDF</>
-                    ) : (
-                      <><ShoppingCart className="w-4 h-4" /> Unlock Full Playbook, $25</>
-                    )}
+                    <Download className="w-4 h-4" /> Download Full PDF (Free)
                   </Button>
-                  {!isUnlocked && (
-                    <p className="text-[11px] text-muted-foreground text-center mt-2">
-                      Instant download after checkout. One-time payment.
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
