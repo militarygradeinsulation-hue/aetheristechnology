@@ -46,7 +46,7 @@ export const FloatingWorkbench: React.FC = () => {
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   // Only ever appear on portal/admin routes — never on the public site,
   // even if a stale portal session is still in localStorage.
-  const isBackendRoute = (() => {
+  const isBackendRoute = () => {
     if (typeof window === "undefined") return false;
     const p = window.location.pathname;
     return p.startsWith("/admin")
@@ -54,14 +54,19 @@ export const FloatingWorkbench: React.FC = () => {
         || p.startsWith("/partner-portal")
         || p.startsWith("/rep-portal")
         || p.startsWith("/app");
-  })();
+  };
 
   useEffect(() => {
-    const check = () => setVisible(isBackendRoute && (hasValidPortalSession() || hasValidAdminToken()));
+    const check = () => setVisible(isBackendRoute() && (hasValidPortalSession() || hasValidAdminToken()));
     check();
     window.addEventListener("storage", check);
-    const t = setInterval(check, 5000);
-    return () => { window.removeEventListener("storage", check); clearInterval(t); };
+    window.addEventListener("popstate", check);
+    const t = setInterval(check, 1500);
+    return () => {
+      window.removeEventListener("storage", check);
+      window.removeEventListener("popstate", check);
+      clearInterval(t);
+    };
   }, []);
 
   // Load persisted state once visibility is known. Mark hydrated AFTER load
