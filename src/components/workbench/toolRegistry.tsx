@@ -67,6 +67,9 @@ const AdminCreationStudio = lazy(() =>
   import("@/components/admin/AdminCreationStudio").then(m => ({ default: m.AdminCreationStudio })));
 const RepImageStudio = lazy(() =>
   import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
+const EasyModeTool = lazy(() =>
+  import("@/components/EasyModeTool").then(m => ({ default: m.EasyModeTool })));
+
 
 const wrap = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-xs font-mono text-muted-foreground">Loading tool…</div>}>
