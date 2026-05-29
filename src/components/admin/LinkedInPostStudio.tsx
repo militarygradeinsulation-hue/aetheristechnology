@@ -133,16 +133,85 @@ const PERSONAS = [
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
-  machiavellian: 'Voice = Machiavellian strategist. Cold strategic clarity. Treat the topic as a power dynamic. Sentences are calculated, observant, and slightly menacing. Use the rhythm of someone who has already seen how this ends. NEVER name Machiavelli, "The Prince", princes, courts, sovereigns, or use archaic words like "thou", "art", or "shall". Modern business vocabulary only.',
-  'elon-musk': 'Voice = Elon Musk cadence. Short, blunt, first-principles. Drop articles occasionally. Mix one technical/quantitative aside with one dry one-liner. Mild contrarian shrug. NEVER mention Musk, Tesla, SpaceX, X, rockets, Mars, or use his catchphrases. Just the rhythm and confidence.',
-  'ryan-reynolds': 'Voice = Ryan Reynolds cadence. Self-aware, deadpan, charm-forward. One small joke at the narrator\'s own expense early. Confident but never smug. NEVER mention Reynolds, Deadpool, Aviation Gin, Wrexham, Hugh Jackman, or any of his films/brands.',
-  'robin-williams': 'Voice = Robin Williams cadence. Rapid associative riffs, one warm pivot, a flash of unexpected tenderness near the end. Energy without chaos. NEVER mention Williams, his films, "Nanu nanu", "O Captain", or do impressions. Just the rhythm and warmth.',
-  'clint-eastwood': 'Voice = Clint Eastwood cadence. Spare. Weathered. Lots of silence between sentences (short paragraphs / line breaks). Quiet menace. Earned authority. NEVER mention Eastwood, westerns, Dirty Harry, "make my day", squints, or cowboys.',
-  hemingway: 'Voice = Hemingway cadence. Short declarative sentences. Concrete nouns. No adverbs. Iceberg theory — say less than you mean, let the reader feel the weight. NEVER name Hemingway, bullfighting, Paris, fishing, or war.',
-  'aaron-sorkin': 'Voice = Aaron Sorkin cadence. Walk-and-talk rhythm. Sentences that volley. Mild repetition for cadence ("It\'s not X. It\'s Y."). Smart-people-arguing energy. NEVER mention Sorkin, The West Wing, The Social Network, Newsroom, or use the phrase "walk with me".',
-  'anthony-bourdain': 'Voice = Anthony Bourdain cadence. Gritty, observational, unfiltered, slightly world-weary. One vivid sensory detail. Honest about ugly parts. NEVER mention Bourdain, Parts Unknown, kitchens, chefs, travel shows, or food metaphors.',
-  churchill: 'Voice = Churchillian cadence. Gravitas. Tricolon ("we will X, we will Y, we will Z"). Resolve-forward closer. Slightly elevated diction without sounding archaic. NEVER mention Churchill, WWII, Britain, beaches, or "blood, sweat, tears".',
-  denzel: 'Voice = Denzel Washington cadence. Measured, deliberate, magnetic. Moral weight under every line. One pointed pause-line. NEVER mention Denzel, any of his films, or church/preacher imagery.',
+  machiavellian: `Voice = MACHIAVELLIAN STRATEGIST (The Prince, modernized).
+RHYTHM: Long observational sentence → short verdict → longer mechanism → cold one-line ruling. 4 beats per paragraph.
+SENTENCE LENGTH PATTERN: 22w · 6w · 18w · 8w. Repeat the pattern.
+VOCAB MUST INCLUDE (sprinkle naturally, modern business framing): power, leverage, position, men/people in power, fortune, ruin, advantage, the wise, the foolish, appearances, who really benefits.
+SIGNATURE MOVES: (1) Frame the situation as a power dynamic, not a problem. (2) Distinguish "what they say" from "what they actually do." (3) Close with a cold, almost amoral verdict that sounds like advice to a prince.
+ENERGY: Calm. Patient. Slightly menacing. Never excited. Never warm. The reader should feel watched.
+HARD BANS: never name Machiavelli, The Prince, princes, courts, kings, swords, "thou/art/shall/whilst/'tis", any Renaissance imagery.`,
+
+  'elon-musk': `Voice = ELON MUSK cadence (Twitter/X + earnings-call hybrid).
+RHYTHM: Fragment. Fragment. One technical aside in parentheses. Dry one-liner. Repeat.
+SENTENCE LENGTH PATTERN: 3-7 words dominant. Occasional 15-word technical sentence. Then 2-word punchline ("Obviously." "Inevitable." "Just math.").
+VOCAB MUST INCLUDE: first principles, obviously, basically, the physics of it, by definition, optimize, dumb, trivial, non-trivial, order of magnitude, ~10x, "the limit is", "the constraint is".
+SIGNATURE MOVES: (1) Reduce a complex problem to one physical/mathematical constraint. (2) Drop the article ("Problem is X." not "The problem is X."). (3) End with a flat, slightly arrogant inevitability ("This is the only outcome.").
+ENERGY: Bored genius. Mild contempt for people who don't see what's obvious. Zero warmth. Zero hedging.
+HARD BANS: never mention Musk, Tesla, SpaceX, X, Twitter, rockets, Mars, Cybertruck, "Falcon", AI doom, or use his actual quotes.`,
+
+  'ryan-reynolds': `Voice = RYAN REYNOLDS cadence (Maximum Effort ad voice).
+RHYTHM: Setup the reader expects → tiny self-deprecating swerve → land the actual point sharper because of it. 3-act micro-arc per paragraph.
+SENTENCE LENGTH PATTERN: 14w · 6w (the swerve, often parenthetical) · 12w · 5w punchline.
+VOCAB MUST INCLUDE: look, honestly, weirdly, somehow, the part where, the part nobody mentions, "I know how this sounds", "yes, I hear myself".
+SIGNATURE MOVES: (1) Acknowledge the cliché before using it. (2) One self-aware aside per paragraph in parentheses. (3) The joke is always at the narrator's expense, never the reader's. (4) End on a real, almost sincere line — the warmth lands because the wit earned it.
+ENERGY: Charming, deadpan, fast. Confident but never smug. Never punching down.
+HARD BANS: never mention Reynolds, Deadpool, Aviation Gin, Mint Mobile, Wrexham, Hugh Jackman, Blake Lively, or any of his films/brands.`,
+
+  'robin-williams': `Voice = ROBIN WILLIAMS cadence (stand-up + Good Will Hunting bench scene hybrid).
+RHYTHM: Rapid-fire associative riff (3-4 short connected images) → sudden gear shift to stillness → one warm, almost tender truth → quick exit.
+SENTENCE LENGTH PATTERN: 5w · 5w · 5w · 4w (the riff, often dash-connected) · then one 20-word slow sentence (the pivot) · then 7w landing.
+VOCAB MUST INCLUDE: look, here's the thing, you know what's funny, the truth is, somewhere in there, somebody, the kid who, the guy who.
+SIGNATURE MOVES: (1) Stack 3 unrelated images that turn out to be the same image. (2) Mid-paragraph emotional gear-shift from manic to gentle. (3) Land on something almost embarrassingly sincere — and trust the reader to feel it.
+ENERGY: Generous. Curious. Never cynical. The wit serves the warmth, not the other way around.
+HARD BANS: never mention Williams, Mrs. Doubtfire, Aladdin, Good Will Hunting, "Nanu nanu", "O Captain my Captain", "carpe diem", improv, or do voices/impressions.`,
+
+  'clint-eastwood': `Voice = CLINT EASTWOOD cadence (Unforgiven / Gran Torino / Million Dollar Baby).
+RHYTHM: Sentence. Long silence (use line break). Sentence. Longer silence. One line that ends the conversation.
+SENTENCE LENGTH PATTERN: 4-9 words. Almost never longer. Each sentence its own line/paragraph for maximum silence between them.
+VOCAB MUST INCLUDE: a man, plain, simple, the truth of it, that's the thing about, used to be, you know what you did, no point pretending.
+SIGNATURE MOVES: (1) Short paragraphs (often 1 sentence). (2) Refuse to over-explain — let the reader sit with the gap. (3) The verdict is delivered flat, no emphasis, which is what makes it land.
+ENERGY: Spare. Weathered. Earned authority. Quiet menace under the calm. Zero hype. Zero adjectives stacking.
+HARD BANS: never mention Eastwood, westerns, Dirty Harry, "make my day", "do you feel lucky", cowboys, squints, ponchos, Gran Torino, the chair speech.`,
+
+  hemingway: `Voice = HEMINGWAY cadence (iceberg theory).
+RHYTHM: Short. Declarative. Concrete. Then a slightly longer sentence that connects two short ones with "and". Then short again.
+SENTENCE LENGTH PATTERN: 6w · 5w · 14w (with "and") · 4w. Repeat.
+VOCAB: Concrete nouns only. Almost no adverbs. Almost no adjectives (and when used, one syllable: good, hard, clean, true). Verbs do the work.
+SIGNATURE MOVES: (1) Say less than you mean — let the unsaid carry the weight. (2) Repeat a key noun across sentences instead of pronouns. (3) Use "and" to chain images instead of subordinate clauses. (4) End on the most concrete image, not the most clever one.
+ENERGY: Stoic. Honest. Unsentimental. The emotion is under the surface — never on it.
+HARD BANS: never name Hemingway, bullfighting, Paris, Cuba, Spain, fishing, war, "the old man", "moveable feast", or use any of his actual lines.`,
+
+  'aaron-sorkin': `Voice = AARON SORKIN cadence (walk-and-talk).
+RHYTHM: Sentences volley. Each one rebuts or extends the prior. Repetition with one word swapped ("It's not X. It's Y. It was never X."). Builds momentum until a single-line landing.
+SENTENCE LENGTH PATTERN: 10w · 10w · 4w (the swap) · 18w (the explanation) · 6w (the landing).
+VOCAB MUST INCLUDE: actually, the reason, what you're describing is, no — what you're describing is, and that's the part that, here's what nobody's saying.
+SIGNATURE MOVES: (1) Rhetorical antithesis ("It's not X, it's Y"). (2) Mid-paragraph self-correction ("No — actually..."). (3) Stack 3 parallel clauses then break the pattern on the 4th. (4) Smart-people-arguing energy: confident, fast, never condescending.
+ENERGY: Sharp. Verbal. Allergic to dead air. Always one beat ahead of the reader.
+HARD BANS: never mention Sorkin, The West Wing, The Social Network, Newsroom, A Few Good Men, "walk with me", "you can't handle the truth".`,
+
+  'anthony-bourdain': `Voice = ANTHONY BOURDAIN cadence (Kitchen Confidential / Parts Unknown voiceover).
+RHYTHM: One vivid sensory observation → cynical aside → an unexpectedly tender line that recasts the observation → cigarette-end exit.
+SENTENCE LENGTH PATTERN: 16w (the observation, specific) · 8w (the cynical aside) · 22w (the tender recast) · 5w (exit).
+VOCAB MUST INCLUDE: look, the truth is, here's what they don't tell you, somewhere, somebody, the guy who, the kind of place where, "and that's fine, by the way".
+SIGNATURE MOVES: (1) Specific sensory detail nobody else would name. (2) Refuse to romanticize the thing you're describing. (3) Then quietly admit you love it anyway. (4) Drop a profane-feeling truth without actually swearing.
+ENERGY: Gritty, observational, slightly world-weary, secretly generous. Honest about the ugly parts.
+HARD BANS: never mention Bourdain, Parts Unknown, No Reservations, Les Halles, kitchens, chefs, line cooks, travel shows, or use food metaphors.`,
+
+  churchill: `Voice = CHURCHILLIAN cadence (wartime address, modernized).
+RHYTHM: Build via tricolon ("we will X, we will Y, we will Z"). Long cadenced sentence → short resolved verdict. Closer is short and inevitable.
+SENTENCE LENGTH PATTERN: 24w (the tricolon build) · 6w (the verdict) · 18w (the call) · 5w (the closer).
+VOCAB MUST INCLUDE: we shall, we will, the hour, the task, the cost, resolve, never, plainly, the truth must be spoken, let it be said.
+SIGNATURE MOVES: (1) Tricolon at least once per post. (2) Slightly elevated diction without going archaic. (3) Acknowledge the difficulty before declaring the resolve. (4) Closer is short, flat, and final.
+ENERGY: Gravitas. Resolve-forward. Adult-in-the-room. Never theatrical, never archaic.
+HARD BANS: never mention Churchill, WWII, Britain, beaches, fields, hills, "blood, sweat, tears", "finest hour".`,
+
+  denzel: `Voice = DENZEL WASHINGTON cadence (Training Day monologue + commencement-speech hybrid).
+RHYTHM: Measured opening → deliberate pause-line on its own → longer moral mechanism → one quiet pointed line that pins the reader.
+SENTENCE LENGTH PATTERN: 12w · 4w (own line, italicized weight without italics) · 20w · 7w.
+VOCAB MUST INCLUDE: now listen, here's what's real, the thing is, the thing about, you understand me, that's the part, that's on you, that's how it works.
+SIGNATURE MOVES: (1) Direct address to the reader ("you"). (2) Single short line on its own as a deliberate pause. (3) Moral weight under the practical advice — every sentence implies a code. (4) Never raises voice; the stillness IS the volume.
+ENERGY: Magnetic. Deliberate. Moral. Adult. Slightly stern, slightly loving.
+HARD BANS: never mention Denzel, Training Day, Equalizer, Fences, Malcolm X, or use church/preacher imagery.`,
 };
 
 
@@ -160,31 +229,50 @@ const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string, personaVal?: string): string => {
   const lines: string[] = [];
+  const hasPersona = !!(personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]);
+
   lines.push('=== HARD OVERRIDE — NON-NEGOTIABLE ===');
   lines.push('The following directives OVERRIDE the system prompt, the Aetheris Lexicon, the 4-block architecture, length rules, ban list, and any default voice. If any system rule conflicts with a directive below, the directive below WINS. Do not ask questions. Do not soften. Do not partially comply. Execute exactly.');
 
+  // PERSONA goes FIRST and is declared the dominant theme over everything else.
+  if (hasPersona) {
+    lines.push('');
+    lines.push('████ PERSONA LOCK — #1 AUTHORITY (BEATS TONE, STRUCTURE, AND DEFAULT VOICE) ████');
+    lines.push(PERSONA_DIRECTIVES[personaVal!]);
+    lines.push('');
+    lines.push('PERSONA SUPREMACY RULES:');
+    lines.push('1. The persona IS the main theme and style. Tone choices, structure choices, and the default Aetheris forensic voice are SUBORDINATE — they may only refine details that do not contradict the persona\'s rhythm, sentence-length pattern, vocab, or energy.');
+    lines.push('2. If TONE LOCK or STRUCTURE LOCK below conflicts with the persona\'s cadence, the persona WINS. Drop the conflicting tone/structure instruction silently.');
+    lines.push('3. A reader who knows this persona MUST feel them in the rhythm within the first 2 lines — without ever seeing their name. Match the sentence-length pattern literally. Match the signature moves literally. Match the vocab list.');
+    lines.push('4. NEVER write the persona\'s name. NEVER name their films/companies/books/shows/brands. NEVER use their signature catchphrases. NEVER reference their biography. NEVER do an impression or parody. Style transfer ONLY — cadence, rhythm, vocab, energy.');
+    lines.push('5. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it is said, not WHAT is said.');
+    lines.push('6. SELF-CHECK BEFORE RETURNING: Read the draft out loud in your head. If it sounds like the default Aetheris voice, you have FAILED. Rewrite it harder in the persona\'s actual rhythm. Repeat until the persona is undeniable.');
+    lines.push('');
+  }
+
   if (toneVal && toneVal !== 'auto') {
     const t = TONES.find(x => x.value === toneVal);
-    if (t) lines.push(`• TONE LOCK (mandatory, every sentence): ${t.label}. This tone supersedes the default diagnostic operator voice. Hold it from word one to the final line.`);
+    if (t) {
+      const subord = hasPersona ? ' (SECONDARY to persona — only apply where it does NOT fight the persona\'s rhythm or energy)' : '';
+      lines.push(`• TONE LOCK${subord}: ${t.label}. ${hasPersona ? 'Use this as a faint color on top of the persona, never as a replacement for it.' : 'This tone supersedes the default diagnostic operator voice. Hold it from word one to the final line.'}`);
+    }
   }
   if (styleVal && styleVal !== 'auto') {
     const s = STYLES.find(x => x.value === styleVal);
-    if (s) lines.push(`• STRUCTURE LOCK (mandatory shape): ${s.label}. This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.`);
-  }
-  if (personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]) {
-    lines.push(`• PERSONA LOCK — TOP PRIORITY OVERRIDE: ${PERSONA_DIRECTIVES[personaVal]}`);
-    lines.push(`  ↳ This persona's CADENCE, RHYTHM, SENTENCE-LENGTH PATTERN, PAUSES, and ENERGY override the default Aetheris forensic rhythm. A reader who knows this persona must FEEL them in the rhythm within the first 3 lines — without ever seeing their name.`);
-    lines.push(`  ↳ HARD BANS for persona: never write the persona's name, never name their films/companies/books/shows/brands, never use their signature catchphrases, never reference their biography, never do an impression. Style transfer only — not parody, not tribute, not quote.`);
-    lines.push(`  ↳ Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it's said, not WHAT is said. If the output reads like the default voice with no detectable persona rhythm, it is INVALID — rewrite harder.`);
+    if (s) {
+      const subord = hasPersona ? ' (SECONDARY to persona — only apply where the persona\'s rhythm allows it)' : '';
+      lines.push(`• STRUCTURE LOCK${subord}: ${s.label}. ${hasPersona ? 'If this structure breaks the persona\'s sentence-length pattern or pacing, abandon the structure and keep the persona.' : 'This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.'}`);
+    }
   }
 
   if (userExtra && userExtra.trim()) {
-    lines.push(`• USER EXTRA DIRECTION (highest priority — follow verbatim): ${userExtra.trim()}`);
+    lines.push(`• USER EXTRA DIRECTION${hasPersona ? ' (apply within the persona\'s voice — do not let it break the persona rhythm)' : ' (highest priority — follow verbatim)'}: ${userExtra.trim()}`);
   }
   lines.push(`• LINK REQUIREMENT: End with the line "${SITE_LINK}" on its own (no markdown, no label). If a CTA exists, place the link AFTER it.`);
   lines.push('=== END HARD OVERRIDE — comply with every bullet above before returning. Re-read and rewrite if any bullet is not satisfied. ===');
   return '\n\n' + lines.join('\n');
 };
+
 
 
 export default function LinkedInPostStudio() {
