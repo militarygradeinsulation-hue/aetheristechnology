@@ -214,6 +214,157 @@ ENERGY: Magnetic. Deliberate. Moral. Adult. Slightly stern, slightly loving.
 HARD BANS: never mention Denzel, Training Day, Equalizer, Fences, Malcolm X, or use church/preacher imagery.`,
 };
 
+// ============================================================
+// LIVE PERSONA ENGINE — randomized freshness module
+// Each generation pulls one item from each axis so the same persona
+// never produces the same shape twice. AI is told to commit to these
+// picks as hard constraints for THIS draft only.
+// ============================================================
+const PERSONA_VARIATIONS: Record<string, {
+  moods: string[];        // emotional weather for this draft
+  openers: string[];      // opening gambit shape
+  pivots: string[];       // mid-post move
+  closers: string[];      // landing shape
+  rhythmTwists: string[]; // micro-rhythm mutation
+  lenses: string[];       // angle the persona looks at the topic through
+}> = {
+  machiavellian: {
+    moods: ['cold patience', 'amused detachment', 'quiet contempt', 'surgical calm', 'predatory stillness'],
+    openers: ['name who actually benefits before describing the situation', 'open with the gap between stated motive and real motive', 'open with what the powerful never say out loud', 'open by reframing a "problem" as a position being defended'],
+    pivots: ['turn the moral framing into a power-mechanics framing', 'expose the second-order incentive nobody is naming', 'flip the victim/perpetrator framing once', 'reveal the alliance hiding behind the conflict'],
+    closers: ['close with cold advice to the reader as if they were the prince', 'close with a verdict that sounds amoral but is operationally correct', 'close on what the wise man does next — in one line'],
+    rhythmTwists: ['hold one paragraph to exactly 3 sentences', 'open with a 4-word sentence before the long observational line', 'put the verdict on its own line for silence'],
+    lenses: ['who is positioning, not who is suffering', 'the leverage being built while attention is elsewhere', 'the appearance being purchased', 'the cost of being predictable'],
+  },
+  'elon-musk': {
+    moods: ['bored genius', 'mild contempt for the obvious', 'late-night terminal energy', 'engineer-on-deadline impatience'],
+    openers: ['open with a 2-word diagnosis', 'open with a physical/mathematical constraint', 'open by collapsing the topic to one variable', 'open with a flat rejection of the framing'],
+    pivots: ['drop a parenthetical technical aside', 'reduce the problem to an order-of-magnitude statement', 'name the constraint everyone is avoiding'],
+    closers: ['close with "Obviously." / "Inevitable." / "Just math." style punchline', 'close with the only outcome the physics allows', 'close with a flat one-word verdict'],
+    rhythmTwists: ['no sentence longer than 7 words except one mid-post technical line', 'use exactly one parenthetical aside', 'drop articles ("Problem is X.")'],
+    lenses: ['the constraint nobody is willing to name', 'the order of magnitude people are off by', 'the part that is just arithmetic', 'the first-principles reduction'],
+  },
+  'ryan-reynolds': {
+    moods: ['charming deadpan', 'self-aware fast', 'warm-under-the-wit', 'lightly exhausted by the cliché he is about to use'],
+    openers: ['acknowledge the cliché before using it', 'open with a setup the reader expects, then swerve in line 2', 'open with a self-deprecating admission'],
+    pivots: ['one parenthetical aside at the narrator\'s expense', 'mid-paragraph "I hear myself" beat', 'pretend to lose the thread then snap back sharper'],
+    closers: ['land on something almost sincere because the wit earned it', 'close with a quiet honest line — no joke', 'close with a deadpan one-liner that re-frames the whole post'],
+    rhythmTwists: ['exactly one parenthetical per paragraph', 'one 5-word punchline per paragraph', '3-act micro-arc inside one paragraph'],
+    lenses: ['the part everyone pretends not to notice', 'the version of this that is mildly embarrassing but true', 'the thing the narrator almost did wrong'],
+  },
+  'robin-williams': {
+    moods: ['generous curiosity', 'manic-then-tender', 'late-night kitchen-table honesty', 'warm associative spark'],
+    openers: ['stack 3 short images that turn out to be the same image', 'open mid-thought as if continuing a conversation', 'open with a rapid-fire riff of 3 unrelated nouns'],
+    pivots: ['sudden gear-shift from manic to still', 'mid-paragraph "but here\'s the thing" pivot to gentleness', 'name the kid/guy/woman at the center quietly'],
+    closers: ['land on something almost embarrassingly sincere', 'close on a single quiet image, no commentary', 'close with a tender truth disguised as a throwaway'],
+    rhythmTwists: ['three 5-word sentences in a row then one 20-word slow one', 'dash-connected riff in line 1', 'one-line paragraph as the emotional pivot'],
+    lenses: ['the person inside the system, not the system', 'the small human moment under the business problem', 'what the kid version of this founder would say'],
+  },
+  'clint-eastwood': {
+    moods: ['weathered calm', 'quiet menace', 'earned tiredness', 'flat finality'],
+    openers: ['open with a 4-word sentence on its own line', 'open with a fact stated like a verdict', 'open by naming what already happened, past tense'],
+    pivots: ['use a single line break as the pivot — no words', 'state the uncomfortable truth flat, no emphasis', 'refuse to explain — let the gap do it'],
+    closers: ['close on one short sentence that ends the conversation', 'close with "no point pretending." style finality', 'close with a single concrete noun'],
+    rhythmTwists: ['every sentence its own paragraph', 'no sentence over 9 words', 'one deliberate one-line silence (just a line break) between paragraphs'],
+    lenses: ['what was always going to happen', 'the part the founder already knows but won\'t say', 'the man in the mirror version of the problem'],
+  },
+  hemingway: {
+    moods: ['stoic honest', 'unsentimental', 'clean morning light', 'tired but clear'],
+    openers: ['open with a concrete noun and a verb', 'open with a fact, not a frame', 'open with a short declarative the reader cannot argue with'],
+    pivots: ['chain two images with "and"', 'repeat the key noun instead of using a pronoun', 'let one short sentence carry the weight'],
+    closers: ['end on the most concrete image, not the cleverest line', 'end with a short sentence and a period that feels final', 'end by naming the thing plainly'],
+    rhythmTwists: ['no adverbs in the post', 'maximum one adjective per sentence, one syllable', 'one "and"-chained sentence per paragraph'],
+    lenses: ['the thing as it is, not as it is described', 'what stays true when you remove the adjectives', 'the action under the explanation'],
+  },
+  'aaron-sorkin': {
+    moods: ['sharp verbal', 'allergic to dead air', 'one beat ahead', 'smart-people-arguing energy'],
+    openers: ['open with "It\'s not X. It\'s Y."', 'open with a self-correction ("No — actually...")', 'open with a rhetorical question the post then dismantles'],
+    pivots: ['mid-paragraph antithesis with one word swapped', 'stack 3 parallel clauses then break the pattern on the 4th', 'rebut the reader\'s likely objection before they make it'],
+    closers: ['close with a single-line landing that reframes the whole post', 'close on the swapped-word version of the opener', 'close with a quiet line that wins the argument'],
+    rhythmTwists: ['exactly one "No — actually..." beat', 'one tricolon then a break', 'one repeated phrase across two sentences with one word changed'],
+    lenses: ['what people are actually arguing about under the surface argument', 'the precise word the framing is hiding behind', 'the rebuttal nobody is making out loud'],
+  },
+  'anthony-bourdain': {
+    moods: ['gritty observational', 'secretly generous', 'cigarette-on-the-fire-escape honest', 'slightly world-weary'],
+    openers: ['open with a specific sensory detail nobody else would name', 'open at street level, not at strategy level', 'open with a scene, not a thesis'],
+    pivots: ['cynical aside right after the observation', 'admit you love the thing you just dismissed', 'name the kind of place where this happens'],
+    closers: ['close with a short cigarette-end exit line', 'close with a tender recast of the cynical aside', 'close on a profane-feeling truth without swearing'],
+    rhythmTwists: ['one 22-word sentence carrying the tender recast', 'one 5-word exit line', 'one specific noun nobody else would pick'],
+    lenses: ['the back-of-house version of the front-of-house pitch', 'the people who actually do the work', 'the ugly part that is also the honest part'],
+  },
+  churchill: {
+    moods: ['resolve-forward gravitas', 'adult-in-the-room calm', 'measured defiance', 'plain-spoken steel'],
+    openers: ['open by acknowledging the difficulty plainly', 'open with "Let it be said..."', 'open with the cost before the call'],
+    pivots: ['deploy one tricolon ("we will X, we will Y, we will Z")', 'name the hour, the task, or the cost', 'pivot from acknowledgment to resolve in one sentence'],
+    closers: ['close short, flat, and final', 'close with a 5-word inevitability', 'close on the resolve, not the rhetoric'],
+    rhythmTwists: ['exactly one tricolon', 'one elevated word, no more', 'one short verdict sentence between two long cadenced ones'],
+    lenses: ['the cost of not acting', 'the hour the reader is actually in', 'the task that cannot be delegated'],
+  },
+  denzel: {
+    moods: ['magnetic stillness', 'measured moral weight', 'slightly stern, slightly loving', 'deliberate adult calm'],
+    openers: ['open with direct address — "Now listen."', 'open with a measured 12-word observation', 'open with "Here\'s what\'s real."'],
+    pivots: ['drop a 4-word line on its own as a deliberate pause', 'name the code under the practical advice', 'turn the post toward the reader: "that\'s on you"'],
+    closers: ['close with a quiet pointed line that pins the reader', 'close with the moral mechanism in one sentence', 'close on a single line of direct address'],
+    rhythmTwists: ['exactly one single-line paragraph as the pause', 'one direct "you" per paragraph', 'never raise the volume — the stillness IS the volume'],
+    lenses: ['the code under the choice', 'what the reader already knows but is avoiding', 'the thing the mentor in the room would say'],
+  },
+};
+
+// Generic freshness modifiers applied across ALL personas
+const UNIVERSAL_ENERGY_DIALS = [
+  'dial intensity to 7/10 — controlled burn',
+  'dial intensity to 9/10 — barely-contained',
+  'dial intensity to 5/10 — eerily calm',
+  'dial intensity to 8/10 — sharpened, no slack',
+];
+const UNIVERSAL_ENTRY_ANGLES = [
+  'enter the post mid-thought, not at the beginning',
+  'enter through a specific concrete object before the abstraction',
+  'enter through a number before any claim',
+  'enter through a contradiction, stated flat',
+  'enter through what the reader assumed, then break it',
+];
+const UNIVERSAL_TEXTURE_MOVES = [
+  'use one sentence fragment as a rhythm break',
+  'repeat one key noun three times across the post for cadence',
+  'use one single-word sentence as a hinge',
+  'leave one deliberate line break where a transition word would normally go',
+];
+
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+const buildPersonaFreshnessBlock = (personaVal: string): string => {
+  const v = PERSONA_VARIATIONS[personaVal];
+  if (!v) return '';
+  const mood = pick(v.moods);
+  const opener = pick(v.openers);
+  const pivot = pick(v.pivots);
+  const closer = pick(v.closers);
+  const twist = pick(v.rhythmTwists);
+  const lens = pick(v.lenses);
+  const energy = pick(UNIVERSAL_ENERGY_DIALS);
+  const entry = pick(UNIVERSAL_ENTRY_ANGLES);
+  const texture = pick(UNIVERSAL_TEXTURE_MOVES);
+  const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return [
+    '',
+    `▓▓ LIVE PERSONA FRESHNESS DIAL — variation seed #${seed} (THIS DRAFT ONLY) ▓▓`,
+    'These randomized picks are non-negotiable for this single draft. They keep the persona alive, prevent repetition across generations, and force a unique shape every time. Treat each pick as a hard constraint, not a suggestion. Do not substitute.',
+    `• MOOD for this draft: ${mood}.`,
+    `• LENS — look at the topic through: ${lens}.`,
+    `• OPENING GAMBIT: ${opener}.`,
+    `• MID-POST PIVOT: ${pivot}.`,
+    `• CLOSER SHAPE: ${closer}.`,
+    `• RHYTHM TWIST: ${twist}.`,
+    `• ENERGY DIAL: ${energy}.`,
+    `• ENTRY ANGLE: ${entry}.`,
+    `• TEXTURE MOVE: ${texture}.`,
+    'FRESHNESS RULE: If this draft could be confused with the last 3 drafts of this same persona, you have failed. Vary the sentence shapes, vary the opening word, vary the closing image. The persona stays — the surface mutates.',
+    '',
+  ].join('\n');
+};
+
+
 
 const SITE_LINK = 'https://aetheris.technology';
 
@@ -247,7 +398,9 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
     lines.push('4. NEVER write the persona\'s name. NEVER name their films/companies/books/shows/brands. NEVER use their signature catchphrases. NEVER reference their biography. NEVER do an impression or parody. Style transfer ONLY — cadence, rhythm, vocab, energy.');
     lines.push('5. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it is said, not WHAT is said.');
     lines.push('6. SELF-CHECK BEFORE RETURNING: Read the draft out loud in your head. If it sounds like the default Aetheris voice, you have FAILED. Rewrite it harder in the persona\'s actual rhythm. Repeat until the persona is undeniable.');
-    lines.push('');
+    lines.push('7. FRESHNESS LOCK: Honor every pick inside the LIVE PERSONA FRESHNESS DIAL block below. Those picks are randomized for THIS draft only and exist to keep the persona alive and unrepeatable across generations. Do not default to your usual shape for this persona — commit to the dialed-in mood, lens, opener, pivot, closer, rhythm twist, energy dial, entry angle, and texture move.');
+    lines.push(buildPersonaFreshnessBlock(personaVal!));
+
   }
 
   if (toneVal && toneVal !== 'auto') {
