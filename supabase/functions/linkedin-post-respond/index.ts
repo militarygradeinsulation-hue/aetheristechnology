@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
+type ChatContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -253,7 +257,7 @@ serve(async (req) => {
     const personaKeys: string[] = Array.isArray(body?.personaKeys) ? body.personaKeys.filter(Boolean) : [];
     const recentDrafts: string[] = Array.isArray(body?.recentDrafts)
       ? body.recentDrafts
-          .filter((s: any) => typeof s === "string" && s.trim().length > 20)
+          .filter((s: unknown): s is string => typeof s === "string" && s.trim().length > 20)
           .slice(0, 24)
           .map((s: string) => s.replace(/https?:\/\/\S+/gi, "").trim().slice(0, 1800))
       : [];
@@ -413,7 +417,7 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
 
             (() => {
               if (isReplyToReply && (hasOriginalImg || hasMyCommentImg || hasTheirReplyImg)) {
-                const parts: any[] = [{ type: "text", text: userInstruction }];
+                const parts: ChatContentPart[] = [{ type: "text", text: userInstruction }];
                 if (hasOriginalImg) {
                   parts.push({ type: "text", text: "ORIGINAL POST SCREENSHOT:" });
                   parts.push({ type: "image_url", image_url: { url: originalPostImageDataUrl } });
