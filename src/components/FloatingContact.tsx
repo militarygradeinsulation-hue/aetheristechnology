@@ -3,6 +3,7 @@ import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
