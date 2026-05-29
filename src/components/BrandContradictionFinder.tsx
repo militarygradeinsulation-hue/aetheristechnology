@@ -33,6 +33,9 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
   const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  useActiveLeadAutofill('brand-contradictions', (lead) => {
+    if (lead.website) setForm(p => ({ ...p, url: p.url || lead.website! }));
+  });
 
   const togglePerception = (p: string) => {
     setForm(prev => ({ ...prev, desiredPerception: prev.desiredPerception.includes(p) ? prev.desiredPerception.filter(x => x !== p) : [...prev.desiredPerception, p] }));
