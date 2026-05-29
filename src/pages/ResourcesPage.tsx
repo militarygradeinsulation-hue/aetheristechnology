@@ -315,6 +315,43 @@ const ResourcesPage = () => {
           );
         })()}
 
+        {/* How to create a Custom Playbook — instructions */}
+        <section id="build-your-own" className="pb-8 px-4 scroll-mt-24">
+          <div className="max-w-4xl mx-auto">
+            <RevealOnScroll>
+              <div className="glass rounded-2xl border border-amber/30 p-8 md:p-10">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">How it works</div>
+                <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-3">
+                  How to create your <span className="text-amber">Custom Playbook</span>
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Every playbook above is free. Custom playbooks are built by our Strategic Business AI from one of 100+ topics, tailored to your business, and delivered as a 20+ page PDF. <span className="text-amber font-semibold">$29 each.</span>
+                </p>
+                <ol className="space-y-4 mb-6">
+                  {[
+                    { t: 'Browse or search topics', d: 'Use the topic library below. Filter by pillar (Operations, Marketing, Sales, Leadership, AI) or search by keyword to find the angle that matches the leak you want to seal.' },
+                    { t: 'Open a topic card', d: 'You will see the pillar, the sub-topics covered, and exactly what the deliverable includes (proprietary frameworks, KPIs, ROI models, real case metrics).' },
+                    { t: 'Sign in and click "Generate & Buy"', d: 'You need a free account so the playbook is saved to your library and can be re-downloaded later. Sign in or create one in 10 seconds.' },
+                    { t: 'Complete checkout — $29 one-time', d: 'Secure Stripe checkout. No subscription. The playbook generates immediately after payment, no waiting on a human.' },
+                    { t: 'Download your PDF', d: 'You will be returned to a download page and the playbook lands in your library at /portal. Re-download anytime. Use it. Hand it to your team. Sell the rebuild internally.' },
+                  ].map((step, i) => (
+                    <li key={i} className="flex gap-4">
+                      <div className="w-8 h-8 rounded-lg bg-amber/15 border border-amber/40 text-amber font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
+                      <div>
+                        <div className="font-semibold text-foreground">{step.t}</div>
+                        <div className="text-sm text-muted-foreground">{step.d}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <div className="rounded-lg border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                  <span className="font-semibold text-amber">Tip:</span> Buy any Aetheris service and you get one custom playbook free. Bundle the playbook with a <a href="/leak-audit" className="text-amber underline">Free Leak Audit™</a> for the sharpest read on which topic to pick.
+                </div>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
+
         {/* On-Demand Playbook Generator */}
         <PlaybookTopicBrowser existingTitles={existingTitles} />
 
