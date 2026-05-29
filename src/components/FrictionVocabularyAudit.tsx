@@ -32,6 +32,13 @@ export const FrictionVocabularyAudit: React.FC<{ adminMode?: boolean }> = ({ adm
   const [unlocked, setUnlocked] = useState(adminMode);
   const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  useActiveLeadAutofill('friction-audit', (lead) => {
+    setForm(p => ({
+      ...p,
+      url: p.url || lead.website || '',
+      industry: p.industry || lead.industry || '',
+    }));
+  });
 
   const toggleTone = (t: string) => { setForm(prev => ({ ...prev, desiredTone: prev.desiredTone.includes(t) ? prev.desiredTone.filter(x => x !== t) : [...prev.desiredTone, t] })); };
 
