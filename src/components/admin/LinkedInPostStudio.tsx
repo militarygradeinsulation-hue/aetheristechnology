@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToAdminLibrary, listAdminLibrary, deleteFromAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { scanRepetition, reportToDirective } from '@/lib/repetitionScan';
 import { AiWritingDetectorCard } from './AiWritingDetectorCard';
 
 const PILLARS = [
