@@ -180,7 +180,8 @@ serve(async (req) => {
       }
 
       let q = admin.from("rep_leads").select("id")
-        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
+
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(need);
