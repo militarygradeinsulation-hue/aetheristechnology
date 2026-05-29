@@ -93,6 +93,7 @@ export const FloatingContact: React.FC = () => {
           )}
         </button>
       </div>
+      </PinnableFloater>
 
       <StickyContactBar />
     </>
