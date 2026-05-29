@@ -115,8 +115,8 @@ export const ProblemPicker: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        <div className="forensic-tile rounded-sm border border-amber/40 p-4 md:p-6">
-          <div className="flex items-baseline justify-between flex-wrap gap-2 mb-5">
+        <div className="rounded-sm border-2 border-amber/40 bg-card/95 p-4 md:p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+          <div className="flex items-baseline justify-between flex-wrap gap-2 mb-8 pb-4 border-b border-amber/20">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber">
               Owner pressure points · {String(total).padStart(2, '0')} cases on file
             </div>
@@ -125,8 +125,7 @@ export const ProblemPicker: React.FC = () => {
             </div>
           </div>
 
-          <div className="columns-1 md:columns-2 gap-4 [column-fill:_balance] space-y-4">
-            <style>{`.problem-tile{break-inside:avoid;display:block;}`}</style>
+          <div className="flex flex-col gap-6 md:gap-8">
             {problemGroups.map((group, idx) => {
               const meta = groupMeta[idx];
               const Icon = meta?.icon ?? Droplets;
@@ -134,17 +133,17 @@ export const ProblemPicker: React.FC = () => {
               return (
                 <RevealOnScroll key={idx}>
                   <div
-                    className={`problem-tile forensic-tile rounded-md transition-all duration-500 mb-4 ${
+                    className={`rounded-lg bg-background/80 border-2 transition-all duration-500 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] ${
                       isOpen
-                        ? 'border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
-                        : 'border-border/60 hover:border-amber/50'
+                        ? 'border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.45)] bg-background/95'
+                        : 'border-border/70 hover:border-amber/50'
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => setOpenIdx(isOpen ? null : idx)}
                       aria-expanded={isOpen}
-                      className="w-full text-left p-4 md:p-5 group"
+                      className="w-full text-left p-5 md:p-7 group"
                     >
                       <div className="flex items-start gap-3 mb-2">
                         <div
