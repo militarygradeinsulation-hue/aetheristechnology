@@ -1157,6 +1157,19 @@ export default function LinkedInPostStudio() {
           </Button>
         </div>
 
+        {/* Repetition Lock controls — scan past drafts, ban repeated structure/persona phrases */}
+        <RepetitionLockBar
+          scanningStructure={scanningStructure}
+          scanningPersona={scanningPersona}
+          onScanStructure={scanStructureNow}
+          onScanPersona={() => scanPersonaNow(respondPersona)}
+          onClearStructure={() => setStructureReport(null)}
+          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[respondPersona]; return n; })}
+          structureReport={structureReport}
+          personaReport={respondPersona !== 'none' ? personaReports[respondPersona] : null}
+          personaLabel={respondPersona}
+        />
+
 
         {(respondLoading || respondOutput) && (
           <div className="rounded-lg border border-border bg-background/40 p-4">
