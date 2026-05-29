@@ -171,7 +171,7 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<AdminImageStudio />) },
   { id: "rep-image-studio", label: "Image Studio (Rep)", group: "Content", icon: ImageIcon, fullPagePath: "/portal",
     accent: "175 78% 50%",
-    render: () => wrap(<RepImageStudio />) },
+    render: () => wrap(getAdminToken() ? <AdminImageStudio /> : <RepImageStudio />) },
   { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
     accent: "230 85% 68%",
     render: () => wrap(<AdminCreationStudio />) },
