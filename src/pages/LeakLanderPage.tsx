@@ -335,61 +335,62 @@ const LeakLanderPage: React.FC = () => {
 
           {/* What the hell do we do — instant answer */}
           <section
-            className="mt-4 max-w-2xl mx-auto animate-fade-in"
+            className="mt-12 max-w-2xl mx-auto animate-fade-in"
             style={{ animationDelay: "300ms", animationFillMode: "both" }}
           >
             <button
               type="button"
               onClick={() => setWhatOpen((v) => !v)}
-              className="relative overflow-hidden w-full group inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-crimson/40 bg-gradient-to-br from-crimson/[0.18] via-crimson/[0.08] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 hover:border-crimson/70 transition-all text-foreground font-mono uppercase tracking-wider text-xs shadow-[0_15px_40px_-15px_hsl(var(--crimson)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.18)] before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none"
+              className="relative overflow-hidden w-full group inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl border-2 border-crimson/50 bg-card/95 backdrop-blur-sm hover:border-crimson transition-all text-foreground font-mono uppercase tracking-wider text-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
               aria-expanded={whatOpen}
             >
-              <HelpCircle className="w-4 h-4 text-crimson relative" />
+              <HelpCircle className="w-5 h-5 text-crimson relative" />
               <span className="relative font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What the Hell Do You Actually Sell?</span>
               <ChevronDown className={`relative w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
             </button>
             {whatOpen && (
-              <div className="mt-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl p-5 animate-fade-in text-left space-y-4">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Case File · Plain English</div>
+              <div className="mt-4 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 animate-fade-in text-left space-y-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+                <div className="font-mono text-xs uppercase tracking-[0.3em] text-amber">Case File · Plain English</div>
                 <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
                   What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
                 </h3>
 
-                <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
+                <div className="rounded-md border-l-4 border-crimson/70 bg-crimson/10 px-4 py-4">
+                  <div className="font-mono text-[11px] uppercase tracking-widest text-crimson mb-2">
                     I know what you're thinking
                   </div>
-                  <p className="text-[14px] leading-relaxed text-foreground/85 italic">
+                  <p className="text-base leading-relaxed text-foreground italic">
                     "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
                   </p>
-                  <p className="text-[14px] leading-relaxed text-foreground/90 mt-2">
+                  <p className="text-base leading-relaxed text-foreground mt-3">
                     I'd think the same thing. I <span className="text-amber">did</span> think the same thing — every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
                   </p>
                 </div>
 
-                <div className="space-y-2.5 text-[15px] leading-relaxed text-foreground/85">
+                <div className="space-y-3 text-base leading-relaxed text-foreground">
                   <p>Most consultants sell services.</p>
-                  <p className="text-foreground font-semibold">We solve problems.</p>
+                  <p className="text-foreground font-semibold text-lg">We solve problems.</p>
                   <p>
                     We investigate every part of your business to find hidden revenue leaks, operational bottlenecks, wasted effort, missed opportunities, and growth barriers.
                   </p>
                   <p>
                     Then we quantify the impact, prioritize the fixes, and build the systems needed to solve them.
                   </p>
-                  <p className="font-mono text-xs uppercase tracking-widest text-amber/90">
+                  <p className="font-mono text-xs uppercase tracking-widest text-amber">
                     Marketing. AI. Automation. CRM. Websites. Operations. Sales.
                   </p>
-                  <p className="italic text-foreground/75">Those are just tools.</p>
+                  <p className="italic text-foreground/80">Those are just tools.</p>
                   <p>
                     The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
                   </p>
-                  <p className="border-l-2 border-crimson/60 pl-3 font-forensic text-base md:text-lg text-foreground">
+                  <p className="border-l-4 border-crimson/70 pl-4 font-forensic text-lg md:text-xl text-foreground">
                     Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
                   </p>
                 </div>
               </div>
             )}
           </section>
+
 
           {/* Forensic Revenue Recovery deck — minimized, PDFs at bottom */}
           <section
