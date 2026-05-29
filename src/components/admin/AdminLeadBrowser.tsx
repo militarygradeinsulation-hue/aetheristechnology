@@ -148,6 +148,14 @@ export const AdminLeadBrowser: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Keep the open detail dialog in sync with refreshed leads (e.g. after a scan completes)
+  useEffect(() => {
+    if (!detail) return;
+    const fresh = leads.find(l => l.id === detail.id);
+    if (fresh && fresh !== detail) setDetail(fresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leads]);
+
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
