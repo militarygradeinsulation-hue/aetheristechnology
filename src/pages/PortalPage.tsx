@@ -474,8 +474,10 @@ const PortalPage: React.FC = () => {
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const sharedWsUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const isAdmin = hasValidAdminToken();
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
+    && (!t.adminOnly || isAdmin)
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
