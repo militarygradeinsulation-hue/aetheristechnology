@@ -1078,8 +1078,17 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   const setStatus = async (status: LeadStatus) => {
     setSaving(true);
-    try { await portalLeads.updateStatus(lead.id, { status }); onChanged(); }
-    catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
+    const prev = lead.status;
+    try {
+      await portalLeads.updateStatus(lead.id, { status });
+      await leadClues.log(lead.id, {
+        kind: 'status_change',
+        label: `Status: ${STATUS_LABEL[prev]} → ${STATUS_LABEL[status]}`,
+        stage_from: prev, stage_to: status,
+      });
+      bumpClues();
+      onChanged();
+    } catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
     finally { setSaving(false); }
   };
 
@@ -1087,6 +1096,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     setSaving(true);
     try {
       await portalLeads.updateStatus(lead.id, { touch: true, status: lead.status === 'new' ? 'touched' : lead.status });
+      await leadClues.log(lead.id, { kind: 'touch', label: 'Logged a touch' });
+      bumpClues();
       toast({ title: 'Touch logged' });
       onChanged();
     } catch { toast({ title: 'Failed', variant: 'destructive' }); }
