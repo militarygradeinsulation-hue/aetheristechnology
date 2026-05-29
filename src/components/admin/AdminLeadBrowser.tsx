@@ -810,6 +810,16 @@ export const AdminLeadBrowser: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={() => setAddDest('holding')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'holding' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Archive className="w-4 h-4 text-amber" /> Hold for me</div>
+                <div className="text-xs text-muted-foreground">Private stash. Reps can't see these — distribute them later from "My holdings".</div>
+              </button>
+              <button
+                type="button"
                 onClick={() => setAddDest('pool')}
                 className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
                   addDest === 'pool' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
@@ -829,6 +839,7 @@ export const AdminLeadBrowser: React.FC = () => {
                 <div className="text-xs text-muted-foreground">Held exclusively for one rep until the hold expires.</div>
               </button>
             </div>
+
             {addDest === 'rep' && (
               <div className="grid sm:grid-cols-2 gap-2">
                 <div>
