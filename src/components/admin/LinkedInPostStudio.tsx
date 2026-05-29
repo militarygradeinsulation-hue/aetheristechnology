@@ -9,6 +9,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { saveToAdminLibrary, listAdminLibrary, deleteFromAdminLibrary, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { scanRepetition, reportToDirective } from '@/lib/repetitionScan';
+import { RepetitionLockBar } from './RepetitionLockBar';
 import { AiWritingDetectorCard } from './AiWritingDetectorCard';
 
 const PILLARS = [
@@ -452,6 +454,12 @@ export default function LinkedInPostStudio() {
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
 
+  // Repetition lock state — populated by the two "scan" buttons
+  const [structureReport, setStructureReport] = useState<import('@/lib/repetitionScan').ScanReport | null>(null);
+  const [personaReports, setPersonaReports] = useState<Record<string, import('@/lib/repetitionScan').ScanReport>>({});
+  const [scanningStructure, setScanningStructure] = useState(false);
+  const [scanningPersona, setScanningPersona] = useState(false);
+
   // Respond-to-post (image upload OR pasted text OR reply-to-reply) state
   const [respondSourceType, setRespondSourceType] = useState<'image' | 'text' | 'reply'>('image');
   const [respondImage, setRespondImage] = useState<string | null>(null);
@@ -618,6 +626,77 @@ export default function LinkedInPostStudio() {
     ].filter(Boolean).join('\n');
   };
 
+  // Build the persistent lock directive from the two scan buttons
+  const buildLockDirective = (currentPersona?: string): string => {
+    const parts: string[] = [];
+    if (structureReport) {
+      parts.push(reportToDirective('Global sentence-structure', structureReport));
+    }
+    const pVal = currentPersona && currentPersona !== 'none' ? currentPersona : null;
+    if (pVal && personaReports[pVal]) {
+      parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
+    }
+    return parts.join('');
+  };
+
+  // Pull every saved post + response (across the full library), extract bodies
+  const collectAllPastBodies = async (): Promise<Array<{ body: string; persona: string | null; type: string }>> => {
+    const items = await listAdminLibrary();
+    return items
+      .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
+      .map(i => ({
+        body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+        persona: (i.input_data as any)?.persona || null,
+        type: i.tool_type,
+      }))
+      .filter(x => x.body && x.body.length > 20);
+  };
+
+  const scanStructureNow = async () => {
+    setScanningStructure(true);
+    try {
+      const all = await collectAllPastBodies();
+      const report = scanRepetition(all.map(a => a.body));
+      setStructureReport(report);
+      toast({
+        title: 'Sentence-structure scan locked in',
+        description: `Scanned ${report.totalSamples} past drafts. Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts, ${report.bannedClosers.length} closers.`,
+      });
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setScanningStructure(false);
+    }
+  };
+
+  const scanPersonaNow = async (personaVal: string) => {
+    if (!personaVal || personaVal === 'none') {
+      toast({ title: 'Pick a personality first', description: 'The persona dropdown must be set before scanning.', variant: 'destructive' });
+      return;
+    }
+    setScanningPersona(true);
+    try {
+      const all = await collectAllPastBodies();
+      const filtered = all.filter(a => a.persona === personaVal).map(a => a.body);
+      if (filtered.length === 0) {
+        toast({ title: 'No saved drafts for this personality yet', description: 'Generate at least 2 drafts with this persona, then re-scan.' });
+        setPersonaReports(prev => ({ ...prev, [personaVal]: { totalSamples: 0, bannedPhrases: [], bannedOpeners: [], bannedClosers: [], bannedOpenerStarts: [] } }));
+        return;
+      }
+      const report = scanRepetition(filtered);
+      setPersonaReports(prev => ({ ...prev, [personaVal]: report }));
+      toast({
+        title: `"${personaVal}" persona repetition locked`,
+        description: `Scanned ${report.totalSamples} drafts. Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts.`,
+      });
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setScanningPersona(false);
+    }
+  };
+
+
   const generateResponse = async (opts?: { freshen?: boolean }) => {
     const useImage = respondSourceType === 'image';
     const isReply = respondSourceType === 'reply';
@@ -639,7 +718,8 @@ export default function LinkedInPostStudio() {
       const adminToken = getAdminToken();
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
       const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra, respondPersona);
-      const extraWithFreshness = (toneStyleTail + freshnessTail).trim();
+      const lockTail = buildLockDirective(respondPersona);
+      const extraWithFreshness = (toneStyleTail + freshnessTail + lockTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -683,6 +763,9 @@ export default function LinkedInPostStudio() {
               myComment: isReply ? myComment.trim().slice(0, 4000) : null,
               theirReply: isReply ? theirReply.trim().slice(0, 4000) : null,
               originalPostText: isReply ? replyOriginalPost.trim().slice(0, 4000) : null,
+              persona: respondPersona,
+              tone: respondTone,
+              style: respondStyle,
             },
             output_data: { body: post, mode: isReply ? 'reply' : respondMode },
           });
@@ -756,7 +839,7 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt, persona).trim(),
+          extraPrompt: (buildToneStyleDirective(tone, postStyle, extraPrompt, persona) + buildLockDirective(persona)).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
@@ -795,6 +878,9 @@ export default function LinkedInPostStudio() {
           creator,
           extraPrompt,
           scheduledFor: scheduleDate,
+          persona,
+          tone,
+          style: postStyle,
         },
         output_data: { body: generated, scheduledFor: scheduleDate },
         created_at,
@@ -1071,6 +1157,19 @@ export default function LinkedInPostStudio() {
             <Sparkles className="w-4 h-4 mr-2" /> Freshen Voice
           </Button>
         </div>
+
+        {/* Repetition Lock controls — scan past drafts, ban repeated structure/persona phrases */}
+        <RepetitionLockBar
+          scanningStructure={scanningStructure}
+          scanningPersona={scanningPersona}
+          onScanStructure={scanStructureNow}
+          onScanPersona={() => scanPersonaNow(respondPersona)}
+          onClearStructure={() => setStructureReport(null)}
+          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[respondPersona]; return n; })}
+          structureReport={structureReport}
+          personaReport={respondPersona !== 'none' ? personaReports[respondPersona] : null}
+          personaLabel={respondPersona}
+        />
 
 
         {(respondLoading || respondOutput) && (
@@ -1482,6 +1581,17 @@ export default function LinkedInPostStudio() {
           })}
         </div>
       </Card>
+      <RepetitionLockBar
+        scanningStructure={scanningStructure}
+        scanningPersona={scanningPersona}
+        onScanStructure={scanStructureNow}
+        onScanPersona={() => scanPersonaNow(persona)}
+        onClearStructure={() => setStructureReport(null)}
+        onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[persona]; return n; })}
+        structureReport={structureReport}
+        personaReport={persona !== 'none' ? personaReports[persona] : null}
+        personaLabel={persona}
+      />
 
       <Button
         onClick={generate}
