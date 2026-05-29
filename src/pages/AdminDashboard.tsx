@@ -793,6 +793,7 @@ const OverviewBody: React.FC<{
       </div>
     )}
     <ManageRepsPanel scope="admin" />
+    <AdminLeadActionsPanel />
     <RepPerformancePanel />
     <LeadPipelinePanel />
     <AdminLeadBrowser />
