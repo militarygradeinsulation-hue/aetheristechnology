@@ -755,15 +755,21 @@ export default function LinkedInPostStudio() {
   };
 
   // Pull every saved post + response (across the full library), extract bodies
-  const collectAllPastBodies = async (): Promise<Array<{ body: string; persona: string | null; type: string }>> => {
+  const collectAllPastBodies = async (): Promise<Array<{ body: string; personas: string[]; type: string }>> => {
     const items = await listAdminLibrary();
     return items
       .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
-      .map(i => ({
-        body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
-        persona: (i.input_data as any)?.persona || null,
-        type: i.tool_type,
-      }))
+      .map(i => {
+        const raw = (i.input_data as any)?.persona;
+        const personas: string[] = Array.isArray(raw)
+          ? raw.filter(Boolean)
+          : (raw && raw !== 'none' ? [raw] : []);
+        return {
+          body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+          personas,
+          type: i.tool_type,
+        };
+      })
       .filter(x => x.body && x.body.length > 20);
   };
 
