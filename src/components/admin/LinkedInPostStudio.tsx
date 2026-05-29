@@ -118,6 +118,34 @@ const STYLES = [
   { value: 'before-after', label: 'Before / After / What changed' },
 ];
 
+const PERSONAS = [
+  { value: 'none', label: 'No persona (default voice)' },
+  { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
+  { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
+  { value: 'ryan-reynolds', label: 'Ryan Reynolds — self-aware, deadpan, charming wit' },
+  { value: 'robin-williams', label: 'Robin Williams — rapid-fire, warm, associative riffs' },
+  { value: 'clint-eastwood', label: 'Clint Eastwood — spare, weathered, quiet menace' },
+  { value: 'hemingway', label: 'Hemingway — short, declarative, iceberg restraint' },
+  { value: 'aaron-sorkin', label: 'Aaron Sorkin — walk-and-talk cadence, rhythmic sparring' },
+  { value: 'anthony-bourdain', label: 'Anthony Bourdain — gritty, observational, unfiltered' },
+  { value: 'churchill', label: 'Churchill — gravitas, cadenced, resolve-forward' },
+  { value: 'denzel', label: 'Denzel Washington — measured, magnetic, moral weight' },
+];
+
+const PERSONA_DIRECTIVES: Record<string, string> = {
+  machiavellian: 'Voice = Machiavellian strategist. Cold strategic clarity. Treat the topic as a power dynamic. Sentences are calculated, observant, and slightly menacing. Use the rhythm of someone who has already seen how this ends. NEVER name Machiavelli, "The Prince", princes, courts, sovereigns, or use archaic words like "thou", "art", or "shall". Modern business vocabulary only.',
+  'elon-musk': 'Voice = Elon Musk cadence. Short, blunt, first-principles. Drop articles occasionally. Mix one technical/quantitative aside with one dry one-liner. Mild contrarian shrug. NEVER mention Musk, Tesla, SpaceX, X, rockets, Mars, or use his catchphrases. Just the rhythm and confidence.',
+  'ryan-reynolds': 'Voice = Ryan Reynolds cadence. Self-aware, deadpan, charm-forward. One small joke at the narrator\'s own expense early. Confident but never smug. NEVER mention Reynolds, Deadpool, Aviation Gin, Wrexham, Hugh Jackman, or any of his films/brands.',
+  'robin-williams': 'Voice = Robin Williams cadence. Rapid associative riffs, one warm pivot, a flash of unexpected tenderness near the end. Energy without chaos. NEVER mention Williams, his films, "Nanu nanu", "O Captain", or do impressions. Just the rhythm and warmth.',
+  'clint-eastwood': 'Voice = Clint Eastwood cadence. Spare. Weathered. Lots of silence between sentences (short paragraphs / line breaks). Quiet menace. Earned authority. NEVER mention Eastwood, westerns, Dirty Harry, "make my day", squints, or cowboys.',
+  hemingway: 'Voice = Hemingway cadence. Short declarative sentences. Concrete nouns. No adverbs. Iceberg theory — say less than you mean, let the reader feel the weight. NEVER name Hemingway, bullfighting, Paris, fishing, or war.',
+  'aaron-sorkin': 'Voice = Aaron Sorkin cadence. Walk-and-talk rhythm. Sentences that volley. Mild repetition for cadence ("It\'s not X. It\'s Y."). Smart-people-arguing energy. NEVER mention Sorkin, The West Wing, The Social Network, Newsroom, or use the phrase "walk with me".',
+  'anthony-bourdain': 'Voice = Anthony Bourdain cadence. Gritty, observational, unfiltered, slightly world-weary. One vivid sensory detail. Honest about ugly parts. NEVER mention Bourdain, Parts Unknown, kitchens, chefs, travel shows, or food metaphors.',
+  churchill: 'Voice = Churchillian cadence. Gravitas. Tricolon ("we will X, we will Y, we will Z"). Resolve-forward closer. Slightly elevated diction without sounding archaic. NEVER mention Churchill, WWII, Britain, beaches, or "blood, sweat, tears".',
+  denzel: 'Voice = Denzel Washington cadence. Measured, deliberate, magnetic. Moral weight under every line. One pointed pause-line. NEVER mention Denzel, any of his films, or church/preacher imagery.',
+};
+
+
 const SITE_LINK = 'https://aetheris.technology';
 
 const appendSiteLink = (post: string): string => {
