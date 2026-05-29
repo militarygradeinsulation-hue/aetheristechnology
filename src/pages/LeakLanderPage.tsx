@@ -83,10 +83,10 @@ const LeakLanderPage: React.FC = () => {
         }}
       />
 
-      <main className="relative flex-1 flex items-center justify-center max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
+      <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
         <div className="w-full">
           {/* Aetheris logo — top-left, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-2xl mx-auto flex justify-start mb-2">
+          <div className="max-w-4xl mx-auto flex justify-start mb-2">
             <button
               type="button"
               onClick={handleLogoTap}
@@ -103,7 +103,7 @@ const LeakLanderPage: React.FC = () => {
           </div>
 
           {/* Hero banner with playable video overlay — glossy glass tile */}
-          <div className="animate-fade-in max-w-2xl mx-auto">
+          <div className="animate-fade-in max-w-4xl mx-auto">
             <button
               type="button"
               onClick={toggleVideo}
@@ -158,7 +158,7 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
           {/* Proprietary banner */}
-          <div className="mt-10 max-w-3xl mx-auto">
+          <div className="mt-10 max-w-5xl mx-auto">
             <div className="rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] px-5 py-5 text-center">
               <div className="font-case text-xs uppercase tracking-widest text-amber mb-2">
                 Proprietary · Built In-House
@@ -200,7 +200,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Free PDF download */}
           <section
-            className="mt-10 max-w-2xl mx-auto animate-fade-in"
+            className="mt-10 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
             <a
@@ -224,7 +224,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Demand generation infographic — front & center above "What the Hell" */}
           <section
-            className="mt-12 max-w-3xl mx-auto animate-fade-in"
+            className="mt-12 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
           >
             <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
@@ -241,7 +241,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Frequently Cited Facts — Island-Test blocks for AI extraction */}
           <section
-            className="mt-12 max-w-3xl mx-auto animate-fade-in"
+            className="mt-12 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
             aria-labelledby="cited-facts-heading"
           >
@@ -335,7 +335,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* What the hell do we do — instant answer */}
           <section
-            className="mt-12 max-w-2xl mx-auto animate-fade-in"
+            className="mt-12 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "300ms", animationFillMode: "both" }}
           >
             <button
@@ -394,7 +394,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Forensic Revenue Recovery deck — minimized, PDFs at bottom */}
           <section
-            className="mt-12 max-w-3xl mx-auto animate-fade-in"
+            className="mt-12 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "330ms", animationFillMode: "both" }}
           >
             <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
