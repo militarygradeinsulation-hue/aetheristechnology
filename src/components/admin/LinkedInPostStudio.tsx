@@ -762,6 +762,9 @@ export default function LinkedInPostStudio() {
               myComment: isReply ? myComment.trim().slice(0, 4000) : null,
               theirReply: isReply ? theirReply.trim().slice(0, 4000) : null,
               originalPostText: isReply ? replyOriginalPost.trim().slice(0, 4000) : null,
+              persona: respondPersona,
+              tone: respondTone,
+              style: respondStyle,
             },
             output_data: { body: post, mode: isReply ? 'reply' : respondMode },
           });
