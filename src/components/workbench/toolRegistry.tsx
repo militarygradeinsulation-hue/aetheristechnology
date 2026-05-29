@@ -128,6 +128,9 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<RepImageStudio />) },
   { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
     render: () => wrap(<AdminCreationStudio />) },
+  { id: "easy-mode", label: "Easy Mode Translator", group: "Content", icon: Languages,
+    render: () => wrap(<EasyModeTool />) },
 ];
+
 
 export const TOOL_BY_ID = Object.fromEntries(TOOL_REGISTRY.map(t => [t.id, t]));
