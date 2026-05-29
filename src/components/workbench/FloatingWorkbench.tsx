@@ -165,20 +165,22 @@ export const FloatingWorkbench: React.FC = () => {
     <>
       {/* Floating launcher (hidden while open) */}
       {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-24 right-4 z-[60] h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
-          title="Open Workbench"
-          aria-label="Open Workbench"
-        >
-          <Wrench className="w-4 h-4" />
-          Workbench
-          {stack.length > 0 && (
-            <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
-              {stack.length}
-            </span>
-          )}
-        </button>
+        <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={60}>
+          <button
+            onClick={() => setOpen(true)}
+            className="h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
+            title="Open Workbench"
+            aria-label="Open Workbench"
+          >
+            <Wrench className="w-4 h-4" />
+            Workbench
+            {stack.length > 0 && (
+              <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
+                {stack.length}
+              </span>
+            )}
+          </button>
+        </PinnableFloater>
       )}
 
       {/* Backdrop (only when open) — click to close, work stays mounted */}
