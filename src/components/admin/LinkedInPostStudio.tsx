@@ -720,7 +720,7 @@ export default function LinkedInPostStudio() {
   const buildFreshnessDirective = (): string => {
     // Pull recent outputs from library to teach the model what NOT to repeat
     const recent = responseLibrary.slice(0, 10)
-      .map(i => (i.output_data as any)?.body as string)
+      .map(i => readString(i.output_data, 'body'))
       .filter(Boolean);
     const openings = recent
       .map(b => (b.split(/\n|\.|!|\?/)[0] || '').trim())
