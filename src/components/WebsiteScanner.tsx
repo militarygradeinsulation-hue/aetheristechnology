@@ -13,6 +13,7 @@ import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { hasValidAdminToken } from '@/lib/adminAuth';
 import { suggestToolsForGap } from '@/lib/repToolTips';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
