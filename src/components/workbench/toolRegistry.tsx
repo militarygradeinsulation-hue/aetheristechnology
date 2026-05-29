@@ -2,8 +2,9 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
-  Film, Wand2, Zap,
+  Film, Wand2, Zap, Languages,
 } from "lucide-react";
+
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,6 +67,9 @@ const AdminCreationStudio = lazy(() =>
   import("@/components/admin/AdminCreationStudio").then(m => ({ default: m.AdminCreationStudio })));
 const RepImageStudio = lazy(() =>
   import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
+const EasyModeTool = lazy(() =>
+  import("@/components/EasyModeTool").then(m => ({ default: m.EasyModeTool })));
+
 
 const wrap = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-xs font-mono text-muted-foreground">Loading tool…</div>}>
@@ -124,6 +128,9 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<RepImageStudio />) },
   { id: "creation-studio", label: "Video & Voiceover Studio", group: "Content", icon: Film, fullPagePath: "/admin",
     render: () => wrap(<AdminCreationStudio />) },
+  { id: "easy-mode", label: "Easy Mode Translator", group: "Content", icon: Languages,
+    render: () => wrap(<EasyModeTool />) },
 ];
+
 
 export const TOOL_BY_ID = Object.fromEntries(TOOL_REGISTRY.map(t => [t.id, t]));
