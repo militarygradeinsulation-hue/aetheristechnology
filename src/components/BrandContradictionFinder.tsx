@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
