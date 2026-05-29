@@ -60,6 +60,21 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [copied, setCopied] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  useActiveLeadAutofill('outreach-email', (lead) => {
+    if (lead.contact_name) setRecipientName(n => n || lead.contact_name!);
+    // Seed the prompt with lead context so the AI has something to work with.
+    if (!prompt) {
+      const ctx = [
+        lead.business_name && `Company: ${lead.business_name}`,
+        lead.contact_name && `Contact: ${lead.contact_name}`,
+        lead.website && `Website: ${lead.website}`,
+        lead.industry && `Industry: ${lead.industry}`,
+        lead.location && `Location: ${lead.location}`,
+      ].filter(Boolean).join('\n');
+      if (ctx) setPrompt(`Write a first-touch outreach email.\n\n${ctx}\n\nAngle: leak/forensics, blunt, no fluff.`);
+    }
+  });
+
   async function handleFile(file: File) {
     if (file.size > 5_000_000) {
       toast({ title: 'Image too large', description: 'Keep under 5MB.', variant: 'destructive' });
