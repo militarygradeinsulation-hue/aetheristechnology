@@ -1580,6 +1580,17 @@ export default function LinkedInPostStudio() {
           })}
         </div>
       </Card>
+      <RepetitionLockBar
+        scanningStructure={scanningStructure}
+        scanningPersona={scanningPersona}
+        onScanStructure={scanStructureNow}
+        onScanPersona={() => scanPersonaNow(persona)}
+        onClearStructure={() => setStructureReport(null)}
+        onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[persona]; return n; })}
+        structureReport={structureReport}
+        personaReport={persona !== 'none' ? personaReports[persona] : null}
+        personaLabel={persona}
+      />
 
       <Button
         onClick={generate}
