@@ -148,6 +148,14 @@ export const AdminLeadBrowser: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Keep the open detail dialog in sync with refreshed leads (e.g. after a scan completes)
+  useEffect(() => {
+    if (!detail) return;
+    const fresh = leads.find(l => l.id === detail.id);
+    if (fresh && fresh !== detail) setDetail(fresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leads]);
+
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
@@ -640,7 +648,7 @@ export const AdminLeadBrowser: React.FC = () => {
       </CardContent>
 
       {/* Detail dialog */}
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o && detail && busy[detail.id] === 'scan') return; if (!o) setDetail(null); }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           {detail && (
             <>
@@ -665,10 +673,19 @@ export const AdminLeadBrowser: React.FC = () => {
 
                 {!detail.enrichment ? (
                   <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                    <p className="text-muted-foreground mb-2">No AI scan yet.</p>
-                    <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => { scan([detail.id]); setDetail(null); }}>
-                      <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
-                    </Button>
+                    {busy[detail.id] === 'scan' ? (
+                      <div className="flex items-center justify-center gap-2 text-amber">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Scanning lead… hang tight, this can take a minute.</span>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground mb-2">No AI scan yet.</p>
+                        <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => scan([detail.id])}>
+                          <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -741,8 +758,9 @@ export const AdminLeadBrowser: React.FC = () => {
                   <Button className="bg-amber text-background hover:bg-amber/90" onClick={() => { assign([detail.id], bulkRep); setDetail(null); }}>
                     <UserPlus className="w-4 h-4 mr-1" /> Send to rep
                   </Button>
-                  <Button variant="outline" onClick={() => { scan([detail.id]); }}>
-                    <ScanLine className="w-4 h-4 mr-1" /> Re-scan
+                  <Button variant="outline" onClick={() => scan([detail.id])} disabled={busy[detail.id] === 'scan'}>
+                    {busy[detail.id] === 'scan' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ScanLine className="w-4 h-4 mr-1" />}
+                    {busy[detail.id] === 'scan' ? 'Scanning…' : 'Re-scan'}
                   </Button>
                 </div>
               </div>
