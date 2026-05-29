@@ -1036,6 +1036,17 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     location: lead.location || '',
   });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cluesTick, setCluesTick] = useState(0);
+  const bumpClues = () => setCluesTick(t => t + 1);
+  const jumpToTool = (toolKey: string) => {
+    const id = `lead-tool-${lead.id}-${toolKey}`;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-amber');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-amber'), 1800);
+    }
+  };
 
   useEffect(() => {
     setEditFields({
