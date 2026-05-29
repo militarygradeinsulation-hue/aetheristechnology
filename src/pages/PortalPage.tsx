@@ -89,6 +89,7 @@ import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
+import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
 type ToolKey =
@@ -844,7 +845,10 @@ const PortalPage: React.FC = () => {
         </div>
 
         {layout === 'tabs' ? (
-          <EasyModeWrapper tabKey={tab}>{renderTabBody(tab)}</EasyModeWrapper>
+          <EasyModeWrapper tabKey={tab}>
+            {isPartner && <PartnerCoachTips tabId={tab} />}
+            {renderTabBody(tab)}
+          </EasyModeWrapper>
         ) : (() => {
           const visibleWidgets = availableTabs.filter(t => effectiveVisible.includes(t.id));
           // Sort: pinned first (in pin-toggle order), then by saved order, then by default order.
@@ -937,6 +941,7 @@ const PortalPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
+                    {isPartner && <PartnerCoachTips tabId={t.id} />}
                     {renderTabBody(t.id)}
                   </div>
                 </div>
