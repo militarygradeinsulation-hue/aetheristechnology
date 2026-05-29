@@ -673,10 +673,19 @@ export const AdminLeadBrowser: React.FC = () => {
 
                 {!detail.enrichment ? (
                   <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                    <p className="text-muted-foreground mb-2">No AI scan yet.</p>
-                    <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => { scan([detail.id]); setDetail(null); }}>
-                      <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
-                    </Button>
+                    {busy[detail.id] === 'scan' ? (
+                      <div className="flex items-center justify-center gap-2 text-amber">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Scanning lead… hang tight, this can take a minute.</span>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground mb-2">No AI scan yet.</p>
+                        <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => scan([detail.id])}>
+                          <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <>
