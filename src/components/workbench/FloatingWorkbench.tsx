@@ -76,23 +76,38 @@ export const FloatingWorkbench: React.FC = () => {
     return g;
   }, []);
 
+  const persistStack = (next: WidgetEntry[]) => {
+    wb.setStack(next);
+    if (active !== "default") {
+      setLayouts(wb.upsertLayout(active, next));
+    }
+    setStack(next);
+  };
+
   const addTool = (toolId: string) => {
     if (stack.some(s => s.toolId === toolId)) {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
     }
-    setStack(s => [...s, { toolId, collapsed: false, size: "md" }]);
+    const next = [...stack, { toolId, collapsed: false, size: "md" as const }];
+    persistStack(next);
   };
-  const removeAt = (idx: number) => setStack(s => s.filter((_, i) => i !== idx));
-  const toggleAt = (idx: number) =>
-    setStack(s => s.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w));
+  const removeAt = (idx: number) => {
+    const next = stack.filter((_, i) => i !== idx);
+    persistStack(next);
+  };
+  const toggleAt = (idx: number) => {
+    const next = stack.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w);
+    persistStack(next);
+  };
   const cycleSizeAt = (idx: number) => {
     const order: Array<"sm" | "md" | "lg" | "xl"> = ["sm", "md", "lg", "xl"];
-    setStack(s => s.map((w, i) => {
+    const next = stack.map((w, i) => {
       if (i !== idx) return w;
       const cur = (w.size || "md") as "sm" | "md" | "lg" | "xl";
       return { ...w, size: order[(order.indexOf(cur) + 1) % order.length] };
-    }));
+    });
+    persistStack(next);
   };
 
   const onDragStart = (idx: number) => (e: React.DragEvent) => {
@@ -105,36 +120,37 @@ export const FloatingWorkbench: React.FC = () => {
     const from = dragIndex.current;
     dragIndex.current = null;
     if (from === null || from === idx) return;
-    setStack(s => {
-      const next = [...s];
-      const [moved] = next.splice(from, 1);
-      next.splice(idx, 0, moved);
-      return next;
-    });
+    const next = [...stack];
+    const [moved] = next.splice(from, 1);
+    next.splice(idx, 0, moved);
+    persistStack(next);
   };
 
   const applyLayout = (name: string) => {
+    wb.setActive(name);
     setActive(name);
-    if (name === "default") { setStack([]); return; }
+    if (name === "default") { wb.setStack([]); setStack([]); return; }
     const l = layouts.find(x => x.name === name);
-    if (l) setStack(l.stack);
+    if (l) { wb.setStack(l.stack); setStack(l.stack); }
   };
   const saveLayout = () => {
     const name = saveName.trim();
     if (!name) { toast({ title: "Name required", variant: "destructive" }); return; }
     if (name === "default") { toast({ title: "Reserved name", variant: "destructive" }); return; }
-    setLayouts(ls => {
-      const exists = ls.some(l => l.name === name);
-      return exists ? ls.map(l => l.name === name ? { name, stack } : l) : [...ls, { name, stack }];
-    });
+    const nextLayouts = wb.upsertLayout(name, stack);
+    wb.setActive(name);
+    wb.setStack(stack);
+    setLayouts(nextLayouts);
     setActive(name);
     setSaveName("");
-    toast({ title: `Saved layout "${name}"` });
+    toast({ title: `Force-saved layout "${name}"`, description: "It will reload after closing, routing, or refreshing." });
   };
   const deleteLayout = (name: string) => {
     if (!confirm(`Delete layout "${name}"?`)) return;
-    setLayouts(ls => ls.filter(l => l.name !== name));
-    if (active === name) { setActive("default"); setStack([]); }
+    const next = layouts.filter(l => l.name !== name);
+    wb.setLayouts(next);
+    setLayouts(next);
+    if (active === name) { wb.setActive("default"); wb.setStack([]); setActive("default"); setStack([]); }
   };
 
   const cycleWidth = () => {
