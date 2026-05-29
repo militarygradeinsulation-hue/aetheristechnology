@@ -1420,9 +1420,9 @@ export default function LinkedInPostStudio() {
                 </div>
               ) : (
                 responseLibrary.map((item) => {
-                  const img = (item.input_data as any)?.imageDataUrl as string | undefined;
-                  const body = (item.output_data as any)?.body as string | undefined;
-                  const mode = (item.output_data as any)?.mode as string | undefined;
+                  const img = readString(item.input_data, 'imageDataUrl');
+                  const body = readString(item.output_data, 'body');
+                  const mode = readString(item.output_data, 'mode');
                   return (
                     <div
                       key={item.id}
@@ -1490,37 +1490,37 @@ export default function LinkedInPostStudio() {
               <X className="w-5 h-5" />
             </Button>
             <div className="text-[10px] uppercase tracking-widest text-amber mb-2">
-              {(viewItem.output_data as any)?.mode === 'full' ? 'Standalone Repost' : 'Comment Reply'} · {new Date(viewItem.created_at).toLocaleString()}
+              {readString(viewItem.output_data, 'mode') === 'full' ? 'Standalone Repost' : 'Comment Reply'} · {new Date(viewItem.created_at).toLocaleString()}
             </div>
-            {(viewItem.input_data as any)?.imageDataUrl && (
+            {readString(viewItem.input_data, 'imageDataUrl') && (
               <img
-                src={(viewItem.input_data as any).imageDataUrl}
+                src={readString(viewItem.input_data, 'imageDataUrl')}
                 alt="Original post"
                 className="max-h-72 mx-auto rounded border border-border mb-4"
               />
             )}
-            {(viewItem.input_data as any)?.postText && (
+            {readString(viewItem.input_data, 'postText') && (
               <div className="text-[11px] text-foreground/70 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source post</div>
-                {(viewItem.input_data as any).postText}
+                {readString(viewItem.input_data, 'postText')}
               </div>
             )}
-            {(viewItem.input_data as any)?.extraContext && (
+            {readString(viewItem.input_data, 'extraContext') && (
               <div className="text-[11px] text-muted-foreground mb-3">
                 <span className="font-semibold text-foreground/80">Direction: </span>
-                {(viewItem.input_data as any).extraContext}
+                {readString(viewItem.input_data, 'extraContext')}
               </div>
             )}
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed border-t border-border pt-4">
-              {(viewItem.output_data as any)?.body}
+              {readString(viewItem.output_data, 'body')}
             </div>
             <div className="flex gap-2 mt-4 flex-wrap">
               <Button
                 size="sm"
                 onClick={() => {
-                  const src = (viewItem.input_data as any)?.postText
-                    || `[screenshot: ${(viewItem.input_data as any)?.fileName || 'LinkedIn post'}]`;
-                  const draft = (viewItem.output_data as any)?.body || '';
+                  const src = readString(viewItem.input_data, 'postText')
+                    || `[screenshot: ${readString(viewItem.input_data, 'fileName') || 'LinkedIn post'}]`;
+                  const draft = readString(viewItem.output_data, 'body') || '';
                   setViewItem(null);
                   createPostFromResponse(src, draft);
                 }}
@@ -1533,7 +1533,7 @@ export default function LinkedInPostStudio() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => { navigator.clipboard.writeText((viewItem.output_data as any)?.body || ''); toast({ title: 'Copied' }); }}
+                onClick={() => { navigator.clipboard.writeText(readString(viewItem.output_data, 'body') || ''); toast({ title: 'Copied' }); }}
               >
                 <Copy className="w-3 h-3 mr-1" /> Copy
               </Button>
