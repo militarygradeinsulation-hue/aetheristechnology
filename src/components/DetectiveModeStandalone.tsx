@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Search, FileSearch } from 'lucide-react';
 import { DetectiveMode } from '@/components/portal/DetectiveMode';
 import { hasValidAdminToken } from '@/lib/adminAuth';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
 
 export const DetectiveModeStandalone: React.FC = () => {
   const [website, setWebsite] = useState('');
