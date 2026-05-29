@@ -163,10 +163,16 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
         </div>
       )}
 
-      {viewItem && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative border border-border">
-            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setViewItem(null)}>
+      {viewItem && createPortal(
+        <div
+          className="fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-4"
+          onClick={() => setViewItem(null)}
+        >
+          <div
+            className="bg-background rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button variant="ghost" size="icon" className="absolute top-3 right-3 z-10" onClick={() => setViewItem(null)}>
               <X className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -186,6 +192,9 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                 const safe = viewItem.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
                 downloadText(`${safe}.txt`, formatLibraryItemAsText(viewItem as any));
               }}>Download .txt</Button>
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setViewItem(null)}>
+                Close
+              </Button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
               {viewLoading ? (
@@ -198,7 +207,8 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
