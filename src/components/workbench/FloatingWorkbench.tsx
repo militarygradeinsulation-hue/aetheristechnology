@@ -41,6 +41,7 @@ export const FloatingWorkbench: React.FC = () => {
   const [showTips, setShowTips] = useState(false);
   const dragIndex = useRef<number | null>(null);
   const hydrated = useRef(false);
+  const activeLead = useActiveLead();
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   useEffect(() => {
