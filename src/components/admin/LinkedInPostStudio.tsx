@@ -1275,12 +1275,12 @@ export default function LinkedInPostStudio() {
           scanningStructure={scanningStructure}
           scanningPersona={scanningPersona}
           onScanStructure={scanStructureNow}
-          onScanPersona={() => scanPersonaNow(respondPersona)}
+          onScanPersona={() => scanPersonaNow(primaryPersona(respondPersona))}
           onClearStructure={() => setStructureReport(null)}
-          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[respondPersona]; return n; })}
+          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; const k = primaryPersona(respondPersona); if (k !== 'none') delete n[k]; return n; })}
           structureReport={structureReport}
-          personaReport={respondPersona !== 'none' ? personaReports[respondPersona] : null}
-          personaLabel={respondPersona}
+          personaReport={primaryPersona(respondPersona) !== 'none' ? personaReports[primaryPersona(respondPersona)] : null}
+          personaLabel={primaryPersona(respondPersona)}
         />
 
 
