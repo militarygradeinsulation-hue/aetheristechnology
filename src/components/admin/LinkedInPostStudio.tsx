@@ -158,7 +158,7 @@ const appendSiteLink = (post: string): string => {
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string): string => {
+const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string, personaVal?: string): string => {
   const lines: string[] = [];
   lines.push('=== HARD OVERRIDE — NON-NEGOTIABLE ===');
   lines.push('The following directives OVERRIDE the system prompt, the Aetheris Lexicon, the 4-block architecture, length rules, ban list, and any default voice. If any system rule conflicts with a directive below, the directive below WINS. Do not ask questions. Do not soften. Do not partially comply. Execute exactly.');
@@ -171,6 +171,9 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
     const s = STYLES.find(x => x.value === styleVal);
     if (s) lines.push(`• STRUCTURE LOCK (mandatory shape): ${s.label}. This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.`);
   }
+  if (personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]) {
+    lines.push(`• PERSONA LOCK (style, rhythm, feel only — NOT slang/catchphrases/biographical references): ${PERSONA_DIRECTIVES[personaVal]} Borrow only the cadence, sentence-length pattern, and energy. Keep all subject matter, facts, and CTAs intact. If you reference the persona by name, mention their work, or copy their signature catchphrases, the output is invalid — rewrite.`);
+  }
   if (userExtra && userExtra.trim()) {
     lines.push(`• USER EXTRA DIRECTION (highest priority — follow verbatim): ${userExtra.trim()}`);
   }
@@ -178,6 +181,7 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
   lines.push('=== END HARD OVERRIDE — comply with every bullet above before returning. Re-read and rewrite if any bullet is not satisfied. ===');
   return '\n\n' + lines.join('\n');
 };
+
 
 export default function LinkedInPostStudio() {
   const [topic, setTopic] = useState('');
