@@ -89,6 +89,7 @@ import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
 import { REP_TOOL_TIPS } from '@/lib/repToolTips';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
+import { BusinessPostAnalyst } from '@/components/portal/BusinessPostAnalyst';
 import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
@@ -102,7 +103,7 @@ type ToolKey =
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
   { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL, runs every prospect tool at once.' },
   { key: 'outreach-email',      name: 'Outreach Email Creator',              href: '#',                     desc: 'Bold, direct emails in the Aetheris voice. Paste, upload a screenshot, or describe the lead.' },
-  { key: 'business-post-analyst', name: 'Business Post Analyst',               href: 'https://businesspostanalyst.lovable.app/', desc: 'Analyze any LinkedIn/social post, instant prospect ammo.', external: true },
+  { key: 'business-post-analyst', name: 'Business Post Analyst',               href: '#',                     desc: 'Analyze any LinkedIn/social post, instant prospect ammo.' },
   { key: 'leak-audit',          name: 'Free Leak Audit (give to prospects)', href: '/leak-audit',           desc: 'Send this URL. Their result is your wedge.' },
   { key: 'scan',                name: 'Website Scanner',                     href: '/scan',                 desc: 'Run a quick scan on a prospect site to break the ice.' },
   { key: 'scam-check',          name: 'Scam / Legit Forensics',              href: '#',                     desc: 'Investigate any site for scam signals. Live RDAP, redirects, SSL, page copy + cited forensic clues.' },
@@ -118,7 +119,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
 
 const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfile | null): React.ReactNode => {
   switch (key) {
-    case 'business-post-analyst': return null;
+    case 'business-post-analyst': return <BusinessPostAnalyst authMode="rep" token={getPortalToken()} />;
     case 'all-in-one':           return <AllInOneGenerator />;
     case 'outreach-email':       return <OutreachEmailCreator authMode="rep" token={getPortalToken()} defaultSenderName={profile?.rep_name} />;
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
