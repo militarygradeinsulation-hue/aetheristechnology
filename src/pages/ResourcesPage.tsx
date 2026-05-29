@@ -10,7 +10,6 @@ import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
-import { useAuth } from '@/contexts/AuthContext';
 import Player from '@vimeo/player';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -31,7 +30,7 @@ const ResourcesPage = () => {
   const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const { user } = useAuth();
+  
 
   useEffect(() => {
     if (iframeRef.current) {
