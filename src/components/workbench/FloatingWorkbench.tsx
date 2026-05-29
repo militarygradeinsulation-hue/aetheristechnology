@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Wrench, Plus, Save, Trash2, Maximize2, Minimize2, X, HelpCircle, GripVertical, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { Wrench, Plus, Save, Trash2, X, HelpCircle, GripVertical, ChevronDown, ExternalLink } from "lucide-react";
 import { wb, type WidgetEntry, type WorkbenchLayout } from "@/lib/workbench";
 import { TOOL_REGISTRY, type ToolGroup } from "./toolRegistry";
 import { WorkbenchWidget } from "./WorkbenchWidget";
