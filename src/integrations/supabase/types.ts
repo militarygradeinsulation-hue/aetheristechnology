@@ -3029,6 +3029,51 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_clue_trail: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          lead_id: string
+          meta: Json
+          rep_code: string | null
+          rep_name: string | null
+          stage_from: string | null
+          stage_to: string | null
+          tip: string | null
+          tool_key: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          label: string
+          lead_id: string
+          meta?: Json
+          rep_code?: string | null
+          rep_name?: string | null
+          stage_from?: string | null
+          stage_to?: string | null
+          tip?: string | null
+          tool_key?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          lead_id?: string
+          meta?: Json
+          rep_code?: string | null
+          rep_name?: string | null
+          stage_from?: string | null
+          stage_to?: string | null
+          tip?: string | null
+          tool_key?: string | null
+        }
+        Relationships: []
+      }
       lead_drip_settings: {
         Row: {
           blocked_keywords: string[]
