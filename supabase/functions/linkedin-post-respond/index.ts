@@ -334,10 +334,13 @@ Return ONLY the response text. One paragraph. No line breaks between sentences. 
 
 ${AETHERIS_LEXICON}
 
+${LEAK_SELECTION_RULES}
+
 ═══════════════════════════════════════════════════════════
 TASK
 ═══════════════════════════════════════════════════════════
-${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor in Cost of the Leak with a real number? (c) Did I close on Revenue Recovery or Revenue Loop language? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLEXICON CHECK BEFORE OUTPUT: (a) Named specific leak category? (b) Anchored a number in Cost of the Leak / COI framing? (c) Closed on Revenue Recovery or Revenue Loop? Rewrite if any answer is no.`}`;
+${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did I pick the leak category that ACTUALLY matches the post's subject (per TOPIC → LEAK MAPPING)? If I picked Brand Contradiction, can I quote a literal say/do gap from the post? If not, swap to the correct leak and rewrite. (b) Did I anchor in Cost of the Leak with a real number? (c) Did I close on Revenue Recovery or Revenue Loop language? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did the leak category I named match the post's actual subject per the TOPIC → LEAK MAPPING? If I defaulted to Brand Contradiction, can I quote a literal say/do gap from the post? If not, switch to the right leak (Conversion Drop-Off / Follow-Up Failure / System Disconnect / Operational Waste / Vocabulary Friction / Growth Ceiling) and rewrite. (b) Anchored a number in Cost of the Leak / COI framing? (c) Closed on Revenue Recovery or Revenue Loop? Rewrite if any answer is no.`}`;
+
 
 
 
