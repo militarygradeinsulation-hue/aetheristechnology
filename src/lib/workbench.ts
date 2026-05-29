@@ -12,6 +12,12 @@ function ns(): string {
   return `workbench.${code}`;
 }
 
+function legacyAdminNs(): string | null {
+  if (typeof localStorage === "undefined" || getPortalProfile()) return null;
+  const token = localStorage.getItem("aetheris_admin_token");
+  return token ? `workbench.${token.slice(-8)}` : null;
+}
+
 const STACK = () => `${ns()}.stack`;
 const LAYOUTS = () => `${ns()}.layouts`;
 const ACTIVE = () => `${ns()}.activeLayout`;
@@ -27,14 +33,19 @@ function read<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
+function readWithLegacy<T>(key: string, legacyKey: string | null, fallback: T): T {
+  const value = read<T>(key, fallback);
+  if (JSON.stringify(value) !== JSON.stringify(fallback) || !legacyKey) return value;
+  return read<T>(legacyKey, fallback);
+}
 function write<T>(key: string, value: T) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
 export const wb = {
-  getStack: (): WidgetEntry[] => read<WidgetEntry[]>(STACK(), []),
+  getStack: (): WidgetEntry[] => readWithLegacy<WidgetEntry[]>(STACK(), legacyAdminNs() ? `${legacyAdminNs()}.stack` : null, []),
   setStack: (s: WidgetEntry[]) => write(STACK(), s),
-  getLayouts: (): WorkbenchLayout[] => read<WorkbenchLayout[]>(LAYOUTS(), []),
+  getLayouts: (): WorkbenchLayout[] => readWithLegacy<WorkbenchLayout[]>(LAYOUTS(), legacyAdminNs() ? `${legacyAdminNs()}.layouts` : null, []),
   setLayouts: (l: WorkbenchLayout[]) => write(LAYOUTS(), l),
   upsertLayout: (name: string, stack: WidgetEntry[]) => {
     const layouts = read<WorkbenchLayout[]>(LAYOUTS(), []);
@@ -45,10 +56,10 @@ export const wb = {
     write(LAYOUTS(), next);
     return next;
   },
-  getActive: (): string => read<string>(ACTIVE(), "default"),
+  getActive: (): string => readWithLegacy<string>(ACTIVE(), legacyAdminNs() ? `${legacyAdminNs()}.activeLayout` : null, "default"),
   setActive: (n: string) => write(ACTIVE(), n),
-  getOpen: (): boolean => read<boolean>(OPEN(), false),
+  getOpen: (): boolean => readWithLegacy<boolean>(OPEN(), legacyAdminNs() ? `${legacyAdminNs()}.open` : null, false),
   setOpen: (o: boolean) => write(OPEN(), o),
-  getWidth: (): "sm" | "md" | "lg" | "full" => read(WIDTH(), "md"),
+  getWidth: (): "sm" | "md" | "lg" | "full" => readWithLegacy(WIDTH(), legacyAdminNs() ? `${legacyAdminNs()}.width` : null, "md"),
   setWidth: (w: "sm" | "md" | "lg" | "full") => write(WIDTH(), w),
 };
