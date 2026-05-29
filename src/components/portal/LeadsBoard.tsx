@@ -21,6 +21,7 @@ import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
+import { LeadActionChecklist } from './LeadActionChecklist';
 import { leadClues } from '@/lib/leadClues';
 import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -1355,6 +1356,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               />
             </div>
           </div>
+
+          {/* Per-lead Action Checklist (touch steps + auto-generated follow-up sequence) */}
+          <LeadActionChecklist leadId={lead.id} leadLabel={lead.business_name || lead.website || undefined} />
 
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />

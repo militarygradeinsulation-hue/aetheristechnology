@@ -47,6 +47,7 @@ const RepActivityPanel = lazy(() => import('@/components/admin/RepActivityPanel'
 const ForecastSettingsPanel = lazy(() => import('@/components/admin/ForecastSettingsPanel').then(m => ({ default: m.ForecastSettingsPanel })));
 const CompanyPortalPreview = lazy(() => import('@/components/admin/CompanyPortalPreview').then(m => ({ default: m.CompanyPortalPreview })));
 const ManageRepsPanel = lazy(() => import('@/components/admin/ManageRepsPanel'));
+const AdminLeadActionsPanel = lazy(() => import('@/components/admin/AdminLeadActionsPanel'));
 const RepPlaybookPanel = lazy(() => import('@/components/admin/RepPlaybookPanel').then(m => ({ default: m.RepPlaybookPanel })));
 const AdminTrainingPanel = lazy(() => import('@/components/admin/AdminTrainingPanel').then(m => ({ default: m.AdminTrainingPanel })));
 const AdminOnboardingStudio = lazy(() => import('@/components/admin/AdminOnboardingStudio').then(m => ({ default: m.AdminOnboardingStudio })));
@@ -792,6 +793,7 @@ const OverviewBody: React.FC<{
       </div>
     )}
     <ManageRepsPanel scope="admin" />
+    <AdminLeadActionsPanel />
     <RepPerformancePanel />
     <LeadPipelinePanel />
     <AdminLeadBrowser />

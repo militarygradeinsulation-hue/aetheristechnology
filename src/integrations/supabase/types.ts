@@ -3029,6 +3029,68 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_action_items: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          kind: string
+          lead_id: string
+          notes: string | null
+          order_idx: number
+          rep_code: string | null
+          skipped_at: string | null
+          step_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          kind: string
+          lead_id: string
+          notes?: string | null
+          order_idx?: number
+          rep_code?: string | null
+          skipped_at?: string | null
+          step_key: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          kind?: string
+          lead_id?: string
+          notes?: string | null
+          order_idx?: number
+          rep_code?: string | null
+          skipped_at?: string | null
+          step_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_action_items_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_clue_trail: {
         Row: {
           created_at: string
