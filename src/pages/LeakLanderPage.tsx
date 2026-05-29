@@ -8,11 +8,13 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import demandGenInfographic from "@/assets/demand-generation-infographic.png";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 const LeakLanderPage: React.FC = () => {
   const [whatOpen, setWhatOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
+  const [deckOpen, setDeckOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
   const tapCountRef = useRef(0);
@@ -220,8 +222,22 @@ const LeakLanderPage: React.FC = () => {
             </a>
           </section>
 
-          {/* Forensic Revenue Recovery deck — carousel */}
-          <ForensicDeckCarousel />
+          {/* Demand generation infographic — front & center above "What the Hell" */}
+          <section
+            className="mt-8 max-w-3xl mx-auto animate-fade-in"
+            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-transparent to-transparent backdrop-blur-xl p-2 sm:p-3 shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.45)]">
+              <img
+                src={demandGenInfographic}
+                alt="Aetheris Business Forensics & Revenue Recovery — 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
+                className="w-full h-auto rounded-xl"
+                loading="lazy"
+              />
+            </div>
+          </section>
+
+
 
           {/* Frequently Cited Facts — Island-Test blocks for AI extraction */}
           <section
