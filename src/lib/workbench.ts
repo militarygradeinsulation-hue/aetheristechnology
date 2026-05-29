@@ -7,7 +7,8 @@ export type WorkbenchLayout = { name: string; stack: WidgetEntry[] };
 
 function ns(): string {
   const p = getPortalProfile();
-  const code = p?.code || (typeof localStorage !== "undefined" ? localStorage.getItem("aetheris_admin_token")?.slice(-8) : null) || "anon";
+  const hasAdmin = typeof localStorage !== "undefined" && !!localStorage.getItem("aetheris_admin_token");
+  const code = p?.code || (hasAdmin ? "admin" : null) || "anon";
   return `workbench.${code}`;
 }
 
@@ -35,6 +36,15 @@ export const wb = {
   setStack: (s: WidgetEntry[]) => write(STACK(), s),
   getLayouts: (): WorkbenchLayout[] => read<WorkbenchLayout[]>(LAYOUTS(), []),
   setLayouts: (l: WorkbenchLayout[]) => write(LAYOUTS(), l),
+  upsertLayout: (name: string, stack: WidgetEntry[]) => {
+    const layouts = read<WorkbenchLayout[]>(LAYOUTS(), []);
+    const cleanStack = stack.map(w => ({ ...w }));
+    const next = layouts.some(l => l.name === name)
+      ? layouts.map(l => l.name === name ? { name, stack: cleanStack } : l)
+      : [...layouts, { name, stack: cleanStack }];
+    write(LAYOUTS(), next);
+    return next;
+  },
   getActive: (): string => read<string>(ACTIVE(), "default"),
   setActive: (n: string) => write(ACTIVE(), n),
   getOpen: (): boolean => read<boolean>(OPEN(), false),
