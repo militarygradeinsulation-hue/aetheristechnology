@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Wrench, Plus, Save, Trash2, Maximize2, Minimize2, X, HelpCircle, GripVertical, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { Wrench, Plus, Save, Trash2, X, HelpCircle, GripVertical, ChevronDown, ExternalLink } from "lucide-react";
 import { wb, type WidgetEntry, type WorkbenchLayout } from "@/lib/workbench";
 import { TOOL_REGISTRY, type ToolGroup } from "./toolRegistry";
 import { WorkbenchWidget } from "./WorkbenchWidget";
@@ -147,33 +146,47 @@ export const FloatingWorkbench: React.FC = () => {
 
   return (
     <>
-      {/* Floating launcher */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-4 z-[60] h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
-        title="Open Workbench"
-        aria-label="Open Workbench"
-      >
-        <Wrench className="w-4 h-4" />
-        Workbench
-        {stack.length > 0 && (
-          <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
-            {stack.length}
-          </span>
-        )}
-      </button>
-
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent
-          side="right"
-          className={`${widthClass[width]} p-0 flex flex-col bg-background border-l border-amber/20`}
+      {/* Floating launcher (hidden while open) */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed bottom-24 right-4 z-[60] h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
+          title="Open Workbench"
+          aria-label="Open Workbench"
         >
-          <SheetHeader className="px-4 py-3 border-b border-border/40 bg-card/40">
+          <Wrench className="w-4 h-4" />
+          Workbench
+          {stack.length > 0 && (
+            <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
+              {stack.length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Backdrop (only when open) — click to close, work stays mounted */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+      )}
+
+      {/*
+        Persistent panel — always mounted so tool state survives close/open.
+        We slide it offscreen via translate-x when closed instead of unmounting.
+      */}
+      <aside
+        className={`fixed top-0 right-0 z-[80] h-screen ${widthClass[width]} bg-background border-l border-amber/20 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full pointer-events-none"}`}
+        aria-hidden={!open}
+      >
+          <div className="px-4 py-3 border-b border-border/40 bg-card/40">
             <div className="flex items-center justify-between gap-2">
-              <SheetTitle className="font-display flex items-center gap-2">
+              <h2 className="font-display flex items-center gap-2 text-lg font-semibold">
                 <Wrench className="w-4 h-4 text-amber" />
                 Workbench
-              </SheetTitle>
+              </h2>
               <div className="flex items-center gap-1">
                 <Select value={width} onValueChange={(v) => setWidth(v as typeof width)}>
                   <SelectTrigger className="h-8 w-[88px]" title="Panel width">
@@ -193,7 +206,7 @@ export const FloatingWorkbench: React.FC = () => {
                 >
                   <HelpCircle className={`w-4 h-4 ${showTips ? "text-amber" : ""}`} />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(false)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(false)} title="Hide (keeps work)">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -261,7 +274,7 @@ export const FloatingWorkbench: React.FC = () => {
                 )}
               </div>
             </div>
-          </SheetHeader>
+          </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             {showTips && (
@@ -278,7 +291,7 @@ export const FloatingWorkbench: React.FC = () => {
                   <li><ChevronDown className="inline w-3 h-3 -mt-0.5" /> collapses a widget so you can keep many tools loaded without scrolling forever.</li>
                   <li><ExternalLink className="inline w-3 h-3 -mt-0.5" /> opens the tool's dedicated full-page version in a new view.</li>
                   <li><span className="text-foreground font-semibold">Layouts</span>: type a name and hit save — recall any saved combo of tools later from the dropdown.</li>
-                  <li>Everything (open widgets, sizes, layouts, panel width) auto-saves to this device.</li>
+                  <li>Closing the Workbench just hides it — your tools, inputs, and outputs stay loaded until you remove them or refresh.</li>
                 </ul>
                 <button
                   onClick={() => setShowTips(false)}
@@ -314,8 +327,7 @@ export const FloatingWorkbench: React.FC = () => {
               ))
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+      </aside>
     </>
   );
 };
