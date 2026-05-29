@@ -845,7 +845,10 @@ const PortalPage: React.FC = () => {
         </div>
 
         {layout === 'tabs' ? (
-          <EasyModeWrapper tabKey={tab}>{renderTabBody(tab)}</EasyModeWrapper>
+          <EasyModeWrapper tabKey={tab}>
+            {isPartner && <PartnerCoachTips tabId={tab} />}
+            {renderTabBody(tab)}
+          </EasyModeWrapper>
         ) : (() => {
           const visibleWidgets = availableTabs.filter(t => effectiveVisible.includes(t.id));
           // Sort: pinned first (in pin-toggle order), then by saved order, then by default order.
