@@ -3,6 +3,7 @@ import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -20,7 +21,8 @@ export const FloatingContact: React.FC = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-3">
+      <PinnableFloater storageKey="floater.floatingcontact" defaultCorner="bottom-left" width={isExpanded ? 220 : 64} height={isExpanded ? 320 : 64} zIndex={50}>
+      <div className="flex flex-col items-start gap-3">
         {isExpanded && (
           <div className="flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-4 fade-in duration-300">
             <a
@@ -91,6 +93,7 @@ export const FloatingContact: React.FC = () => {
           )}
         </button>
       </div>
+      </PinnableFloater>
 
       <StickyContactBar />
     </>
