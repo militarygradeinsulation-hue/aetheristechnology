@@ -23,15 +23,12 @@ serve(async (req) => {
       ? body.ids.filter((x: unknown) => typeof x === "string" && x.length > 0)
       : (body.id && typeof body.id === "string" ? [body.id] : []);
     const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign", "create_leads"]);
-    // Guard runs AFTER no-id actions are handled below — see early returns.
-    const requireIds = () => {
-      if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) {
-        return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      return null;
-    };
-    const idErr = requireIds();
-    if (idErr) return idErr;
+    console.log("[admin-assign-lead] action=", action, "ids=", ids.length, "rows=", Array.isArray(body.rows) ? body.rows.length : 0);
+    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) {
+      console.warn("[admin-assign-lead] Missing id(s) for action:", action, "body keys:", Object.keys(body));
+      return new Response(JSON.stringify({ error: `Missing id(s) for action "${action}"` }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
 
 
     // ---------- CREATE LEADS: manual admin entry / bulk paste, optionally drop to pool or to a specific rep ----------
