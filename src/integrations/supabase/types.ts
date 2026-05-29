@@ -4530,6 +4530,7 @@ export type Database = {
       }
       rep_leads: {
         Row: {
+          admin_holding: boolean
           assigned_at: string | null
           assigned_to_code: string | null
           assignment_expires_at: string | null
@@ -4561,6 +4562,7 @@ export type Database = {
           why_fit: string | null
         }
         Insert: {
+          admin_holding?: boolean
           assigned_at?: string | null
           assigned_to_code?: string | null
           assignment_expires_at?: string | null
@@ -4592,6 +4594,7 @@ export type Database = {
           why_fit?: string | null
         }
         Update: {
+          admin_holding?: boolean
           assigned_at?: string | null
           assigned_to_code?: string | null
           assignment_expires_at?: string | null

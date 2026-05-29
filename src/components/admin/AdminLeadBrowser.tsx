@@ -17,7 +17,8 @@ import { getAdminToken } from '@/lib/adminAuth';
 import { DetectiveMode } from '@/components/portal/DetectiveMode';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
-  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap, Plus, Flame, Upload,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap, Plus, Flame, Upload, Archive, ArrowRightLeft,
+
 } from 'lucide-react';
 
 interface Lead {
@@ -41,6 +42,8 @@ interface Lead {
   created_at: string;
   notes: string | null;
   low_hanging_fruit?: boolean | null;
+  admin_holding?: boolean | null;
+
 }
 
 interface ManualLeadRow {
@@ -64,17 +67,20 @@ interface Rep { code: string; rep_name: string | null; is_active: boolean; role:
 
 const STATUS_FILTERS = [
   { value: 'pool', label: 'Unassigned pool' },
+  { value: 'holding', label: 'My holdings' },
   { value: 'assigned', label: 'Dripped (held for rep)' },
   { value: 'claimed', label: 'Claimed / working' },
   { value: 'all', label: 'All leads' },
 ];
+
 
 export const AdminLeadBrowser: React.FC = () => {
   const { toast } = useToast();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'pool' | 'assigned' | 'claimed' | 'all'>('pool');
+  const [filter, setFilter] = useState<'pool' | 'holding' | 'assigned' | 'claimed' | 'all'>('pool');
+
   const [search, setSearch] = useState('');
   const [minScore, setMinScore] = useState<number | ''>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -104,7 +110,8 @@ export const AdminLeadBrowser: React.FC = () => {
   const [addExcelRows, setAddExcelRows] = useState<ManualLeadRow[]>([]);
   const [addExcelFileName, setAddExcelFileName] = useState<string>('');
   const [addExcelParsing, setAddExcelParsing] = useState(false);
-  const [addDest, setAddDest] = useState<'pool' | 'rep'>('pool');
+  const [addDest, setAddDest] = useState<'pool' | 'rep' | 'holding'>('holding');
+
   const [addRepCode, setAddRepCode] = useState('');
   const [addHoldHours, setAddHoldHours] = useState(72);
   const [addLHF, setAddLHF] = useState(false);
@@ -199,6 +206,21 @@ export const AdminLeadBrowser: React.FC = () => {
       toast({ title: `Released ${ids.length} back to pool` }); load();
     } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
+
+  const moveToPool = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_pool', ids });
+      toast({ title: `Released ${ids.length} from holding to the pool` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const moveToHolding = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_holding', ids });
+      toast({ title: `Pulled ${ids.length} into your holding area` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
 
   const remove = async (ids: string[]) => {
     if (!confirm(`Delete ${ids.length} lead${ids.length > 1 ? 's' : ''}?`)) return;
@@ -530,6 +552,16 @@ export const AdminLeadBrowser: React.FC = () => {
             </div>
             <Button size="sm" variant="outline" onClick={() => unassign(selectedIds)}>Unassign</Button>
             <Button size="sm" variant="outline" onClick={() => release(selectedIds)}>Release</Button>
+            {filter === 'holding' ? (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToPool(selectedIds)}>
+                <Shuffle className="w-3 h-3 mr-1" /> Push to pool
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToHolding(selectedIds)}>
+                <Archive className="w-3 h-3 mr-1" /> Hold for me
+              </Button>
+            )}
+
             <Button size="sm" variant="outline" className="text-red-400" onClick={() => remove(selectedIds)}>
               <Trash2 className="w-3 h-3 mr-1" /> Delete
             </Button>
@@ -572,9 +604,11 @@ export const AdminLeadBrowser: React.FC = () => {
                 </span>
                 <span className="text-xs truncate">
                   {l.claimed_by_code ? <span className="text-blue-400">✓ {repName(l.claimed_by_code)}</span>
+                    : l.admin_holding ? <span className="text-amber font-mono uppercase tracking-wider text-[10px]">held</span>
                     : l.assigned_to_code ? <span className="text-amber">→ {repName(l.assigned_to_code)}</span>
                     : <span className="text-muted-foreground">pool</span>}
                 </span>
+
                 <div className="flex items-center justify-end gap-1">
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => scan([l.id])} disabled={busy[l.id] === 'scan'} title="Scan with AI">
                     {busy[l.id] === 'scan' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ScanLine className="w-3 h-3" />}
@@ -585,6 +619,16 @@ export const AdminLeadBrowser: React.FC = () => {
                       {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {l.admin_holding ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber" onClick={() => moveToPool([l.id])} title="Push to unassigned pool">
+                      <Shuffle className="w-3 h-3" />
+                    </Button>
+                  ) : !l.claimed_by_code && !l.assigned_to_code ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber/80" onClick={() => moveToHolding([l.id])} title="Hold for me">
+                      <Archive className="w-3 h-3" />
+                    </Button>
+                  ) : null}
+
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400" onClick={() => remove([l.id])} title="Delete">
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -804,6 +848,16 @@ export const AdminLeadBrowser: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={() => setAddDest('holding')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'holding' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Archive className="w-4 h-4 text-amber" /> Hold for me</div>
+                <div className="text-xs text-muted-foreground">Private stash. Reps can't see these — distribute them later from "My holdings".</div>
+              </button>
+              <button
+                type="button"
                 onClick={() => setAddDest('pool')}
                 className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
                   addDest === 'pool' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
@@ -823,6 +877,7 @@ export const AdminLeadBrowser: React.FC = () => {
                 <div className="text-xs text-muted-foreground">Held exclusively for one rep until the hold expires.</div>
               </button>
             </div>
+
             {addDest === 'rep' && (
               <div className="grid sm:grid-cols-2 gap-2">
                 <div>
@@ -1091,7 +1146,8 @@ export const AdminLeadBrowser: React.FC = () => {
             <Button variant="outline" onClick={() => setAddOpen(false)} disabled={addBusy}>Cancel</Button>
             <Button className="bg-amber text-background hover:bg-amber/90" onClick={submitAddLeads} disabled={addBusy}>
               {addBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-              {addDest === 'rep' ? 'Drop to rep' : 'Drop to pool'}
+              {addDest === 'rep' ? 'Drop to rep' : addDest === 'holding' ? 'Hold for me' : 'Drop to pool'}
+
             </Button>
           </DialogFooter>
         </DialogContent>

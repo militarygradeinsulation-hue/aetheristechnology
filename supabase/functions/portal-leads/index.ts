@@ -80,9 +80,11 @@ async function topUpRepDrop(supabase: any, repCode: string): Promise<number> {
       .select("id,business_name,industry,website,location,contact_name,email,why_fit,notes")
       .is("claimed_by_code", null)
       .is("assigned_to_code", null)
+      .eq("admin_holding", false)
       .order("score", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(needed * 4 + skippedIds.size);
+
     const { data: candidatesRaw } = await candidatesQuery;
     const blocked = await loadBlockedKeywords(supabase);
     const candidates = (candidatesRaw || [])
@@ -153,9 +155,11 @@ serve(async (req) => {
           .order("score", { ascending: false, nullsFirst: false })
           .limit(100);
       } else {
-        query = query.is("claimed_by_code", null).is("assigned_to_code", null)
+
+        query = query.is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
           .order("score", { ascending: false, nullsFirst: false })
           .order("created_at", { ascending: false }).limit(200);
+
         if (body.industry) query = query.ilike("industry", `%${body.industry}%`);
         if (body.location) query = query.ilike("location", `%${body.location}%`);
         if (body.minScore) query = query.gte("score", Number(body.minScore));

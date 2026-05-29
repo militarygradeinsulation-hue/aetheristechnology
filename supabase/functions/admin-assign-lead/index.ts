@@ -36,7 +36,7 @@ serve(async (req) => {
       const rows: any[] = Array.isArray(body.rows) ? body.rows : [];
       if (rows.length === 0) return new Response(JSON.stringify({ error: "No rows provided" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-      const destination = String(body.destination || "pool"); // "pool" | "rep"
+      const destination = String(body.destination || "pool"); // "pool" | "rep" | "holding"
       const assignCode = destination === "rep" ? String(body.assign_to_code || "").trim() : "";
       const holdHours = Math.max(1, Math.min(720, Number(body.hold_hours) || 72));
       const sharedLHF = body.low_hanging_fruit === true;
@@ -50,6 +50,7 @@ serve(async (req) => {
 
       const nowIso = new Date().toISOString();
       const expires = destination === "rep" ? new Date(Date.now() + holdHours * 3600 * 1000).toISOString() : null;
+      const isHolding = destination === "holding";
 
       const cleaned = rows.map((r: any) => {
         const business = String(r.business_name || r.company || r.name || "").trim();
@@ -72,10 +73,13 @@ serve(async (req) => {
           low_hanging_fruit: lhf,
           source: "admin_manual",
           status: "new",
+          admin_holding: isHolding,
           assigned_to_code: destination === "rep" ? assignCode : null,
           assigned_at: destination === "rep" ? nowIso : null,
           assignment_expires_at: expires,
         };
+      }).filter(Boolean);
+
       }).filter(Boolean);
 
       if (cleaned.length === 0) return new Response(JSON.stringify({ error: "No valid rows (business name required)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -94,13 +98,37 @@ serve(async (req) => {
       if (!rep || !rep.is_active) return new Response(JSON.stringify({ error: "Rep code not found or inactive" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
       const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
+      const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
       const { error } = await admin.from("rep_leads").update({
         assigned_to_code: code,
         assigned_at: new Date().toISOString(),
         assignment_expires_at: expires,
+        admin_holding: false,
       }).in("id", ids).is("claimed_by_code", null);
       if (error) throw error;
       return new Response(JSON.stringify({ ok: true, assigned: ids.length, code, expires }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE FROM HOLDING → POOL (admin distributes their personal stash) ----------
+    if (action === "move_to_pool") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: false,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE TO HOLDING (admin pulls a pool lead back into personal stash) ----------
+    if (action === "move_to_holding") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: true,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids).is("claimed_by_code", null);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     }
 
     if (action === "unassign") {
@@ -152,7 +180,8 @@ serve(async (req) => {
       }
 
       let q = admin.from("rep_leads").select("id")
-        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
+
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(need);
@@ -213,7 +242,8 @@ serve(async (req) => {
       }
 
       let q = admin.from("rep_leads").select("id,industry,score")
-        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
+
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(totalNeed);
