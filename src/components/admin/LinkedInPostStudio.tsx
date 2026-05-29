@@ -172,8 +172,12 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
     if (s) lines.push(`• STRUCTURE LOCK (mandatory shape): ${s.label}. This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.`);
   }
   if (personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]) {
-    lines.push(`• PERSONA LOCK (style, rhythm, feel only — NOT slang/catchphrases/biographical references): ${PERSONA_DIRECTIVES[personaVal]} Borrow only the cadence, sentence-length pattern, and energy. Keep all subject matter, facts, and CTAs intact. If you reference the persona by name, mention their work, or copy their signature catchphrases, the output is invalid — rewrite.`);
+    lines.push(`• PERSONA LOCK — TOP PRIORITY OVERRIDE: ${PERSONA_DIRECTIVES[personaVal]}`);
+    lines.push(`  ↳ This persona's CADENCE, RHYTHM, SENTENCE-LENGTH PATTERN, PAUSES, and ENERGY override the default Aetheris forensic rhythm. A reader who knows this persona must FEEL them in the rhythm within the first 3 lines — without ever seeing their name.`);
+    lines.push(`  ↳ HARD BANS for persona: never write the persona's name, never name their films/companies/books/shows/brands, never use their signature catchphrases, never reference their biography, never do an impression. Style transfer only — not parody, not tribute, not quote.`);
+    lines.push(`  ↳ Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it's said, not WHAT is said. If the output reads like the default voice with no detectable persona rhythm, it is INVALID — rewrite harder.`);
   }
+
   if (userExtra && userExtra.trim()) {
     lines.push(`• USER EXTRA DIRECTION (highest priority — follow verbatim): ${userExtra.trim()}`);
   }
