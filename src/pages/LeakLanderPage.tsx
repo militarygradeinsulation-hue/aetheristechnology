@@ -158,15 +158,15 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
           {/* Proprietary banner */}
-          <div className="mt-5 max-w-3xl mx-auto">
-            <div className="glass rounded-sm border border-amber/40 px-4 py-3 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+          <div className="mt-10 max-w-3xl mx-auto">
+            <div className="rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] px-5 py-5 text-center">
+              <div className="font-case text-xs uppercase tracking-widest text-amber mb-2">
                 Proprietary · Built In-House
               </div>
-              <p className="text-sm text-foreground/90 leading-snug">
+              <p className="text-base sm:text-lg text-foreground leading-relaxed">
                 All technology in this suite is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
               </p>
-              <p className="text-sm text-foreground/90 leading-snug mt-2">
+              <p className="text-base sm:text-lg text-foreground leading-relaxed mt-3">
                 We aren't a marketing, consulting, or brand agency. We do not sell software, AI, or systems. We are <span className="text-amber font-semibold">strictly Business Forensics</span>.
               </p>
             </div>
@@ -174,7 +174,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Buttons */}
           <section
-            className="mt-6 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
+            className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
             <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider text-xs transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
@@ -200,34 +200,34 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Free PDF download */}
           <section
-            className="mt-4 max-w-2xl mx-auto animate-fade-in"
+            className="mt-10 max-w-2xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
             <a
               href="/downloads/How-Aetheris-Can-Help-You.pdf"
               download
-              className="relative overflow-hidden group flex items-center gap-3 px-4 py-3 rounded-xl border border-amber/40 bg-gradient-to-br from-amber/[0.12] via-amber/[0.05] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 hover:border-amber/70 transition-all shadow-[0_15px_40px_-15px_hsl(var(--amber)/0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none"
+              className="relative overflow-hidden group flex items-center gap-3 px-5 py-4 rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm hover:border-amber transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
             >
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/15 ring-1 ring-amber/40">
-                <Download className="w-5 h-5 text-amber" />
+              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
+                <Download className="w-6 h-6 text-amber" />
               </div>
               <div className="relative flex-1 text-left">
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
-                <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
+                <div className="font-forensic text-lg sm:text-xl font-bold text-foreground leading-tight">
                   How Aetheris Can Help You
                 </div>
-                <div className="text-[11px] text-muted-foreground">No email required. Tap to download.</div>
+                <div className="text-sm text-muted-foreground">No email required. Tap to download.</div>
               </div>
-              <ArrowRight className="relative w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="relative w-5 h-5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
             </a>
           </section>
 
           {/* Demand generation infographic — front & center above "What the Hell" */}
           <section
-            className="mt-8 max-w-3xl mx-auto animate-fade-in"
+            className="mt-12 max-w-3xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
           >
-            <div className="rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-transparent to-transparent backdrop-blur-xl p-2 sm:p-3 shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.45)]">
+            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
               <img
                 src={demandGenInfographic}
                 alt="Aetheris Business Forensics & Revenue Recovery — 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
