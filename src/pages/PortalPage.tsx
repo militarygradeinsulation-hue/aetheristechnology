@@ -941,6 +941,7 @@ const PortalPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
+                    {isPartner && <PartnerCoachTips tabId={t.id} />}
                     {renderTabBody(t.id)}
                   </div>
                 </div>
