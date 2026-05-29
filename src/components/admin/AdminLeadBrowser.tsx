@@ -975,46 +975,84 @@ export const AdminLeadBrowser: React.FC = () => {
                       const XLSX = await import('xlsx');
                       const buf = await file.arrayBuffer();
                       const wb = XLSX.read(buf, { type: 'array' });
-                      const ws = wb.Sheets[wb.SheetNames[0]];
-                      const json: any[] = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
-                      const norm = (k: string) => k.toLowerCase().trim().replace(/[\s\-]+/g, '_');
-                      const knownKeys = ['business_name','contact_name','email','phone','website','industry','location','score','notes'];
-                      const aliases: Record<string, string> = {
-                        business: 'business_name', company: 'business_name', name: 'business_name', business_name: 'business_name',
-                        contact: 'contact_name', contact_name: 'contact_name', dm: 'contact_name', decision_maker: 'contact_name',
-                        email: 'email', email_address: 'email',
-                        phone: 'phone', phone_number: 'phone', telephone: 'phone',
-                        website: 'website', url: 'website', site: 'website',
-                        industry: 'industry', svc: 'industry', services: 'industry', service: 'industry',
-                        location: 'location', loc: 'location', city: 'location', address: 'location',
-                        score: 'score', rating: 'score', fit: 'score',
-                        notes: 'notes', note: 'notes', comment: 'notes', comments: 'notes', pain: 'notes', pitch: 'notes',
+                      // Try every sheet, pick the one with the most usable rows
+                      let best: ManualLeadRow[] = [];
+                      let bestSheet = '';
+                      const norm = (k: string) => String(k).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+                      // Column-name pattern matchers (substring on normalized header)
+                      const matchers: Array<{ field: keyof ManualLeadRow; patterns: string[] }> = [
+                        { field: 'business_name', patterns: ['business','company','organization','org_name','account','firm','employer','name'] },
+                        { field: 'contact_name',  patterns: ['contact','owner','decision','dm','poc','rep_name','person','first_name','last_name','full_name'] },
+                        { field: 'email',         patterns: ['email','e_mail','mail'] },
+                        { field: 'phone',         patterns: ['phone','tel','mobile','cell'] },
+                        { field: 'website',       patterns: ['website','url','site','domain','homepage','web'] },
+                        { field: 'industry',      patterns: ['industry','vertical','sector','category','svc','service','trade'] },
+                        { field: 'location',      patterns: ['location','city','state','address','region','geo','area','loc'] },
+                        { field: 'score',         patterns: ['score','rating','fit','priority','grade'] },
+                        { field: 'notes',         patterns: ['note','comment','pain','pitch','description','summary','detail','reason','leak','opportunity'] },
+                      ];
+                      const mapHeader = (h: string): keyof ManualLeadRow | null => {
+                        const nk = norm(h);
+                        if (!nk) return null;
+                        // exact first
+                        for (const m of matchers) if (m.patterns.some(p => nk === p)) return m.field;
+                        // substring
+                        for (const m of matchers) if (m.patterns.some(p => nk.includes(p))) return m.field;
+                        return null;
                       };
-                      const parsed: ManualLeadRow[] = json.map((raw) => {
-                        const row: any = { ...EMPTY_ROW };
-                        const extras: string[] = [];
-                        for (const [k, v] of Object.entries(raw)) {
-                          const val = v == null ? '' : String(v).trim();
-                          if (!val) continue;
-                          const nk = norm(k);
-                          const target = aliases[nk];
-                          if (target) {
-                            row[target] = row[target] ? `${row[target]} ${val}`.trim() : val;
-                          } else {
-                            extras.push(`${k}: ${val}`);
+                      for (const sheetName of wb.SheetNames) {
+                        const ws = wb.Sheets[sheetName];
+                        if (!ws) continue;
+                        // Read as matrix to auto-detect header row
+                        const matrix: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false, blankrows: false });
+                        if (!matrix.length) continue;
+                        // Find header row: first row in first 15 where at least 2 cells map to known fields
+                        let headerIdx = 0;
+                        let headers: string[] = [];
+                        for (let i = 0; i < Math.min(matrix.length, 15); i++) {
+                          const row = matrix[i].map((c: any) => String(c ?? '').trim());
+                          const mapped = row.filter(c => c && mapHeader(c)).length;
+                          if (mapped >= 2) { headerIdx = i; headers = row; break; }
+                        }
+                        if (!headers.length) headers = matrix[0].map((c: any) => String(c ?? '').trim());
+                        const fieldMap: (keyof ManualLeadRow | null)[] = headers.map(h => mapHeader(h));
+                        // Fallback: if no business_name column detected, use the first text column
+                        if (!fieldMap.includes('business_name')) {
+                          const firstTextCol = headers.findIndex((_, i) => matrix.slice(headerIdx + 1, headerIdx + 6).some(r => String(r[i] ?? '').trim().length > 1));
+                          if (firstTextCol >= 0) fieldMap[firstTextCol] = 'business_name';
+                        }
+                        const rows: ManualLeadRow[] = [];
+                        for (let r = headerIdx + 1; r < matrix.length; r++) {
+                          const cells = matrix[r];
+                          if (!cells || cells.every((c: any) => !String(c ?? '').trim())) continue;
+                          const row: any = { ...EMPTY_ROW };
+                          const extras: string[] = [];
+                          cells.forEach((cell: any, idx: number) => {
+                            const val = String(cell ?? '').trim();
+                            if (!val) return;
+                            const target = fieldMap[idx];
+                            if (target) {
+                              row[target] = row[target] ? `${row[target]} ${val}`.trim() : val;
+                            } else if (headers[idx]) {
+                              extras.push(`${headers[idx]}: ${val}`);
+                            }
+                          });
+                          if (extras.length) row.notes = [row.notes, extras.join(' | ')].filter(Boolean).join(' | ');
+                          if (row.score) {
+                            const n = Number(String(row.score).replace(/[^0-9.\-]/g, ''));
+                            row.score = Number.isFinite(n) ? String(Math.min(100, Math.max(0, n <= 5 ? Math.round(n * 20) : Math.round(n)))) : '';
                           }
+                          if (row.business_name) rows.push(row as ManualLeadRow);
                         }
-                        if (extras.length) row.notes = [row.notes, extras.join(' | ')].filter(Boolean).join(' | ');
-                        if (row.score) {
-                          const n = Number(row.score);
-                          row.score = Number.isFinite(n) ? String(Math.min(100, Math.max(0, n <= 5 ? Math.round(n * 20) : Math.round(n)))) : '';
-                        }
-                        return row as ManualLeadRow;
-                      }).filter(r => r.business_name);
-                      setAddExcelRows(parsed);
-                      if (parsed.length === 0) {
-                        toast({ title: 'No leads found', description: 'Make sure your file has a header row and a business_name column.', variant: 'destructive' });
+                        if (rows.length > best.length) { best = rows; bestSheet = sheetName; }
                       }
+                      setAddExcelRows(best);
+                      if (best.length === 0) {
+                        toast({ title: 'No leads found', description: 'Could not detect a business/company column in any sheet. Try renaming a column to "business_name" or "company".', variant: 'destructive' });
+                      } else {
+                        toast({ title: `Parsed ${best.length} leads`, description: bestSheet ? `From sheet "${bestSheet}". Columns were auto-mapped.` : 'Columns were auto-mapped.' });
+                      }
+
                     } catch (err) {
                       toast({ title: 'Failed to parse file', description: err instanceof Error ? err.message : '', variant: 'destructive' });
                       setAddExcelRows([]);
