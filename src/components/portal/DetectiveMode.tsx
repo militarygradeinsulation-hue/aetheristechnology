@@ -118,9 +118,9 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           business_name: (lead as any)?.business_name || '',
           contact_name: (lead as any)?.contact_name || '',
           email: (lead as any)?.email || '',
-          scan: !curScan,
-          firecrawl: !curFc,
-          rocketreach: !curRr,
+          scan: true,
+          firecrawl: true,
+          rocketreach: true,
         },
         headers,
       });
@@ -136,8 +136,8 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     if (auth === 'admin') {
       const steps: PrepStep[] = [];
       if (!curEnrich && hasLeadId) steps.push({ key: 'enrich', label: 'AI enrichment (weak points, talking points, decision makers)', status: 'pending' });
-      const needsDeep = !curRr || !curFc || (!curScan && hasWebsite);
-      if (needsDeep) steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+      if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
+      steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
       setPrepSteps(steps);
 
       if (!curEnrich && hasLeadId) {
@@ -167,27 +167,35 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         }
       }
 
-      // Always backfill rr/fc/scan via detective-prep if still missing (admin lead may
-      // not have run rep deep-scan yet, and standalone admin runs have no lead id).
-      if (!curRr || !curFc || (!curScan && hasWebsite)) {
-        updateStep('deep', { status: 'running' });
+      // Always run company website scan + deep scan (Firecrawl + RocketReach) every time
+      // Detective Mode runs — even if cached data exists, we re-pull for freshness.
+      if (hasWebsite) {
+        updateStep('scan', { status: 'running' });
         try {
-          await runDetectivePrep('Firecrawl + RocketReach');
-          updateStep('deep', { status: 'done', note: 'fresh pull' });
+          await runDetectivePrep('website scan');
+          updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'fresh pull' });
         } catch (e) {
-          updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+          updateStep('scan', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
         }
+      }
+
+      updateStep('deep', { status: 'running' });
+      try {
+        await runDetectivePrep('Firecrawl + RocketReach');
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
+      } catch (e) {
+        updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
       }
       return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
     }
 
-    // Portal path
+    // Portal path — always run company website scan + deep scan on every Detective run
     const steps: PrepStep[] = [];
-    if (!curScan && hasWebsite) steps.push({ key: 'scan', label: 'Forensic website scan', status: 'pending' });
-    if (!curRr || !curFc) steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+    if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
+    steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
     setPrepSteps(steps);
 
-    if (!curScan && hasWebsite) {
+    if (hasWebsite) {
       updateStep('scan', { status: 'running' });
       try {
         if (hasLeadId) {
@@ -198,28 +206,26 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           await runDetectivePrep('website scan');
         }
         setLiveScan(curScan);
-        updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'done' });
+        updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'fresh pull' });
       } catch (e) {
         updateStep('scan', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
       }
     }
 
-    if (!curRr || !curFc) {
-      updateStep('deep', { status: 'running' });
-      try {
-        if (hasLeadId) {
-          const res: any = await portalLeads.rocketReach((lead as any).id, {});
-          curRr = res.person || curRr;
-          if (res.firecrawl) curFc = res.firecrawl;
-          setLiveRr(curRr); setLiveFc(curFc);
-          updateStep('deep', { status: 'done', note: res.cached ? 'loaded saved' : 'fresh pull' });
-        } else {
-          await runDetectivePrep('Firecrawl + RocketReach');
-          updateStep('deep', { status: 'done', note: 'fresh pull' });
-        }
-      } catch (e) {
-        updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+    updateStep('deep', { status: 'running' });
+    try {
+      if (hasLeadId) {
+        const res: any = await portalLeads.rocketReach((lead as any).id, { force: true });
+        curRr = res.person || curRr;
+        if (res.firecrawl) curFc = res.firecrawl;
+        setLiveRr(curRr); setLiveFc(curFc);
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
+      } else {
+        await runDetectivePrep('Firecrawl + RocketReach');
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
       }
+    } catch (e) {
+      updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
     }
 
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
