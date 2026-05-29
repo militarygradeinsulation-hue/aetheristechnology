@@ -131,6 +131,12 @@ serve(async (req) => {
     const postType: string = (body?.postType || "").toString();
     const creator: string = (body?.creator || "auto").toString();
     const extraPrompt: string = (body?.extraPrompt || "").toString();
+    const personaActive: boolean = !!body?.personaActive
+      || /PERSONA LOCK|PERSONA BLEND LOCK/i.test(extraPrompt);
+    const personaKeys: string[] = Array.isArray(body?.personaKeys) ? body.personaKeys.filter(Boolean) : [];
+    const recentDrafts: string[] = Array.isArray(body?.recentDrafts)
+      ? body.recentDrafts.filter((s: any) => typeof s === "string" && s.trim().length > 20).slice(0, 8)
+      : [];
 
     if (!topic) {
       return new Response(JSON.stringify({ error: "topic required" }), {
@@ -145,6 +151,44 @@ serve(async (req) => {
         ? "Do NOT tag any creator in this post."
         : `If it fits naturally, work in ${creator} using the angle defined in your instructions. If it doesn't fit, skip the tag.`;
 
+    // LIVE ANTI-REPETITION — feed the model its own recent drafts and demand variation.
+    const liveAntiRepetitionBlock = recentDrafts.length > 0
+      ? `\n\n═══════════════════════════════════════════════════════════
+LIVE ANTI-REPETITION AUDIT (your last ${recentDrafts.length} drafts — DO NOT echo them)
+═══════════════════════════════════════════════════════════
+The following are your most recent outputs. They define what "repetitive" looks like RIGHT NOW. You must NOT:
+  · Reuse any 4+ word phrase from them (even reworded with one synonym swap)
+  · Open with the same first 3-4 words, the same verb shape, or the same reframe template
+  · Land on the same leak category if you used it in the last 3 drafts
+  · Recycle the same dollar-figure shape, the same anchor sentence, or the same closing image
+  · Default to "Operational Waste", "Architecture Failure", "Brand Contradiction", or any single leak label more than once per 4 drafts — rotate aggressively across the full vocabulary
+Read them, then write something that COULD NOT be mistaken for any of them:
+
+${recentDrafts.map((d, i) => `── DRAFT ${i + 1} ──\n${d.trim()}`).join("\n\n")}
+
+═══════════════════════════════════════════════════════════
+END AUDIT — your new draft must feel like a different operator on a different day.`
+      : "";
+
+    // PERSONA-LED MODE: when a persona is active, the persona's voice is supreme.
+    // The Aetheris lexicon becomes a faint flavor, not a checklist. The LIVE
+    // anti-repetition audit replaces the rigid LEXICON CHECK.
+    const personaLedClause = personaActive
+      ? `\n\n═══════════════════════════════════════════════════════════
+PERSONA-LED MODE — voice supremacy over lexicon
+═══════════════════════════════════════════════════════════
+A persona lock has been declared in the user prompt below${personaKeys.length ? ` (${personaKeys.join(" + ")})` : ""}. That persona OWNS the voice, rhythm, vocab, and sentence-length pattern of this draft.
+  · The 4-Block Architecture, the Forensic Lexicon, and the bans above are SUBORDINATE flavor — apply them ONLY where they do not fight the persona's cadence.
+  · You are NOT required to name a specific leak category from the 7-item list. Diagnose the leak in the persona's own language. A precise dollar/percent number is still mandatory.
+  · "Operational Waste", "Architecture Failure", "Brand Contradiction" and the other named categories are now RARE-USE LABELS. Prefer the persona's own framing.
+  · If the persona's rhythm wants bullets, fragments, dialogue, or a non-standard structure — let it. Persona wins.
+  · A reader fluent in the persona must feel them within the first 2 lines. If the draft sounds like the default Aetheris voice, you have FAILED — rewrite.`
+      : "";
+
+    const lexiconCheck = personaActive
+      ? `LIVE CHECK BEFORE OUTPUT: (a) Does the persona's voice dominate every paragraph? (b) Is there a concrete number? (c) Did I avoid every phrase, opener, and leak label that appears in the LIVE ANTI-REPETITION AUDIT above? (d) Could this draft be confused with any of my recent drafts? If yes to (d) — rewrite from a new angle.`
+      : `LEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category from the Aetheris Lexicon (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor a concrete number inside Cost of the Leak / COI framing? (c) Did I close on Revenue Recovery or Revenue Loop language, not generic 'growth'? (d) Did I avoid all forbidden substitutions (consulting / funnel / strategy / mindset / tip / hack / hustle / grind / unlock)? Rewrite before returning if any answer is no.`;
+
     const userPrompt = `Write a LinkedIn post for Aetheris.technology with the following parameters:
 
 TOPIC: ${topic}
@@ -152,10 +196,12 @@ ${pillar ? `CONTENT PILLAR: ${pillar}` : ""}
 ${postType ? `POST TYPE: ${postType}` : ""}
 CREATOR TAG INSTRUCTION: ${creatorInstruction}
 ${extraPrompt ? `\nADDITIONAL DIRECTION: ${extraPrompt}` : ""}
+${personaLedClause}
+${liveAntiRepetitionBlock}
 
-Follow all brand voice, structure, hashtag, and tone rules from your instructions. Output only the post — no commentary, no labels, no quotation marks around the post.
+Follow all brand voice, structure, hashtag, and tone rules from your instructions${personaActive ? " EXCEPT where the active persona's rhythm overrides them — persona wins every conflict" : ""}. Output only the post — no commentary, no labels, no quotation marks around the post.
 
-LEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category from the Aetheris Lexicon (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor a concrete number inside Cost of the Leak / COI framing? (c) Did I close on Revenue Recovery or Revenue Loop language, not generic 'growth'? (d) Did I avoid all forbidden substitutions (consulting / funnel / strategy / mindset / tip / hack / hustle / grind / unlock)? Rewrite before returning if any answer is no.`;
+${lexiconCheck}`;
 
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
