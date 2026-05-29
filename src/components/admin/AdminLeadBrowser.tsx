@@ -207,6 +207,21 @@ export const AdminLeadBrowser: React.FC = () => {
     } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
+  const moveToPool = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_pool', ids });
+      toast({ title: `Released ${ids.length} from holding to the pool` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const moveToHolding = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_holding', ids });
+      toast({ title: `Pulled ${ids.length} into your holding area` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+
   const remove = async (ids: string[]) => {
     if (!confirm(`Delete ${ids.length} lead${ids.length > 1 ? 's' : ''}?`)) return;
     try {
