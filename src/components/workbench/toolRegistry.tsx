@@ -2,8 +2,9 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
-  Film, Wand2, Zap,
+  Film, Wand2, Zap, Languages,
 } from "lucide-react";
+
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
 import { supabase } from "@/integrations/supabase/client";
 
