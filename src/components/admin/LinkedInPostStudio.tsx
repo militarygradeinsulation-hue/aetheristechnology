@@ -780,6 +780,14 @@ export default function LinkedInPostStudio() {
                 <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div className="mt-2">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
+              <Select value={respondPersona} onValueChange={setRespondPersona}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
+                <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
             <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
               Site link auto-appended: aetheris.technology
             </div>
