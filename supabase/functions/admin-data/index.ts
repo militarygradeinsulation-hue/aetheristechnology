@@ -125,15 +125,17 @@ serve(async (req) => {
       let q = supabase
         .from("rep_leads")
         .select(
-          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at,notes,low_hanging_fruit",
+          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at,notes,low_hanging_fruit,admin_holding",
         )
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(200);
 
-      if (filter === "pool") q = q.is("claimed_by_code", null).is("assigned_to_code", null);
+      if (filter === "pool") q = q.is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false);
       if (filter === "assigned") q = q.is("claimed_by_code", null).not("assigned_to_code", "is", null);
       if (filter === "claimed") q = q.not("claimed_by_code", "is", null);
+      if (filter === "holding") q = q.eq("admin_holding", true);
+
       if (search.trim()) {
         const s = search.trim();
         q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
