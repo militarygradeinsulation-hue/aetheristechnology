@@ -16,6 +16,7 @@ import { hasValidPortalSession } from "@/lib/portalAuth";
 import { hasValidAdminToken } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 import { PinnableFloater } from "@/components/ui/PinnableFloater";
+import { useActiveLead, clearActiveLead } from "@/lib/activeLead";
 
 // Widths applied at ALL viewports (no sm: prefix) so mobile users can
 // resize too. Sheet base has w-3/4 + sm:max-w-sm — we override both via
@@ -40,6 +41,7 @@ export const FloatingWorkbench: React.FC = () => {
   const [showTips, setShowTips] = useState(false);
   const dragIndex = useRef<number | null>(null);
   const hydrated = useRef(false);
+  const activeLead = useActiveLead();
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   useEffect(() => {
@@ -230,6 +232,27 @@ export const FloatingWorkbench: React.FC = () => {
                 </Button>
               </div>
             </div>
+
+            {activeLead && (
+              <div className="mt-2 flex items-center gap-2 rounded-md border border-amber/40 bg-amber/10 px-2 py-1.5 text-[11px]">
+                <span className="font-mono uppercase tracking-wider text-amber">Active Lead</span>
+                <span className="truncate text-foreground font-semibold">
+                  {activeLead.business_name || activeLead.website || activeLead.contact_name || activeLead.leadId.slice(0, 8)}
+                </span>
+                {activeLead.website && (
+                  <span className="truncate text-muted-foreground hidden sm:inline">· {activeLead.website}</span>
+                )}
+                <span className="ml-auto text-muted-foreground hidden md:inline">Tools auto-fill</span>
+                <button
+                  onClick={clearActiveLead}
+                  className="text-muted-foreground hover:text-foreground"
+                  title="Clear active lead"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
 
             <div className="flex items-center gap-2 flex-wrap pt-2">
               <DropdownMenu>

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
 
 type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
 
@@ -58,6 +59,21 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [copied, setCopied] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useActiveLeadAutofill('outreach-email', (lead) => {
+    if (lead.contact_name) setRecipientName(n => n || lead.contact_name!);
+    // Seed the prompt with lead context so the AI has something to work with.
+    if (!prompt) {
+      const ctx = [
+        lead.business_name && `Company: ${lead.business_name}`,
+        lead.contact_name && `Contact: ${lead.contact_name}`,
+        lead.website && `Website: ${lead.website}`,
+        lead.industry && `Industry: ${lead.industry}`,
+        lead.location && `Location: ${lead.location}`,
+      ].filter(Boolean).join('\n');
+      if (ctx) setPrompt(`Write a first-touch outreach email.\n\n${ctx}\n\nAngle: leak/forensics, blunt, no fluff.`);
+    }
+  });
 
   async function handleFile(file: File) {
     if (file.size > 5_000_000) {

@@ -22,6 +22,7 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
 import { leadClues } from '@/lib/leadClues';
+import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
@@ -1065,6 +1066,28 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   useEffect(() => { setRr(lead.enrichment?.rocketreach || null); }, [lead.enrichment]);
   useEffect(() => { setFc(lead.enrichment?.firecrawl || null); }, [lead.enrichment]);
   useEffect(() => { if (lead.website) setScanUrl(lead.website); }, [lead.website]);
+
+  // Active Lead context — when this row is open, mark it as the active lead
+  // so any tool the rep opens (Workbench, Detective Mode, Scanner, etc.)
+  // auto-fills url/business/contact and logs a clue. Cleared if this row
+  // closes AND it was the lead that set the context.
+  useEffect(() => {
+    if (!open) return;
+    setActiveLead({
+      leadId: lead.id,
+      business_name: lead.business_name || undefined,
+      website: lead.website || undefined,
+      contact_name: lead.contact_name || undefined,
+      email: lead.email || undefined,
+      phone: lead.phone || undefined,
+      industry: lead.industry || undefined,
+      location: lead.location || undefined,
+    });
+    return () => {
+      const cur = getActiveLead();
+      if (cur?.leadId === lead.id) clearActiveLead();
+    };
+  }, [open, lead.id, lead.business_name, lead.website, lead.contact_name, lead.email, lead.phone, lead.industry, lead.location]);
 
   const scheduleSaveNotes = (val: string) => {
     setNotes(val);
