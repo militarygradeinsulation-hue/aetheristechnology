@@ -189,13 +189,13 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
     }
 
-    // Portal path
+    // Portal path — always run company website scan + deep scan on every Detective run
     const steps: PrepStep[] = [];
-    if (!curScan && hasWebsite) steps.push({ key: 'scan', label: 'Forensic website scan', status: 'pending' });
-    if (!curRr || !curFc) steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+    if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
+    steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
     setPrepSteps(steps);
 
-    if (!curScan && hasWebsite) {
+    if (hasWebsite) {
       updateStep('scan', { status: 'running' });
       try {
         if (hasLeadId) {
@@ -206,28 +206,26 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           await runDetectivePrep('website scan');
         }
         setLiveScan(curScan);
-        updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'done' });
+        updateStep('scan', { status: 'done', note: curScan?.grade ? `Grade ${curScan.grade}` : 'fresh pull' });
       } catch (e) {
         updateStep('scan', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
       }
     }
 
-    if (!curRr || !curFc) {
-      updateStep('deep', { status: 'running' });
-      try {
-        if (hasLeadId) {
-          const res: any = await portalLeads.rocketReach((lead as any).id, {});
-          curRr = res.person || curRr;
-          if (res.firecrawl) curFc = res.firecrawl;
-          setLiveRr(curRr); setLiveFc(curFc);
-          updateStep('deep', { status: 'done', note: res.cached ? 'loaded saved' : 'fresh pull' });
-        } else {
-          await runDetectivePrep('Firecrawl + RocketReach');
-          updateStep('deep', { status: 'done', note: 'fresh pull' });
-        }
-      } catch (e) {
-        updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+    updateStep('deep', { status: 'running' });
+    try {
+      if (hasLeadId) {
+        const res: any = await portalLeads.rocketReach((lead as any).id, { force: true });
+        curRr = res.person || curRr;
+        if (res.firecrawl) curFc = res.firecrawl;
+        setLiveRr(curRr); setLiveFc(curFc);
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
+      } else {
+        await runDetectivePrep('Firecrawl + RocketReach');
+        updateStep('deep', { status: 'done', note: 'fresh pull' });
       }
+    } catch (e) {
+      updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
     }
 
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
