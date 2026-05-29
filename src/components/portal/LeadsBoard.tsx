@@ -1136,6 +1136,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
       setScan(res.scan);
       setOpen(true); // ensure still open after data lands
+      await leadClues.log(lead.id, {
+        kind: 'scan',
+        label: res.cached ? 'Loaded saved website scan' : 'Ran website leak scan',
+        tool_key: 'website-scanner',
+        meta: { url: scanUrl, cached: !!res.cached, grade: res.scan?.grade, score: res.scan?.score },
+      });
+      bumpClues();
       toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead' });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
