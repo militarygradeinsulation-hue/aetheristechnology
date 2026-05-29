@@ -155,7 +155,7 @@ serve(async (req) => {
           .order("score", { ascending: false, nullsFirst: false })
           .limit(100);
       } else {
-      } else {
+
         query = query.is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
           .order("score", { ascending: false, nullsFirst: false })
           .order("created_at", { ascending: false }).limit(200);
