@@ -619,6 +619,16 @@ export const AdminLeadBrowser: React.FC = () => {
                       {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {l.admin_holding ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber" onClick={() => moveToPool([l.id])} title="Push to unassigned pool">
+                      <Shuffle className="w-3 h-3" />
+                    </Button>
+                  ) : !l.claimed_by_code && !l.assigned_to_code ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber/80" onClick={() => moveToHolding([l.id])} title="Hold for me">
+                      <Archive className="w-3 h-3" />
+                    </Button>
+                  ) : null}
+
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400" onClick={() => remove([l.id])} title="Delete">
                     <Trash2 className="w-3 h-3" />
                   </Button>
