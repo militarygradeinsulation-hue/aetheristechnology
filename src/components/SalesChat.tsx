@@ -367,6 +367,7 @@ export const SalesChat: React.FC = () => {
             </div>
           </div>
         </div>
+        </PinnableFloater>
       )}
 
       {/* Mobile sticky bar */}
