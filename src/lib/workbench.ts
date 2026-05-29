@@ -34,8 +34,10 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 function readWithLegacy<T>(key: string, legacyKey: string | null, fallback: T): T {
-  const value = read<T>(key, fallback);
-  if (JSON.stringify(value) !== JSON.stringify(fallback) || !legacyKey) return value;
+  if (typeof localStorage !== "undefined" && localStorage.getItem(key) !== null) {
+    return read<T>(key, fallback);
+  }
+  if (!legacyKey) return fallback;
   return read<T>(legacyKey, fallback);
 }
 function write<T>(key: string, value: T) {
