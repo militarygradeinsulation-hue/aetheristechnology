@@ -166,7 +166,7 @@ const ResourcesPage = () => {
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks, $29 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
+                <span className="text-amber font-medium">Every playbook here is free.</span> Want one tailored to your exact business and topic? Build a <a href="#build-your-own" className="text-amber underline">Custom Playbook</a> below.
               </p>
             </RevealOnScroll>
           </div>
@@ -183,45 +183,21 @@ const ResourcesPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {(playbooks || []).map((resource, index) => {
                   const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
-                  const isFree = index < FREE_PLAYBOOK_COUNT;
-                  const isPurchased = purchasedPlaybookIds?.has(resource.id);
-                  const isUnlocked = isFree || isPurchased;
-
                   return (
                     <RevealOnScroll key={resource.id} delay={index * 0.1}>
                       <button
                         type="button"
-                        onClick={() => { setPreviewPlaybook(resource); setPreviewIndex(index); }}
-                        className={`forensic-tile rounded-2xl p-8 border transition-all group h-full w-full flex flex-col text-left ${
-                          isUnlocked
-                            ? 'border-border hover:border-amber/30'
-                            : 'border-border/50 hover:border-primary/30'
-                        }`}
+                        onClick={() => { setPreviewPlaybook(resource); }}
+                        className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
                       >
                         <div className="flex items-start gap-4 mb-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                            isUnlocked
-                              ? 'bg-primary/20 group-hover:bg-primary/30'
-                              : 'bg-secondary/50 group-hover:bg-secondary/70'
-                          }`}>
-                            {isUnlocked ? (
-                              <IconComp className="w-6 h-6 text-amber" />
-                            ) : (
-                              <Lock className="w-5 h-5 text-muted-foreground" />
-                            )}
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
+                            <IconComp className="w-6 h-6 text-amber" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
-                              {isFree && (
-                                <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
-                              )}
-                              {!isFree && isPurchased && (
-                                <span className="text-[10px] font-bold bg-primary/15 text-primary border border-primary/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Unlocked</span>
-                              )}
-                              {!isUnlocked && (
-                                <span className="text-[10px] font-bold bg-secondary text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">$25</span>
-                              )}
+                              <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
                             </div>
                             <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
                           </div>
