@@ -1317,8 +1317,21 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
 
-          {/* Detective Mode — picks best angle, shows deduction, writes the message */}
-          <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+          {/* Clue Trail + Detective Mode — side by side on large screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-3 items-start">
+            <div id={`lead-tool-${lead.id}-detective-mode`} className="space-y-3 transition-shadow rounded-lg">
+              {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+              <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+            </div>
+            <div className="lg:sticky lg:top-4">
+              <LeadCluesTrail
+                lead={lead}
+                refreshSignal={cluesTick}
+                onAdvanceStatus={async (s) => { await setStatus(s); }}
+                onJumpToTool={jumpToTool}
+              />
+            </div>
+          </div>
 
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
