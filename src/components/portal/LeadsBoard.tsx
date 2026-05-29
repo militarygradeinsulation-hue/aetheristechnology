@@ -20,6 +20,8 @@ import {
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
+import { LeadCluesTrail } from './LeadCluesTrail';
+import { leadClues } from '@/lib/leadClues';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
@@ -1034,6 +1036,17 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     location: lead.location || '',
   });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cluesTick, setCluesTick] = useState(0);
+  const bumpClues = () => setCluesTick(t => t + 1);
+  const jumpToTool = (toolKey: string) => {
+    const id = `lead-tool-${lead.id}-${toolKey}`;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-amber');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-amber'), 1800);
+    }
+  };
 
   useEffect(() => {
     setEditFields({
@@ -1065,8 +1078,17 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   const setStatus = async (status: LeadStatus) => {
     setSaving(true);
-    try { await portalLeads.updateStatus(lead.id, { status }); onChanged(); }
-    catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
+    const prev = lead.status;
+    try {
+      await portalLeads.updateStatus(lead.id, { status });
+      await leadClues.log(lead.id, {
+        kind: 'status_change',
+        label: `Status: ${STATUS_LABEL[prev]} → ${STATUS_LABEL[status]}`,
+        stage_from: prev, stage_to: status,
+      });
+      bumpClues();
+      onChanged();
+    } catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
     finally { setSaving(false); }
   };
 
@@ -1074,6 +1096,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     setSaving(true);
     try {
       await portalLeads.updateStatus(lead.id, { touch: true, status: lead.status === 'new' ? 'touched' : lead.status });
+      await leadClues.log(lead.id, { kind: 'touch', label: 'Logged a touch' });
+      bumpClues();
       toast({ title: 'Touch logged' });
       onChanged();
     } catch { toast({ title: 'Failed', variant: 'destructive' }); }
@@ -1112,6 +1136,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
       setScan(res.scan);
       setOpen(true); // ensure still open after data lands
+      await leadClues.log(lead.id, {
+        kind: 'scan',
+        label: res.cached ? 'Loaded saved website scan' : 'Ran website leak scan',
+        tool_key: 'website-scanner',
+        meta: { url: scanUrl, cached: !!res.cached, grade: res.scan?.grade, score: res.scan?.score },
+      });
+      bumpClues();
       toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead' });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
@@ -1127,6 +1158,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       setRr(res.person);
       if (res.firecrawl) setFc(res.firecrawl);
       setOpen(true);
+      await leadClues.log(lead.id, {
+        kind: 'rocketreach',
+        label: res.cached ? 'Loaded saved decision-maker enrichment' : 'Enriched decision-maker (RocketReach + Firecrawl)',
+        tool_key: 'rocketreach',
+        meta: { cached: !!res.cached, name: res.person?.name, title: res.person?.current_title },
+      });
+      bumpClues();
       if (res.note) {
         toast({ title: 'Deep scan note', description: res.note });
       } else {
@@ -1279,8 +1317,21 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
 
-          {/* Detective Mode — picks best angle, shows deduction, writes the message */}
-          <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+          {/* Clue Trail + Detective Mode — side by side on large screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-3 items-start">
+            <div id={`lead-tool-${lead.id}-detective-mode`} className="space-y-3 transition-shadow rounded-lg">
+              {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+              <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+            </div>
+            <div className="lg:sticky lg:top-4">
+              <LeadCluesTrail
+                lead={lead}
+                refreshSignal={cluesTick}
+                onAdvanceStatus={async (s) => { await setStatus(s); }}
+                onJumpToTool={jumpToTool}
+              />
+            </div>
+          </div>
 
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
@@ -1303,7 +1354,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           </div>
 
           {/* Company Scan */}
-          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+          <div id={`lead-tool-${lead.id}-website-scanner`} className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2 transition-shadow">
+
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
                 <Search className="w-3 h-3" /> Company Scan
