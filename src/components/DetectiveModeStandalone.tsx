@@ -15,6 +15,11 @@ export const DetectiveModeStandalone: React.FC = () => {
   const [businessName, setBusinessName] = useState('');
   const [industry, setIndustry] = useState('');
   const [started, setStarted] = useState(false);
+  useActiveLeadAutofill('detective-mode', (lead) => {
+    if (lead.website) setWebsite(w => w || lead.website!);
+    if (lead.business_name) setBusinessName(b => b || lead.business_name!);
+    if (lead.industry) setIndustry(i => i || lead.industry!);
+  });
 
   const auth: 'admin' | 'portal' = hasValidAdminToken() ? 'admin' : 'portal';
 
