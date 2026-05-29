@@ -6,12 +6,25 @@ import {
 } from "lucide-react";
 
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
+import { getAdminToken } from "@/lib/adminAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+/** Prefer admin session if present, else fall back to rep/portal session. */
+function activeAuth(): { mode: "admin" | "rep"; token: string } {
+  const admin = getAdminToken();
+  if (admin) return { mode: "admin", token: admin };
+  return { mode: "rep", token: getPortalToken() || "" };
+}
+
 const bannerInvoke = async (body: Record<string, unknown>) => {
-  const token = getPortalToken();
+  const auth = activeAuth();
+  if (auth.mode === "admin") {
+    return supabase.functions.invoke("admin-image-studio", {
+      body, headers: auth.token ? { "x-admin-token": auth.token } : {},
+    });
+  }
   return supabase.functions.invoke("portal-image-studio", {
-    body, headers: token ? { "x-portal-token": token } : {},
+    body, headers: auth.token ? { "x-portal-token": auth.token } : {},
   });
 };
 
