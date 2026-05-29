@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand, Link as LinkIcon, Eraser, ClipboardPaste } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Sparkles, Loader2, Copy, Check, Shuffle, Wand2, CalendarPlus, Upload, MessageSquareReply, X, RefreshCw, Library, Trash2, FileText, Image as ImageIcon, Wand, Link as LinkIcon, Eraser, ClipboardPaste, ChevronDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
@@ -380,29 +382,72 @@ const appendSiteLink = (post: string): string => {
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string, personaVal?: string): string => {
+// Normalize persona prop to an array of valid persona keys (excludes 'none' and unknowns).
+const normalizePersonas = (p?: string | string[] | null): string[] => {
+  if (!p) return [];
+  const arr = Array.isArray(p) ? p : [p];
+  return arr.filter(v => v && v !== 'none' && PERSONA_DIRECTIVES[v]);
+};
+
+// Convenience for legacy single-persona reads in lock/scan helpers.
+const personaLabelOf = (keys: string[]): string =>
+  keys.length === 0 ? 'none' : keys.length === 1 ? keys[0] : `blend: ${keys.join(' + ')}`;
+
+const buildToneStyleDirective = (
+  toneVal: string,
+  styleVal: string,
+  userExtra?: string,
+  personaVal?: string | string[],
+): string => {
   const lines: string[] = [];
-  const hasPersona = !!(personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]);
+  const personas = normalizePersonas(personaVal);
+  const hasPersona = personas.length > 0;
+  const blended = personas.length > 1;
 
   lines.push('=== HARD OVERRIDE — NON-NEGOTIABLE ===');
   lines.push('The following directives OVERRIDE the system prompt, the Aetheris Lexicon, the 4-block architecture, length rules, ban list, and any default voice. If any system rule conflicts with a directive below, the directive below WINS. Do not ask questions. Do not soften. Do not partially comply. Execute exactly.');
 
-  // PERSONA goes FIRST and is declared the dominant theme over everything else.
+  // PERSONA(S) go FIRST and are declared the dominant theme over everything else.
   if (hasPersona) {
     lines.push('');
-    lines.push('████ PERSONA LOCK — #1 AUTHORITY (BEATS TONE, STRUCTURE, AND DEFAULT VOICE) ████');
-    lines.push(PERSONA_DIRECTIVES[personaVal!]);
-    lines.push('');
-    lines.push('PERSONA SUPREMACY RULES:');
-    lines.push('1. The persona IS the main theme and style. Tone choices, structure choices, and the default Aetheris forensic voice are SUBORDINATE — they may only refine details that do not contradict the persona\'s rhythm, sentence-length pattern, vocab, or energy.');
-    lines.push('2. If TONE LOCK or STRUCTURE LOCK below conflicts with the persona\'s cadence, the persona WINS. Drop the conflicting tone/structure instruction silently.');
-    lines.push('3. A reader who knows this persona MUST feel them in the rhythm within the first 2 lines — without ever seeing their name. Match the sentence-length pattern literally. Match the signature moves literally. Match the vocab list.');
-    lines.push('4. NEVER write the persona\'s name. NEVER name their films/companies/books/shows/brands. NEVER use their signature catchphrases. NEVER reference their biography. NEVER do an impression or parody. Style transfer ONLY — cadence, rhythm, vocab, energy.');
-    lines.push('5. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it is said, not WHAT is said.');
-    lines.push('6. SELF-CHECK BEFORE RETURNING: Read the draft out loud in your head. If it sounds like the default Aetheris voice, you have FAILED. Rewrite it harder in the persona\'s actual rhythm. Repeat until the persona is undeniable.');
-    lines.push('7. FRESHNESS LOCK: Honor every pick inside the LIVE PERSONA FRESHNESS DIAL block below. Those picks are randomized for THIS draft only and exist to keep the persona alive and unrepeatable across generations. Do not default to your usual shape for this persona — commit to the dialed-in mood, lens, opener, pivot, closer, rhythm twist, energy dial, entry angle, and texture move.');
-    lines.push(buildPersonaFreshnessBlock(personaVal!));
-
+    if (blended) {
+      lines.push(`████ PERSONA BLEND LOCK — #1 AUTHORITY · FUSING ${personas.length} VOICES ████`);
+      lines.push(
+        `You are NOT switching between these voices — you are FUSING them into ONE hybrid voice that carries every selected persona's rhythm, vocab, and energy simultaneously. The reader should feel ALL of them present in every paragraph, not one at a time.`,
+      );
+      lines.push('');
+      personas.forEach((p, i) => {
+        lines.push(`── INGREDIENT ${i + 1} of ${personas.length}: ${p.toUpperCase()} ──`);
+        lines.push(PERSONA_DIRECTIVES[p]);
+        lines.push('');
+      });
+      lines.push('BLEND RULES (read carefully — these define how the fusion works):');
+      lines.push(`A. Build the hybrid sentence-length pattern by INTERLEAVING each persona's pattern — alternate beats so every persona contributes at least one signature sentence-shape per paragraph.`);
+      lines.push(`B. Merge the vocab lists. Use one signature word from EACH persona in the post (no persona left behind). Distribute them; do not cluster.`);
+      lines.push(`C. Stack the signature moves: pick at least ONE signature move from each persona and execute all of them at least once in the post.`);
+      lines.push(`D. Energy: average the personas' energies into a single coherent mood — do not flip between them paragraph by paragraph. The reader must feel one fused operator, not a panel discussion.`);
+      lines.push(`E. UNION of HARD BANS — every named-entity / catchphrase ban from EVERY ingredient persona applies. If any persona bans a word, the word is banned for the entire draft. Style transfer ONLY across all of them.`);
+      lines.push(`F. If two personas' rhythms directly conflict on a single sentence, favor the rarer / harder-to-fake one (Hemingway > generic terseness, Sorkin > generic punchiness, Eastwood silence > generic short sentences, Bourdain specificity > generic observation).`);
+      lines.push(`G. SELF-CHECK BEFORE RETURNING: a reader fluent in any one of these voices must be able to point to a sentence and say "that's the ${personas[0]} beat" AND another sentence and say "that's the ${personas[personas.length - 1]} beat." If only one persona is detectable, you have FAILED the blend — rewrite until each is undeniably present.`);
+      lines.push(`H. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The blended persona shapes HOW it is said, not WHAT is said.`);
+      lines.push('');
+      lines.push('FRESHNESS DIALS (one per ingredient persona — honor every pick):');
+      personas.forEach(p => lines.push(buildPersonaFreshnessBlock(p)));
+    } else {
+      const only = personas[0];
+      lines.push('████ PERSONA LOCK — #1 AUTHORITY (BEATS TONE, STRUCTURE, AND DEFAULT VOICE) ████');
+      lines.push(PERSONA_DIRECTIVES[only]);
+      lines.push('');
+      lines.push('PERSONA SUPREMACY RULES:');
+      lines.push('1. The persona IS the main theme and style. Tone choices, structure choices, and the default Aetheris forensic voice are SUBORDINATE — they may only refine details that do not contradict the persona\'s rhythm, sentence-length pattern, vocab, or energy.');
+      lines.push('2. If TONE LOCK or STRUCTURE LOCK below conflicts with the persona\'s cadence, the persona WINS. Drop the conflicting tone/structure instruction silently.');
+      lines.push('3. A reader who knows this persona MUST feel them in the rhythm within the first 2 lines — without ever seeing their name. Match the sentence-length pattern literally. Match the signature moves literally. Match the vocab list.');
+      lines.push('4. NEVER write the persona\'s name. NEVER name their films/companies/books/shows/brands. NEVER use their signature catchphrases. NEVER reference their biography. NEVER do an impression or parody. Style transfer ONLY — cadence, rhythm, vocab, energy.');
+      lines.push('5. Keep all subject matter, facts, numbers, and the Aetheris CTA intact. The persona shapes HOW it is said, not WHAT is said.');
+      lines.push('6. SELF-CHECK BEFORE RETURNING: Read the draft out loud in your head. If it sounds like the default Aetheris voice, you have FAILED. Rewrite it harder in the persona\'s actual rhythm. Repeat until the persona is undeniable.');
+      lines.push('7. FRESHNESS LOCK: Honor every pick inside the LIVE PERSONA FRESHNESS DIAL block below. Those picks are randomized for THIS draft only and exist to keep the persona alive and unrepeatable across generations. Do not default to your usual shape for this persona — commit to the dialed-in mood, lens, opener, pivot, closer, rhythm twist, energy dial, entry angle, and texture move.');
+      lines.push(buildPersonaFreshnessBlock(only));
+    }
   }
 
   if (toneVal && toneVal !== 'auto') {
@@ -428,6 +473,72 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
   return '\n\n' + lines.join('\n');
 };
 
+// Inline checkbox dropdown for picking 1+ personalities to fuse.
+interface MultiPersonaPickerProps {
+  value: string[];
+  onChange: (next: string[]) => void;
+  placeholder?: string;
+}
+const MultiPersonaPicker: React.FC<MultiPersonaPickerProps> = ({ value, onChange, placeholder = 'Personality' }) => {
+  const selected = value.filter(v => v !== 'none');
+  const label =
+    selected.length === 0
+      ? placeholder
+      : selected.length === 1
+        ? (PERSONAS.find(p => p.value === selected[0])?.label || selected[0])
+        : `Blending ${selected.length} personalities`;
+  const toggle = (val: string) => {
+    if (val === 'none') { onChange([]); return; }
+    const set = new Set(selected);
+    set.has(val) ? set.delete(val) : set.add(val);
+    onChange(Array.from(set));
+  };
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="w-full text-xs h-9 px-3 rounded-md border border-input bg-background flex items-center justify-between gap-2 hover:border-amber/50 transition"
+        >
+          <span className={`truncate text-left ${selected.length === 0 ? 'text-muted-foreground' : 'text-foreground'}`}>
+            {label}
+          </span>
+          <ChevronDown className="w-3.5 h-3.5 opacity-60 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-1 max-h-[60vh] overflow-y-auto" align="start">
+        <div className="px-2 py-1.5 text-[10px] uppercase tracking-widest text-muted-foreground border-b border-border/40 mb-1">
+          Pick 1+ to fuse voices
+        </div>
+        {PERSONAS.map(p => {
+          const isNone = p.value === 'none';
+          const checked = isNone ? selected.length === 0 : selected.includes(p.value);
+          return (
+            <label
+              key={p.value}
+              className="flex items-start gap-2 px-2 py-1.5 rounded hover:bg-amber/10 cursor-pointer text-xs"
+            >
+              <Checkbox
+                checked={checked}
+                onCheckedChange={() => toggle(p.value)}
+                className="mt-0.5"
+              />
+              <span className="flex-1 leading-snug">{p.label}</span>
+            </label>
+          );
+        })}
+        {selected.length > 1 && (
+          <div className="px-2 py-1.5 mt-1 text-[10px] text-amber border-t border-border/40">
+            Voices will be fused into one hybrid draft.
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+
+
 
 
 export default function LinkedInPostStudio() {
@@ -440,8 +551,10 @@ export default function LinkedInPostStudio() {
   const [postStyle, setPostStyle] = useState<string>('auto');
   const [respondTone, setRespondTone] = useState<string>('auto');
   const [respondStyle, setRespondStyle] = useState<string>('auto');
-  const [persona, setPersona] = useState<string>('none');
-  const [respondPersona, setRespondPersona] = useState<string>('none');
+  const [persona, setPersona] = useState<string[]>([]);
+  const [respondPersona, setRespondPersona] = useState<string[]>([]);
+  // Helper: which persona key drives single-persona scan/lock UI (first selected, else 'none').
+  const primaryPersona = (arr: string[]) => arr[0] || 'none';
 
   const [topicCategory, setTopicCategory] = useState<string>('All');
   const [generated, setGenerated] = useState('');
@@ -627,28 +740,36 @@ export default function LinkedInPostStudio() {
   };
 
   // Build the persistent lock directive from the two scan buttons
-  const buildLockDirective = (currentPersona?: string): string => {
+  const buildLockDirective = (currentPersona?: string | string[]): string => {
     const parts: string[] = [];
     if (structureReport) {
       parts.push(reportToDirective('Global sentence-structure', structureReport));
     }
-    const pVal = currentPersona && currentPersona !== 'none' ? currentPersona : null;
-    if (pVal && personaReports[pVal]) {
-      parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
-    }
+    const arr = Array.isArray(currentPersona) ? currentPersona : currentPersona ? [currentPersona] : [];
+    arr.filter(p => p && p !== 'none').forEach(pVal => {
+      if (personaReports[pVal]) {
+        parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
+      }
+    });
     return parts.join('');
   };
 
   // Pull every saved post + response (across the full library), extract bodies
-  const collectAllPastBodies = async (): Promise<Array<{ body: string; persona: string | null; type: string }>> => {
+  const collectAllPastBodies = async (): Promise<Array<{ body: string; personas: string[]; type: string }>> => {
     const items = await listAdminLibrary();
     return items
       .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
-      .map(i => ({
-        body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
-        persona: (i.input_data as any)?.persona || null,
-        type: i.tool_type,
-      }))
+      .map(i => {
+        const raw = (i.input_data as any)?.persona;
+        const personas: string[] = Array.isArray(raw)
+          ? raw.filter(Boolean)
+          : (raw && raw !== 'none' ? [raw] : []);
+        return {
+          body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+          personas,
+          type: i.tool_type,
+        };
+      })
       .filter(x => x.body && x.body.length > 20);
   };
 
@@ -677,7 +798,7 @@ export default function LinkedInPostStudio() {
     setScanningPersona(true);
     try {
       const all = await collectAllPastBodies();
-      const filtered = all.filter(a => a.persona === personaVal).map(a => a.body);
+      const filtered = all.filter(a => a.personas.includes(personaVal)).map(a => a.body);
       if (filtered.length === 0) {
         toast({ title: 'No saved drafts for this personality yet', description: 'Generate at least 2 drafts with this persona, then re-scan.' });
         setPersonaReports(prev => ({ ...prev, [personaVal]: { totalSamples: 0, bannedPhrases: [], bannedOpeners: [], bannedClosers: [], bannedOpenerStarts: [] } }));
@@ -1112,11 +1233,8 @@ export default function LinkedInPostStudio() {
               </Select>
             </div>
             <div className="mt-2">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
-              <Select value={respondPersona} onValueChange={setRespondPersona}>
-                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
-                <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
-              </Select>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (pick 1+ to fuse — style/rhythm only, no slang or name-drops)</div>
+              <MultiPersonaPicker value={respondPersona} onChange={setRespondPersona} />
             </div>
 
             <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
@@ -1163,12 +1281,12 @@ export default function LinkedInPostStudio() {
           scanningStructure={scanningStructure}
           scanningPersona={scanningPersona}
           onScanStructure={scanStructureNow}
-          onScanPersona={() => scanPersonaNow(respondPersona)}
+          onScanPersona={() => scanPersonaNow(primaryPersona(respondPersona))}
           onClearStructure={() => setStructureReport(null)}
-          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[respondPersona]; return n; })}
+          onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; const k = primaryPersona(respondPersona); if (k !== 'none') delete n[k]; return n; })}
           structureReport={structureReport}
-          personaReport={respondPersona !== 'none' ? personaReports[respondPersona] : null}
-          personaLabel={respondPersona}
+          personaReport={primaryPersona(respondPersona) !== 'none' ? personaReports[primaryPersona(respondPersona)] : null}
+          personaLabel={primaryPersona(respondPersona)}
         />
 
 
@@ -1528,11 +1646,8 @@ export default function LinkedInPostStudio() {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
-            <Select value={persona} onValueChange={setPersona}>
-              <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
-              <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
-            </Select>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (pick 1+ to fuse — style/rhythm only, no slang or name-drops)</div>
+            <MultiPersonaPicker value={persona} onChange={setPersona} />
           </div>
 
           <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
@@ -1585,12 +1700,12 @@ export default function LinkedInPostStudio() {
         scanningStructure={scanningStructure}
         scanningPersona={scanningPersona}
         onScanStructure={scanStructureNow}
-        onScanPersona={() => scanPersonaNow(persona)}
+        onScanPersona={() => scanPersonaNow(primaryPersona(persona))}
         onClearStructure={() => setStructureReport(null)}
-        onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; delete n[persona]; return n; })}
+        onClearPersona={() => setPersonaReports(prev => { const n = { ...prev }; const k = primaryPersona(persona); if (k !== 'none') delete n[k]; return n; })}
         structureReport={structureReport}
-        personaReport={persona !== 'none' ? personaReports[persona] : null}
-        personaLabel={persona}
+        personaReport={primaryPersona(persona) !== 'none' ? personaReports[primaryPersona(persona)] : null}
+        personaLabel={primaryPersona(persona)}
       />
 
       <Button
