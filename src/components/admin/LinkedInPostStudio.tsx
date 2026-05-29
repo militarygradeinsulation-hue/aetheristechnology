@@ -193,6 +193,9 @@ export default function LinkedInPostStudio() {
   const [postStyle, setPostStyle] = useState<string>('auto');
   const [respondTone, setRespondTone] = useState<string>('auto');
   const [respondStyle, setRespondStyle] = useState<string>('auto');
+  const [persona, setPersona] = useState<string>('none');
+  const [respondPersona, setRespondPersona] = useState<string>('none');
+
   const [topicCategory, setTopicCategory] = useState<string>('All');
   const [generated, setGenerated] = useState('');
   const [loading, setLoading] = useState(false);
