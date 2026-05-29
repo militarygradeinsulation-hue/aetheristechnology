@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
+  Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield, Crown,
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
   X, Minimize2, Maximize2,
 } from 'lucide-react';
@@ -440,7 +440,8 @@ const PortalPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadChat]);
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number }[] = [
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean }[] = [
+    { id: 'jw-admin' as Tab, label: 'Joseph Work Account', icon: <Crown className="w-4 h-4" />, iconCmp: Crown, href: '/admin', adminOnly: true },
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
@@ -473,8 +474,10 @@ const PortalPage: React.FC = () => {
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const sharedWsUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const isAdmin = hasValidAdminToken();
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
+    && (!t.adminOnly || isAdmin)
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
@@ -787,6 +790,7 @@ const PortalPage: React.FC = () => {
                       id={`portal-tab-btn-${t.id}`}
                       type="button"
                       onClick={() => {
+                        if (t.href) { window.location.href = t.href; return; }
                         setTab(t.id);
                         setActiveTool(null);
                         logPortalActivity('tab_view', { tab: t.id });
