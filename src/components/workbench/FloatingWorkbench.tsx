@@ -76,24 +76,29 @@ export const FloatingWorkbench: React.FC = () => {
     return g;
   }, []);
 
+  const persistStack = (next: WidgetEntry[]) => {
+    wb.setStack(next);
+    if (active !== "default") {
+      setLayouts(wb.upsertLayout(active, next));
+    }
+    setStack(next);
+  };
+
   const addTool = (toolId: string) => {
     if (stack.some(s => s.toolId === toolId)) {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
     }
     const next = [...stack, { toolId, collapsed: false, size: "md" as const }];
-    wb.setStack(next);
-    setStack(next);
+    persistStack(next);
   };
   const removeAt = (idx: number) => {
     const next = stack.filter((_, i) => i !== idx);
-    wb.setStack(next);
-    setStack(next);
+    persistStack(next);
   };
   const toggleAt = (idx: number) => {
     const next = stack.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w);
-    wb.setStack(next);
-    setStack(next);
+    persistStack(next);
   };
   const cycleSizeAt = (idx: number) => {
     const order: Array<"sm" | "md" | "lg" | "xl"> = ["sm", "md", "lg", "xl"];
@@ -102,8 +107,7 @@ export const FloatingWorkbench: React.FC = () => {
       const cur = (w.size || "md") as "sm" | "md" | "lg" | "xl";
       return { ...w, size: order[(order.indexOf(cur) + 1) % order.length] };
     });
-    wb.setStack(next);
-    setStack(next);
+    persistStack(next);
   };
 
   const onDragStart = (idx: number) => (e: React.DragEvent) => {
@@ -119,8 +123,7 @@ export const FloatingWorkbench: React.FC = () => {
     const next = [...stack];
     const [moved] = next.splice(from, 1);
     next.splice(idx, 0, moved);
-    wb.setStack(next);
-    setStack(next);
+    persistStack(next);
   };
 
   const applyLayout = (name: string) => {
