@@ -118,6 +118,34 @@ const STYLES = [
   { value: 'before-after', label: 'Before / After / What changed' },
 ];
 
+const PERSONAS = [
+  { value: 'none', label: 'No persona (default voice)' },
+  { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
+  { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
+  { value: 'ryan-reynolds', label: 'Ryan Reynolds — self-aware, deadpan, charming wit' },
+  { value: 'robin-williams', label: 'Robin Williams — rapid-fire, warm, associative riffs' },
+  { value: 'clint-eastwood', label: 'Clint Eastwood — spare, weathered, quiet menace' },
+  { value: 'hemingway', label: 'Hemingway — short, declarative, iceberg restraint' },
+  { value: 'aaron-sorkin', label: 'Aaron Sorkin — walk-and-talk cadence, rhythmic sparring' },
+  { value: 'anthony-bourdain', label: 'Anthony Bourdain — gritty, observational, unfiltered' },
+  { value: 'churchill', label: 'Churchill — gravitas, cadenced, resolve-forward' },
+  { value: 'denzel', label: 'Denzel Washington — measured, magnetic, moral weight' },
+];
+
+const PERSONA_DIRECTIVES: Record<string, string> = {
+  machiavellian: 'Voice = Machiavellian strategist. Cold strategic clarity. Treat the topic as a power dynamic. Sentences are calculated, observant, and slightly menacing. Use the rhythm of someone who has already seen how this ends. NEVER name Machiavelli, "The Prince", princes, courts, sovereigns, or use archaic words like "thou", "art", or "shall". Modern business vocabulary only.',
+  'elon-musk': 'Voice = Elon Musk cadence. Short, blunt, first-principles. Drop articles occasionally. Mix one technical/quantitative aside with one dry one-liner. Mild contrarian shrug. NEVER mention Musk, Tesla, SpaceX, X, rockets, Mars, or use his catchphrases. Just the rhythm and confidence.',
+  'ryan-reynolds': 'Voice = Ryan Reynolds cadence. Self-aware, deadpan, charm-forward. One small joke at the narrator\'s own expense early. Confident but never smug. NEVER mention Reynolds, Deadpool, Aviation Gin, Wrexham, Hugh Jackman, or any of his films/brands.',
+  'robin-williams': 'Voice = Robin Williams cadence. Rapid associative riffs, one warm pivot, a flash of unexpected tenderness near the end. Energy without chaos. NEVER mention Williams, his films, "Nanu nanu", "O Captain", or do impressions. Just the rhythm and warmth.',
+  'clint-eastwood': 'Voice = Clint Eastwood cadence. Spare. Weathered. Lots of silence between sentences (short paragraphs / line breaks). Quiet menace. Earned authority. NEVER mention Eastwood, westerns, Dirty Harry, "make my day", squints, or cowboys.',
+  hemingway: 'Voice = Hemingway cadence. Short declarative sentences. Concrete nouns. No adverbs. Iceberg theory — say less than you mean, let the reader feel the weight. NEVER name Hemingway, bullfighting, Paris, fishing, or war.',
+  'aaron-sorkin': 'Voice = Aaron Sorkin cadence. Walk-and-talk rhythm. Sentences that volley. Mild repetition for cadence ("It\'s not X. It\'s Y."). Smart-people-arguing energy. NEVER mention Sorkin, The West Wing, The Social Network, Newsroom, or use the phrase "walk with me".',
+  'anthony-bourdain': 'Voice = Anthony Bourdain cadence. Gritty, observational, unfiltered, slightly world-weary. One vivid sensory detail. Honest about ugly parts. NEVER mention Bourdain, Parts Unknown, kitchens, chefs, travel shows, or food metaphors.',
+  churchill: 'Voice = Churchillian cadence. Gravitas. Tricolon ("we will X, we will Y, we will Z"). Resolve-forward closer. Slightly elevated diction without sounding archaic. NEVER mention Churchill, WWII, Britain, beaches, or "blood, sweat, tears".',
+  denzel: 'Voice = Denzel Washington cadence. Measured, deliberate, magnetic. Moral weight under every line. One pointed pause-line. NEVER mention Denzel, any of his films, or church/preacher imagery.',
+};
+
+
 const SITE_LINK = 'https://aetheris.technology';
 
 const appendSiteLink = (post: string): string => {
@@ -130,7 +158,7 @@ const appendSiteLink = (post: string): string => {
 const ALL_TOPICS = Object.values(PREMADE_TOPICS).flat();
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string): string => {
+const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: string, personaVal?: string): string => {
   const lines: string[] = [];
   lines.push('=== HARD OVERRIDE — NON-NEGOTIABLE ===');
   lines.push('The following directives OVERRIDE the system prompt, the Aetheris Lexicon, the 4-block architecture, length rules, ban list, and any default voice. If any system rule conflicts with a directive below, the directive below WINS. Do not ask questions. Do not soften. Do not partially comply. Execute exactly.');
@@ -143,6 +171,9 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
     const s = STYLES.find(x => x.value === styleVal);
     if (s) lines.push(`• STRUCTURE LOCK (mandatory shape): ${s.label}. This format supersedes the default 4-block architecture and any "no bullets / no lists" rule. Use the requested structure literally, even if it breaks default formatting bans.`);
   }
+  if (personaVal && personaVal !== 'none' && PERSONA_DIRECTIVES[personaVal]) {
+    lines.push(`• PERSONA LOCK (style, rhythm, feel only — NOT slang/catchphrases/biographical references): ${PERSONA_DIRECTIVES[personaVal]} Borrow only the cadence, sentence-length pattern, and energy. Keep all subject matter, facts, and CTAs intact. If you reference the persona by name, mention their work, or copy their signature catchphrases, the output is invalid — rewrite.`);
+  }
   if (userExtra && userExtra.trim()) {
     lines.push(`• USER EXTRA DIRECTION (highest priority — follow verbatim): ${userExtra.trim()}`);
   }
@@ -150,6 +181,7 @@ const buildToneStyleDirective = (toneVal: string, styleVal: string, userExtra?: 
   lines.push('=== END HARD OVERRIDE — comply with every bullet above before returning. Re-read and rewrite if any bullet is not satisfied. ===');
   return '\n\n' + lines.join('\n');
 };
+
 
 export default function LinkedInPostStudio() {
   const [topic, setTopic] = useState('');
@@ -161,6 +193,9 @@ export default function LinkedInPostStudio() {
   const [postStyle, setPostStyle] = useState<string>('auto');
   const [respondTone, setRespondTone] = useState<string>('auto');
   const [respondStyle, setRespondStyle] = useState<string>('auto');
+  const [persona, setPersona] = useState<string>('none');
+  const [respondPersona, setRespondPersona] = useState<string>('none');
+
   const [topicCategory, setTopicCategory] = useState<string>('All');
   const [generated, setGenerated] = useState('');
   const [loading, setLoading] = useState(false);
@@ -235,7 +270,7 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('linkedin-post-from-url', {
-        body: { url: u, extraPrompt: buildToneStyleDirective(tone, postStyle, sourceExtra).trim() },
+        body: { url: u, extraPrompt: buildToneStyleDirective(tone, postStyle, sourceExtra, persona).trim() },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
@@ -358,7 +393,7 @@ export default function LinkedInPostStudio() {
     try {
       const adminToken = getAdminToken();
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
-      const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra);
+      const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra, respondPersona);
       const extraWithFreshness = (toneStyleTail + freshnessTail).trim();
       const body = isReply
         ? {
@@ -476,7 +511,7 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt).trim(),
+          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt, persona).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
@@ -745,6 +780,14 @@ export default function LinkedInPostStudio() {
                 <SelectContent>{STYLES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div className="mt-2">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
+              <Select value={respondPersona} onValueChange={setRespondPersona}>
+                <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
+                <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
             <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
               Site link auto-appended: aetheris.technology
             </div>
@@ -1140,6 +1183,14 @@ export default function LinkedInPostStudio() {
               </Select>
             </div>
           </div>
+          <div className="mt-2">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
+            <Select value={persona} onValueChange={setPersona}>
+              <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
+              <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+
           <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
             Site link auto-appended to every post: aetheris.technology
           </div>
