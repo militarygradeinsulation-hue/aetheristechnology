@@ -24,16 +24,13 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   BarChart3,
 };
 
-const FREE_PLAYBOOK_COUNT = 3;
+// All pre-built playbooks are free. Only custom AI-generated playbooks (via PlaybookTopicBrowser) are paid.
 
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
-  const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
   const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
-  const [previewIndex, setPreviewIndex] = useState<number>(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const { user } = useAuth();
@@ -76,45 +73,11 @@ const ResourcesPage = () => {
     gcTime: 30 * 60 * 1000,
   });
 
-  // Check which playbooks the user has purchased
-  const { data: purchasedPlaybookIds } = useQuery({
-    queryKey: ['purchased-playbooks', user?.id],
-    queryFn: async () => {
-      if (!user) return new Set<string>();
-      const { data, error } = await supabase
-        .from('purchases')
-        .select('metadata')
-        .eq('user_id', user.id);
-      if (error) return new Set<string>();
-      const ids = new Set<string>();
-      (data || []).forEach((p: any) => {
-        if (p.metadata?.playbook_id) ids.add(p.metadata.playbook_id);
-      });
-      return ids;
-    },
-    enabled: !!user,
-  });
-
   const existingTitles = (playbooks || []).map(p => p.title);
 
-  const handlePlaybookAction = (playbook: any, index: number) => {
-    const isFree = index < FREE_PLAYBOOK_COUNT;
-    const isPurchased = purchasedPlaybookIds?.has(playbook.id);
-
-    if (isFree || isPurchased) {
-      // Direct download
-      window.open(playbook.file_url, '_blank');
-      return;
-    }
-
-    // Need to purchase
-    if (!user) {
-      navigate('/login?redirect=/resources');
-      return;
-    }
-
-    setCheckoutPlaybookId(playbook.id);
-    setCheckoutPlaybookTitle(playbook.title);
+  const handlePlaybookAction = (playbook: any) => {
+    // All pre-built playbooks are free, no paywall.
+    if (playbook.file_url) window.open(playbook.file_url, '_blank');
   };
 
   if (checkoutPlaybookId) {
