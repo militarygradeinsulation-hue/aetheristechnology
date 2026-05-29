@@ -389,6 +389,14 @@ const normalizePersonas = (p?: string | string[] | null): string[] => {
   return arr.filter(v => v && v !== 'none' && PERSONA_DIRECTIVES[v]);
 };
 
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+
+const readString = (value: unknown, key: string): string | undefined => {
+  const found = asRecord(value)[key];
+  return typeof found === 'string' ? found : undefined;
+};
+
 // Convenience for legacy single-persona reads in lock/scan helpers.
 const personaLabelOf = (keys: string[]): string =>
   keys.length === 0 ? 'none' : keys.length === 1 ? keys[0] : `blend: ${keys.join(' + ')}`;
@@ -490,7 +498,8 @@ const MultiPersonaPicker: React.FC<MultiPersonaPickerProps> = ({ value, onChange
   const toggle = (val: string) => {
     if (val === 'none') { onChange([]); return; }
     const set = new Set(selected);
-    set.has(val) ? set.delete(val) : set.add(val);
+    if (set.has(val)) set.delete(val);
+    else set.add(val);
     onChange(Array.from(set));
   };
   return (
