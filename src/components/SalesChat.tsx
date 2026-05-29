@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
