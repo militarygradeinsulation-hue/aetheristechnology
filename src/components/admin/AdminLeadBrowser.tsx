@@ -107,7 +107,8 @@ export const AdminLeadBrowser: React.FC = () => {
   const [addExcelRows, setAddExcelRows] = useState<ManualLeadRow[]>([]);
   const [addExcelFileName, setAddExcelFileName] = useState<string>('');
   const [addExcelParsing, setAddExcelParsing] = useState(false);
-  const [addDest, setAddDest] = useState<'pool' | 'rep'>('pool');
+  const [addDest, setAddDest] = useState<'pool' | 'rep' | 'holding'>('holding');
+
   const [addRepCode, setAddRepCode] = useState('');
   const [addHoldHours, setAddHoldHours] = useState(72);
   const [addLHF, setAddLHF] = useState(false);
