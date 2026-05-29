@@ -758,8 +758,9 @@ export const AdminLeadBrowser: React.FC = () => {
                   <Button className="bg-amber text-background hover:bg-amber/90" onClick={() => { assign([detail.id], bulkRep); setDetail(null); }}>
                     <UserPlus className="w-4 h-4 mr-1" /> Send to rep
                   </Button>
-                  <Button variant="outline" onClick={() => { scan([detail.id]); }}>
-                    <ScanLine className="w-4 h-4 mr-1" /> Re-scan
+                  <Button variant="outline" onClick={() => scan([detail.id])} disabled={busy[detail.id] === 'scan'}>
+                    {busy[detail.id] === 'scan' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ScanLine className="w-4 h-4 mr-1" />}
+                    {busy[detail.id] === 'scan' ? 'Scanning…' : 'Re-scan'}
                   </Button>
                 </div>
               </div>
