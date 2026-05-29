@@ -740,15 +740,17 @@ export default function LinkedInPostStudio() {
   };
 
   // Build the persistent lock directive from the two scan buttons
-  const buildLockDirective = (currentPersona?: string): string => {
+  const buildLockDirective = (currentPersona?: string | string[]): string => {
     const parts: string[] = [];
     if (structureReport) {
       parts.push(reportToDirective('Global sentence-structure', structureReport));
     }
-    const pVal = currentPersona && currentPersona !== 'none' ? currentPersona : null;
-    if (pVal && personaReports[pVal]) {
-      parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
-    }
+    const arr = Array.isArray(currentPersona) ? currentPersona : currentPersona ? [currentPersona] : [];
+    arr.filter(p => p && p !== 'none').forEach(pVal => {
+      if (personaReports[pVal]) {
+        parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
+      }
+    });
     return parts.join('');
   };
 
