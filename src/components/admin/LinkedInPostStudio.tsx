@@ -717,7 +717,8 @@ export default function LinkedInPostStudio() {
       const adminToken = getAdminToken();
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
       const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra, respondPersona);
-      const extraWithFreshness = (toneStyleTail + freshnessTail).trim();
+      const lockTail = buildLockDirective(respondPersona);
+      const extraWithFreshness = (toneStyleTail + freshnessTail + lockTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
