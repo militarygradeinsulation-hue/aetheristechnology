@@ -551,8 +551,10 @@ export default function LinkedInPostStudio() {
   const [postStyle, setPostStyle] = useState<string>('auto');
   const [respondTone, setRespondTone] = useState<string>('auto');
   const [respondStyle, setRespondStyle] = useState<string>('auto');
-  const [persona, setPersona] = useState<string>('none');
-  const [respondPersona, setRespondPersona] = useState<string>('none');
+  const [persona, setPersona] = useState<string[]>([]);
+  const [respondPersona, setRespondPersona] = useState<string[]>([]);
+  // Helper: which persona key drives single-persona scan/lock UI (first selected, else 'none').
+  const primaryPersona = (arr: string[]) => arr[0] || 'none';
 
   const [topicCategory, setTopicCategory] = useState<string>('All');
   const [generated, setGenerated] = useState('');
