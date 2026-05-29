@@ -511,7 +511,7 @@ export default function LinkedInPostStudio() {
           pillar: pillar === 'auto' ? '' : pillar,
           postType: postType === 'auto' ? '' : postType,
           creator,
-          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt).trim(),
+          extraPrompt: buildToneStyleDirective(tone, postStyle, extraPrompt, persona).trim(),
         },
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
