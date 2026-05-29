@@ -81,18 +81,29 @@ export const FloatingWorkbench: React.FC = () => {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
     }
-    setStack(s => [...s, { toolId, collapsed: false, size: "md" }]);
+    const next = [...stack, { toolId, collapsed: false, size: "md" as const }];
+    wb.setStack(next);
+    setStack(next);
   };
-  const removeAt = (idx: number) => setStack(s => s.filter((_, i) => i !== idx));
-  const toggleAt = (idx: number) =>
-    setStack(s => s.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w));
+  const removeAt = (idx: number) => {
+    const next = stack.filter((_, i) => i !== idx);
+    wb.setStack(next);
+    setStack(next);
+  };
+  const toggleAt = (idx: number) => {
+    const next = stack.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w);
+    wb.setStack(next);
+    setStack(next);
+  };
   const cycleSizeAt = (idx: number) => {
     const order: Array<"sm" | "md" | "lg" | "xl"> = ["sm", "md", "lg", "xl"];
-    setStack(s => s.map((w, i) => {
+    const next = stack.map((w, i) => {
       if (i !== idx) return w;
       const cur = (w.size || "md") as "sm" | "md" | "lg" | "xl";
       return { ...w, size: order[(order.indexOf(cur) + 1) % order.length] };
-    }));
+    });
+    wb.setStack(next);
+    setStack(next);
   };
 
   const onDragStart = (idx: number) => (e: React.DragEvent) => {
@@ -105,12 +116,11 @@ export const FloatingWorkbench: React.FC = () => {
     const from = dragIndex.current;
     dragIndex.current = null;
     if (from === null || from === idx) return;
-    setStack(s => {
-      const next = [...s];
-      const [moved] = next.splice(from, 1);
-      next.splice(idx, 0, moved);
-      return next;
-    });
+    const next = [...stack];
+    const [moved] = next.splice(from, 1);
+    next.splice(idx, 0, moved);
+    wb.setStack(next);
+    setStack(next);
   };
 
   const applyLayout = (name: string) => {
