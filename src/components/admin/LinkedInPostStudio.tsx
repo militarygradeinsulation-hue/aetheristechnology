@@ -1640,11 +1640,8 @@ export default function LinkedInPostStudio() {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (style/feel/rhythm only — no slang or name-drops)</div>
-            <Select value={persona} onValueChange={setPersona}>
-              <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Personality" /></SelectTrigger>
-              <SelectContent>{PERSONAS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
-            </Select>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Personality (pick 1+ to fuse — style/rhythm only, no slang or name-drops)</div>
+            <MultiPersonaPicker value={persona} onChange={setPersona} />
           </div>
 
           <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
