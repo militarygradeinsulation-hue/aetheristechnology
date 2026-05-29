@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield,
+  Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield, Crown,
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
   X, Minimize2, Maximize2,
 } from 'lucide-react';
