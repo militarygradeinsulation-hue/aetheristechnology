@@ -390,6 +390,54 @@ const LeakLanderPage: React.FC = () => {
             )}
           </section>
 
+          {/* Forensic Revenue Recovery deck — minimized, PDFs at bottom */}
+          <section
+            className="mt-8 max-w-3xl mx-auto animate-fade-in"
+            style={{ animationDelay: "330ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.04] via-white/[0.02] to-transparent backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={() => setDeckOpen((v) => !v)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white/[0.03] transition-colors rounded-xl"
+                aria-expanded={deckOpen}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText className="w-4 h-4 text-amber shrink-0" />
+                  <div className="min-w-0">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Case File · Deck</div>
+                    <div className="font-forensic text-sm font-bold text-foreground truncate">Forensic Revenue Recovery</div>
+                  </div>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-amber shrink-0 transition-transform ${deckOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              <div className="border-t border-white/10 px-4 py-3 flex flex-wrap items-center justify-center gap-2">
+                <a
+                  href="/downloads/Forensic-Revenue-Recovery.pdf"
+                  download
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber/40 bg-amber/10 hover:bg-amber/20 text-amber font-mono text-[11px] uppercase tracking-wider transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download PDF
+                </a>
+                <a
+                  href="/downloads/Forensic-Revenue-Recovery.pptx"
+                  download
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] text-foreground font-mono text-[11px] uppercase tracking-wider transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download PPTX
+                </a>
+              </div>
+
+              {deckOpen && (
+                <div className="border-t border-white/10 p-3 animate-fade-in">
+                  <ForensicDeckCarousel />
+                </div>
+              )}
+            </div>
+          </section>
+
+
           {/* Contact info — compact glass row */}
           <section
             className="relative mt-6 animate-fade-in"
