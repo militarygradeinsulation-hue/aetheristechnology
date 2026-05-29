@@ -624,6 +624,77 @@ export default function LinkedInPostStudio() {
     ].filter(Boolean).join('\n');
   };
 
+  // Build the persistent lock directive from the two scan buttons
+  const buildLockDirective = (currentPersona?: string): string => {
+    const parts: string[] = [];
+    if (structureReport) {
+      parts.push(reportToDirective('Global sentence-structure', structureReport));
+    }
+    const pVal = currentPersona && currentPersona !== 'none' ? currentPersona : null;
+    if (pVal && personaReports[pVal]) {
+      parts.push(reportToDirective(`Persona "${pVal}"`, personaReports[pVal]));
+    }
+    return parts.join('');
+  };
+
+  // Pull every saved post + response (across the full library), extract bodies
+  const collectAllPastBodies = async (): Promise<Array<{ body: string; persona: string | null; type: string }>> => {
+    const items = await listAdminLibrary();
+    return items
+      .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
+      .map(i => ({
+        body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+        persona: (i.input_data as any)?.persona || null,
+        type: i.tool_type,
+      }))
+      .filter(x => x.body && x.body.length > 20);
+  };
+
+  const scanStructureNow = async () => {
+    setScanningStructure(true);
+    try {
+      const all = await collectAllPastBodies();
+      const report = scanRepetition(all.map(a => a.body));
+      setStructureReport(report);
+      toast({
+        title: 'Sentence-structure scan locked in',
+        description: `Scanned ${report.totalSamples} past drafts. Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts, ${report.bannedClosers.length} closers.`,
+      });
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setScanningStructure(false);
+    }
+  };
+
+  const scanPersonaNow = async (personaVal: string) => {
+    if (!personaVal || personaVal === 'none') {
+      toast({ title: 'Pick a personality first', description: 'The persona dropdown must be set before scanning.', variant: 'destructive' });
+      return;
+    }
+    setScanningPersona(true);
+    try {
+      const all = await collectAllPastBodies();
+      const filtered = all.filter(a => a.persona === personaVal).map(a => a.body);
+      if (filtered.length === 0) {
+        toast({ title: 'No saved drafts for this personality yet', description: 'Generate at least 2 drafts with this persona, then re-scan.' });
+        setPersonaReports(prev => ({ ...prev, [personaVal]: { totalSamples: 0, bannedPhrases: [], bannedOpeners: [], bannedClosers: [], bannedOpenerStarts: [] } }));
+        return;
+      }
+      const report = scanRepetition(filtered);
+      setPersonaReports(prev => ({ ...prev, [personaVal]: report }));
+      toast({
+        title: `"${personaVal}" persona repetition locked`,
+        description: `Scanned ${report.totalSamples} drafts. Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts.`,
+      });
+    } catch (e) {
+      toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setScanningPersona(false);
+    }
+  };
+
+
   const generateResponse = async (opts?: { freshen?: boolean }) => {
     const useImage = respondSourceType === 'image';
     const isReply = respondSourceType === 'reply';
