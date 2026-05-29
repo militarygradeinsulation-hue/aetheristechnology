@@ -155,9 +155,11 @@ serve(async (req) => {
           .order("score", { ascending: false, nullsFirst: false })
           .limit(100);
       } else {
-        query = query.is("claimed_by_code", null).is("assigned_to_code", null)
+      } else {
+        query = query.is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
           .order("score", { ascending: false, nullsFirst: false })
           .order("created_at", { ascending: false }).limit(200);
+
         if (body.industry) query = query.ilike("industry", `%${body.industry}%`);
         if (body.location) query = query.ilike("location", `%${body.location}%`);
         if (body.minScore) query = query.gte("score", Number(body.minScore));
