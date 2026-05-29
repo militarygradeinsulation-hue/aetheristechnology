@@ -798,17 +798,21 @@ export default function LinkedInPostStudio() {
     setScanningPersona(true);
     try {
       const all = await collectAllPastBodies();
-      const filtered = all.filter(a => a.personas.includes(personaVal)).map(a => a.body);
-      if (filtered.length === 0) {
-        toast({ title: 'No saved drafts for this personality yet', description: 'Generate at least 2 drafts with this persona, then re-scan.' });
+      const matched = all.filter(a => a.personas.includes(personaVal)).map(a => a.body);
+      const allBodies = all.map(a => a.body);
+      // Scan EVERY past draft regardless of which persona was used — the model
+      // must avoid repeating itself across the whole library, not just within one persona.
+      const sourceBodies = allBodies.length > 0 ? allBodies : matched;
+      if (sourceBodies.length === 0) {
+        toast({ title: 'No saved drafts yet', description: 'Generate at least 2 drafts, then re-scan.' });
         setPersonaReports(prev => ({ ...prev, [personaVal]: { totalSamples: 0, bannedPhrases: [], bannedOpeners: [], bannedClosers: [], bannedOpenerStarts: [] } }));
         return;
       }
-      const report = scanRepetition(filtered);
+      const report = scanRepetition(sourceBodies);
       setPersonaReports(prev => ({ ...prev, [personaVal]: report }));
       toast({
-        title: `"${personaVal}" persona repetition locked`,
-        description: `Scanned ${report.totalSamples} drafts. Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts.`,
+        title: `"${personaVal}" repetition locked`,
+        description: `Scanned ${report.totalSamples} past drafts (all personas). Banned ${report.bannedPhrases.length} phrases, ${report.bannedOpenerStarts.length} opener starts.`,
       });
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
