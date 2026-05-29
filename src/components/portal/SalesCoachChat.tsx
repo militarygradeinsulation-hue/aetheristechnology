@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileTe
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 import { ScreenSnip } from '@/components/ScreenSnip';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 type Attachment =
   | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
