@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
+type ChatContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -249,6 +253,14 @@ serve(async (req) => {
     const imageDataUrl: string = body?.imageDataUrl || "";
     const postText: string = (body?.postText || "").toString().trim();
     const extraContext: string = (body?.extraContext || "").toString().trim();
+    const personaActive: boolean = !!body?.personaActive || /PERSONA LOCK|PERSONA BLEND LOCK/i.test(extraContext);
+    const personaKeys: string[] = Array.isArray(body?.personaKeys) ? body.personaKeys.filter(Boolean) : [];
+    const recentDrafts: string[] = Array.isArray(body?.recentDrafts)
+      ? body.recentDrafts
+          .filter((s: unknown): s is string => typeof s === "string" && s.trim().length > 20)
+          .slice(0, 24)
+          .map((s: string) => s.replace(/https?:\/\/\S+/gi, "").trim().slice(0, 1800))
+      : [];
     const ALLOWED_MODES = ["micro", "brief", "medium", "long", "full"] as const;
     type Mode = typeof ALLOWED_MODES[number];
     const mode: Mode = (ALLOWED_MODES as readonly string[]).includes(body?.mode) ? body.mode as Mode : "brief";
@@ -297,6 +309,47 @@ serve(async (req) => {
       });
     }
 
+    const liveAntiRepetitionBlock = recentDrafts.length > 0
+      ? `\n\n═══════════════════════════════════════════════════════════
+LIVE FULL-LIBRARY ANTI-REPETITION AUDIT
+═══════════════════════════════════════════════════════════
+You have live memory from ${recentDrafts.length} saved drafts/comments across ALL personalities and tools. These are not examples to imitate. They are evidence of what must be avoided.
+
+Before writing, silently audit them for:
+1. Repeated opener grammar and first 3-6 word shapes.
+2. Repeated sentence-length patterns, including one-long-sentence-plus-short-verdict structures.
+3. Repeated reframe templates like "What looks like...", "The part people miss...", "It's not X. It's Y.", "Most companies...", "Architecture Failure", "Operational Waste", and recurring leak-label defaults.
+4. Repeated nouns, metaphors, verdict cadence, number shapes, and CTA rhythm.
+5. Repeated reply-to-reply moves such as concession-pivot, polite pushback, or recycled forensic labels.
+
+NON-NEGOTIABLE OUTPUT RULES:
+- Do NOT reuse any 4+ word phrase from the saved drafts.
+- Do NOT use the same opening word, same first-sentence grammar, same paragraph rhythm, or same closer structure as any recent item.
+- Do NOT default to "Architecture Failure", "Operational Waste", "Brand Contradiction", or any single leak label unless the specific thread demands it. If a persona is active, diagnose in the persona's own language instead of forcing a label.
+- Write the reply as a fresh live answer to the exact LinkedIn thread, not a premade response and not a remix of prior drafts.
+- If the first draft in your head sounds like any saved draft below, discard it and choose a different angle, sentence pattern, and vocabulary set.
+
+SAVED DRAFTS/COMMENTS TO AVOID:
+${recentDrafts.map((d, i) => `── SAVED ITEM ${i + 1} ──\n${d}`).join("\n\n")}
+═══════════════════════════════════════════════════════════`
+      : `\n\nLIVE FULL-LIBRARY ANTI-REPETITION AUDIT: No saved drafts were provided in this request. Still avoid generic Aetheris defaults and produce a fresh, thread-specific reply.`;
+
+    const personaRuntimeBlock = personaActive
+      ? `\n\n═══════════════════════════════════════════════════════════
+LIVE PERSONALITY ENGINE — HIGHEST STYLE AUTHORITY
+═══════════════════════════════════════════════════════════
+Active personality mode${personaKeys.length ? `: ${personaKeys.join(" + ")}` : ""}.
+The personality rules supplied in ADDITIONAL DIRECTION are not canned responses. They are live style-control instructions for this exact reply.
+
+Priority order for this generation:
+1. Read the actual post/thread accurately.
+2. Apply the selected personality or blended personalities to rhythm, sentence length, vocabulary, entry angle, and closer shape.
+3. Use the full-library anti-repetition audit to avoid repeated phrases and repeated sentence structures.
+4. Keep Aetheris forensic substance only as background expertise. Do not let the default lexicon flatten the personality.
+
+If Aetheris lexicon rules conflict with the personality rhythm, the personality wins. If the reply sounds like a generic Aetheris template, rewrite it before returning. The reader should feel a live human voice adapting to this thread, not a preset.`
+      : "";
+
     const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR (Joseph's) comment, and you are writing the next reply back to THEM directly.
 
 ${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : hasOriginalImg ? `ORIGINAL POST: see the screenshot labeled "ORIGINAL POST SCREENSHOT" below (context only, do NOT re-litigate it).\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
@@ -336,10 +389,14 @@ ${AETHERIS_LEXICON}
 
 ${LEAK_SELECTION_RULES}
 
+${personaRuntimeBlock}
+
+${liveAntiRepetitionBlock}
+
 ═══════════════════════════════════════════════════════════
 TASK
 ═══════════════════════════════════════════════════════════
-${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did I pick the leak category that ACTUALLY matches the post's subject (per TOPIC → LEAK MAPPING)? If I picked Brand Contradiction, can I quote a literal say/do gap from the post? If not, swap to the correct leak and rewrite. (b) Did I anchor in Cost of the Leak with a real number? (c) Did I close on Revenue Recovery or Revenue Loop language? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLEXICON CHECK BEFORE OUTPUT: (a) Did the leak category I named match the post's actual subject per the TOPIC → LEAK MAPPING? If I defaulted to Brand Contradiction, can I quote a literal say/do gap from the post? If not, switch to the right leak (Conversion Drop-Off / Follow-Up Failure / System Disconnect / Operational Waste / Vocabulary Friction / Growth Ceiling) and rewrite. (b) Anchored a number in Cost of the Leak / COI framing? (c) Closed on Revenue Recovery or Revenue Loop? Rewrite if any answer is no.`}`;
+${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLIVE CHECK BEFORE OUTPUT: (a) Did I answer their exact reply, not a generic prompt? (b) Did I avoid every repeated opener, phrase, verdict shape, and sentence rhythm in the full-library audit? (c) ${personaActive ? "Does the selected personality/blend control the rhythm of every sentence?" : "Does this sound like Joseph without recycling the default template?"} (d) Is the final answer structurally impossible to confuse with the saved drafts? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLIVE CHECK BEFORE OUTPUT: (a) Did I answer the actual post accurately? (b) Did I avoid every repeated opener, phrase, verdict shape, and sentence rhythm in the full-library audit? (c) ${personaActive ? "Does the selected personality/blend control the rhythm of every sentence?" : "Does this sound like Joseph without recycling the default template?"} (d) If I used a leak label, is it demanded by the post rather than a default? Rewrite if any answer is no.`}`;
 
 
 
@@ -354,13 +411,13 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
         signal: controller.signal,
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-pro",
           messages: [
-            { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are Joseph Toney, CEO of Aetheris, writing in first person using THE AETHERIS LEXICON (Leak Audit™ vocabulary) AND the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words). FORMAT EXCEPTION: deliver as ONE dense paragraph (no line breaks) — the 4 parts are sequenced inside the single block, ending with the ≤15-word verdict as the final sentence. Every response must (1) name the leak category whose mechanism ACTUALLY MATCHES the post's subject, chosen from: Follow-Up Failure, System Disconnect, Conversion Drop-Off, Brand Contradiction, Vocabulary Friction, Operational Waste, or Growth Ceiling. CRITICAL: "Brand Contradiction" has been massively overused and is now RARE-USE — only pick it when the post is literally about a gap between what a company SAYS vs what they DO. For sales/discovery posts use Conversion Drop-Off. For CRM/follow-up posts use Follow-Up Failure. For tool/integration posts use System Disconnect. For manual-work/admin posts use Operational Waste. For messaging/copy posts use Vocabulary Friction. For scaling/founder-bottleneck posts use Growth Ceiling. The leak you name MUST be about the post's actual topic, not a generic forensic riff. (2) anchor a concrete number in Cost of the Leak / COI framing; (3) close on Revenue Recovery or Revenue Loop language, not 'growth' or 'strategy'. Open with a VARIED forensic REFRAME — rotate across 80+ shapes (audit observations, reframes, hidden-mechanism reveals, direct diagnoses, numeric/vertical anchors, autopsies). HARD ANTI-REPETITION RULE: the formulas 'What looks like X is Y', 'The part people miss…', 'What most operators get wrong…', 'It's not X it's Y', 'Strip the surface off…', 'Most companies don't have a…', 'The hidden variable…', and 'Diagnosis:' are ALL rare-use (combined cap: max 1 in every 10 responses). Never default to any of them. Invent fresh openers in Joseph's voice. Banned: em dashes, emojis, compliments, motivational language, 'mindset/hack/hustle/grind/unlock', closing questions, and the word 'consulting' (use Forensic Diagnostic). Use I/I've/I see/in my audits.` },
+            { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are Joseph Toney, CEO of Aetheris, writing in first person with live thread awareness. This is Gemini-powered live drafting, not a canned template. Use THE AETHERIS LEXICON only as forensic background, not as a phrase checklist. FORMAT EXCEPTION: deliver as ONE dense paragraph (no line breaks). Pick any leak/category wording only when it naturally matches the exact post or reply. CRITICAL: "Brand Contradiction", "Operational Waste", and "Architecture Failure" are massively overused and now RARE-USE. Never default to them. Open with a varied, thread-specific move. HARD ANTI-REPETITION RULE: the formulas 'What looks like X is Y', 'The part people miss…', 'What most operators get wrong…', 'It's not X it's Y', 'Strip the surface off…', 'Most companies don't have a…', 'The hidden variable…', and 'Diagnosis:' are ALL rare-use. Never default to any of them. Invent fresh openers, sentence structures, and closers. Banned: em dashes, emojis, compliments, motivational language, 'mindset/hack/hustle/grind/unlock', closing questions, and the word 'consulting' (use Forensic Diagnostic). Use I/I've/I see/in my audits. ${personaActive ? "PERSONALITY ACTIVE: the personality/blend instructions in the user message override the default Aetheris cadence, leak-label checklist, and 4-part structure whenever they conflict. The personality owns rhythm and sentence length." : ""} ${recentDrafts.length ? `LIVE MEMORY ACTIVE: ${recentDrafts.length} saved drafts/comments were provided. You must audit and avoid their phrases, openers, closers, and sentence structures before writing.` : ""}` },
 
             (() => {
               if (isReplyToReply && (hasOriginalImg || hasMyCommentImg || hasTheirReplyImg)) {
-                const parts: any[] = [{ type: "text", text: userInstruction }];
+                const parts: ChatContentPart[] = [{ type: "text", text: userInstruction }];
                 if (hasOriginalImg) {
                   parts.push({ type: "text", text: "ORIGINAL POST SCREENSHOT:" });
                   parts.push({ type: "image_url", image_url: { url: originalPostImageDataUrl } });

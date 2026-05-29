@@ -389,6 +389,14 @@ const normalizePersonas = (p?: string | string[] | null): string[] => {
   return arr.filter(v => v && v !== 'none' && PERSONA_DIRECTIVES[v]);
 };
 
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+
+const readString = (value: unknown, key: string): string | undefined => {
+  const found = asRecord(value)[key];
+  return typeof found === 'string' ? found : undefined;
+};
+
 // Convenience for legacy single-persona reads in lock/scan helpers.
 const personaLabelOf = (keys: string[]): string =>
   keys.length === 0 ? 'none' : keys.length === 1 ? keys[0] : `blend: ${keys.join(' + ')}`;
@@ -490,7 +498,8 @@ const MultiPersonaPicker: React.FC<MultiPersonaPickerProps> = ({ value, onChange
   const toggle = (val: string) => {
     if (val === 'none') { onChange([]); return; }
     const set = new Set(selected);
-    set.has(val) ? set.delete(val) : set.add(val);
+    if (set.has(val)) set.delete(val);
+    else set.add(val);
     onChange(Array.from(set));
   };
   return (
@@ -711,7 +720,7 @@ export default function LinkedInPostStudio() {
   const buildFreshnessDirective = (): string => {
     // Pull recent outputs from library to teach the model what NOT to repeat
     const recent = responseLibrary.slice(0, 10)
-      .map(i => (i.output_data as any)?.body as string)
+      .map(i => readString(i.output_data, 'body'))
       .filter(Boolean);
     const openings = recent
       .map(b => (b.split(/\n|\.|!|\?/)[0] || '').trim())
@@ -754,18 +763,30 @@ export default function LinkedInPostStudio() {
     return parts.join('');
   };
 
-  // Pull every saved post + response (across the full library), extract bodies
+  // Pull every saved draft/comment we can find across the full library, regardless
+  // of tool/persona. Repetition prevention must use the whole archive, not only
+  // the currently selected personality or one tool_type.
   const collectAllPastBodies = async (): Promise<Array<{ body: string; personas: string[]; type: string }>> => {
     const items = await listAdminLibrary();
+    const textKeys = ['body', 'post', 'content', 'caption', 'draft', 'response', 'comment', 'text', 'generated', 'linkedinPost', 'copy', 'output'];
+    const extractBody = (out: unknown): string => {
+      if (typeof out === 'string') return out;
+      if (!out || typeof out !== 'object') return '';
+      const rec = out as Record<string, unknown>;
+      for (const key of textKeys) {
+        const val = rec[key];
+        if (typeof val === 'string' && val.trim().length > 20) return val;
+      }
+      return Object.values(rec).find(v => typeof v === 'string' && v.trim().length > 80 && v.length < 6000) as string || '';
+    };
     return items
-      .filter(i => i.tool_type === 'linkedin_response' || i.tool_type === 'linkedin_post')
       .map(i => {
-        const raw = (i.input_data as any)?.persona;
+        const raw = asRecord(i.input_data).persona;
         const personas: string[] = Array.isArray(raw)
-          ? raw.filter(Boolean)
-          : (raw && raw !== 'none' ? [raw] : []);
+          ? raw.filter((v): v is string => typeof v === 'string' && Boolean(v))
+          : (typeof raw === 'string' && raw !== 'none' ? [raw] : []);
         return {
-          body: (i.output_data as any)?.body || (i.output_data as any)?.post || '',
+          body: extractBody(i.output_data),
           personas,
           type: i.tool_type,
         };
@@ -841,10 +862,22 @@ export default function LinkedInPostStudio() {
     setRespondOutput('');
     try {
       const adminToken = getAdminToken();
+      const activePersonas = normalizePersonas(respondPersona);
+      let allPastBodies: string[] = [];
+      let liveLibraryLockTail = '';
+      try {
+        const all = await collectAllPastBodies();
+        allPastBodies = all.map(a => a.body).filter(Boolean);
+        const liveReport = scanRepetition(allPastBodies);
+        if (liveReport.totalSamples > 0) {
+          liveLibraryLockTail = `${reportToDirective('Live full-library comments/drafts', liveReport)}\n\nFULL-LIBRARY MEMORY RULE: You just scanned ${liveReport.totalSamples} saved drafts/comments across every personality and tool. Never claim no drafts were scanned. Treat every saved output as prior voice memory and make this reply structurally different from them.`;
+        }
+      } catch { /* non-fatal: generation still works */ }
       const freshnessTail = opts?.freshen ? buildFreshnessDirective() : '';
       const toneStyleTail = buildToneStyleDirective(respondTone, respondStyle, respondExtra, respondPersona);
       const lockTail = buildLockDirective(respondPersona);
-      const extraWithFreshness = (toneStyleTail + freshnessTail + lockTail).trim();
+      const recentDrafts = [respondOutput, ...allPastBodies].filter(s => s && s.trim().length > 20).slice(0, 30);
+      const extraWithFreshness = (toneStyleTail + freshnessTail + liveLibraryLockTail + lockTail).trim();
       const body = isReply
         ? {
             conversationKind: 'reply_to_reply',
@@ -856,10 +889,13 @@ export default function LinkedInPostStudio() {
             originalPostImageDataUrl: replyOriginalImage,
             mode: 'brief',
             extraContext: extraWithFreshness,
+            personaActive: activePersonas.length > 0,
+            personaKeys: activePersonas,
+            recentDrafts,
           }
         : useImage
-        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: extraWithFreshness }
-        : { postText: respondText.trim(), mode: respondMode, extraContext: extraWithFreshness };
+        ? { imageDataUrl: respondImage, mode: respondMode, extraContext: extraWithFreshness, personaActive: activePersonas.length > 0, personaKeys: activePersonas, recentDrafts }
+        : { postText: respondText.trim(), mode: respondMode, extraContext: extraWithFreshness, personaActive: activePersonas.length > 0, personaKeys: activePersonas, recentDrafts };
       const { data, error } = await supabase.functions.invoke('linkedin-post-respond', {
         body,
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
@@ -1384,9 +1420,9 @@ export default function LinkedInPostStudio() {
                 </div>
               ) : (
                 responseLibrary.map((item) => {
-                  const img = (item.input_data as any)?.imageDataUrl as string | undefined;
-                  const body = (item.output_data as any)?.body as string | undefined;
-                  const mode = (item.output_data as any)?.mode as string | undefined;
+                  const img = readString(item.input_data, 'imageDataUrl');
+                  const body = readString(item.output_data, 'body');
+                  const mode = readString(item.output_data, 'mode');
                   return (
                     <div
                       key={item.id}
@@ -1454,37 +1490,37 @@ export default function LinkedInPostStudio() {
               <X className="w-5 h-5" />
             </Button>
             <div className="text-[10px] uppercase tracking-widest text-amber mb-2">
-              {(viewItem.output_data as any)?.mode === 'full' ? 'Standalone Repost' : 'Comment Reply'} · {new Date(viewItem.created_at).toLocaleString()}
+              {readString(viewItem.output_data, 'mode') === 'full' ? 'Standalone Repost' : 'Comment Reply'} · {new Date(viewItem.created_at).toLocaleString()}
             </div>
-            {(viewItem.input_data as any)?.imageDataUrl && (
+            {readString(viewItem.input_data, 'imageDataUrl') && (
               <img
-                src={(viewItem.input_data as any).imageDataUrl}
+                src={readString(viewItem.input_data, 'imageDataUrl')}
                 alt="Original post"
                 className="max-h-72 mx-auto rounded border border-border mb-4"
               />
             )}
-            {(viewItem.input_data as any)?.postText && (
+            {readString(viewItem.input_data, 'postText') && (
               <div className="text-[11px] text-foreground/70 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source post</div>
-                {(viewItem.input_data as any).postText}
+                {readString(viewItem.input_data, 'postText')}
               </div>
             )}
-            {(viewItem.input_data as any)?.extraContext && (
+            {readString(viewItem.input_data, 'extraContext') && (
               <div className="text-[11px] text-muted-foreground mb-3">
                 <span className="font-semibold text-foreground/80">Direction: </span>
-                {(viewItem.input_data as any).extraContext}
+                {readString(viewItem.input_data, 'extraContext')}
               </div>
             )}
             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed border-t border-border pt-4">
-              {(viewItem.output_data as any)?.body}
+              {readString(viewItem.output_data, 'body')}
             </div>
             <div className="flex gap-2 mt-4 flex-wrap">
               <Button
                 size="sm"
                 onClick={() => {
-                  const src = (viewItem.input_data as any)?.postText
-                    || `[screenshot: ${(viewItem.input_data as any)?.fileName || 'LinkedIn post'}]`;
-                  const draft = (viewItem.output_data as any)?.body || '';
+                  const src = readString(viewItem.input_data, 'postText')
+                    || `[screenshot: ${readString(viewItem.input_data, 'fileName') || 'LinkedIn post'}]`;
+                  const draft = readString(viewItem.output_data, 'body') || '';
                   setViewItem(null);
                   createPostFromResponse(src, draft);
                 }}
@@ -1497,7 +1533,7 @@ export default function LinkedInPostStudio() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => { navigator.clipboard.writeText((viewItem.output_data as any)?.body || ''); toast({ title: 'Copied' }); }}
+                onClick={() => { navigator.clipboard.writeText(readString(viewItem.output_data, 'body') || ''); toast({ title: 'Copied' }); }}
               >
                 <Copy className="w-3 h-3 mr-1" /> Copy
               </Button>
