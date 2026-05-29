@@ -1158,6 +1158,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       setRr(res.person);
       if (res.firecrawl) setFc(res.firecrawl);
       setOpen(true);
+      await leadClues.log(lead.id, {
+        kind: 'rocketreach',
+        label: res.cached ? 'Loaded saved decision-maker enrichment' : 'Enriched decision-maker (RocketReach + Firecrawl)',
+        tool_key: 'rocketreach',
+        meta: { cached: !!res.cached, name: res.person?.name, title: res.person?.current_title },
+      });
+      bumpClues();
       if (res.note) {
         toast({ title: 'Deep scan note', description: res.note });
       } else {
