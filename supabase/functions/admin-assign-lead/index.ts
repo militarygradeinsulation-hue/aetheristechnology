@@ -36,7 +36,7 @@ serve(async (req) => {
       const rows: any[] = Array.isArray(body.rows) ? body.rows : [];
       if (rows.length === 0) return new Response(JSON.stringify({ error: "No rows provided" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-      const destination = String(body.destination || "pool"); // "pool" | "rep"
+      const destination = String(body.destination || "pool"); // "pool" | "rep" | "holding"
       const assignCode = destination === "rep" ? String(body.assign_to_code || "").trim() : "";
       const holdHours = Math.max(1, Math.min(720, Number(body.hold_hours) || 72));
       const sharedLHF = body.low_hanging_fruit === true;
@@ -50,6 +50,7 @@ serve(async (req) => {
 
       const nowIso = new Date().toISOString();
       const expires = destination === "rep" ? new Date(Date.now() + holdHours * 3600 * 1000).toISOString() : null;
+      const isHolding = destination === "holding";
 
       const cleaned = rows.map((r: any) => {
         const business = String(r.business_name || r.company || r.name || "").trim();
@@ -72,10 +73,13 @@ serve(async (req) => {
           low_hanging_fruit: lhf,
           source: "admin_manual",
           status: "new",
+          admin_holding: isHolding,
           assigned_to_code: destination === "rep" ? assignCode : null,
           assigned_at: destination === "rep" ? nowIso : null,
           assignment_expires_at: expires,
         };
+      }).filter(Boolean);
+
       }).filter(Boolean);
 
       if (cleaned.length === 0) return new Response(JSON.stringify({ error: "No valid rows (business name required)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
