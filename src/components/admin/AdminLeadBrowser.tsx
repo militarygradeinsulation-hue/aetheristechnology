@@ -604,9 +604,11 @@ export const AdminLeadBrowser: React.FC = () => {
                 </span>
                 <span className="text-xs truncate">
                   {l.claimed_by_code ? <span className="text-blue-400">✓ {repName(l.claimed_by_code)}</span>
+                    : l.admin_holding ? <span className="text-amber font-mono uppercase tracking-wider text-[10px]">held</span>
                     : l.assigned_to_code ? <span className="text-amber">→ {repName(l.assigned_to_code)}</span>
                     : <span className="text-muted-foreground">pool</span>}
                 </span>
+
                 <div className="flex items-center justify-end gap-1">
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => scan([l.id])} disabled={busy[l.id] === 'scan'} title="Scan with AI">
                     {busy[l.id] === 'scan' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ScanLine className="w-3 h-3" />}
