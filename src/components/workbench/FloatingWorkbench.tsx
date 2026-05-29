@@ -39,6 +39,7 @@ export const FloatingWorkbench: React.FC = () => {
   const [saveName, setSaveName] = useState("");
   const [showTips, setShowTips] = useState(false);
   const dragIndex = useRef<number | null>(null);
+  const hydrated = useRef(false);
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   useEffect(() => {
@@ -49,7 +50,8 @@ export const FloatingWorkbench: React.FC = () => {
     return () => { window.removeEventListener("storage", check); clearInterval(t); };
   }, []);
 
-  // Load persisted state once visibility is known.
+  // Load persisted state once visibility is known. Mark hydrated AFTER load
+  // so the write effects below don't clobber saved values with initial defaults.
   useEffect(() => {
     if (!visible) return;
     setStack(wb.getStack());
@@ -57,13 +59,15 @@ export const FloatingWorkbench: React.FC = () => {
     setActive(wb.getActive());
     setWidth(wb.getWidth());
     setOpen(wb.getOpen());
+    hydrated.current = true;
   }, [visible]);
 
-  useEffect(() => { if (visible) wb.setStack(stack); }, [stack, visible]);
-  useEffect(() => { if (visible) wb.setLayouts(layouts); }, [layouts, visible]);
-  useEffect(() => { if (visible) wb.setActive(active); }, [active, visible]);
-  useEffect(() => { if (visible) wb.setWidth(width); }, [width, visible]);
-  useEffect(() => { if (visible) wb.setOpen(open); }, [open, visible]);
+  useEffect(() => { if (hydrated.current) wb.setStack(stack); }, [stack]);
+  useEffect(() => { if (hydrated.current) wb.setLayouts(layouts); }, [layouts]);
+  useEffect(() => { if (hydrated.current) wb.setActive(active); }, [active]);
+  useEffect(() => { if (hydrated.current) wb.setWidth(width); }, [width]);
+  useEffect(() => { if (hydrated.current) wb.setOpen(open); }, [open]);
+
 
   const grouped = useMemo(() => {
     const g: Record<ToolGroup, typeof TOOL_REGISTRY> = {
