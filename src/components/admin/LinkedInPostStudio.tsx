@@ -784,7 +784,7 @@ export default function LinkedInPostStudio() {
         const raw = asRecord(i.input_data).persona;
         const personas: string[] = Array.isArray(raw)
           ? raw.filter((v): v is string => typeof v === 'string' && Boolean(v))
-          : (raw && raw !== 'none' ? [raw] : []);
+          : (typeof raw === 'string' && raw !== 'none' ? [raw] : []);
         return {
           body: extractBody(i.output_data),
           personas,
