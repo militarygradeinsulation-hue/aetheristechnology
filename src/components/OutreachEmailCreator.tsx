@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
 
 type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
 
