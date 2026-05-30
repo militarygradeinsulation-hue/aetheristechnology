@@ -313,7 +313,7 @@ export const FloatingWorkbench: React.FC = () => {
                 <SelectTrigger className="h-8 w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   <SelectItem value="default">Default (empty)</SelectItem>
                   {layouts.map(l => <SelectItem key={l.name} value={l.name}>{l.name}</SelectItem>)}
                 </SelectContent>
