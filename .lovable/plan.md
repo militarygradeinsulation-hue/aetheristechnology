@@ -1,70 +1,52 @@
-# Plan: Floating Workbench Overlay
+## 1. Workbench clicks not registering (dropdowns, Add Tool, width, layouts)
 
-A persistent "Workbench" button you can summon from any page. It opens a floating panel where you stack any tool as a collapsible widget, run several at once, and your drafts survive reloads. Saved layouts let you switch between, say, "Morning prospecting" and "Reply session" in one click.
+**Cause:** The Workbench panel is `z-[80]`, but Radix `DropdownMenu` and `Select` portals render to `document.body` at default `z-50`. They open *behind* the panel, so clicks/changes don't land. Same reason "load layout" select can't be opened, and the panel-width Select looks dead.
 
-## What you'll see
+**Fix:**
+- Add `z-[100]` (above `z-[80]` aside) to every `DropdownMenuContent` and `SelectContent` inside `FloatingWorkbench.tsx` (Add tool menu, panel width select, layouts select).
+- Verify with a quick click-through after the change.
 
-- A small floating **Workbench** button (bottom-right, above FloatingContact) on every admin/rep portal page.
-- Click → a right-side slide-over panel opens (resizable, dismissable, doesn't block the page underneath).
-- Inside: a stack of **collapsible tool widgets**. Each widget = one tool (Outreach Email, Website Scanner, All-in-One, Post-from-Source, Sales Script, Follow-up Plan, Content Calendar, Playbook, Brand Contradiction Finder, Friction Audit, LinkedIn Banner, Strategic Questions, Resume Forensics, Detective Mode, etc.).
-- Top of panel: **"+ Add tool"** dropdown, **layout selector** (Default / saved layouts), **Save layout** / **Edit** / **Delete**.
-- Each widget has: collapse, reorder (drag handle), remove, and an "open full page" link.
-- Half-finished work (email drafts, scan URL, generator inputs) stays when you close the panel or reload the page.
+## 2. Add LinkedIn Comment Generator tool
 
-## Saved layouts
+The current Reply Composer is tuned for full replies. Add a sibling tool focused on short, punchy comment responses.
 
-Same model as the existing `PortalViewSelector`:
-- "Default" = empty workbench.
-- User can save named layouts: which tools are in the stack, order, collapsed/expanded state.
-- Stored per-rep so each person gets their own.
+- New component `src/components/portal/LinkedInCommentGenerator.tsx` — paste post text or screenshot → generates 3 comment variants (short / medium / sharp-question), each 1–3 sentences.
+- New edge function `supabase/functions/linkedin-comment-generate/index.ts` using `google/gemini-3-flash-preview` with:
+  - Anti-repetition scan against saved library (same `collectAllPastBodies` pattern already used by the reply composer).
+  - Persona support (reuse the persona blocks already in `linkedin-post-respond`).
+  - Hard cap: each comment ≤ 320 chars, no "Architecture Failure / Operational Waste" cliché list.
+- Register the tool in `src/components/workbench/toolRegistry.tsx` under the **Outreach** group so it shows in Add Tool dropdown.
+- Auto-save outputs to the shared library so future runs scan against them too.
 
-## Tools available as widgets (all current tools)
+## 3. Auto clock-out after inactivity
 
-Grouped in the "+ Add tool" menu:
-- **Outreach**: Outreach Email, Post-from-Source, LinkedIn Banner, Sales Script, Follow-up Plan
-- **Diagnostics**: Website Scanner, Brand Contradiction Finder, Friction Audit, Strategic Questions, Detective Mode, Resume Forensics
-- **Content**: All-in-One Generator, Content Calendar, Playbook Creator, Social Content
-- **Brief Builders**: Interview Briefing, Lead Game Plan
+**Behavior:** If a rep is clocked in and idle (no clicks, key presses, route changes, or API calls) for **30 minutes**, automatically clock out with note `"Auto clock-out (inactive 30m)"`.
 
-Each tool's existing component is reused as-is inside a widget shell — no duplication of logic.
+**Where:**
+- `src/components/portal/RepClockWidget.tsx` — add an activity listener (`mousemove`, `keydown`, `click`, `visibilitychange`) that resets a timer. When timer fires AND `entry.clock_out_at` is null, call `portalTimeclock.clockOut("Auto clock-out (inactive 30m)")` and toast the rep.
+- Persist `lastActivityAt` in `localStorage` so closing the tab also counts as inactivity (on next portal load, if clocked-in and `now - lastActivityAt > 30m`, auto clock out).
+- Small UI hint near the clock widget: "Auto clock-out after 30m idle."
 
-## Technical section
+## 4. Hunt mode → no way to act on leads
 
-**New files**
-- `src/components/workbench/FloatingWorkbench.tsx` — the floating button + slide-over container (uses shadcn `Sheet`, side="right", size variants for `sm/md/lg/full`).
-- `src/components/workbench/WorkbenchStack.tsx` — renders the ordered widget list with drag-to-reorder (lightweight, no new dep — HTML5 drag/drop).
-- `src/components/workbench/WorkbenchWidget.tsx` — collapsible shell (header: icon, title, expand/collapse, remove, "open full"). Uses shadcn `Collapsible`.
-- `src/components/workbench/toolRegistry.ts` — central registry mapping `toolId → { label, icon, group, Component, fullPagePath }`. One entry per tool, pointing to the existing component (e.g. `OutreachEmailCreator`, `WebsiteScanner`, `AllInOneGenerator`, etc.).
-- `src/lib/workbench.ts` — localStorage-backed persistence:
-  - `workbench.${repCode}.stack` — current `[{ toolId, collapsed }]`
-  - `workbench.${repCode}.layouts` — `[{ name, stack }]`
-  - `workbench.${repCode}.activeLayout`
-  - `workbench.${repCode}.toolState.${toolId}` — per-tool form/draft state (each tool component will accept an optional `persistKey` prop and use a tiny `useWorkbenchPersistedState` hook to read/write here).
+Hunt currently surfaces companies but doesn't expose contact channels.
 
-**Persistence approach (drafts survive reload)**
-- Add `useWorkbenchPersistedState<T>(persistKey, initial)` hook (debounced localStorage write).
-- For widget instances, the registry passes `persistKey="workbench.${repCode}.toolState.${toolId}"` into the component.
-- Most existing tool components use `useState` for their inputs; we add 1-line opt-in: replace `useState` with `useWorkbenchPersistedState` only inside widget-mounted instances by wrapping each registered component in a tiny adapter that supplies an initial-state hydrator. Components used on their full pages stay unchanged.
-  - Concretely: each registry entry wraps the component in `<PersistedToolWrapper persistKey={...}>` which uses React context to expose a `usePersisted` helper. Tools that don't opt in still work — they just won't survive reload (acceptable for view-only tools like Detective Mode).
-- Heavy tools (Website Scanner results, generated content) already write to `library` table — we won't re-persist that, just inputs.
+- In `LeadsBoard.tsx` (Hunt panel), when a lead row is opened, fetch enriched contact info via the existing RocketReach-backed edge function (already have `ROCKETREACH_API_KEY` secret) and show: email, phone, LinkedIn URL, and direct buttons:
+  - **Email** → opens rep mailbox composer prefilled with subject + playbook attachment.
+  - **DM** → opens LinkedIn URL in new tab.
+  - **Call** → `tel:` link + logs an attempt to `lead_actions`.
+- If RocketReach returns nothing, show a clear "No contact data found — try LinkedIn manually" state instead of silently failing.
 
-**Mounting**
-- Mount `<FloatingWorkbench />` once inside `src/pages/PortalPage.tsx` (rep portal) and in the admin shell (`AdminDashboard` / wherever `FloatingContact` is rendered for staff).
-- Hide on public marketing pages (`/`, `/leak-audit`, blog) — gate on `useStaffUnlock`/rep code presence.
+## 5. Playbook attachment tab is empty
 
-**Styling**
-- Reuse `forensic-tile` card style, amber accents, JetBrains Mono micro-labels. No new design tokens.
-- Slide-over widths: `sm` (420px), `md` (640px), `lg` (900px), `full` (full-screen). Toggle via header buttons.
-- On mobile: full-width sheet, accordion still works.
+When the outreach panel says "attach the playbook" and the Playbook tab opens empty, it's because `PortalPlaybook` requires the `portal-playbook` edge function to return `plays`, but no plays exist yet for new reps.
 
-**Out of scope (this pass)**
-- Drag-to-tile grid layout (rejected per your accordion preference).
-- Cross-tool data piping (e.g. Scanner → Outreach prefill). Easy follow-up once registry exists.
-- Server-side sync of layouts (localStorage only for v1; can promote to `rep_workspace_prefs` later).
+- Seed the rep portal with the existing Aetheris playbook content (already present in `src/lib/portalPlaybook.ts` types / admin tables) — ensure `portal-playbook` falls back to the global Aetheris playbook when the rep has no custom plays.
+- In the outreach flow, expose a **"Attach Playbook PDF"** button that pulls from the public `playbooks` storage bucket (`Aetheris-Credentials.pdf` + the operator playbook PDF) so it always works even if the dynamic plays list is empty.
+- Show inline message in the Playbook tab when empty: "Loading from the company playbook…" with a retry button.
 
-## Files changed
-
-- **New**: `src/components/workbench/{FloatingWorkbench,WorkbenchStack,WorkbenchWidget,PersistedToolWrapper}.tsx`, `src/components/workbench/toolRegistry.ts`, `src/lib/workbench.ts`, `src/hooks/useWorkbenchPersistedState.ts`
-- **Edited**: `src/pages/PortalPage.tsx` (mount overlay), `src/pages/AdminDashboard.tsx` (mount overlay for staff), `src/components/FloatingContact.tsx` (offset z-index/position so the two buttons don't overlap)
-
-No DB migrations. No edge functions. Pure frontend.
+## Technical notes
+- All edge functions deployed via `supabase--deploy_edge_functions` after writing.
+- No DB migrations needed (use existing `lead_actions`, `time_entries`, `playbooks` bucket, `library_items`).
+- Reuse `google/gemini-3-flash-preview` for speed on the comment generator.
+- Z-index fix is the single highest-impact change — unblocks all workbench usage immediately.
