@@ -36,6 +36,40 @@ export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = fals
     return () => { if (tickRef.current) window.clearInterval(tickRef.current); };
   }, [open]);
 
+  // Auto clock-out after 30 minutes of inactivity.
+  // Tracks last activity in localStorage so tab-close also counts as idle time.
+  useEffect(() => {
+    if (!open) return;
+    const IDLE_MS = 30 * 60 * 1000;
+    const KEY = "rep.lastActivityAt";
+    const bump = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch {} };
+    bump();
+
+    const events = ["mousemove", "keydown", "click", "touchstart", "scroll", "visibilitychange"];
+    events.forEach(e => window.addEventListener(e, bump, { passive: true }));
+
+    const checkIdle = async () => {
+      let last = 0;
+      try { last = Number(localStorage.getItem(KEY) || "0"); } catch {}
+      if (!last || Date.now() - last < IDLE_MS) return;
+      try {
+        const { entry } = await portalTimeclock.clockOut("Auto clock-out (inactive 30m)");
+        setOpen(null);
+        toast({
+          title: "Auto clocked out",
+          description: `Inactive 30m. Session: ${formatDuration(entry.duration_seconds)}`,
+        });
+      } catch (e) { console.error("auto clock-out failed", e); }
+    };
+    // Check every 60s (also catches stale tabs / re-opens).
+    checkIdle();
+    const id = window.setInterval(checkIdle, 60_000);
+    return () => {
+      events.forEach(e => window.removeEventListener(e, bump));
+      window.clearInterval(id);
+    };
+  }, [open]);
+
   const elapsed = open
     ? Math.max(0, Math.floor((Date.now() - new Date(open.clock_in_at).getTime()) / 1000))
     : 0;
