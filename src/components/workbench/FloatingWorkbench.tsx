@@ -230,7 +230,7 @@ export const FloatingWorkbench: React.FC = () => {
                   <SelectTrigger className="h-8 w-[88px]" title="Panel width">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100]">
                     <SelectItem value="sm">Small</SelectItem>
                     <SelectItem value="md">Medium</SelectItem>
                     <SelectItem value="lg">Large</SelectItem>
@@ -278,7 +278,7 @@ export const FloatingWorkbench: React.FC = () => {
                     <Plus className="w-3.5 h-3.5 mr-1" /> Add tool
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 max-h-[60vh] overflow-y-auto" align="start">
+                <DropdownMenuContent className="w-64 max-h-[60vh] overflow-y-auto z-[100]" align="start">
                   {(Object.keys(grouped) as ToolGroup[]).map(group => grouped[group].length > 0 && (
                     <React.Fragment key={group}>
                       <DropdownMenuLabel className="text-amber font-mono text-[10px] uppercase tracking-wider">
@@ -313,7 +313,7 @@ export const FloatingWorkbench: React.FC = () => {
                 <SelectTrigger className="h-8 w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   <SelectItem value="default">Default (empty)</SelectItem>
                   {layouts.map(l => <SelectItem key={l.name} value={l.name}>{l.name}</SelectItem>)}
                 </SelectContent>
