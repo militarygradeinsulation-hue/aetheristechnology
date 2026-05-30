@@ -278,7 +278,7 @@ export const FloatingWorkbench: React.FC = () => {
                     <Plus className="w-3.5 h-3.5 mr-1" /> Add tool
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 max-h-[60vh] overflow-y-auto" align="start">
+                <DropdownMenuContent className="w-64 max-h-[60vh] overflow-y-auto z-[100]" align="start">
                   {(Object.keys(grouped) as ToolGroup[]).map(group => grouped[group].length > 0 && (
                     <React.Fragment key={group}>
                       <DropdownMenuLabel className="text-amber font-mono text-[10px] uppercase tracking-wider">
