@@ -230,7 +230,7 @@ export const FloatingWorkbench: React.FC = () => {
                   <SelectTrigger className="h-8 w-[88px]" title="Panel width">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100]">
                     <SelectItem value="sm">Small</SelectItem>
                     <SelectItem value="md">Medium</SelectItem>
                     <SelectItem value="lg">Large</SelectItem>
