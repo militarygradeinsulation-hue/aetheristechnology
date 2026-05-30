@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
@@ -76,6 +76,7 @@ const ScamCheckCard = lazy(() => import('@/components/admin/ScamCheckCard').then
 const DetectiveModeStandalone = lazy(() => import('@/components/DetectiveModeStandalone').then(m => ({ default: m.DetectiveModeStandalone })));
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
 const AdminPodcastStudio = lazy(() => import('@/components/admin/AdminPodcastStudio').then(m => ({ default: m.AdminPodcastStudio })));
+const EasyModeTool = lazy(() => import('@/components/EasyModeTool').then(m => ({ default: m.EasyModeTool })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -212,6 +213,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
     { key: 'documents', label: 'Documents', icon: FileBox },
+    { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
@@ -493,6 +495,7 @@ const AdminDashboard: React.FC = () => {
       case 'briefings': return <BriefingsPanel />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
+      case 'easymode': return <EasyModeTool />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return <ContentEngine />;
