@@ -1,4 +1,4 @@
-// Per-lead Action Items — touch checklist + auto-generated follow-up sequence.
+// Per-lead Action Items — touch checklist + auto-generated follow-up sequence. (redeploy)
 // Verified via portal token (rep) OR admin token. Service role for DB ops.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
