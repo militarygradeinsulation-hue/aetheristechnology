@@ -33,16 +33,27 @@ serve(async (req) => {
       const limit = Math.max(1, Math.min(200, Number(body.limit) || 50));
       const offset = Math.max(0, Number(body.offset) || 0);
       const toolType: string | undefined = typeof body.tool_type === "string" ? body.tool_type : undefined;
-      // Lightweight: exclude heavy input_data/output_data to avoid CPU/memory limits.
+      // Lightweight by default, but when a tool_type filter is set we include
+      // input_data/output_data so list views (e.g. the LinkedIn Response
+      // Library) can render real previews — body, mode, topic — instead of
+      // empty rows that just say "REPLY · timestamp".
+      const includeBlobs = !!toolType;
+      const cols = includeBlobs
+        ? "id, tool_type, title, file_url, created_at, input_data, output_data"
+        : "id, tool_type, title, file_url, created_at";
       let q = supabase
         .from("admin_library")
-        .select("id, tool_type, title, file_url, created_at")
+        .select(cols)
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
       if (toolType) q = q.eq("tool_type", toolType);
       const { data, error } = await q;
       if (error) throw error;
-      const items = (data || []).map((r: any) => ({ ...r, input_data: {}, output_data: {} }));
+      const items = (data || []).map((r: any) => ({
+        ...r,
+        input_data: r.input_data ?? {},
+        output_data: r.output_data ?? {},
+      }));
       return new Response(JSON.stringify({ items, limit, offset, hasMore: items.length === limit }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
