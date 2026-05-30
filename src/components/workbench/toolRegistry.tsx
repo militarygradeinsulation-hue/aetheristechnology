@@ -62,6 +62,8 @@ const SalesScriptGenerator = lazy(() =>
   import("@/components/SalesScriptGenerator").then(m => ({ default: m.SalesScriptGenerator })));
 const FollowUpPlanGenerator = lazy(() =>
   import("@/components/FollowUpPlanGenerator").then(m => ({ default: m.FollowUpPlanGenerator })));
+const LinkedInCommentGenerator = lazy(() =>
+  import("@/components/portal/LinkedInCommentGenerator").then(m => ({ default: m.LinkedInCommentGenerator })));
 
 const WebsiteScanner = lazy(() =>
   import("@/components/WebsiteScanner").then(m => ({ default: m.WebsiteScanner })));
