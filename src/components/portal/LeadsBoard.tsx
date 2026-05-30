@@ -27,6 +27,7 @@ import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead'
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
+import { wb } from '@/lib/workbench';
 
 function nextBusinessMorningISO(): string {
   const d = new Date();
