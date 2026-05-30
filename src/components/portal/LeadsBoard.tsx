@@ -1047,7 +1047,19 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('ring-2', 'ring-amber');
       setTimeout(() => el.classList.remove('ring-2', 'ring-amber'), 1800);
+      return;
     }
+    // Fallback: open the tool inside the Floating Workbench so the clue
+    // actually goes somewhere even when the tool isn't rendered inline.
+    try {
+      const stack = wb.getStack();
+      if (!stack.some(w => w.toolId === toolKey)) {
+        wb.setStack([{ toolId: toolKey }, ...stack]);
+      }
+      wb.setOpen(true);
+      // Nudge listeners (FloatingWorkbench polls via storage events).
+      window.dispatchEvent(new StorageEvent('storage', { key: 'workbench.open' }));
+    } catch { /* ignore */ }
   };
 
   useEffect(() => {
