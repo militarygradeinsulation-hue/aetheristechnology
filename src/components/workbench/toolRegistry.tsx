@@ -125,6 +125,9 @@ export const TOOL_REGISTRY: ToolDef[] = [
       const isAdmin = !!getAdminToken();
       return wrap(<PostFromSourceGenerator adminMode={isAdmin} repMode={!isAdmin} />);
     } },
+  { id: "linkedin-comment", label: "LinkedIn Comment Generator", group: "Outreach", icon: MessageSquare,
+    accent: "200 85% 60%",
+    render: () => wrap(<LinkedInCommentGenerator />) },
   { id: "linkedin-banner", label: "LinkedIn Banner", group: "Outreach", icon: ImageIcon,
     accent: "45 95% 60%",
     render: () => wrap(<LinkedInBannerCreator invoke={bannerInvoke} />) },
