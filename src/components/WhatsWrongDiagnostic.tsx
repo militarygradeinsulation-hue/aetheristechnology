@@ -6,6 +6,9 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 
 // Consolidated to 4 high-signal categories, keeps the "no fluff" promise
 const ISSUE_CATEGORIES = [
