@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
 
@@ -123,11 +124,38 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       if (mode === 'subjects') {
-        setSubjects(((data as SubjectsOut)?.hooks) || []);
+        const hooks = ((data as SubjectsOut)?.hooks) || [];
+        setSubjects(hooks);
+        if (hooks.length) {
+          saveToolRun({
+            tool_type: 'outreach_subjects',
+            title: `Subject Hooks — ${(prompt || pasted || recipientName || 'untitled').slice(0, 60)}`,
+            input_data: { prompt, pastedText: pasted, recipientName, senderName, mode },
+            output_data: { hooks },
+          });
+        }
       } else if (mode === 'analyze') {
-        setAnalysis(((data as any)?.analysis) || null);
+        const analysisData = ((data as any)?.analysis) || null;
+        setAnalysis(analysisData);
+        if (analysisData) {
+          saveToolRun({
+            tool_type: 'outreach_email_analysis',
+            title: `Email Analysis — ${(recipientName || prompt || pasted || 'untitled').slice(0, 60)}`,
+            input_data: { pastedText: pasted, recipientName, senderName, mode },
+            output_data: analysisData,
+          });
+        }
       } else {
-        setResult(data as EmailOut);
+        const email = data as EmailOut;
+        setResult(email);
+        if (email?.body) {
+          saveToolRun({
+            tool_type: 'outreach_email',
+            title: email.subject?.slice(0, 80) || `Outreach Email — ${(recipientName || prompt || 'untitled').slice(0, 60)}`,
+            input_data: { mode, prompt, pastedText: pasted, recipientName, senderName },
+            output_data: email,
+          });
+        }
       }
     } catch (e) {
       toast({ title: 'Generation failed', description: String((e as Error).message), variant: 'destructive' });

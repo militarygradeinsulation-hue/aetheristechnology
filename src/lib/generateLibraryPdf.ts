@@ -39,6 +39,10 @@ const TOOL_LABELS: Record<string, string> = {
   linkedin_post: 'LinkedIn Post',
   resume_analysis: 'Resume Forensic Analysis',
   easy_mode: 'Easy-Mode Translation',
+  outreach_email: 'Outreach Email',
+  outreach_email_analysis: 'Outreach Email Analysis',
+  outreach_subjects: 'Subject-Line Hooks',
+  whats_wrong: "What's Wrong Diagnosis",
 };
 
 type Block =

@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAdminToken } from '@/lib/adminAuth';
 import { Loader2, FileUp, Sparkles, Download, FileText, Copy } from 'lucide-react';
 import { downloadResumeAnalysisPdf, downloadResumeAnalysisText, buildResumeAnalysisText } from '@/lib/generateResumePdf';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 interface Analysis {
   candidate_name?: string;
@@ -54,6 +55,17 @@ export const AdminResumeAnalyzer: React.FC = () => {
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || 'Analysis failed');
       setResult(j);
+      try {
+        const candidate = j?.analysis?.candidate_name || j?.filename || file.name;
+        await saveToolRun({
+          tool_type: 'resume_analysis',
+          title: `Resume — ${candidate}`,
+          input_data: { filename: file.name, role },
+          output_data: j,
+        });
+      } catch (saveErr) {
+        console.warn('Resume analysis save failed:', saveErr);
+      }
     } catch (e) {
       toast({ title: 'Failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     } finally { setBusy(false); }

@@ -5,6 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generateDiagnosticPdf } from '@/lib/generateDiagnosticPdf';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, XCircle, TrendingUp, Megaphone, ShoppingCart, Palette, Settings, Rocket, Download } from 'lucide-react';
 
 // --- DATA ---
@@ -289,6 +292,16 @@ export const BusinessDiagnostic: React.FC = () => {
       catScores,
       weakestCategories: weakest,
     });
+
+    // Also save to the operator library so logged-in admins/reps can find it later.
+    if (getPortalToken() || getAdminToken()) {
+      saveToolRun({
+        tool_type: 'business_diagnostic',
+        title: `Business Diagnostic — ${company || name || email}`,
+        input_data: { name, email, company, answers },
+        output_data: { totalScore, maxScore: 80, catScores, weakestCategories: weakest, scores },
+      });
+    }
 
     setPdfDownloaded(true);
     setSubmitting(false);

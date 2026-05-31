@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getPortalToken } from "@/lib/portalAuth";
 import { getAdminToken } from "@/lib/adminAuth";
+import { saveToolRun } from "@/lib/toolSaveHelper";
 import {
   Wand2, Image as ImageIcon, Copy, Download, Save, Trash2,
   Loader2, X, BookOpen, Sparkles, RefreshCw,
@@ -109,10 +110,15 @@ export const EasyModeTool: React.FC = () => {
       return;
     }
     setOutput(out);
-    if (!title) {
-      const seed = text.trim().slice(0, 60) || (imageName ? `Image: ${imageName}` : "Easy Mode note");
-      setTitle(seed);
-    }
+    const seed = text.trim().slice(0, 60) || (imageName ? `Image: ${imageName}` : "Easy Mode note");
+    if (!title) setTitle(seed);
+    // Auto-save every generation to the global library so research never disappears.
+    saveToolRun({
+      tool_type: "easy_mode",
+      title: `Easy Mode — ${seed}`,
+      input_data: { text, had_image: !!imageDataUrl, image_name: imageName },
+      output_data: { output: out },
+    });
   };
 
   const copyOut = async () => {
