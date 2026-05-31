@@ -146,6 +146,7 @@ const PortalPage: React.FC = () => {
   const [profile, setProfile] = useState<PortalProfile | null>(() => getPortalProfile());
   const [tab, setTab] = useState<Tab>('overview');
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [restoredFor, setRestoredFor] = useState<string | null>(null);
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
   const { mode: tabColorMode } = useTabColorMode();
