@@ -111,6 +111,15 @@ export const WhatsWrongDiagnostic: React.FC = () => {
       setRecommendation(data);
       setStep('results');
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      // Only persist for authenticated operators (admin or rep portal).
+      if (getPortalToken() || getAdminToken()) {
+        saveToolRun({
+          tool_type: 'whats_wrong',
+          title: `What's Wrong — ${selectedIssues.slice(0, 3).join(', ').slice(0, 80) || 'diagnosis'}`,
+          input_data: { issues: selectedIssues, notes },
+          output_data: data,
+        });
+      }
     } catch {
       toast({ title: 'Analysis failed', description: 'Please try again.', variant: 'destructive' });
       setStep('notes');
