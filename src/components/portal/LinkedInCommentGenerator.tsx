@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, MessageSquare, Copy, RefreshCw, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { saveToolRun } from "@/lib/toolSaveHelper";
+import { QuickDownloadBar } from "@/components/QuickDownloadBar";
 
 type Variants = { short: string; medium: string; sharp_question: string; scanned?: number };
 
