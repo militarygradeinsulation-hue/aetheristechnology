@@ -5,6 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generateDiagnosticPdf } from '@/lib/generateDiagnosticPdf';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, XCircle, TrendingUp, Megaphone, ShoppingCart, Palette, Settings, Rocket, Download } from 'lucide-react';
 
 // --- DATA ---
