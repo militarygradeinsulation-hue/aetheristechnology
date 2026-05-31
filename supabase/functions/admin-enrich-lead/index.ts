@@ -18,9 +18,20 @@ const SYSTEM = `You are a B2B sales forensics analyst. Given scraped website con
   "decision_makers": [{"role":"...", "why":"..."}],
   "industry_refined": "best-fit industry label",
   "estimated_revenue_band": "<$1M | $1-5M | $5-25M | $25M+",
-  "confidence": "low|medium|high"
+  "confidence": "low|medium|high",
+  "outreach": {
+    "recommended_channel": "call | email | linkedin | text",
+    "channel_confidence": "low|medium|high",
+    "why_this_channel": "2-3 sentences grounded in OBSERVABLE evidence from the site — tone, formality, industry norms, contact availability, company size, decision-maker persona. Cite specifics you saw.",
+    "secondary_channel": "call | email | linkedin | text",
+    "best_time_to_reach": "e.g. 'Tue-Thu 7-9am local — trades start early' or 'After 2pm Mon-Wed — professional services post-lunch'",
+    "persona_read": "1-2 sentences on the likely personality / decision style of the owner or buyer (analytical, relational, fast-mover, skeptical, gatekept, etc.) based on the site's voice, design, and content",
+    "tone_to_use": "e.g. 'blunt + numbers-first', 'warm + consultative', 'technical + peer-to-peer'",
+    "do_not_do": ["1-3 short anti-patterns specific to this prospect"],
+    "first_touch_script": "3-5 sentence opener tailored to the chosen channel (call: voicemail-safe; email: subject line + 2-line body; linkedin: connection note under 300 chars)"
+  }
 }
-Be blunt and specific. No fluff. If the site is empty or low-info, say so in score_reason and lower confidence.`;
+Be blunt and specific. No fluff. The outreach recommendation MUST be evidence-based — reference what you actually saw (e.g. 'no email listed, only phone CTA → call', 'long-form thought-leadership + active LinkedIn → warm LinkedIn DM', 'enterprise site with gated demo → email ops lead, never cold call', 'family-owned trades shop → call early morning, owner answers'). If the site is low-info, say so in score_reason, lower confidence, and recommend the safest default channel for that industry.`;
 
 async function firecrawl(url: string, key: string): Promise<string> {
   try {
