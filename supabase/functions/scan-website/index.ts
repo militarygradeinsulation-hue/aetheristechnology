@@ -178,7 +178,9 @@ For next steps: provide 5 prioritized action items.
 
 For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.
 
-For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.`,
+For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.
+
+For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated location/area-served/phone area code, then recommend the optimal email send windows tailored to THIS specific business. Account for: (1) industry rhythm — e.g. trades/field-service owners check email 6-8am or after 5pm; B2B SaaS execs scan inbox 7-9am and 4-6pm; healthcare/legal mid-morning; restaurants between lunch and dinner rush (2-4pm); retail off-peak; (2) company size — solo/owner-operator vs. mid-market with assistants gatekeeping; (3) location/timezone — give windows in the PROSPECT'S local time AND ET; (4) day-of-week — avoid Mondays before 10am and Friday afternoons for most; Tue/Wed/Thu are prime for B2B; Sundays evenings work for owner-operators planning their week; (5) seasonality if relevant (tax season for accountants, summer for HVAC, etc.); (6) avoid times derived from on-site signals (e.g. "office closed Fridays" banner). Cite the evidence behind each window.`,
           },
         ],
         tools: [
