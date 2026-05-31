@@ -262,6 +262,13 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             <p className="text-muted-foreground">7 forensic posts + weekly rotation, five formats, each finds a leak, names a leak, or fixes a leak</p>
           </div>
 
+          <QuickDownloadBar
+            toolType="social_content"
+            title={`Forensic Content Pack${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
+
+
           {/* Format Sections */}
           {sections.map(({ key, dataKey, title, desc }) => {
             const posts = result[dataKey];
