@@ -141,6 +141,12 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
             <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && ',  unlock for the full calendar'}</p>
           </div>
 
+          <QuickDownloadBar
+            toolType="content_calendar"
+            title={`30-Day Content Calendar${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
+
           <div className="space-y-3">
             {days.map((day: any, i: number) => {
               const visible = unlocked || i < FREE_DAYS;
