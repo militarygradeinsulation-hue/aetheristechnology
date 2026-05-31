@@ -1418,6 +1418,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
             </select>
             <Button size="sm" variant="outline" onClick={logTouch} disabled={saving}>Log touch</Button>
+            <Button size="sm" variant="ghost" onClick={openForward} className="text-amber hover:text-amber hover:bg-amber/10">
+              <Send className="w-3 h-3 mr-1" /> Forward to rep
+            </Button>
             <Button size="sm" variant="ghost" onClick={release} className="text-muted-foreground">
               <RotateCcw className="w-3 h-3 mr-1" /> Repool
             </Button>
