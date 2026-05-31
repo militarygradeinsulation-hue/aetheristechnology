@@ -1147,6 +1147,39 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
   };
 
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardReps, setForwardReps] = useState<{ code: string; rep_name: string | null }[]>([]);
+  const [forwardTarget, setForwardTarget] = useState('');
+  const [forwardNote, setForwardNote] = useState('');
+  const [forwardBusy, setForwardBusy] = useState(false);
+
+  const openForward = async () => {
+    setForwardOpen(true);
+    setForwardTarget('');
+    setForwardNote('');
+    if (forwardReps.length === 0) {
+      try {
+        const { reps } = await portalLeads.listReps();
+        setForwardReps(reps || []);
+      } catch (e) {
+        toast({ title: 'Could not load reps', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      }
+    }
+  };
+
+  const doForward = async () => {
+    if (!forwardTarget) { toast({ title: 'Pick a rep', variant: 'destructive' }); return; }
+    setForwardBusy(true);
+    try {
+      const res = await portalLeads.forward(lead.id, forwardTarget, forwardNote);
+      toast({ title: `Forwarded to ${res.target}`, description: 'Lead is now in their drip queue for 72h.' });
+      setForwardOpen(false);
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Forward failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setForwardBusy(false); }
+  };
+
   const remove = async () => {
     if (!confirm('Permanently delete this lead? This cannot be undone.')) return;
     try { await portalLeads.remove(lead.id); toast({ title: 'Lead deleted' }); onChanged(); }
