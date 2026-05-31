@@ -22,6 +22,7 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
 import { LeadActionChecklist } from './LeadActionChecklist';
+import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { leadClues } from '@/lib/leadClues';
 import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
