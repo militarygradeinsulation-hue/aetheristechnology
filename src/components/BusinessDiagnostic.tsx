@@ -293,6 +293,16 @@ export const BusinessDiagnostic: React.FC = () => {
       weakestCategories: weakest,
     });
 
+    // Also save to the operator library so logged-in admins/reps can find it later.
+    if (getPortalToken() || getAdminToken()) {
+      saveToolRun({
+        tool_type: 'business_diagnostic',
+        title: `Business Diagnostic — ${company || name || email}`,
+        input_data: { name, email, company, answers },
+        output_data: { totalScore, maxScore: 80, catScores, weakestCategories: weakest, scores },
+      });
+    }
+
     setPdfDownloaded(true);
     setSubmitting(false);
   };
