@@ -135,6 +135,12 @@ export const LinkedInCommentGenerator: React.FC = () => {
 
       {variants && (
         <div className="space-y-2 pt-2">
+          <QuickDownloadBar
+            toolType="linkedin_comment"
+            title={`LinkedIn Comment — ${(postText.trim() || persona.trim() || "post").slice(0, 60)}`}
+            outputData={variants}
+            inputData={{ postText, persona, extraContext }}
+          />
           {([
             ["short", "Short (1 line)"],
             ["medium", "Medium (2–3 sentences)"],
