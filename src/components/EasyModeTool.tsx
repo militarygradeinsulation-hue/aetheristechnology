@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getPortalToken } from "@/lib/portalAuth";
 import { getAdminToken } from "@/lib/adminAuth";
+import { saveToolRun } from "@/lib/toolSaveHelper";
 import {
   Wand2, Image as ImageIcon, Copy, Download, Save, Trash2,
   Loader2, X, BookOpen, Sparkles, RefreshCw,
