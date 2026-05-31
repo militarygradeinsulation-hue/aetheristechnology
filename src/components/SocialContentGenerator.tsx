@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 import { Badge } from '@/components/ui/badge';
 import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Running forensic scan...', target: 18 },
