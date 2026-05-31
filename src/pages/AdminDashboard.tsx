@@ -595,6 +595,14 @@ const AdminDashboard: React.FC = () => {
                 <Database className="w-4 h-4 mr-1 text-primary" /> HubSpot Hub
               </Button>
             </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.dispatchEvent(new Event('workbench:toggle'))}
+              title="Open Workbench"
+            >
+              <Wrench className="w-4 h-4 mr-1 text-amber" /> Workbench
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </Button>
