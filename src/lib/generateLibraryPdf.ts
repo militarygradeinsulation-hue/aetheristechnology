@@ -29,6 +29,16 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions Audit',
   friction_audit: 'Friction Vocabulary Audit',
   playbook: 'Strategic Playbook',
+  website_scan: 'Website Forensic Scan',
+  business_diagnostic: 'Business Diagnostic',
+  ai_detect: 'AI Writing Detector',
+  scam_check: 'Scam Check Report',
+  detective_case: 'Detective Case File',
+  linkedin_response: 'LinkedIn Reply',
+  linkedin_comment: 'LinkedIn Comment Pack',
+  linkedin_post: 'LinkedIn Post',
+  resume_analysis: 'Resume Forensic Analysis',
+  easy_mode: 'Easy-Mode Translation',
 };
 
 type Block =
