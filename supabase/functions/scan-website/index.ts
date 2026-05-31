@@ -118,6 +118,20 @@ serve(async (req) => {
       attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
     }
 
+    // DNS fallback: toggle www. prefix and retry once
+    if (!attempt.ok && attempt.data?.code === "SCRAPE_DNS_RESOLUTION_ERROR") {
+      try {
+        const u = new URL(formattedUrl);
+        u.hostname = u.hostname.startsWith("www.")
+          ? u.hostname.replace(/^www\./, "")
+          : `www.${u.hostname}`;
+        const altUrl = u.toString();
+        console.warn("DNS failed, retrying with alternate hostname:", altUrl);
+        formattedUrl = altUrl;
+        attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
+      } catch (_) { /* ignore */ }
+    }
+
     const scrapeData = attempt.data;
 
     if (!attempt.ok) {
@@ -126,9 +140,11 @@ serve(async (req) => {
       const friendly =
         code === "SCRAPE_TIMEOUT"
           ? "That site took too long to respond. Try again in a moment, or scan the homepage directly."
+          : code === "SCRAPE_DNS_RESOLUTION_ERROR"
+          ? `We couldn't resolve that domain. Double-check the spelling — common pitfalls: extra hyphens (e.g. "tool-die" vs "tooldie"), wrong TLD (.com vs .net), or the company may have rebranded. Search the company name on Google to confirm the live URL, then re-scan.`
           : (scrapeData?.error || "Failed to scrape website");
       return new Response(
-        JSON.stringify({ error: friendly }),
+        JSON.stringify({ error: friendly, code }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
