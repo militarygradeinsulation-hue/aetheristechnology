@@ -1436,6 +1436,58 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 {scan.executiveSummary && (
                   <p className="text-xs text-muted-foreground italic whitespace-pre-wrap">{scan.executiveSummary}</p>
                 )}
+                {scan.outreach && (
+                  <div className="rounded-md border-2 border-amber/60 bg-amber/10 p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-amber">⚡ How to reach this lead</p>
+                      <span className="text-[10px] font-mono text-muted-foreground">Confidence: {scan.outreach.channel_confidence || 'medium'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded font-mono text-xs font-bold uppercase ${scan.outreach.recommended_channel === 'call' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-blue-500/20 text-blue-400 border border-blue-500/40'}`}>
+                        {scan.outreach.recommended_channel === 'call' ? '📞 CALL FIRST' : '✉️ EMAIL FIRST'}
+                      </span>
+                      {scan.outreach.secondary_channel && (
+                        <span className="text-[10px] text-muted-foreground">then: {scan.outreach.secondary_channel}</span>
+                      )}
+                    </div>
+                    {scan.outreach.why_this_channel && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Why: </span>
+                        <span className="text-foreground">{scan.outreach.why_this_channel}</span>
+                      </div>
+                    )}
+                    {scan.outreach.best_time_to_reach && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Best time: </span>
+                        <span className="text-foreground">{scan.outreach.best_time_to_reach}</span>
+                      </div>
+                    )}
+                    {scan.outreach.persona_read && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Persona: </span>
+                        <span className="text-muted-foreground italic">{scan.outreach.persona_read}</span>
+                      </div>
+                    )}
+                    {scan.outreach.tone_to_use && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Tone: </span>
+                        <span className="text-foreground">{scan.outreach.tone_to_use}</span>
+                      </div>
+                    )}
+                    {Array.isArray(scan.outreach.do_not_do) && scan.outreach.do_not_do.length > 0 && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-red-400">Do NOT: </span>
+                        <span className="text-muted-foreground">{scan.outreach.do_not_do.join(' · ')}</span>
+                      </div>
+                    )}
+                    {scan.outreach.first_touch_script && (
+                      <div className="text-xs border-t border-amber/30 pt-2 mt-1">
+                        <p className="font-mono text-[10px] uppercase text-amber mb-1">First-touch script</p>
+                        <p className="text-foreground whitespace-pre-wrap bg-background/40 rounded p-2 border border-amber/20">{scan.outreach.first_touch_script}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
                   <div className="space-y-1.5">
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Top Gaps</p>

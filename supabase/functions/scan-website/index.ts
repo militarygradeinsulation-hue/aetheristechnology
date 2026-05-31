@@ -176,7 +176,9 @@ For ROI projections: break down by category showing current annual waste vs proj
 
 For next steps: provide 5 prioritized action items.
 
-For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.`,
+For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.
+
+For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.`,
           },
         ],
         tools: [
@@ -239,8 +241,24 @@ For competitive brief: a 2-3 sentence assessment of their competitive digital po
                     description: "5 prioritized action items",
                   },
                   competitiveBrief: { type: "string", description: "2-3 sentence competitive positioning assessment" },
+                  outreach: {
+                    type: "object",
+                    description: "Evidence-based recommendation on whether to call or email first, with persona read and opening script. Must reference actual site signals.",
+                    properties: {
+                      recommended_channel: { type: "string", enum: ["call", "email"], description: "Which to do FIRST" },
+                      channel_confidence: { type: "string", enum: ["high", "medium", "low"] },
+                      why_this_channel: { type: "string", description: "2-3 sentences citing specific observable evidence from the site (e.g. 'phone number featured in header', 'no contact form, only email', 'formal corporate tone suggests written first contact')" },
+                      secondary_channel: { type: "string", description: "Backup channel if first doesn't land, with timing" },
+                      best_time_to_reach: { type: "string", description: "Specific window with reasoning, e.g. 'Tue-Thu 9-11am ET — owner-operator likely on jobsites afternoons'" },
+                      persona_read: { type: "string", description: "What the site reveals about the decision-maker's personality and pressures" },
+                      tone_to_use: { type: "string", description: "e.g. 'blunt operator', 'warm consultative', 'data-driven peer'" },
+                      do_not_do: { type: "array", items: { type: "string" }, description: "2-3 anti-patterns specific to this prospect" },
+                      first_touch_script: { type: "string", description: "Ready-to-send 2-4 sentence opener referencing something specific found on their site" },
+                    },
+                    required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script"],
+                  },
                 },
-                required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief"],
+                required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
               },
             },
           },
