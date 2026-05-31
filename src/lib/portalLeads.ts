@@ -82,6 +82,9 @@ export const portalLeads = {
   download: () => callPortalLeads('download') as Promise<{ ok: true; rows: any[] }>,
   scan: (id: string, opts: { url?: string; force?: boolean } = {}) =>
     callPortalLeads('scan', { id, ...opts }) as Promise<{ ok: true; scan: LeadScan; cached: boolean }>,
+  listReps: () => callPortalLeads('list_reps') as Promise<{ ok: true; reps: { code: string; rep_name: string | null }[] }>,
+  forward: (id: string, target_code: string, note?: string) =>
+    callPortalLeads('forward', { id, target_code, note }) as Promise<{ ok: true; target: string }>,
   rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string } = {}) => {
     const token = getPortalToken();
     if (!token) throw new Error('Not signed in');

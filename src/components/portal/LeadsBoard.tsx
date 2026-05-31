@@ -11,7 +11,7 @@ import { getPortalToken } from '@/lib/portalAuth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info, Send,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
@@ -1147,6 +1147,39 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
   };
 
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardReps, setForwardReps] = useState<{ code: string; rep_name: string | null }[]>([]);
+  const [forwardTarget, setForwardTarget] = useState('');
+  const [forwardNote, setForwardNote] = useState('');
+  const [forwardBusy, setForwardBusy] = useState(false);
+
+  const openForward = async () => {
+    setForwardOpen(true);
+    setForwardTarget('');
+    setForwardNote('');
+    if (forwardReps.length === 0) {
+      try {
+        const { reps } = await portalLeads.listReps();
+        setForwardReps(reps || []);
+      } catch (e) {
+        toast({ title: 'Could not load reps', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      }
+    }
+  };
+
+  const doForward = async () => {
+    if (!forwardTarget) { toast({ title: 'Pick a rep', variant: 'destructive' }); return; }
+    setForwardBusy(true);
+    try {
+      const res = await portalLeads.forward(lead.id, forwardTarget, forwardNote);
+      toast({ title: `Forwarded to ${res.target}`, description: 'Lead is now in their drip queue for 72h.' });
+      setForwardOpen(false);
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Forward failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setForwardBusy(false); }
+  };
+
   const remove = async () => {
     if (!confirm('Permanently delete this lead? This cannot be undone.')) return;
     try { await portalLeads.remove(lead.id); toast({ title: 'Lead deleted' }); onChanged(); }
@@ -1385,6 +1418,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
             </select>
             <Button size="sm" variant="outline" onClick={logTouch} disabled={saving}>Log touch</Button>
+            <Button size="sm" variant="ghost" onClick={openForward} className="text-amber hover:text-amber hover:bg-amber/10">
+              <Send className="w-3 h-3 mr-1" /> Forward to rep
+            </Button>
             <Button size="sm" variant="ghost" onClick={release} className="text-muted-foreground">
               <RotateCcw className="w-3 h-3 mr-1" /> Repool
             </Button>
@@ -1767,6 +1803,52 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         </div>
         </ErrorBoundary>
       )}
+
+      <Dialog open={forwardOpen} onOpenChange={(o) => !forwardBusy && setForwardOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Send className="w-5 h-5 text-amber" /> Forward lead to a rep
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Pass <span className="text-amber font-semibold">{lead.business_name || 'this lead'}</span> — including all your research, scan results, and notes — to another rep. They'll get it in their drip queue for 72 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Send to</Label>
+              <select
+                value={forwardTarget}
+                onChange={(e) => setForwardTarget(e.target.value)}
+                disabled={forwardBusy || forwardReps.length === 0}
+                className="w-full bg-background border border-input rounded-md px-2 h-9 text-sm"
+              >
+                <option value="">{forwardReps.length === 0 ? 'Loading reps…' : 'Pick a rep'}</option>
+                {forwardReps.map(r => (
+                  <option key={r.code} value={r.code}>{r.rep_name || r.code}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs">Note for them (optional)</Label>
+              <Textarea
+                value={forwardNote}
+                onChange={(e) => setForwardNote(e.target.value)}
+                placeholder="Why you're forwarding, what you learned, who to ask for…"
+                className="min-h-[70px] text-sm"
+                disabled={forwardBusy}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setForwardOpen(false)} disabled={forwardBusy}>Cancel</Button>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={doForward} disabled={forwardBusy || !forwardTarget}>
+                {forwardBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                Forward
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
