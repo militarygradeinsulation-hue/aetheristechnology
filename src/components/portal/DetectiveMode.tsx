@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, ArrowDown, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download, CheckCircle2, MapPin, Pin, Stamp } from 'lucide-react';
+import { DetectiveContactPlan } from './DetectiveContactPlan';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -639,6 +640,11 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             )}
             {r.best_angle.why_this_one && <p className="text-xs text-muted-foreground/90 mt-2 leading-relaxed border-t border-amber/20 pt-2 italic">{r.best_angle.why_this_one}</p>}
           </div>
+        )}
+
+        {/* Best playbook + best time + best method to contact */}
+        {r.best_angle && (
+          <DetectiveContactPlan lead={lead as any} rr={liveRr} />
         )}
 
         {/* Deduction trail — pinned clues connected by string */}
