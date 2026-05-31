@@ -158,6 +158,34 @@ const PortalPage: React.FC = () => {
   const VISIBLE_KEY = `${ns}.visibleTabs.v1`;
   const LAYOUT_KEY = `${ns}.layout.v1`;
   const SIZES_KEY = `${ns}.widgetSizes.v1`;
+  const ACTIVE_TAB_KEY = `${ns}.activeTab.v1`;
+  const ACTIVE_TOOL_KEY = `${ns}.activeTool.v1`;
+
+  // Restore the last-viewed tab + tool once profile is known (per rep code).
+  useEffect(() => {
+    if (!profile?.code || restoredFor === profile.code) return;
+    try {
+      const savedTab = localStorage.getItem(ACTIVE_TAB_KEY);
+      if (savedTab) setTab(savedTab as Tab);
+      const savedTool = localStorage.getItem(ACTIVE_TOOL_KEY);
+      if (savedTool) setActiveTool(savedTool as ToolKey);
+    } catch {}
+    setRestoredFor(profile.code);
+  }, [profile?.code, restoredFor, ACTIVE_TAB_KEY, ACTIVE_TOOL_KEY]);
+
+  // Persist tab + tool whenever they change (after restore so we don't overwrite).
+  useEffect(() => {
+    if (!profile?.code || restoredFor !== profile.code) return;
+    try { localStorage.setItem(ACTIVE_TAB_KEY, tab); } catch {}
+  }, [tab, profile?.code, restoredFor, ACTIVE_TAB_KEY]);
+  useEffect(() => {
+    if (!profile?.code || restoredFor !== profile.code) return;
+    try {
+      if (activeTool) localStorage.setItem(ACTIVE_TOOL_KEY, activeTool);
+      else localStorage.removeItem(ACTIVE_TOOL_KEY);
+    } catch {}
+  }, [activeTool, profile?.code, restoredFor, ACTIVE_TOOL_KEY]);
+
   const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint']; // newly added tabs auto-show
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
