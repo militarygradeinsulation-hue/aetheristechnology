@@ -38,19 +38,38 @@ function clamp(p: Pos, w: number, h: number): Pos {
   };
 }
 
+function snapEdge(p: Pos, w: number, margin = 12): Pos {
+  if (typeof window === "undefined") return p;
+  const W = window.innerWidth;
+  const center = p.x + w / 2;
+  const x = center < W / 2 ? margin : W - w - margin;
+  return { x, y: p.y };
+}
+
 export function useDraggablePin(opts: {
   storageKey: string;
   defaultCorner?: Corner;
   width?: number;
   height?: number;
+  longPressMs?: number;
+  snapToEdge?: boolean;
 }) {
-  const { storageKey, defaultCorner = "bottom-right", width = 64, height = 64 } = opts;
+  const {
+    storageKey,
+    defaultCorner = "bottom-right",
+    width = 64,
+    height = 64,
+    longPressMs = 350,
+    snapToEdge = true,
+  } = opts;
   const [pos, setPos] = useState<Pos>(() => {
     const saved = load(storageKey);
     return saved ? { x: saved.x, y: saved.y } : defaultPos(defaultCorner, width, height);
   });
   const [pinned, setPinned] = useState<boolean>(() => load(storageKey)?.pinned ?? false);
-  const dragRef = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ dx: number; dy: number; moved: boolean; active: boolean } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Persist
   useEffect(() => {
@@ -69,32 +88,62 @@ export function useDraggablePin(opts: {
   // Global pointer move/up
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
-      if (!dragRef.current || pinned) return;
+      if (!dragRef.current || !dragRef.current.active || pinned) return;
       const { dx, dy } = dragRef.current;
       dragRef.current.moved = true;
+      e.preventDefault();
       setPos(clamp({ x: e.clientX - dx, y: e.clientY - dy }, width, height));
     };
     const onUp = () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+      const wasActive = dragRef.current?.active;
       dragRef.current = null;
       document.body.style.userSelect = "";
+      setDragging(false);
+      if (wasActive && snapToEdge) {
+        setPos((p) => snapEdge(p, width));
+      }
     };
-    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointermove", onMove, { passive: false });
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
-  }, [pinned, width, height]);
+  }, [pinned, width, height, snapToEdge]);
 
+  // Immediate drag (handle)
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (pinned) return;
-    dragRef.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false };
+    dragRef.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false, active: true };
     document.body.style.userSelect = "none";
+    setDragging(true);
   }, [pinned, pos.x, pos.y]);
+
+  // Long-press anywhere on the body to start dragging
+  const onBodyPointerDown = useCallback((e: React.PointerEvent) => {
+    if (pinned) return;
+    const startX = e.clientX, startY = e.clientY;
+    dragRef.current = { dx: startX - pos.x, dy: startY - pos.y, moved: false, active: false };
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+      if (dragRef.current) {
+        dragRef.current.active = true;
+        document.body.style.userSelect = "none";
+        setDragging(true);
+        try { (navigator as any).vibrate?.(20); } catch {}
+      }
+    }, longPressMs);
+  }, [pinned, pos.x, pos.y, longPressMs]);
 
   const togglePin = useCallback(() => setPinned((p) => !p), []);
 
   const justDragged = useCallback(() => !!dragRef.current?.moved, []);
 
-  return { pos, pinned, togglePin, onPointerDown, justDragged, setPos };
+  return { pos, pinned, dragging, togglePin, onPointerDown, onBodyPointerDown, justDragged, setPos };
 }

@@ -30,7 +30,7 @@ export const PinnableFloater: React.FC<Props> = ({
   children,
   hideHandle,
 }) => {
-  const { pos, pinned, togglePin, onPointerDown } = useDraggablePin({
+  const { pos, pinned, dragging, togglePin, onPointerDown, onBodyPointerDown } = useDraggablePin({
     storageKey, defaultCorner, width, height,
   });
 
@@ -56,15 +56,16 @@ export const PinnableFloater: React.FC<Props> = ({
 
   return (
     <div
-      className={`fixed ${className || ""}`}
+      className={`fixed ${className || ""} ${dragging ? "transition-none" : "transition-[left,top] duration-200 ease-out"}`}
       style={{ left: pos.x, top: pos.y, zIndex }}
+      onPointerDown={pinned ? undefined : onBodyPointerDown}
     >
       {!hideHandle && (
         <div className="absolute -top-3 -left-3 flex items-center gap-0.5 rounded-full bg-background/90 border border-amber/40 shadow-md backdrop-blur px-1 py-0.5 opacity-70 hover:opacity-100 transition-opacity">
           <button
             type="button"
-            onPointerDown={onPointerDown}
-            title={pinned ? "Unpin to move" : "Drag to move"}
+            onPointerDown={(e) => { e.stopPropagation(); onPointerDown(e); }}
+            title={pinned ? "Unpin to move" : "Drag — or long-press anywhere on the bubble"}
             aria-label="Drag handle"
             disabled={pinned}
             className={`p-0.5 rounded ${pinned ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing"} touch-none`}
@@ -73,6 +74,7 @@ export const PinnableFloater: React.FC<Props> = ({
           </button>
           <button
             type="button"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={togglePin}
             title={pinned ? "Unpin" : "Pin in place"}
             aria-label={pinned ? "Unpin" : "Pin"}
@@ -84,6 +86,7 @@ export const PinnableFloater: React.FC<Props> = ({
           </button>
           <button
             type="button"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={cycleOpacity}
             title={`Opacity ${Math.round(opacity * 100)}% — click to cycle`}
             aria-label="Cycle opacity"
@@ -98,7 +101,7 @@ export const PinnableFloater: React.FC<Props> = ({
       )}
       <div
         style={{ opacity }}
-        className="transition-opacity hover:!opacity-100"
+        className={`transition-opacity hover:!opacity-100 ${dragging ? "scale-105 ring-2 ring-amber/60 rounded-full" : ""}`}
       >
         {children}
       </div>
