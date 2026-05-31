@@ -438,6 +438,67 @@ serve(async (req) => {
       return jsonResp({ ok: true, scan: enrichment.scan, cached: false });
     }
 
+    // ---------- LIST REPS (for forwarding picker) ----------
+    if (action === "list_reps") {
+      const { data, error } = await supabase.from("rep_codes")
+        .select("code,rep_name")
+        .eq("is_active", true)
+        .order("rep_name");
+      if (error) throw error;
+      const reps = (data || []).filter((r: any) => r.code !== claims.code);
+      return jsonResp({ ok: true, reps });
+    }
+
+    // ---------- FORWARD lead to another rep ----------
+    if (action === "forward") {
+      const id = sanitizeStr(body.id);
+      const targetCode = sanitizeStr(body.target_code);
+      const note = sanitizeStr(body.note, 1000);
+      if (!id || !targetCode) return jsonResp({ error: "Missing id or target_code" }, 400);
+      if (targetCode === claims.code) return jsonResp({ error: "Cannot forward to yourself" }, 400);
+
+      // Validate target rep exists and is active
+      const { data: target } = await supabase.from("rep_codes")
+        .select("code,rep_name").eq("code", targetCode).eq("is_active", true).maybeSingle();
+      if (!target) return jsonResp({ error: "Target rep not found or inactive" }, 404);
+
+      // Must own the lead (claimed by me) OR have it in my drip (assigned to me, unclaimed)
+      const { data: lead } = await supabase.from("rep_leads")
+        .select("id,business_name,claimed_by_code,assigned_to_code,notes")
+        .eq("id", id).maybeSingle();
+      if (!lead) return jsonResp({ error: "Lead not found" }, 404);
+      const owns = lead.claimed_by_code === claims.code;
+      const inDrip = !lead.claimed_by_code && lead.assigned_to_code === claims.code;
+      if (!owns && !inDrip) return jsonResp({ error: "You can only forward leads you've claimed or that are in your drip." }, 403);
+
+      // Get sender name for the forwarding note
+      const { data: senderRep } = await supabase.from("rep_codes")
+        .select("rep_name").eq("code", claims.code).maybeSingle();
+      const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+      const forwardLine = `\n[Forwarded ${stamp} from ${senderRep?.rep_name || claims.code} → ${target.rep_name || targetCode}]${note ? `\nNote: ${note}` : ""}`;
+      const newNotes = ((lead.notes || "") + forwardLine).slice(0, 8000);
+
+      // Release current claim, assign to target rep with 72h hold
+      const expiresAt = new Date(Date.now() + 72 * 3600 * 1000).toISOString();
+      const { error } = await supabase.from("rep_leads")
+        .update({
+          claimed_by_code: null,
+          claimed_at: null,
+          assigned_to_code: targetCode,
+          assigned_at: new Date().toISOString(),
+          assignment_expires_at: expiresAt,
+          status: "new",
+          notes: newNotes,
+        })
+        .eq("id", id);
+      if (error) throw error;
+
+      await logActivity(supabase, claims, "lead_forward", {
+        lead_id: id, target_code: targetCode, target_name: target.rep_name, business: lead.business_name,
+      });
+      return jsonResp({ ok: true, target: target.rep_name || targetCode });
+    }
+
     return jsonResp({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("portal-leads error:", e);
