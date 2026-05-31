@@ -32,6 +32,7 @@ const widthOrder: Array<"sm" | "md" | "lg" | "full"> = ["sm", "md", "lg", "full"
 export const FloatingWorkbench: React.FC = () => {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const [stack, setStack] = useState<WidgetEntry[]>([]);
   const [layouts, setLayouts] = useState<WorkbenchLayout[]>([]);
@@ -42,6 +43,7 @@ export const FloatingWorkbench: React.FC = () => {
   const dragIndex = useRef<number | null>(null);
   const hydrated = useRef(false);
   const activeLead = useActiveLead();
+
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   // Only ever appear on portal/admin routes — never on the public site,
@@ -57,17 +59,25 @@ export const FloatingWorkbench: React.FC = () => {
   };
 
   useEffect(() => {
-    const check = () => setVisible(isBackendRoute() && (hasValidPortalSession() || hasValidAdminToken()));
+    const check = () => {
+      const admin = hasValidAdminToken();
+      setIsAdmin(admin);
+      setVisible(isBackendRoute() && (hasValidPortalSession() || admin));
+    };
     check();
+    const openHandler = () => { setVisible(true); setOpen(true); };
     window.addEventListener("storage", check);
     window.addEventListener("popstate", check);
+    window.addEventListener("workbench:toggle", openHandler);
     const t = setInterval(check, 1500);
     return () => {
       window.removeEventListener("storage", check);
       window.removeEventListener("popstate", check);
+      window.removeEventListener("workbench:toggle", openHandler);
       clearInterval(t);
     };
   }, []);
+
 
   // Load persisted state once visibility is known. Mark hydrated AFTER load
   // so the write effects below don't clobber saved values with initial defaults.
@@ -182,8 +192,8 @@ export const FloatingWorkbench: React.FC = () => {
 
   return (
     <>
-      {/* Floating launcher (hidden while open) */}
-      {!open && (
+      {/* Floating launcher — hidden for admin (Joseph opens via tab/button) */}
+      {!open && !isAdmin && (
         <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={60}>
           <button
             onClick={() => setOpen(true)}

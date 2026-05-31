@@ -93,7 +93,7 @@ import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { BusinessPostAnalyst } from '@/components/portal/BusinessPostAnalyst';
 import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -444,6 +444,7 @@ const PortalPage: React.FC = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean }[] = [
     { id: 'jw-admin' as Tab, label: 'Joseph Work Account', icon: <Crown className="w-4 h-4" />, iconCmp: Crown, href: '/admin', adminOnly: true },
+    { id: 'workbench' as Tab, label: 'Workbench', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench, adminOnly: true },
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
@@ -720,7 +721,9 @@ const PortalPage: React.FC = () => {
                         key={t.id}
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          setTab(t.id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                          setTabSearch(''); setTabSearchOpen(false);
+                          if (t.id === 'workbench') { window.dispatchEvent(new Event('workbench:toggle')); return; }
+                          setTab(t.id); setActiveTool(null);
                           if (layout !== 'tabs') setLayout('tabs');
                         }}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
@@ -794,6 +797,7 @@ const PortalPage: React.FC = () => {
                       type="button"
                       onClick={() => {
                         if (t.href) { window.location.href = t.href; return; }
+                        if (t.id === 'workbench') { window.dispatchEvent(new Event('workbench:toggle')); return; }
                         setTab(t.id);
                         setActiveTool(null);
                         logPortalActivity('tab_view', { tab: t.id });
