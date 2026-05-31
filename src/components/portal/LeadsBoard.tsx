@@ -22,6 +22,7 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
 import { LeadActionChecklist } from './LeadActionChecklist';
+import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { leadClues } from '@/lib/leadClues';
 import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -1405,6 +1406,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
           {/* Per-lead Action Checklist (touch steps + auto-generated follow-up sequence) */}
           <LeadActionChecklist leadId={lead.id} leadLabel={lead.business_name || lead.website || undefined} />
+
+          {/* Industry-matched playbooks the rep can download or attach to the next email */}
+          <LeadPlaybookMatcher lead={lead} />
 
           {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
