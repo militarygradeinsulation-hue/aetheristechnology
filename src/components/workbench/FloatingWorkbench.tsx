@@ -32,6 +32,7 @@ const widthOrder: Array<"sm" | "md" | "lg" | "full"> = ["sm", "md", "lg", "full"
 export const FloatingWorkbench: React.FC = () => {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const [stack, setStack] = useState<WidgetEntry[]>([]);
   const [layouts, setLayouts] = useState<WorkbenchLayout[]>([]);
@@ -42,6 +43,7 @@ export const FloatingWorkbench: React.FC = () => {
   const dragIndex = useRef<number | null>(null);
   const hydrated = useRef(false);
   const activeLead = useActiveLead();
+
 
   // Determine visibility (staff/admin/rep only) and recheck on storage changes.
   // Only ever appear on portal/admin routes — never on the public site,
