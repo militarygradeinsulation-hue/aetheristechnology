@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 import { Badge } from '@/components/ui/badge';
 import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Running forensic scan...', target: 18 },
@@ -260,6 +261,13 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             </h2>
             <p className="text-muted-foreground">7 forensic posts + weekly rotation, five formats, each finds a leak, names a leak, or fixes a leak</p>
           </div>
+
+          <QuickDownloadBar
+            toolType="social_content"
+            title={`Forensic Content Pack${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
+
 
           {/* Format Sections */}
           {sections.map(({ key, dataKey, title, desc }) => {

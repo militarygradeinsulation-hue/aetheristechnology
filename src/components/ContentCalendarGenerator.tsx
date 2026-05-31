@@ -10,6 +10,7 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 import { PostImageGenerator } from './admin/PostImageGenerator';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Analyzing your industry...', target: 25 },
@@ -139,6 +140,12 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
             <h2 className="text-3xl font-bold text-foreground font-display mb-2">Your <span className="text-amber">30-Day</span> Content Calendar</h2>
             <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && ',  unlock for the full calendar'}</p>
           </div>
+
+          <QuickDownloadBar
+            toolType="content_calendar"
+            title={`30-Day Content Calendar${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
 
           <div className="space-y-3">
             {days.map((day: any, i: number) => {
