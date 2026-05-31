@@ -176,7 +176,9 @@ For ROI projections: break down by category showing current annual waste vs proj
 
 For next steps: provide 5 prioritized action items.
 
-For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.`,
+For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.
+
+For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.`,
           },
         ],
         tools: [
