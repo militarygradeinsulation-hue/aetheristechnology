@@ -44,7 +44,15 @@ export const LinkedInCommentGenerator: React.FC = () => {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setVariants(data as Variants);
+      const v = data as Variants;
+      setVariants(v);
+      const titleSeed = (postText.trim() || persona.trim() || "LinkedIn post").slice(0, 60);
+      saveToolRun({
+        tool_type: "linkedin_comment",
+        title: `LinkedIn Comment — ${titleSeed}`,
+        input_data: { postText, persona, extraContext, hasImage: !!imageDataUrl },
+        output_data: v,
+      });
     } catch (e) {
       toast({ title: "Generation failed", description: (e as Error).message, variant: "destructive" });
     } finally {
