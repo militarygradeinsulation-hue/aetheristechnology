@@ -59,17 +59,25 @@ export const FloatingWorkbench: React.FC = () => {
   };
 
   useEffect(() => {
-    const check = () => setVisible(isBackendRoute() && (hasValidPortalSession() || hasValidAdminToken()));
+    const check = () => {
+      const admin = hasValidAdminToken();
+      setIsAdmin(admin);
+      setVisible(isBackendRoute() && (hasValidPortalSession() || admin));
+    };
     check();
+    const openHandler = () => { setVisible(true); setOpen(true); };
     window.addEventListener("storage", check);
     window.addEventListener("popstate", check);
+    window.addEventListener("workbench:toggle", openHandler);
     const t = setInterval(check, 1500);
     return () => {
       window.removeEventListener("storage", check);
       window.removeEventListener("popstate", check);
+      window.removeEventListener("workbench:toggle", openHandler);
       clearInterval(t);
     };
   }, []);
+
 
   // Load persisted state once visibility is known. Mark hydrated AFTER load
   // so the write effects below don't clobber saved values with initial defaults.
