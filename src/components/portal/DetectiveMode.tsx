@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Sparkles, Loader2, Copy, Check, ArrowRight, ArrowDown, FileSearch, Mail, Linkedin, Brain, HelpCircle, Eye, Lightbulb, Gavel, Save, Download, CheckCircle2, MapPin, Pin, Stamp } from 'lucide-react';
+import { DetectiveContactPlan } from './DetectiveContactPlan';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
