@@ -15,7 +15,7 @@ interface Props {
 const STEP_ICONS = [Target, Search, MessageSquare, Wrench];
 
 export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   const hasScan = !!scan;
