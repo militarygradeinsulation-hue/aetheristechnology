@@ -1521,6 +1521,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                         <p className="font-mono text-[10px] uppercase text-amber mb-1">First-touch script</p>
                         <p className="text-foreground whitespace-pre-wrap bg-background/40 rounded p-2 border border-amber/20">{scan.outreach.first_touch_script}</p>
                       </div>
+                    )}
                     {scan.outreach.email_timing && (
                       <div className="text-xs border-t border-amber/30 pt-2 mt-1 space-y-1.5">
                         <p className="font-mono text-[10px] uppercase text-amber">📧 Best Email Timing</p>
