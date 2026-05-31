@@ -11,7 +11,7 @@ import { getPortalToken } from '@/lib/portalAuth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info, Send,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
