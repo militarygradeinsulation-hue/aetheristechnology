@@ -1803,6 +1803,52 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         </div>
         </ErrorBoundary>
       )}
+
+      <Dialog open={forwardOpen} onOpenChange={(o) => !forwardBusy && setForwardOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Send className="w-5 h-5 text-amber" /> Forward lead to a rep
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Pass <span className="text-amber font-semibold">{lead.business_name || 'this lead'}</span> — including all your research, scan results, and notes — to another rep. They'll get it in their drip queue for 72 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Send to</Label>
+              <select
+                value={forwardTarget}
+                onChange={(e) => setForwardTarget(e.target.value)}
+                disabled={forwardBusy || forwardReps.length === 0}
+                className="w-full bg-background border border-input rounded-md px-2 h-9 text-sm"
+              >
+                <option value="">{forwardReps.length === 0 ? 'Loading reps…' : 'Pick a rep'}</option>
+                {forwardReps.map(r => (
+                  <option key={r.code} value={r.code}>{r.rep_name || r.code}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs">Note for them (optional)</Label>
+              <Textarea
+                value={forwardNote}
+                onChange={(e) => setForwardNote(e.target.value)}
+                placeholder="Why you're forwarding, what you learned, who to ask for…"
+                className="min-h-[70px] text-sm"
+                disabled={forwardBusy}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setForwardOpen(false)} disabled={forwardBusy}>Cancel</Button>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={doForward} disabled={forwardBusy || !forwardTarget}>
+                {forwardBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                Forward
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
