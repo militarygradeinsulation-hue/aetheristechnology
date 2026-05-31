@@ -199,7 +199,21 @@ const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog' | 'liveevents'>('workspace');
+  const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog' | 'liveevents'>(() => {
+    try {
+      const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+      if (saved) return saved as any;
+    } catch {}
+    return 'workspace';
+  });
+  const setActiveTab: typeof setActiveTabState = ((value: any) => {
+    setActiveTabState(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      try { localStorage.setItem(ACTIVE_TAB_KEY, String(next)); } catch {}
+      return next;
+    });
+  }) as any;
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'insights', label: 'AI Insights', icon: Brain },
     { key: 'events', label: 'Campaign', icon: Megaphone },
