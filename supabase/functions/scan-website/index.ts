@@ -178,7 +178,9 @@ For next steps: provide 5 prioritized action items.
 
 For competitive brief: a 2-3 sentence assessment of their competitive digital positioning.
 
-For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.`,
+For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.
+
+For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated location/area-served/phone area code, then recommend the optimal email send windows tailored to THIS specific business. Account for: (1) industry rhythm — e.g. trades/field-service owners check email 6-8am or after 5pm; B2B SaaS execs scan inbox 7-9am and 4-6pm; healthcare/legal mid-morning; restaurants between lunch and dinner rush (2-4pm); retail off-peak; (2) company size — solo/owner-operator vs. mid-market with assistants gatekeeping; (3) location/timezone — give windows in the PROSPECT'S local time AND ET; (4) day-of-week — avoid Mondays before 10am and Friday afternoons for most; Tue/Wed/Thu are prime for B2B; Sundays evenings work for owner-operators planning their week; (5) seasonality if relevant (tax season for accountants, summer for HVAC, etc.); (6) avoid times derived from on-site signals (e.g. "office closed Fridays" banner). Cite the evidence behind each window.`,
           },
         ],
         tools: [
@@ -254,8 +256,42 @@ For OUTREACH (CRITICAL — the sales rep depends on this): based on observable e
                       tone_to_use: { type: "string", description: "e.g. 'blunt operator', 'warm consultative', 'data-driven peer'" },
                       do_not_do: { type: "array", items: { type: "string" }, description: "2-3 anti-patterns specific to this prospect" },
                       first_touch_script: { type: "string", description: "Ready-to-send 2-4 sentence opener referencing something specific found on their site" },
+                      email_timing: {
+                        type: "object",
+                        description: "Location/industry/size-tailored email send windows. Cite evidence behind each window.",
+                        properties: {
+                          inferred_timezone: { type: "string", description: "e.g. 'America/Indiana/Indianapolis (ET)' — infer from address, area-served, phone area code" },
+                          timezone_evidence: { type: "string", description: "What on the site revealed the timezone (address block, phone area code, service-area page, etc.)" },
+                          inferred_industry: { type: "string", description: "Specific industry vertical used to pick rhythm, e.g. 'residential HVAC', 'B2B SaaS', 'boutique law firm'" },
+                          inferred_company_size: { type: "string", enum: ["solo", "small (2-10)", "mid (11-50)", "large (51-200)", "enterprise (200+)"], description: "Inferred from team page, office count, client logos" },
+                          size_evidence: { type: "string", description: "What signals revealed size (team page count, multi-location, enterprise logos, etc.)" },
+                          best_send_windows: {
+                            type: "array",
+                            description: "Top 2-4 send windows ranked best→good, in prospect local time AND ET",
+                            items: {
+                              type: "object",
+                              properties: {
+                                day: { type: "string", description: "e.g. 'Tuesday', 'Tue-Thu', 'Sunday evening'" },
+                                local_time: { type: "string", description: "Window in prospect local time, e.g. '6:30-7:45 AM CT'" },
+                                eastern_time: { type: "string", description: "Same window converted to ET, e.g. '7:30-8:45 AM ET'" },
+                                reasoning: { type: "string", description: "Why this window for THIS prospect — cite industry/size/site evidence" },
+                              },
+                              required: ["day", "local_time", "eastern_time", "reasoning"],
+                            },
+                          },
+                          avoid_windows: {
+                            type: "array",
+                            description: "Specific times to NOT send and why (e.g. 'Mon before 10am — Monday inbox triage')",
+                            items: { type: "string" },
+                          },
+                          subject_line_angle: { type: "string", description: "Suggested subject-line angle that matches the timing context (e.g. early-AM = scannable/short; evening = thoughtful question)" },
+                          follow_up_cadence: { type: "string", description: "Recommended follow-up rhythm tuned to this prospect (e.g. '3 touches over 9 days: Tue AM, Thu PM, following Mon AM')" },
+                          seasonality_note: { type: "string", description: "Optional seasonal factor if industry-relevant; empty string if none" },
+                        },
+                        required: ["inferred_timezone", "inferred_industry", "inferred_company_size", "best_send_windows", "avoid_windows", "subject_line_angle", "follow_up_cadence"],
+                      },
                     },
-                    required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script"],
+                    required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing"],
                   },
                 },
                 required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],

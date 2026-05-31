@@ -1522,6 +1522,54 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                         <p className="text-foreground whitespace-pre-wrap bg-background/40 rounded p-2 border border-amber/20">{scan.outreach.first_touch_script}</p>
                       </div>
                     )}
+                    {scan.outreach.email_timing && (
+                      <div className="text-xs border-t border-amber/30 pt-2 mt-1 space-y-1.5">
+                        <p className="font-mono text-[10px] uppercase text-amber">📧 Best Email Timing</p>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[11px]">
+                          {scan.outreach.email_timing.inferred_timezone && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">TZ:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_timezone}</span></div>
+                          )}
+                          {scan.outreach.email_timing.inferred_industry && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">Industry:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_industry}</span></div>
+                          )}
+                          {scan.outreach.email_timing.inferred_company_size && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">Size:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_company_size}</span></div>
+                          )}
+                          {scan.outreach.email_timing.timezone_evidence && (
+                            <div className="col-span-2 text-muted-foreground text-[10px] italic">TZ source: {scan.outreach.email_timing.timezone_evidence}</div>
+                          )}
+                          {scan.outreach.email_timing.size_evidence && (
+                            <div className="col-span-2 text-muted-foreground text-[10px] italic">Size source: {scan.outreach.email_timing.size_evidence}</div>
+                          )}
+                        </div>
+                        {Array.isArray(scan.outreach.email_timing.best_send_windows) && scan.outreach.email_timing.best_send_windows.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="font-mono text-[10px] uppercase text-amber/80">Send Windows (best → good)</p>
+                            {scan.outreach.email_timing.best_send_windows.map((w: any, i: number) => (
+                              <div key={i} className="bg-background/40 rounded p-1.5 border border-amber/20">
+                                <p className="text-foreground font-semibold">{w.day} · <span className="text-amber">{w.local_time}</span> <span className="text-muted-foreground">({w.eastern_time})</span></p>
+                                {w.reasoning && <p className="text-muted-foreground text-[10px]">{w.reasoning}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {Array.isArray(scan.outreach.email_timing.avoid_windows) && scan.outreach.email_timing.avoid_windows.length > 0 && (
+                          <div className="text-[11px]">
+                            <span className="font-mono text-[10px] uppercase text-red-400">Avoid:</span>{' '}
+                            <span className="text-muted-foreground">{scan.outreach.email_timing.avoid_windows.join(' · ')}</span>
+                          </div>
+                        )}
+                        {scan.outreach.email_timing.subject_line_angle && (
+                          <div className="text-[11px]"><span className="font-mono text-[10px] uppercase text-muted-foreground">Subject angle:</span> <span className="text-foreground">{scan.outreach.email_timing.subject_line_angle}</span></div>
+                        )}
+                        {scan.outreach.email_timing.follow_up_cadence && (
+                          <div className="text-[11px]"><span className="font-mono text-[10px] uppercase text-muted-foreground">Cadence:</span> <span className="text-foreground">{scan.outreach.email_timing.follow_up_cadence}</span></div>
+                        )}
+                        {scan.outreach.email_timing.seasonality_note && (
+                          <div className="text-[11px] text-amber/80 italic">⚠ {scan.outreach.email_timing.seasonality_note}</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
