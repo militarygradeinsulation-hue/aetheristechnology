@@ -1891,6 +1891,12 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   "Client asked for someone local / specific vertical",
                   "Great lead, I'm over capacity. Take it.",
                   "They need a different service / solution",
+                  "Low hanging fruit — easy close",
+                  "Great niche to connect with",
+                  "High intent, move fast",
+                  "Warm intro possible — use my name",
+                  "Price sensitive — needs discount talk",
+                  "Decision maker already sold",
                 ].map((note) => (
                   <button
                     key={note}
