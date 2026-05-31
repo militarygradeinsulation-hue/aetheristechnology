@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAdminToken } from '@/lib/adminAuth';
 import { Loader2, FileUp, Sparkles, Download, FileText, Copy } from 'lucide-react';
 import { downloadResumeAnalysisPdf, downloadResumeAnalysisText, buildResumeAnalysisText } from '@/lib/generateResumePdf';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 interface Analysis {
   candidate_name?: string;
