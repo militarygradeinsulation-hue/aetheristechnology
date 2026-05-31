@@ -90,27 +90,46 @@ serve(async (req) => {
 
     console.log("Scraping URL:", formattedUrl);
 
-    const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: formattedUrl,
-        formats: ["markdown", "links"],
-        onlyMainContent: false,
-        waitFor: 3000,
-      }),
-    });
+    async function firecrawlScrape(opts: { onlyMainContent: boolean; waitFor: number; timeout: number; }) {
+      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          formats: ["markdown", "links"],
+          onlyMainContent: opts.onlyMainContent,
+          waitFor: opts.waitFor,
+          timeout: opts.timeout,
+          blockAds: true,
+          removeBase64Images: true,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok && data?.success !== false, data };
+    }
 
-    const scrapeData = await scrapeResponse.json();
+    let attempt = await firecrawlScrape({ onlyMainContent: false, waitFor: 2000, timeout: 45000 });
 
-    if (!scrapeResponse.ok) {
+    if (!attempt.ok) {
+      console.warn("Firecrawl first attempt failed, retrying lighter:", attempt.data?.code || attempt.data?.error);
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
+    }
+
+    const scrapeData = attempt.data;
+
+    if (!attempt.ok) {
       console.error("Firecrawl error:", scrapeData);
+      const code = scrapeData?.code;
+      const friendly =
+        code === "SCRAPE_TIMEOUT"
+          ? "That site took too long to respond. Try again in a moment, or scan the homepage directly."
+          : (scrapeData?.error || "Failed to scrape website");
       return new Response(
-        JSON.stringify({ error: scrapeData.error || "Failed to scrape website" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: friendly }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
