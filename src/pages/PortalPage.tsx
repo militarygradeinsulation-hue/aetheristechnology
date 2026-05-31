@@ -795,6 +795,7 @@ const PortalPage: React.FC = () => {
                       type="button"
                       onClick={() => {
                         if (t.href) { window.location.href = t.href; return; }
+                        if (t.id === 'workbench') { window.dispatchEvent(new Event('workbench:toggle')); return; }
                         setTab(t.id);
                         setActiveTool(null);
                         logPortalActivity('tab_view', { tab: t.id });
