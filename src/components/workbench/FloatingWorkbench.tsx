@@ -192,8 +192,8 @@ export const FloatingWorkbench: React.FC = () => {
 
   return (
     <>
-      {/* Floating launcher (hidden while open) */}
-      {!open && (
+      {/* Floating launcher — hidden for admin (Joseph opens via tab/button) */}
+      {!open && !isAdmin && (
         <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={60}>
           <button
             onClick={() => setOpen(true)}
