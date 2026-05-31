@@ -724,6 +724,53 @@ export const AdminLeadBrowser: React.FC = () => {
                         ))}
                       </div>
                     )}
+                    {detail.enrichment.outreach && (
+                      <div className="p-3 rounded-lg bg-amber/5 border border-amber/30 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="font-display text-amber uppercase tracking-wider">
+                            Recommended outreach: {String(detail.enrichment.outreach.recommended_channel || '—').toUpperCase()}
+                          </div>
+                          {detail.enrichment.outreach.channel_confidence && (
+                            <span className="text-[10px] font-mono uppercase text-muted-foreground">
+                              {detail.enrichment.outreach.channel_confidence} confidence
+                            </span>
+                          )}
+                        </div>
+                        {detail.enrichment.outreach.why_this_channel && (
+                          <div className="text-muted-foreground">{detail.enrichment.outreach.why_this_channel}</div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          {detail.enrichment.outreach.secondary_channel && (
+                            <div><span className="text-muted-foreground">Backup:</span> {detail.enrichment.outreach.secondary_channel}</div>
+                          )}
+                          {detail.enrichment.outreach.best_time_to_reach && (
+                            <div><span className="text-muted-foreground">Best time:</span> {detail.enrichment.outreach.best_time_to_reach}</div>
+                          )}
+                          {detail.enrichment.outreach.tone_to_use && (
+                            <div className="col-span-2"><span className="text-muted-foreground">Tone:</span> {detail.enrichment.outreach.tone_to_use}</div>
+                          )}
+                        </div>
+                        {detail.enrichment.outreach.persona_read && (
+                          <div className="pt-2 border-t border-amber/20">
+                            <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Persona read</div>
+                            <div>{detail.enrichment.outreach.persona_read}</div>
+                          </div>
+                        )}
+                        {Array.isArray(detail.enrichment.outreach.do_not_do) && detail.enrichment.outreach.do_not_do.length > 0 && (
+                          <div>
+                            <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Do NOT</div>
+                            <ul className="list-disc list-inside space-y-0.5">
+                              {detail.enrichment.outreach.do_not_do.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                        {detail.enrichment.outreach.first_touch_script && (
+                          <div className="p-2 rounded bg-background/60 border border-border/40 italic">
+                            {detail.enrichment.outreach.first_touch_script}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="flex gap-3 text-[10px] font-mono uppercase text-muted-foreground pt-2 border-t border-border/30">
                       {detail.enrichment.estimated_revenue_band && <span>Rev: {detail.enrichment.estimated_revenue_band}</span>}
                       {detail.enrichment.confidence && <span>Confidence: {detail.enrichment.confidence}</span>}
