@@ -721,7 +721,9 @@ const PortalPage: React.FC = () => {
                         key={t.id}
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          setTab(t.id); setActiveTool(null); setTabSearch(''); setTabSearchOpen(false);
+                          setTabSearch(''); setTabSearchOpen(false);
+                          if (t.id === 'workbench') { window.dispatchEvent(new Event('workbench:toggle')); return; }
+                          setTab(t.id); setActiveTool(null);
                           if (layout !== 'tabs') setLayout('tabs');
                         }}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
