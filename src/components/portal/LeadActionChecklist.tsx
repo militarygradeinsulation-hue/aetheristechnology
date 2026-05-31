@@ -20,7 +20,7 @@ export const LeadActionChecklist: React.FC<Props> = ({ leadId, leadLabel }) => {
   const [items, setItems] = useState<LeadActionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const load = async () => {
     try {
