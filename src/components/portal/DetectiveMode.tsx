@@ -642,6 +642,11 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           </div>
         )}
 
+        {/* Best playbook + best time + best method to contact */}
+        {r.best_angle && (
+          <DetectiveContactPlan lead={lead as any} rr={liveRr} />
+        )}
+
         {/* Deduction trail — pinned clues connected by string */}
         {r.deduction_chain && r.deduction_chain.length > 0 && (
           <div className="space-y-1">
