@@ -1881,8 +1881,28 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 ))}
               </select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="text-xs">Note for them (optional)</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  "Not my industry — better fit for you",
+                  "Tried multiple times, no response. Fresh eyes needed.",
+                  "Too small / too big for my tier",
+                  "Client asked for someone local / specific vertical",
+                  "Great lead, I'm over capacity. Take it.",
+                  "They need a different service / solution",
+                ].map((note) => (
+                  <button
+                    key={note}
+                    type="button"
+                    onClick={() => setForwardNote(note)}
+                    className="text-[11px] px-2 py-1 rounded border border-amber/30 bg-amber/5 text-amber/90 hover:bg-amber/15 hover:border-amber/50 transition-colors"
+                    disabled={forwardBusy}
+                  >
+                    {note}
+                  </button>
+                ))}
+              </div>
               <Textarea
                 value={forwardNote}
                 onChange={(e) => setForwardNote(e.target.value)}
