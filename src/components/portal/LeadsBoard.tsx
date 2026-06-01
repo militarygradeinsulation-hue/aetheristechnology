@@ -469,6 +469,7 @@ export const LeadsBoard: React.FC = () => {
                       {l.email && <p className="truncate"><Mail className="w-3 h-3 inline mr-1" />{l.email}</p>}
                       {l.phone && <p className="truncate"><Phone className="w-3 h-3 inline mr-1" />{l.phone}</p>}
                     </div>
+                    <GenericEmailWarning email={l.email} />
                     <div className="mt-3 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => handleSkipDrip(l)} className="text-muted-foreground">
                         <X className="w-3 h-3 mr-1" /> Skip
