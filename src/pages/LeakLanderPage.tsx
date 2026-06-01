@@ -172,28 +172,28 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Buttons — primary CTAs, larger */}
           <section
-            className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
+            className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider text-xs transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
+            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/home">
-                <ExternalLink className="w-3.5 h-3.5 mr-2 text-amber relative" />
+                <ExternalLink className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Main Site</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider text-xs transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
+            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/contact">
-                <FileText className="w-3.5 h-3.5 mr-2 text-amber relative" />
+                <FileText className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Intake Form</span>
               </Link>
             </Button>
-            <Button asChild size="sm" className="relative overflow-hidden bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider text-xs ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/35 before:to-transparent before:pointer-events-none">
+            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/35 before:to-transparent before:pointer-events-none">
               <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Calendar className="w-3.5 h-3.5 mr-2 relative" />
+                <Calendar className="w-5 h-5 mr-2 relative" />
                 <span className="relative">Book the Diagnostic</span>
-                <ArrowRight className="ml-2 w-3.5 h-3.5 relative" />
+                <ArrowRight className="ml-2 w-5 h-5 relative" />
               </a>
             </Button>
           </section>
@@ -239,30 +239,67 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Frequently Cited Facts — Island-Test blocks for AI extraction */}
+          {/* Three options — side-by-side dropdowns at the bottom */}
           <section
-            className="mt-12 max-w-5xl mx-auto animate-fade-in"
+            className="mt-12 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
-            aria-labelledby="cited-facts-heading"
           >
-            <button
-              type="button"
-              onClick={() => setFactsOpen((v) => !v)}
-              className="w-full flex flex-col items-center gap-2 group rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
-              aria-expanded={factsOpen}
-              aria-controls="cited-facts-content"
-            >
-              <div className="font-mono text-xs uppercase tracking-[0.3em] text-amber">
-                For Operators · For AI Answer Engines
+            <div className="text-center mb-5">
+              <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber/80">
+                More · Tap to Open
               </div>
-              <h2
-                id="cited-facts-heading"
-                className="font-forensic text-2xl md:text-3xl font-bold text-foreground text-center inline-flex items-center gap-2"
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Frequently Cited Facts trigger */}
+              <button
+                type="button"
+                onClick={() => setFactsOpen((v) => !v)}
+                className="group flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
+                aria-expanded={factsOpen}
+                aria-controls="cited-facts-content"
               >
-                Frequently Cited Facts
-                <ChevronDown className={`w-5 h-5 text-amber transition-transform ${factsOpen ? "rotate-180" : ""}`} />
-              </h2>
-            </button>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                  For Operators · For AI
+                </div>
+                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
+                  Frequently Cited Facts
+                  <ChevronDown className={`w-4 h-4 text-amber transition-transform ${factsOpen ? "rotate-180" : ""}`} />
+                </h2>
+              </button>
+
+              {/* What the Hell trigger */}
+              <button
+                type="button"
+                onClick={() => setWhatOpen((v) => !v)}
+                className="group relative overflow-hidden flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-crimson/50 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-crimson transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
+                aria-expanded={whatOpen}
+              >
+                <HelpCircle className="w-5 h-5 text-crimson" />
+                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2 drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">
+                  What the Hell Do You Sell?
+                  <ChevronDown className={`w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
+                </h2>
+              </button>
+
+              {/* Forensic Revenue Recovery deck trigger */}
+              <button
+                type="button"
+                onClick={() => setDeckOpen((v) => !v)}
+                className="group flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
+                aria-expanded={deckOpen}
+              >
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                  Case File · Deck
+                </div>
+                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
+                  Forensic Revenue Recovery
+                  <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
+                </h2>
+              </button>
+            </div>
+
+            {/* Expanded panels render full-width below */}
             {factsOpen && (
               <div id="cited-facts-content" className="grid gap-5 mt-6 animate-fade-in">
                 <article className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
@@ -326,30 +363,9 @@ const LeakLanderPage: React.FC = () => {
                 </article>
               </div>
             )}
-          </section>
 
-
-
-
-
-
-          {/* What the hell do we do — instant answer */}
-          <section
-            className="mt-12 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "300ms", animationFillMode: "both" }}
-          >
-            <button
-              type="button"
-              onClick={() => setWhatOpen((v) => !v)}
-              className="relative overflow-hidden w-full group inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl border-2 border-crimson/50 bg-card/95 backdrop-blur-sm hover:border-crimson transition-all text-foreground font-mono uppercase tracking-wider text-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
-              aria-expanded={whatOpen}
-            >
-              <HelpCircle className="w-5 h-5 text-crimson relative" />
-              <span className="relative font-bold drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">What the Hell Do You Actually Sell?</span>
-              <ChevronDown className={`relative w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
-            </button>
             {whatOpen && (
-              <div className="mt-4 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 animate-fade-in text-left space-y-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+              <div className="mt-6 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 animate-fade-in text-left space-y-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
                 <div className="font-mono text-xs uppercase tracking-[0.3em] text-amber">Case File · Plain English</div>
                 <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
                   What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
@@ -389,55 +405,32 @@ const LeakLanderPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </section>
 
-
-          {/* Forensic Revenue Recovery deck — minimized, PDFs at bottom */}
-          <section
-            className="mt-12 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "330ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-              <button
-                type="button"
-                onClick={() => setDeckOpen((v) => !v)}
-                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-amber/5 transition-colors rounded-t-xl"
-                aria-expanded={deckOpen}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <FileText className="w-5 h-5 text-amber shrink-0" />
-                  <div className="min-w-0">
-                    <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-amber">Case File · Deck</div>
-                    <div className="font-forensic text-base font-bold text-foreground truncate">Forensic Revenue Recovery</div>
-                  </div>
+            {deckOpen && (
+              <div className="mt-6 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in">
+                <div className="px-5 py-4 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
+                  <a
+                    href="/downloads/Forensic-Revenue-Recovery.pdf"
+                    download
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
+                  >
+                    <Download className="w-4 h-4" /> Download PDF
+                  </a>
+                  <a
+                    href="/downloads/Forensic-Revenue-Recovery.pptx"
+                    download
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
+                  >
+                    <Download className="w-4 h-4" /> Download PPTX
+                  </a>
                 </div>
-                <ChevronDown className={`w-5 h-5 text-amber shrink-0 transition-transform ${deckOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              <div className="border-t border-amber/20 px-5 py-4 flex flex-wrap items-center justify-center gap-3">
-                <a
-                  href="/downloads/Forensic-Revenue-Recovery.pdf"
-                  download
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
-                >
-                  <Download className="w-4 h-4" /> Download PDF
-                </a>
-                <a
-                  href="/downloads/Forensic-Revenue-Recovery.pptx"
-                  download
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
-                >
-                  <Download className="w-4 h-4" /> Download PPTX
-                </a>
-              </div>
-
-              {deckOpen && (
-                <div className="border-t border-amber/20 p-4 animate-fade-in">
+                <div className="p-4">
                   <ForensicDeckCarousel />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </section>
+
 
 
           {/* Contact info — compact glass row */}
