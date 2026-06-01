@@ -324,21 +324,32 @@ export const LeadsBoard: React.FC = () => {
     return { groups, totalShown: filtered.length };
   }, [mine, mineGroupBy, mineSort, mineSearch, mineMinScore, mineContactState]);
 
+  // All leads with a website/email — used as the picker list.
+  // We show already-deep-scanned ones too so the user can SEE what's been done,
+  // and choose to re-scan or skip them.
   const scanCandidates = useMemo(
-    () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
+    () => mine.filter(l => l.website || l.email),
     [mine]
+  );
+  const isAlreadyScanned = useCallback(
+    (l: any) => !!(l?.enrichment?.rocketreach || l?.enrichment?.firecrawl),
+    []
+  );
+  const freshCandidates = useMemo(
+    () => scanCandidates.filter(l => !isAlreadyScanned(l)),
+    [scanCandidates, isAlreadyScanned]
   );
 
   const openBulkPicker = useCallback(() => {
     if (scanCandidates.length === 0) {
-      toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
+      toast({ title: 'Nothing to scan', description: 'No leads have a website or email yet.' });
       return;
     }
-    // Preselect first 10
-    setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)));
+    // Preselect first 10 leads that have NOT been deep-scanned yet
+    setBulkSelected(new Set(freshCandidates.slice(0, 10).map(l => l.id)));
     setBulkStatuses({});
     setBulkPickerOpen(true);
-  }, [scanCandidates, toast]);
+  }, [scanCandidates, freshCandidates, toast]);
 
   const toggleBulkPick = (id: string) => {
     setBulkSelected(prev => {
