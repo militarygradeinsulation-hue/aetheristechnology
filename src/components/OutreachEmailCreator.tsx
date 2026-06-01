@@ -277,6 +277,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             {mode === 'create' ? 'Context / Angle'
               : mode === 'subjects' ? 'Context / Angle for the subject hooks'
               : mode === 'analyze' ? 'Extra context (optional)'
+              : mode === 'linkedin_intro' ? 'Context about them (their post, role, company, what you noticed)'
               : 'Notes for the rewrite (optional)'}
           </label>
           <Textarea
@@ -289,7 +290,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
                 ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
                 : mode === 'analyze'
                   ? "Who it is going to, what you want it to do. Helps the critique stay on-target."
-                  : "What you want changed. Tone, urgency, specific facts to add."}
+                  : mode === 'linkedin_intro'
+                    ? "What caught your eye. Their recent post, a hire, their role, something specific. NO pitch ideas — this is a soft intro."
+                    : "What you want changed. Tone, urgency, specific facts to add."}
             rows={4}
           />
         </div>
