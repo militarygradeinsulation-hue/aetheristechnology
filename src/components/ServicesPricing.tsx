@@ -830,25 +830,25 @@ export const ServicesPricing: React.FC = () => {
                     </span>
                   )}
 
-                  {/* Header */}
+                  {/* Header — case file */}
                   <div className="flex items-start gap-4 mb-5">
-                    <div className="w-14 h-14 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
-                      <expandedService.icon className="w-7 h-7 text-primary" />
+                    <div className="w-12 h-12 rounded-md bg-amber/10 ring-1 ring-amber/50 shadow-[0_0_18px_-2px_hsl(var(--amber-glow)/0.55)] flex items-center justify-center flex-shrink-0">
+                      <expandedService.icon className="w-6 h-6 text-amber" />
                     </div>
                     <div className="flex-1 min-w-0 pr-8">
-                      <h3 className="text-2xl md:text-3xl font-bold text-foreground font-display mb-1">{expandedService.title}</h3>
+                      <h3 className="text-2xl md:text-3xl font-bold text-foreground font-forensic mb-1 leading-tight">{expandedService.title}</h3>
                       <div className="flex items-baseline gap-2 flex-wrap">
                         {isServiceComingSoon(expandedService) ? (
-                          <span className="text-xs font-mono uppercase tracking-widest text-red-400">Pricing TBA</span>
+                          <span className="text-xs font-case uppercase tracking-widest text-crimson">Pricing TBA</span>
                         ) : billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                           <>
-                            <span className="text-2xl font-bold text-gradient-amber font-display">{expandedService.monthlyPricing}</span>
+                            <span className="text-2xl font-bold text-amber font-forensic">{expandedService.monthlyPricing}</span>
                             <span className="text-sm text-muted-foreground/70 line-through">{expandedService.pricing}</span>
                             <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{expandedService.monthlySavePercent}%</span>
                           </>
                         ) : (
                           <>
-                            <span className="text-2xl font-bold text-primary font-display">{expandedService.pricing}</span>
+                            <span className="text-2xl font-bold text-amber font-forensic">{expandedService.pricing}</span>
                             <span className="text-sm text-muted-foreground">{expandedService.pricingDetail}</span>
                           </>
                         )}
