@@ -66,7 +66,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: '30-Day Lead Gen Sprint', priceCents: 99900, tier: 3, highlight: true },
   { name: 'Marketing-to-Sales Alignment', priceCents: 129900, tier: 3 },
   { name: 'Sales Process Redesign', priceCents: 149900, tier: 3, highlight: true },
-  { name: '14-Day Forensic Diagnostic', priceCents: 290000, tier: 3, highlight: true },
+  { name: 'Leak Audit', priceCents: 290000, tier: 3, highlight: true },
   { name: 'Fractional CTO/CMO', priceCents: 590000, tier: 3, recurring: true, highlight: true },
 ];
 
