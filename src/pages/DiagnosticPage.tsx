@@ -159,11 +159,11 @@ const DiagnosticPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The 21-Day Revenue Diagnostic, $18,500 | Aetheris"
-        description="Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M. Map where CRM, sales follow-up, and lead flow are losing money."
+        title="The Leak Audit™, $2,500 | Aetheris"
+        description="Operator-led Leak Audit for specialty manufacturers $5M–$25M. $2,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
-        keywords="revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
-        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Diagnostic', path: '/diagnostic' }]}
+        keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
+        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
       />
       <Background />
       <div className="relative z-10">
