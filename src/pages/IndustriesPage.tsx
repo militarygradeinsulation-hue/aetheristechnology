@@ -215,28 +215,28 @@ const IndustriesPage: React.FC = () => {
 
             <div className="forensic-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                What you get, every industry, every engagement
+                The Leak Audit™ · Every industry, same forensic process
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-start gap-3">
+                  <FileText className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-foreground text-sm">7-step forensic process</div>
+                    <div className="text-xs text-muted-foreground">Trace every leak to a record.</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
                   <DollarSign className="w-5 h-5 text-amber shrink-0 mt-0.5" />
                   <div>
-                    <div className="font-bold text-foreground text-sm">$18,500 fixed</div>
-                    <div className="text-xs text-muted-foreground">No hourly. No scope creep.</div>
+                    <div className="font-bold text-foreground text-sm">$2,500 flat, operator-led</div>
+                    <div className="text-xs text-muted-foreground">Applied 1:1 to engagement.</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock className="w-5 h-5 text-amber shrink-0 mt-0.5" />
                   <div>
-                    <div className="font-bold text-foreground text-sm">21 calendar days</div>
-                    <div className="text-xs text-muted-foreground">Kickoff to sealed report.</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <FileText className="w-5 h-5 text-amber shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-bold text-foreground text-sm">15–30 page report</div>
-                    <div className="text-xs text-muted-foreground">+ source-data appendix.</div>
+                    <div className="font-bold text-foreground text-sm">Free self-scan first</div>
+                    <div className="text-xs text-muted-foreground">Run /leak-audit in minutes.</div>
                   </div>
                 </div>
               </div>
