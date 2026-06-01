@@ -35,7 +35,7 @@ interface DetectiveResult {
 export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment, auth = 'portal' }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
+  const [channel, setChannel] = useState<'email' | 'linkedin' | 'linkedin_intro'>('email');
   const [result, setResult] = useState<DetectiveResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(0);
