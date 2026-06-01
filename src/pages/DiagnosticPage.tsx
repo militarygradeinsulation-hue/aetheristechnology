@@ -232,8 +232,8 @@ const DiagnosticPage: React.FC = () => {
 
             <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
-              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
-              <p className="text-sm text-muted-foreground mt-2">21 calendar days. No retainer required. No percentage-of-savings.</p>
+              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$2,500</div>
+              <p className="text-sm text-muted-foreground mt-2">Operator-led Leak Audit. No retainer required. No percentage-of-savings. Applied toward any engagement.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
                 <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
