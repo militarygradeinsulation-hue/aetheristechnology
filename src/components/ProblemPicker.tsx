@@ -145,7 +145,7 @@ export const ProblemPicker: React.FC = () => {
                       aria-expanded={isOpen}
                       className="w-full text-left p-5 md:p-7 group"
                     >
-                      <div className="flex items-start gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2">
                         <div
                           className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 transition-all ${
                             isOpen
@@ -155,11 +155,11 @@ export const ProblemPicker: React.FC = () => {
                         >
                           <Icon className="w-5 h-5 text-amber" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-0.5">
+                        <div className="flex-1 min-w-0 text-center">
+                          <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1.5">
                             Case {String(idx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
                           </div>
-                          <div className="font-forensic font-bold text-foreground text-base md:text-lg leading-tight">
+                          <div className="font-forensic font-bold text-foreground text-2xl md:text-4xl leading-tight">
                             "{group.problem}"
                           </div>
                         </div>
@@ -174,7 +174,7 @@ export const ProblemPicker: React.FC = () => {
                         </div>
                       </div>
 
-                      <p className="text-base md:text-lg text-foreground/80 leading-snug pl-[3.25rem]">
+                      <p className="text-base md:text-lg text-foreground/80 leading-snug text-center mt-3">
                         <span className="font-case text-[10px] uppercase tracking-widest text-crimson">
                           You feel it as →{' '}
                         </span>
@@ -182,7 +182,7 @@ export const ProblemPicker: React.FC = () => {
                       </p>
 
                       {!isOpen && (
-                        <div className="pl-[3.25rem] mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 group-hover:text-amber/80 transition-colors">
+                        <div className="mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 group-hover:text-amber/80 transition-colors text-center">
                           Click for the tool that plugs this →
                         </div>
                       )}
