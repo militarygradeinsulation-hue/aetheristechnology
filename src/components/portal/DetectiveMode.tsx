@@ -374,10 +374,13 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             <Search className="w-3 h-3 mr-1" /> Open the case (email)
           </Button>
           <Button size="sm" variant="outline" onClick={() => run('linkedin')} className="h-8 border-amber/50 text-amber hover:bg-amber/10">
-            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn version
+            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn (forensic)
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => run('linkedin_intro')} className="h-8 border-sky-500/50 text-sky-400 hover:bg-sky-500/10">
+            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn intro (soft, non-salesy)
           </Button>
           <ReadAloudButton
-            text="Detective Mode. Reads every scrap on this lead, picks the single best angle from their leaks and gaps, shows the deduction from point A to point B, then writes the message in Aetheris voice."
+            text="Detective Mode. Reads every scrap on this lead, picks the single best angle from their leaks and gaps, shows the deduction from point A to point B, then writes the message in Aetheris voice. Or generate a soft, non-salesy first-touch LinkedIn intro."
             label="Listen"
             className="h-8 border-amber/40 text-amber hover:bg-amber/10"
           />
