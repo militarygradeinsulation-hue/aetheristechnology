@@ -46,6 +46,27 @@ GROUND RULES:
 
 Return the critique via the analyze_email tool.`;
 
+const LINKEDIN_INTRO_SYSTEM_PROMPT = `You write FIRST-TOUCH LinkedIn DMs for Aetheris reps.
+
+This is an INTRODUCTION. It is not a pitch. It is not a sales message. It is a human reaching out to another human on LinkedIn.
+
+HARD RULES:
+1. NEVER pitch. Do not mention Aetheris, "audit", "leak", "diagnostic", services, calls, meetings, or any next step beyond "happy to connect" or a single curious question.
+2. NEVER ask for a call, demo, intro, 15 minutes, "quick chat", or any time on the calendar.
+3. NEVER use dashes (em, en, hyphen-as-pause). Use periods or commas. Hyphens only inside compound words like "follow-up".
+4. No emoji. No exclamation points. No flattery ("love what you're doing", "huge fan", "impressive work"). No "I hope this finds you well."
+5. 40 to 90 words. Short sentences. Reads like a real person, not a template.
+6. Open with ONE specific, genuine observation about THEM (their post, role, company, industry, something they shipped). Prove you actually looked.
+7. Add ONE short personal context line about why you're reaching out (shared interest, a question their work raised, a pattern in their space). NO product mention.
+8. Close with EITHER a soft "open to connecting / following your work" OR ONE genuine curious question. Never both. Never a CTA.
+9. No subject line. LinkedIn DMs do not have subjects.
+
+TONE: warm, curious, peer-to-peer, low-pressure. Sounds like a competent operator who reached out because they were genuinely interested, not because they want something.
+
+If a tone or personality is specified, adapt the cadence but keep ALL hard rules. The point: zero sales pressure on the first touch.
+
+Return the message via the write_linkedin_intro tool.`;
+
 const EMAIL_TOOL = {
   type: "function",
   function: {
@@ -59,6 +80,23 @@ const EMAIL_TOOL = {
         why_it_works: { type: "string", description: "One sentence operator note explaining the leverage." },
       },
       required: ["subject", "body", "why_it_works"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const LINKEDIN_INTRO_TOOL = {
+  type: "function",
+  function: {
+    name: "write_linkedin_intro",
+    description: "Write a soft, non-salesy first-touch LinkedIn DM. No pitch, no CTA to a call.",
+    parameters: {
+      type: "object",
+      properties: {
+        body: { type: "string", description: "40 to 90 words. No subject. No dashes. No pitch. No call ask." },
+        why_it_works: { type: "string", description: "One sentence on why this opener is hard to ignore without feeling sold to." },
+      },
+      required: ["body", "why_it_works"],
       additionalProperties: false,
     },
   },
