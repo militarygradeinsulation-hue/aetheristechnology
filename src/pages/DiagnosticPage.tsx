@@ -358,10 +358,10 @@ const DiagnosticPage: React.FC = () => {
 
             <section className="forensic-tile rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                <div className="font-case text-base md:text-lg uppercase tracking-widest text-amber font-semibold">
                   Automatically included · $2,500 Leak Audit
                 </div>
-                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                <div className="font-case text-base md:text-lg uppercase tracking-widest text-muted-foreground font-semibold">
                   No add-on fee · No upsell
                 </div>
               </div>
