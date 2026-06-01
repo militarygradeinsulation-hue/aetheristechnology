@@ -222,7 +222,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
         tools: [tool],
