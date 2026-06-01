@@ -176,8 +176,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
         setResult(email);
         if (email?.body) {
           saveToolRun({
-            tool_type: 'outreach_email',
-            title: email.subject?.slice(0, 80) || `Outreach Email — ${(recipientName || prompt || 'untitled').slice(0, 60)}`,
+            tool_type: mode === 'linkedin_intro' ? 'linkedin_intro' : 'outreach_email',
+            title: (email.subject || `LinkedIn Intro — ${(recipientName || prompt || 'untitled').slice(0, 60)}`).slice(0, 80),
             input_data: { mode, prompt, pastedText: pasted, recipientName, senderName },
             output_data: email,
           });
