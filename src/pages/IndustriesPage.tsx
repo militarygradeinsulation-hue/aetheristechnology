@@ -86,10 +86,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You feel the lanes losing money but can't prove which ones, so every Monday meeting becomes a guess and a fight.",
     whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Lane margin and quote response are operational, they need both forensic audit and hands-on fix execution.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Lane margin and quote response leaks come up first in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
