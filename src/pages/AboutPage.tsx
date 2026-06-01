@@ -22,6 +22,15 @@ const CRED_BLOCKS: { label: string; body: string }[] = [
   { label: 'Business continuity', body: 'Sales calls run by Joseph Toney. Active engagements delivered jointly with operating partner. Client files, contracts, and credentials live in a documented, partner-accessible system. Continuity contact and escalation path provided to every retained client.' },
 ];
 
+const METHODOLOGY_STEPS: { n: string; title: string; body: string }[] = [
+  { n: '01', title: 'Define the leak', body: 'A revenue leak is a measurable gap between two observable numbers in your own data, never a forecast, never a "potential opportunity."' },
+  { n: '02', title: 'Measure the baseline', body: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency.' },
+  { n: '03', title: 'Attribute the dollars', body: 'Every leak is tagged with the baseline metric, the proposed fix, conservative + aggressive ROI, and the exact metric we will re-measure after implementation.' },
+  { n: '04', title: 'Stay in scope', body: 'In: CRM data, sales activity, attribution, cadences, handoffs. Out: pricing strategy, brand strategy, hiring, capital structure, shop-floor manufacturing.' },
+  { n: '05', title: 'Make it auditable', body: 'Every claim traces back to a record export. Source CSVs, queries, this methodology document, and a re-runnable script ship with the report.' },
+  { n: '06', title: 'Deliver the file', body: 'Written report (15–30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $2,500 flat for the Leak Audit, applied toward engagement.' },
+];
+
 const AboutPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
