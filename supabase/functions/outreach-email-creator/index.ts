@@ -209,10 +209,11 @@ serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const mode: "create" | "rewrite" | "subjects" | "analyze" =
+    const mode: "create" | "rewrite" | "subjects" | "analyze" | "linkedin_intro" =
       body.mode === "rewrite" ? "rewrite"
         : body.mode === "subjects" ? "subjects"
         : body.mode === "analyze" ? "analyze"
+        : body.mode === "linkedin_intro" || body.mode === "linkedin-intro" ? "linkedin_intro"
         : "create";
     const prompt: string = (body.prompt || "").toString().slice(0, 4000);
     const pastedText: string = (body.pastedText || "").toString().slice(0, 8000);
