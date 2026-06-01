@@ -159,11 +159,11 @@ const DiagnosticPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The 21-Day Revenue Diagnostic, $18,500 | Aetheris"
-        description="Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M. Map where CRM, sales follow-up, and lead flow are losing money."
+        title="The Leak Audit™, $2,500 | Aetheris"
+        description="Operator-led Leak Audit for specialty manufacturers $5M–$25M. $2,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
-        keywords="revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
-        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Diagnostic', path: '/diagnostic' }]}
+        keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
+        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
       />
       <Background />
       <div className="relative z-10">
@@ -175,10 +175,10 @@ const DiagnosticPage: React.FC = () => {
                 Specialty manufacturers · $5M–$25M
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
-                The 21-Day Revenue Diagnostic.
+                The Leak Audit™.
               </h1>
               <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap.
+                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap, for $2,500 flat.
               </p>
               <div className="mt-8 max-w-3xl mx-auto">
                 <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
@@ -187,7 +187,7 @@ const DiagnosticPage: React.FC = () => {
                     loading="lazy"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                     allowFullScreen
-                    title="The 21-Day Revenue Diagnostic"
+                    title="The Leak Audit"
                     className="absolute inset-0 w-full h-full"
                   />
                 </div>
@@ -218,7 +218,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
                     <li>• You get a written leak map, not a software login</li>
-                    <li>• One fixed fee. $18,500. No retainer to read the report</li>
+                    <li>• One fixed fee. $2,500. No retainer to read the report</li>
                     <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>• We tell you exactly where the money is leaking and what to fix first</li>
@@ -232,8 +232,8 @@ const DiagnosticPage: React.FC = () => {
 
             <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
-              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
-              <p className="text-sm text-muted-foreground mt-2">21 calendar days. No retainer required. No percentage-of-savings.</p>
+              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$2,500</div>
+              <p className="text-sm text-muted-foreground mt-2">Operator-led Leak Audit. No retainer required. No percentage-of-savings. Applied toward any engagement.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
                 <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
@@ -264,7 +264,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
 
               <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
-                $18,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
+                $2,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
               </h3>
 
               <div className="overflow-x-auto mb-6">
@@ -273,7 +273,7 @@ const DiagnosticPage: React.FC = () => {
                     <tr className="border-b border-amber/30">
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 pr-3">Line item</th>
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">Typical agency / consultancy</th>
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Diagnostic</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Leak Audit</th>
                     </tr>
                   </thead>
                   <tbody className="text-foreground/85">
@@ -297,7 +297,7 @@ const DiagnosticPage: React.FC = () => {
                     <tr className="border-t-2 border-amber/50">
                       <td className="py-3 pr-3 font-bold text-foreground">TOTAL</td>
                       <td className="py-3 px-3 font-bold text-muted-foreground">$82,000 – $215,000</td>
-                      <td className="py-3 pl-3 font-bold text-amber text-lg">$18,500 flat</td>
+                      <td className="py-3 pl-3 font-bold text-amber text-lg">$2,500 flat</td>
                     </tr>
                   </tbody>
                 </table>
@@ -305,8 +305,8 @@ const DiagnosticPage: React.FC = () => {
 
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">21 days</div>
-                  <div className="text-xs text-muted-foreground mt-1">Fixed timeline. Agencies average 90–120 days to deliver less.</div>
+                  <div className="font-forensic text-3xl font-bold text-amber">Fast turnaround</div>
+                  <div className="text-xs text-muted-foreground mt-1">Operator-led. Agencies average 90–120 days to deliver less.</div>
                 </div>
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
@@ -323,7 +323,7 @@ const DiagnosticPage: React.FC = () => {
                   The real math
                 </div>
                 <p className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$18,500 to find the leak is roughly 1.3% – 4.6% of what it's costing you to ignore it.</span> One recovered deal usually pays for the engagement 5–20x over.
+                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find the leak is a rounding error against what it's costing you to ignore it.</span> One recovered deal usually pays for the audit 100x over.
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-3">
                   If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves, before you sign anything else.
@@ -359,17 +359,17 @@ const DiagnosticPage: React.FC = () => {
             <section className="forensic-tile rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                  Automatically included · $18,500 package
+                  Automatically included · $2,500 Leak Audit
                 </div>
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                   No add-on fee · No upsell
                 </div>
               </div>
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
-                The full Operator Tool Suite ships with every Diagnostic.
+                The full Operator Tool Suite ships with every Leak Audit.
               </h2>
               <p className="text-sm text-foreground/75 mb-5">
-                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
+                When you buy the $2,500 Leak Audit, your operator runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {TOOL_BUNDLE.map((t, idx) => {
