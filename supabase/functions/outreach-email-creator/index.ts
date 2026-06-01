@@ -117,7 +117,6 @@ const ANALYZE_TOOL = {
         },
         problems: {
           type: "array",
-          minItems: 3,
           items: {
             type: "object",
             properties: {
