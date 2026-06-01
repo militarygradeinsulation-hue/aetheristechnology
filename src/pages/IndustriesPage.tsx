@@ -44,10 +44,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
     whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Quote-to-cash is where manufacturers leak most. Diagnostic maps it, retainer rebuilds the follow-up engine.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Quote-to-cash is where manufacturers leak most. Start with the operator-led Leak Audit, fee applies 1:1 to any engagement.',
+      link: '/leak-audit',
     },
   },
   {
