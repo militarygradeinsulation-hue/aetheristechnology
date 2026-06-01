@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { OperatorBio } from '@/components/OperatorBio';
