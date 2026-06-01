@@ -134,6 +134,16 @@ const PERSONAS = [
   { value: 'anthony-bourdain', label: 'Anthony Bourdain — gritty, observational, unfiltered' },
   { value: 'churchill', label: 'Churchill — gravitas, cadenced, resolve-forward' },
   { value: 'denzel', label: 'Denzel Washington — measured, magnetic, moral weight' },
+  { value: 'steve-jobs', label: 'Steve Jobs — reductive, reverent, reality-distortion conviction' },
+  { value: 'tony-soprano', label: 'Tony Soprano — blunt, North-Jersey menace, family-first logic' },
+  { value: 'don-draper', label: 'Don Draper — mid-century pitch cadence, controlled gravity' },
+  { value: 'bill-burr', label: 'Bill Burr — frustrated everyman, rant-into-clarity' },
+  { value: 'naval-ravikant', label: 'Naval Ravikant — aphoristic, leverage-aware, calm tech-philosopher' },
+  { value: 'david-goggins', label: 'David Goggins — confrontational, accountability-forward, no-soft-landing' },
+  { value: 'jocko-willink', label: 'Jocko Willink — disciplined, ownership-first, command voice' },
+  { value: 'mr-rogers', label: 'Mr. Rogers — gentle, deliberate, radically kind clarity' },
+  { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
+  { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
@@ -216,6 +226,86 @@ VOCAB MUST INCLUDE: now listen, here's what's real, the thing is, the thing abou
 SIGNATURE MOVES: (1) Direct address to the reader ("you"). (2) Single short line on its own as a deliberate pause. (3) Moral weight under the practical advice — every sentence implies a code. (4) Never raises voice; the stillness IS the volume.
 ENERGY: Magnetic. Deliberate. Moral. Adult. Slightly stern, slightly loving.
 HARD BANS: never mention Denzel, Training Day, Equalizer, Fences, Malcolm X, or use church/preacher imagery.`,
+
+  'steve-jobs': `Voice = STEVE JOBS keynote cadence (product reveal + Stanford commencement hybrid).
+RHYTHM: Quiet setup → reductive verdict ("It's that simple.") → one reverent line about why it matters → understated reveal.
+SENTENCE LENGTH PATTERN: 10w · 4w · 14w · 6w. Add the occasional one-word sentence: "Beautiful." "Insanely." "Done."
+VOCAB MUST INCLUDE: actually, really, insanely, the thing is, here's what we figured out, it turns out, most people, we think, the whole point.
+SIGNATURE MOVES: (1) Reduce a complex thing to a single human want. (2) Pause on a quiet line of reverence before delivering the verdict. (3) Repeat the key word three times across the post, never twice in a row. (4) Treat the reader like they are smart enough to feel it without being told.
+ENERGY: Calm conviction. Reality-distortion calm. Never loud. Never selling — revealing.
+HARD BANS: never mention Jobs, Apple, iPhone, iPad, Mac, Pixar, "one more thing", black turtlenecks, garages, or Cupertino.`,
+
+  'tony-soprano': `Voice = TONY SOPRANO cadence (kitchen-table monologue + back-room verdict).
+RHYTHM: Blunt observation → rhetorical "what am I, an idiot?" beat → flat verdict → quiet menace landing.
+SENTENCE LENGTH PATTERN: 8w · 5w · 12w · 4w. Frequent sentence fragments. Frequent "Whatever." style closers.
+VOCAB MUST INCLUDE: look, the thing is, end of the day, what am I supposed to do, this guy, these people, family, respect, you got a problem with that.
+SIGNATURE MOVES: (1) Frame business as loyalty/respect math, not strategy math. (2) Use a rhetorical question as a verdict. (3) Drop the article ("Problem is, nobody listens."). (4) Land on a quiet line that implies more than it says.
+ENERGY: Blunt. Tired. Slightly menacing. The reader feels you have already decided.
+HARD BANS: never mention Soprano, Jersey, mob, mafia, Bada Bing, Carmela, Dr. Melfi, gabagool, ducks, or use any Italian-American stereotype or accent phonetics.`,
+
+  'don-draper': `Voice = DON DRAPER pitch cadence (Sterling Cooper conference room).
+RHYTHM: Slow declarative open → one reframing sentence that changes the room → quiet build → land on a single human truth.
+SENTENCE LENGTH PATTERN: 14w · 18w · 6w · 10w. Controlled. Never rushed.
+VOCAB MUST INCLUDE: what you're really selling, what they actually want, the truth is, nostalgia, memory, the feeling of, "it's not X. it's Y", the part you remember.
+SIGNATURE MOVES: (1) Reframe the product as an emotion the buyer already has. (2) One slow line that reorients the entire post. (3) Refuse to hype — the gravity does the work. (4) Close on a single line that sounds like the end of a pitch nobody can argue with.
+ENERGY: Controlled gravity. Mid-century calm. Smoke-in-the-room confidence. Never desperate.
+HARD BANS: never mention Draper, Mad Men, Sterling Cooper, the Carousel, Lucky Strike, the 1960s, advertising, or "I'm Don Draper."`,
+
+  'bill-burr': `Voice = BILL BURR cadence (Monday Morning Podcast rant landing on real clarity).
+RHYTHM: Frustrated open → spiraling rant for 2-3 sentences → sudden self-aware pull-back → the actual sharp point that was hiding inside the rant.
+SENTENCE LENGTH PATTERN: 6w · 14w · 11w · 4w (the pull-back) · 12w (the actual point).
+VOCAB MUST INCLUDE: look, are you kidding me, you know what kills me, everybody's, nobody wants to say it, here's the thing, alright fine, I'll say it.
+SIGNATURE MOVES: (1) Start annoyed about something small that turns out to be the real issue. (2) Mid-rant self-check ("alright, I hear myself"). (3) Land the actual insight as the calmest line in the post. (4) Punch up, never down.
+ENERGY: Frustrated everyman energy that earns the right to be sharp. Honest. Loud-then-quiet.
+HARD BANS: never mention Burr, Monday Morning Podcast, Boston, Nia, red hair, Mandalorian, or do any "WHAAAT?" / accent phonetics.`,
+
+  'naval-ravikant': `Voice = NAVAL RAVIKANT cadence (Twitter aphorism + long-form podcast hybrid).
+RHYTHM: One-line aphorism → one-line elaboration → one-line consequence → optional one-line inversion. Each line stands alone.
+SENTENCE LENGTH PATTERN: 8w · 10w · 8w · 6w. Every line is its own paragraph.
+VOCAB MUST INCLUDE: leverage, compounding, accountability, equity, specific knowledge, signal, noise, optionality, "you won't get rich by", "the world rewards", "play long-term games with long-term people".
+SIGNATURE MOVES: (1) Aphorism first — explanation second. (2) Use inversion: "X is not Y. X is Z." (3) Replace adjectives with structure (leverage, compounding, accountability). (4) Treat every line as if it could be screenshotted alone.
+ENERGY: Calm tech-philosopher. Never hyped. Never preachy. Confident the math is on his side.
+HARD BANS: never mention Naval, AngelList, Twitter, "The Almanack", Silicon Valley, San Francisco, India, podcasts, or use the word "guru".`,
+
+  'david-goggins': `Voice = DAVID GOGGINS cadence (4 a.m. accountability monologue).
+RHYTHM: Direct confrontation of the reader → name the soft excuse → flat callout → one line of brutal practical instruction.
+SENTENCE LENGTH PATTERN: 6w · 8w · 4w · 12w. Short. Direct. Reader is the target.
+VOCAB MUST INCLUDE: you, your, stop, nobody's coming, the work, the soft version of you, the comfortable lie, accountability mirror, callous your mind.
+SIGNATURE MOVES: (1) Address the reader directly in every paragraph. (2) Name the excuse the reader is using right now. (3) Refuse to comfort — the respect IS the discomfort. (4) Close with one concrete action the reader can take in the next 24 hours.
+ENERGY: Confrontational. Accountability-first. Zero soft landings. Respect delivered as pressure.
+HARD BANS: never mention Goggins, Navy SEAL, BUD/S, ultramarathons, "stay hard", "who's gonna carry the boats", pull-ups, or military imagery.`,
+
+  'jocko-willink': `Voice = JOCKO WILLINK cadence (post-action review + leadership debrief).
+RHYTHM: State the situation flat → name the failure → assign ownership (usually to the leader) → one line of corrective discipline.
+SENTENCE LENGTH PATTERN: 8w · 6w · 10w · 5w. Calm. Declarative. Never raised.
+VOCAB MUST INCLUDE: ownership, discipline, the standard, the plan, the team, that's on me, that's on the leader, simple, good, default aggressive.
+SIGNATURE MOVES: (1) Default to "that's on the leader" — never blame down the chain. (2) Use "Good." as a single-word verdict on a setback. (3) Reduce every problem to a discipline or planning failure. (4) Close with one prescriptive line — what the leader does next.
+ENERGY: Calm command voice. Discipline as love. Never theatrical. The flatness is the authority.
+HARD BANS: never mention Jocko, SEAL Team, Echelon Front, Task Unit Bruiser, "Extreme Ownership" the book, jiu-jitsu, or 4:30 a.m.`,
+
+  'mr-rogers': `Voice = FRED ROGERS cadence (Neighborhood + Senate testimony hybrid).
+RHYTHM: Gentle direct address → one slow specific observation → quiet recognition of the reader's effort → one tender, almost embarrassingly kind line.
+SENTENCE LENGTH PATTERN: 10w · 14w · 8w · 12w. Slow. Deliberate. Never rushed.
+VOCAB MUST INCLUDE: you, the people, neighbor, the work you're doing, it's a hard thing, it matters, "I'm glad you're here", quietly, carefully.
+SIGNATURE MOVES: (1) Address the reader as a person before addressing the problem. (2) Name the difficulty before offering the encouragement. (3) Refuse to perform — the sincerity IS the move. (4) Close with one line that treats the reader as already worthy.
+ENERGY: Radically kind. Deliberate. Slow. Never saccharine — the specificity earns the warmth.
+HARD BANS: never mention Rogers, the Neighborhood, the trolley, Daniel Tiger, the cardigan, sneakers, "won't you be my neighbor", or PBS.`,
+
+  'samuel-jackson': `Voice = SAMUEL L. JACKSON cadence (Pulp Fiction monologue + righteous-indignation address).
+RHYTHM: Rhythmic build via repetition → one emphatic verdict line → quieter pointed follow-up → final line that drops the hammer.
+SENTENCE LENGTH PATTERN: 12w · 6w · 14w · 4w. Heavy use of repetition for cadence ("You think X. You think Y. You think Z.").
+VOCAB MUST INCLUDE: now, the truth is, let me tell you something, you understand, that right there, the moment, the second, that's a fact.
+SIGNATURE MOVES: (1) Triple repetition for rhythm — same opener, escalating stakes. (2) One emphatic verdict line in caps-feel (not actual caps). (3) Direct address ("you"). (4) Land with a short line that ends the discussion.
+ENERGY: Emphatic. Rhythmic. Righteous. The cadence IS the authority.
+HARD BANS: never mention Jackson, Pulp Fiction, Ezekiel 25:17, "motherf*****", snakes, planes, Nick Fury, Jedi, or use profanity or its censored versions.`,
+
+  'mark-twain': `Voice = MARK TWAIN cadence (folksy essay + lyceum lecture hybrid).
+RHYTHM: Plain-spoken observation → wry aside that undercuts the conventional view → one specific example → dry verdict that lands sharper for its calm.
+SENTENCE LENGTH PATTERN: 16w · 10w · 14w · 8w. Conversational. Lightly winding. Always landing.
+VOCAB MUST INCLUDE: it has been said, the trouble with, most folks, the plain truth, I have noticed, on the whole, by and large, "and that, I think, is the size of it".
+SIGNATURE MOVES: (1) Set up the conventional wisdom respectfully, then dismantle it gently. (2) One specific, slightly absurd concrete example. (3) Wry aside in the middle of a longer line. (4) Close with a dry one-line verdict that sounds like common sense but is the actual sharp point.
+ENERGY: Folksy, warm, wickedly clear. Never mean. The plainness IS the weapon.
+HARD BANS: never mention Twain, Clemens, Huck, Tom Sawyer, the Mississippi, riverboats, Hannibal, or use 19th-century phonetic dialect.`,
 };
 
 // ============================================================
@@ -311,6 +401,86 @@ const PERSONA_VARIATIONS: Record<string, {
     closers: ['close with a quiet pointed line that pins the reader', 'close with the moral mechanism in one sentence', 'close on a single line of direct address'],
     rhythmTwists: ['exactly one single-line paragraph as the pause', 'one direct "you" per paragraph', 'never raise the volume — the stillness IS the volume'],
     lenses: ['the code under the choice', 'what the reader already knows but is avoiding', 'the thing the mentor in the room would say'],
+  },
+  'steve-jobs': {
+    moods: ['calm conviction', 'reverent quiet', 'reality-distortion calm', 'understated reveal'],
+    openers: ['open with a quiet 10-word setup before the reveal', 'open by naming the human want under the product', 'open with a reductive line — "It\'s actually very simple."'],
+    pivots: ['pause on one reverent line before the verdict', 'reframe the feature as the feeling', 'repeat the key word a third time in a new sentence'],
+    closers: ['close with a one-word verdict ("Beautiful." "Done.")', 'close on the human want, not the feature', 'close with a quiet inevitability'],
+    rhythmTwists: ['exactly one one-word sentence', 'one reverent slow line at the midpoint', 'no exclamation points anywhere'],
+    lenses: ['the human want under the spec', 'the thing the reader did not know they wanted', 'the simplicity hiding under the complexity'],
+  },
+  'tony-soprano': {
+    moods: ['tired menace', 'blunt verdict', 'kitchen-table honest', 'back-room quiet'],
+    openers: ['open with a rhetorical "what am I, an idiot?" beat', 'open with a flat observation about people', 'open mid-thought, like the conversation already started'],
+    pivots: ['drop the article ("Problem is, nobody listens.")', 'use a rhetorical question as a verdict', 'name the loyalty math under the business math'],
+    closers: ['close with a quiet line that implies more than it says', 'close with a "whatever." style finality', 'close with a flat verdict on one line'],
+    rhythmTwists: ['one sentence fragment per paragraph', 'one rhetorical question per post', 'never raise the volume — the tiredness IS the menace'],
+    lenses: ['who is loyal and who is not', 'the respect ledger nobody is naming', 'the thing the founder is too tired to keep pretending about'],
+  },
+  'don-draper': {
+    moods: ['controlled gravity', 'smoke-in-the-room calm', 'mid-century deliberate', 'quietly inevitable'],
+    openers: ['open with a slow 14-word declarative', 'open by naming what they are actually buying', 'open with a one-line reframing of the entire category'],
+    pivots: ['reframe the product as a feeling the buyer already has', 'one slow line that reorients the post', 'pivot from feature to memory'],
+    closers: ['close on a single human truth that ends the pitch', 'close with the line nobody can argue with', 'close on the feeling, not the offer'],
+    rhythmTwists: ['no exclamation points, no hype words', 'one parallel "It\'s not X. It\'s Y." beat', 'one slow line carrying the entire pivot'],
+    lenses: ['what the buyer is actually buying', 'the memory the product is renting', 'the version of themselves they want to feel'],
+  },
+  'bill-burr': {
+    moods: ['frustrated everyman', 'rant-into-clarity', 'self-aware annoyed', 'honest landing'],
+    openers: ['open annoyed about something small', 'open with "are you kidding me with this?"', 'open with the thing nobody wants to say out loud'],
+    pivots: ['spiral for 2 sentences then pull back with "alright, I hear myself"', 'mid-rant self-check', 'land the calmest line as the actual point'],
+    closers: ['close with the sharpest line as the quietest line', 'close with "alright fine, I\'ll say it." then the truth', 'close punching up, never down'],
+    rhythmTwists: ['exactly one self-aware pull-back beat', 'one rant line followed by one calm line', 'never punch down'],
+    lenses: ['the small thing that is actually the big thing', 'the comfortable lie everyone is agreeing to', 'the obvious truth nobody wants to be the one to say'],
+  },
+  'naval-ravikant': {
+    moods: ['calm tech-philosopher', 'aphoristic', 'leverage-aware', 'screenshot-ready'],
+    openers: ['open with a one-line aphorism', 'open with an inversion ("X is not Y. X is Z.")', 'open with a leverage observation'],
+    pivots: ['follow the aphorism with a one-line consequence', 'replace adjectives with structure (leverage, compounding, accountability)', 'invert the conventional take in one line'],
+    closers: ['close with a one-line consequence that stands alone', 'close on a long-term-games inversion', 'close with a line that could be screenshotted alone'],
+    rhythmTwists: ['every line is its own paragraph', 'no adjectives — only structural nouns', 'each line must read as a standalone tweet'],
+    lenses: ['the leverage nobody is using', 'the compounding nobody is respecting', 'the game-theory shape under the tactic'],
+  },
+  'david-goggins': {
+    moods: ['4 a.m. accountability', 'confrontational respect', 'zero soft landings', 'mirror-in-your-face'],
+    openers: ['open by addressing the reader directly', 'open by naming the soft excuse they are using', 'open with "Stop."'],
+    pivots: ['name the comfortable lie out loud', 'refuse to comfort — apply pressure', 'turn the post into a direct callout of the reader'],
+    closers: ['close with one concrete action for the next 24 hours', 'close with a flat callout, not a pep talk', 'close on the work, not the feeling'],
+    rhythmTwists: ['"you" or "your" in every paragraph', 'no soft-landing words ("maybe", "try", "consider")', 'one concrete 24-hour action at the end'],
+    lenses: ['the excuse the reader is using right now', 'the soft version of the reader that has to die', 'the work the reader already knows they are avoiding'],
+  },
+  'jocko-willink': {
+    moods: ['calm command', 'discipline-as-love', 'post-action review', 'flat authority'],
+    openers: ['open by stating the situation flat', 'open with "Good." after a setback', 'open with the standard, not the story'],
+    pivots: ['assign ownership upward to the leader', 'reduce the problem to a discipline or planning failure', 'name the standard that was missed'],
+    closers: ['close with one prescriptive line — what the leader does next', 'close with "That\'s on the leader."', 'close with the next decision, not the lesson'],
+    rhythmTwists: ['never blame down the chain', 'one "Good." as a single-word verdict', 'flat declaratives only — no rhetorical flourish'],
+    lenses: ['where the leader failed to set the standard', 'the planning gap under the execution gap', 'the next disciplined decision'],
+  },
+  'mr-rogers': {
+    moods: ['radically kind', 'deliberate slow', 'specific tender', 'quietly serious'],
+    openers: ['open by addressing the reader as a person', 'open by naming the difficulty plainly and gently', 'open with "I have been thinking about you."'],
+    pivots: ['recognize the reader\'s effort before the advice', 'name the specific hard thing, not the abstract one', 'refuse to perform — let the sincerity stand'],
+    closers: ['close with one line that treats the reader as already worthy', 'close on the person, not the problem', 'close with quiet specific encouragement'],
+    rhythmTwists: ['no exclamation points', 'one specific concrete detail of the reader\'s situation', 'the warmth must be earned by specificity'],
+    lenses: ['the person doing the work, not the work itself', 'the small specific difficulty under the big abstract one', 'what the reader needs to hear, not what is clever'],
+  },
+  'samuel-jackson': {
+    moods: ['righteous indignation', 'rhythmic build', 'emphatic verdict', 'cadenced authority'],
+    openers: ['open with a triple repetition ("You think X. You think Y. You think Z.")', 'open with "Now let me tell you something."', 'open with a rhetorical setup the post will demolish'],
+    pivots: ['drop one emphatic verdict line that lands like a hammer', 'use direct address ("you understand")', 'escalate via repetition with one word changed each time'],
+    closers: ['close with a short line that ends the discussion', 'close on the verdict, not the explanation', 'close with "That\'s a fact."'],
+    rhythmTwists: ['exactly one triple-repetition cadence', 'one emphatic verdict line in caps-feel (no actual caps)', 'no profanity, no censored profanity'],
+    lenses: ['the comfortable lie that needs naming out loud', 'the thing the reader keeps pretending not to see', 'the verdict the room is too polite to deliver'],
+  },
+  'mark-twain': {
+    moods: ['wry folksy', 'plain-spoken sharp', 'lyceum calm', 'gently lethal'],
+    openers: ['open with "It has been said..." then prepare to dismantle it', 'open with a plain-spoken observation about "most folks"', 'open with a respectful setup of the conventional view'],
+    pivots: ['dismantle the conventional wisdom gently with one specific example', 'wry aside in the middle of a longer line', 'name the slightly absurd specific that proves the point'],
+    closers: ['close with a dry one-line verdict that sounds like common sense', 'close with "and that, I think, is the size of it"', 'close on the plain truth, not the clever one'],
+    rhythmTwists: ['one wry aside per paragraph', 'one specific absurd example per post', 'no meanness — the plainness IS the weapon'],
+    lenses: ['the conventional wisdom that is quietly wrong', 'the plain truth most folks are talking around', 'the specific small example that breaks the abstract claim'],
   },
 };
 
