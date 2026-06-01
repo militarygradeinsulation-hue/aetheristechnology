@@ -218,7 +218,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
                     <li>• You get a written leak map, not a software login</li>
-                    <li>• One fixed fee. $18,500. No retainer to read the report</li>
+                    <li>• One fixed fee. $2,500. No retainer to read the report</li>
                     <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>• We tell you exactly where the money is leaking and what to fix first</li>
