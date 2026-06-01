@@ -1329,6 +1329,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               )}
               {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || ', ')}
             </p>
+            <GenericEmailWarning email={lead.email} />
             {(() => {
               const verdict = buildLeadVerdict(lead, scan);
               if (!verdict) return null;
