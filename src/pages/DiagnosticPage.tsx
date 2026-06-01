@@ -264,7 +264,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
 
               <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
-                $18,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
+                $2,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
               </h3>
 
               <div className="overflow-x-auto mb-6">
