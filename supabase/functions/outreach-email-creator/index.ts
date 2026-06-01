@@ -15,21 +15,36 @@ const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const SYSTEM_PROMPT = `You write outreach emails for Aetheris (Business Forensics Operators).
 
-VOICE: blunt, forensic, operator. We are not consultants. We are not influencers. We do not flatter. We name the leak.
+DEFAULT VOICE: blunt, forensic, operator. We are not consultants. We are not influencers. We do not flatter. We name the leak.
 
 HARD RULES (non-negotiable):
 1. NEVER use dashes of any kind. No em dash. No en dash. No hyphen used as a pause. Use a period or a comma instead. The only place a hyphen is allowed is inside a proper compound word like "follow-up" or a URL.
 2. No corporate filler. No "I hope this finds you well." No "just checking in." No "circling back."
 3. No emoji. No exclamation points.
-4. Short sentences. One idea per line. Body should read like the operator is standing across the desk.
-5. Subject line is under 7 words. It implies a leak, a number, or a specific observation. Never generic.
-6. Open with a specific observation about the prospect (from their site, post, or image). Never start with "Hi {Name}, I came across..."
+4. Short sentences. One idea per line.
+5. Subject line is under 7 words. Specific. Never generic.
+6. Open with a specific observation about the prospect. Never start with "Hi {Name}, I came across..."
 7. Close with a low-friction ask. A 12 minute call. A reply with one number. Not "let me know if interested."
 8. Max 140 words in the body.
+
+TONE/PERSONALITY: If the user specifies a tone and/or personality, ADAPT the voice while keeping the hard rules. Tone shifts cadence and warmth. Personality shifts the operator archetype. The hard rules above are always enforced.
 
 If an image is provided, treat it as the prospect's website, ad, social post, or storefront. Pull the most damning specific detail and lead with it.
 
 Return the email as a JSON tool call with subject + body. Do not include any greeting like "Hi {Name}" unless the user gave you a name. Do not sign off with a name; the rep will add their signature.`;
+
+const CRITIQUE_SYSTEM_PROMPT = `You are a fair, evidence-based email critic for Aetheris reps.
+
+GROUND RULES:
+1. Only flag REAL problems. Quote the exact offending text from the email verbatim. If you cannot quote it, do not flag it.
+2. Do NOT invent problems to fill a quota. A strong email can have ZERO problems. Be honest.
+3. Do NOT downgrade an email just because it does not match your personal taste. Judge against: clarity, specificity, opener strength, ask strength, length, and tone consistency.
+4. Dashes (em, en, or hyphen-as-pause) and emoji ARE legitimate problems IF they actually appear in the draft.
+5. If the email is already strong, say so. Grade A or B. Keep "problems" short or empty. Put praise in "what_works".
+6. The "rewritten_body" must preserve the writer's intent and any concrete facts. Tighten, do not replace. No dashes. Under 140 words.
+7. You are critiquing the DRAFT the rep submitted. Never critique your own rewrite.
+
+Return the critique via the analyze_email tool.`;
 
 const EMAIL_TOOL = {
   type: "function",
@@ -102,7 +117,6 @@ const ANALYZE_TOOL = {
         },
         problems: {
           type: "array",
-          minItems: 3,
           items: {
             type: "object",
             properties: {
@@ -168,20 +182,26 @@ serve(async (req) => {
     const senderName: string = (body.senderName || "").toString().slice(0, 80);
     const imageBase64: string | null = body.imageBase64 ? String(body.imageBase64).slice(0, 5_500_000) : null;
     const imageMime: string = (body.imageMime || "image/png").toString();
+    const tone: string = (body.tone || "").toString().slice(0, 60);
+    const personality: string = (body.personality || "").toString().slice(0, 60);
 
     if (!prompt && !pastedText && !imageBase64) {
       return json({ error: "Provide a prompt, pasted email, or an image." }, 400);
     }
 
+    const styleLine = (tone || personality)
+      ? `\nTONE: ${tone || "(default operator)"}\nPERSONALITY: ${personality || "(default operator)"}\n`
+      : "";
+
     let userInstruction = "";
     if (mode === "rewrite") {
-      userInstruction = `Rewrite the following email in the Aetheris operator voice. Keep the intent. Remove ALL dashes. Cut filler. Make it specific.\n\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
+      userInstruction = `Rewrite the following email. Keep the intent and any concrete facts. Remove ALL dashes. Cut filler. Make it specific.${styleLine}\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
     } else if (mode === "subjects") {
-      userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.\n\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
+      userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.${styleLine}\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     } else if (mode === "analyze") {
-      userInstruction = `Analyze this outreach email. Be brutally honest. The rep wants to know exactly what is wrong and what to do better. Read the image (a screenshot of the email) and/or the pasted text below. Extract subject and body. Critique every weak line. Quote the offending text verbatim. Grade it. Then give a full rewrite in the Aetheris operator voice (no dashes, short sentences, specific opener, low-friction ask, under 140 words).\n\n${pastedText ? `PASTED EMAIL:\n${pastedText}\n\n` : ""}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
+      userInstruction = `Critique the outreach email below. Follow the GROUND RULES strictly. Only flag problems you can quote verbatim. Do not invent problems to fill space. If the email is already strong, grade it A or B and leave the problems array short or empty. The rewritten_body should preserve the writer's intent and any concrete facts; tighten, do not replace.\n\n${pastedText ? `EMAIL DRAFT:\n${pastedText}\n\n` : "(no pasted text; read the screenshot)\n\n"}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
     } else {
-      userInstruction = `Write a cold outreach email.\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
+      userInstruction = `Write a cold outreach email.${styleLine}\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     }
 
     const userContent: any[] = [{ type: "text", text: userInstruction }];
@@ -202,7 +222,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
         tools: [tool],

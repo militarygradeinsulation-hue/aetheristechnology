@@ -46,6 +46,28 @@ function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   });
 }
 
+const TONES = [
+  { value: '', label: 'Default (forensic operator)' },
+  { value: 'blunt', label: 'Blunt & direct' },
+  { value: 'curious', label: 'Curious & probing' },
+  { value: 'warm', label: 'Warm & respectful' },
+  { value: 'urgent', label: 'Urgent & high-stakes' },
+  { value: 'contrarian', label: 'Contrarian & provocative' },
+  { value: 'dry-humor', label: 'Dry humor' },
+  { value: 'consultative', label: 'Consultative & calm' },
+];
+
+const PERSONALITIES = [
+  { value: '', label: 'Default (Aetheris operator)' },
+  { value: 'forensic-auditor', label: 'Forensic auditor (numbers-first)' },
+  { value: 'seasoned-cfo', label: 'Seasoned CFO' },
+  { value: 'street-smart-operator', label: 'Street-smart operator' },
+  { value: 'no-bs-founder', label: 'No-BS founder' },
+  { value: 'investigative-journalist', label: 'Investigative journalist' },
+  { value: 'trusted-advisor', label: 'Trusted advisor / mentor' },
+  { value: 'analytical-strategist', label: 'Analytical strategist' },
+];
+
 export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, defaultSenderName }) => {
   const { toast } = useToast();
   const [mode, setMode] = useState<Mode>('create');
@@ -53,6 +75,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [senderName, setSenderName] = useState(defaultSenderName || '');
   const [prompt, setPrompt] = useState('');
   const [pasted, setPasted] = useState('');
+  const [tone, setTone] = useState('');
+  const [personality, setPersonality] = useState('');
   const [image, setImage] = useState<{ url: string; base64: string; mime: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailOut | null>(null);
@@ -116,6 +140,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           pastedText: pasted,
           recipientName,
           senderName,
+          tone,
+          personality,
           imageBase64: image?.base64 || null,
           imageMime: image?.mime || null,
         },
@@ -217,6 +243,31 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
                 <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
               </div>
             )}
+          </div>
+        )}
+
+        {mode !== 'analyze' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Tone</label>
+              <select
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {TONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Personality</label>
+              <select
+                value={personality}
+                onChange={(e) => setPersonality(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {PERSONALITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </div>
           </div>
         )}
 
