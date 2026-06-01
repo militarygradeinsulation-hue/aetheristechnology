@@ -297,7 +297,7 @@ const DiagnosticPage: React.FC = () => {
                     <tr className="border-t-2 border-amber/50">
                       <td className="py-3 pr-3 font-bold text-foreground">TOTAL</td>
                       <td className="py-3 px-3 font-bold text-muted-foreground">$82,000 – $215,000</td>
-                      <td className="py-3 pl-3 font-bold text-amber text-lg">$18,500 flat</td>
+                      <td className="py-3 pl-3 font-bold text-amber text-lg">$2,500 flat</td>
                     </tr>
                   </tbody>
                 </table>
