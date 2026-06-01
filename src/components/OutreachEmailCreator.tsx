@@ -246,6 +246,31 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           </div>
         )}
 
+        {mode !== 'analyze' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Tone</label>
+              <select
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {TONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Personality</label>
+              <select
+                value={personality}
+                onChange={(e) => setPersonality(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {PERSONALITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
             {mode === 'create' ? 'Context / Angle'
