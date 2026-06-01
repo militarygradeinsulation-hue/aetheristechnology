@@ -324,21 +324,32 @@ export const LeadsBoard: React.FC = () => {
     return { groups, totalShown: filtered.length };
   }, [mine, mineGroupBy, mineSort, mineSearch, mineMinScore, mineContactState]);
 
+  // All leads with a website/email — used as the picker list.
+  // We show already-deep-scanned ones too so the user can SEE what's been done,
+  // and choose to re-scan or skip them.
   const scanCandidates = useMemo(
-    () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
+    () => mine.filter(l => l.website || l.email),
     [mine]
+  );
+  const isAlreadyScanned = useCallback(
+    (l: any) => !!(l?.enrichment?.rocketreach || l?.enrichment?.firecrawl),
+    []
+  );
+  const freshCandidates = useMemo(
+    () => scanCandidates.filter(l => !isAlreadyScanned(l)),
+    [scanCandidates, isAlreadyScanned]
   );
 
   const openBulkPicker = useCallback(() => {
     if (scanCandidates.length === 0) {
-      toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
+      toast({ title: 'Nothing to scan', description: 'No leads have a website or email yet.' });
       return;
     }
-    // Preselect first 10
-    setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)));
+    // Preselect first 10 leads that have NOT been deep-scanned yet
+    setBulkSelected(new Set(freshCandidates.slice(0, 10).map(l => l.id)));
     setBulkStatuses({});
     setBulkPickerOpen(true);
-  }, [scanCandidates, toast]);
+  }, [scanCandidates, freshCandidates, toast]);
 
   const toggleBulkPick = (id: string) => {
     setBulkSelected(prev => {
@@ -715,13 +726,16 @@ export const LeadsBoard: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{bulkSelected.size}/10 selected · {scanCandidates.length} eligible</span>
+            <span>
+              {bulkSelected.size}/10 selected · {freshCandidates.length} fresh ·{' '}
+              <span className="text-green-400">{scanCandidates.length - freshCandidates.length} already deep-scanned</span>
+            </span>
             <div className="flex gap-2">
               <button
                 className="text-amber hover:underline disabled:opacity-50"
                 disabled={bulkScanning}
-                onClick={() => setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)))}
-              >Select first 10</button>
+                onClick={() => setBulkSelected(new Set(freshCandidates.slice(0, 10).map(l => l.id)))}
+              >Select first 10 fresh</button>
               <button
                 className="text-muted-foreground hover:text-foreground disabled:opacity-50"
                 disabled={bulkScanning}
@@ -730,13 +744,17 @@ export const LeadsBoard: React.FC = () => {
             </div>
           </div>
           <div className="max-h-[50vh] overflow-y-auto space-y-1 border border-border/50 rounded-md p-2">
-            {scanCandidates.map(l => {
+            {/* Fresh leads first, already-scanned ones at the bottom so users see what's left to do */}
+            {[...freshCandidates, ...scanCandidates.filter(l => isAlreadyScanned(l))].map(l => {
               const checked = bulkSelected.has(l.id);
               const status = bulkStatuses[l.id];
+              const alreadyDone = isAlreadyScanned(l);
               return (
                 <label
                   key={l.id}
-                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${checked ? 'bg-amber/5' : ''}`}
+                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${
+                    checked ? 'bg-amber/5' : alreadyDone ? 'bg-green-500/5 opacity-80' : ''
+                  }`}
                 >
                   <input
                     type="checkbox"
@@ -746,7 +764,14 @@ export const LeadsBoard: React.FC = () => {
                     className="accent-amber"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || ', '}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-2">
+                      {l.business_name || l.email || '—'}
+                      {alreadyDone && !status && (
+                        <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-green-400/40 text-green-400 bg-green-500/5">
+                          ✓ Already deep-scanned
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {[l.industry, l.location, l.website].filter(Boolean).join(' · ')}
                     </p>
@@ -756,7 +781,9 @@ export const LeadsBoard: React.FC = () => {
                   )}
                   {status === 'done' && <span className="text-xs text-green-400">✓ Done</span>}
                   {status === 'failed' && <span className="text-xs text-red-400">Failed</span>}
-                  {!status && checked && <span className="text-xs text-muted-foreground">Queued</span>}
+                  {!status && checked && (
+                    <span className="text-xs text-muted-foreground">{alreadyDone ? 'Will re-scan' : 'Queued'}</span>
+                  )}
                 </label>
               );
             })}
