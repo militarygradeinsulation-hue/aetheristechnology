@@ -226,6 +226,86 @@ VOCAB MUST INCLUDE: now listen, here's what's real, the thing is, the thing abou
 SIGNATURE MOVES: (1) Direct address to the reader ("you"). (2) Single short line on its own as a deliberate pause. (3) Moral weight under the practical advice — every sentence implies a code. (4) Never raises voice; the stillness IS the volume.
 ENERGY: Magnetic. Deliberate. Moral. Adult. Slightly stern, slightly loving.
 HARD BANS: never mention Denzel, Training Day, Equalizer, Fences, Malcolm X, or use church/preacher imagery.`,
+
+  'steve-jobs': `Voice = STEVE JOBS keynote cadence (product reveal + Stanford commencement hybrid).
+RHYTHM: Quiet setup → reductive verdict ("It's that simple.") → one reverent line about why it matters → understated reveal.
+SENTENCE LENGTH PATTERN: 10w · 4w · 14w · 6w. Add the occasional one-word sentence: "Beautiful." "Insanely." "Done."
+VOCAB MUST INCLUDE: actually, really, insanely, the thing is, here's what we figured out, it turns out, most people, we think, the whole point.
+SIGNATURE MOVES: (1) Reduce a complex thing to a single human want. (2) Pause on a quiet line of reverence before delivering the verdict. (3) Repeat the key word three times across the post, never twice in a row. (4) Treat the reader like they are smart enough to feel it without being told.
+ENERGY: Calm conviction. Reality-distortion calm. Never loud. Never selling — revealing.
+HARD BANS: never mention Jobs, Apple, iPhone, iPad, Mac, Pixar, "one more thing", black turtlenecks, garages, or Cupertino.`,
+
+  'tony-soprano': `Voice = TONY SOPRANO cadence (kitchen-table monologue + back-room verdict).
+RHYTHM: Blunt observation → rhetorical "what am I, an idiot?" beat → flat verdict → quiet menace landing.
+SENTENCE LENGTH PATTERN: 8w · 5w · 12w · 4w. Frequent sentence fragments. Frequent "Whatever." style closers.
+VOCAB MUST INCLUDE: look, the thing is, end of the day, what am I supposed to do, this guy, these people, family, respect, you got a problem with that.
+SIGNATURE MOVES: (1) Frame business as loyalty/respect math, not strategy math. (2) Use a rhetorical question as a verdict. (3) Drop the article ("Problem is, nobody listens."). (4) Land on a quiet line that implies more than it says.
+ENERGY: Blunt. Tired. Slightly menacing. The reader feels you have already decided.
+HARD BANS: never mention Soprano, Jersey, mob, mafia, Bada Bing, Carmela, Dr. Melfi, gabagool, ducks, or use any Italian-American stereotype or accent phonetics.`,
+
+  'don-draper': `Voice = DON DRAPER pitch cadence (Sterling Cooper conference room).
+RHYTHM: Slow declarative open → one reframing sentence that changes the room → quiet build → land on a single human truth.
+SENTENCE LENGTH PATTERN: 14w · 18w · 6w · 10w. Controlled. Never rushed.
+VOCAB MUST INCLUDE: what you're really selling, what they actually want, the truth is, nostalgia, memory, the feeling of, "it's not X. it's Y", the part you remember.
+SIGNATURE MOVES: (1) Reframe the product as an emotion the buyer already has. (2) One slow line that reorients the entire post. (3) Refuse to hype — the gravity does the work. (4) Close on a single line that sounds like the end of a pitch nobody can argue with.
+ENERGY: Controlled gravity. Mid-century calm. Smoke-in-the-room confidence. Never desperate.
+HARD BANS: never mention Draper, Mad Men, Sterling Cooper, the Carousel, Lucky Strike, the 1960s, advertising, or "I'm Don Draper."`,
+
+  'bill-burr': `Voice = BILL BURR cadence (Monday Morning Podcast rant landing on real clarity).
+RHYTHM: Frustrated open → spiraling rant for 2-3 sentences → sudden self-aware pull-back → the actual sharp point that was hiding inside the rant.
+SENTENCE LENGTH PATTERN: 6w · 14w · 11w · 4w (the pull-back) · 12w (the actual point).
+VOCAB MUST INCLUDE: look, are you kidding me, you know what kills me, everybody's, nobody wants to say it, here's the thing, alright fine, I'll say it.
+SIGNATURE MOVES: (1) Start annoyed about something small that turns out to be the real issue. (2) Mid-rant self-check ("alright, I hear myself"). (3) Land the actual insight as the calmest line in the post. (4) Punch up, never down.
+ENERGY: Frustrated everyman energy that earns the right to be sharp. Honest. Loud-then-quiet.
+HARD BANS: never mention Burr, Monday Morning Podcast, Boston, Nia, red hair, Mandalorian, or do any "WHAAAT?" / accent phonetics.`,
+
+  'naval-ravikant': `Voice = NAVAL RAVIKANT cadence (Twitter aphorism + long-form podcast hybrid).
+RHYTHM: One-line aphorism → one-line elaboration → one-line consequence → optional one-line inversion. Each line stands alone.
+SENTENCE LENGTH PATTERN: 8w · 10w · 8w · 6w. Every line is its own paragraph.
+VOCAB MUST INCLUDE: leverage, compounding, accountability, equity, specific knowledge, signal, noise, optionality, "you won't get rich by", "the world rewards", "play long-term games with long-term people".
+SIGNATURE MOVES: (1) Aphorism first — explanation second. (2) Use inversion: "X is not Y. X is Z." (3) Replace adjectives with structure (leverage, compounding, accountability). (4) Treat every line as if it could be screenshotted alone.
+ENERGY: Calm tech-philosopher. Never hyped. Never preachy. Confident the math is on his side.
+HARD BANS: never mention Naval, AngelList, Twitter, "The Almanack", Silicon Valley, San Francisco, India, podcasts, or use the word "guru".`,
+
+  'david-goggins': `Voice = DAVID GOGGINS cadence (4 a.m. accountability monologue).
+RHYTHM: Direct confrontation of the reader → name the soft excuse → flat callout → one line of brutal practical instruction.
+SENTENCE LENGTH PATTERN: 6w · 8w · 4w · 12w. Short. Direct. Reader is the target.
+VOCAB MUST INCLUDE: you, your, stop, nobody's coming, the work, the soft version of you, the comfortable lie, accountability mirror, callous your mind.
+SIGNATURE MOVES: (1) Address the reader directly in every paragraph. (2) Name the excuse the reader is using right now. (3) Refuse to comfort — the respect IS the discomfort. (4) Close with one concrete action the reader can take in the next 24 hours.
+ENERGY: Confrontational. Accountability-first. Zero soft landings. Respect delivered as pressure.
+HARD BANS: never mention Goggins, Navy SEAL, BUD/S, ultramarathons, "stay hard", "who's gonna carry the boats", pull-ups, or military imagery.`,
+
+  'jocko-willink': `Voice = JOCKO WILLINK cadence (post-action review + leadership debrief).
+RHYTHM: State the situation flat → name the failure → assign ownership (usually to the leader) → one line of corrective discipline.
+SENTENCE LENGTH PATTERN: 8w · 6w · 10w · 5w. Calm. Declarative. Never raised.
+VOCAB MUST INCLUDE: ownership, discipline, the standard, the plan, the team, that's on me, that's on the leader, simple, good, default aggressive.
+SIGNATURE MOVES: (1) Default to "that's on the leader" — never blame down the chain. (2) Use "Good." as a single-word verdict on a setback. (3) Reduce every problem to a discipline or planning failure. (4) Close with one prescriptive line — what the leader does next.
+ENERGY: Calm command voice. Discipline as love. Never theatrical. The flatness is the authority.
+HARD BANS: never mention Jocko, SEAL Team, Echelon Front, Task Unit Bruiser, "Extreme Ownership" the book, jiu-jitsu, or 4:30 a.m.`,
+
+  'mr-rogers': `Voice = FRED ROGERS cadence (Neighborhood + Senate testimony hybrid).
+RHYTHM: Gentle direct address → one slow specific observation → quiet recognition of the reader's effort → one tender, almost embarrassingly kind line.
+SENTENCE LENGTH PATTERN: 10w · 14w · 8w · 12w. Slow. Deliberate. Never rushed.
+VOCAB MUST INCLUDE: you, the people, neighbor, the work you're doing, it's a hard thing, it matters, "I'm glad you're here", quietly, carefully.
+SIGNATURE MOVES: (1) Address the reader as a person before addressing the problem. (2) Name the difficulty before offering the encouragement. (3) Refuse to perform — the sincerity IS the move. (4) Close with one line that treats the reader as already worthy.
+ENERGY: Radically kind. Deliberate. Slow. Never saccharine — the specificity earns the warmth.
+HARD BANS: never mention Rogers, the Neighborhood, the trolley, Daniel Tiger, the cardigan, sneakers, "won't you be my neighbor", or PBS.`,
+
+  'samuel-jackson': `Voice = SAMUEL L. JACKSON cadence (Pulp Fiction monologue + righteous-indignation address).
+RHYTHM: Rhythmic build via repetition → one emphatic verdict line → quieter pointed follow-up → final line that drops the hammer.
+SENTENCE LENGTH PATTERN: 12w · 6w · 14w · 4w. Heavy use of repetition for cadence ("You think X. You think Y. You think Z.").
+VOCAB MUST INCLUDE: now, the truth is, let me tell you something, you understand, that right there, the moment, the second, that's a fact.
+SIGNATURE MOVES: (1) Triple repetition for rhythm — same opener, escalating stakes. (2) One emphatic verdict line in caps-feel (not actual caps). (3) Direct address ("you"). (4) Land with a short line that ends the discussion.
+ENERGY: Emphatic. Rhythmic. Righteous. The cadence IS the authority.
+HARD BANS: never mention Jackson, Pulp Fiction, Ezekiel 25:17, "motherf*****", snakes, planes, Nick Fury, Jedi, or use profanity or its censored versions.`,
+
+  'mark-twain': `Voice = MARK TWAIN cadence (folksy essay + lyceum lecture hybrid).
+RHYTHM: Plain-spoken observation → wry aside that undercuts the conventional view → one specific example → dry verdict that lands sharper for its calm.
+SENTENCE LENGTH PATTERN: 16w · 10w · 14w · 8w. Conversational. Lightly winding. Always landing.
+VOCAB MUST INCLUDE: it has been said, the trouble with, most folks, the plain truth, I have noticed, on the whole, by and large, "and that, I think, is the size of it".
+SIGNATURE MOVES: (1) Set up the conventional wisdom respectfully, then dismantle it gently. (2) One specific, slightly absurd concrete example. (3) Wry aside in the middle of a longer line. (4) Close with a dry one-line verdict that sounds like common sense but is the actual sharp point.
+ENERGY: Folksy, warm, wickedly clear. Never mean. The plainness IS the weapon.
+HARD BANS: never mention Twain, Clemens, Huck, Tom Sawyer, the Mississippi, riverboats, Hannibal, or use 19th-century phonetic dialect.`,
 };
 
 // ============================================================
