@@ -187,7 +187,7 @@ const DiagnosticPage: React.FC = () => {
                     loading="lazy"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                     allowFullScreen
-                    title="The 21-Day Revenue Diagnostic"
+                    title="The Leak Audit"
                     className="absolute inset-0 w-full h-full"
                   />
                 </div>
