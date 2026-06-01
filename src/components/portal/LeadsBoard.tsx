@@ -1477,7 +1477,6 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   Last scanned {new Date(scan.scanned_at).toLocaleString()}
                 </span>
             )}
-            <GenericEmailWarning email={lead.email} compact />
             <div className="flex flex-wrap gap-2">
               <Input
                 value={scanUrl}
