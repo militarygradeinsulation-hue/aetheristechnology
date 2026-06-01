@@ -364,22 +364,24 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       {result && (
         <Card className="glass p-5 space-y-4 border-amber/30">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Draft</div>
-            <Button size="sm" variant="outline" onClick={() => copyText('all', `Subject: ${result.subject}\n\n${result.body}`)}>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">{result.subject ? 'Operator Draft' : 'LinkedIn Intro (Soft First-Touch)'}</div>
+            <Button size="sm" variant="outline" onClick={() => copyText('all', result.subject ? `Subject: ${result.subject}\n\n${result.body}` : result.body)}>
               {copied === 'all' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
               Copy All
             </Button>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
-              <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
-                {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
-              </button>
+          {result.subject && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
+                <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                  {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+                </button>
+              </div>
+              <div className="font-display font-bold text-lg text-foreground">{result.subject}</div>
             </div>
-            <div className="font-display font-bold text-lg text-foreground">{result.subject}</div>
-          </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-1">
