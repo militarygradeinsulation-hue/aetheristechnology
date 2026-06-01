@@ -47,6 +47,36 @@ function scoreTier(score: number): { label: string; tone: string; advice: string
   return { label: 'LOW PRIORITY', tone: 'text-muted-foreground', advice: 'Weak signal. Only work if your queue is empty. Consider skipping back to pool.' };
 }
 
+const GENERIC_EMAIL_LOCAL = /^(info|contact|hello|hi|sales|support|admin|office|team|inquiries|enquiries|mail|marketing|help)@/i;
+function isGenericEmail(email?: string | null): boolean {
+  return !!email && GENERIC_EMAIL_LOCAL.test(email.trim());
+}
+function GenericEmailWarning({ email, compact = false }: { email?: string | null; compact?: boolean }) {
+  if (!isGenericEmail(email)) return null;
+  const prefix = (email || '').split('@')[0]?.toLowerCase() || 'info';
+  if (compact) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded border border-amber/40 bg-amber/10 px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-amber"
+        title={`${prefix}@ is a generic inbox — DM the company on LinkedIn instead`}
+      >
+        <Info className="w-2.5 h-2.5" /> {prefix}@ — DM on LinkedIn
+      </span>
+    );
+  }
+  return (
+    <div className="mt-1 flex items-start gap-1.5 rounded border border-amber/40 bg-amber/10 px-2 py-1 text-[11px] text-amber">
+      <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+      <span>
+        <span className="font-mono uppercase tracking-wider mr-1">Generic inbox</span>
+        <span className="text-amber/90">
+          <span className="font-mono">{prefix}@</span> rarely reaches a decision-maker. Contact the company directly through LinkedIn instead.
+        </span>
+      </span>
+    </div>
+  );
+}
+
 type LeadVerdictTone = 'go' | 'maybe' | 'skip';
 function buildLeadVerdict(lead: RepLead, scan: any): { label: string; tone: LeadVerdictTone; text: string } | null {
   // 1. Scan executive summary wins (the richest signal)
