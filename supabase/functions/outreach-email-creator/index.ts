@@ -256,14 +256,15 @@ serve(async (req) => {
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) throw new Error("LOVABLE_API_KEY missing");
 
-    const tool = mode === "subjects" ? SUBJECT_TOOL : mode === "analyze" ? ANALYZE_TOOL : EMAIL_TOOL;
+    const tool = mode === "subjects" ? SUBJECT_TOOL : mode === "analyze" ? ANALYZE_TOOL : mode === "linkedin_intro" ? LINKEDIN_INTRO_TOOL : EMAIL_TOOL;
+    const systemPrompt = mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : mode === "linkedin_intro" ? LINKEDIN_INTRO_SYSTEM_PROMPT : SYSTEM_PROMPT;
     const res = await fetch(LOVABLE_AI_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userContent },
         ],
         tools: [tool],
