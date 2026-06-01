@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { OperatorBio } from '@/components/OperatorBio';
@@ -19,6 +20,15 @@ const CRED_BLOCKS: { label: string; body: string }[] = [
   { label: 'Certifications', body: 'Vibe Coding, Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis), Google. AI for Business, Harvard edX AI for Business Systems. AI Engineer, IBM AI Engineering. HubSpot Certification, HubSpot. Biomedical & Health Science Researchers, CITI Program (Credential ID 76234047). Google Analytics Individual Qualification, Google Operations Center. Marketing & Analytics, Google Digital Academy (Skillshop).' },
   { label: 'Company', body: 'Aetheris. Headquartered in Indianapolis, Indiana. US-wide engagements remote and on-site. Intellectual property held by CTOguy.ai.' },
   { label: 'Business continuity', body: 'Sales calls run by Joseph Toney. Active engagements delivered jointly with operating partner. Client files, contracts, and credentials live in a documented, partner-accessible system. Continuity contact and escalation path provided to every retained client.' },
+];
+
+const METHODOLOGY_STEPS: { n: string; title: string; body: string }[] = [
+  { n: '01', title: 'Define the leak', body: 'A revenue leak is a measurable gap between two observable numbers in your own data, never a forecast, never a "potential opportunity."' },
+  { n: '02', title: 'Measure the baseline', body: 'We pull a 12-month snapshot from your system of record and measure three layers: lead-to-contact speed, deal-stage progression, and touch frequency.' },
+  { n: '03', title: 'Attribute the dollars', body: 'Every leak is tagged with the baseline metric, the proposed fix, conservative + aggressive ROI, and the exact metric we will re-measure after implementation.' },
+  { n: '04', title: 'Stay in scope', body: 'In: CRM data, sales activity, attribution, cadences, handoffs. Out: pricing strategy, brand strategy, hiring, capital structure, shop-floor manufacturing.' },
+  { n: '05', title: 'Make it auditable', body: 'Every claim traces back to a record export. Source CSVs, queries, this methodology document, and a re-runnable script ship with the report.' },
+  { n: '06', title: 'Deliver the file', body: 'Written report (15–30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $2,500 flat for the Leak Audit, applied toward engagement.' },
 ];
 
 const AboutPage = () => {
@@ -95,6 +105,48 @@ const AboutPage = () => {
                     <p className="text-foreground/85 leading-relaxed">{b.body}</p>
                   </section>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="px-4 pb-16">
+            <div className="max-w-3xl mx-auto">
+              <div className="mb-8">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                  Methodology · The Leak Audit™ · Condensed
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  How I find the money <span className="text-amber">you've been losing.</span>
+                </h2>
+                <p className="text-lg text-muted-foreground mt-4">
+                  Six forensic rules. Written for the owner who's been burned before. Every claim in the final report can be re-derived from your own data by your CFO, controller, or any outside auditor.
+                </p>
+              </div>
+              <ol className="space-y-4">
+                {METHODOLOGY_STEPS.map((s) => (
+                  <li key={s.n} className="forensic-tile rounded-sm border border-border/60 p-5 md:p-6 flex gap-4">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber/80 leading-none pt-1">
+                      Step
+                      <div className="font-forensic text-2xl text-amber mt-1">{s.n}</div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-foreground mb-1">{s.title}</div>
+                      <p className="text-foreground/80 text-sm leading-relaxed">{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/diagnostic">
+                  <Button className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                    See the $2,500 Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/methodology">
+                  <Button variant="outline" className="glass-hover border-amber/40 text-amber">
+                    Read the full methodology
+                  </Button>
+                </Link>
               </div>
             </div>
           </section>

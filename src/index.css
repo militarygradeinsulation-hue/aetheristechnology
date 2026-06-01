@@ -795,3 +795,22 @@ input, textarea, [contenteditable="true"] {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><path d='M4 3 L4 22 L9 17 L12 24 L15 23 L12 16 L20 16 Z' fill='%23F5A623' stroke='%231a1a1a' stroke-width='1.5' stroke-linejoin='round'/></svg>") 4 3, auto !important;
 }
 
+
+/* Slow amber glow for the Leak Audit hero word */
+@keyframes leak-audit-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 8px hsl(var(--amber) / 0.15),
+      0 0 22px hsl(var(--amber-glow) / 0.10);
+  }
+  50% {
+    text-shadow:
+      0 0 14px hsl(var(--amber) / 0.55),
+      0 0 38px hsl(var(--amber-glow) / 0.45),
+      0 0 70px hsl(var(--amber-glow) / 0.20);
+  }
+}
+.leak-audit-glow {
+  animation: leak-audit-glow 4.2s ease-in-out infinite;
+  will-change: text-shadow;
+}
