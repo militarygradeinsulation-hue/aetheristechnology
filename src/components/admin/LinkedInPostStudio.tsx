@@ -1318,21 +1318,19 @@ export default function LinkedInPostStudio() {
 
         {respondSourceType === 'image' ? (
           !respondImage ? (
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => respondFileInputRef.current?.click()}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') respondFileInputRef.current?.click(); }}
-              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30"
+            <label
+              htmlFor="respond-screenshot-input"
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30 select-none"
             >
               <Upload className="w-6 h-6 text-muted-foreground pointer-events-none" />
               <div className="text-sm font-semibold text-foreground pointer-events-none">Upload screenshot</div>
-              <div className="text-[11px] text-muted-foreground pointer-events-none">PNG, JPG, or WEBP (max 10 MB)</div>
+              <div className="text-[11px] text-muted-foreground pointer-events-none">PNG, JPG, WEBP, or HEIC (max 10 MB)</div>
               <input
+                id="respond-screenshot-input"
                 ref={respondFileInputRef}
                 type="file"
-                accept="image/*"
-                className="hidden"
+                accept="image/*,.heic,.heif"
+                className="sr-only"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   handleRespondFile(f);
@@ -1340,7 +1338,7 @@ export default function LinkedInPostStudio() {
                   e.target.value = '';
                 }}
               />
-            </div>
+            </label>
           ) : (
             <div className="relative rounded-lg border border-border bg-background/40 p-3">
               <button
