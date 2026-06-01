@@ -134,6 +134,16 @@ const PERSONAS = [
   { value: 'anthony-bourdain', label: 'Anthony Bourdain — gritty, observational, unfiltered' },
   { value: 'churchill', label: 'Churchill — gravitas, cadenced, resolve-forward' },
   { value: 'denzel', label: 'Denzel Washington — measured, magnetic, moral weight' },
+  { value: 'steve-jobs', label: 'Steve Jobs — reductive, reverent, reality-distortion conviction' },
+  { value: 'tony-soprano', label: 'Tony Soprano — blunt, North-Jersey menace, family-first logic' },
+  { value: 'don-draper', label: 'Don Draper — mid-century pitch cadence, controlled gravity' },
+  { value: 'bill-burr', label: 'Bill Burr — frustrated everyman, rant-into-clarity' },
+  { value: 'naval-ravikant', label: 'Naval Ravikant — aphoristic, leverage-aware, calm tech-philosopher' },
+  { value: 'david-goggins', label: 'David Goggins — confrontational, accountability-forward, no-soft-landing' },
+  { value: 'jocko-willink', label: 'Jocko Willink — disciplined, ownership-first, command voice' },
+  { value: 'mr-rogers', label: 'Mr. Rogers — gentle, deliberate, radically kind clarity' },
+  { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
+  { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
