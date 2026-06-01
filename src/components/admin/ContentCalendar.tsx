@@ -134,6 +134,28 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({ viewMode: exte
 
   useEffect(() => { load(); }, [load]);
 
+  // Auto-jump to the month of the most recent item if current month is empty.
+  // Prevents "calendar looks empty" when items were saved in earlier months.
+  const [autoJumped, setAutoJumped] = useState(false);
+  useEffect(() => {
+    if (autoJumped || loading || items.length === 0) return;
+    const hasInCurrentMonth = items.some(i => {
+      const d = new Date(i.created_at);
+      return d.getFullYear() === year && d.getMonth() === month;
+    });
+    if (!hasInCurrentMonth) {
+      const newest = items.reduce((acc, i) => {
+        const t = new Date(i.created_at).getTime();
+        return t > acc ? t : acc;
+      }, 0);
+      if (newest > 0) {
+        const nd = new Date(newest);
+        setCurrentDate(new Date(nd.getFullYear(), nd.getMonth(), 1));
+      }
+    }
+    setAutoJumped(true);
+  }, [items, loading, year, month, autoJumped]);
+
   const filtered = useMemo(() => {
     if (!typeFilter) return items;
     return items.filter(i => i.tool_type === typeFilter);
