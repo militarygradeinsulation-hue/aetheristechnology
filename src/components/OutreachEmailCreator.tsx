@@ -46,6 +46,28 @@ function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   });
 }
 
+const TONES = [
+  { value: '', label: 'Default (forensic operator)' },
+  { value: 'blunt', label: 'Blunt & direct' },
+  { value: 'curious', label: 'Curious & probing' },
+  { value: 'warm', label: 'Warm & respectful' },
+  { value: 'urgent', label: 'Urgent & high-stakes' },
+  { value: 'contrarian', label: 'Contrarian & provocative' },
+  { value: 'dry-humor', label: 'Dry humor' },
+  { value: 'consultative', label: 'Consultative & calm' },
+];
+
+const PERSONALITIES = [
+  { value: '', label: 'Default (Aetheris operator)' },
+  { value: 'forensic-auditor', label: 'Forensic auditor (numbers-first)' },
+  { value: 'seasoned-cfo', label: 'Seasoned CFO' },
+  { value: 'street-smart-operator', label: 'Street-smart operator' },
+  { value: 'no-bs-founder', label: 'No-BS founder' },
+  { value: 'investigative-journalist', label: 'Investigative journalist' },
+  { value: 'trusted-advisor', label: 'Trusted advisor / mentor' },
+  { value: 'analytical-strategist', label: 'Analytical strategist' },
+];
+
 export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, defaultSenderName }) => {
   const { toast } = useToast();
   const [mode, setMode] = useState<Mode>('create');
@@ -53,6 +75,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
   const [senderName, setSenderName] = useState(defaultSenderName || '');
   const [prompt, setPrompt] = useState('');
   const [pasted, setPasted] = useState('');
+  const [tone, setTone] = useState('');
+  const [personality, setPersonality] = useState('');
   const [image, setImage] = useState<{ url: string; base64: string; mime: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailOut | null>(null);
