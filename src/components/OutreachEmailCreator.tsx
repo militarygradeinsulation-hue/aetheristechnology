@@ -355,6 +355,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
             : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
             : mode === 'subjects' ? <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>
+            : mode === 'linkedin_intro' ? <><Linkedin className="w-4 h-4 mr-2"/>Write Soft LinkedIn Intro</>
             : <><ScanSearch className="w-4 h-4 mr-2"/>Tear It Apart</>}
         </Button>
       </Card>
