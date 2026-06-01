@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 
 const INCLUDES = [
-  '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
+  
   'Lead-to-contact, deal-stage progression, and touch-frequency analysis',
   'Full Operator Tool Suite (9 live tools) run against your business, see below',
   'Written report (15–30 pages): leak map + prioritized fixes + ROI projections',
