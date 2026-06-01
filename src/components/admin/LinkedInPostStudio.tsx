@@ -868,10 +868,16 @@ export default function LinkedInPostStudio() {
     }
   };
 
+  const respondFileInputRef = useRef<HTMLInputElement | null>(null);
+
   const handleRespondFile = (file: File | null | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'Please upload an image file', variant: 'destructive' });
+    if (!file) {
+      console.warn('[PostStudio] No file received from input');
+      return;
+    }
+    const isImage = file.type ? file.type.startsWith('image/') : /\.(png|jpe?g|webp|gif|heic|heif|bmp)$/i.test(file.name);
+    if (!isImage) {
+      toast({ title: 'Please upload an image file', description: `Got: ${file.type || file.name}`, variant: 'destructive' });
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -883,6 +889,11 @@ export default function LinkedInPostStudio() {
       setRespondImage(reader.result as string);
       setRespondFileName(file.name);
       setRespondOutput('');
+      toast({ title: 'Screenshot loaded', description: file.name });
+    };
+    reader.onerror = () => {
+      console.error('[PostStudio] FileReader error', reader.error);
+      toast({ title: 'Could not read file', description: String(reader.error?.message || 'Unknown error'), variant: 'destructive' });
     };
     reader.readAsDataURL(file);
   };
