@@ -273,7 +273,7 @@ const DiagnosticPage: React.FC = () => {
                     <tr className="border-b border-amber/30">
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 pr-3">Line item</th>
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">Typical agency / consultancy</th>
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Diagnostic</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Leak Audit</th>
                     </tr>
                   </thead>
                   <tbody className="text-foreground/85">
