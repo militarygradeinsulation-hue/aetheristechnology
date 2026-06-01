@@ -140,6 +140,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
           pastedText: pasted,
           recipientName,
           senderName,
+          tone,
+          personality,
           imageBase64: image?.base64 || null,
           imageMime: image?.mime || null,
         },
