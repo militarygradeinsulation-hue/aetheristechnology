@@ -1318,17 +1318,29 @@ export default function LinkedInPostStudio() {
 
         {respondSourceType === 'image' ? (
           !respondImage ? (
-            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30">
-              <Upload className="w-6 h-6 text-muted-foreground" />
-              <div className="text-sm font-semibold text-foreground">Upload screenshot</div>
-              <div className="text-[11px] text-muted-foreground">PNG, JPG, or WEBP (max 10 MB)</div>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => respondFileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') respondFileInputRef.current?.click(); }}
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30"
+            >
+              <Upload className="w-6 h-6 text-muted-foreground pointer-events-none" />
+              <div className="text-sm font-semibold text-foreground pointer-events-none">Upload screenshot</div>
+              <div className="text-[11px] text-muted-foreground pointer-events-none">PNG, JPG, or WEBP (max 10 MB)</div>
               <input
+                ref={respondFileInputRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => handleRespondFile(e.target.files?.[0])}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  handleRespondFile(f);
+                  // Reset so selecting the same file again still fires onChange
+                  e.target.value = '';
+                }}
               />
-            </label>
+            </div>
           ) : (
             <div className="relative rounded-lg border border-border bg-background/40 p-3">
               <button
