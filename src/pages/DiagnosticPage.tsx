@@ -305,8 +305,8 @@ const DiagnosticPage: React.FC = () => {
 
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">21 days</div>
-                  <div className="text-xs text-muted-foreground mt-1">Fixed timeline. Agencies average 90–120 days to deliver less.</div>
+                  <div className="font-forensic text-3xl font-bold text-amber">Fast turnaround</div>
+                  <div className="text-xs text-muted-foreground mt-1">Operator-led. Agencies average 90–120 days to deliver less.</div>
                 </div>
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
