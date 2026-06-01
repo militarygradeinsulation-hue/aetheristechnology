@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp, Linkedin } from 'lucide-react';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 
-type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
+type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze' | 'linkedin_intro';
 
 interface Props {
   /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
