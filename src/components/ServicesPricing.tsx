@@ -799,26 +799,23 @@ export const ServicesPricing: React.FC = () => {
                 exit={{ scale: 0.95, opacity: 0, y: 10 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card border border-primary/30 rounded-2xl shadow-2xl shadow-primary/20"
+                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto forensic-tile border border-amber/40 rounded-md shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.45)]"
               >
                 {/* Close */}
                 <button
                   onClick={() => setExpandedIdx(null)}
-                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10"
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/80 hover:bg-background border border-amber/40 flex items-center justify-center text-amber hover:text-amber transition-colors z-10"
                   aria-label="Close"
                 >
                   <X className="w-5 h-5" />
                 </button>
 
-                {expandedService.thumbnail && (
-                  <div className="w-full bg-white border-b border-border">
-                    <img
-                      src={expandedService.thumbnail}
-                      alt={expandedService.title}
-                      className="w-full h-auto object-contain block"
-                    />
+                {/* Case file banner */}
+                <div className="px-6 md:px-8 pt-6 pb-2 border-b border-amber/15">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber/80">
+                    Case file · Tool {String((expandedIdx ?? 0) + 1).padStart(2, '0')} / {String(services.length).padStart(2, '0')}
                   </div>
-                )}
+                </div>
 
                 <div className="p-6 md:p-8">
                   {expandedService.badge && (
