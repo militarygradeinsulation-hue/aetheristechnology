@@ -104,7 +104,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
   'Forensic Diagnostic': [
     'How a $7M shop found $1.2M in 14 days without hiring',
     'What I found inside a $30M company\'s revenue ops in 90 minutes',
-    'The 14-day Forensic Diagnostic framework I run on every engagement',
+    'The Leak Audit framework I run on every engagement',
     'Why I charge $2,500 flat to look, and why it\'s the cheapest thing you\'ll buy this year',
     'Inside a real diagnostic: 4 leaks, $480k recovered, no new tools',
     'The case for a forensic diagnostic before any tech stack rebuild',

@@ -85,7 +85,7 @@ export const AdminImageStudio: React.FC = () => {
     'Scaling a broken system just bleeds faster. Plug the holes first.',
     'Every recommendation comes with the math, the source, and the cost of doing nothing.',
     'Outside operator. Inside view. Real numbers in 14 days.',
-    '14-day forensic diagnostic. Ledger-grade evidence. No theater.',
+    'Leak Audit. Ledger-grade evidence. No theater.',
     'Operator, not consultant. Built on receipts, not slide decks.',
   ];
   const [bannerPreset, setBannerPreset] = useState('stop_guessing');

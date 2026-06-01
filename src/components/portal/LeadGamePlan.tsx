@@ -62,14 +62,14 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
     // 3. Talk to THIS person
     const talkTo: string[] = [];
     if (isOwner) talkTo.push(`**${contactFirstName} is an owner/operator.** They care about: revenue leaks, time leaks, hiring leaks. Skip features. Lead with: "I scanned ${company}, found about ${topGap?.annualCost || '$50k–$120k'}/yr leaving silently. Want the breakdown?"`);
-    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics, most ops leaders we audit find 8–15% of revenue leaking through process gaps. 14-day diagnostic, $2,900, applied to anything bigger."`);
+    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics, most ops leaders we audit find 8–15% of revenue leaking through process gaps. Leak Audit, $2,900, applied to anything bigger."`);
     else if (isMarketing) talkTo.push(`**Marketing leader.** They care about: attribution, conversion leaks, brand contradictions. Lead with: "We ran a brand contradiction scan on ${company}, found [X]. Want to see the rest?" (use Brand Contradiction Finder first.)`);
     else if (isSales) talkTo.push(`**Sales leader.** They care about: pipeline leaks, follow-up failure, lost deals. Lead with: "Our forensic audit on companies your size usually finds 20-30% of pipeline value leaking from broken follow-up. Want a free leak audit?"`);
     else if (isTech) talkTo.push(`**Tech leader.** They care about: stack debt, integration leaks, data silos. They\'ll skip BS, go technical fast. Mention Triple-AI architecture and skip the marketing pitch.`);
     else talkTo.push(`Title unclear, open broad: "I help operators find revenue leaks they can\'t see from inside the building. Took a quick look at ${company}, should I send what I found?"`);
 
     talkTo.push(`**Channel order:** 1) Personalized email referencing one specific finding. 2) LinkedIn DM 24h later. 3) Call 48h after that. Never pitch in DM #1.`);
-    talkTo.push(`**Always close with the wedge:** the free /leak-audit self-scan or the $2,900 14-Day Forensic Diagnostic. Never quote retainer first.`);
+    talkTo.push(`**Always close with the wedge:** the free /leak-audit self-scan or the $2,900 Leak Audit. Never quote retainer first.`);
     talkTo.push(`**Objection "we're fine"** → "That\'s what every leak sounds like from the inside. The diagnostic exists to prove it either way, $2,900 to know for sure."`);
 
     // 4. Tools to use
