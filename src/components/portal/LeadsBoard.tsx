@@ -1388,6 +1388,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               {editing ? 'Cancel' : 'Edit lead'}
             </Button>
           </div>
+          <GenericEmailWarning email={lead.email} compact />
           {editing && (
             <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {([
