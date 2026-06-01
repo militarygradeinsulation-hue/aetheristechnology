@@ -350,18 +350,24 @@ export const LeadsBoard: React.FC = () => {
     });
   };
 
-  const runBulkDeepScan = useCallback(async () => {
-    const ids = Array.from(bulkSelected);
-    const targets = scanCandidates.filter(l => ids.includes(l.id));
-    if (targets.length === 0) return;
+  const runBulkDeepScanFor = useCallback(async (ids: string[]) => {
+    const targets = scanCandidates.filter(l => ids.includes(l.id))
+      // include leads that already have RR but were just retried
+      .concat(mine.filter(l => ids.includes(l.id) && !scanCandidates.find(s => s.id === l.id)));
+    const unique = Array.from(new Map(targets.map(l => [l.id, l])).values());
+    if (unique.length === 0) return;
     setBulkScanning(true);
-    setBulkStatuses(Object.fromEntries(targets.map(l => [l.id, 'scanning' as const])));
-    toast({ title: `Deep-scanning ${targets.length} leads in parallel…` });
+    setBulkStatuses(prev => ({
+      ...prev,
+      ...Object.fromEntries(unique.map(l => [l.id, 'scanning' as const])),
+    }));
+    toast({ title: `Deep-scanning ${unique.length} lead${unique.length === 1 ? '' : 's'} in parallel…` });
     try {
       const results = await Promise.allSettled(
-        targets.map(async l => {
+        unique.map(async l => {
           try {
-            const out = await portalLeads.rocketReach(l.id, {});
+            // force: true so every selected lead gets a complete fresh scan
+            const out = await portalLeads.rocketReach(l.id, { force: true });
             setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
             return out;
           } catch (e) {
@@ -373,7 +379,7 @@ export const LeadsBoard: React.FC = () => {
       const ok = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.length - ok;
       await Promise.allSettled(
-        targets.map(async (l, i) => {
+        unique.map(async (l, i) => {
           const r = results[i];
           if (r.status !== 'fulfilled') return;
           const data: any = r.value;
@@ -391,7 +397,7 @@ export const LeadsBoard: React.FC = () => {
       );
       toast({
         title: `Bulk deep scan finished`,
-        description: `${ok} succeeded${failed ? `, ${failed} failed` : ''}. Follow-ups added to your calendar.`,
+        description: `${ok} succeeded${failed ? `, ${failed} failed — use Retry failed` : ''}. Follow-ups added to your calendar.`,
         variant: failed && !ok ? 'destructive' : 'default',
       });
       refreshMine();
@@ -400,7 +406,20 @@ export const LeadsBoard: React.FC = () => {
     } finally {
       setBulkScanning(false);
     }
-  }, [bulkSelected, scanCandidates, refreshMine, toast]);
+  }, [scanCandidates, mine, refreshMine, toast]);
+
+  const runBulkDeepScan = useCallback(
+    () => runBulkDeepScanFor(Array.from(bulkSelected)),
+    [bulkSelected, runBulkDeepScanFor]
+  );
+
+  const retryFailedBulkScan = useCallback(() => {
+    const failedIds = Object.entries(bulkStatuses)
+      .filter(([, s]) => s === 'failed')
+      .map(([id]) => id);
+    if (failedIds.length === 0) return;
+    runBulkDeepScanFor(failedIds);
+  }, [bulkStatuses, runBulkDeepScanFor]);
 
 
   return (
