@@ -44,10 +44,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
     whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Quote-to-cash is where manufacturers leak most. Diagnostic maps it, retainer rebuilds the follow-up engine.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Quote-to-cash is where manufacturers leak most. Start with the operator-led Leak Audit, fee applies 1:1 to any engagement.',
+      link: '/leak-audit',
     },
   },
   {
@@ -65,10 +65,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
     whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
     recommended: {
-      name: '21-Day Revenue Diagnostic',
-      price: '$18,500',
-      why: 'Bid follow-up and change-order capture are the two biggest dollar leaks. Sealed report shows both in 21 days.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Bid follow-up and change-order capture surface fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
@@ -86,10 +86,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You feel the lanes losing money but can't prove which ones, so every Monday meeting becomes a guess and a fight.",
     whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Lane margin and quote response are operational, they need both forensic audit and hands-on fix execution.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Lane margin and quote response leaks come up first in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
@@ -128,10 +128,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
     whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Highest dollar bleed per leak. Underwriting cycle and KYC handoffs need both audit and ongoing system rebuild.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Underwriting cycle and KYC handoff drops show up fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
