@@ -24,15 +24,29 @@ interface RepOption {
 const GENERIC_PARTNER = '__partner__';
 const GENERIC_REP = '__rep__';
 
+const REP_PREVIEW_KEY = 'admin.portalPreview.selectedRep.v1';
+const DEVICE_PREVIEW_KEY = 'admin.portalPreview.device.v1';
+
 export const CompanyPortalPreview: React.FC = () => {
   const { toast } = useToast();
-  const [device, setDevice] = useState<Device>('desktop');
+  const [device, setDevice] = useState<Device>(() => {
+    if (typeof window === 'undefined') return 'desktop';
+    const v = localStorage.getItem(DEVICE_PREVIEW_KEY) as Device | null;
+    return v === 'desktop' || v === 'tablet' || v === 'mobile' ? v : 'desktop';
+  });
   const [nonce, setNonce] = useState(0);
   const [reps, setReps] = useState<RepOption[]>([]);
-  const [selected, setSelected] = useState<string>(GENERIC_PARTNER);
+  const [selected, setSelected] = useState<string>(() => {
+    if (typeof window === 'undefined') return GENERIC_PARTNER;
+    return localStorage.getItem(REP_PREVIEW_KEY) || GENERIC_PARTNER;
+  });
   const [loadingReps, setLoadingReps] = useState(true);
   const [impersonating, setImpersonating] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Persist selection + device across reloads and tab switches
+  useEffect(() => { try { localStorage.setItem(REP_PREVIEW_KEY, selected); } catch {} }, [selected]);
+  useEffect(() => { try { localStorage.setItem(DEVICE_PREVIEW_KEY, device); } catch {} }, [device]);
 
   // Load reps for the picker
   useEffect(() => {
