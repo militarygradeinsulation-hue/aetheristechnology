@@ -359,17 +359,17 @@ const DiagnosticPage: React.FC = () => {
             <section className="forensic-tile rounded-sm border border-amber/40 p-6 mb-10">
               <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                  Automatically included · $18,500 package
+                  Automatically included · $2,500 Leak Audit
                 </div>
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                   No add-on fee · No upsell
                 </div>
               </div>
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
-                The full Operator Tool Suite ships with every Diagnostic.
+                The full Operator Tool Suite ships with every Leak Audit.
               </h2>
               <p className="text-sm text-foreground/75 mb-5">
-                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
+                When you buy the $2,500 Leak Audit, your operator runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {TOOL_BUNDLE.map((t, idx) => {
