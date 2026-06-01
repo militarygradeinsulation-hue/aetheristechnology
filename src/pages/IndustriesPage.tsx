@@ -65,10 +65,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
     whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
     recommended: {
-      name: '21-Day Revenue Diagnostic',
-      price: '$18,500',
-      why: 'Bid follow-up and change-order capture are the two biggest dollar leaks. Sealed report shows both in 21 days.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Bid follow-up and change-order capture surface fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
