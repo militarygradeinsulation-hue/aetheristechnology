@@ -232,13 +232,13 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
 
       {/* Inputs */}
       <Card className="glass p-5 space-y-4">
-        {(mode === 'create' || mode === 'subjects') && (
+        {(mode === 'create' || mode === 'subjects' || mode === 'linkedin_intro') && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Recipient (optional)</label>
               <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Jordan, COO at Acme" />
             </div>
-            {mode === 'create' && (
+            {(mode === 'create' || mode === 'linkedin_intro') && (
               <div>
                 <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">From (your name)</label>
                 <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
