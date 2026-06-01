@@ -69,7 +69,7 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
     else talkTo.push(`Title unclear, open broad: "I help operators find revenue leaks they can\'t see from inside the building. Took a quick look at ${company}, should I send what I found?"`);
 
     talkTo.push(`**Channel order:** 1) Personalized email referencing one specific finding. 2) LinkedIn DM 24h later. 3) Call 48h after that. Never pitch in DM #1.`);
-    talkTo.push(`**Always close with the wedge:** the free /leak-audit self-scan or the $2,900 14-Day Forensic Diagnostic. Never quote retainer first.`);
+    talkTo.push(`**Always close with the wedge:** the free /leak-audit self-scan or the $2,900 Leak Audit. Never quote retainer first.`);
     talkTo.push(`**Objection "we're fine"** → "That\'s what every leak sounds like from the inside. The diagnostic exists to prove it either way, $2,900 to know for sure."`);
 
     // 4. Tools to use
