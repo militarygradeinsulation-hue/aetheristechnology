@@ -761,10 +761,51 @@ export const LeadsBoard: React.FC = () => {
               );
             })}
           </div>
+          {/* Live status summary so you can see exactly which leads were used + their scan state */}
+          {Object.keys(bulkStatuses).length > 0 && (() => {
+            const entries = Object.entries(bulkStatuses);
+            const done = entries.filter(([, s]) => s === 'done').length;
+            const failed = entries.filter(([, s]) => s === 'failed').length;
+            const scanning = entries.filter(([, s]) => s === 'scanning').length;
+            return (
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-2 text-xs space-y-1">
+                <div className="flex flex-wrap items-center gap-3 font-mono uppercase tracking-wider">
+                  <span className="text-amber">Batch · {entries.length} leads</span>
+                  <span className="text-green-400">✓ {done} done</span>
+                  {scanning > 0 && <span className="text-amber inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />{scanning} scanning</span>}
+                  {failed > 0 && <span className="text-red-400">✗ {failed} failed</span>}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {entries.map(([id, s]) => {
+                    const lead = mine.find(l => l.id === id);
+                    if (!lead) return null;
+                    const tone = s === 'done' ? 'border-green-400/40 text-green-400'
+                      : s === 'failed' ? 'border-red-400/40 text-red-400'
+                      : 'border-amber/40 text-amber';
+                    return (
+                      <span key={id} className={`px-2 py-0.5 rounded border ${tone} text-[10px] font-mono`}>
+                        {(lead.business_name || lead.email || 'lead').slice(0, 28)}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" disabled={bulkScanning} onClick={() => setBulkPickerOpen(false)}>
-              {bulkScanning ? 'Running…' : 'Cancel'}
+              {bulkScanning ? 'Running…' : 'Close'}
             </Button>
+            {Object.values(bulkStatuses).some(s => s === 'failed') && (
+              <Button
+                variant="outline"
+                disabled={bulkScanning}
+                onClick={retryFailedBulkScan}
+                className="border-red-400/50 text-red-400 hover:bg-red-500/10"
+              >
+                <RotateCcw className="w-3 h-3 mr-1" /> Retry failed
+              </Button>
+            )}
             <Button
               className="bg-amber text-background hover:bg-amber/90"
               disabled={bulkScanning || bulkSelected.size === 0}
