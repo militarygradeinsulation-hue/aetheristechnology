@@ -350,18 +350,24 @@ export const LeadsBoard: React.FC = () => {
     });
   };
 
-  const runBulkDeepScan = useCallback(async () => {
-    const ids = Array.from(bulkSelected);
-    const targets = scanCandidates.filter(l => ids.includes(l.id));
-    if (targets.length === 0) return;
+  const runBulkDeepScanFor = useCallback(async (ids: string[]) => {
+    const targets = scanCandidates.filter(l => ids.includes(l.id))
+      // include leads that already have RR but were just retried
+      .concat(mine.filter(l => ids.includes(l.id) && !scanCandidates.find(s => s.id === l.id)));
+    const unique = Array.from(new Map(targets.map(l => [l.id, l])).values());
+    if (unique.length === 0) return;
     setBulkScanning(true);
-    setBulkStatuses(Object.fromEntries(targets.map(l => [l.id, 'scanning' as const])));
-    toast({ title: `Deep-scanning ${targets.length} leads in parallel…` });
+    setBulkStatuses(prev => ({
+      ...prev,
+      ...Object.fromEntries(unique.map(l => [l.id, 'scanning' as const])),
+    }));
+    toast({ title: `Deep-scanning ${unique.length} lead${unique.length === 1 ? '' : 's'} in parallel…` });
     try {
       const results = await Promise.allSettled(
-        targets.map(async l => {
+        unique.map(async l => {
           try {
-            const out = await portalLeads.rocketReach(l.id, {});
+            // force: true so every selected lead gets a complete fresh scan
+            const out = await portalLeads.rocketReach(l.id, { force: true });
             setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
             return out;
           } catch (e) {
@@ -373,7 +379,7 @@ export const LeadsBoard: React.FC = () => {
       const ok = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.length - ok;
       await Promise.allSettled(
-        targets.map(async (l, i) => {
+        unique.map(async (l, i) => {
           const r = results[i];
           if (r.status !== 'fulfilled') return;
           const data: any = r.value;
@@ -391,7 +397,7 @@ export const LeadsBoard: React.FC = () => {
       );
       toast({
         title: `Bulk deep scan finished`,
-        description: `${ok} succeeded${failed ? `, ${failed} failed` : ''}. Follow-ups added to your calendar.`,
+        description: `${ok} succeeded${failed ? `, ${failed} failed — use Retry failed` : ''}. Follow-ups added to your calendar.`,
         variant: failed && !ok ? 'destructive' : 'default',
       });
       refreshMine();
@@ -400,7 +406,20 @@ export const LeadsBoard: React.FC = () => {
     } finally {
       setBulkScanning(false);
     }
-  }, [bulkSelected, scanCandidates, refreshMine, toast]);
+  }, [scanCandidates, mine, refreshMine, toast]);
+
+  const runBulkDeepScan = useCallback(
+    () => runBulkDeepScanFor(Array.from(bulkSelected)),
+    [bulkSelected, runBulkDeepScanFor]
+  );
+
+  const retryFailedBulkScan = useCallback(() => {
+    const failedIds = Object.entries(bulkStatuses)
+      .filter(([, s]) => s === 'failed')
+      .map(([id]) => id);
+    if (failedIds.length === 0) return;
+    runBulkDeepScanFor(failedIds);
+  }, [bulkStatuses, runBulkDeepScanFor]);
 
 
   return (
@@ -742,10 +761,51 @@ export const LeadsBoard: React.FC = () => {
               );
             })}
           </div>
+          {/* Live status summary so you can see exactly which leads were used + their scan state */}
+          {Object.keys(bulkStatuses).length > 0 && (() => {
+            const entries = Object.entries(bulkStatuses);
+            const done = entries.filter(([, s]) => s === 'done').length;
+            const failed = entries.filter(([, s]) => s === 'failed').length;
+            const scanning = entries.filter(([, s]) => s === 'scanning').length;
+            return (
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-2 text-xs space-y-1">
+                <div className="flex flex-wrap items-center gap-3 font-mono uppercase tracking-wider">
+                  <span className="text-amber">Batch · {entries.length} leads</span>
+                  <span className="text-green-400">✓ {done} done</span>
+                  {scanning > 0 && <span className="text-amber inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />{scanning} scanning</span>}
+                  {failed > 0 && <span className="text-red-400">✗ {failed} failed</span>}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {entries.map(([id, s]) => {
+                    const lead = mine.find(l => l.id === id);
+                    if (!lead) return null;
+                    const tone = s === 'done' ? 'border-green-400/40 text-green-400'
+                      : s === 'failed' ? 'border-red-400/40 text-red-400'
+                      : 'border-amber/40 text-amber';
+                    return (
+                      <span key={id} className={`px-2 py-0.5 rounded border ${tone} text-[10px] font-mono`}>
+                        {(lead.business_name || lead.email || 'lead').slice(0, 28)}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" disabled={bulkScanning} onClick={() => setBulkPickerOpen(false)}>
-              {bulkScanning ? 'Running…' : 'Cancel'}
+              {bulkScanning ? 'Running…' : 'Close'}
             </Button>
+            {Object.values(bulkStatuses).some(s => s === 'failed') && (
+              <Button
+                variant="outline"
+                disabled={bulkScanning}
+                onClick={retryFailedBulkScan}
+                className="border-red-400/50 text-red-400 hover:bg-red-500/10"
+              >
+                <RotateCcw className="w-3 h-3 mr-1" /> Retry failed
+              </Button>
+            )}
             <Button
               className="bg-amber text-background hover:bg-amber/90"
               disabled={bulkScanning || bulkSelected.size === 0}
