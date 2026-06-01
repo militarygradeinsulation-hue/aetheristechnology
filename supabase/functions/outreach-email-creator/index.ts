@@ -182,20 +182,26 @@ serve(async (req) => {
     const senderName: string = (body.senderName || "").toString().slice(0, 80);
     const imageBase64: string | null = body.imageBase64 ? String(body.imageBase64).slice(0, 5_500_000) : null;
     const imageMime: string = (body.imageMime || "image/png").toString();
+    const tone: string = (body.tone || "").toString().slice(0, 60);
+    const personality: string = (body.personality || "").toString().slice(0, 60);
 
     if (!prompt && !pastedText && !imageBase64) {
       return json({ error: "Provide a prompt, pasted email, or an image." }, 400);
     }
 
+    const styleLine = (tone || personality)
+      ? `\nTONE: ${tone || "(default operator)"}\nPERSONALITY: ${personality || "(default operator)"}\n`
+      : "";
+
     let userInstruction = "";
     if (mode === "rewrite") {
-      userInstruction = `Rewrite the following email in the Aetheris operator voice. Keep the intent. Remove ALL dashes. Cut filler. Make it specific.\n\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
+      userInstruction = `Rewrite the following email. Keep the intent and any concrete facts. Remove ALL dashes. Cut filler. Make it specific.${styleLine}\nORIGINAL:\n${pastedText}\n\nADDITIONAL CONTEXT:\n${prompt || "(none)"}`;
     } else if (mode === "subjects") {
-      userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.\n\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
+      userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.${styleLine}\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     } else if (mode === "analyze") {
-      userInstruction = `Analyze this outreach email. Be brutally honest. The rep wants to know exactly what is wrong and what to do better. Read the image (a screenshot of the email) and/or the pasted text below. Extract subject and body. Critique every weak line. Quote the offending text verbatim. Grade it. Then give a full rewrite in the Aetheris operator voice (no dashes, short sentences, specific opener, low-friction ask, under 140 words).\n\n${pastedText ? `PASTED EMAIL:\n${pastedText}\n\n` : ""}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
+      userInstruction = `Critique the outreach email below. Follow the GROUND RULES strictly. Only flag problems you can quote verbatim. Do not invent problems to fill space. If the email is already strong, grade it A or B and leave the problems array short or empty. The rewritten_body should preserve the writer's intent and any concrete facts; tighten, do not replace.\n\n${pastedText ? `EMAIL DRAFT:\n${pastedText}\n\n` : "(no pasted text; read the screenshot)\n\n"}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
     } else {
-      userInstruction = `Write a cold outreach email.\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
+      userInstruction = `Write a cold outreach email.${styleLine}\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     }
 
     const userContent: any[] = [{ type: "text", text: userInstruction }];
