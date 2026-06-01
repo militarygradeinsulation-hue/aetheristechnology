@@ -490,16 +490,6 @@ const DiagnosticPage: React.FC = () => {
               </p>
             </section>
 
-            <section className="forensic-tile rounded-sm border border-amber/30 p-6 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">After the diagnostic</div>
-              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer, $15K/month.</h2>
-              <p className="text-sm text-foreground/80 mb-4">
-                3-month minimum. Available only to Diagnostic clients. We execute the prioritized fixes ourselves.
-              </p>
-              <Link to="/implementation" className="text-amber font-semibold hover:underline">
-                See implementation details →
-              </Link>
-            </section>
           </div>
         </main>
         <Footer />
