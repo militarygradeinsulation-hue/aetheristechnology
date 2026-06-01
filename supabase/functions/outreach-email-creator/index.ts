@@ -319,7 +319,7 @@ serve(async (req) => {
     }
 
     return json({
-      subject: stripDashes(parsed.subject || ""),
+      subject: mode === "linkedin_intro" ? "" : stripDashes(parsed.subject || ""),
       body: stripDashes(parsed.body || ""),
       why_it_works: stripDashes(parsed.why_it_works || ""),
       mode,
