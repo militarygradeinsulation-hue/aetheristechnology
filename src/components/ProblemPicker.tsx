@@ -86,165 +86,129 @@ const groupMeta = [
 
 
 export const ProblemPicker: React.FC = () => {
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
   const total = problemGroups.length;
+  const openGroup = openIdx !== null ? problemGroups[openIdx] : null;
+  const openMeta = openIdx !== null ? groupMeta[openIdx] : null;
 
   return (
-    <section className="px-4 py-14">
-      <div className="max-w-[1800px] 2xl:max-w-[2000px] mx-auto">
+    <section className="px-4 py-10">
+      <div className="max-w-[1400px] mx-auto">
         <RevealOnScroll>
-          <div className="text-center mb-10 max-w-5xl mx-auto">
+          <div className="text-center mb-6 max-w-4xl mx-auto">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
               Start here · I've been where you are
             </div>
-            <h2 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+            <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-[1.1]">
               Pick your <span className="text-crimson italic">problem</span>.
-              <br className="hidden md:block" />
-              <span className="text-foreground/90"> I've had </span>
-              <span className="text-amber italic">all of these</span>
-              <span className="text-foreground/90"> — and built the fix for each one.</span>
-              <br className="hidden md:block" />
               <span className="text-amber"> Meet the tool that fixes it.</span>
             </h2>
-            <p className="text-base md:text-lg text-foreground/85 mt-4">
-              I've sat in your chair — 11pm, spreadsheet open, knowing something was broken and not knowing what. So I built the tools I wish I'd had. Pick the one that hits closest. No email. No upsell. Just the fix.
-            </p>
-            <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-3">
-              {String(total).padStart(2, '0')} owner pressure points · Click any case to open the fix
+            <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-2">
+              {String(total).padStart(2, '0')} owner pressure points · Tap a tile
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="rounded-sm border-2 border-amber/40 bg-card/95 p-4 md:p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-          <div className="flex items-baseline justify-between flex-wrap gap-2 mb-8 pb-4 border-b border-amber/20">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-              Owner pressure points · {String(total).padStart(2, '0')} cases on file
-            </div>
-            <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-              No email · No upsell
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-6 md:gap-8">
+        <div className="rounded-sm border-2 border-amber/40 bg-card/95 p-3 md:p-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-3">
             {problemGroups.map((group, idx) => {
               const meta = groupMeta[idx];
               const Icon = meta?.icon ?? Droplets;
               const isOpen = openIdx === idx;
               return (
-                <RevealOnScroll key={idx}>
-                  <div
-                    className={`rounded-lg bg-background/80 border-2 transition-all duration-500 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] ${
-                      isOpen
-                        ? 'border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.45)] bg-background/95'
-                        : 'border-border/70 hover:border-amber/50'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setOpenIdx(isOpen ? null : idx)}
-                      aria-expanded={isOpen}
-                      className="w-full text-left p-5 md:p-7 group"
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setOpenIdx(isOpen ? null : idx)}
+                  aria-expanded={isOpen}
+                  className={`text-left rounded-md bg-background/80 border-2 p-3 md:p-4 transition-all flex flex-col gap-2 min-h-[120px] ${
+                    isOpen
+                      ? 'border-amber shadow-[0_0_24px_-4px_hsl(var(--amber-glow)/0.55)] bg-background'
+                      : 'border-border/60 hover:border-amber/60 hover:bg-background/95'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                        isOpen ? 'bg-amber/25 ring-1 ring-amber/60' : 'bg-amber/10'
+                      }`}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div
-                          className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 transition-all ${
-                            isOpen
-                              ? 'bg-amber/20 ring-1 ring-amber/50 shadow-[0_0_18px_-2px_hsl(var(--amber-glow)/0.55)]'
-                              : 'bg-amber/10 group-hover:bg-amber/20'
-                          }`}
-                        >
-                          <Icon className="w-5 h-5 text-amber" />
-                        </div>
-                        <div className="flex-1 min-w-0 text-center">
-                          <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1.5">
-                            Case {String(idx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-                          </div>
-                          <div className="font-forensic font-bold text-foreground text-2xl md:text-4xl leading-tight">
-                            "{group.problem}"
-                          </div>
-                        </div>
-                        <div
-                          className={`w-7 h-7 rounded-full border border-amber/40 flex items-center justify-center shrink-0 transition-all ${
-                            isOpen
-                              ? 'bg-amber text-primary-foreground rotate-180'
-                              : 'text-amber group-hover:bg-amber/10'
-                          }`}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      <p className="text-base md:text-lg text-foreground/80 leading-snug text-center mt-3">
-                        <span className="font-case text-[10px] uppercase tracking-widest text-crimson">
-                          You feel it as →{' '}
-                        </span>
-                        {meta?.felt ?? group.symptom}
-                      </p>
-
-                      {!isOpen && (
-                        <div className="mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 group-hover:text-amber/80 transition-colors text-center">
-                          Click for the tool that plugs this →
-                        </div>
-                      )}
-                    </button>
-
-                    {isOpen && (
-                      <div className="px-4 md:px-5 pb-5 pt-0 animate-fade-in">
-                        <div className="h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent mb-5" />
-
-                        {meta?.backstory && (
-                          <div className="mb-5 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
-                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
-                              Why this tool exists · Joseph's file
-                            </div>
-                            <p className="text-sm text-foreground/85 leading-relaxed italic">
-                              "{meta.backstory}"
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
-                          The fix
-                        </div>
-                        <p className="text-sm text-foreground/85 mb-4">
-                          {meta?.fix}
-                        </p>
-
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {group.tools.map((tool) => (
-                            <Link
-                              key={tool.title}
-                              to={tool.path}
-                              className="group/tool rounded-md border border-amber/25 bg-background/40 p-4 hover:border-amber/60 hover:bg-amber/5 transition-all flex flex-col"
-                            >
-                              <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">
-                                What it cures
-                              </div>
-                              <p className="text-sm text-foreground/90 leading-snug mb-3">
-                                {tool.solves}
-                              </p>
-                              <div className="mt-auto pt-3 border-t border-amber/15 flex items-center justify-between gap-3">
-                                <span className="font-forensic text-sm font-bold text-foreground leading-tight">
-                                  {tool.title}
-                                </span>
-                                <span className="text-amber text-xs font-semibold inline-flex items-center gap-1 group-hover/tool:gap-2 transition-all whitespace-nowrap">
-                                  Run it free <ArrowRight className="w-3.5 h-3.5" />
-                                </span>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      <Icon className="w-4 h-4 text-amber" />
+                    </div>
+                    <div className="font-case text-[9px] uppercase tracking-widest text-amber/80">
+                      Case {String(idx + 1).padStart(2, '0')}
+                    </div>
                   </div>
-                </RevealOnScroll>
+                  <div className="font-forensic font-bold text-foreground text-sm md:text-base leading-snug">
+                    "{group.problem}"
+                  </div>
+                  <p className="text-[11px] md:text-xs text-foreground/70 leading-snug italic line-clamp-2 mt-auto">
+                    {meta?.felt ?? group.symptom}
+                  </p>
+                </button>
               );
             })}
           </div>
+
+          {openGroup && (
+            <div className="mt-4 rounded-md border border-amber/40 bg-background/95 p-4 md:p-5 animate-fade-in">
+              <div className="flex items-baseline justify-between gap-3 mb-3 pb-3 border-b border-amber/20">
+                <div>
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber">
+                    Case {String((openIdx ?? 0) + 1).padStart(2, '0')} · Open file
+                  </div>
+                  <div className="font-forensic text-lg md:text-xl font-bold text-foreground leading-tight">
+                    "{openGroup.problem}"
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpenIdx(null)}
+                  className="font-case text-[9px] uppercase tracking-widest text-muted-foreground hover:text-amber"
+                >
+                  Close ✕
+                </button>
+              </div>
+
+              {openMeta?.backstory && (
+                <div className="mb-3 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-3 py-2">
+                  <p className="text-[13px] text-foreground/85 leading-relaxed italic">
+                    "{openMeta.backstory}"
+                  </p>
+                </div>
+              )}
+
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                The fix
+              </div>
+              <p className="text-sm text-foreground/85 mb-3">{openMeta?.fix}</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {openGroup.tools.map((tool) => (
+                  <Link
+                    key={tool.title}
+                    to={tool.path}
+                    className="group/tool rounded-md border border-amber/25 bg-background/40 p-3 hover:border-amber/60 hover:bg-amber/5 transition-all flex flex-col"
+                  >
+                    <p className="text-[13px] text-foreground/90 leading-snug mb-2">
+                      {tool.solves}
+                    </p>
+                    <div className="mt-auto pt-2 border-t border-amber/15 flex items-center justify-between gap-2">
+                      <span className="font-forensic text-sm font-bold text-foreground leading-tight">
+                        {tool.title}
+                      </span>
+                      <span className="text-amber text-xs font-semibold inline-flex items-center gap-1 whitespace-nowrap">
+                        Run it free <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-4">
           <Link
             to="/catalog"
             className="text-sm text-amber hover:underline inline-flex items-center gap-1.5 font-semibold"
