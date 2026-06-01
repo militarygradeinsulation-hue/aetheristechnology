@@ -1477,7 +1477,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 <span className="text-[10px] text-muted-foreground">
                   Last scanned {new Date(scan.scanned_at).toLocaleString()}
                 </span>
-            )}
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
               <Input
                 value={scanUrl}
