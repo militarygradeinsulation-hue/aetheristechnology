@@ -128,10 +128,10 @@ const INDUSTRIES: IndustryLeak[] = [
     humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
     whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
     recommended: {
-      name: '21-Day Revenue Diagnostic + Implementation Retainer',
-      price: '$18,500 + $15K/mo',
-      why: 'Highest dollar bleed per leak. Underwriting cycle and KYC handoffs need both audit and ongoing system rebuild.',
-      link: '/diagnostic',
+      name: 'The Leak Audit (Forensic Diagnostic)',
+      price: '$2,500 flat',
+      why: 'Underwriting cycle and KYC handoff drops show up fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
+      link: '/leak-audit',
     },
   },
   {
