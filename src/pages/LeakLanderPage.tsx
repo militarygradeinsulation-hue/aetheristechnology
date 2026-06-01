@@ -172,28 +172,28 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Buttons — primary CTAs, larger */}
           <section
-            className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
+            className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider text-xs transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
+            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/home">
-                <ExternalLink className="w-3.5 h-3.5 mr-2 text-amber relative" />
+                <ExternalLink className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Main Site</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider text-xs transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
+            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/contact">
-                <FileText className="w-3.5 h-3.5 mr-2 text-amber relative" />
+                <FileText className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Intake Form</span>
               </Link>
             </Button>
-            <Button asChild size="sm" className="relative overflow-hidden bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider text-xs ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/35 before:to-transparent before:pointer-events-none">
+            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/35 before:to-transparent before:pointer-events-none">
               <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Calendar className="w-3.5 h-3.5 mr-2 relative" />
+                <Calendar className="w-5 h-5 mr-2 relative" />
                 <span className="relative">Book the Diagnostic</span>
-                <ArrowRight className="ml-2 w-3.5 h-3.5 relative" />
+                <ArrowRight className="ml-2 w-5 h-5 relative" />
               </a>
             </Button>
           </section>
