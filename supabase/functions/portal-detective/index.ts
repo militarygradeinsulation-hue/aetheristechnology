@@ -163,7 +163,27 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const dossier = buildDossier(body);
-    const channel = body?.channel === "linkedin" ? "linkedin" : "email";
+    const rawChannel = body?.channel;
+    const isSoftIntro = rawChannel === "linkedin_intro" || rawChannel === "linkedin-intro";
+    const channel = isSoftIntro ? "linkedin" : (rawChannel === "linkedin" ? "linkedin" : "email");
+
+    const softIntroOverride = isSoftIntro ? `
+
+# CRITICAL OVERRIDE — SOFT FIRST-TOUCH LINKEDIN INTRO MODE
+You are NOT writing a forensic pitch. You are writing the rep's FIRST EVER message to this person on LinkedIn. The rules above for naming the leak, costing it, and pushing the /leak-audit, the $2,500 Forensic Diagnostic, or a 15-min look are SUSPENDED for the "message" field only.
+
+For the "message" field, instead:
+- Channel must be "linkedin".
+- subject MUST be null.
+- body MUST be 40 to 90 words, warm, peer-to-peer, NON-SALESY.
+- Do NOT mention Aetheris, "audit", "leak", "diagnostic", any service, any call, any meeting, any "15 minutes", or any next step beyond "open to connecting" or ONE genuine curious question.
+- Do NOT pitch. Do NOT name a dollar leak in the body. Do NOT push a CTA.
+- Open with one specific genuine observation about THEM (their post, role, company, industry, something they shipped) using the dossier evidence.
+- End with EITHER a soft "open to connecting / following your work" line OR ONE genuine curious question. Never both.
+- Forbidden: dashes (em, en, hyphen-as-pause), emoji, exclamation points, flattery like "love what you're doing", "huge fan", "I hope this finds you well".
+
+The monologue, deduction_chain, best_angle, and deeper_forensics fields STILL show the full forensic reasoning. Only the "message" itself is the soft intro. why_it_lands should explain why this soft opener earns a reply without setting off sales alarms.
+` : "";
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -172,8 +192,8 @@ Deno.serve(async (req) => {
         model: "google/gemini-2.5-flash",
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `Preferred channel: ${channel}\n\n=== DOSSIER ===\n${dossier}\n\nReturn the JSON now.` },
+          { role: "system", content: SYSTEM_PROMPT + softIntroOverride },
+          { role: "user", content: `Preferred channel: ${channel}${isSoftIntro ? " (SOFT FIRST-TOUCH INTRO — see override)" : ""}\n\n=== DOSSIER ===\n${dossier}\n\nReturn the JSON now.` },
         ],
       }),
     });
