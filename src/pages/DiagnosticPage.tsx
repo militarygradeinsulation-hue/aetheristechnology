@@ -175,10 +175,10 @@ const DiagnosticPage: React.FC = () => {
                 Specialty manufacturers · $5M–$25M
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
-                The 21-Day Revenue Diagnostic.
+                The Leak Audit™.
               </h1>
               <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap.
+                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap, for $2,500 flat.
               </p>
               <div className="mt-8 max-w-3xl mx-auto">
                 <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
