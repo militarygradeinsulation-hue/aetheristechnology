@@ -323,7 +323,7 @@ const DiagnosticPage: React.FC = () => {
                   The real math
                 </div>
                 <p className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$18,500 to find the leak is roughly 1.3% – 4.6% of what it's costing you to ignore it.</span> One recovered deal usually pays for the engagement 5–20x over.
+                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find the leak is a rounding error against what it's costing you to ignore it.</span> One recovered deal usually pays for the audit 100x over.
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-3">
                   If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves, before you sign anything else.
