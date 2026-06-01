@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp } from 'lucide-react';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp, Linkedin } from 'lucide-react';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 
-type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze';
+type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze' | 'linkedin_intro';
 
 interface Props {
   /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
@@ -176,8 +176,8 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
         setResult(email);
         if (email?.body) {
           saveToolRun({
-            tool_type: 'outreach_email',
-            title: email.subject?.slice(0, 80) || `Outreach Email — ${(recipientName || prompt || 'untitled').slice(0, 60)}`,
+            tool_type: mode === 'linkedin_intro' ? 'linkedin_intro' : 'outreach_email',
+            title: (email.subject || `LinkedIn Intro — ${(recipientName || prompt || 'untitled').slice(0, 60)}`).slice(0, 80),
             input_data: { mode, prompt, pastedText: pasted, recipientName, senderName },
             output_data: email,
           });
@@ -213,7 +213,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
 
       {/* Mode switch */}
       <div className="flex flex-wrap gap-2">
-        {(['create','rewrite','subjects','analyze'] as Mode[]).map((m) => (
+        {(['create','rewrite','subjects','analyze','linkedin_intro'] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -224,6 +224,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New Email</>
               : m === 'rewrite' ? <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>
               : m === 'subjects' ? <><Type className="w-3.5 h-3.5"/>Subject Hooks</>
+              : m === 'linkedin_intro' ? <><Linkedin className="w-3.5 h-3.5"/>LinkedIn Intro (Soft)</>
               : <><ScanSearch className="w-3.5 h-3.5"/>Critique My Email</>}
           </button>
         ))}
@@ -231,13 +232,13 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
 
       {/* Inputs */}
       <Card className="glass p-5 space-y-4">
-        {(mode === 'create' || mode === 'subjects') && (
+        {(mode === 'create' || mode === 'subjects' || mode === 'linkedin_intro') && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Recipient (optional)</label>
               <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Jordan, COO at Acme" />
             </div>
-            {mode === 'create' && (
+            {(mode === 'create' || mode === 'linkedin_intro') && (
               <div>
                 <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">From (your name)</label>
                 <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
@@ -276,6 +277,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             {mode === 'create' ? 'Context / Angle'
               : mode === 'subjects' ? 'Context / Angle for the subject hooks'
               : mode === 'analyze' ? 'Extra context (optional)'
+              : mode === 'linkedin_intro' ? 'Context about them (their post, role, company, what you noticed)'
               : 'Notes for the rewrite (optional)'}
           </label>
           <Textarea
@@ -288,7 +290,9 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
                 ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
                 : mode === 'analyze'
                   ? "Who it is going to, what you want it to do. Helps the critique stay on-target."
-                  : "What you want changed. Tone, urgency, specific facts to add."}
+                  : mode === 'linkedin_intro'
+                    ? "What caught your eye. Their recent post, a hire, their role, something specific. NO pitch ideas — this is a soft intro."
+                    : "What you want changed. Tone, urgency, specific facts to add."}
             rows={4}
           />
         </div>
@@ -351,6 +355,7 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
             : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
             : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
             : mode === 'subjects' ? <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>
+            : mode === 'linkedin_intro' ? <><Linkedin className="w-4 h-4 mr-2"/>Write Soft LinkedIn Intro</>
             : <><ScanSearch className="w-4 h-4 mr-2"/>Tear It Apart</>}
         </Button>
       </Card>
@@ -359,22 +364,24 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       {result && (
         <Card className="glass p-5 space-y-4 border-amber/30">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Draft</div>
-            <Button size="sm" variant="outline" onClick={() => copyText('all', `Subject: ${result.subject}\n\n${result.body}`)}>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">{result.subject ? 'Operator Draft' : 'LinkedIn Intro (Soft First-Touch)'}</div>
+            <Button size="sm" variant="outline" onClick={() => copyText('all', result.subject ? `Subject: ${result.subject}\n\n${result.body}` : result.body)}>
               {copied === 'all' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
               Copy All
             </Button>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
-              <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
-                {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
-              </button>
+          {result.subject && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
+                <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                  {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+                </button>
+              </div>
+              <div className="font-display font-bold text-lg text-foreground">{result.subject}</div>
             </div>
-            <div className="font-display font-bold text-lg text-foreground">{result.subject}</div>
-          </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-1">

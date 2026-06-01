@@ -35,7 +35,7 @@ interface DetectiveResult {
 export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment, auth = 'portal' }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
+  const [channel, setChannel] = useState<'email' | 'linkedin' | 'linkedin_intro'>('email');
   const [result, setResult] = useState<DetectiveResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(0);
@@ -232,7 +232,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
   };
 
-  const run = async (ch: 'email' | 'linkedin' = channel) => {
+  const run = async (ch: 'email' | 'linkedin' | 'linkedin_intro' = channel) => {
     const headers: Record<string, string> = {};
     if (auth === 'admin') {
       const t = getAdminToken();
@@ -374,10 +374,13 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             <Search className="w-3 h-3 mr-1" /> Open the case (email)
           </Button>
           <Button size="sm" variant="outline" onClick={() => run('linkedin')} className="h-8 border-amber/50 text-amber hover:bg-amber/10">
-            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn version
+            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn (forensic)
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => run('linkedin_intro')} className="h-8 border-sky-500/50 text-sky-400 hover:bg-sky-500/10">
+            <Linkedin className="w-3 h-3 mr-1" /> LinkedIn intro (soft, non-salesy)
           </Button>
           <ReadAloudButton
-            text="Detective Mode. Reads every scrap on this lead, picks the single best angle from their leaks and gaps, shows the deduction from point A to point B, then writes the message in Aetheris voice."
+            text="Detective Mode. Reads every scrap on this lead, picks the single best angle from their leaks and gaps, shows the deduction from point A to point B, then writes the message in Aetheris voice. Or generate a soft, non-salesy first-touch LinkedIn intro."
             label="Listen"
             className="h-8 border-amber/40 text-amber hover:bg-amber/10"
           />

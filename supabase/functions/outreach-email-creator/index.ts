@@ -46,6 +46,27 @@ GROUND RULES:
 
 Return the critique via the analyze_email tool.`;
 
+const LINKEDIN_INTRO_SYSTEM_PROMPT = `You write FIRST-TOUCH LinkedIn DMs for Aetheris reps.
+
+This is an INTRODUCTION. It is not a pitch. It is not a sales message. It is a human reaching out to another human on LinkedIn.
+
+HARD RULES:
+1. NEVER pitch. Do not mention Aetheris, "audit", "leak", "diagnostic", services, calls, meetings, or any next step beyond "happy to connect" or a single curious question.
+2. NEVER ask for a call, demo, intro, 15 minutes, "quick chat", or any time on the calendar.
+3. NEVER use dashes (em, en, hyphen-as-pause). Use periods or commas. Hyphens only inside compound words like "follow-up".
+4. No emoji. No exclamation points. No flattery ("love what you're doing", "huge fan", "impressive work"). No "I hope this finds you well."
+5. 40 to 90 words. Short sentences. Reads like a real person, not a template.
+6. Open with ONE specific, genuine observation about THEM (their post, role, company, industry, something they shipped). Prove you actually looked.
+7. Add ONE short personal context line about why you're reaching out (shared interest, a question their work raised, a pattern in their space). NO product mention.
+8. Close with EITHER a soft "open to connecting / following your work" OR ONE genuine curious question. Never both. Never a CTA.
+9. No subject line. LinkedIn DMs do not have subjects.
+
+TONE: warm, curious, peer-to-peer, low-pressure. Sounds like a competent operator who reached out because they were genuinely interested, not because they want something.
+
+If a tone or personality is specified, adapt the cadence but keep ALL hard rules. The point: zero sales pressure on the first touch.
+
+Return the message via the write_linkedin_intro tool.`;
+
 const EMAIL_TOOL = {
   type: "function",
   function: {
@@ -59,6 +80,23 @@ const EMAIL_TOOL = {
         why_it_works: { type: "string", description: "One sentence operator note explaining the leverage." },
       },
       required: ["subject", "body", "why_it_works"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const LINKEDIN_INTRO_TOOL = {
+  type: "function",
+  function: {
+    name: "write_linkedin_intro",
+    description: "Write a soft, non-salesy first-touch LinkedIn DM. No pitch, no CTA to a call.",
+    parameters: {
+      type: "object",
+      properties: {
+        body: { type: "string", description: "40 to 90 words. No subject. No dashes. No pitch. No call ask." },
+        why_it_works: { type: "string", description: "One sentence on why this opener is hard to ignore without feeling sold to." },
+      },
+      required: ["body", "why_it_works"],
       additionalProperties: false,
     },
   },
@@ -171,10 +209,11 @@ serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const mode: "create" | "rewrite" | "subjects" | "analyze" =
+    const mode: "create" | "rewrite" | "subjects" | "analyze" | "linkedin_intro" =
       body.mode === "rewrite" ? "rewrite"
         : body.mode === "subjects" ? "subjects"
         : body.mode === "analyze" ? "analyze"
+        : body.mode === "linkedin_intro" || body.mode === "linkedin-intro" ? "linkedin_intro"
         : "create";
     const prompt: string = (body.prompt || "").toString().slice(0, 4000);
     const pastedText: string = (body.pastedText || "").toString().slice(0, 8000);
@@ -200,6 +239,8 @@ serve(async (req) => {
       userInstruction = `Write 10 subject line hooks for a cold outreach email to this prospect. Each must be under 7 words, specific, and pass the "would you open this" test. Vary the angle: some name a leak, some lead with a number, some make a specific observation, some take a contrarian stance, some create curiosity, some issue a challenge. No filler. No emoji. No dashes.${styleLine}\nRECIPIENT: ${recipientName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     } else if (mode === "analyze") {
       userInstruction = `Critique the outreach email below. Follow the GROUND RULES strictly. Only flag problems you can quote verbatim. Do not invent problems to fill space. If the email is already strong, grade it A or B and leave the problems array short or empty. The rewritten_body should preserve the writer's intent and any concrete facts; tighten, do not replace.\n\n${pastedText ? `EMAIL DRAFT:\n${pastedText}\n\n` : "(no pasted text; read the screenshot)\n\n"}${prompt ? `EXTRA CONTEXT: ${prompt}` : ""}`;
+    } else if (mode === "linkedin_intro") {
+      userInstruction = `Write a SOFT, NON-SALESY first-touch LinkedIn DM. This is the very first time the rep is reaching out. Do NOT pitch. Do NOT ask for a call or meeting. Open with one specific, genuine observation about the recipient or their company. End with either a soft "open to connecting" line OR ONE genuine curious question. 40 to 90 words. No subject.${styleLine}\nRECIPIENT: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT ABOUT THE RECIPIENT (their work, post, role, company, industry): ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL (their post / profile / site copy):\n${pastedText}` : ""}`;
     } else {
       userInstruction = `Write a cold outreach email.${styleLine}\nRECIPIENT NAME: ${recipientName || "(unknown)"}\nSENDER NAME: ${senderName || "(unknown)"}\nCONTEXT / ANGLE: ${prompt || "(none)"}${pastedText ? `\n\nREFERENCE MATERIAL:\n${pastedText}` : ""}`;
     }
@@ -215,14 +256,15 @@ serve(async (req) => {
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) throw new Error("LOVABLE_API_KEY missing");
 
-    const tool = mode === "subjects" ? SUBJECT_TOOL : mode === "analyze" ? ANALYZE_TOOL : EMAIL_TOOL;
+    const tool = mode === "subjects" ? SUBJECT_TOOL : mode === "analyze" ? ANALYZE_TOOL : mode === "linkedin_intro" ? LINKEDIN_INTRO_TOOL : EMAIL_TOOL;
+    const systemPrompt = mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : mode === "linkedin_intro" ? LINKEDIN_INTRO_SYSTEM_PROMPT : SYSTEM_PROMPT;
     const res = await fetch(LOVABLE_AI_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: mode === "analyze" ? CRITIQUE_SYSTEM_PROMPT : SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userContent },
         ],
         tools: [tool],
@@ -277,7 +319,7 @@ serve(async (req) => {
     }
 
     return json({
-      subject: stripDashes(parsed.subject || ""),
+      subject: mode === "linkedin_intro" ? "" : stripDashes(parsed.subject || ""),
       body: stripDashes(parsed.body || ""),
       why_it_works: stripDashes(parsed.why_it_works || ""),
       mode,
