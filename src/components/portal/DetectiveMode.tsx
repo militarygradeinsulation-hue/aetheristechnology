@@ -232,7 +232,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
   };
 
-  const run = async (ch: 'email' | 'linkedin' = channel) => {
+  const run = async (ch: 'email' | 'linkedin' | 'linkedin_intro' = channel) => {
     const headers: Record<string, string> = {};
     if (auth === 'admin') {
       const t = getAdminToken();
