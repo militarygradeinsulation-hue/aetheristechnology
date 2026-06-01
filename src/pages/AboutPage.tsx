@@ -109,6 +109,48 @@ const AboutPage = () => {
             </div>
           </section>
 
+          <section className="px-4 pb-16">
+            <div className="max-w-3xl mx-auto">
+              <div className="mb-8">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+                  Methodology · The Leak Audit™ · Condensed
+                </div>
+                <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  How I find the money <span className="text-amber">you've been losing.</span>
+                </h2>
+                <p className="text-lg text-muted-foreground mt-4">
+                  Six forensic rules. Written for the owner who's been burned before. Every claim in the final report can be re-derived from your own data by your CFO, controller, or any outside auditor.
+                </p>
+              </div>
+              <ol className="space-y-4">
+                {METHODOLOGY_STEPS.map((s) => (
+                  <li key={s.n} className="forensic-tile rounded-sm border border-border/60 p-5 md:p-6 flex gap-4">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber/80 leading-none pt-1">
+                      Step
+                      <div className="font-forensic text-2xl text-amber mt-1">{s.n}</div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-foreground mb-1">{s.title}</div>
+                      <p className="text-foreground/80 text-sm leading-relaxed">{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/diagnostic">
+                  <Button className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                    See the $2,500 Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/methodology">
+                  <Button variant="outline" className="glass-hover border-amber/40 text-amber">
+                    Read the full methodology
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+
           <VerifiableOutcomes />
           <TechLogos />
         </div>
