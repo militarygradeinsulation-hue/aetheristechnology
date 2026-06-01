@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -868,10 +868,16 @@ export default function LinkedInPostStudio() {
     }
   };
 
+  const respondFileInputRef = useRef<HTMLInputElement | null>(null);
+
   const handleRespondFile = (file: File | null | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'Please upload an image file', variant: 'destructive' });
+    if (!file) {
+      console.warn('[PostStudio] No file received from input');
+      return;
+    }
+    const isImage = file.type ? file.type.startsWith('image/') : /\.(png|jpe?g|webp|gif|heic|heif|bmp)$/i.test(file.name);
+    if (!isImage) {
+      toast({ title: 'Please upload an image file', description: `Got: ${file.type || file.name}`, variant: 'destructive' });
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -883,6 +889,11 @@ export default function LinkedInPostStudio() {
       setRespondImage(reader.result as string);
       setRespondFileName(file.name);
       setRespondOutput('');
+      toast({ title: 'Screenshot loaded', description: file.name });
+    };
+    reader.onerror = () => {
+      console.error('[PostStudio] FileReader error', reader.error);
+      toast({ title: 'Could not read file', description: String(reader.error?.message || 'Unknown error'), variant: 'destructive' });
     };
     reader.readAsDataURL(file);
   };
@@ -1307,17 +1318,29 @@ export default function LinkedInPostStudio() {
 
         {respondSourceType === 'image' ? (
           !respondImage ? (
-            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30">
-              <Upload className="w-6 h-6 text-muted-foreground" />
-              <div className="text-sm font-semibold text-foreground">Upload screenshot</div>
-              <div className="text-[11px] text-muted-foreground">PNG, JPG, or WEBP (max 10 MB)</div>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => respondFileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') respondFileInputRef.current?.click(); }}
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border/60 hover:border-amber/60 rounded-lg p-6 cursor-pointer transition bg-background/30"
+            >
+              <Upload className="w-6 h-6 text-muted-foreground pointer-events-none" />
+              <div className="text-sm font-semibold text-foreground pointer-events-none">Upload screenshot</div>
+              <div className="text-[11px] text-muted-foreground pointer-events-none">PNG, JPG, or WEBP (max 10 MB)</div>
               <input
+                ref={respondFileInputRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => handleRespondFile(e.target.files?.[0])}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  handleRespondFile(f);
+                  // Reset so selecting the same file again still fires onChange
+                  e.target.value = '';
+                }}
               />
-            </label>
+            </div>
           ) : (
             <div className="relative rounded-lg border border-border bg-background/40 p-3">
               <button
