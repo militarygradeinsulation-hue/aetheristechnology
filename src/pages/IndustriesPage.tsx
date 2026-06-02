@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign, Star } from 'lucide-react';
+import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign, Star, Search, ChevronDown, ChevronUp, Scale, Home, GraduationCap, ShoppingBag, Hotel, Wrench, Plane, Megaphone, Stethoscope, Sparkles, Cpu, Leaf, Beaker, Hammer, Briefcase } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
@@ -28,161 +29,394 @@ interface IndustryLeak {
   };
 }
 
+const DEFAULT_RECOMMENDED = {
+  name: 'The Leak Audit (Forensic Diagnostic)',
+  price: '$2,500 flat',
+  why: 'Operator-led forensic mini-audit. Fee applies 1:1 toward any engagement.',
+  link: '/leak-audit',
+};
+
 const INDUSTRIES: IndustryLeak[] = [
   {
-    industry: 'Specialty Manufacturing',
-    icon: Factory,
-    primaryLeak: 'Quote-to-close drag and stalled deals after Day 3.',
-    typicalLoss: '$300K–$1.8M / yr',
-    whatWeMeasure: [
-      'Quote follow-up SLA vs. actual',
-      'Time-in-stage by deal value',
-      'RFQ-to-PO conversion by lane',
-    ],
-    slug: 'ai-for-manufacturing',
-    image: INFOGRAPHICS.industryManufacturing,
-    humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
-    whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
-    recommended: {
-      name: 'The Leak Audit (Forensic Diagnostic)',
-      price: '$2,500 flat',
-      why: 'Quote-to-cash is where manufacturers leak most. Start with the operator-led Leak Audit, fee applies 1:1 to any engagement.',
-      link: '/leak-audit',
-    },
-  },
-  {
-    industry: 'Construction',
-    icon: HardHat,
-    primaryLeak: 'Bid follow-up gaps and RFI cycle bleed.',
-    typicalLoss: '$200K–$1.2M / yr',
-    whatWeMeasure: [
-      'Bid → award follow-up cadence',
-      'RFI cycle time and stall points',
-      'Change-order capture rate',
-    ],
-    slug: 'ai-for-construction',
-    image: INFOGRAPHICS.industryConstruction,
-    humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
-    whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
-    recommended: {
-      name: 'The Leak Audit (Forensic Diagnostic)',
-      price: '$2,500 flat',
-      why: 'Bid follow-up and change-order capture surface fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
-      link: '/leak-audit',
-    },
-  },
-  {
-    industry: 'Logistics',
-    icon: Truck,
-    primaryLeak: 'Quote response lag and lane-margin invisibility.',
-    typicalLoss: '$250K–$2M / yr',
-    whatWeMeasure: [
-      'Quote response time vs. carrier SLA',
-      'Lane-level margin attribution',
-      'Exception triage cycle',
-    ],
-    slug: 'ai-for-logistics',
-    image: INFOGRAPHICS.industryLogistics,
-    humanCost: "You feel the lanes losing money but can't prove which ones, so every Monday meeting becomes a guess and a fight.",
-    whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
-    recommended: {
-      name: 'The Leak Audit (Forensic Diagnostic)',
-      price: '$2,500 flat',
-      why: 'Lane margin and quote response leaks come up first in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
-      link: '/leak-audit',
-    },
-  },
-  {
-    industry: 'Healthcare',
-    icon: Heart,
-    primaryLeak: 'Intake fall-off and prior-auth aging.',
-    typicalLoss: '$180K–$900K / yr',
-    whatWeMeasure: [
-      'Inquiry-to-appointment conversion',
-      'No-show + reschedule loss',
-      'Prior-auth aging buckets',
-    ],
-    slug: 'ai-for-healthcare',
-    image: INFOGRAPHICS.industryHealthcare,
-    humanCost: "Patients are calling and never booking. Front desk is drowning. You feel like you're running a clinic that's leaking patients out the back door.",
-    whatYouGetBack: "Inquiries become appointments. Prior auths stop aging out. Your front desk stops crying in the breakroom on Fridays.",
-    recommended: {
-      name: 'Forensic Diagnostic',
-      price: '$2,500 flat',
-      why: 'Start with the operator-led mini-audit. Intake and prior-auth leaks usually surface inside two weeks. Fee applies to engagement.',
-      link: '/leak-audit',
-    },
-  },
-  {
-    industry: 'Finance',
-    icon: Banknote,
-    primaryLeak: 'Underwriting cycle drag and KYC handoff loss.',
-    typicalLoss: '$400K–$2.5M / yr',
-    whatWeMeasure: [
-      'Application-to-decision days',
-      'KYC handoff drop-off',
-      'Re-work rate per file',
-    ],
-    slug: 'ai-for-finance',
+    industry: 'Accounting & Bookkeeping',
+    icon: Briefcase,
+    primaryLeak: 'Scope creep and unbilled hours buried in client work.',
+    typicalLoss: '$120K–$600K / yr',
+    whatWeMeasure: ['Realization rate per client', 'Unbilled time bleed', 'Onboarding-to-first-invoice lag'],
+    slug: 'ai-for-accounting',
     image: INFOGRAPHICS.industryFinance,
-    humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
-    whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
-    recommended: {
-      name: 'The Leak Audit (Forensic Diagnostic)',
-      price: '$2,500 flat',
-      why: 'Underwriting cycle and KYC handoff drops show up fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.',
-      link: '/leak-audit',
-    },
+    humanCost: "You bill what you remember, not what you did. Tax season eats 90 hours a week and you still feel behind.",
+    whatYouGetBack: "Every hour captured. Every scope-add billed. Clean realization you can defend in a partner meeting.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Architecture & Design',
+    icon: Sparkles,
+    primaryLeak: 'Unpaid design iterations and proposal-to-contract drag.',
+    typicalLoss: '$150K–$800K / yr',
+    whatWeMeasure: ['Revisions vs. contracted scope', 'Proposal close rate', 'Phase invoice aging'],
+    slug: 'ai-for-architecture',
+    image: INFOGRAPHICS.industryConstruction,
+    humanCost: "You're redlining renders at midnight for a client who hasn't paid Phase 1 yet.",
+    whatYouGetBack: "Scope locked in writing. Phases billed on completion. You stop subsidizing indecisive clients.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Automotive & Dealerships',
+    icon: Wrench,
+    primaryLeak: 'Lead response lag and service-bay throughput loss.',
+    typicalLoss: '$200K–$1.4M / yr',
+    whatWeMeasure: ['Web lead → test drive conversion', 'Service bay utilization', 'F&I attach rate'],
+    slug: 'ai-for-automotive',
+    image: INFOGRAPHICS.industryLogistics,
+    humanCost: "Hot leads ghost because nobody called inside an hour. Service bays sit empty between jobs.",
+    whatYouGetBack: "Every lead worked inside the window. Bays sequenced. Same floor, more cars out the door.",
+    recommended: DEFAULT_RECOMMENDED,
   },
   {
     industry: 'B2B SaaS',
     icon: Code2,
     primaryLeak: 'Trial-to-paid drop and renewal silent churn.',
     typicalLoss: '$150K–$1M / yr',
-    whatWeMeasure: [
-      'Trial activation by cohort',
-      'Renewal at-risk signals',
-      'Expansion playbook touch-rate',
-    ],
+    whatWeMeasure: ['Trial activation by cohort', 'Renewal at-risk signals', 'Expansion playbook touch-rate'],
     slug: 'ai-for-saas',
     image: INFOGRAPHICS.industrySaas,
     humanCost: "MRR looks fine until it doesn't. You find out an anchor account is gone two weeks after they decided, and nobody saw it coming.",
     whatYouGetBack: "Churn signals named before the cancel email. Trial activation actually working. You stop apologizing to your board for surprises.",
-    recommended: {
-      name: 'Forensic Diagnostic',
-      price: '$2,500 flat',
-      why: 'Most popular entry for SaaS, fast read on activation and churn signals. Fee applies toward a larger engagement.',
-      link: '/leak-audit',
-    },
+    recommended: { ...DEFAULT_RECOMMENDED, why: 'Most popular entry for SaaS, fast read on activation and churn signals. Fee applies toward a larger engagement.' },
   },
-];
+  {
+    industry: 'Construction',
+    icon: HardHat,
+    primaryLeak: 'Bid follow-up gaps and RFI cycle bleed.',
+    typicalLoss: '$200K–$1.2M / yr',
+    whatWeMeasure: ['Bid → award follow-up cadence', 'RFI cycle time and stall points', 'Change-order capture rate'],
+    slug: 'ai-for-construction',
+    image: INFOGRAPHICS.industryConstruction,
+    humanCost: "You're sitting in the truck at a jobsite typing change orders on your phone, knowing three bids you sent last week never got a callback.",
+    whatYouGetBack: "Bids get followed up automatically. Change orders get captured the day they happen. You stop eating the margin you already earned.",
+    recommended: { ...DEFAULT_RECOMMENDED, why: 'Bid follow-up and change-order capture surface fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.' },
+  },
+  {
+    industry: 'Education & Training',
+    icon: GraduationCap,
+    primaryLeak: 'Enrollment fall-off and course completion drop.',
+    typicalLoss: '$100K–$700K / yr',
+    whatWeMeasure: ['Inquiry → enrollment conversion', 'Completion by cohort', 'Renewal/re-enroll rate'],
+    slug: 'ai-for-education',
+    image: INFOGRAPHICS.industrySaas,
+    humanCost: "Students inquire, then disappear. You don't know which marketing dollars actually brought a seat.",
+    whatYouGetBack: "Enrollment funnel named end to end. Completion lifts. You stop guessing what works.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'E-commerce & Retail',
+    icon: ShoppingBag,
+    primaryLeak: 'Cart abandonment and post-purchase retention drop.',
+    typicalLoss: '$200K–$1.5M / yr',
+    whatWeMeasure: ['Checkout funnel drop-off', 'Second-purchase rate', 'Refund/return root causes'],
+    slug: 'ai-for-ecommerce',
+    image: INFOGRAPHICS.industrySaas,
+    humanCost: "You spend more on ads every month and the LTV won't move. You feel like you're feeding a furnace.",
+    whatYouGetBack: "Checkout fixed where it actually bleeds. Repeat customers built on purpose. CAC stops climbing.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Finance',
+    icon: Banknote,
+    primaryLeak: 'Underwriting cycle drag and KYC handoff loss.',
+    typicalLoss: '$400K–$2.5M / yr',
+    whatWeMeasure: ['Application-to-decision days', 'KYC handoff drop-off', 'Re-work rate per file'],
+    slug: 'ai-for-finance',
+    image: INFOGRAPHICS.industryFinance,
+    humanCost: "Files sit. Clients ghost. You know deals died inside your own pipeline and nobody can tell you exactly where.",
+    whatYouGetBack: "Cycle time cut in half. Handoff drops named and closed. You walk into the quarterly review with answers, not excuses.",
+    recommended: { ...DEFAULT_RECOMMENDED, why: 'Underwriting cycle and KYC handoff drops show up fast in the Leak Audit. Operator-led, fee applies 1:1 to engagement.' },
+  },
+  {
+    industry: 'Healthcare',
+    icon: Heart,
+    primaryLeak: 'Intake fall-off and prior-auth aging.',
+    typicalLoss: '$180K–$900K / yr',
+    whatWeMeasure: ['Inquiry-to-appointment conversion', 'No-show + reschedule loss', 'Prior-auth aging buckets'],
+    slug: 'ai-for-healthcare',
+    image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Patients are calling and never booking. Front desk is drowning. You feel like you're running a clinic that's leaking patients out the back door.",
+    whatYouGetBack: "Inquiries become appointments. Prior auths stop aging out. Your front desk stops crying in the breakroom on Fridays.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Home Services & Trades',
+    icon: Hammer,
+    primaryLeak: 'Estimate response lag and tech-utilization gaps.',
+    typicalLoss: '$120K–$800K / yr',
+    whatWeMeasure: ['Lead → booked job conversion', 'Tech billable-hour utilization', 'Upsell capture per ticket'],
+    slug: 'ai-for-home-services',
+    image: INFOGRAPHICS.industryConstruction,
+    humanCost: "Phone rings while you're under a sink. Estimates pile up in your truck. You're losing jobs to whoever called back first.",
+    whatYouGetBack: "Every call captured. Estimates out same day. Trucks routed for max billable hours.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Hospitality & Hotels',
+    icon: Hotel,
+    primaryLeak: 'Direct booking loss and ancillary revenue gaps.',
+    typicalLoss: '$200K–$1.5M / yr',
+    whatWeMeasure: ['OTA vs. direct mix', 'RevPAR by segment', 'F&B attach and upsell rate'],
+    slug: 'ai-for-hospitality',
+    image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "OTAs eat your margin. Walk-ins ask for upgrades nobody offered them. Repeat guests don't come back.",
+    whatYouGetBack: "Direct bookings up. Upsell scripts that actually run. Guest data that follows them next visit.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Legal & Law Firms',
+    icon: Scale,
+    primaryLeak: 'Intake conversion drop and matter-aging WIP.',
+    typicalLoss: '$200K–$1.2M / yr',
+    whatWeMeasure: ['Inquiry → engagement conversion', 'WIP aging and write-downs', 'Realization rate by partner'],
+    slug: 'ai-for-legal',
+    image: INFOGRAPHICS.industryFinance,
+    humanCost: "Qualified leads call, never sign. WIP sits 90 days because nobody chases it. Partners argue, nothing changes.",
+    whatYouGetBack: "Intake closed inside the window. WIP aged and collected. Realization defended with numbers.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Logistics',
+    icon: Truck,
+    primaryLeak: 'Quote response lag and lane-margin invisibility.',
+    typicalLoss: '$250K–$2M / yr',
+    whatWeMeasure: ['Quote response time vs. carrier SLA', 'Lane-level margin attribution', 'Exception triage cycle'],
+    slug: 'ai-for-logistics',
+    image: INFOGRAPHICS.industryLogistics,
+    humanCost: "You feel the lanes losing money but can't prove which ones, so every Monday meeting becomes a guess and a fight.",
+    whatYouGetBack: "Lane-by-lane margin in writing. Quotes back inside SLA. You stop being the human ETA system everyone's calling at 6am.",
+    recommended: { ...DEFAULT_RECOMMENDED, why: 'Lane margin and quote response leaks come up first in the Leak Audit. Operator-led, fee applies 1:1 to engagement.' },
+  },
+  {
+    industry: 'Marketing & Creative Agencies',
+    icon: Megaphone,
+    primaryLeak: 'Scope creep, unbilled revisions, retainer drift.',
+    typicalLoss: '$150K–$900K / yr',
+    whatWeMeasure: ['Hours-vs-budget per account', 'Retainer utilization', 'Pitch-to-close conversion'],
+    slug: 'ai-for-agencies',
+    image: INFOGRAPHICS.industrySaas,
+    humanCost: "Every account is over hours. Pitches eat weeks. You're profitable on paper, broke in cash.",
+    whatYouGetBack: "Scope locked. Retainers measured weekly. Pitches built from a library, not from scratch.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Medical Practices & Dental',
+    icon: Stethoscope,
+    primaryLeak: 'Missed recall and unbilled treatment plans.',
+    typicalLoss: '$150K–$800K / yr',
+    whatWeMeasure: ['Recall compliance', 'Treatment plan acceptance', 'Insurance follow-up aging'],
+    slug: 'ai-for-medical-practices',
+    image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Patients vanish between visits. Treatment plans sit in the chart unaccepted. Insurance ages and gets written off.",
+    whatYouGetBack: "Recall worked every week. Plans presented with intent. Insurance chased to the dollar.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Professional Services',
+    icon: Briefcase,
+    primaryLeak: 'Proposal cycle drag and project-margin erosion.',
+    typicalLoss: '$150K–$1M / yr',
+    whatWeMeasure: ['Proposal → close cycle', 'Project margin vs. quoted', 'Utilization by consultant'],
+    slug: 'ai-for-professional-services',
+    image: INFOGRAPHICS.industryFinance,
+    humanCost: "Every proposal is a custom rebuild. Margins erode mid-project. You can't tell who's actually profitable.",
+    whatYouGetBack: "Proposals from templates that win. Margin tracked weekly. Underperformers named with data.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Real Estate',
+    icon: Home,
+    primaryLeak: 'Lead response lag and pipeline ghosting.',
+    typicalLoss: '$150K–$1M / yr',
+    whatWeMeasure: ['Speed-to-first-touch', 'Showing → offer conversion', 'Past-client referral rate'],
+    slug: 'ai-for-real-estate',
+    image: INFOGRAPHICS.industryConstruction,
+    humanCost: "Leads convert for whoever calls first. You're driving between showings while opportunities die in voicemail.",
+    whatYouGetBack: "Every lead touched in minutes. Past clients worked on cadence. Pipeline you can actually forecast.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Specialty Manufacturing',
+    icon: Factory,
+    primaryLeak: 'Quote-to-close drag and stalled deals after Day 3.',
+    typicalLoss: '$300K–$1.8M / yr',
+    whatWeMeasure: ['Quote follow-up SLA vs. actual', 'Time-in-stage by deal value', 'RFQ-to-PO conversion by lane'],
+    slug: 'ai-for-manufacturing',
+    image: INFOGRAPHICS.industryManufacturing,
+    humanCost: "You're answering RFQ emails at 10pm on a Tuesday while your kid is asking why you're still on the laptop.",
+    whatYouGetBack: "Quotes go out same-day without you touching them. You leave the shop at 5pm and the system is still selling.",
+    recommended: { ...DEFAULT_RECOMMENDED, why: 'Quote-to-cash is where manufacturers leak most. Start with the operator-led Leak Audit, fee applies 1:1 to any engagement.' },
+  },
+  {
+    industry: 'Technology & IT Services',
+    icon: Cpu,
+    primaryLeak: 'Ticket-resolution drag and contract renewal silence.',
+    typicalLoss: '$180K–$1.2M / yr',
+    whatWeMeasure: ['MTTR by ticket class', 'Renewal touch cadence', 'Add-on attach rate'],
+    slug: 'ai-for-it-services',
+    image: INFOGRAPHICS.industrySaas,
+    humanCost: "Tickets sit. Renewals go silent. You only learn an account is at risk after they've already shopped you.",
+    whatYouGetBack: "MTTR halved. Renewals on a written cadence. Add-ons attached where the data says they fit.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Travel & Tourism',
+    icon: Plane,
+    primaryLeak: 'Booking abandonment and upsell capture gaps.',
+    typicalLoss: '$120K–$900K / yr',
+    whatWeMeasure: ['Inquiry → booking conversion', 'Ancillary attach rate', 'Cancellation root causes'],
+    slug: 'ai-for-travel',
+    image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Inquiries pile up. Bookings go to whoever quotes first. Upsells happen by accident, not on purpose.",
+    whatYouGetBack: "Quotes back inside the window. Upsell scripts that actually run. Cancellation reasons you can fix.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+  {
+    industry: 'Wellness, Spa & Fitness',
+    icon: Leaf,
+    primaryLeak: 'Membership churn and class/booking under-utilization.',
+    typicalLoss: '$80K–$500K / yr',
+    whatWeMeasure: ['Member churn signals', 'Class utilization', 'Package upsell rate'],
+    slug: 'ai-for-wellness',
+    image: INFOGRAPHICS.industryHealthcare,
+    humanCost: "Members ghost without notice. Classes run half-empty. Front desk forgets to offer the package.",
+    whatYouGetBack: "Churn signals caught early. Classes filled on purpose. Upsells built into every checkout.",
+    recommended: DEFAULT_RECOMMENDED,
+  },
+].sort((a, b) => a.industry.localeCompare(b.industry));
+
+const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () => void }> = ({ v, expanded, onToggle }) => {
+  const Icon = v.icon;
+  const navigate = useNavigate();
+  return (
+    <div className="forensic-tile rounded-sm border border-border/60 hover:border-amber/50 transition-all flex flex-col overflow-hidden">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="text-left group"
+      >
+        <div className="relative overflow-hidden border-b border-amber/20 bg-background/40">
+          <img
+            src={v.image}
+            alt={`${v.industry} forensic case-file infographic`}
+            loading="lazy"
+            width={768}
+            height={384}
+            className="w-full aspect-[2/1] object-cover"
+          />
+          <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
+            Aetheris AI Studio
+          </span>
+        </div>
+        <div className="p-5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 shrink-0 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+              <Icon className="w-5 h-5 text-amber" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold font-forensic text-foreground truncate">{v.industry}</h2>
+              <div className="font-mono text-crimson text-xs">{v.typicalLoss}</div>
+            </div>
+          </div>
+          {expanded ? <ChevronUp className="w-5 h-5 text-amber shrink-0" /> : <ChevronDown className="w-5 h-5 text-amber shrink-0" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="px-5 pb-5 -mt-1">
+          <p className="text-sm text-muted-foreground mb-3 italic">"{v.primaryLeak}"</p>
+
+          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
+            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">What this costs you personally</div>
+            <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
+          </div>
+          <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
+            <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you get back</div>
+            <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
+          </div>
+
+          <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">What we measure</div>
+          <ul className="space-y-1 mb-4">
+            {v.whatWeMeasure.map((m) => (
+              <li key={m} className="text-xs text-foreground/75 flex gap-2">
+                <span className="text-amber">›</span>{m}
+              </li>
+            ))}
+          </ul>
+
+          <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
+            <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+              <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+            </div>
+            <div className="font-bold text-sm text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
+            <div className="font-mono text-amber text-xs mb-2">{v.recommended.price}</div>
+            <p className="text-[11px] text-muted-foreground leading-snug mb-2">{v.recommended.why}</p>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber hover:underline"
+            >
+              View this package <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          <Link
+            to={`/${v.slug}`}
+            className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40 w-full"
+          >
+            Open the case file <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const IndustriesPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return INDUSTRIES;
+    return INDUSTRIES.filter((v) =>
+      v.industry.toLowerCase().includes(q) ||
+      v.primaryLeak.toLowerCase().includes(q) ||
+      v.whatWeMeasure.some((m) => m.toLowerCase().includes(q)) ||
+      v.slug.toLowerCase().includes(q)
+    );
+  }, [query]);
 
   const jsonLd = combineSchemas(
     serviceSchema(
       'The Leak Audit, by Industry',
-      '21-Day Revenue Diagnostic ($18,500) applied to specialty manufacturing, construction, logistics, healthcare, finance, and B2B SaaS. Fixed-fee. Source-data appendix included.',
+      'Forensic Diagnostic ($2,500 flat) applied across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'What does the 21-Day Leak Audit actually deliver per industry?', answer: 'Same deliverable shape across industries: a 15–30 page leak map, dollar-quantified leaks, prioritized fixes, ROI projections, source-data appendix, and a 60-min readout. The leak *patterns* differ by industry, that\'s what these vertical pages document.' },
-    { question: 'How much is the Leak Audit?', answer: 'Fixed fee of $18,500. 21 calendar days from kickoff. CRM-agnostic, runs on a CSV export from HubSpot, Salesforce, or any system of record.' },
-    { question: 'What if my industry isn\'t listed?', answer: 'The methodology travels. If your business has leads, dollars, or hours moving through systems and people, there are leaks. Book a 15-minute call and we\'ll scope it.' },
-    { question: 'How fast do you find the first leak?', answer: 'Free self-scan: 14 minutes. Operator-led 21-Day Leak Audit: first leaks named within Week 1, full sealed report Day 21.' },
+    { question: 'What does the Leak Audit deliver per industry?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these vertical pages document.' },
+    { question: 'How much is the Leak Audit?', answer: '$2,500 flat fee, operator-led. Applied 1:1 toward any engagement that follows.' },
+    { question: 'What if my industry is not listed?', answer: 'The methodology travels. Type your niche in the search bar above, or book a 15-minute call and we will scope it.' },
+    { question: 'How fast do you find the first leak?', answer: 'Free self-scan at /leak-audit runs in minutes. Operator-led Leak Audit surfaces first leaks inside Week 1.' },
   ];
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The Leak Audit by Industry | $18,500 Revenue Diagnostic | Aetheris"
-        description="21-Day Revenue Diagnostic by industry. Fixed $18,500 fee. Manufacturing, construction, logistics, healthcare, finance, SaaS. Source-data appendix included."
+        title="The Leak Audit by Industry | 20+ Verticals | Aetheris"
+        description="Forensic Diagnostic by industry. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
         path="/industries"
-        keywords="revenue leak audit by industry, manufacturing revenue diagnostic, construction bid leak, logistics quote response, healthcare intake leak, B2B SaaS churn audit, fixed-fee revenue diagnostic"
+        keywords="revenue leak audit by industry, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Industries', path: '/industries' },
@@ -195,7 +429,7 @@ const IndustriesPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
-        <section className="pt-32 pb-12 px-4">
+        <section className="pt-32 pb-10 px-4">
           <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-crimson/10 border border-crimson/30 text-crimson text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
@@ -205,129 +439,54 @@ const IndustriesPage: React.FC = () => {
               Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
               Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-4">
-              Different wound patterns. Same 3am chest tightness. Same "I know something's off but I can't put my finger on it."
-            </p>
-            <p className="text-base md:text-lg text-foreground/80 max-w-3xl mx-auto mb-8 italic">
-              I built this because I lived it. Marine, construction operator, dad with kids in surgery, running a business while everything else was on fire. Below is what your industry's bleed actually feels like at 7pm, and what stops feeling that way once we fix it.
+            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
+              Tap any industry to open the case file. Type your niche below if you don't see it — the methodology travels.
             </p>
 
-
-            <div className="forensic-tile rounded-sm p-6 max-w-3xl mx-auto border border-amber/30 text-left">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                The Leak Audit™ · Every industry, same forensic process
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-start gap-3">
-                  <FileText className="w-5 h-5 text-amber shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-bold text-foreground text-sm">7-step forensic process</div>
-                    <div className="text-xs text-muted-foreground">Trace every leak to a record.</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <DollarSign className="w-5 h-5 text-amber shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-bold text-foreground text-sm">$2,500 flat, operator-led</div>
-                    <div className="text-xs text-muted-foreground">Applied 1:1 to engagement.</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-amber shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-bold text-foreground text-sm">Free self-scan first</div>
-                    <div className="text-xs text-muted-foreground">Run /leak-audit in minutes.</div>
-                  </div>
-                </div>
+            <div className="max-w-xl mx-auto relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber/70 pointer-events-none" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search your industry or niche (e.g. dental, freight, agency)…"
+                className="pl-9 h-12 bg-background/60 border-amber/30 focus-visible:ring-amber/50"
+                aria-label="Search industries"
+              />
+              <div className="mt-2 font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                {filtered.length} of {INDUSTRIES.length} industries
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-12 px-4">
+        <section className="py-8 px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {INDUSTRIES.map((v) => {
-                const Icon = v.icon;
-                return (
-                  <Link
+            {filtered.length === 0 ? (
+              <div className="forensic-tile rounded-sm p-10 border border-amber/30 text-center max-w-2xl mx-auto">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">No exact match</div>
+                <h3 className="font-forensic text-2xl font-bold mb-3">
+                  "{query}" isn't on the board yet — that doesn't mean it doesn't leak.
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Run the free self-scan or book a 15-minute scoping call. The methodology travels across verticals.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link to="/leak-audit"><Button className="bg-crimson hover:bg-crimson/90">Run the free self-scan</Button></Link>
+                  <Button variant="outline" onClick={() => setIsContactModalOpen(true)}>Book a scoping call</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map((v) => (
+                  <IndustryCard
                     key={v.slug}
-                    to={`/${v.slug}`}
-                    className="forensic-tile rounded-sm p-6 border border-border/60 hover:border-amber/50 transition-all hover:-translate-y-1 group flex flex-col"
-                  >
-                    <div className="relative -mx-6 -mt-6 mb-5 overflow-hidden border-b border-amber/20 bg-background/40">
-                      <img
-                        src={v.image}
-                        alt={`${v.industry} forensic case-file infographic`}
-                        loading="lazy"
-                        width={768}
-                        height={768}
-                        className="w-full aspect-[2/1] object-cover"
-                      />
-                      <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
-                        Aetheris AI Studio
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
-                        <Icon className="w-6 h-6 text-amber" />
-                      </div>
-                      <div className="text-right">
-                        <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">Typical bleed</div>
-                        <div className="font-mono text-crimson font-bold text-sm">{v.typicalLoss}</div>
-                      </div>
-                    </div>
-                    <h2 className="text-xl font-bold font-forensic mb-2 text-foreground">{v.industry}</h2>
-                    <p className="text-sm text-muted-foreground mb-3 italic">"{v.primaryLeak}"</p>
-
-                    <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
-                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">
-                        What this costs you personally
-                      </div>
-                      <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
-                    </div>
-                    <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
-                      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
-                        What you get back
-                      </div>
-                      <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
-                    </div>
-
-                    <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
-                      What we measure
-                    </div>
-
-                    <ul className="space-y-1 mb-4 flex-1">
-                      {v.whatWeMeasure.map((m) => (
-                        <li key={m} className="text-xs text-foreground/75 flex gap-2">
-                          <span className="text-amber">›</span>{m}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
-                      <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                        <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
-                      </div>
-                      <div className="font-bold text-sm text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
-                      <div className="font-mono text-amber text-xs mb-2">{v.recommended.price}</div>
-                      <p className="text-[11px] text-muted-foreground leading-snug mb-2">{v.recommended.why}</p>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber hover:underline"
-                      >
-                        View this package <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    <div className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40">
-                      Open the case file <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                    v={v}
+                    expanded={!!expanded[v.slug]}
+                    onToggle={() => setExpanded((s) => ({ ...s, [v.slug]: !s[v.slug] }))}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -340,12 +499,12 @@ const IndustriesPage: React.FC = () => {
               The methodology travels.
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. $18,500. 21 days. Sealed report.
+              If revenue moves through systems and people, there are leaks. $2,500 flat. Applied 1:1 toward engagement.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/diagnostic">
+              <Link to="/leak-audit">
                 <Button size="lg" className="bg-crimson hover:bg-crimson/90 text-foreground font-semibold">
-                  Open The Leak Audit, $18,500 <ArrowRight className="ml-2 w-4 h-4" />
+                  Open The Leak Audit <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link to="/leak-audit">
