@@ -3,7 +3,7 @@ import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileTe
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
 import { useActiveLead } from '@/lib/activeLead';
-import { supabase } from '@/integrations/supabase/client';
+
 import { ScreenSnip } from '@/components/ScreenSnip';
 import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
