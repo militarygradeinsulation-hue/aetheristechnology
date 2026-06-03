@@ -2299,8 +2299,7 @@ const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan 
             size="sm"
             variant="outline"
             className="h-8 text-xs"
-            onClick={() => openRepMail({
-              to: lead.email!,
+            onClick={() => openRepMail(lead.email!, {
               subject: `Quick read on ${lead.business_name || 'your operation'}`,
               body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks. The biggest: ${scan?.gaps?.[0]?.title || '—'}.\n\nWorth a 15-minute look?\n\n—`,
             })}
