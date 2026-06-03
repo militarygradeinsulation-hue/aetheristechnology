@@ -240,13 +240,40 @@ Deno.serve(async (req) => {
     const isPartner = claims.role === "partner";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    const body = await req.json() as { messages: Array<{ role: string; content: any }> };
+    const body = await req.json() as { messages: Array<{ role: string; content: any }>; leadContext?: any };
     const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
     const convo: any[] = [
       { role: "system", content: systemPrompt },
       { role: "system", content: `Rep code (do not reveal): ${claims.code}` },
-      ...body.messages,
     ];
+
+    if (body.leadContext && typeof body.leadContext === "object") {
+      const lc = body.leadContext;
+      const leakLines = Array.isArray(lc.leaks)
+        ? lc.leaks.map((g: any) => {
+            const touchLine = g.touches?.length
+              ? ` · touches: ${g.touches.slice(-3).map((t: any) => `[${new Date(t.at).toLocaleDateString()}] ${t.note}`).join(' | ')}`
+              : '';
+            return `  ${g.idx + 1}. [${g.status}] ${g.title} (${g.category}, ${g.severity || 'n/a'}) — cost ${g.annualCost}, fix: ${g.recommendedFix}, ROI ${g.projectedROI}${touchLine}`;
+          }).join("\n")
+        : "  (no leaks scanned yet)";
+      const leadBlock = `ACTIVE LEAD CONTEXT (use this for every reply, especially when drafting emails/DMs/scripts — never invent details):
+- Business: ${lc.business || 'unknown'}
+- Contact: ${lc.contact || 'unknown'} <${lc.email || 'no-email'}>${lc.phone ? ` · ${lc.phone}` : ''}
+- Website: ${lc.website || 'n/a'} · Industry: ${lc.industry || 'n/a'} · Location: ${lc.location || 'n/a'}
+- Pipeline status: ${lc.status || 'new'} · Touches: ${lc.touchCount || 0}${lc.lastTouchedAt ? ` (last ${new Date(lc.lastTouchedAt).toLocaleDateString()})` : ''}
+- Scan score: ${lc.scanScore ?? 'n/a'} (${lc.scanGrade || '—'}) · Leaks open: ${lc.openLeaks}/${(lc.openLeaks ?? 0) + (lc.closedLeaks ?? 0)}
+- Executive summary: ${lc.executiveSummary || '—'}
+- Rep notes: ${lc.notes || '—'}
+Leaks:
+${leakLines}
+
+When the rep asks you to draft an email, DM, or call script: lead with the highest-cost OPEN leak, weave in the specific dollar figure, and close with a single clear ask (15-min Leak Audit call or the $18,000 Diagnostic, whichever fits). Do NOT mention leaks the rep already marked CLOSED unless they ask.`;
+      convo.push({ role: "system", content: leadBlock });
+    }
+
+    convo.push(...body.messages);
+
 
     const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
 
