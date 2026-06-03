@@ -1698,16 +1698,12 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   </div>
                 )}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Top Gaps</p>
-                    {scan.gaps.slice(0, 6).map((g: any, i: number) => (
-                      <div key={i} className="text-xs border-l-2 border-amber/40 pl-2">
-                        <p className="font-semibold text-foreground">{g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span></p>
-                        <p className="text-muted-foreground">{g.description}</p>
-                        <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
-                      </div>
-                    ))}
-                  </div>
+                  <LeakChecklist
+                    leadId={lead.id}
+                    gaps={scan.gaps}
+                    initialProgress={scan.gapProgress || {}}
+                    onChange={(p) => setScan((prev: any) => prev ? { ...prev, gapProgress: p } : prev)}
+                  />
                 )}
                 {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
                   <div>
@@ -1717,6 +1713,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     </ul>
                   </div>
                 )}
+                <PostScanNextSteps lead={lead} scan={scan} />
               </div>
             )}
           </div>
