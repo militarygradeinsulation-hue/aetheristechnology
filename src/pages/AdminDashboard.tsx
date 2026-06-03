@@ -530,7 +530,7 @@ const AdminDashboard: React.FC = () => {
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return <ContentEngine />;
       case 'crm': return <AdminCrm />;
-      case 'creation': return <AdminCreationStudio />;
+      
       case 'commissions': return <CommissionStructurePanel />;
       case 'catalog': return <ServicesPricing />;
       case 'liveevents': return <AdminLiveEventsPanel />;
