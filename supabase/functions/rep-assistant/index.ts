@@ -250,12 +250,13 @@ Deno.serve(async (req) => {
     // --- Pull active-lead context server-side so we always have the freshest scan + leak progress.
     if (body.activeLeadId) {
       try {
-        const { data: lead } = await sb
+        const q = sb
           .from("rep_leads")
-          .select("id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment")
-          .eq("id", body.activeLeadId)
-          .eq("claimed_by_code", claims.code)
-          .maybeSingle();
+          .select("id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment,claimed_by_code")
+          .eq("id", body.activeLeadId);
+        // Reps can only see leads they've claimed. Partners can see any lead.
+        if (claims.role !== "partner") q.eq("claimed_by_code", claims.code);
+        const { data: lead } = await q.maybeSingle();
 
         if (lead) {
           const scan: any = (lead.enrichment as any)?.scan || {};
