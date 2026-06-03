@@ -671,7 +671,7 @@ const AdminDashboard: React.FC = () => {
 
             {!tabsCollapsed && (
               <div className="flex gap-2 mb-8 flex-wrap">
-                {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
+                {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).slice().sort((a, b) => a.label.localeCompare(b.label)).map(({ key: tab, label, icon: Icon }) => {
                   const active = activeTab === tab;
                   return (
                     <Button
