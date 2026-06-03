@@ -84,57 +84,44 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
 
   // --- Active Lead context: keep the bot locked on whichever lead the rep last opened. ---
   const activeLead = useActiveLead();
-  const [leadScan, setLeadScan] = useState<any>(null);
+  const [leadSummary, setLeadSummary] = useState<{ business?: string; contact?: string; openLeaks?: number; totalLeaks?: number } | null>(null);
   useEffect(() => {
     let cancelled = false;
-    setLeadScan(null);
+    setLeadSummary(null);
     if (!activeLead?.leadId) return;
     (async () => {
-      const { data } = await supabase
-        .from('rep_leads')
-        .select('id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment')
-        .eq('id', activeLead.leadId)
-        .maybeSingle();
-      if (!cancelled) setLeadScan(data || null);
+      // Pull a lightweight summary via portal-leads (auth'd) so the chip can show counts.
+      try {
+        const token = getPortalToken();
+        if (!token) return;
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/portal-leads`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-portal-token': token,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ action: 'list', view: 'mine' }),
+        });
+        const data = await res.json();
+        const lead = (data?.leads || []).find((l: any) => l.id === activeLead.leadId);
+        if (cancelled || !lead) return;
+        const scan = (lead.enrichment as any)?.scan;
+        const gaps = Array.isArray(scan?.gaps) ? scan.gaps : [];
+        const progress = scan?.gapProgress || {};
+        const closed = Object.values(progress).filter((p: any) => p?.checked).length;
+        setLeadSummary({
+          business: lead.business_name,
+          contact: lead.contact_name,
+          openLeaks: Math.max(0, gaps.length - closed),
+          totalLeaks: gaps.length,
+        });
+      } catch { /* ignore */ }
     })();
     return () => { cancelled = true; };
   }, [activeLead?.leadId]);
 
-  const buildLeadContext = useCallback(() => {
-    if (!leadScan) return null;
-    const scan = (leadScan.enrichment as any)?.scan || null;
-    const progress = scan?.gapProgress || {};
-    const gaps = Array.isArray(scan?.gaps) ? scan.gaps.map((g: any, i: number) => {
-      const p = progress[String(i)] || {};
-      return {
-        idx: i, title: g.title, category: g.category, severity: g.severity,
-        annualCost: g.annualCost, recommendedFix: g.recommendedFix, projectedROI: g.projectedROI,
-        description: g.description,
-        status: p.checked ? 'CLOSED' : 'OPEN',
-        touches: Array.isArray(p.touches) ? p.touches.map((t: any) => ({ at: t.at, note: t.note })) : [],
-      };
-    }) : [];
-    return {
-      leadId: leadScan.id,
-      business: leadScan.business_name,
-      contact: leadScan.contact_name,
-      email: leadScan.email,
-      phone: leadScan.phone,
-      website: leadScan.website,
-      industry: leadScan.industry,
-      location: leadScan.location,
-      status: leadScan.status,
-      touchCount: leadScan.touch_count,
-      lastTouchedAt: leadScan.last_touched_at,
-      notes: leadScan.notes,
-      scanScore: scan?.score,
-      scanGrade: scan?.grade,
-      executiveSummary: scan?.executiveSummary,
-      leaks: gaps,
-      openLeaks: gaps.filter((g: any) => g.status === 'OPEN').length,
-      closedLeaks: gaps.filter((g: any) => g.status === 'CLOSED').length,
-    };
-  }, [leadScan]);
 
 
 
