@@ -876,6 +876,34 @@ const PortalPage: React.FC = () => {
             widgetSizes={widgetSizes}
             onWidgetSizeChange={setWidgetSize}
           />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 border-amber/40 text-amber hover:bg-amber/10"
+            onClick={() => {
+              const OPTIMIZED_ORDER = ['leads', 'tools', 'coach', 'poststudio', 'art', 'video'];
+              const availableIds = new Set(availableTabs.map(t => t.id));
+              const order = OPTIMIZED_ORDER.filter(id => availableIds.has(id as Tab));
+              setLayout('widgets');
+              setVisibleTabs(order);
+              persistOrder(order);
+              setPinnedWidgetsState([]);
+              try { localStorage.setItem(PINNED_KEY, JSON.stringify([])); } catch {}
+              const sizeMap: Record<string, WidgetSize> = {
+                leads: 4, tools: 4, coach: 4, poststudio: 2, art: 2, video: 2,
+              };
+              setWidgetSizesState(prev => {
+                const next = { ...prev };
+                order.forEach(id => { next[id] = (sizeMap[id] || 4) as WidgetSize; });
+                try { localStorage.setItem(SIZES_KEY, JSON.stringify(next)); } catch {}
+                return next;
+              });
+              toast({ title: 'Optimized mode on', description: 'Leads → Tools → AI Coach → Media Studio.' });
+            }}
+            title="One-click optimized rep layout"
+          >
+            <Zap className="w-3.5 h-3.5" /> Optimized
+          </Button>
           <TabColorToggle />
           <TabSizeSlider />
 
