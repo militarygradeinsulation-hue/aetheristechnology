@@ -514,7 +514,16 @@ const AdminDashboard: React.FC = () => {
         </Tabs>
       );
       case 'briefings': return <BriefingsPanel />;
-      case 'imagestudio': return <AdminImageStudio />;
+      case 'mediastudio': return (
+        <Tabs defaultValue="video" className="w-full">
+          <TabsList>
+            <TabsTrigger value="video"><Film className="w-4 h-4 mr-1.5" />Video Studio</TabsTrigger>
+            <TabsTrigger value="image"><ImageIcon className="w-4 h-4 mr-1.5" />Image Studio</TabsTrigger>
+          </TabsList>
+          <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
+          <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
+        </Tabs>
+      );
       case 'documents': return <AdminDocumentsPanel />;
       case 'easymode': return <EasyModeTool />;
       case 'systems': return <AdminForensicsSystemsPanel />;
