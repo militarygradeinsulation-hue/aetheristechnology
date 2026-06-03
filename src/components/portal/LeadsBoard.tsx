@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
@@ -1697,16 +1698,12 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   </div>
                 )}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Top Gaps</p>
-                    {scan.gaps.slice(0, 6).map((g: any, i: number) => (
-                      <div key={i} className="text-xs border-l-2 border-amber/40 pl-2">
-                        <p className="font-semibold text-foreground">{g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span></p>
-                        <p className="text-muted-foreground">{g.description}</p>
-                        <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
-                      </div>
-                    ))}
-                  </div>
+                  <LeakChecklist
+                    leadId={lead.id}
+                    gaps={scan.gaps}
+                    initialProgress={scan.gapProgress || {}}
+                    onChange={(p) => setScan((prev: any) => prev ? { ...prev, gapProgress: p } : prev)}
+                  />
                 )}
                 {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
                   <div>
@@ -1716,6 +1713,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     </ul>
                   </div>
                 )}
+                <PostScanNextSteps lead={lead} scan={scan} />
               </div>
             )}
           </div>
@@ -2136,6 +2134,183 @@ const UploadDownloadPanel: React.FC<{ onUploaded: () => void }> = ({ onUploaded 
           </Button>
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+// ---------- Leak Checklist (per-gap checkoff + touch log) ----------
+type GapProgress = Record<string, { checked: boolean; touches: { at: string; note: string }[]; closedAt?: string }>;
+
+const LeakChecklist: React.FC<{
+  leadId: string;
+  gaps: any[];
+  initialProgress: GapProgress;
+  onChange?: (p: GapProgress) => void;
+}> = ({ leadId, gaps, initialProgress, onChange }) => {
+  const { toast } = useToast();
+  const [progress, setProgress] = useState<GapProgress>(initialProgress || {});
+  const [openTouchIdx, setOpenTouchIdx] = useState<number | null>(null);
+  const [touchNote, setTouchNote] = useState('');
+  const [busy, setBusy] = useState<number | null>(null);
+
+  useEffect(() => { setProgress(initialProgress || {}); }, [leadId, initialProgress]);
+
+  const update = (next: GapProgress) => { setProgress(next); onChange?.(next); };
+
+  const toggleChecked = async (i: number, checked: boolean) => {
+    setBusy(i);
+    try {
+      const res = await portalLeads.updateScanProgress(leadId, i, { checked });
+      update(res.gapProgress as GapProgress);
+    } catch (e: any) {
+      toast({ title: 'Could not save', description: e?.message, variant: 'destructive' });
+    } finally { setBusy(null); }
+  };
+
+  const addTouch = async (i: number) => {
+    const note = touchNote.trim();
+    if (!note) { toast({ title: 'Add a quick note about the touch point', variant: 'destructive' }); return; }
+    setBusy(i);
+    try {
+      const res = await portalLeads.updateScanProgress(leadId, i, { addTouch: true, touchNote: note });
+      update(res.gapProgress as GapProgress);
+      setTouchNote(''); setOpenTouchIdx(null);
+      toast({ title: 'Touch logged', description: 'Lead status bumped to Touched.' });
+    } catch (e: any) {
+      toast({ title: 'Could not log touch', description: e?.message, variant: 'destructive' });
+    } finally { setBusy(null); }
+  };
+
+  const closed = Object.values(progress).filter(p => p?.checked).length;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+          Top Gaps · {closed}/{gaps.length} closed
+        </p>
+        {closed > 0 && (
+          <span className="text-[10px] font-mono text-emerald-400">✓ {closed} fixed/handled</span>
+        )}
+      </div>
+      {gaps.slice(0, 8).map((g: any, i: number) => {
+        const p = progress[String(i)] || { checked: false, touches: [] };
+        const touches = Array.isArray(p.touches) ? p.touches : [];
+        return (
+          <div
+            key={i}
+            className={`text-xs border-l-2 pl-2 py-1 ${p.checked ? 'border-emerald-500/60 opacity-70' : 'border-amber/40'}`}
+          >
+            <div className="flex items-start gap-2">
+              <Checkbox
+                checked={!!p.checked}
+                disabled={busy === i}
+                onCheckedChange={(v) => toggleChecked(i, !!v)}
+                className="mt-0.5"
+                aria-label={`Mark "${g.title}" handled`}
+              />
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold ${p.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                  {g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span>
+                </p>
+                <p className="text-muted-foreground">{g.description}</p>
+                <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+
+                {touches.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
+                    {touches.slice(-4).map((t, ti) => (
+                      <li key={ti} className="text-[11px] text-muted-foreground">
+                        <span className="font-mono text-[10px] text-amber/80">[{new Date(t.at).toLocaleDateString()}]</span> {t.note}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {openTouchIdx === i ? (
+                  <div className="mt-1.5 flex gap-1.5">
+                    <Input
+                      value={touchNote}
+                      onChange={(e) => setTouchNote(e.target.value)}
+                      placeholder="Touch point: e.g. emailed CFO re: stalled deals leak"
+                      className="h-7 text-xs"
+                      autoFocus
+                      onKeyDown={(e) => { if (e.key === 'Enter') addTouch(i); if (e.key === 'Escape') { setOpenTouchIdx(null); setTouchNote(''); } }}
+                    />
+                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => addTouch(i)} disabled={busy === i}>Log</Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setOpenTouchIdx(null); setTouchNote(''); }}>Cancel</Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="mt-1 text-[11px] text-amber hover:text-amber/80 underline-offset-2 hover:underline"
+                    onClick={() => { setOpenTouchIdx(i); setTouchNote(''); }}
+                  >
+                    + Add touch point{touches.length > 0 ? ` (${touches.length})` : ''}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------- Post-Scan Next Steps (crystal-clear CTAs) ----------
+const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan }) => {
+  const openCoachWithDraft = (intent: 'email' | 'linkedin' | 'call') => {
+    // Lock lead context for the coach
+    setActiveLead({
+      leadId: lead.id,
+      business_name: lead.business_name || undefined,
+      website: lead.website || undefined,
+      contact_name: lead.contact_name || undefined,
+      email: lead.email || undefined,
+      phone: lead.phone || undefined,
+      industry: lead.industry || undefined,
+      location: lead.location || undefined,
+    });
+    const promptMap = {
+      email: `Draft a tight outreach email to ${lead.contact_name || 'the decision maker'} at ${lead.business_name || 'this company'}. Lead with the #1 leak from the scan and propose a 15-min Leak Audit call. Keep it under 110 words.`,
+      linkedin: `Write a 3-line LinkedIn DM to ${lead.contact_name || 'the decision maker'} at ${lead.business_name || 'this company'} that names the most expensive leak from the scan and asks one question.`,
+      call: `Give me a 30-second cold-call opener for ${lead.business_name || 'this company'} that names the top 1-2 leaks from the scan and gets to a meeting ask.`,
+    } as const;
+    window.dispatchEvent(new CustomEvent('coach:prefill', { detail: { prompt: promptMap[intent], leadId: lead.id } }));
+  };
+
+  return (
+    <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 mt-2">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 mb-2">
+        ▸ Next Step — pick one and go
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        <Button size="sm" className="h-8 text-xs" onClick={() => openCoachWithDraft('email')}>
+          ✉ Draft outreach email
+        </Button>
+        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => openCoachWithDraft('linkedin')}>
+          in LinkedIn DM
+        </Button>
+        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => openCoachWithDraft('call')}>
+          ☎ Cold-call opener
+        </Button>
+        {lead.email && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => openRepMail(lead.email!, {
+              subject: `Quick read on ${lead.business_name || 'your operation'}`,
+              body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks. The biggest: ${scan?.gaps?.[0]?.title || '—'}.\n\nWorth a 15-minute look?\n\n—`,
+            })}
+          >
+            ➜ Open in Mail
+          </Button>
+        )}
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-2">
+        The Sales Coach already has this lead's scan loaded — ask follow-ups and it remembers every leak.
+      </p>
     </div>
   );
 };
