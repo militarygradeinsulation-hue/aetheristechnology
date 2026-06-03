@@ -15,6 +15,7 @@ import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
 import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Heavy panels — lazy-loaded so the initial admin bundle stays small and the
 // post-login navigation to /admin feels instant. Only the active tab's code
@@ -200,7 +201,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes' | 'creation' | 'catalog' | 'liveevents'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved) return saved as any;
@@ -230,10 +231,9 @@ const AdminDashboard: React.FC = () => {
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
-    { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'mediastudio', label: 'Media Studio', icon: ImageIcon },
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
-    { key: 'briefing', label: 'Interview Briefing', icon: BookOpen },
-    { key: 'interviews', label: 'Interviews', icon: CalendarClock },
+    { key: 'hiring', label: 'Hiring', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
     { key: 'library', label: 'Library', icon: Library },
     { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
@@ -248,11 +248,10 @@ const AdminDashboard: React.FC = () => {
     { key: 'team', label: 'Team Messages', icon: MessageSquare },
     { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'training', label: 'Training', icon: GraduationCap },
-    { key: 'creation', label: 'Video Studio', icon: Film },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['briefing', 'hires', 'briefings']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -504,17 +503,34 @@ const AdminDashboard: React.FC = () => {
   const renderTabBody = (key: string): React.ReactNode => {
     switch (key) {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
-      case 'interviews': return <InterviewsPanel me="admin" />;
-      case 'briefing': return <InterviewBriefingPanel />;
+      case 'hiring': return (
+        <Tabs defaultValue="interviews" className="w-full">
+          <TabsList>
+            <TabsTrigger value="interviews"><CalendarClock className="w-4 h-4 mr-1.5" />Interviews</TabsTrigger>
+            <TabsTrigger value="briefing"><BookOpen className="w-4 h-4 mr-1.5" />Interview Briefing</TabsTrigger>
+          </TabsList>
+          <TabsContent value="interviews" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewsPanel me="admin" /></Suspense></TabsContent>
+          <TabsContent value="briefing" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewBriefingPanel /></Suspense></TabsContent>
+        </Tabs>
+      );
       case 'briefings': return <BriefingsPanel />;
-      case 'imagestudio': return <AdminImageStudio />;
+      case 'mediastudio': return (
+        <Tabs defaultValue="video" className="w-full">
+          <TabsList>
+            <TabsTrigger value="video"><Film className="w-4 h-4 mr-1.5" />Video Studio</TabsTrigger>
+            <TabsTrigger value="image"><ImageIcon className="w-4 h-4 mr-1.5" />Image Studio</TabsTrigger>
+          </TabsList>
+          <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
+          <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
+        </Tabs>
+      );
       case 'documents': return <AdminDocumentsPanel />;
       case 'easymode': return <EasyModeTool />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return <ContentEngine />;
       case 'crm': return <AdminCrm />;
-      case 'creation': return <AdminCreationStudio />;
+      
       case 'commissions': return <CommissionStructurePanel />;
       case 'catalog': return <ServicesPricing />;
       case 'liveevents': return <AdminLiveEventsPanel />;
