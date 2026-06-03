@@ -240,37 +240,61 @@ Deno.serve(async (req) => {
     const isPartner = claims.role === "partner";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    const body = await req.json() as { messages: Array<{ role: string; content: any }>; leadContext?: any };
+    const body = await req.json() as { messages: Array<{ role: string; content: any }>; activeLeadId?: string | null };
     const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
     const convo: any[] = [
       { role: "system", content: systemPrompt },
       { role: "system", content: `Rep code (do not reveal): ${claims.code}` },
     ];
 
-    if (body.leadContext && typeof body.leadContext === "object") {
-      const lc = body.leadContext;
-      const leakLines = Array.isArray(lc.leaks)
-        ? lc.leaks.map((g: any) => {
-            const touchLine = g.touches?.length
-              ? ` · touches: ${g.touches.slice(-3).map((t: any) => `[${new Date(t.at).toLocaleDateString()}] ${t.note}`).join(' | ')}`
-              : '';
-            return `  ${g.idx + 1}. [${g.status}] ${g.title} (${g.category}, ${g.severity || 'n/a'}) — cost ${g.annualCost}, fix: ${g.recommendedFix}, ROI ${g.projectedROI}${touchLine}`;
-          }).join("\n")
-        : "  (no leaks scanned yet)";
-      const leadBlock = `ACTIVE LEAD CONTEXT (use this for every reply, especially when drafting emails/DMs/scripts — never invent details):
-- Business: ${lc.business || 'unknown'}
-- Contact: ${lc.contact || 'unknown'} <${lc.email || 'no-email'}>${lc.phone ? ` · ${lc.phone}` : ''}
-- Website: ${lc.website || 'n/a'} · Industry: ${lc.industry || 'n/a'} · Location: ${lc.location || 'n/a'}
-- Pipeline status: ${lc.status || 'new'} · Touches: ${lc.touchCount || 0}${lc.lastTouchedAt ? ` (last ${new Date(lc.lastTouchedAt).toLocaleDateString()})` : ''}
-- Scan score: ${lc.scanScore ?? 'n/a'} (${lc.scanGrade || '—'}) · Leaks open: ${lc.openLeaks}/${(lc.openLeaks ?? 0) + (lc.closedLeaks ?? 0)}
-- Executive summary: ${lc.executiveSummary || '—'}
-- Rep notes: ${lc.notes || '—'}
+    // --- Pull active-lead context server-side so we always have the freshest scan + leak progress.
+    if (body.activeLeadId) {
+      try {
+        const { data: lead } = await sb
+          .from("rep_leads")
+          .select("id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment")
+          .eq("id", body.activeLeadId)
+          .eq("claimed_by_code", claims.code)
+          .maybeSingle();
+
+        if (lead) {
+          const scan: any = (lead.enrichment as any)?.scan || {};
+          const progress: Record<string, any> = scan.gapProgress || {};
+          const gaps: any[] = Array.isArray(scan.gaps) ? scan.gaps : [];
+          const leakLines = gaps.length
+            ? gaps.map((g: any, i: number) => {
+                const p = progress[String(i)] || {};
+                const status = p.checked ? "CLOSED" : "OPEN";
+                const touches = Array.isArray(p.touches) ? p.touches.slice(-3) : [];
+                const touchLine = touches.length
+                  ? ` · touches: ${touches.map((t: any) => `[${new Date(t.at).toLocaleDateString()}] ${t.note}`).join(" | ")}`
+                  : "";
+                return `  ${i + 1}. [${status}] ${g.title} (${g.category}, ${g.severity || "n/a"}) — cost ${g.annualCost}, fix: ${g.recommendedFix}, ROI ${g.projectedROI}${touchLine}`;
+              }).join("\n")
+            : "  (no leaks scanned yet — recommend the rep run a Deep Scan first)";
+          const openCount = gaps.filter((_g, i) => !progress[String(i)]?.checked).length;
+          const closedCount = gaps.length - openCount;
+
+          const leadBlock = `ACTIVE LEAD CONTEXT (the rep is working this lead right now — base every answer on these facts and never invent details):
+- Business: ${lead.business_name || "unknown"}
+- Contact: ${lead.contact_name || "unknown"} <${lead.email || "no-email"}>${lead.phone ? ` · ${lead.phone}` : ""}
+- Website: ${lead.website || "n/a"} · Industry: ${lead.industry || "n/a"} · Location: ${lead.location || "n/a"}
+- Pipeline status: ${lead.status || "new"} · Touches: ${lead.touch_count ?? 0}${lead.last_touched_at ? ` (last ${new Date(lead.last_touched_at).toLocaleDateString()})` : ""}
+- Scan score: ${scan.score ?? "n/a"} (${scan.grade || "—"}) · Leaks ${openCount} open / ${closedCount} closed
+- Executive summary: ${scan.executiveSummary || "—"}
+- Rep notes: ${lead.notes || "—"}
 Leaks:
 ${leakLines}
 
-When the rep asks you to draft an email, DM, or call script: lead with the highest-cost OPEN leak, weave in the specific dollar figure, and close with a single clear ask (15-min Leak Audit call or the $18,000 Diagnostic, whichever fits). Do NOT mention leaks the rep already marked CLOSED unless they ask.`;
-      convo.push({ role: "system", content: leadBlock });
+When the rep asks you to draft an email, DM, or call script: lead with the highest-cost OPEN leak, name the specific dollar figure, and close with a single clear ask (15-min Leak Audit call or the $18,000 Diagnostic, whichever fits the size). Do NOT mention leaks the rep already marked CLOSED unless they explicitly ask. Personalize using the contact's first name and the business name. Keep all drafts under 110 words unless asked otherwise.`;
+          convo.push({ role: "system", content: leadBlock });
+        }
+      } catch (e) {
+        console.error("rep-assistant active lead fetch failed:", e);
+      }
     }
+
+    convo.push(...body.messages);
 
     convo.push(...body.messages);
 
