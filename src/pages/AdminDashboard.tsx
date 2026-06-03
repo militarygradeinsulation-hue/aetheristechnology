@@ -685,31 +685,63 @@ const AdminDashboard: React.FC = () => {
               )}
             </div>
 
-            {!tabsCollapsed && (
-              <div className="flex gap-2 mb-8 flex-wrap">
-                {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).slice().sort((a, b) => a.label.localeCompare(b.label)).map(({ key: tab, label, icon: Icon }) => {
-                  const active = activeTab === tab;
-                  return (
-                    <Button
-                      key={tab}
-                      id={`admin-tab-btn-${tab}`}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(tab as typeof activeTab);
-                        ensureTabData(tab);
-                        if (tab !== 'tools') setActiveTool(null);
-                      }}
-                      variant={active ? 'default' : 'outline'}
-                      style={tabButtonStyle(tabScale)}
-                      className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
-                    >
-                      <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
-                      <span>{label}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
+            {!tabsCollapsed && (() => {
+              const CATEGORIES: { name: string; keys: string[] }[] = [
+                { name: 'Overview', keys: ['overview', 'insights', 'events'] },
+                { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
+                { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
+                { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
+                { name: 'Ops', keys: ['calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
+                { name: 'Forensics & Tools', keys: ['systems', 'easymode', 'briefings', 'tools'] },
+                { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
+              ];
+              const visibleSet = new Set(visibleTabs);
+              const categorized = new Set(CATEGORIES.flatMap(c => c.keys));
+              const uncategorized = ALL_TAB_DEFS
+                .filter(t => visibleSet.has(t.key) && !categorized.has(t.key))
+                .map(t => t.key);
+              const groups = [
+                ...CATEGORIES.map(c => ({ name: c.name, keys: c.keys.filter(k => visibleSet.has(k)) })),
+                ...(uncategorized.length ? [{ name: 'Other', keys: uncategorized }] : []),
+              ].filter(g => g.keys.length > 0);
+
+              return (
+                <div className="space-y-3 mb-8">
+                  {groups.map(group => (
+                    <div key={group.name}>
+                      <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground/70 mb-1.5 px-1">{group.name}</div>
+                      <div className="flex gap-2 flex-wrap">
+                        {group.keys
+                          .map(k => ALL_TAB_DEFS.find(t => t.key === k))
+                          .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
+                          .sort((a, b) => a.label.localeCompare(b.label))
+                          .map(({ key: tab, label, icon: Icon }) => {
+                            const active = activeTab === tab;
+                            return (
+                              <Button
+                                key={tab}
+                                id={`admin-tab-btn-${tab}`}
+                                type="button"
+                                onClick={() => {
+                                  setActiveTab(tab as typeof activeTab);
+                                  ensureTabData(tab);
+                                  if (tab !== 'tools') setActiveTool(null);
+                                }}
+                                variant={active ? 'default' : 'outline'}
+                                style={tabButtonStyle(tabScale)}
+                                className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                              >
+                                <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                                <span>{label}</span>
+                              </Button>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             <EasyModeWrapper tabKey={activeTab}><Suspense fallback={<PanelFallback />}>{renderTabBody(activeTab)}</Suspense></EasyModeWrapper>
           </>
