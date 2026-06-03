@@ -15,6 +15,7 @@ import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
 import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Heavy panels — lazy-loaded so the initial admin bundle stays small and the
 // post-login navigation to /admin feels instant. Only the active tab's code
