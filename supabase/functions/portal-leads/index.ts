@@ -499,6 +499,60 @@ serve(async (req) => {
       return jsonResp({ ok: true, target: target.rep_name || targetCode });
     }
 
+    // ---------- UPDATE SCAN PROGRESS (per-leak checkoff + touches) ----------
+    if (action === "update_scan_progress") {
+      const id = sanitizeStr(body.id);
+      const gapIndex = Number(body.gapIndex);
+      if (!id || !Number.isFinite(gapIndex) || gapIndex < 0) {
+        return jsonResp({ error: "Missing id or gapIndex" }, 400);
+      }
+      const checked = body.checked === undefined ? undefined : !!body.checked;
+      const touchNote = body.touchNote !== undefined ? sanitizeStr(body.touchNote, 1000) : null;
+      const addTouch = !!body.addTouch;
+
+      const { data: lead, error: leadErr } = await supabase
+        .from("rep_leads")
+        .select("id, enrichment, touch_count")
+        .eq("id", id)
+        .eq("claimed_by_code", claims.code)
+        .maybeSingle();
+      if (leadErr) throw leadErr;
+      if (!lead) return jsonResp({ error: "Lead not found or not yours" }, 404);
+
+      const enrichment = (lead.enrichment as any) || {};
+      const scan = enrichment.scan || {};
+      const progress: Record<string, any> = { ...(scan.gapProgress || {}) };
+      const cur = progress[String(gapIndex)] || { checked: false, touches: [] };
+      const next: any = {
+        checked: checked === undefined ? !!cur.checked : checked,
+        touches: Array.isArray(cur.touches) ? [...cur.touches] : [],
+      };
+      if (checked === true && !cur.checked) next.closedAt = new Date().toISOString();
+      if (addTouch && touchNote) {
+        next.touches.push({ at: new Date().toISOString(), note: touchNote });
+      }
+      progress[String(gapIndex)] = next;
+      const newEnrichment = { ...enrichment, scan: { ...scan, gapProgress: progress } };
+
+      const patch: Record<string, unknown> = { enrichment: newEnrichment };
+      if (addTouch && touchNote) {
+        patch.last_touched_at = new Date().toISOString();
+        patch.touch_count = (lead.touch_count ?? 0) + 1;
+        if (!body.skipStatusBump) patch.status = "touched";
+      }
+
+      const { error: updErr } = await supabase
+        .from("rep_leads")
+        .update(patch)
+        .eq("id", id);
+      if (updErr) throw updErr;
+
+      await logActivity(supabase, claims, "lead_leak_progress", {
+        lead_id: id, gapIndex, checked: next.checked, added_touch: !!(addTouch && touchNote),
+      });
+      return jsonResp({ ok: true, gapProgress: progress });
+    }
+
     return jsonResp({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("portal-leads error:", e);
