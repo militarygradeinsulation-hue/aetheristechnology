@@ -19,7 +19,8 @@ import {
 import { buildLifecycle, type RepLifecycle } from "@/lib/hireLifecycle";
 import { AdminOnboardingStudio } from "@/components/admin/AdminOnboardingStudio";
 import { MillionDollarPathView } from "@/components/admin/MillionDollarPathView";
-import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2, Flame } from "lucide-react";
+import HireBlueprintScript from "@/components/admin/HireBlueprintScript";
+import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2, Flame, Mic } from "lucide-react";
 
 const SECTIONS: { key: HirePlaybookEntry["section"]; label: string; icon: any; tone: string }[] = [
   { key: "day_one", label: "Day 1 outreach", icon: MessageCircle, tone: "border-amber/40" },
@@ -124,6 +125,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
     <Tabs defaultValue="path" className="space-y-4">
       <TabsList className="bg-card/60 border border-border/60 flex-wrap h-auto">
         <TabsTrigger value="path" className="gap-1.5"><Flame className="w-3.5 h-3.5" /> $1M / 90 Days</TabsTrigger>
+        <TabsTrigger value="blueprint" className="gap-1.5"><Mic className="w-3.5 h-3.5" /> Day-1 Blueprint</TabsTrigger>
         <TabsTrigger value="lifecycle" className="gap-1.5"><Activity className="w-3.5 h-3.5" /> Lifecycle</TabsTrigger>
         <TabsTrigger value="roster" className="gap-1.5"><Users className="w-3.5 h-3.5" /> Roster & Teams</TabsTrigger>
         <TabsTrigger value="cadence" className="gap-1.5"><CalendarPlus className="w-3.5 h-3.5" /> Engagement Cadence</TabsTrigger>
@@ -133,6 +135,10 @@ const AdminHiresOnboardingPanel: React.FC = () => {
 
       <TabsContent value="path" className="space-y-4 mt-0">
         <MillionDollarPathView />
+      </TabsContent>
+
+      <TabsContent value="blueprint" className="space-y-4 mt-0">
+        <HireBlueprintScript />
       </TabsContent>
 
       <TabsContent value="lifecycle" className="space-y-4 mt-0">
