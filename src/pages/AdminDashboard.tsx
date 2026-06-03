@@ -751,7 +751,9 @@ const AdminDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-8">
                   {groups.map(group => {
                     const containsActive = group.keys.includes(activeTab);
-                    const isOpen = expandedCats.has(group.name) || containsActive;
+                    const isOpen = collapsedCats.has(group.name)
+                      ? false
+                      : (expandedCats.has(group.name) || containsActive);
                     return (
                       <section
                         key={group.name}
@@ -761,7 +763,7 @@ const AdminDashboard: React.FC = () => {
                       >
                         <button
                           type="button"
-                          onClick={() => toggleCategory(group.name)}
+                          onClick={() => toggleCategory(group.name, isOpen)}
                           className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left"
                           aria-expanded={isOpen}
                         >
