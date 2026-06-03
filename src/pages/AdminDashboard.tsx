@@ -724,50 +724,69 @@ const AdminDashboard: React.FC = () => {
 
               return (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-8">
-                  {groups.map(group => (
-                    <section
-                      key={group.name}
-                      className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm px-3.5 py-3 hover:border-border/70 transition-colors"
-                    >
-                      <header className="flex items-center gap-2 mb-2.5">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-amber/80">
-                          {group.name}
-                        </span>
-                        <span className="h-px flex-1 bg-border/40" aria-hidden />
-                        <span className="text-[10px] font-mono text-muted-foreground/50">
-                          {group.keys.length}
-                        </span>
-                      </header>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {group.keys
-                          .map(k => ALL_TAB_DEFS.find(t => t.key === k))
-                          .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
-                          .sort((a, b) => a.label.localeCompare(b.label))
-                          .map(({ key: tab, label, icon: Icon }) => {
-                            const active = activeTab === tab;
-                            return (
-                              <Button
-                                key={tab}
-                                id={`admin-tab-btn-${tab}`}
-                                type="button"
-                                onClick={() => {
-                                  setActiveTab(tab as typeof activeTab);
-                                  ensureTabData(tab);
-                                  if (tab !== 'tools') setActiveTool(null);
-                                }}
-                                variant={active ? 'default' : 'ghost'}
-                                size="sm"
-                                style={tabButtonStyle(tabScale)}
-                                className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
-                              >
-                                <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
-                                <span>{label}</span>
-                              </Button>
-                            );
-                          })}
-                      </div>
-                    </section>
-                  ))}
+                  {groups.map(group => {
+                    const containsActive = group.keys.includes(activeTab);
+                    const isOpen = expandedCats.has(group.name) || containsActive;
+                    return (
+                      <section
+                        key={group.name}
+                        className={`rounded-lg border bg-card/30 backdrop-blur-sm transition-colors ${
+                          containsActive ? 'border-amber/40' : 'border-border/40 hover:border-border/70'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleCategory(group.name)}
+                          className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left"
+                          aria-expanded={isOpen}
+                        >
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform ${isOpen ? '' : '-rotate-90'}`}
+                          />
+                          <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-amber/80">
+                            {group.name}
+                          </span>
+                          <span className="h-px flex-1 bg-border/40" aria-hidden />
+                          <span className="text-[10px] font-mono text-muted-foreground/50">
+                            {group.keys.length}
+                          </span>
+                          {containsActive && (
+                            <span className="text-[9px] font-mono uppercase tracking-wider text-amber/90">●</span>
+                          )}
+                        </button>
+                        {isOpen && (
+                          <div className="flex gap-1.5 flex-wrap px-3.5 pb-3 pt-0.5">
+                            {group.keys
+                              .map(k => ALL_TAB_DEFS.find(t => t.key === k))
+                              .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map(({ key: tab, label, icon: Icon }) => {
+                                const active = activeTab === tab;
+                                return (
+                                  <Button
+                                    key={tab}
+                                    id={`admin-tab-btn-${tab}`}
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveTab(tab as typeof activeTab);
+                                      ensureTabData(tab);
+                                      if (tab !== 'tools') setActiveTool(null);
+                                    }}
+                                    variant={active ? 'default' : 'ghost'}
+                                    size="sm"
+                                    style={tabButtonStyle(tabScale)}
+                                    className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
+                                  >
+                                    <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                                    <span>{label}</span>
+                                  </Button>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </section>
+                    );
+                  })}
                 </div>
               );
             })()}
