@@ -6,6 +6,80 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ---------------------------------------------------------------------------
+// Deterministic leak calculator — same domain + score => same dollar range,
+// every run. Eliminates the "score stays, dollars change" credibility problem.
+// ---------------------------------------------------------------------------
+function hash32(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+function fmt$(n: number): string {
+  const r = Math.round(n / 100) * 100;
+  return "$" + r.toLocaleString("en-US");
+}
+function computeLeakRange(host: string, score: number): { low: number; high: number } {
+  const s = Math.max(0, Math.min(100, score | 0));
+  let baseLow: number, baseHigh: number;
+  if (s >= 90) { baseLow = 8000;   baseHigh = 18000; }
+  else if (s >= 80) { baseLow = 22000;  baseHigh = 48000; }
+  else if (s >= 70) { baseLow = 48000;  baseHigh = 95000; }
+  else if (s >= 60) { baseLow = 85000;  baseHigh = 165000; }
+  else if (s >= 50) { baseLow = 130000; baseHigh = 240000; }
+  else if (s >= 40) { baseLow = 180000; baseHigh = 320000; }
+  else { baseLow = 240000; baseHigh = 420000; }
+  const h = hash32(host.toLowerCase());
+  const variance = ((h % 1000) / 1000) * 0.24 - 0.12; // -12% .. +12%, fixed per host
+  return { low: baseLow * (1 + variance), high: baseHigh * (1 + variance) };
+}
+function applyDeterministicLeaks(analysis: any, host: string): any {
+  if (!analysis || typeof analysis !== "object") return analysis;
+  const score = typeof analysis.score === "number" ? analysis.score : 60;
+  const { low, high } = computeLeakRange(host, score);
+  const totalRange = `${fmt$(low)} - ${fmt$(high)}`;
+
+  const gaps: any[] = Array.isArray(analysis.gaps) ? analysis.gaps : [];
+  const weights = gaps.map((g) => g?.severity === "critical" ? 3 : g?.severity === "warning" ? 2 : 1);
+  const totalW = weights.reduce((a, b) => a + b, 0) || 1;
+  gaps.forEach((g, i) => {
+    const share = weights[i] / totalW;
+    if (g && typeof g === "object") g.annualCost = `${fmt$(low * share)} - ${fmt$(high * share)}`;
+  });
+
+  const roi: any[] = Array.isArray(analysis.roiTable) ? analysis.roiTable : [];
+  if (roi.length) {
+    const per = 1 / roi.length;
+    roi.forEach((r) => {
+      if (r && typeof r === "object") {
+        r.currentWaste = `${fmt$(low * per)} - ${fmt$(high * per)}`;
+        r.projectedRecovery = `${fmt$(low * per * 0.6)} - ${fmt$(high * per * 0.75)}`;
+      }
+    });
+  }
+
+  if (typeof analysis.executiveSummary === "string") {
+    const dollarRange = /\$[\d,]+\s*[-–]\s*\$[\d,]+/g;
+    const hadRange = dollarRange.test(analysis.executiveSummary);
+    let summary = analysis.executiveSummary.replace(/\$[\d,]+\s*[-–]\s*\$[\d,]+/g, totalRange);
+    if (!hadRange) {
+      let replaced = false;
+      summary = summary.replace(/\$[\d,]{4,}/g, (m) => {
+        if (replaced) return m;
+        replaced = true;
+        return totalRange;
+      });
+    }
+    analysis.executiveSummary = summary;
+  }
+
+  analysis.totalAnnualLeak = totalRange;
+  return analysis;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
