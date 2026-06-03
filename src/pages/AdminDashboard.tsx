@@ -706,38 +706,37 @@ const AdminDashboard: React.FC = () => {
               ].filter(g => g.keys.length > 0);
 
               return (
-                <div className="space-y-3 mb-8">
-                  {groups.map(group => (
-                    <div key={group.name}>
-                      <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground/70 mb-1.5 px-1">{group.name}</div>
-                      <div className="flex gap-2 flex-wrap">
-                        {group.keys
-                          .map(k => ALL_TAB_DEFS.find(t => t.key === k))
-                          .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
-                          .sort((a, b) => a.label.localeCompare(b.label))
-                          .map(({ key: tab, label, icon: Icon }) => {
-                            const active = activeTab === tab;
-                            return (
-                              <Button
-                                key={tab}
-                                id={`admin-tab-btn-${tab}`}
-                                type="button"
-                                onClick={() => {
-                                  setActiveTab(tab as typeof activeTab);
-                                  ensureTabData(tab);
-                                  if (tab !== 'tools') setActiveTool(null);
-                                }}
-                                variant={active ? 'default' : 'outline'}
-                                style={tabButtonStyle(tabScale)}
-                                className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
-                              >
-                                <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
-                                <span>{label}</span>
-                              </Button>
-                            );
-                          })}
-                      </div>
-                    </div>
+                <div className="flex gap-2 flex-wrap items-center mb-8 w-full">
+                  {groups.map((group, gi) => (
+                    <React.Fragment key={group.name}>
+                      {gi > 0 && <div className="h-6 w-px bg-border/60 mx-1" aria-hidden />}
+                      <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground/70 px-1">{group.name}</div>
+                      {group.keys
+                        .map(k => ALL_TAB_DEFS.find(t => t.key === k))
+                        .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
+                        .sort((a, b) => a.label.localeCompare(b.label))
+                        .map(({ key: tab, label, icon: Icon }) => {
+                          const active = activeTab === tab;
+                          return (
+                            <Button
+                              key={tab}
+                              id={`admin-tab-btn-${tab}`}
+                              type="button"
+                              onClick={() => {
+                                setActiveTab(tab as typeof activeTab);
+                                ensureTabData(tab);
+                                if (tab !== 'tools') setActiveTool(null);
+                              }}
+                              variant={active ? 'default' : 'outline'}
+                              style={tabButtonStyle(tabScale)}
+                              className={`gap-2 whitespace-nowrap font-medium ${getTabColorClasses(tab, active, tabColorMode)}`}
+                            >
+                              <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                              <span>{label}</span>
+                            </Button>
+                          );
+                        })}
+                    </React.Fragment>
                   ))}
                 </div>
               );
