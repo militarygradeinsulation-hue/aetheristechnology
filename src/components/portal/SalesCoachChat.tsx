@@ -82,6 +82,62 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
+  // --- Active Lead context: keep the bot locked on whichever lead the rep last opened. ---
+  const activeLead = useActiveLead();
+  const [leadScan, setLeadScan] = useState<any>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setLeadScan(null);
+    if (!activeLead?.leadId) return;
+    (async () => {
+      const { data } = await supabase
+        .from('rep_leads')
+        .select('id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment')
+        .eq('id', activeLead.leadId)
+        .maybeSingle();
+      if (!cancelled) setLeadScan(data || null);
+    })();
+    return () => { cancelled = true; };
+  }, [activeLead?.leadId]);
+
+  const buildLeadContext = useCallback(() => {
+    if (!leadScan) return null;
+    const scan = (leadScan.enrichment as any)?.scan || null;
+    const progress = scan?.gapProgress || {};
+    const gaps = Array.isArray(scan?.gaps) ? scan.gaps.map((g: any, i: number) => {
+      const p = progress[String(i)] || {};
+      return {
+        idx: i, title: g.title, category: g.category, severity: g.severity,
+        annualCost: g.annualCost, recommendedFix: g.recommendedFix, projectedROI: g.projectedROI,
+        description: g.description,
+        status: p.checked ? 'CLOSED' : 'OPEN',
+        touches: Array.isArray(p.touches) ? p.touches.map((t: any) => ({ at: t.at, note: t.note })) : [],
+      };
+    }) : [];
+    return {
+      leadId: leadScan.id,
+      business: leadScan.business_name,
+      contact: leadScan.contact_name,
+      email: leadScan.email,
+      phone: leadScan.phone,
+      website: leadScan.website,
+      industry: leadScan.industry,
+      location: leadScan.location,
+      status: leadScan.status,
+      touchCount: leadScan.touch_count,
+      lastTouchedAt: leadScan.last_touched_at,
+      notes: leadScan.notes,
+      scanScore: scan?.score,
+      scanGrade: scan?.grade,
+      executiveSummary: scan?.executiveSummary,
+      leaks: gaps,
+      openLeaks: gaps.filter((g: any) => g.status === 'OPEN').length,
+      closedLeaks: gaps.filter((g: any) => g.status === 'CLOSED').length,
+    };
+  }, [leadScan]);
+
+
+
   const buildApiContent = (text: string, atts: Attachment[]) => {
     const textParts: string[] = [];
     if (text) textParts.push(text);
