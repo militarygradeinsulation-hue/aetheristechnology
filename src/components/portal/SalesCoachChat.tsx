@@ -187,7 +187,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages, buildLeadContext]);
+  }, [isLoading, messages, activeLead?.leadId]);
 
   // Listen for prefill events from LeadsBoard (e.g. "Draft outreach email")
   useEffect(() => {
