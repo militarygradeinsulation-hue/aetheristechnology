@@ -429,13 +429,30 @@ serve(async (req) => {
         return jsonResp({ error: scanData?.error || "Scan failed" }, 502);
       }
 
-      const enrichment = { ...((lead.enrichment as any) || {}), scan: { ...scanData, scanned_at: new Date().toISOString(), scanned_url: rawUrl } };
+      // Auto-schedule the rep's outreach cadence on their calendar.
+      const calendarEvents = await scheduleScanCadence({
+        supabase,
+        repCode: claims.code,
+        leadId: id,
+        businessName: lead.business_name || "Lead",
+        scan: scanData,
+      });
+
+      const enrichment = {
+        ...((lead.enrichment as any) || {}),
+        scan: {
+          ...scanData,
+          scanned_at: new Date().toISOString(),
+          scanned_url: rawUrl,
+          calendarEventIds: calendarEvents.map((e) => e.id),
+        },
+      };
       await supabase.from("rep_leads")
         .update({ enrichment, enriched_at: new Date().toISOString() })
         .eq("id", id).eq("claimed_by_code", claims.code);
 
-      await logActivity(supabase, claims, "lead_scan", { lead_id: id, url: rawUrl, score: scanData?.score });
-      return jsonResp({ ok: true, scan: enrichment.scan, cached: false });
+      await logActivity(supabase, claims, "lead_scan", { lead_id: id, url: rawUrl, score: scanData?.score, scheduled: calendarEvents.length });
+      return jsonResp({ ok: true, scan: enrichment.scan, cached: false, scheduled: calendarEvents.length });
     }
 
     // ---------- LIST REPS (for forwarding picker) ----------
