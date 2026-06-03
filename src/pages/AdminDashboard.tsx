@@ -308,6 +308,7 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   const EXPANDED_CATS_KEY = 'admin.expandedTabCats.v1';
+  const COLLAPSED_CATS_KEY = 'admin.collapsedTabCats.v1';
   const [expandedCats, setExpandedCats] = useState<Set<string>>(() => {
     try {
       const raw = localStorage.getItem(EXPANDED_CATS_KEY);
@@ -315,13 +316,37 @@ const AdminDashboard: React.FC = () => {
     } catch { /* noop */ }
     return new Set<string>();
   });
-  const toggleCategory = useCallback((name: string) => {
-    setExpandedCats(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name); else next.add(name);
-      try { localStorage.setItem(EXPANDED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
-      return next;
-    });
+  const [collapsedCats, setCollapsedCats] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSED_CATS_KEY);
+      if (raw) return new Set(JSON.parse(raw));
+    } catch { /* noop */ }
+    return new Set<string>();
+  });
+  const toggleCategory = useCallback((name: string, currentlyOpen: boolean) => {
+    if (currentlyOpen) {
+      setExpandedCats(prev => {
+        const next = new Set(prev); next.delete(name);
+        try { localStorage.setItem(EXPANDED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+      setCollapsedCats(prev => {
+        const next = new Set(prev); next.add(name);
+        try { localStorage.setItem(COLLAPSED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+    } else {
+      setCollapsedCats(prev => {
+        const next = new Set(prev); next.delete(name);
+        try { localStorage.setItem(COLLAPSED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+      setExpandedCats(prev => {
+        const next = new Set(prev); next.add(name);
+        try { localStorage.setItem(EXPANDED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+    }
   }, []);
 
   const tabSearchResults = tabSearch.trim()
