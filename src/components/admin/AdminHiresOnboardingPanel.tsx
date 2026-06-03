@@ -19,7 +19,8 @@ import {
 import { buildLifecycle, type RepLifecycle } from "@/lib/hireLifecycle";
 import { AdminOnboardingStudio } from "@/components/admin/AdminOnboardingStudio";
 import { MillionDollarPathView } from "@/components/admin/MillionDollarPathView";
-import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2, Flame } from "lucide-react";
+import HireBlueprintScript from "@/components/admin/HireBlueprintScript";
+import { Users, UserPlus, ShieldX, CalendarPlus, Trash2, Save, BookOpenCheck, Plus, AlertTriangle, MessageCircle, Repeat, GraduationCap, Activity, Copy, CheckCircle2, Flame, Mic } from "lucide-react";
 
 const SECTIONS: { key: HirePlaybookEntry["section"]; label: string; icon: any; tone: string }[] = [
   { key: "day_one", label: "Day 1 outreach", icon: MessageCircle, tone: "border-amber/40" },
