@@ -170,7 +170,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages, leadContext: buildLeadContext() }),
+        body: JSON.stringify({ messages: apiMessages, activeLeadId: activeLead?.leadId || null }),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
