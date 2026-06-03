@@ -26,6 +26,100 @@ function sanitizeStr(v: unknown, max = 500): string | null {
   return s.slice(0, max);
 }
 
+// ---- Auto-schedule outreach cadence on the rep's calendar after a scan ----
+function parseHourHint(text: string | undefined | null): number {
+  // Returns a UTC hour to use for reminders. Defaults to 14:00 UTC (~10am ET).
+  if (!text) return 14;
+  const t = String(text).toLowerCase();
+  // try "9-11am", "10am", "2pm", "14:00"
+  const ampm = t.match(/(\d{1,2})\s*(?::\d{2})?\s*(am|pm)/);
+  if (ampm) {
+    let h = parseInt(ampm[1], 10);
+    if (ampm[2] === "pm" && h < 12) h += 12;
+    if (ampm[2] === "am" && h === 12) h = 0;
+    return Math.max(0, Math.min(23, h + 4)); // assume ET → +4/5 UTC, use +4
+  }
+  const h24 = t.match(/(\d{1,2}):\d{2}/);
+  if (h24) return Math.max(0, Math.min(23, parseInt(h24[1], 10) + 4));
+  if (/morning|am\b/.test(t)) return 14;
+  if (/afternoon|pm\b/.test(t)) return 19;
+  if (/evening/.test(t)) return 22;
+  return 14;
+}
+
+async function scheduleScanCadence(opts: {
+  supabase: any; repCode: string; leadId: string; businessName: string; scan: any;
+}): Promise<Array<{ id: string }>> {
+  try {
+    const { supabase, repCode, leadId, businessName, scan } = opts;
+    const outreach = scan?.outreach || {};
+    const channel = String(outreach.recommended_channel || "email").toLowerCase();
+    const channelLabel = channel === "call" ? "Call" : "Email";
+    const kind = channel === "call" ? "call" : "follow_up";
+    const bestTime = outreach.best_time_to_reach || "";
+    const cadence = outreach?.email_timing?.follow_up_cadence || "";
+    const sendWindows = Array.isArray(outreach?.email_timing?.best_send_windows)
+      ? outreach.email_timing.best_send_windows.join(", ") : "";
+    const tz = outreach?.email_timing?.inferred_timezone || "";
+    const script = outreach?.first_touch_script || "";
+
+    const hour = parseHourHint(bestTime);
+    const now = new Date();
+    // Anchor to tomorrow at the recommended hour
+    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, hour, 0, 0));
+
+    // 4-touch cadence by day offset from anchor
+    const cadenceSteps: Array<{ label: string; offsetDays: number; kind: string }> = [
+      { label: `Touch 1 · ${channelLabel} first`, offsetDays: 0, kind },
+      { label: `Touch 2 · ${channelLabel === "Call" ? "Email" : "Call"} follow-up`, offsetDays: 3, kind: channel === "call" ? "follow_up" : "call" },
+      { label: `Touch 3 · ${channelLabel} bump`, offsetDays: 7, kind },
+      { label: `Touch 4 · Breakup ${channelLabel}`, offsetDays: 14, kind },
+    ];
+
+    const bodyBase = [
+      `Lead: ${businessName}`,
+      bestTime ? `Best window: ${bestTime}` : "",
+      tz ? `Timezone: ${tz}` : "",
+      sendWindows ? `Send windows: ${sendWindows}` : "",
+      cadence ? `Cadence: ${cadence}` : "",
+      outreach.why_this_channel ? `Why ${channelLabel}: ${outreach.why_this_channel}` : "",
+      script ? `\nFirst-touch script:\n${script}` : "",
+    ].filter(Boolean).join("\n");
+
+    // Remove previous auto-scheduled events for this lead before re-seeding
+    await supabase.from("rep_calendar_events")
+      .delete()
+      .eq("lead_id", leadId)
+      .eq("rep_code", repCode)
+      .eq("created_by", "system");
+
+    const rows = cadenceSteps.map((s) => ({
+      rep_code: repCode,
+      lead_id: leadId,
+      kind: s.kind,
+      title: `${s.label} — ${businessName}`,
+      body: bodyBase,
+      start_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000).toISOString(),
+      end_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000 + 30 * 60 * 1000).toISOString(),
+      all_day: false,
+      created_by: "system",
+    }));
+
+    const { data, error } = await supabase
+      .from("rep_calendar_events")
+      .insert(rows)
+      .select("id");
+    if (error) {
+      console.error("scheduleScanCadence insert error:", error);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.error("scheduleScanCadence error:", e);
+    return [];
+  }
+}
+
 const FREE_EMAIL_DOMAINS = new Set([
   "gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com",
   "live.com","msn.com","comcast.net","ymail.com","me.com","mac.com","proton.me",
@@ -429,13 +523,30 @@ serve(async (req) => {
         return jsonResp({ error: scanData?.error || "Scan failed" }, 502);
       }
 
-      const enrichment = { ...((lead.enrichment as any) || {}), scan: { ...scanData, scanned_at: new Date().toISOString(), scanned_url: rawUrl } };
+      // Auto-schedule the rep's outreach cadence on their calendar.
+      const calendarEvents = await scheduleScanCadence({
+        supabase,
+        repCode: claims.code,
+        leadId: id,
+        businessName: lead.business_name || "Lead",
+        scan: scanData,
+      });
+
+      const enrichment = {
+        ...((lead.enrichment as any) || {}),
+        scan: {
+          ...scanData,
+          scanned_at: new Date().toISOString(),
+          scanned_url: rawUrl,
+          calendarEventIds: calendarEvents.map((e) => e.id),
+        },
+      };
       await supabase.from("rep_leads")
         .update({ enrichment, enriched_at: new Date().toISOString() })
         .eq("id", id).eq("claimed_by_code", claims.code);
 
-      await logActivity(supabase, claims, "lead_scan", { lead_id: id, url: rawUrl, score: scanData?.score });
-      return jsonResp({ ok: true, scan: enrichment.scan, cached: false });
+      await logActivity(supabase, claims, "lead_scan", { lead_id: id, url: rawUrl, score: scanData?.score, scheduled: calendarEvents.length });
+      return jsonResp({ ok: true, scan: enrichment.scan, cached: false, scheduled: calendarEvents.length });
     }
 
     // ---------- LIST REPS (for forwarding picker) ----------

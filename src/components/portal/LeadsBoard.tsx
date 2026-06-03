@@ -1333,7 +1333,10 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         meta: { url: scanUrl, cached: !!res.cached, grade: res.scan?.grade, score: res.scan?.score },
       });
       bumpClues();
-      toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead' });
+      toast({
+        title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead',
+        description: !res.cached && res.scheduled ? `${res.scheduled} touchpoint reminders added to your calendar.` : undefined,
+      });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
