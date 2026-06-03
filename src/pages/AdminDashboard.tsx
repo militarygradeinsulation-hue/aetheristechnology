@@ -503,8 +503,16 @@ const AdminDashboard: React.FC = () => {
   const renderTabBody = (key: string): React.ReactNode => {
     switch (key) {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
-      case 'interviews': return <InterviewsPanel me="admin" />;
-      case 'briefing': return <InterviewBriefingPanel />;
+      case 'hiring': return (
+        <Tabs defaultValue="interviews" className="w-full">
+          <TabsList>
+            <TabsTrigger value="interviews"><CalendarClock className="w-4 h-4 mr-1.5" />Interviews</TabsTrigger>
+            <TabsTrigger value="briefing"><BookOpen className="w-4 h-4 mr-1.5" />Interview Briefing</TabsTrigger>
+          </TabsList>
+          <TabsContent value="interviews" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewsPanel me="admin" /></Suspense></TabsContent>
+          <TabsContent value="briefing" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewBriefingPanel /></Suspense></TabsContent>
+        </Tabs>
+      );
       case 'briefings': return <BriefingsPanel />;
       case 'imagestudio': return <AdminImageStudio />;
       case 'documents': return <AdminDocumentsPanel />;
