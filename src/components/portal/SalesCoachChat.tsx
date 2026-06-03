@@ -200,7 +200,21 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages]);
+  }, [isLoading, messages, buildLeadContext]);
+
+  // Listen for prefill events from LeadsBoard (e.g. "Draft outreach email")
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {};
+      const prompt = String(detail.prompt || '').trim();
+      if (!prompt) return;
+      setIsOpen(true);
+      // small delay so context (active lead + scan) can hydrate
+      setTimeout(() => { runChat(prompt, []); }, 250);
+    };
+    window.addEventListener('coach:prefill', handler);
+    return () => window.removeEventListener('coach:prefill', handler);
+  }, [runChat]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
