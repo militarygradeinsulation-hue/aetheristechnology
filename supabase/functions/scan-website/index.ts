@@ -426,6 +426,10 @@ For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated loc
       }
     }
 
+    // Override AI dollar figures with deterministic per-domain math so reps
+    // never see the score hold steady while the leak number drifts.
+    analysis = applyDeterministicLeaks(analysis, parsedHost);
+
     // Save to database - store full report in gaps column
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
