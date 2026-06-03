@@ -344,22 +344,18 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           )}
         </div>
       </div>
-      {leadScan && (
+      {leadSummary && (
         <div className="px-4 py-1.5 border-b border-amber/20 bg-amber/5 text-[11px] flex items-center justify-between gap-2">
           <span className="text-amber font-mono uppercase tracking-wider text-[10px]">▸ Locked on</span>
           <span className="flex-1 min-w-0 truncate text-foreground">
-            {leadScan.business_name || 'Untitled lead'}
-            {leadScan.contact_name ? ` · ${leadScan.contact_name}` : ''}
+            {leadSummary.business || 'Untitled lead'}
+            {leadSummary.contact ? ` · ${leadSummary.contact}` : ''}
           </span>
-          {(() => {
-            const scan = (leadScan.enrichment as any)?.scan;
-            const total = Array.isArray(scan?.gaps) ? scan.gaps.length : 0;
-            const closed = scan?.gapProgress
-              ? Object.values(scan.gapProgress).filter((p: any) => p?.checked).length
-              : 0;
-            if (!total) return null;
-            return <span className="font-mono text-[10px] text-emerald-400">{closed}/{total} leaks closed</span>;
-          })()}
+          {!!leadSummary.totalLeaks && (
+            <span className="font-mono text-[10px] text-emerald-400">
+              {(leadSummary.totalLeaks - (leadSummary.openLeaks ?? 0))}/{leadSummary.totalLeaks} leaks closed
+            </span>
+          )}
         </div>
       )}
 
