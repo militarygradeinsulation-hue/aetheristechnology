@@ -92,6 +92,9 @@ const Home = () => {
           {/* Who you're actually talking to */}
           <OperatorBio />
 
+          {/* Proof: anonymized verifiable outcomes */}
+          <VerifiableOutcomes />
+
           
 
 
