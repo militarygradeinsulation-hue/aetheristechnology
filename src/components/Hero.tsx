@@ -150,7 +150,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               type="button"
               onClick={toggleVideo}
               aria-label={playing ? 'Pause video' : 'Play video'}
-              className="group relative w-72 md:w-96 aspect-square rounded-full overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
+              className="group relative w-full max-w-4xl aspect-[3/2] rounded-xl overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
             >
               <img
                 src={architectLogo}
