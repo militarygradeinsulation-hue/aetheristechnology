@@ -49,15 +49,20 @@ function pickTime(industry?: string | null) {
 }
 
 function pickMethod(lead: Props["lead"], rr: any): ContactPlan["method"] {
-  const hasEmail = !!(lead.email || rr?.best_email);
+  const rrEmail = rr?.best_email || rr?.emails?.[0]?.email || null;
+  const rrPhone = Array.isArray(rr?.phones) && rr.phones.length > 0 ? rr.phones[0]?.number : null;
+  const hasEmail = !!(lead.email || rrEmail);
   const hasLinkedIn = !!(rr?.linkedin_url);
-  const hasPhone = Array.isArray(rr?.phones) && rr.phones.length > 0;
+  const hasPhone = !!rrPhone;
+  const displayEmail = rrEmail || lead.email;
 
   if (hasEmail) {
     return {
       kind: "email",
-      label: `Email${rr?.best_email ? ` → ${rr.best_email}` : ""}`,
-      reason: "Direct, async, leaves a written paper trail they can forward internally.",
+      label: `Email${displayEmail ? ` → ${displayEmail}` : ""}`,
+      reason: rr?.source === "firecrawl_only"
+        ? "Pulled from the company website — verify before sending a high-stakes message."
+        : "Direct, async, leaves a written paper trail they can forward internally.",
     };
   }
   if (hasLinkedIn) {
@@ -70,7 +75,7 @@ function pickMethod(lead: Props["lead"], rr: any): ContactPlan["method"] {
   if (hasPhone) {
     return {
       kind: "phone",
-      label: `Call → ${rr.phones[0]?.number}`,
+      label: `Call → ${rrPhone}`,
       reason: "No digital channel verified — phone is the highest-confidence touch.",
     };
   }
