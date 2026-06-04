@@ -350,6 +350,7 @@ async function runPersonality(opts: {
     "Only use facts visible in the supplied context. NEVER invent. If a field can't be supported, return an empty array or null.",
     "Cite every claim with a short evidence string and the source URL it came from when possible.",
     "Keep it specific, useful, and warm — this is for a human conversation, not a profile dump.",
+    "CURRENCY RULE (NON-NEGOTIABLE): any monetary figure must be in US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, EUR, GBP, CAD, AUD, or any other currency.",
     "Return strict JSON matching the schema. No prose outside JSON.",
   ].join(" ");
 

@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM = `You are a B2B sales forensics analyst. Given scraped website content for a prospect, return STRICT JSON:
+const SYSTEM = `You are a B2B sales forensics analyst. CURRENCY RULE (NON-NEGOTIABLE): every monetary figure, estimate, ROI, leak, deal size, fee, or cost must be in US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, EUR, GBP, CAD, AUD, or any other currency. Given scraped website content for a prospect, return STRICT JSON:
 {
   "score": 0-100 (how strong a fit they are for an AI consulting / forensic ops engagement; weight: business size, signs of friction, industry leverage, contact-ability),
   "score_reason": short 1-line justification,
