@@ -837,10 +837,10 @@ const AdminDashboard: React.FC = () => {
                   key={tab}
                   className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}
                 >
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                  <div className="flex items-center justify-between gap-2 border-b border-border bg-secondary/30" style={tabTileStyle(tabScale)}>
                     <div className="flex items-center gap-2 min-w-0">
-                      <Icon className="w-4 h-4 text-amber shrink-0" />
-                      <span className="font-display font-bold text-sm text-foreground truncate">{label}</span>
+                      <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} className="text-amber shrink-0" />
+                      <span className="font-display font-bold text-foreground truncate" style={{ fontSize: `${(14 * tabScale).toFixed(2)}px` }}>{label}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {([1, 2, 3, 4] as const).map(s => (
