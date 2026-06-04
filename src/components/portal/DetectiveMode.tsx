@@ -123,6 +123,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           scan: true,
           firecrawl: true,
           rocketreach: true,
+          personality: true,
         },
         headers,
       });
@@ -131,6 +132,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       if ((data as any)?.scan) curScan = (data as any).scan;
       if ((data as any)?.firecrawl) curFc = (data as any).firecrawl;
       if ((data as any)?.rocketreach) curRr = (data as any).rocketreach;
+      if ((data as any)?.personality) setLivePersonality((data as any).personality);
       setLiveScan(curScan); setLiveFc(curFc); setLiveRr(curRr);
       return note;
     };
