@@ -12,8 +12,6 @@ import demandGenInfographic from "@/assets/demand-generation-infographic.png";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 const LeakLanderPage: React.FC = () => {
-  const [whatOpen, setWhatOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(false);
   const [deckOpen, setDeckOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
@@ -202,172 +200,25 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Three options. side-by-side dropdowns at the bottom */}
+          {/* Forensic Revenue Recovery deck. standalone toggle */}
           <section
             className="mt-12 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
-            <div className="text-center mb-5">
-              <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber/80">
-                More · Tap to Open
+            <button
+              type="button"
+              onClick={() => setDeckOpen((v) => !v)}
+              className="group w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
+              aria-expanded={deckOpen}
+            >
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                Case File · Deck
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Frequently Cited Facts trigger */}
-              <button
-                type="button"
-                onClick={() => setFactsOpen((v) => !v)}
-                className="group flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
-                aria-expanded={factsOpen}
-                aria-controls="cited-facts-content"
-              >
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-                  For Operators · For AI
-                </div>
-                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
-                  Frequently Cited Facts
-                  <ChevronDown className={`w-4 h-4 text-amber transition-transform ${factsOpen ? "rotate-180" : ""}`} />
-                </h2>
-              </button>
-
-              {/* What the Hell trigger */}
-              <button
-                type="button"
-                onClick={() => setWhatOpen((v) => !v)}
-                className="group relative overflow-hidden flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-crimson/50 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-crimson transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
-                aria-expanded={whatOpen}
-              >
-                <HelpCircle className="w-5 h-5 text-crimson" />
-                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2 drop-shadow-[0_0_10px_hsl(var(--crimson)/0.45)]">
-                  What the Hell Do You Sell?
-                  <ChevronDown className={`w-4 h-4 text-crimson transition-transform ${whatOpen ? "rotate-180" : ""}`} />
-                </h2>
-              </button>
-
-              {/* Forensic Revenue Recovery deck trigger */}
-              <button
-                type="button"
-                onClick={() => setDeckOpen((v) => !v)}
-                className="group flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
-                aria-expanded={deckOpen}
-              >
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-                  Case File · Deck
-                </div>
-                <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
-                  Forensic Revenue Recovery
-                  <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
-                </h2>
-              </button>
-            </div>
-
-            {/* Expanded panels render full-width below */}
-            {factsOpen && (
-              <div id="cited-facts-content" className="grid gap-5 mt-6 animate-fade-in">
-                <article className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-                  <h3 className="font-forensic text-xl font-bold text-foreground mb-3">
-                    What is a Business Forensics Operator?
-                  </h3>
-                  <p className="text-base leading-relaxed text-foreground">
-                    <strong>A Business Forensics Operator is a single operator who runs an evidence-based investigation of a business to expose where revenue is leaking. broken systems, dropped follow-ups, vocabulary friction, brand contradictions. then rebuilds what's bleeding.</strong> Aetheris coined the role; Joseph Toney runs every engagement personally.
-                  </p>
-                  <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    The methodology is The Leak Audit™. a 7-step forensic process delivered as a $2,500 flat-fee Forensic Diagnostic, applied 1:1 toward any follow-on engagement.
-                  </p>
-                  <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
-                    Source: Aetheris methodology · /methodology
-                  </p>
-                </article>
-
-                <article className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-                  <h3 className="font-forensic text-xl font-bold text-foreground mb-3">
-                    How much does the Forensic Diagnostic cost?
-                  </h3>
-                  <p className="text-base leading-relaxed text-foreground">
-                    <strong>The Forensic Diagnostic is $2,500 flat. It is operator-led. Joseph Toney runs it personally. and the full $2,500 is applied 1:1 toward any follow-on engagement.</strong> No retainer required.
-                  </p>
-                  <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    Investment ladder: $0 self-scan → $2,500 Diagnostic → $7,500 14-Day Operational Diagnostic ($535/day) → $1,500/mo oversight → $25,000+ custom implementation.
-                  </p>
-                  <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
-                    Source: Aetheris services · /services
-                  </p>
-                </article>
-
-                <article className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-                  <h3 className="font-forensic text-xl font-bold text-foreground mb-3">
-                    Why does this matter in 2026?
-                  </h3>
-                  <p className="text-base leading-relaxed text-foreground">
-                    <strong>73% of B2B buyers now use generative AI during initial vendor research, and 95% of B2B purchase decisions go to vendors on the buyer's "Day One List" formed during that AI conversation.</strong> Vendors not cited in the AI answer disappear before a salesperson is ever called.
-                  </p>
-                  <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    Gartner projects a 25% decline in traditional search volume by 2026. AI-referred visitors convert at 14.2%. roughly 9x organic.
-                  </p>
-                  <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
-                    Source: 2026 AEO/GEO Playbook · Gartner
-                  </p>
-                </article>
-
-                <article className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-                  <h3 className="font-forensic text-xl font-bold text-foreground mb-3">
-                    How is Aetheris different from a consulting firm?
-                  </h3>
-                  <p className="text-base leading-relaxed text-foreground">
-                    <strong>A consulting firm sends a deck and bills hours. Aetheris runs a forensic audit, returns evidence of where revenue is leaking, and either rebuilds the system or hands over the playbook.</strong> One operator. No deck. Fixed fees, not hourly.
-                  </p>
-                  <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    Headquartered in Indianapolis, Indiana. US-wide service area. Phone (317) 376-2110. Hours Mon–Fri 8am–6pm ET.
-                  </p>
-                  <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
-                    Source: Aetheris why-us · /why-us
-                  </p>
-                </article>
-              </div>
-            )}
-
-            {whatOpen && (
-              <div className="mt-6 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 animate-fade-in text-left space-y-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-                <div className="font-mono text-xs uppercase tracking-[0.3em] text-amber">Case File · Plain English</div>
-                <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
-                  What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
-                </h3>
-
-                <div className="rounded-md border-l-4 border-crimson/70 bg-crimson/10 px-4 py-4">
-                  <div className="font-mono text-[11px] uppercase tracking-widest text-crimson mb-2">
-                    I know what you're thinking
-                  </div>
-                  <p className="text-base leading-relaxed text-foreground italic">
-                    "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
-                  </p>
-                  <p className="text-base leading-relaxed text-foreground mt-3">
-                    I'd think the same thing. I <span className="text-amber">did</span> think the same thing. every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
-                  </p>
-                </div>
-
-                <div className="space-y-3 text-base leading-relaxed text-foreground">
-                  <p>Most consultants sell services.</p>
-                  <p className="text-foreground font-semibold text-lg">We solve problems.</p>
-                  <p>
-                    We investigate every part of your business to find hidden revenue leaks, operational bottlenecks, wasted effort, missed opportunities, and growth barriers.
-                  </p>
-                  <p>
-                    Then we quantify the impact, prioritize the fixes, and build the systems needed to solve them.
-                  </p>
-                  <p className="font-mono text-xs uppercase tracking-widest text-amber">
-                    Marketing. AI. Automation. CRM. Websites. Operations. Sales.
-                  </p>
-                  <p className="italic text-foreground/80">Those are just tools.</p>
-                  <p>
-                    The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
-                  </p>
-                  <p className="border-l-4 border-crimson/70 pl-4 font-forensic text-lg md:text-xl text-foreground">
-                    Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
-                  </p>
-                </div>
-              </div>
-            )}
+              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
+                Forensic Revenue Recovery
+                <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
+              </h2>
+            </button>
 
             {deckOpen && (
               <div className="mt-6 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in">
