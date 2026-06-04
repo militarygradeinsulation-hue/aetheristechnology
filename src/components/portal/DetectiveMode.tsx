@@ -47,6 +47,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [liveRr, setLiveRr] = useState<any>(rr);
   const [liveFc, setLiveFc] = useState<any>(fc);
   const [liveEnrich, setLiveEnrich] = useState<any>(enrichment);
+  const [livePersonality, setLivePersonality] = useState<any>(null);
   const tileRef = useRef<HTMLDivElement>(null);
   const talkScrollRef = useRef<HTMLDivElement>(null);
 
