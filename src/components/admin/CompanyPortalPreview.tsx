@@ -118,7 +118,7 @@ export const CompanyPortalPreview: React.FC<{ defaultTab?: string; title?: strin
         ? 'partner'
         : (reps.find(r => r.code === selected)?.role ?? 'rep');
 
-  const src = `/portal?adminPreview=1&role=${role}&n=${nonce}`;
+  const src = `/portal?adminPreview=1&role=${role}${defaultTab ? `&tab=${defaultTab}` : ''}&n=${nonce}`;
 
   const refresh = () => setNonce(n => n + 1);
   const openInNewTab = () => window.open(src, '_blank', 'noopener,noreferrer');
