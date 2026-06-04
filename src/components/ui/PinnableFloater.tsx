@@ -12,6 +12,8 @@ interface Props {
   children: React.ReactNode;
   /** Hide the small drag/pin chip (kept visible by default). */
   hideHandle?: boolean;
+  /** Disable long-press-anywhere drag (use the grip handle only). Useful when the floater contains interactive content like a chat panel. */
+  disableBodyDrag?: boolean;
 }
 
 const OPACITY_STEPS = [1, 0.85, 0.65, 0.45, 0.25];
