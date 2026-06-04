@@ -59,21 +59,29 @@ export const PinnableFloater: React.FC<Props> = ({
 
   return (
     <div
-      className={`fixed ${className || ""} ${dragging ? "transition-none" : "transition-[left,top] duration-200 ease-out"}`}
-      style={{ left: pos.x, top: pos.y, zIndex }}
-      onPointerDown={pinned ? undefined : onBodyPointerDown}
+      className={`fixed ${className || ""} ${dragging ? "transition-none select-none" : "transition-[left,top] duration-200 ease-out"}`}
+      style={{ left: pos.x, top: pos.y, zIndex, touchAction: dragging ? "none" : undefined }}
+      onPointerDown={pinned || disableBodyDrag ? undefined : onBodyPointerDown}
     >
       {!hideHandle && (
-        <div className="absolute -top-3 -left-3 flex items-center gap-0.5 rounded-full bg-background/90 border border-amber/40 shadow-md backdrop-blur px-1 py-0.5 opacity-70 hover:opacity-100 transition-opacity">
+        <div className="absolute -top-4 -left-4 flex items-center gap-1 rounded-full bg-background/95 border border-amber/50 shadow-lg backdrop-blur px-1.5 py-1 opacity-80 hover:opacity-100 transition-opacity">
           <button
             type="button"
-            onPointerDown={(e) => { e.stopPropagation(); onPointerDown(e); }}
-            title={pinned ? "Unpin to move" : "Drag — or long-press anywhere on the bubble"}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              try { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); } catch {}
+              onPointerDown(e);
+            }}
+            onPointerUp={(e) => {
+              try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); } catch {}
+            }}
+            title={pinned ? "Unpin to move" : "Drag to move"}
             aria-label="Drag handle"
             disabled={pinned}
-            className={`p-0.5 rounded ${pinned ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing"} touch-none`}
+            className={`p-1.5 rounded-full ${pinned ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing hover:bg-amber/20"} touch-none`}
           >
-            <GripVertical className="w-3 h-3 text-amber" />
+            <GripVertical className="w-4 h-4 text-amber" />
           </button>
           <button
             type="button"
@@ -81,11 +89,11 @@ export const PinnableFloater: React.FC<Props> = ({
             onClick={togglePin}
             title={pinned ? "Unpin" : "Pin in place"}
             aria-label={pinned ? "Unpin" : "Pin"}
-            className="p-0.5 rounded hover:bg-amber/20"
+            className="p-1 rounded hover:bg-amber/20"
           >
             {pinned
-              ? <Pin className="w-3 h-3 text-amber fill-amber" />
-              : <PinOff className="w-3 h-3 text-muted-foreground" />}
+              ? <Pin className="w-3.5 h-3.5 text-amber fill-amber" />
+              : <PinOff className="w-3.5 h-3.5 text-muted-foreground" />}
           </button>
           <button
             type="button"
@@ -93,10 +101,10 @@ export const PinnableFloater: React.FC<Props> = ({
             onClick={cycleOpacity}
             title={`Opacity ${Math.round(opacity * 100)}% — click to cycle`}
             aria-label="Cycle opacity"
-            className="p-0.5 rounded hover:bg-amber/20 flex items-center gap-0.5"
+            className="p-1 rounded hover:bg-amber/20 flex items-center gap-0.5"
           >
-            <Droplet className="w-3 h-3 text-amber" />
-            <span className="text-[8px] font-mono text-amber leading-none">
+            <Droplet className="w-3.5 h-3.5 text-amber" />
+            <span className="text-[9px] font-mono text-amber leading-none">
               {Math.round(opacity * 100)}
             </span>
           </button>
@@ -104,7 +112,7 @@ export const PinnableFloater: React.FC<Props> = ({
       )}
       <div
         style={{ opacity }}
-        className={`transition-opacity hover:!opacity-100 ${dragging ? "scale-105 ring-2 ring-amber/60 rounded-full" : ""}`}
+        className={`transition-opacity hover:!opacity-100 ${dragging ? "scale-105 ring-2 ring-amber/60 rounded-xl pointer-events-none" : ""}`}
       >
         {children}
       </div>
