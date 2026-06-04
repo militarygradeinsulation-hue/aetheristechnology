@@ -16,7 +16,7 @@ import { RepImageStudio } from '@/components/portal/RepImageStudio';
 import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
-import { FileText, Search } from 'lucide-react';
+import { FileText, Search, LayoutGrid } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
@@ -903,6 +903,21 @@ const PortalPage: React.FC = () => {
             title="One-click optimized rep layout"
           >
             <Zap className="w-3.5 h-3.5" /> Optimized
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={() => {
+              const allIds = availableTabs.map(t => t.id as string);
+              setLayout('tabs');
+              setVisibleTabs(allIds);
+              persistOrder(allIds);
+              toast({ title: 'Showing all tabs', description: `${allIds.length} tabs restored to full view.` });
+            }}
+            title="Reset to show every available tab"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" /> Show All
           </Button>
           <TabColorToggle />
           <TabSizeSlider />
