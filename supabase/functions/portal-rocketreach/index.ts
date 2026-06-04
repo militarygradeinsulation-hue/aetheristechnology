@@ -255,24 +255,54 @@ serve(async (req) => {
         ].filter(Boolean).join(" · ")
       : null;
 
-    const summary = person ? {
-      id: person.id,
-      name: person.name,
-      title: person.current_title || person.normalized_title,
-      employer: person.current_employer,
-      location: [person.city, person.region, person.country].filter(Boolean).join(", "),
-      linkedin_url: person.linkedin_url,
-      emails: rankedEmails,
-      best_email: bestEmail,
+    // Merge Firecrawl-scraped emails/phones into the summary so they appear
+    // even when RocketReach has no person match.
+    const fcJsonEarly = (firecrawl as any)?.json || {};
+    const mergedEmails = [...rankedEmails];
+    const haveEmailAddrs = new Set(mergedEmails.map(e => String(e.email || "").toLowerCase()));
+    [...fcEmails].forEach(addr => {
+      if (!haveEmailAddrs.has(addr)) {
+        mergedEmails.push({ email: addr, type: "website", grade: null, smtp_valid: null });
+        haveEmailAddrs.add(addr);
+      }
+    });
+    // Domain-match emails float to the top
+    mergedEmails.sort((a, b) => {
+      const aM = domain && String(a.email || "").toLowerCase().endsWith("@" + domain) ? 1 : 0;
+      const bM = domain && String(b.email || "").toLowerCase().endsWith("@" + domain) ? 1 : 0;
+      return bM - aM;
+    });
+
+    const personPhones = person ? (person.phones || []).map((p: any) => ({ number: p.number, type: p.type, is_premium: p.is_premium })) : [];
+    const mergedPhones = [...personPhones];
+    const havePhoneDigits = new Set(mergedPhones.map(p => String(p.number || "").replace(/\D/g, "")));
+    [...fcPhones].forEach(num => {
+      const digits = num.replace(/\D/g, "");
+      if (!havePhoneDigits.has(digits)) {
+        mergedPhones.push({ number: num, type: "website", is_premium: false });
+        havePhoneDigits.add(digits);
+      }
+    });
+
+    const summary = (person || mergedEmails.length || mergedPhones.length) ? {
+      id: person?.id || null,
+      name: person?.name || name || null,
+      title: person?.current_title || person?.normalized_title || null,
+      employer: person?.current_employer || company || fcJsonEarly?.legal_name || null,
+      location: person ? [person.city, person.region, person.country].filter(Boolean).join(", ") : (fcJsonEarly?.headquarters || null),
+      linkedin_url: person?.linkedin_url || fcJsonEarly?.social_links?.linkedin || null,
+      emails: mergedEmails,
+      best_email: mergedEmails[0]?.email || bestEmail || null,
       best_email_reason: bestEmailReason,
-      phones: (person.phones || []).map((p: any) => ({ number: p.number, type: p.type, is_premium: p.is_premium })),
-      profile_pic: person.profile_pic,
-      job_history: (person.job_history || []).slice(0, 5).map((j: any) => ({
+      phones: mergedPhones,
+      profile_pic: person?.profile_pic || null,
+      job_history: person ? (person.job_history || []).slice(0, 5).map((j: any) => ({
         title: j.title, company_name: j.company_name, start_date: j.start_date, end_date: j.end_date,
-      })),
-      education: (person.education || []).slice(0, 3),
-      links: person.links || {},
-      lookup_status: person.status,
+      })) : [],
+      education: person ? (person.education || []).slice(0, 3) : [],
+      links: person?.links || fcJsonEarly?.social_links || {},
+      lookup_status: person?.status || (person ? null : "firecrawl_only"),
+      source: person ? "rocketreach" : "firecrawl_only",
       additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
         const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
         const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
