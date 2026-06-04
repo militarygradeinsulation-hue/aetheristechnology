@@ -14,6 +14,7 @@ import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 
 import { ProblemPicker } from '@/components/ProblemPicker';
 import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
+import { OperatorBio } from '@/components/OperatorBio';
 
 
 
@@ -86,6 +87,9 @@ const Home = () => {
 
           {/* Operator-code gated free website leak scan */}
           <RepCodeFreeScan />
+
+          {/* Who you're actually talking to */}
+          <OperatorBio />
 
           
 
