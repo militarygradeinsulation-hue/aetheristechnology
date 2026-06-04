@@ -145,42 +145,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
           </div>
 
 
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={toggleVideo}
-              aria-label={playing ? 'Pause video' : 'Play video'}
-              className="group relative w-full max-w-4xl aspect-[3/2] rounded-xl overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
-            >
-              <img
-                src={architectLogo}
-                alt="Joseph Toney, Aetheris Operator"
-                width={384}
-                height={384}
-                fetchPriority="high"
-                decoding="async"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
-              />
-
-              <video
-                ref={videoRef}
-                src={heroLeakVideo}
-                playsInline
-                onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
-                onPause={() => setPlaying(false)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
-              />
-              {!playing && (
-                <span className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/30 transition-colors">
-                  <span className="rounded-full bg-amber/90 text-background p-5 shadow-xl group-hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 fill-current" />
-                  </span>
-                </span>
-              )}
-            </button>
-          </div>
-
-
           <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
             <span className="font-case text-xs uppercase tracking-widest text-amber">
               For exhausted business owners · Indianapolis · US-wide
