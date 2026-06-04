@@ -33,7 +33,7 @@ const SYSTEM = `You are a B2B sales forensics analyst. Given scraped website con
 }
 Be blunt and specific. No fluff. The outreach recommendation MUST be evidence-based — reference what you actually saw (e.g. 'no email listed, only phone CTA → call', 'long-form thought-leadership + active LinkedIn → warm LinkedIn DM', 'enterprise site with gated demo → email ops lead, never cold call', 'family-owned trades shop → call early morning, owner answers'). If the site is low-info, say so in score_reason, lower confidence, and recommend the safest default channel for that industry.`;
 
-async function firecrawl(url: string, key: string): Promise<string> {
+async function firecrawl(url: string, key: string): Promise<{ md: string; err?: string }> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
@@ -42,10 +42,41 @@ async function firecrawl(url: string, key: string): Promise<string> {
     });
     const j = await r.json().catch(() => ({}));
     const md = j?.data?.markdown || j?.markdown || "";
-    return String(md).slice(0, 15000);
-  } catch {
-    return "";
+    if (!r.ok) return { md: "", err: `firecrawl ${r.status}: ${(j?.error || "").toString().slice(0, 200)}` };
+    return { md: String(md).slice(0, 15000) };
+  } catch (e) {
+    return { md: "", err: `firecrawl exception: ${e instanceof Error ? e.message : String(e)}` };
   }
+}
+
+async function firecrawlSearch(query: string, key: string): Promise<{ md: string; url?: string; err?: string }> {
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ query, limit: 3, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { md: "", err: `firecrawl search ${r.status}` };
+    const results = j?.data?.web || j?.data || [];
+    const arr = Array.isArray(results) ? results : [];
+    const top = arr[0] || {};
+    const md = top?.markdown || top?.description || "";
+    return { md: String(md).slice(0, 15000), url: top?.url };
+  } catch (e) {
+    return { md: "", err: `firecrawl search exception: ${e instanceof Error ? e.message : String(e)}` };
+  }
+}
+
+function deriveUrlFromEmail(email?: string | null): string | null {
+  if (!email) return null;
+  const m = String(email).match(/@([^\s>]+)/);
+  if (!m) return null;
+  const domain = m[1].toLowerCase();
+  // skip free mail providers
+  if (/^(gmail|yahoo|hotmail|outlook|aol|icloud|live|msn|comcast|protonmail|me)\./.test(domain + ".")) return null;
+  if (["gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com","live.com","msn.com","comcast.net","protonmail.com","me.com"].includes(domain)) return null;
+  return `https://${domain}`;
 }
 
 async function aiAnalyze(payload: Record<string, unknown>, content: string, key: string) {
@@ -94,23 +125,57 @@ serve(async (req) => {
     for (const lead of leads || []) {
       try {
         let content = "";
-        if (lead.website && FIRECRAWL) {
+        let scrapedUrl: string | null = null;
+        const scrapeNotes: string[] = [];
+
+        // 1) Try direct website if present
+        const candidates: string[] = [];
+        if (lead.website) {
           const url = lead.website.startsWith("http") ? lead.website : `https://${lead.website}`;
-          content = await firecrawl(url, FIRECRAWL);
+          candidates.push(url);
         }
+        // 2) Derive from email domain
+        const fromEmail = deriveUrlFromEmail(lead.email);
+        if (fromEmail && !candidates.includes(fromEmail)) candidates.push(fromEmail);
+
+        if (FIRECRAWL) {
+          for (const url of candidates) {
+            const r = await firecrawl(url, FIRECRAWL);
+            if (r.md && r.md.length > 200) { content = r.md; scrapedUrl = url; break; }
+            if (r.err) scrapeNotes.push(`${url} → ${r.err}`);
+          }
+          // 3) Fallback: search the business name
+          if (!content && lead.business_name) {
+            const q = [lead.business_name, lead.location, lead.industry].filter(Boolean).join(" ");
+            const s = await firecrawlSearch(q, FIRECRAWL);
+            if (s.md) { content = s.md; scrapedUrl = s.url || null; scrapeNotes.push(`fallback: search '${q}' → ${s.url || "no url"}`); }
+            else if (s.err) scrapeNotes.push(`search err: ${s.err}`);
+          }
+        } else {
+          scrapeNotes.push("FIRECRAWL_API_KEY not configured");
+        }
+
         const enriched = await aiAnalyze(lead, content, LOVABLE);
-        const newScore = Number(enriched?.score);
+        if (typeof enriched === "object" && enriched) {
+          (enriched as Record<string, unknown>).scrape_source_url = scrapedUrl;
+          (enriched as Record<string, unknown>).scrape_notes = scrapeNotes;
+          (enriched as Record<string, unknown>).scraped_chars = content.length;
+        }
+        const newScore = Number((enriched as Record<string, unknown>)?.score);
         const patch: Record<string, unknown> = {
           enrichment: enriched,
           enriched_at: new Date().toISOString(),
         };
         if (Number.isFinite(newScore)) patch.score = Math.max(0, Math.min(100, Math.round(newScore)));
-        if (enriched?.industry_refined && !lead.industry) patch.industry = String(enriched.industry_refined).slice(0, 100);
+        const indRefined = (enriched as Record<string, unknown>)?.industry_refined;
+        if (indRefined && !lead.industry) patch.industry = String(indRefined).slice(0, 100);
+        if (scrapedUrl && !lead.website) patch.website = scrapedUrl;
 
         const { error: uErr } = await admin.from("rep_leads").update(patch).eq("id", lead.id);
         if (uErr) throw uErr;
         results.push({ id: lead.id, ok: true, score: Number.isFinite(newScore) ? newScore : undefined });
       } catch (e) {
+        console.error("enrich error for", lead.id, e);
         results.push({ id: lead.id, ok: false, error: e instanceof Error ? e.message : String(e) });
       }
     }
