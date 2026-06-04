@@ -1266,7 +1266,7 @@ export default function LinkedInPostStudio() {
         <h2 className="font-display text-3xl font-bold mb-1">Post Studio</h2>
         <p className="text-muted-foreground text-sm">
           On-brand LinkedIn posts with creator tagging, hashtag strategy, and operator voice.
-          Cycle through premade topics + prompts or write your own.
+          Start from topic ideas or write your own.
         </p>
       </div>
 
