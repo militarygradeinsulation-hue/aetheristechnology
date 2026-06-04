@@ -50,14 +50,14 @@ export const ComparisonSection: React.FC = () => {
             Case File 09 <span className="text-muted-foreground/70 tracking-[0.28em]">/ Tools vs. Big-Name Agencies</span>
           </div>
           <h2 className="font-forensic font-black text-3xl md:text-5xl leading-[1.04] tracking-tight mt-5 max-w-[20ch] text-foreground">
-            What each tool replaces — and what an agency would <span className="text-amber italic">actually charge you.</span>
+            What each tool replaces. and what an agency would <span className="text-amber italic">actually charge you.</span>
           </h2>
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed mt-5 max-w-[64ch]">
-            Below is the same deliverable — priced by us once, and priced by the agencies you've heard of every month. Sources: WebFX & SmartSites published rates, G2 pricing, Clutch industry survey (2026).
+            Below is the same deliverable. priced by us once, and priced by the agencies you've heard of every month. Sources: WebFX & SmartSites published rates, G2 pricing, Clutch industry survey (2026).
           </p>
         </RevealOnScroll>
 
-        {/* Section 1 — What each tool replaces */}
+        {/* Section 1. What each tool replaces */}
         <RevealOnScroll>
           <div className="mt-12 font-case text-[11px] uppercase tracking-[0.34em] text-amber/90 flex items-center gap-3">
             <span className="font-bold text-amber">01</span>
@@ -101,7 +101,7 @@ export const ComparisonSection: React.FC = () => {
           </p>
         </RevealOnScroll>
 
-        {/* Section 2 — The Verdict */}
+        {/* Section 2. The Verdict */}
         <RevealOnScroll>
           <div className="mt-16 font-case text-[11px] uppercase tracking-[0.34em] text-amber/90 flex items-center gap-3">
             <span className="font-bold text-amber">02</span>
@@ -142,7 +142,7 @@ export const ComparisonSection: React.FC = () => {
           </p>
         </RevealOnScroll>
 
-        {/* Section 3 — Real published agency pricing */}
+        {/* Section 3. Real published agency pricing */}
         <RevealOnScroll>
           <div className="mt-16 font-case text-[11px] uppercase tracking-[0.34em] text-amber/90 flex items-center gap-3">
             <span className="font-bold text-amber">03</span>

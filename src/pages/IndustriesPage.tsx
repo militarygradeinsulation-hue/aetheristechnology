@@ -440,7 +440,7 @@ const IndustriesPage: React.FC = () => {
               Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-              Tap any industry to open the case file. Type your niche below if you don't see it — the methodology travels.
+              Tap any industry to open the case file. Type your niche below if you don't see it. the methodology travels.
             </p>
 
             <div className="max-w-xl mx-auto relative">
@@ -465,7 +465,7 @@ const IndustriesPage: React.FC = () => {
               <div className="forensic-tile rounded-sm p-10 border border-amber/30 text-center max-w-2xl mx-auto">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">No exact match</div>
                 <h3 className="font-forensic text-2xl font-bold mb-3">
-                  "{query}" isn't on the board yet — that doesn't mean it doesn't leak.
+                  "{query}" isn't on the board yet. that doesn't mean it doesn't leak.
                 </h3>
                 <p className="text-muted-foreground mb-6">
                   Run the free self-scan or book a 15-minute scoping call. The methodology travels across verticals.

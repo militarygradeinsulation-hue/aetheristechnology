@@ -130,7 +130,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
 }) => (
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
-    {/* OPERATOR INTRO VIDEO — larger, sits right under the hero image */}
+    {/* OPERATOR INTRO VIDEO. larger, sits right under the hero image */}
     <div className="mb-12">
       <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
         <video

@@ -17,7 +17,7 @@ const CapabilitiesPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="What's leaking? Tools by problem — Aetheris"
+        title="What's leaking? Tools by problem. Aetheris"
         description="Free AI tools from Aetheris, organized by the problem you're trying to solve: revenue leaks, brand contradictions, cold pipeline, content drought, bad hires."
         path="/capabilities"
         keywords="business problem tools, revenue leak audit, sales follow-up, content generator, hiring forensics"
@@ -43,7 +43,7 @@ const CapabilitiesPage = () => {
                   What's <span className="text-gradient-amber">actually broken</span>?
                 </h1>
                 <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                  Every tool below is grouped by the problem it solves — not the feature it has. Find the sentence that sounds like your week. Run what's under it. Free.
+                  Every tool below is grouped by the problem it solves. not the feature it has. Find the sentence that sounds like your week. Run what's under it. Free.
                 </p>
               </div>
             </RevealOnScroll>

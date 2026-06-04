@@ -36,7 +36,7 @@ const LOCATIONS: Record<LocationKey, LocationConfig> = {
       'Indianapolis Business Forensics Operator. Find revenue leaks in your Indianapolis business. Free Leak Audit, $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic.',
     h1: 'Business Forensics in Indianapolis',
     intro:
-      'Aetheris is an Indianapolis-based Business Forensics Operator. We expose revenue leaks Indianapolis owners can\'t see from the inside — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuild the broken systems causing them.',
+      'Aetheris is an Indianapolis-based Business Forensics Operator. We expose revenue leaks Indianapolis owners can\'t see from the inside. broken systems, dropped follow-ups, vocabulary friction, brand contradictions. then rebuild the broken systems causing them.',
     areaServed: ['Indianapolis', 'Carmel', 'Fishers', 'Noblesville', 'Greenwood', 'Zionsville', 'Westfield'],
   },
   indiana: {
@@ -48,7 +48,7 @@ const LOCATIONS: Record<LocationKey, LocationConfig> = {
       'Indiana Business Forensics Operator headquartered in Indianapolis. Revenue leak audits and operational diagnostics for businesses across Indianapolis, Fort Wayne, Bloomington, Evansville, and the entire state.',
     h1: 'Business Forensics Across Indiana',
     intro:
-      'Aetheris is an Indiana Business Forensics Operator headquartered in Indianapolis. We serve owner-led businesses across the entire state — Indianapolis, Fort Wayne, Bloomington, Evansville, South Bend, Carmel — with the same forensic methodology used by clients nationwide.',
+      'Aetheris is an Indiana Business Forensics Operator headquartered in Indianapolis. We serve owner-led businesses across the entire state. Indianapolis, Fort Wayne, Bloomington, Evansville, South Bend, Carmel. with the same forensic methodology used by clients nationwide.',
     areaServed: ['Indianapolis', 'Fort Wayne', 'Bloomington', 'Evansville', 'South Bend', 'Carmel', 'Fishers', 'Lafayette', 'Terre Haute'],
   },
 };
@@ -70,7 +70,7 @@ const LocationPage: React.FC = () => {
       {
         '@type': ['LocalBusiness', 'ProfessionalService'],
         '@id': `${pageUrl}#localbusiness`,
-        name: 'Aetheris — Business Forensics Operator',
+        name: 'Aetheris. Business Forensics Operator',
         description: config.metaDescription,
         url: pageUrl,
         telephone: '+1-317-376-2110',

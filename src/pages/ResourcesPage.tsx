@@ -311,7 +311,7 @@ const ResourcesPage = () => {
           );
         })()}
 
-        {/* How to create a Custom Playbook — instructions */}
+        {/* How to create a Custom Playbook. instructions */}
         <section id="build-your-own" className="pb-8 px-4 scroll-mt-24">
           <div className="max-w-4xl mx-auto">
             <RevealOnScroll>
@@ -328,7 +328,7 @@ const ResourcesPage = () => {
                     { t: 'Browse or search topics', d: 'Use the topic library below. Filter by pillar (Operations, Marketing, Sales, Leadership, AI) or search by keyword to find the angle that matches the leak you want to seal.' },
                     { t: 'Open a topic card', d: 'You will see the pillar, the sub-topics covered, and exactly what the deliverable includes (proprietary frameworks, KPIs, ROI models, real case metrics).' },
                     { t: 'Sign in and click "Generate & Buy"', d: 'You need a free account so the playbook is saved to your library and can be re-downloaded later. Sign in or create one in 10 seconds.' },
-                    { t: 'Complete checkout — $29 one-time', d: 'Secure Stripe checkout. No subscription. The playbook generates immediately after payment, no waiting on a human.' },
+                    { t: 'Complete checkout. $29 one-time', d: 'Secure Stripe checkout. No subscription. The playbook generates immediately after payment, no waiting on a human.' },
                     { t: 'Download your PDF', d: 'You will be returned to a download page and the playbook lands in your library at /portal. Re-download anytime. Use it. Hand it to your team. Sell the rebuild internally.' },
                   ].map((step, i) => (
                     <li key={i} className="flex gap-4">

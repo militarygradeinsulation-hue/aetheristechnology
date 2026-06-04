@@ -297,7 +297,7 @@ export const BusinessDiagnostic: React.FC = () => {
     if (getPortalToken() || getAdminToken()) {
       saveToolRun({
         tool_type: 'business_diagnostic',
-        title: `Business Diagnostic — ${company || name || email}`,
+        title: `Business Diagnostic. ${company || name || email}`,
         input_data: { name, email, company, answers },
         output_data: { totalScore, maxScore: 80, catScores, weakestCategories: weakest, scores },
       });
