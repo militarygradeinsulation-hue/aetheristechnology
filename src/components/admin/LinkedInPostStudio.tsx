@@ -1479,9 +1479,6 @@ export default function LinkedInPostStudio() {
               <MultiPersonaPicker value={respondPersona} onChange={setRespondPersona} />
             </div>
 
-            <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
-              Site link auto-appended: aetheris.technology
-            </div>
           </div>
         </div>
 
