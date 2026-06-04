@@ -47,6 +47,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
   const [liveRr, setLiveRr] = useState<any>(rr);
   const [liveFc, setLiveFc] = useState<any>(fc);
   const [liveEnrich, setLiveEnrich] = useState<any>(enrichment);
+  const [livePersonality, setLivePersonality] = useState<any>(null);
   const tileRef = useRef<HTMLDivElement>(null);
   const talkScrollRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +123,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           scan: true,
           firecrawl: true,
           rocketreach: true,
+          personality: true,
         },
         headers,
       });
@@ -130,6 +132,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       if ((data as any)?.scan) curScan = (data as any).scan;
       if ((data as any)?.firecrawl) curFc = (data as any).firecrawl;
       if ((data as any)?.rocketreach) curRr = (data as any).rocketreach;
+      if ((data as any)?.personality) setLivePersonality((data as any).personality);
       setLiveScan(curScan); setLiveFc(curFc); setLiveRr(curRr);
       return note;
     };
@@ -194,6 +197,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     const steps: PrepStep[] = [];
     if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
     steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+    if ((lead as any)?.contact_name) steps.push({ key: 'personality', label: 'Personality + backstory dossier', status: 'pending' });
     setPrepSteps(steps);
 
     if (hasWebsite) {
@@ -227,6 +231,18 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       }
     } catch (e) {
       updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+    }
+
+    // Personality dossier — separate call so portal leads (which use portalLeads.rocketReach)
+    // still get the human-connection brief.
+    if ((lead as any)?.contact_name) {
+      updateStep('personality', { status: 'running' });
+      try {
+        await runDetectivePrep('personality dossier');
+        updateStep('personality', { status: 'done', note: 'connection angles built' });
+      } catch (e) {
+        updateStep('personality', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+      }
     }
 
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
@@ -649,6 +665,138 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         {r.best_angle && (
           <DetectiveContactPlan lead={lead as any} rr={liveRr} />
         )}
+
+        {/* Personality + backstory dossier — human connection angles for outreach */}
+        {livePersonality && !livePersonality.error && (
+          <div className="rounded-md border-2 border-amber/40 bg-background/60 p-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <Brain className="w-3.5 h-3.5 text-amber" />
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">
+                Personality dossier · {(lead as any)?.contact_name || 'subject'}
+              </p>
+              {livePersonality.confidence && (
+                <span className="ml-auto text-[9px] font-mono uppercase tracking-wider text-muted-foreground">
+                  confidence: <span className={livePersonality.confidence === 'high' ? 'text-emerald-400' : livePersonality.confidence === 'medium' ? 'text-amber' : 'text-muted-foreground'}>{livePersonality.confidence}</span>
+                </span>
+              )}
+            </div>
+
+            {livePersonality.summary && (
+              <p className="text-[12px] text-foreground italic leading-relaxed border-l-2 border-amber/40 pl-3">
+                {livePersonality.summary}
+              </p>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-2">
+              {Array.isArray(livePersonality.backstory) && livePersonality.backstory.length > 0 && (
+                <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Backstory</p>
+                  <ul className="text-[11px] text-foreground space-y-1 list-disc list-inside marker:text-amber/60">
+                    {livePersonality.backstory.slice(0, 6).map((b: string, i: number) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(livePersonality.hobbies_interests) && livePersonality.hobbies_interests.length > 0 && (
+                <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Hobbies & interests</p>
+                  <ul className="text-[11px] text-foreground space-y-1 list-disc list-inside marker:text-amber/60">
+                    {livePersonality.hobbies_interests.slice(0, 6).map((b: string, i: number) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(livePersonality.values_causes) && livePersonality.values_causes.length > 0 && (
+                <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Values & causes</p>
+                  <ul className="text-[11px] text-foreground space-y-1 list-disc list-inside marker:text-amber/60">
+                    {livePersonality.values_causes.slice(0, 5).map((b: string, i: number) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {livePersonality.communication_style && (
+                <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">How they communicate</p>
+                  <p className="text-[11px] text-foreground leading-snug">{livePersonality.communication_style}</p>
+                </div>
+              )}
+
+              {Array.isArray(livePersonality.shared_ground_hints) && livePersonality.shared_ground_hints.length > 0 && (
+                <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Common ground</p>
+                  <ul className="text-[11px] text-foreground space-y-1 list-disc list-inside marker:text-amber/60">
+                    {livePersonality.shared_ground_hints.slice(0, 5).map((b: string, i: number) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(livePersonality.watch_outs) && livePersonality.watch_outs.length > 0 && (
+                <div className="rounded border border-crimson/40 bg-crimson/5 p-2.5 space-y-1">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-crimson">Watch-outs · avoid</p>
+                  <ul className="text-[11px] text-foreground space-y-1 list-disc list-inside marker:text-crimson/60">
+                    {livePersonality.watch_outs.slice(0, 5).map((b: string, i: number) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {Array.isArray(livePersonality.talking_points) && livePersonality.talking_points.length > 0 && (
+              <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1.5">
+                <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Talking points · land these</p>
+                <ul className="space-y-1.5">
+                  {livePersonality.talking_points.slice(0, 6).map((tp: any, i: number) => (
+                    <li key={i} className="text-[11px]">
+                      <span className="text-foreground font-medium">→ {tp.point}</span>
+                      {tp.why && <span className="text-muted-foreground italic"> — {tp.why}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {Array.isArray(livePersonality.icebreakers) && livePersonality.icebreakers.length > 0 && (
+              <div className="rounded border border-amber/40 bg-amber/5 p-2.5 space-y-1.5">
+                <p className="text-[9px] font-mono uppercase tracking-wider text-amber">Icebreakers · ready to send</p>
+                <ul className="space-y-1">
+                  {livePersonality.icebreakers.slice(0, 4).map((ib: string, i: number) => (
+                    <li key={i} className="text-[11.5px] text-foreground italic leading-snug">"{ib}"</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {Array.isArray(livePersonality.recent_signals) && livePersonality.recent_signals.length > 0 && (
+              <div className="rounded border border-border/60 bg-card/40 p-2.5 space-y-1">
+                <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80">Recent signals</p>
+                <ul className="text-[11px] text-foreground space-y-1">
+                  {livePersonality.recent_signals.slice(0, 5).map((s: any, i: number) => (
+                    <li key={i}>
+                      • {s.signal}
+                      {s.when && <span className="text-muted-foreground"> · {s.when}</span>}
+                      {s.url && <> · <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">source</a></>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {Array.isArray(livePersonality.sources) && livePersonality.sources.length > 0 && (
+              <details className="text-[10px] text-muted-foreground">
+                <summary className="cursor-pointer hover:text-foreground font-mono uppercase tracking-wider">sources ({livePersonality.sources.length})</summary>
+                <ul className="mt-1 space-y-0.5 pl-3">
+                  {livePersonality.sources.map((s: any, i: number) => (
+                    <li key={i}>
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-amber/80 hover:underline break-all">{s.url}</a>
+                      {s.what && <span> — {s.what}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
+
 
         {/* Deduction trail — pinned clues connected by string */}
         {r.deduction_chain && r.deduction_chain.length > 0 && (
