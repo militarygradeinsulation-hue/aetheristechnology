@@ -123,7 +123,7 @@ const Home = () => {
           </section>
 
 
-          {/* Upcoming events — anchor the bottom */}
+          {/* Upcoming events, anchor the bottom */}
           <UpcomingEvents />
         </main>
 
