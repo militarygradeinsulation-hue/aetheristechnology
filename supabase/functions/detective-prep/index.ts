@@ -25,6 +25,94 @@ function domainFromUrl(url?: string | null): string | null {
   } catch { return null; }
 }
 
+// ---- Contact extraction from Firecrawl + raw page text ---------------------
+const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+const PHONE_RE = /(\+?\d{1,2}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
+
+function extractContactsFromFirecrawl(fc: any, domain: string | null): { emails: string[]; phones: string[] } {
+  const emails = new Set<string>();
+  const phones = new Set<string>();
+  if (!fc) return { emails: [], phones: [] };
+  const jsonE = Array.isArray(fc?.json?.emails) ? fc.json.emails : [];
+  const jsonP = Array.isArray(fc?.json?.phones) ? fc.json.phones : [];
+  jsonE.forEach((e: any) => { const s = String(e || "").trim().toLowerCase(); if (s && s.includes("@")) emails.add(s); });
+  jsonP.forEach((p: any) => { const s = String(p || "").trim(); if (s) phones.add(s); });
+  const text = [
+    typeof fc?.markdown_excerpt === "string" ? fc.markdown_excerpt : "",
+    typeof fc?.summary === "string" ? fc.summary : "",
+    JSON.stringify(fc?.json || {}),
+  ].join("\n");
+  (text.match(EMAIL_RE) || []).forEach(e => emails.add(e.toLowerCase()));
+  (text.match(PHONE_RE) || []).forEach(p => {
+    const digits = p.replace(/\D/g, "");
+    if (digits.length >= 10 && digits.length <= 13) phones.add(p.trim());
+  });
+  // Light cleanup: drop obvious non-contact emails (assets, .png@, sentry, wixpress, etc.)
+  const filteredEmails = [...emails].filter(e =>
+    !/\.(png|jpg|jpeg|gif|svg|webp)@/i.test(e) &&
+    !/(sentry|wixpress|example\.com|test@test)/i.test(e)
+  );
+  // Prefer emails matching the company domain first
+  filteredEmails.sort((a, b) => {
+    const aMatch = domain && a.endsWith("@" + domain) ? 1 : 0;
+    const bMatch = domain && b.endsWith("@" + domain) ? 1 : 0;
+    return bMatch - aMatch;
+  });
+  return { emails: filteredEmails, phones: [...phones] };
+}
+
+function mergeContactsFromFirecrawl(rr: any, fc: any, domain: string | null, name: string, company: string): any {
+  const { emails, phones } = extractContactsFromFirecrawl(fc, domain);
+  if (!rr && emails.length === 0 && phones.length === 0) return null;
+
+  const existing = rr || {
+    id: null,
+    name: name || null,
+    title: null,
+    employer: company || (fc?.json?.legal_name || null),
+    location: fc?.json?.headquarters || null,
+    linkedin_url: fc?.json?.social_links?.linkedin || null,
+    emails: [],
+    best_email: null,
+    phones: [],
+    profile_pic: null,
+    job_history: [],
+    education: [],
+    links: fc?.json?.social_links || {},
+    additional_contacts: [],
+    fetched_at: new Date().toISOString(),
+    source: "firecrawl_only",
+  };
+
+  // Merge emails — RR-ranked first, then site-extracted that aren't already present
+  const haveEmails = new Set((existing.emails || []).map((e: any) => String(e?.email || "").toLowerCase()));
+  const mergedEmails = [...(existing.emails || [])];
+  emails.forEach(addr => {
+    if (!haveEmails.has(addr)) {
+      mergedEmails.push({ email: addr, type: "website", grade: null, smtp_valid: null, source: "firecrawl" });
+      haveEmails.add(addr);
+    }
+  });
+
+  // Merge phones
+  const havePhones = new Set((existing.phones || []).map((p: any) => String(p?.number || "").replace(/\D/g, "")));
+  const mergedPhones = [...(existing.phones || [])];
+  phones.forEach(num => {
+    const digits = num.replace(/\D/g, "");
+    if (!havePhones.has(digits)) {
+      mergedPhones.push({ number: num, type: "website", is_premium: false, source: "firecrawl" });
+      havePhones.add(digits);
+    }
+  });
+
+  return {
+    ...existing,
+    emails: mergedEmails,
+    phones: mergedPhones,
+    best_email: existing.best_email || mergedEmails[0]?.email || null,
+  };
+}
+
 async function runFirecrawl(websiteUrl: string, name: string, company: string, domain: string | null, FC_KEY: string) {
   try {
     const [scrapeRes, mapRes, searchRes] = await Promise.all([
@@ -237,7 +325,11 @@ serve(async (req) => {
       ? runRocketReach(RR_KEY, name, company, email, domain)
       : Promise.resolve(null);
 
-    const [scan, firecrawl, rocketreach] = await Promise.all([scanPromise, fcPromise, rrPromise]);
+    const [scan, firecrawl, rocketreachRaw] = await Promise.all([scanPromise, fcPromise, rrPromise]);
+
+    // Backfill emails/phones from the website scrape so deep scan always returns
+    // contacts when they exist on the page, even if RocketReach finds no person.
+    const rocketreach = mergeContactsFromFirecrawl(rocketreachRaw, firecrawl, domain, name, company);
 
     return json({
       ok: true,
