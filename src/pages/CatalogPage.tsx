@@ -58,7 +58,7 @@ const CatalogPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Resume Forensics teaser — featured in showcase */}
+          {/* Resume Forensics teaser. featured in showcase */}
           <section className="px-4 pb-12">
             <div className="max-w-5xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10">
               <div className="grid gap-6 md:gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] items-center">

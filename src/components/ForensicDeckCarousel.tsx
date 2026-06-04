@@ -69,7 +69,7 @@ export const ForensicDeckCarousel: React.FC = () => {
           >
             <img
               src={slides[idx]}
-              alt={`Forensic Revenue Recovery — slide ${idx + 1} of ${SLIDE_COUNT}`}
+              alt={`Forensic Revenue Recovery. slide ${idx + 1} of ${SLIDE_COUNT}`}
               className="w-full h-full object-contain transition-transform group-hover:scale-[1.01]"
               loading="lazy"
               draggable={false}

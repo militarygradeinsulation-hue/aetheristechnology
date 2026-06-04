@@ -732,7 +732,7 @@ export const ServicesPricing: React.FC = () => {
                     {service.description}
                   </p>
 
-                  {/* Success stat — case-file footnote */}
+                  {/* Success stat. case-file footnote */}
                   <div className="pl-[3.5rem] mb-3 font-case text-[10px] uppercase tracking-widest text-muted-foreground/80 leading-snug">
                     ▸ {service.successStat}
                   </div>
@@ -831,7 +831,7 @@ export const ServicesPricing: React.FC = () => {
                     </span>
                   )}
 
-                  {/* Header — case file */}
+                  {/* Header. case file */}
                   <div className="flex items-start gap-4 mb-5">
                     <div className="w-12 h-12 rounded-md bg-amber/10 ring-1 ring-amber/50 shadow-[0_0_18px_-2px_hsl(var(--amber-glow)/0.55)] flex items-center justify-center flex-shrink-0">
                       <expandedService.icon className="w-6 h-6 text-amber" />

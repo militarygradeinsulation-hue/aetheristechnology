@@ -115,7 +115,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
       if (getPortalToken() || getAdminToken()) {
         saveToolRun({
           tool_type: 'whats_wrong',
-          title: `What's Wrong — ${selectedIssues.slice(0, 3).join(', ').slice(0, 80) || 'diagnosis'}`,
+          title: `What's Wrong. ${selectedIssues.slice(0, 3).join(', ').slice(0, 80) || 'diagnosis'}`,
           input_data: { issues: selectedIssues, notes },
           output_data: data,
         });

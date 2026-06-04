@@ -142,7 +142,7 @@ const MethodologyPage: React.FC = () => {
                 </Link>
             </div>
 
-            {/* Audio briefing — moved from Home */}
+            {/* Audio briefing. moved from Home */}
             <div className="mb-10 forensic-tile rounded-sm border border-amber/40 p-6 md:p-7">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                 Listen · 5 min briefing

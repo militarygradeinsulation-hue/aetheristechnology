@@ -45,7 +45,7 @@ const tools: Tool[] = [
   },
   {
     thumbnail: resumeForensicsThumb,
-    problem: "You're about to hire the wrong person — again.",
+    problem: "You're about to hire the wrong person. again.",
     title: 'Resume Forensics',
     solves: 'Turns a resume into a case file: fit score, red flags, interview traps.',
     realTalk: "Know who you're hiring before you sign the offer, so you stop bleeding $40K on the wrong person and stop having the 'we need to let you go' conversation 90 days later.",
@@ -66,7 +66,7 @@ export const FreeTools: React.FC = () => {
               What's <span className="text-gradient-amber">bleeding you</span> right now?
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Every tool below starts with the problem it solves — not the feature list. Read the problem. If it sounds like your week, run the tool. Free.
+              Every tool below starts with the problem it solves. not the feature list. Read the problem. If it sounds like your week, run the tool. Free.
             </p>
           </div>
         </RevealOnScroll>

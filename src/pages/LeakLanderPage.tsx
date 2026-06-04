@@ -54,8 +54,8 @@ const LeakLanderPage: React.FC = () => {
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
-        title="Your Business Is Leaking — Aetheris Business Forensics"
-        description="78% of leaks we find, the owner already felt — they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
+        title="Your Business Is Leaking. Aetheris Business Forensics"
+        description="78% of leaks we find, the owner already felt. they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
         path="/"
       />
 
@@ -69,7 +69,7 @@ const LeakLanderPage: React.FC = () => {
       >
         <div className="max-w-5xl mx-auto px-4 py-2.5 text-center text-xs sm:text-sm font-medium">
           <span className="font-case uppercase tracking-widest text-amber mr-2">Limited Offer</span>
-          Follow &amp; connect with me on LinkedIn — I'll run a one-time <span className="text-amber font-semibold">premium analysis free</span>. See why I'm different than everyone else. <span className="underline underline-offset-2">Connect →</span>
+          Follow &amp; connect with me on LinkedIn. I'll run a one-time <span className="text-amber font-semibold">premium analysis free</span>. See why I'm different than everyone else. <span className="underline underline-offset-2">Connect →</span>
         </div>
       </a>
 
@@ -85,7 +85,7 @@ const LeakLanderPage: React.FC = () => {
 
       <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
         <div className="w-full">
-          {/* Aetheris logo — top-left, triple-tap to /staff (admins + reps) */}
+          {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
           <div className="max-w-4xl mx-auto flex justify-start mb-2">
             <button
               type="button"
@@ -102,7 +102,7 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Hero banner with playable video overlay — glossy glass tile */}
+          {/* Hero banner with playable video overlay. glossy glass tile */}
           <div className="animate-fade-in max-w-4xl mx-auto">
             <button
               type="button"
@@ -172,7 +172,7 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Buttons — primary CTAs, larger */}
+          {/* Buttons. primary CTAs, larger */}
           <section
             className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
@@ -222,7 +222,7 @@ const LeakLanderPage: React.FC = () => {
             </a>
           </section>
 
-          {/* Demand generation infographic — front & center above "What the Hell" */}
+          {/* Demand generation infographic. front & center above "What the Hell" */}
           <section
             className="mt-12 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
@@ -230,7 +230,7 @@ const LeakLanderPage: React.FC = () => {
             <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
               <img
                 src={demandGenInfographic}
-                alt="Aetheris Business Forensics & Revenue Recovery — 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
+                alt="Aetheris Business Forensics & Revenue Recovery. 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
                 className="w-full h-auto rounded-xl"
                 loading="lazy"
               />
@@ -239,7 +239,7 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Three options — side-by-side dropdowns at the bottom */}
+          {/* Three options. side-by-side dropdowns at the bottom */}
           <section
             className="mt-12 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
@@ -307,10 +307,10 @@ const LeakLanderPage: React.FC = () => {
                     What is a Business Forensics Operator?
                   </h3>
                   <p className="text-base leading-relaxed text-foreground">
-                    <strong>A Business Forensics Operator is a single operator who runs an evidence-based investigation of a business to expose where revenue is leaking — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuilds what's bleeding.</strong> Aetheris coined the role; Joseph Toney runs every engagement personally.
+                    <strong>A Business Forensics Operator is a single operator who runs an evidence-based investigation of a business to expose where revenue is leaking. broken systems, dropped follow-ups, vocabulary friction, brand contradictions. then rebuilds what's bleeding.</strong> Aetheris coined the role; Joseph Toney runs every engagement personally.
                   </p>
                   <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    The methodology is The Leak Audit™ — a 7-step forensic process delivered as a $2,500 flat-fee Forensic Diagnostic, applied 1:1 toward any follow-on engagement.
+                    The methodology is The Leak Audit™. a 7-step forensic process delivered as a $2,500 flat-fee Forensic Diagnostic, applied 1:1 toward any follow-on engagement.
                   </p>
                   <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
                     Source: Aetheris methodology · /methodology
@@ -322,7 +322,7 @@ const LeakLanderPage: React.FC = () => {
                     How much does the Forensic Diagnostic cost?
                   </h3>
                   <p className="text-base leading-relaxed text-foreground">
-                    <strong>The Forensic Diagnostic is $2,500 flat. It is operator-led — Joseph Toney runs it personally — and the full $2,500 is applied 1:1 toward any follow-on engagement.</strong> No retainer required.
+                    <strong>The Forensic Diagnostic is $2,500 flat. It is operator-led. Joseph Toney runs it personally. and the full $2,500 is applied 1:1 toward any follow-on engagement.</strong> No retainer required.
                   </p>
                   <p className="text-base leading-relaxed text-foreground/80 mt-3">
                     Investment ladder: $0 self-scan → $2,500 Diagnostic → $7,500 14-Day Operational Diagnostic ($535/day) → $1,500/mo oversight → $25,000+ custom implementation.
@@ -340,7 +340,7 @@ const LeakLanderPage: React.FC = () => {
                     <strong>73% of B2B buyers now use generative AI during initial vendor research, and 95% of B2B purchase decisions go to vendors on the buyer's "Day One List" formed during that AI conversation.</strong> Vendors not cited in the AI answer disappear before a salesperson is ever called.
                   </p>
                   <p className="text-base leading-relaxed text-foreground/80 mt-3">
-                    Gartner projects a 25% decline in traditional search volume by 2026. AI-referred visitors convert at 14.2% — roughly 9x organic.
+                    Gartner projects a 25% decline in traditional search volume by 2026. AI-referred visitors convert at 14.2%. roughly 9x organic.
                   </p>
                   <p className="text-xs font-mono uppercase tracking-widest text-amber mt-4">
                     Source: 2026 AEO/GEO Playbook · Gartner
@@ -379,7 +379,7 @@ const LeakLanderPage: React.FC = () => {
                     "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
                   </p>
                   <p className="text-base leading-relaxed text-foreground mt-3">
-                    I'd think the same thing. I <span className="text-amber">did</span> think the same thing — every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
+                    I'd think the same thing. I <span className="text-amber">did</span> think the same thing. every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
                   </p>
                 </div>
 
@@ -433,7 +433,7 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Contact info — compact glass row */}
+          {/* Contact info. compact glass row */}
           <section
             className="relative mt-12 animate-fade-in"
             style={{ animationDelay: "340ms", animationFillMode: "both" }}
