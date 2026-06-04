@@ -88,6 +88,9 @@ const Home = () => {
           {/* Operator-code gated free website leak scan */}
           <RepCodeFreeScan />
 
+          {/* Who you're actually talking to */}
+          <OperatorBio />
+
           
 
 
