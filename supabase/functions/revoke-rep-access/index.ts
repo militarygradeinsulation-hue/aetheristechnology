@@ -1,50 +1,52 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { verifyAdminToken } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-    }
-
     const url = Deno.env.get("SUPABASE_URL")!;
-    const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const userClient = createClient(url, anon, { global: { headers: { Authorization: authHeader } } });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: claimsErr } = await userClient.auth.getClaims(token);
-    if (claimsErr || !claims?.claims?.sub) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-    }
+    const adminTok = req.headers.get("x-admin-token");
+    const okAdmin = await verifyAdminToken(adminTok, service);
+    if (!okAdmin) return json(401, { error: "Admin auth required" });
 
-    const admin = createClient(url, service);
-    const { data: isAdminRow } = await admin.rpc("is_admin", { _user_id: claims.claims.sub });
-    if (!isAdminRow) {
-      return new Response(JSON.stringify({ error: "Admin only" }), { status: 403, headers: corsHeaders });
-    }
-
-    const { code } = await req.json();
+    const { code } = await req.json().catch(() => ({}));
     if (!code || typeof code !== "string") {
-      return new Response(JSON.stringify({ error: "code required" }), { status: 400, headers: corsHeaders });
+      return json(400, { error: "code required" });
     }
+
+    const admin = createClient(url, service, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     // Find rep
-    const { data: rep } = await admin.from("rep_codes").select("id, rep_email").eq("code", code).maybeSingle();
+    const { data: rep } = await admin
+      .from("rep_codes")
+      .select("id, rep_email")
+      .eq("code", code)
+      .maybeSingle();
 
     let auth_deleted = false;
     if (rep?.rep_email) {
-      // Find any auth user with this email and delete them
       const { data: usersList } = await admin.auth.admin.listUsers();
-      const match = usersList?.users?.find((u) => (u.email || "").toLowerCase() === rep.rep_email!.toLowerCase());
+      const match = usersList?.users?.find(
+        (u) => (u.email || "").toLowerCase() === rep.rep_email!.toLowerCase(),
+      );
       if (match) {
         const { error: delErr } = await admin.auth.admin.deleteUser(match.id);
         if (!delErr) auth_deleted = true;
@@ -53,15 +55,10 @@ Deno.serve(async (req) => {
 
     // Delete rep_codes row — ON DELETE CASCADE handles mailbox, notes, library, settings
     const { error: repDelErr } = await admin.from("rep_codes").delete().eq("code", code);
-    if (repDelErr) {
-      return new Response(JSON.stringify({ error: repDelErr.message }), { status: 500, headers: corsHeaders });
-    }
+    if (repDelErr) return json(500, { error: repDelErr.message });
 
-    return new Response(JSON.stringify({ revoked: true, auth_deleted }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json(200, { revoked: true, auth_deleted });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: corsHeaders });
+    return json(500, { error: e instanceof Error ? e.message : String(e) });
   }
 });

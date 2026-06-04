@@ -106,7 +106,11 @@ export async function setRepTeam(repId: string, teamName: string) {
  * then their rep_codes row (which cascades to mailbox/notes/library/settings).
  */
 export async function revokeRepAccess(code: string): Promise<{ revoked: boolean; auth_deleted: boolean }> {
-  const { data, error } = await supabase.functions.invoke("revoke-rep-access", { body: { code } });
+  const { getAdminToken } = await import("./adminAuth");
+  const { data, error } = await supabase.functions.invoke("revoke-rep-access", {
+    body: { code },
+    headers: { "x-admin-token": getAdminToken() || "" },
+  });
   if (error) throw error;
   return data as { revoked: boolean; auth_deleted: boolean };
 }
