@@ -958,6 +958,11 @@ const SubmissionsBody: React.FC<{
   deleteSubmission: (id: string) => void;
 }> = ({ submissions, toggleRead, deleteSubmission }) => (
   <div className="space-y-6">
+    <CompanyPortalPreview
+      defaultTab="leads"
+      title="Rep Leads Workspace"
+      subtitle="Same Leads board, Game Plan, Detective, and clues trail your reps use. Pick a rep to load their queue and work alongside them. Changes are live."
+    />
     <AdminLeadBrowser />
     <div className="space-y-4">
       <h3 className="font-display text-lg text-foreground">Form Submissions</h3>

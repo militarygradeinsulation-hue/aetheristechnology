@@ -27,7 +27,7 @@ const GENERIC_REP = '__rep__';
 const REP_PREVIEW_KEY = 'admin.portalPreview.selectedRep.v1';
 const DEVICE_PREVIEW_KEY = 'admin.portalPreview.device.v1';
 
-export const CompanyPortalPreview: React.FC = () => {
+export const CompanyPortalPreview: React.FC<{ defaultTab?: string; title?: string; subtitle?: string }> = ({ defaultTab, title, subtitle }) => {
   const { toast } = useToast();
   const [device, setDevice] = useState<Device>(() => {
     if (typeof window === 'undefined') return 'desktop';
@@ -118,7 +118,7 @@ export const CompanyPortalPreview: React.FC = () => {
         ? 'partner'
         : (reps.find(r => r.code === selected)?.role ?? 'rep');
 
-  const src = `/portal?adminPreview=1&role=${role}&n=${nonce}`;
+  const src = `/portal?adminPreview=1&role=${role}${defaultTab ? `&tab=${defaultTab}` : ''}&n=${nonce}`;
 
   const refresh = () => setNonce(n => n + 1);
   const openInNewTab = () => window.open(src, '_blank', 'noopener,noreferrer');
@@ -131,8 +131,8 @@ export const CompanyPortalPreview: React.FC = () => {
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-amber" />
           <div>
-            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Company Portal, Live Preview</h2>
-            <p className="text-xs text-muted-foreground">View any rep's real portal, leads, commissions, calendar, training. Changes are live.</p>
+            <h2 className="text-lg font-bold text-foreground font-display leading-tight">{title || 'Company Portal, Live Preview'}</h2>
+            <p className="text-xs text-muted-foreground">{subtitle || "View any rep's real portal, leads, commissions, calendar, training. Changes are live."}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
