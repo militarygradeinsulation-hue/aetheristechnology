@@ -47,6 +47,7 @@ const AdminHiresOnboardingPanel = lazy(() => import('@/components/admin/AdminHir
 const RepActivityPanel = lazy(() => import('@/components/admin/RepActivityPanel').then(m => ({ default: m.RepActivityPanel })));
 const ForecastSettingsPanel = lazy(() => import('@/components/admin/ForecastSettingsPanel').then(m => ({ default: m.ForecastSettingsPanel })));
 const CompanyPortalPreview = lazy(() => import('@/components/admin/CompanyPortalPreview').then(m => ({ default: m.CompanyPortalPreview })));
+const AdminRepLeadsView = lazy(() => import('@/components/admin/AdminRepLeadsView').then(m => ({ default: m.AdminRepLeadsView })));
 const ManageRepsPanel = lazy(() => import('@/components/admin/ManageRepsPanel'));
 const AdminLeadActionsPanel = lazy(() => import('@/components/admin/AdminLeadActionsPanel'));
 const RepPlaybookPanel = lazy(() => import('@/components/admin/RepPlaybookPanel').then(m => ({ default: m.RepPlaybookPanel })));
@@ -958,11 +959,7 @@ const SubmissionsBody: React.FC<{
   deleteSubmission: (id: string) => void;
 }> = ({ submissions, toggleRead, deleteSubmission }) => (
   <div className="space-y-6">
-    <CompanyPortalPreview
-      defaultTab="leads"
-      title="Rep Leads Workspace"
-      subtitle="Same Leads board, Game Plan, Detective, and clues trail your reps use. Pick a rep to load their queue and work alongside them. Changes are live."
-    />
+    <AdminRepLeadsView />
     <AdminLeadBrowser />
     <div className="space-y-4">
       <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
