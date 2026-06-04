@@ -117,6 +117,35 @@ serve(async (req) => {
 
     // Easter egg: detect Aetheris own domain
     const parsedHost = new URL(formattedUrl).hostname.replace(/^www\./, "").toLowerCase();
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // ----- DETERMINISTIC CACHE -----
+    // If this host has been scanned before, return the FIRST stored analysis so
+    // every subsequent scan of the same company shows identical results.
+    if (parsedHost !== "aetheris.technology" && parsedHost !== "aetheristechnology.lovable.app") {
+      try {
+        const hostPattern = encodeURIComponent(`%${parsedHost}%`);
+        const cacheRes = await fetch(
+          `${supabaseUrl}/rest/v1/website_scans?select=gaps,url,created_at&url=ilike.${hostPattern}&order=created_at.asc&limit=1`,
+          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        );
+        if (cacheRes.ok) {
+          const rows = await cacheRes.json();
+          const cached = Array.isArray(rows) && rows[0]?.gaps;
+          if (cached && typeof cached === "object" && cached.score != null) {
+            console.log("Returning cached scan for host:", parsedHost);
+            return new Response(JSON.stringify({ ...cached, _cached: true }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Scan cache lookup failed, continuing with fresh scan:", e);
+      }
+    }
+
     if (parsedHost === "aetheris.technology" || parsedHost === "aetheristechnology.lovable.app") {
       const easterEgg = {
         score: 97,
@@ -452,9 +481,8 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     // never see the score hold steady while the leak number drifts.
     analysis = applyDeterministicLeaks(analysis, parsedHost);
 
-    // Save to database - store full report in gaps column
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    // Save to database - store full report in gaps column (first scan only is reused later)
+
 
     await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
       method: "POST",
