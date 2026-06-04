@@ -14,6 +14,7 @@ import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 
 import { ProblemPicker } from '@/components/ProblemPicker';
 import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
+import { ComparisonSection } from '@/components/ComparisonSection';
 
 
 const Home = () => {
