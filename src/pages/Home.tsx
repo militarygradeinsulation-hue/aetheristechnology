@@ -7,6 +7,7 @@ import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
+import architectBanner from '@/assets/you-dont-need-expensive.png.asset.json';
 
 
 import { UpcomingEvents } from '@/components/UpcomingEvents';
