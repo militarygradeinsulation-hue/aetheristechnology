@@ -275,6 +275,131 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
   } : null;
 }
 
+// ---- Personality dossier --------------------------------------------------
+// Pulls public-web signals about the person (LinkedIn, podcasts, interviews,
+// bios, alumni pages, news mentions) and uses Lovable AI to synthesize a
+// rep-ready personality brief: backstory, hobbies, talking points, etc.
+async function runPersonality(opts: {
+  name: string; company: string; domain: string | null;
+  linkedinUrl?: string | null; rocketreach: any; firecrawl: any;
+  FC_KEY: string; LOV_KEY: string;
+}) {
+  const { name, company, domain, linkedinUrl, rocketreach, firecrawl, FC_KEY, LOV_KEY } = opts;
+  if (!name) return null;
+
+  // 1) Targeted web search for personal signal
+  const personQuery = [
+    `"${name}"`,
+    company ? `"${company}"` : (domain || ""),
+    "(linkedin OR podcast OR interview OR bio OR speaker OR alumni OR volunteer OR hobby OR family OR charity)",
+  ].filter(Boolean).join(" ");
+
+  const searchPromise = fetch("https://api.firecrawl.dev/v2/search", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query: personQuery, limit: 8 }),
+  }).then(r => r.ok ? r.json() : null).catch(() => null);
+
+  // 2) Scrape the LinkedIn profile (or any URL passed) as markdown
+  const liPromise = linkedinUrl
+    ? fetch("https://api.firecrawl.dev/v2/scrape", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ url: linkedinUrl, formats: ["markdown", "summary"], onlyMainContent: true, waitFor: 1500 }),
+      }).then(r => r.ok ? r.json() : null).catch(() => null)
+    : Promise.resolve(null);
+
+  const [searchRaw, liRaw] = await Promise.all([searchPromise, liPromise]);
+
+  const searchResults = Array.isArray((searchRaw as any)?.data)
+    ? (searchRaw as any).data.slice(0, 8).map((r: any) => ({
+        url: r.url, title: r.title, description: r.description,
+      }))
+    : Array.isArray((searchRaw as any)?.web?.results)
+      ? (searchRaw as any).web.results.slice(0, 8).map((r: any) => ({
+          url: r.url, title: r.title, description: r.description,
+        }))
+      : [];
+
+  const liScrape = (liRaw as any)?.data || liRaw;
+  const linkedinContext = liScrape ? {
+    summary: liScrape?.summary || null,
+    markdown_excerpt: typeof liScrape?.markdown === "string" ? liScrape.markdown.slice(0, 5000) : null,
+  } : null;
+
+  // If we got essentially nothing extra, still try with what we have.
+  const hasAnySignal = searchResults.length > 0 || !!linkedinContext || !!rocketreach || !!firecrawl;
+  if (!hasAnySignal) return null;
+
+  const contextPayload = {
+    target: { name, company, domain, linkedin_url: linkedinUrl || null },
+    rocketreach: rocketreach ? {
+      title: rocketreach.title, employer: rocketreach.employer, location: rocketreach.location,
+      linkedin_url: rocketreach.linkedin_url,
+      job_history: rocketreach.job_history, education: rocketreach.education, links: rocketreach.links,
+    } : null,
+    company_profile: firecrawl?.json || null,
+    company_summary: firecrawl?.summary || null,
+    web_results: searchResults,
+    linkedin: linkedinContext,
+  };
+
+  const SYSTEM = [
+    "You are a sales-intel analyst building a PERSONALITY BRIEF for a rep about to do outreach.",
+    "Goal: surface human connection points — backstory, hobbies, passions, communication style, talking points, and conversation icebreakers.",
+    "Only use facts visible in the supplied context. NEVER invent. If a field can't be supported, return an empty array or null.",
+    "Cite every claim with a short evidence string and the source URL it came from when possible.",
+    "Keep it specific, useful, and warm — this is for a human conversation, not a profile dump.",
+    "Return strict JSON matching the schema. No prose outside JSON.",
+  ].join(" ");
+
+  const SCHEMA_HINT = `{
+  "summary": "1-2 sentence read on who this person is (style + what they care about)",
+  "backstory": ["short bullet about origin / career arc / notable transitions"],
+  "hobbies_interests": ["specific hobby or interest with detail"],
+  "values_causes": ["volunteer work, charities, causes they champion"],
+  "communication_style": "how they show up (e.g. blunt operator, story-driven, data-first)",
+  "talking_points": [{"point": "specific topic to bring up", "why": "why it resonates with them"}],
+  "icebreakers": ["1-sentence opener a rep could actually say"],
+  "shared_ground_hints": ["common-ground angles (alma mater, hometown, sports team, prior employer)"],
+  "watch_outs": ["things to AVOID — pet peeves, sensitive topics, prior bad vendor experiences"],
+  "recent_signals": [{"signal": "recent post/podcast/award/job change", "when": "rough date if known", "url": "source"}],
+  "sources": [{"url": "...", "what": "what this source provided"}],
+  "confidence": "low | medium | high"
+}`;
+
+  try {
+    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOV_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: SYSTEM },
+          { role: "user", content: `Build the personality brief for this person.\n\nSCHEMA:\n${SCHEMA_HINT}\n\nCONTEXT:\n${JSON.stringify(contextPayload).slice(0, 24000)}` },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (!r.ok) {
+      console.error("personality AI error", r.status, await r.text().catch(() => ""));
+      return { error: `ai_${r.status}`, web_results: searchResults };
+    }
+    const j = await r.json();
+    const txt = j?.choices?.[0]?.message?.content || "{}";
+    let parsed: any;
+    try { parsed = JSON.parse(txt); } catch { parsed = { raw: txt }; }
+    return {
+      ...parsed,
+      web_results: searchResults,
+      fetched_at: new Date().toISOString(),
+    };
+  } catch (e) {
+    console.error("personality build failed", e);
+    return null;
+  }
+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
