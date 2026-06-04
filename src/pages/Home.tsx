@@ -87,6 +87,8 @@ const Home = () => {
           {/* Operator-code gated free website leak scan */}
           <RepCodeFreeScan />
 
+          <ComparisonSection />
+
 
 
 
