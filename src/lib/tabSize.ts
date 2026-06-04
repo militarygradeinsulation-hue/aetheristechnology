@@ -53,3 +53,21 @@ export function tabButtonStyle(scale: number): React.CSSProperties {
 export function tabIconSize(scale: number): number {
   return Math.round(16 * scale);
 }
+
+/** Inline style to apply to a tab-tile container (e.g. category section, widget tile header). */
+export function tabTileStyle(scale: number): React.CSSProperties {
+  return {
+    fontSize: `${(12 * scale).toFixed(2)}px`,
+    padding: `${Math.round(10 * scale)}px ${Math.round(14 * scale)}px`,
+  };
+}
+
+/** Inline style for the inner content area (where tab buttons live). */
+export function tabTileBodyStyle(scale: number): React.CSSProperties {
+  return {
+    gap: `${Math.round(6 * scale)}px`,
+    paddingLeft: `${Math.round(14 * scale)}px`,
+    paddingRight: `${Math.round(14 * scale)}px`,
+    paddingBottom: `${Math.round(12 * scale)}px`,
+  };
+}
