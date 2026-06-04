@@ -418,6 +418,7 @@ serve(async (req) => {
     const wantScan = body.scan !== false;
     const wantFirecrawl = body.firecrawl !== false;
     const wantRR = body.rocketreach !== false;
+    const wantPersonality = body.personality !== false;
 
     if (!websiteRaw && !company && !name && !email) {
       return json({ error: "Provide website, business_name, contact_name, or email." }, 400);
@@ -430,6 +431,7 @@ serve(async (req) => {
 
     const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY");
     const RR_KEY = Deno.env.get("ROCKETREACH_API_KEY");
+    const LOV_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
     const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
     const ANON = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
 
@@ -456,14 +458,25 @@ serve(async (req) => {
     // contacts when they exist on the page, even if RocketReach finds no person.
     const rocketreach = mergeContactsFromFirecrawl(rocketreachRaw, firecrawl, domain, name, company);
 
+    // Personality dossier — runs after RR/FC so we can hand it LinkedIn URL etc.
+    const personality = (wantPersonality && name && FC_KEY && LOV_KEY)
+      ? await runPersonality({
+          name, company, domain,
+          linkedinUrl: rocketreach?.linkedin_url || null,
+          rocketreach, firecrawl, FC_KEY, LOV_KEY,
+        })
+      : null;
+
     return json({
       ok: true,
       scan,
       firecrawl,
       rocketreach,
+      personality,
       missing_keys: {
         firecrawl: !FC_KEY,
         rocketreach: !RR_KEY,
+        personality: !LOV_KEY || !FC_KEY,
       },
     });
   } catch (e) {
