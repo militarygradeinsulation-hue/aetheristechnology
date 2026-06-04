@@ -33,7 +33,7 @@ const SYSTEM = `You are a B2B sales forensics analyst. Given scraped website con
 }
 Be blunt and specific. No fluff. The outreach recommendation MUST be evidence-based — reference what you actually saw (e.g. 'no email listed, only phone CTA → call', 'long-form thought-leadership + active LinkedIn → warm LinkedIn DM', 'enterprise site with gated demo → email ops lead, never cold call', 'family-owned trades shop → call early morning, owner answers'). If the site is low-info, say so in score_reason, lower confidence, and recommend the safest default channel for that industry.`;
 
-async function firecrawl(url: string, key: string): Promise<string> {
+async function firecrawl(url: string, key: string): Promise<{ md: string; err?: string }> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
@@ -42,10 +42,41 @@ async function firecrawl(url: string, key: string): Promise<string> {
     });
     const j = await r.json().catch(() => ({}));
     const md = j?.data?.markdown || j?.markdown || "";
-    return String(md).slice(0, 15000);
-  } catch {
-    return "";
+    if (!r.ok) return { md: "", err: `firecrawl ${r.status}: ${(j?.error || "").toString().slice(0, 200)}` };
+    return { md: String(md).slice(0, 15000) };
+  } catch (e) {
+    return { md: "", err: `firecrawl exception: ${e instanceof Error ? e.message : String(e)}` };
   }
+}
+
+async function firecrawlSearch(query: string, key: string): Promise<{ md: string; url?: string; err?: string }> {
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ query, limit: 3, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { md: "", err: `firecrawl search ${r.status}` };
+    const results = j?.data?.web || j?.data || [];
+    const arr = Array.isArray(results) ? results : [];
+    const top = arr[0] || {};
+    const md = top?.markdown || top?.description || "";
+    return { md: String(md).slice(0, 15000), url: top?.url };
+  } catch (e) {
+    return { md: "", err: `firecrawl search exception: ${e instanceof Error ? e.message : String(e)}` };
+  }
+}
+
+function deriveUrlFromEmail(email?: string | null): string | null {
+  if (!email) return null;
+  const m = String(email).match(/@([^\s>]+)/);
+  if (!m) return null;
+  const domain = m[1].toLowerCase();
+  // skip free mail providers
+  if (/^(gmail|yahoo|hotmail|outlook|aol|icloud|live|msn|comcast|protonmail|me)\./.test(domain + ".")) return null;
+  if (["gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com","live.com","msn.com","comcast.net","protonmail.com","me.com"].includes(domain)) return null;
+  return `https://${domain}`;
 }
 
 async function aiAnalyze(payload: Record<string, unknown>, content: string, key: string) {
