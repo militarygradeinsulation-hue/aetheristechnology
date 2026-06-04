@@ -30,6 +30,7 @@ Rules:
 - 2,800 words minimum.
 - Short paragraphs (2–4 sentences).
 - Numbers in digits, currency explicit, time frames specific.
+- CURRENCY RULE (NON-NEGOTIABLE): every dollar amount is US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, ₹, EUR, GBP, JPY, CAD, AUD, or any other currency or symbol.
 - No emojis in body copy. Tables may use 📊 ✅ ⚠️ sparingly.
 - Internal links to https://aetheris.technology/leak-audit and https://aetheris.technology/contact where natural.
 - Return ONLY raw markdown. No JSON, no code fences, no preface.`;

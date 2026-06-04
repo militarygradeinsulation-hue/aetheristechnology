@@ -55,6 +55,7 @@ VISUAL FORMATTING — non-negotiable
 ✓ Use 2–3 emojis max for emphasis across the whole post. Never decorative.
 ✓ "Staircase" or numbered lists welcome for evidence/steps.
 ✓ Numbers in digits. Currency explicit. Time frames specific.
+✓ CURRENCY RULE (NON-NEGOTIABLE): every dollar amount is US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, ₹, EUR, GBP, JPY, CAD, AUD, or any other currency or symbol.
 
 ═══════════════════════════════════════════════════════════
 THE 2-1-3 STRUCTURE (use as the default skeleton)

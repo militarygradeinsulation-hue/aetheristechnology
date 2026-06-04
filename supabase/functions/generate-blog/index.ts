@@ -327,6 +327,7 @@ ${brandedFramework}
 - Lead with the forensic frame. First 3 lines match Case File DNA — a finding, not an intro.
 - H2s as dossier section markers: "THE INVENTORY", "THE AUTOPSY", "THE MATH", "THE FIX", "THE PATTERN"
 - Numbers stay in digits, currency stays explicit, time frames stay specific. "$1.4M/year" not "millions."
+- CURRENCY RULE (NON-NEGOTIABLE): every dollar amount is US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, ₹, EUR, GBP, JPY, CAD, AUD, or any other currency or symbol.
 - Break every 3-4 sentences. Air on the page is part of the brand.
 - Every blog ends with a single clean CTA — the 14-Point Leak Audit, no alternatives, no "also consider."
 - No generic intro paragraphs. No "In today's rapidly evolving business landscape…" Start in the middle.
