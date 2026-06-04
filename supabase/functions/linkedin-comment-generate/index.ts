@@ -27,6 +27,30 @@ Output 3 distinct comment variants in a JSON tool call. Each must be a different
 - Treat the "recent drafts" the user sends as a forbidden-style list. Do not echo their openers, structures, or phrasing.
 - If a persona is provided, write IN that persona's voice. Persona overrides default cadence but the no-self-promo rule still applies.`;
 
+const BANNED_OUTPUT_PATTERNS = [
+  /aetheris/i,
+  /businessforensics\.tech/i,
+  /aetheris\.technology/i,
+  /business forensics/i,
+  /leak audit/i,
+  /diagnostic/i,
+  /\bleak(s|ing)?\b/i,
+  /forensic/i,
+  /autopsy/i,
+  /great post/i,
+  /love this/i,
+  /well said/i,
+  /spot on/i,
+  /https?:\/\//i,
+];
+
+function validateComment(value: unknown) {
+  const text = String(value || "").trim().replace(/[—–]/g, ",").replace(/https?:\/\/\S+/gi, "");
+  const violation = BANNED_OUTPUT_PATTERNS.find((pattern) => pattern.test(text));
+  if (violation) throw new Error("AI response failed the no-template/no-pitch filter. Regenerate with more source context.");
+  return text;
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
