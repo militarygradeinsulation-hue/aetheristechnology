@@ -270,7 +270,9 @@ For competitive brief: a 2-3 sentence assessment of their competitive digital po
 
 For OUTREACH (CRITICAL — the sales rep depends on this): based on observable evidence from the actual site content (tone of copy, presence/absence of phone numbers, contact forms, chat widgets, "book a call" CTAs, team bios, founder voice, formality of language, response-time promises, social proof style, industry conventions), recommend whether the rep should CALL or EMAIL first. Be blunt and evidence-based — cite specific signals from the site. Fill every outreach field.
 
-For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated location/area-served/phone area code, then recommend the optimal email send windows tailored to THIS specific business. Account for: (1) industry rhythm — e.g. trades/field-service owners check email 6-8am or after 5pm; B2B SaaS execs scan inbox 7-9am and 4-6pm; healthcare/legal mid-morning; restaurants between lunch and dinner rush (2-4pm); retail off-peak; (2) company size — solo/owner-operator vs. mid-market with assistants gatekeeping; (3) location/timezone — give windows in the PROSPECT'S local time AND ET; (4) day-of-week — avoid Mondays before 10am and Friday afternoons for most; Tue/Wed/Thu are prime for B2B; Sundays evenings work for owner-operators planning their week; (5) seasonality if relevant (tax season for accountants, summer for HVAC, etc.); (6) avoid times derived from on-site signals (e.g. "office closed Fridays" banner). Cite the evidence behind each window.`,
+For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated location/area-served/phone area code, then recommend the optimal email send windows tailored to THIS specific business. Account for: (1) industry rhythm — e.g. trades/field-service owners check email 6-8am or after 5pm; B2B SaaS execs scan inbox 7-9am and 4-6pm; healthcare/legal mid-morning; restaurants between lunch and dinner rush (2-4pm); retail off-peak; (2) company size — solo/owner-operator vs. mid-market with assistants gatekeeping; (3) location/timezone — give windows in the PROSPECT'S local time AND ET; (4) day-of-week — avoid Mondays before 10am and Friday afternoons for most; Tue/Wed/Thu are prime for B2B; Sundays evenings work for owner-operators planning their week; (5) seasonality if relevant (tax season for accountants, summer for HVAC, etc.); (6) avoid times derived from on-site signals (e.g. "office closed Fridays" banner). Cite the evidence behind each window.
+
+For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-written outreach): produce EXACTLY 5 touches in order at day_offset 0, 3, 7, 14, 21. For EACH touch: pick the channel that fits this prospect and that step in the cadence (mix call/email/linkedin/voicemail/text — don't repeat the same channel 5 times unless evidence demands it); write a specific subject_or_opener referencing something concrete from the site; write 3-5 talking_points that EACH cite a specific gap/leak you found above (use the actual gap title or dollar figure — no generic copy); write 2 objection_handles with one-line responses; write a single cta; write a complete ready-to-send full_script (email body, voicemail script, or call talk-track — 80-180 words, ready to copy-paste with no edits); write a why_now line explaining why this channel at this point in the cadence; write the best_send_window_local in the prospect's local time. The 5-touch sequence should escalate logically: open with insight → reinforce with data → social proof / case → direct challenge / value reframe → breakup. Reference real leaks from the gaps array in this same report.`,
           },
         ],
         tools: [
@@ -380,8 +382,28 @@ For EMAIL_TIMING (CRITICAL): infer the prospect's timezone from their stated loc
                         },
                         required: ["inferred_timezone", "inferred_industry", "inferred_company_size", "best_send_windows", "avoid_windows", "subject_line_angle", "follow_up_cadence"],
                       },
+                      touchpoint_plan: {
+                        type: "array",
+                        description: "EXACTLY 5 fully-written outreach touches (day_offset 0,3,7,14,21). Each touch is ready to drop on a calendar and run with zero editing. Talking points MUST cite specific gaps from this report.",
+                        items: {
+                          type: "object",
+                          properties: {
+                            step: { type: "number", description: "1-5" },
+                            day_offset: { type: "number", description: "Days from Touch 1 (0, 3, 7, 14, 21)" },
+                            channel: { type: "string", enum: ["call", "email", "linkedin", "voicemail", "text"] },
+                            why_now: { type: "string", description: "Why this channel at this point in the cadence (1 sentence)" },
+                            subject_or_opener: { type: "string", description: "Exact subject line (email) or first line (call/voicemail/LinkedIn/text)" },
+                            talking_points: { type: "array", items: { type: "string" }, description: "3-5 bullets, each citing a specific gap/leak/dollar figure from THIS report" },
+                            objection_handles: { type: "array", items: { type: "string" }, description: "2 likely pushbacks with one-line responses, formatted 'Pushback: ... → Response: ...'" },
+                            cta: { type: "string", description: "Single ask for this touch (e.g. '15-min Tue/Wed teardown call')" },
+                            full_script: { type: "string", description: "Complete ready-to-send body — 80-180 words. No placeholders. Sign as Aetheris operator." },
+                            best_send_window_local: { type: "string", description: "Exact send window in prospect local time, e.g. 'Tue 7:15-8:00 AM CT'" },
+                          },
+                          required: ["step", "day_offset", "channel", "why_now", "subject_or_opener", "talking_points", "cta", "full_script", "best_send_window_local"],
+                        },
+                      },
                     },
-                    required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing"],
+                    required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing", "touchpoint_plan"],
                   },
                 },
                 required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],

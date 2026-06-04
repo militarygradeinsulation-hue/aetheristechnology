@@ -1,52 +1,62 @@
-## 1. Workbench clicks not registering (dropdowns, Add Tool, width, layouts)
+## Goal
 
-**Cause:** The Workbench panel is `z-[80]`, but Radix `DropdownMenu` and `Select` portals render to `document.body` at default `z-50`. They open *behind* the panel, so clicks/changes don't land. Same reason "load layout" select can't be opened, and the panel-width Select looks dead.
+When a rep scans a lead, generate a **complete, ready-to-run outreach sequence** (every touchpoint with its date, channel, why, subject/opener, talking points, objection handles, and CTA) and automatically save **each touch as its own calendar event** on the rep's calendar — body fully populated, no thinking required.
 
-**Fix:**
-- Add `z-[100]` (above `z-[80]` aside) to every `DropdownMenuContent` and `SelectContent` inside `FloatingWorkbench.tsx` (Add tool menu, panel width select, layouts select).
-- Verify with a quick click-through after the change.
+Today the scan only seeds 4 generic reminders sharing one shared body (recommended channel + best time + the one `first_touch_script`). Touches 2–4 are blank scaffolding. This plan upgrades that to per-touch, fully written playbooks.
 
-## 2. Add LinkedIn Comment Generator tool
+## What changes
 
-The current Reply Composer is tuned for full replies. Add a sibling tool focused on short, punchy comment responses.
+### 1. Scan AI returns a `touchpoint_plan` (new field on `outreach`)
 
-- New component `src/components/portal/LinkedInCommentGenerator.tsx` — paste post text or screenshot → generates 3 comment variants (short / medium / sharp-question), each 1–3 sentences.
-- New edge function `supabase/functions/linkedin-comment-generate/index.ts` using `google/gemini-3-flash-preview` with:
-  - Anti-repetition scan against saved library (same `collectAllPastBodies` pattern already used by the reply composer).
-  - Persona support (reuse the persona blocks already in `linkedin-post-respond`).
-  - Hard cap: each comment ≤ 320 chars, no "Architecture Failure / Operational Waste" cliché list.
-- Register the tool in `src/components/workbench/toolRegistry.tsx` under the **Outreach** group so it shows in Add Tool dropdown.
-- Auto-save outputs to the shared library so future runs scan against them too.
+Extend the `website_diagnostic_report` tool schema in `supabase/functions/scan-website/index.ts` so the AI produces a 5-touch sequence tuned to the prospect's industry, size, timezone, and the leaks the scan just found.
 
-## 3. Auto clock-out after inactivity
+Each touch in the array:
 
-**Behavior:** If a rep is clocked in and idle (no clicks, key presses, route changes, or API calls) for **30 minutes**, automatically clock out with note `"Auto clock-out (inactive 30m)"`.
+- `step` (1–5)
+- `day_offset` (0, 3, 7, 14, 21)
+- `channel` (`call` | `email` | `linkedin` | `voicemail` | `text`)
+- `why_now` — what makes this touch land at this point in the cadence (e.g. "Day 7 bump: tie back to the broken CTA you flagged on Touch 1")
+- `subject_or_opener` — exact subject line (email) or opening line (call/voicemail/LinkedIn)
+- `talking_points` — 3–5 bullets tied to **specific leaks from this scan** (e.g. "lead with the $14k/yr SEO leak on /services")
+- `objection_handles` — 2 likely pushbacks with one-line responses
+- `cta` — the one ask
+- `full_script` — ready-to-send body (email draft, voicemail script, or call talk-track)
+- `best_send_window_local` — exact send window in prospect local time
 
-**Where:**
-- `src/components/portal/RepClockWidget.tsx` — add an activity listener (`mousemove`, `keydown`, `click`, `visibilitychange`) that resets a timer. When timer fires AND `entry.clock_out_at` is null, call `portalTimeclock.clockOut("Auto clock-out (inactive 30m)")` and toast the rep.
-- Persist `lastActivityAt` in `localStorage` so closing the tab also counts as inactivity (on next portal load, if clocked-in and `now - lastActivityAt > 30m`, auto clock out).
-- Small UI hint near the clock widget: "Auto clock-out after 30m idle."
+The system prompt is updated to require the plan reference real leaks/gaps the scan surfaced (no generic copy).
 
-## 4. Hunt mode → no way to act on leads
+### 2. `scheduleScanCadence` consumes `touchpoint_plan` instead of hardcoding 4 generic touches
 
-Hunt currently surfaces companies but doesn't expose contact channels.
+In `supabase/functions/portal-leads/index.ts`:
 
-- In `LeadsBoard.tsx` (Hunt panel), when a lead row is opened, fetch enriched contact info via the existing RocketReach-backed edge function (already have `ROCKETREACH_API_KEY` secret) and show: email, phone, LinkedIn URL, and direct buttons:
-  - **Email** → opens rep mailbox composer prefilled with subject + playbook attachment.
-  - **DM** → opens LinkedIn URL in new tab.
-  - **Call** → `tel:` link + logs an attempt to `lead_actions`.
-- If RocketReach returns nothing, show a clear "No contact data found — try LinkedIn manually" state instead of silently failing.
+- If `scan.outreach.touchpoint_plan` exists and has ≥1 item, iterate over it.
+- For each touch, create a `rep_calendar_events` row with:
+  - `kind` mapped from channel (`call` → `call`, `meeting` if CTA is a meeting, else `follow_up`)
+  - `start_at` = anchor (tomorrow at recommended hour) + `day_offset` days, at the touch's own best send hour
+  - `end_at` = +30 min
+  - `title` = `Touch {step} · {Channel} — {business_name}`
+  - `body` = a clean, fully assembled brief with sections: WHY NOW, SUBJECT/OPENER, TALKING POINTS (bulleted), OBJECTION HANDLES, CTA, FULL SCRIPT, BEST WINDOW, LEAKS REFERENCED
+- Fallback (if AI didn't return a plan, e.g. older cached scans or AI gateway hiccup): keep the existing 4-touch generic seeder so reps never end up with an empty calendar.
+- Keep the existing dedupe: delete prior `created_by='system'` events for this `lead_id`+`rep_code` before inserting fresh ones, so re-scan re-seeds cleanly.
 
-## 5. Playbook attachment tab is empty
+### 3. Calendar UI surfaces the talking points in-place
 
-When the outreach panel says "attach the playbook" and the Playbook tab opens empty, it's because `PortalPlaybook` requires the `portal-playbook` edge function to return `plays`, but no plays exist yet for new reps.
+`RepCalendarView` (and the admin view) already render `body`. No structural change needed — the new body is plain-text formatted with clear section headers (`WHY NOW`, `TALKING POINTS`, `FULL SCRIPT`, etc.) so it reads well in the existing event detail panel.
 
-- Seed the rep portal with the existing Aetheris playbook content (already present in `src/lib/portalPlaybook.ts` types / admin tables) — ensure `portal-playbook` falls back to the global Aetheris playbook when the rep has no custom plays.
-- In the outreach flow, expose a **"Attach Playbook PDF"** button that pulls from the public `playbooks` storage bucket (`Aetheris-Credentials.pdf` + the operator playbook PDF) so it always works even if the dynamic plays list is empty.
-- Show inline message in the Playbook tab when empty: "Loading from the company playbook…" with a retry button.
+### 4. Toast confirmation gets sharper
+
+After a fresh scan: `"Scan complete — 5 fully-written touchpoints added to your calendar."` (uses the count actually inserted, falls back gracefully).
 
 ## Technical notes
-- All edge functions deployed via `supabase--deploy_edge_functions` after writing.
-- No DB migrations needed (use existing `lead_actions`, `time_entries`, `playbooks` bucket, `library_items`).
-- Reuse `google/gemini-3-flash-preview` for speed on the comment generator.
-- Z-index fix is the single highest-impact change — unblocks all workbench usage immediately.
+
+- No DB migration needed — `rep_calendar_events` already has `title`, `body`, `kind`, `start_at`, `lead_id`, `created_by='system'`.
+- No new edge function — changes are confined to `scan-website` (schema + prompt) and `portal-leads` (cadence builder).
+- The plan is generated inside the existing single AI call in `scan-website`, so there's **no extra latency or extra API cost** per scan.
+- Re-scanning a lead replaces the auto-events (same dedupe as today). Rep-edited or admin-added events on the same lead are untouched (different `created_by`).
+- Body uses plain text with line breaks — no markdown rendering dependency. Stays under ~3KB per event.
+
+## Out of scope (call out if you want them next)
+
+- Push notifications / email reminders at touch time (today the calendar just shows them).
+- Auto-sending the drafted email/LinkedIn touches — this plan only **drafts** them onto the calendar; the rep still hits send.
+- Backfilling old already-scanned leads — only newly-scanned (or force-rescanned) leads get the full plan.
