@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { ComparisonSection } from '@/components/ComparisonSection';
 import { Button } from '@/components/ui/button';
 import { INFOGRAPHICS } from '@/lib/infographics';
 
@@ -89,6 +90,8 @@ const CatalogPage: React.FC = () => {
           </section>
 
           <ServicesPricing />
+
+          <ComparisonSection />
 
         </main>
         <Footer />
