@@ -125,23 +125,57 @@ serve(async (req) => {
     for (const lead of leads || []) {
       try {
         let content = "";
-        if (lead.website && FIRECRAWL) {
+        let scrapedUrl: string | null = null;
+        const scrapeNotes: string[] = [];
+
+        // 1) Try direct website if present
+        const candidates: string[] = [];
+        if (lead.website) {
           const url = lead.website.startsWith("http") ? lead.website : `https://${lead.website}`;
-          content = await firecrawl(url, FIRECRAWL);
+          candidates.push(url);
         }
+        // 2) Derive from email domain
+        const fromEmail = deriveUrlFromEmail(lead.email);
+        if (fromEmail && !candidates.includes(fromEmail)) candidates.push(fromEmail);
+
+        if (FIRECRAWL) {
+          for (const url of candidates) {
+            const r = await firecrawl(url, FIRECRAWL);
+            if (r.md && r.md.length > 200) { content = r.md; scrapedUrl = url; break; }
+            if (r.err) scrapeNotes.push(`${url} → ${r.err}`);
+          }
+          // 3) Fallback: search the business name
+          if (!content && lead.business_name) {
+            const q = [lead.business_name, lead.location, lead.industry].filter(Boolean).join(" ");
+            const s = await firecrawlSearch(q, FIRECRAWL);
+            if (s.md) { content = s.md; scrapedUrl = s.url || null; scrapeNotes.push(`fallback: search '${q}' → ${s.url || "no url"}`); }
+            else if (s.err) scrapeNotes.push(`search err: ${s.err}`);
+          }
+        } else {
+          scrapeNotes.push("FIRECRAWL_API_KEY not configured");
+        }
+
         const enriched = await aiAnalyze(lead, content, LOVABLE);
-        const newScore = Number(enriched?.score);
+        if (typeof enriched === "object" && enriched) {
+          (enriched as Record<string, unknown>).scrape_source_url = scrapedUrl;
+          (enriched as Record<string, unknown>).scrape_notes = scrapeNotes;
+          (enriched as Record<string, unknown>).scraped_chars = content.length;
+        }
+        const newScore = Number((enriched as Record<string, unknown>)?.score);
         const patch: Record<string, unknown> = {
           enrichment: enriched,
           enriched_at: new Date().toISOString(),
         };
         if (Number.isFinite(newScore)) patch.score = Math.max(0, Math.min(100, Math.round(newScore)));
-        if (enriched?.industry_refined && !lead.industry) patch.industry = String(enriched.industry_refined).slice(0, 100);
+        const indRefined = (enriched as Record<string, unknown>)?.industry_refined;
+        if (indRefined && !lead.industry) patch.industry = String(indRefined).slice(0, 100);
+        if (scrapedUrl && !lead.website) patch.website = scrapedUrl;
 
         const { error: uErr } = await admin.from("rep_leads").update(patch).eq("id", lead.id);
         if (uErr) throw uErr;
         results.push({ id: lead.id, ok: true, score: Number.isFinite(newScore) ? newScore : undefined });
       } catch (e) {
+        console.error("enrich error for", lead.id, e);
         results.push({ id: lead.id, ok: false, error: e instanceof Error ? e.message : String(e) });
       }
     }
