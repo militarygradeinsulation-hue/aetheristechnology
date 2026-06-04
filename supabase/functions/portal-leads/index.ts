@@ -47,64 +47,169 @@ function parseHourHint(text: string | undefined | null): number {
   return 14;
 }
 
+function channelToKind(ch: string, cta: string = ""): string {
+  const c = String(ch || "").toLowerCase();
+  if (c === "call") return "call";
+  if (c === "voicemail") return "call";
+  if (/meeting|demo|call/i.test(cta) && c === "email") return "follow_up";
+  if (c === "linkedin" || c === "text") return "follow_up";
+  return "follow_up";
+}
+
+function channelLabel(ch: string): string {
+  const c = String(ch || "").toLowerCase();
+  if (c === "call") return "Call";
+  if (c === "email") return "Email";
+  if (c === "linkedin") return "LinkedIn";
+  if (c === "voicemail") return "Voicemail";
+  if (c === "text") return "Text";
+  return "Touch";
+}
+
+function buildTouchBody(opts: {
+  businessName: string;
+  touch: any;
+  scan: any;
+  outreach: any;
+}): string {
+  const { businessName, touch, scan, outreach } = opts;
+  const tz = outreach?.email_timing?.inferred_timezone || "";
+  const lines: string[] = [];
+  lines.push(`LEAD: ${businessName}`);
+  if (scan?.score != null) lines.push(`SCAN SCORE: ${scan.score}${scan.grade ? ` (${scan.grade})` : ""}`);
+  lines.push("");
+  lines.push(`CHANNEL: ${channelLabel(touch.channel)}`);
+  if (touch.best_send_window_local) lines.push(`BEST WINDOW: ${touch.best_send_window_local}${tz ? ` · ${tz}` : ""}`);
+  if (touch.why_now) {
+    lines.push("");
+    lines.push("WHY NOW:");
+    lines.push(touch.why_now);
+  }
+  if (touch.subject_or_opener) {
+    lines.push("");
+    lines.push(String(touch.channel).toLowerCase() === "email" ? "SUBJECT:" : "OPENER:");
+    lines.push(touch.subject_or_opener);
+  }
+  if (Array.isArray(touch.talking_points) && touch.talking_points.length) {
+    lines.push("");
+    lines.push("TALKING POINTS:");
+    for (const tp of touch.talking_points) lines.push(`• ${tp}`);
+  }
+  if (Array.isArray(touch.objection_handles) && touch.objection_handles.length) {
+    lines.push("");
+    lines.push("OBJECTION HANDLES:");
+    for (const oh of touch.objection_handles) lines.push(`• ${oh}`);
+  }
+  if (touch.cta) {
+    lines.push("");
+    lines.push("CTA:");
+    lines.push(touch.cta);
+  }
+  if (touch.full_script) {
+    lines.push("");
+    lines.push("FULL SCRIPT (ready to send):");
+    lines.push("---");
+    lines.push(touch.full_script);
+    lines.push("---");
+  }
+  // Surface top leaks referenced so the rep sees the receipts
+  const gaps: any[] = Array.isArray(scan?.gaps) ? scan.gaps : [];
+  const topGaps = gaps
+    .filter((g) => g?.severity === "critical" || g?.severity === "warning")
+    .slice(0, 4)
+    .map((g) => `• ${g.title}${g.annualCost ? ` — ${g.annualCost}/yr` : ""}`);
+  if (topGaps.length) {
+    lines.push("");
+    lines.push("LEAKS REFERENCED:");
+    for (const l of topGaps) lines.push(l);
+  }
+  return lines.join("\n").slice(0, 4000);
+}
+
 async function scheduleScanCadence(opts: {
   supabase: any; repCode: string; leadId: string; businessName: string; scan: any;
 }): Promise<Array<{ id: string }>> {
   try {
     const { supabase, repCode, leadId, businessName, scan } = opts;
     const outreach = scan?.outreach || {};
-    const channel = String(outreach.recommended_channel || "email").toLowerCase();
-    const channelLabel = channel === "call" ? "Call" : "Email";
-    const kind = channel === "call" ? "call" : "follow_up";
     const bestTime = outreach.best_time_to_reach || "";
-    const cadence = outreach?.email_timing?.follow_up_cadence || "";
-    const sendWindows = Array.isArray(outreach?.email_timing?.best_send_windows)
-      ? outreach.email_timing.best_send_windows.join(", ") : "";
-    const tz = outreach?.email_timing?.inferred_timezone || "";
-    const script = outreach?.first_touch_script || "";
-
-    const hour = parseHourHint(bestTime);
+    const baseHour = parseHourHint(bestTime);
     const now = new Date();
-    // Anchor to tomorrow at the recommended hour
-    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, hour, 0, 0));
+    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, baseHour, 0, 0));
 
-    // 4-touch cadence by day offset from anchor
-    const cadenceSteps: Array<{ label: string; offsetDays: number; kind: string }> = [
-      { label: `Touch 1 · ${channelLabel} first`, offsetDays: 0, kind },
-      { label: `Touch 2 · ${channelLabel === "Call" ? "Email" : "Call"} follow-up`, offsetDays: 3, kind: channel === "call" ? "follow_up" : "call" },
-      { label: `Touch 3 · ${channelLabel} bump`, offsetDays: 7, kind },
-      { label: `Touch 4 · Breakup ${channelLabel}`, offsetDays: 14, kind },
-    ];
-
-    const bodyBase = [
-      `Lead: ${businessName}`,
-      bestTime ? `Best window: ${bestTime}` : "",
-      tz ? `Timezone: ${tz}` : "",
-      sendWindows ? `Send windows: ${sendWindows}` : "",
-      cadence ? `Cadence: ${cadence}` : "",
-      outreach.why_this_channel ? `Why ${channelLabel}: ${outreach.why_this_channel}` : "",
-      script ? `\nFirst-touch script:\n${script}` : "",
-    ].filter(Boolean).join("\n");
-
-    // Remove previous auto-scheduled events for this lead before re-seeding
+    // Always clear prior auto-events for this lead before re-seeding
     await supabase.from("rep_calendar_events")
       .delete()
       .eq("lead_id", leadId)
       .eq("rep_code", repCode)
       .eq("created_by", "system");
 
-    const rows = cadenceSteps.map((s) => ({
-      rep_code: repCode,
-      lead_id: leadId,
-      kind: s.kind,
-      title: `${s.label} — ${businessName}`,
-      body: bodyBase,
-      start_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000).toISOString(),
-      end_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000 + 30 * 60 * 1000).toISOString(),
-      all_day: false,
-      created_by: "system",
-    }));
+    const plan: any[] = Array.isArray(outreach.touchpoint_plan) ? outreach.touchpoint_plan : [];
 
+    let rows: any[] = [];
+
+    if (plan.length > 0) {
+      rows = plan.map((t, idx) => {
+        const step = Number.isFinite(t.step) ? Number(t.step) : idx + 1;
+        const dayOffset = Number.isFinite(t.day_offset) ? Number(t.day_offset) : [0, 3, 7, 14, 21][idx] ?? idx * 3;
+        const hour = parseHourHint(t.best_send_window_local || bestTime);
+        const start = new Date(Date.UTC(
+          anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate() + dayOffset,
+          hour, 0, 0,
+        ));
+        const label = channelLabel(t.channel);
+        return {
+          rep_code: repCode,
+          lead_id: leadId,
+          kind: channelToKind(t.channel, t.cta),
+          title: `Touch ${step} · ${label} — ${businessName}`,
+          body: buildTouchBody({ businessName, touch: t, scan, outreach }),
+          start_at: start.toISOString(),
+          end_at: new Date(start.getTime() + 30 * 60 * 1000).toISOString(),
+          all_day: false,
+          created_by: "system",
+        };
+      });
+    } else {
+      // ---- Fallback: legacy 4-touch generic seeder for old/cached scans without a plan ----
+      const channel = String(outreach.recommended_channel || "email").toLowerCase();
+      const cLabel = channelLabel(channel);
+      const kind = channelToKind(channel);
+      const cadence = outreach?.email_timing?.follow_up_cadence || "";
+      const sendWindows = Array.isArray(outreach?.email_timing?.best_send_windows)
+        ? outreach.email_timing.best_send_windows.map((w: any) => w?.day && w?.local_time ? `${w.day} ${w.local_time}` : (typeof w === "string" ? w : "")).filter(Boolean).join(", ")
+        : "";
+      const tz = outreach?.email_timing?.inferred_timezone || "";
+      const script = outreach?.first_touch_script || "";
+      const bodyBase = [
+        `LEAD: ${businessName}`,
+        bestTime ? `BEST WINDOW: ${bestTime}` : "",
+        tz ? `TIMEZONE: ${tz}` : "",
+        sendWindows ? `SEND WINDOWS: ${sendWindows}` : "",
+        cadence ? `CADENCE: ${cadence}` : "",
+        outreach.why_this_channel ? `WHY ${cLabel.toUpperCase()}: ${outreach.why_this_channel}` : "",
+        script ? `\nFIRST-TOUCH SCRIPT:\n${script}` : "",
+      ].filter(Boolean).join("\n");
+      const steps = [
+        { label: `Touch 1 · ${cLabel} first`, offsetDays: 0, kind },
+        { label: `Touch 2 · ${cLabel === "Call" ? "Email" : "Call"} follow-up`, offsetDays: 3, kind: channel === "call" ? "follow_up" : "call" },
+        { label: `Touch 3 · ${cLabel} bump`, offsetDays: 7, kind },
+        { label: `Touch 4 · Breakup ${cLabel}`, offsetDays: 14, kind },
+      ];
+      rows = steps.map((s) => ({
+        rep_code: repCode,
+        lead_id: leadId,
+        kind: s.kind,
+        title: `${s.label} — ${businessName}`,
+        body: bodyBase,
+        start_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000).toISOString(),
+        end_at: new Date(anchor.getTime() + s.offsetDays * 24 * 3600 * 1000 + 30 * 60 * 1000).toISOString(),
+        all_day: false,
+        created_by: "system",
+      }));
+    }
+
+    if (!rows.length) return [];
     const { data, error } = await supabase
       .from("rep_calendar_events")
       .insert(rows)
