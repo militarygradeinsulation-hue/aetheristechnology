@@ -237,7 +237,11 @@ serve(async (req) => {
       ? runRocketReach(RR_KEY, name, company, email, domain)
       : Promise.resolve(null);
 
-    const [scan, firecrawl, rocketreach] = await Promise.all([scanPromise, fcPromise, rrPromise]);
+    const [scan, firecrawl, rocketreachRaw] = await Promise.all([scanPromise, fcPromise, rrPromise]);
+
+    // Backfill emails/phones from the website scrape so deep scan always returns
+    // contacts when they exist on the page, even if RocketReach finds no person.
+    const rocketreach = mergeContactsFromFirecrawl(rocketreachRaw, firecrawl, domain, name, company);
 
     return json({
       ok: true,
