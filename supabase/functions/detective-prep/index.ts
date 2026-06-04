@@ -398,7 +398,7 @@ async function runPersonality(opts: {
     console.error("personality build failed", e);
     return null;
   }
-
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
