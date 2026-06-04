@@ -13,7 +13,7 @@ import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
-import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
+import { useTabSize, tabButtonStyle, tabIconSize, tabTileStyle, tabTileBodyStyle } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
