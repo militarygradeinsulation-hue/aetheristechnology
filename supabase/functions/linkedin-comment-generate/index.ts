@@ -5,7 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
-const SYSTEM = `You are Joseph Toney writing SHORT LinkedIn COMMENTS on someone else's post.
+const SYSTEM = `You are an AI writing fresh SHORT LinkedIn COMMENTS for Joseph on someone else's post.
+
+This is live AI drafting, not premade scripts. There are no canned responses, no signature opener library, no brand lexicon, and no fallback templates.
 
 YOUR JOB: React to THEIR post like a real person in their feed. Add to THEIR point, push back on it, extend it, or ask a sharper question about what THEY said. You are a peer in the conversation, not a brand account.
 
@@ -24,6 +26,30 @@ Output 3 distinct comment variants in a JSON tool call. Each must be a different
 - No two variants may share the same opening word, sentence rhythm, or closing line.
 - Treat the "recent drafts" the user sends as a forbidden-style list. Do not echo their openers, structures, or phrasing.
 - If a persona is provided, write IN that persona's voice. Persona overrides default cadence but the no-self-promo rule still applies.`;
+
+const BANNED_OUTPUT_PATTERNS = [
+  /aetheris/i,
+  /businessforensics\.tech/i,
+  /aetheris\.technology/i,
+  /business forensics/i,
+  /leak audit/i,
+  /diagnostic/i,
+  /\bleak(s|ing)?\b/i,
+  /forensic/i,
+  /autopsy/i,
+  /great post/i,
+  /love this/i,
+  /well said/i,
+  /spot on/i,
+  /https?:\/\//i,
+];
+
+function validateComment(value: unknown) {
+  const text = String(value || "").trim().replace(/[—–]/g, ",").replace(/https?:\/\/\S+/gi, "");
+  const violation = BANNED_OUTPUT_PATTERNS.find((pattern) => pattern.test(text));
+  if (violation) throw new Error("AI response failed the no-template/no-pitch filter. Regenerate with more source context.");
+  return text;
+}
 
 
 serve(async (req) => {
@@ -49,7 +75,7 @@ serve(async (req) => {
       `\n\nDo NOT reuse the opening words, sentence rhythms, label stack, or signature closers from the drafts above. Pick a different angle.`;
 
     const personaBlock = persona && typeof persona === "string"
-      ? `\n\nACTIVE PERSONA OVERRIDE — write in this voice and rhythm. It takes priority over the default Aetheris cadence:\n${persona}`
+      ? `\n\nACTIVE PERSONA OVERRIDE — write in this voice and rhythm. It controls cadence and style only, not canned content:\n${persona}`
       : "";
 
     const extra = extraContext && typeof extraContext === "string"
@@ -106,9 +132,9 @@ serve(async (req) => {
     const args = JSON.parse(call.function.arguments || "{}");
 
     return new Response(JSON.stringify({
-      short: String(args.short || "").trim(),
-      medium: String(args.medium || "").trim(),
-      sharp_question: String(args.sharp_question || "").trim(),
+      short: validateComment(args.short),
+      medium: validateComment(args.medium),
+      sharp_question: validateComment(args.sharp_question),
       scanned: drafts.length,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {

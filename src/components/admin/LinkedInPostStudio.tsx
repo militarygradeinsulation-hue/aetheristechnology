@@ -1083,7 +1083,7 @@ export default function LinkedInPostStudio() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const post = appendSiteLink(data.post || '');
+      const post = data.post || '';
       setRespondOutput(post);
       // Auto-save to response library
       if (post.trim()) {
@@ -1266,7 +1266,7 @@ export default function LinkedInPostStudio() {
         <h2 className="font-display text-3xl font-bold mb-1">Post Studio</h2>
         <p className="text-muted-foreground text-sm">
           On-brand LinkedIn posts with creator tagging, hashtag strategy, and operator voice.
-          Cycle through premade topics + prompts or write your own.
+          Start from topic ideas or write your own.
         </p>
       </div>
 
@@ -1479,9 +1479,6 @@ export default function LinkedInPostStudio() {
               <MultiPersonaPicker value={respondPersona} onChange={setRespondPersona} />
             </div>
 
-            <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
-              Site link auto-appended: aetheris.technology
-            </div>
           </div>
         </div>
 
