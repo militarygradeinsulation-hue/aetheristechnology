@@ -82,20 +82,6 @@ const Home = () => {
 
           <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
-          {/* Proprietary banner */}
-          <div className="px-4 max-w-3xl mx-auto mt-6">
-            <div className="glass rounded-sm border border-amber/40 px-4 py-3 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
-                Proprietary · Built In-House
-              </div>
-              <p className="text-sm text-foreground/90 leading-snug">
-                All technology in this suite is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
-              </p>
-              <p className="text-sm text-foreground/90 leading-snug mt-2">
-                We aren't a marketing, consulting, or brand agency. We do not sell software, AI, or systems. We are <span className="text-amber font-semibold">strictly Business Forensics</span>.
-              </p>
-            </div>
-          </div>
 
           {/* Operator-code gated free website leak scan */}
           <RepCodeFreeScan />
