@@ -16,7 +16,7 @@ import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
 // Eager: home + 404 (always needed)
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import AboutPage from "./pages/AboutPage";
+
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import DiagnosticPage from "./pages/DiagnosticPage";
@@ -126,7 +126,7 @@ const App = () => (
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<CatalogPage />} />
                       <Route path="/why-us" element={<WhyUsPage />} />
-                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/about" element={<Navigate to="/" replace />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/blog/:slug" element={<BlogPostPage />} />
@@ -176,7 +176,7 @@ const App = () => (
                       <Route path="/news" element={<NewsPage />} />
                       <Route path="/news/:slug" element={<NewsPostPage />} />
                       <Route path="/methodology" element={<MethodologyPage />} />
-                      <Route path="/credentials" element={<Navigate to="/about" replace />} />
+                      <Route path="/credentials" element={<Navigate to="/" replace />} />
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                       <Route path="/indianapolis" element={<LocationPage />} />
