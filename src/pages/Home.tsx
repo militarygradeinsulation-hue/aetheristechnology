@@ -15,6 +15,7 @@ import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 import { ProblemPicker } from '@/components/ProblemPicker';
 import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
 import { OperatorBio } from '@/components/OperatorBio';
+import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 
 
 
@@ -90,6 +91,9 @@ const Home = () => {
 
           {/* Who you're actually talking to */}
           <OperatorBio />
+
+          {/* Proof: anonymized verifiable outcomes */}
+          <VerifiableOutcomes />
 
           
 
