@@ -173,15 +173,17 @@ const SCRIPT_TOOL = {
 
 function scriptUserPrompt(s: Strategy, slot: { format: string; topicAngle: string; targetEmotion: string }) {
   const guides: Record<string, string> = {
-    auditRoast: `Write an AUDIT ROAST. Open with the dollar figure or the most broken thing. Walk through 2-3 specific findings about a hypothetical ${s.niche} business with real numbers. End: "wonder what we'd find on yours? link in bio runs this scan free."`,
-    patternReveal: `Write a PATTERN REVEAL. Open with "Here's a leak I find in 80% of ${s.niche} businesses." Expose the pattern with real numbers. Give the EXACT fix (workflow, sequence, automation). End with the soft CTA.`,
-    founderPOV: `Write a FOUNDER POV. Behind-the-scenes of building or finding a recent win. First-person, specific. Show momentum without bragging. End with the soft CTA.`,
-    counterTake: `Write a COUNTER-TAKE. Open with "Everyone tells [target buyer] to [common advice]. That's wrong." Explain why with reasoning. Give the better play. End with the soft CTA.`,
+    auditRoast: `FORMAT — AUDIT ROAST. Open cold with the dollar figure or the most broken finding from a hypothetical ${s.niche} business. Walk through 2–3 specific forensic findings with real numbers. Name the mechanism. Close with an original Operator Close written in voice — invite the viewer to get audited without using any stock phrase.`,
+    patternReveal: `FORMAT — PATTERN REVEAL. Expose a leak you see across ${s.niche} operators. Quantify the pattern with real numbers (X out of 10, % drag, $ leak). Give the exact mechanism and the exact fix. Close with an original Operator Close in voice — no canned CTA.`,
+    founderPOV: `FORMAT — FOUNDER POV. First-person diagnostic. Something you walked into, audited, or fixed recently. Specific numbers, specific mechanism. No bragging. Close with an original Operator Close in voice — no canned CTA.`,
+    counterTake: `FORMAT — COUNTER-TAKE. Reframe a piece of common ${s.niche} advice. Name what's actually true and why. Quantify the cost of the wrong play. Close with an original Operator Close in voice — no canned CTA.`,
   };
   return `${guides[slot.format] || guides.auditRoast}
 
 TOPIC ANGLE: ${slot.topicAngle}
-TARGET EMOTION: ${slot.targetEmotion}`;
+TARGET EMOTION: ${slot.targetEmotion}
+
+Write this fresh. Do not lift phrases from prior scripts. The voice spec and blueprint above are the rules — execute them live.`;
 }
 
 // ---- handlers ----
