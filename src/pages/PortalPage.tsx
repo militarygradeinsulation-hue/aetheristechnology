@@ -904,6 +904,21 @@ const PortalPage: React.FC = () => {
           >
             <Zap className="w-3.5 h-3.5" /> Optimized
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={() => {
+              const allIds = availableTabs.map(t => t.id as string);
+              setLayout('tabs');
+              setVisibleTabs(allIds);
+              persistOrder(allIds);
+              toast({ title: 'Showing all tabs', description: `${allIds.length} tabs restored to full view.` });
+            }}
+            title="Reset to show every available tab"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" /> Show All
+          </Button>
           <TabColorToggle />
           <TabSizeSlider />
 
