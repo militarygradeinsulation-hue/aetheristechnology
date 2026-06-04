@@ -481,9 +481,8 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     // never see the score hold steady while the leak number drifts.
     analysis = applyDeterministicLeaks(analysis, parsedHost);
 
-    // Save to database - store full report in gaps column
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    // Save to database - store full report in gaps column (first scan only is reused later)
+
 
     await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
       method: "POST",
