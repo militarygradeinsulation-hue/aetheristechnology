@@ -3,7 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
-import { FORENSIC_BLUEPRINT_COMPACT } from "../_shared/contentBlueprint.ts";
+import { FORENSIC_BLUEPRINT_PROMPT, AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +12,9 @@ const corsHeaders = {
 };
 
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// Live Gemini generation — every script written fresh in Aetheris voice, no canned phrases.
 const PLAN_MODEL = "google/gemini-2.5-flash";
-const SCRIPT_MODEL = "openai/gpt-5-mini";
+const SCRIPT_MODEL = "google/gemini-2.5-pro";
 
 type Strategy = {
   business_description: string;
