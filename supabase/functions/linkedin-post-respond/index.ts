@@ -413,7 +413,7 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are Joseph Toney, CEO of Aetheris, writing in first person with live thread awareness. This is Gemini-powered live drafting, not a canned template. Use THE AETHERIS LEXICON only as forensic background, not as a phrase checklist. FORMAT EXCEPTION: deliver as ONE dense paragraph (no line breaks). Pick any leak/category wording only when it naturally matches the exact post or reply. CRITICAL: "Brand Contradiction", "Operational Waste", and "Architecture Failure" are massively overused and now RARE-USE. Never default to them. Open with a varied, thread-specific move. HARD ANTI-REPETITION RULE: the formulas 'What looks like X is Y', 'The part people miss…', 'What most operators get wrong…', 'It's not X it's Y', 'Strip the surface off…', 'Most companies don't have a…', 'The hidden variable…', and 'Diagnosis:' are ALL rare-use. Never default to any of them. Invent fresh openers, sentence structures, and closers. Banned: em dashes, emojis, compliments, motivational language, 'mindset/hack/hustle/grind/unlock', closing questions, and the word 'consulting' (use Forensic Diagnostic). Use I/I've/I see/in my audits. ${personaActive ? "PERSONALITY ACTIVE: the personality/blend instructions in the user message override the default Aetheris cadence, leak-label checklist, and 4-part structure whenever they conflict. The personality owns rhythm and sentence length." : ""} ${recentDrafts.length ? `LIVE MEMORY ACTIVE: ${recentDrafts.length} saved drafts/comments were provided. You must audit and avoid their phrases, openers, closers, and sentence structures before writing.` : ""}` },
+            { role: "system", content: `${HUMAN_RESPONSE_SYSTEM}${personaActive ? "\n\nPERSONALITY ACTIVE: the personality/blend instructions in the user message control rhythm, sentence length, vocabulary, and angle." : ""}${recentDrafts.length ? `\n\nLIVE MEMORY ACTIVE: ${recentDrafts.length} saved drafts/comments were provided. Avoid their phrases, openers, closers, and sentence structures.` : ""}` },
 
             (() => {
               if (isReplyToReply && (hasOriginalImg || hasMyCommentImg || hasTheirReplyImg)) {
@@ -478,18 +478,16 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
     if (!post) throw new Error("Empty response from AI");
     post = post.replace(/[—–]/g, ".");
 
-    // Strip any model-generated URLs so we control the single CTA link at the end.
-    const CTA_LINK = "https://businessforensics.tech/";
+    // Strip any model-generated URLs. Comments/replies should be human responses,
+    // not traffic redirects or canned sales CTAs.
     post = post.replace(/https?:\/\/\S+/gi, "").replace(/\s{2,}/g, " ").trim();
 
     // Mode-aware character ceilings. LinkedIn truncates comments past ~1,250
     // chars, so we trim well below that and ALWAYS land on a sentence boundary
     // — never ship a half-thought, never blow past the platform limit.
-    // Reserve room for the appended CTA link.
-    const CTA_RESERVE = CTA_LINK.length + 2; // newline + link
     const MODE_CAP: Record<Mode, number> = { micro: 470, brief: 1150, medium: 1550, long: 2150, full: 2900 };
     const baseCap = maxCharsOverride ?? (isReplyToReply ? 650 : MODE_CAP[mode]);
-    const HARD_CAP = baseCap - CTA_RESERVE;
+    const HARD_CAP = baseCap;
     if (post.length > HARD_CAP) {
       const slice = post.slice(0, HARD_CAP);
       const lastStop = Math.max(
@@ -507,10 +505,6 @@ ${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION
         post = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim().replace(/[,;:]+$/, "") + ".";
       }
     }
-
-    // Append the canonical CTA link on its own line.
-    post = `${post}\n\n${CTA_LINK}`;
-
 
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
