@@ -1335,7 +1335,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       bumpClues();
       toast({
         title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead',
-        description: !res.cached && res.scheduled ? `${res.scheduled} touchpoint reminders added to your calendar.` : undefined,
+        description: !res.cached && res.scheduled
+          ? `${res.scheduled} fully-written touchpoints added to your calendar — scripts, talking points, objection handles, all set.`
+          : undefined,
       });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
