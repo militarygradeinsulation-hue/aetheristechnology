@@ -176,8 +176,37 @@ serve(async (req) => {
 
     const firecrawl = await firecrawlPromise;
 
-    // If nothing found, return cached data (if any) or a soft empty response — never 404
-    if (!person && !firecrawl) {
+    // ---- Backfill emails/phones from Firecrawl page extraction ----
+    // This is the primary use case for deep scan: even when RocketReach finds no
+    // person, surface every email/phone scraped from the prospect's website.
+    const EMAIL_RE_PF = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const PHONE_RE_PF = /(\+?\d{1,2}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
+    const fcEmails = new Set<string>();
+    const fcPhones = new Set<string>();
+    if (firecrawl) {
+      const jsonE = Array.isArray((firecrawl as any)?.json?.emails) ? (firecrawl as any).json.emails : [];
+      const jsonP = Array.isArray((firecrawl as any)?.json?.phones) ? (firecrawl as any).json.phones : [];
+      jsonE.forEach((e: any) => { const s = String(e || "").trim().toLowerCase(); if (s && s.includes("@")) fcEmails.add(s); });
+      jsonP.forEach((p: any) => { const s = String(p || "").trim(); if (s) fcPhones.add(s); });
+      const text = [
+        typeof (firecrawl as any)?.markdown_excerpt === "string" ? (firecrawl as any).markdown_excerpt : "",
+        typeof (firecrawl as any)?.summary === "string" ? (firecrawl as any).summary : "",
+        JSON.stringify((firecrawl as any)?.json || {}),
+      ].join("\n");
+      (text.match(EMAIL_RE_PF) || []).forEach(e => {
+        const s = e.toLowerCase();
+        if (!/\.(png|jpg|jpeg|gif|svg|webp)@/i.test(s) && !/(sentry|wixpress|example\.com|test@test)/i.test(s)) {
+          fcEmails.add(s);
+        }
+      });
+      (text.match(PHONE_RE_PF) || []).forEach(p => {
+        const digits = p.replace(/\D/g, "");
+        if (digits.length >= 10 && digits.length <= 13) fcPhones.add(p.trim());
+      });
+    }
+
+    // If nothing found at all, return cached data (if any) or a soft empty response
+    if (!person && !firecrawl && fcEmails.size === 0 && fcPhones.size === 0) {
       const cachedRr = (lead.enrichment as any)?.rocketreach || null;
       const cachedFc = (lead.enrichment as any)?.firecrawl || null;
       if (cachedRr || cachedFc) {
