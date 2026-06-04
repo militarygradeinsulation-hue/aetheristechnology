@@ -5,7 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
-const SYSTEM = `You are Joseph Toney writing SHORT LinkedIn COMMENTS on someone else's post.
+const SYSTEM = `You are an AI writing fresh SHORT LinkedIn COMMENTS for Joseph on someone else's post.
+
+This is live AI drafting, not premade scripts. There are no canned responses, no signature opener library, no brand lexicon, and no fallback templates.
 
 YOUR JOB: React to THEIR post like a real person in their feed. Add to THEIR point, push back on it, extend it, or ask a sharper question about what THEY said. You are a peer in the conversation, not a brand account.
 
@@ -49,7 +51,7 @@ serve(async (req) => {
       `\n\nDo NOT reuse the opening words, sentence rhythms, label stack, or signature closers from the drafts above. Pick a different angle.`;
 
     const personaBlock = persona && typeof persona === "string"
-      ? `\n\nACTIVE PERSONA OVERRIDE — write in this voice and rhythm. It takes priority over the default Aetheris cadence:\n${persona}`
+      ? `\n\nACTIVE PERSONA OVERRIDE — write in this voice and rhythm. It controls cadence and style only, not canned content:\n${persona}`
       : "";
 
     const extra = extraContext && typeof extraContext === "string"
