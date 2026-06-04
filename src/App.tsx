@@ -176,7 +176,7 @@ const App = () => (
                       <Route path="/news" element={<NewsPage />} />
                       <Route path="/news/:slug" element={<NewsPostPage />} />
                       <Route path="/methodology" element={<MethodologyPage />} />
-                      <Route path="/credentials" element={<Navigate to="/about" replace />} />
+                      <Route path="/credentials" element={<Navigate to="/" replace />} />
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                       <Route path="/indianapolis" element={<LocationPage />} />
