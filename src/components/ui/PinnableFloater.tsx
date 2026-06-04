@@ -31,6 +31,7 @@ export const PinnableFloater: React.FC<Props> = ({
   className,
   children,
   hideHandle,
+  disableBodyDrag,
 }) => {
   const { pos, pinned, dragging, togglePin, onPointerDown, onBodyPointerDown } = useDraggablePin({
     storageKey, defaultCorner, width, height,
