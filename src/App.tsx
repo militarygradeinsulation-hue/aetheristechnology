@@ -16,7 +16,7 @@ import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
 // Eager: home + 404 (always needed)
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import AboutPage from "./pages/AboutPage";
+
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import DiagnosticPage from "./pages/DiagnosticPage";
