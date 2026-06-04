@@ -365,7 +365,7 @@ Priority order for this generation:
 If Aetheris lexicon rules conflict with the personality rhythm, the personality wins. If the reply sounds like a generic Aetheris template, rewrite it before returning. The reader should feel a live human voice adapting to this thread, not a preset.`
       : "";
 
-    const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR (Joseph's) comment, and you are writing the next reply back to THEM directly.
+    const replyToReplyBlock = `You are continuing a LinkedIn thread. Someone replied to YOUR comment, and you are writing the next reply back to THEM directly.
 
 ${originalPostText ? `ORIGINAL POST (context only, do NOT re-litigate it):\n"""\n${originalPostText}\n"""\n` : hasOriginalImg ? `ORIGINAL POST: see the screenshot labeled "ORIGINAL POST SCREENSHOT" below (context only, do NOT re-litigate it).\n` : ""}YOUR PRIOR COMMENT (the one they're responding to — do NOT repeat its diagnosis verbatim):
 """
@@ -377,41 +377,26 @@ THEIR REPLY TO YOU (this is who you're now answering):
 ${theirReply || (hasTheirReplyImg ? "(see screenshot labeled THEIR REPLY SCREENSHOT — read the reply text in that image carefully)" : "")}
 """
 
-GEAR SHIFT FOR REPLY-TO-REPLY (very important — different from a top-level comment):
-- This is conversational, not a fresh diagnosis. You already made the diagnosis upstream.
-- Acknowledge or engage their specific point in the first clause. Name what they got right OR sharpen where their framing slips. No compliments ("great point"), no "thanks for the thoughtful reply" — just engage the substance directly.
-- DO NOT re-open with one of the forensic "I see this in audits weekly" openers. That's for top-level comments. Here the opener is a direct hook into THEIR words: "Where I'd push back on that is…", "Right on the [X], but the [Y] piece is where it gets interesting…", "That's the version most people land on. The deeper read is…", "Agreed on [X]. Where it gets messy is [Y]."
-- Shorter than a top-level comment: 50–90 words AND under 650 characters total. ONE dense paragraph. No line breaks. If you hit ~500 characters, close it out — do not keep going.
-- Still first person ("I", "I've", "in my audits"). Still systems-first. Still one numeric anchor if it earns the line.
-- End with a tight verdict OR a single sharp clarifying line that hands the conversation back without asking a soft permission question. ("That's the line that separates X from Y." is fine. "Does that make sense?" is banned.)
-- All other HARD BANS still apply (no em dashes, no emojis, no motivational language, no compliments, no questions as closers unless it's a forensic challenge).`;
+Write a live human reply to THEIR exact words. Engage the substance in the first clause. Do not diagnose, brand, sell, append a link, or reuse Aetheris language. Keep it 45–90 words, one paragraph, no line breaks. It can end with a clean statement or a real question if that is the most natural way to continue the conversation.`;
 
     const topLevelTaskBlock = `${hasImage ? "The image attached is a screenshot of someone's LinkedIn post." : `The following is the full text of someone's LinkedIn post:\n\n"""\n${postText}\n"""`}
 
-1. Read the post carefully. Identify the author's core claim and the surface framing.
-2. Write a ${modeSpec.label} (${modeSpec.spec}) AS JOSEPH TONEY in first person, in ONE dense paragraph (no line breaks).
-3. Open with a VARIED signature opener from the 80+ shapes in the style guide. ROTATE across categories (audit, reframe, hidden-mechanism, direct-diagnosis, numeric-anchor, autopsy, concession-pivot). HARD BAN on defaulting to the same formula: "What looks like X is Y", "The part people miss…", "What most operators get wrong…", "It's not X. It's Y.", "Strip the surface off…", "Most companies don't have a…", "The hidden variable…", and "Diagnosis:" are ALL rare-use (combined cap: max 1 in every 10 responses). Do not start with the same first word as a recent response. Invent fresh openers in Joseph's voice when possible. Never open with a compliment or agreement.
-4. Use "I", "I've", "I see", "I watch", "in my audits", "in my experience" as the anchor. This is a real operator speaking from real reps, not a brand voice.
-5. Reframe the surface → name the system underneath → explain the mechanism from your operator vantage point → land a sharp closing verdict.
-6. Reference "At Aetheris.technology we…" at most ONCE, and only if it earns the line.
+1. Read the post carefully. Identify the author's actual point.
+2. Write a ${modeSpec.label} (${modeSpec.spec}) in Joseph's first-person voice, in ONE natural paragraph.
+3. Respond to the specific post, not to a generic business prompt.
+4. Do not use a preset opener, Aetheris vocabulary, a diagnostic frame, a sales frame, or a link.
 ${extraContext ? `\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : ""}
 
 Return ONLY the response text. One paragraph. No line breaks between sentences. No commentary, no labels, no quotation marks, no markdown.`;
 
-    const userInstruction = `${STYLE_GUIDE}
-
-${AETHERIS_LEXICON}
-
-${LEAK_SELECTION_RULES}
-
-${personaRuntimeBlock}
+    const userInstruction = `${personaRuntimeBlock}
 
 ${liveAntiRepetitionBlock}
 
 ═══════════════════════════════════════════════════════════
 TASK
 ═══════════════════════════════════════════════════════════
-${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLIVE CHECK BEFORE OUTPUT: (a) Did I answer their exact reply, not a generic prompt? (b) Did I avoid every repeated opener, phrase, verdict shape, and sentence rhythm in the full-library audit? (c) ${personaActive ? "Does the selected personality/blend control the rhythm of every sentence?" : "Does this sound like Joseph without recycling the default template?"} (d) Is the final answer structurally impossible to confuse with the saved drafts? If any answer is no, rewrite before returning.` : topLevelTaskBlock + `\n\nLIVE CHECK BEFORE OUTPUT: (a) Did I answer the actual post accurately? (b) Did I avoid every repeated opener, phrase, verdict shape, and sentence rhythm in the full-library audit? (c) ${personaActive ? "Does the selected personality/blend control the rhythm of every sentence?" : "Does this sound like Joseph without recycling the default template?"} (d) If I used a leak label, is it demanded by the post rather than a default? Rewrite if any answer is no.`}`;
+${isReplyToReply ? replyToReplyBlock + (extraContext ? `\n\nADDITIONAL DIRECTION FROM OPERATOR: ${extraContext}` : "") + `\n\nReturn ONLY the reply text. One paragraph. No line breaks. No commentary, no labels, no quotation marks, no markdown.\n\nLIVE CHECK BEFORE OUTPUT: Did I answer their exact reply like a person, avoid every canned opener, avoid Aetheris language, and avoid a sales/link CTA? If not, rewrite before returning.` : topLevelTaskBlock + `\n\nLIVE CHECK BEFORE OUTPUT: Did I answer the actual post like a person, avoid every canned opener, avoid Aetheris language, and avoid a sales/link CTA? If not, rewrite before returning.`}`;
 
 
 
