@@ -16,7 +16,7 @@ import { RepImageStudio } from '@/components/portal/RepImageStudio';
 import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
-import { FileText, Search } from 'lucide-react';
+import { FileText, Search, LayoutGrid } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
