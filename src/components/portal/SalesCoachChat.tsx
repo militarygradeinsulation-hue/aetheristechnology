@@ -536,7 +536,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
         </PinnableFloater>
       )}
       {isOpen && (
-        <PinnableFloater storageKey="floater.salescoach.panel" defaultCorner="bottom-right" width={420} height={640} zIndex={50}>
+        <PinnableFloater storageKey="floater.salescoach.panel" defaultCorner="bottom-right" width={420} height={640} zIndex={50} disableBodyDrag>
           {Panel}
         </PinnableFloater>
       )}
