@@ -90,8 +90,6 @@ const Home = () => {
           <RepCodeFreeScan />
 
 
-          {/* Proof: anonymized verifiable outcomes */}
-          <VerifiableOutcomes />
 
           
 
