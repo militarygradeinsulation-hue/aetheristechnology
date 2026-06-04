@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
 type ChatContentPart =
   | { type: "text"; text: string }
