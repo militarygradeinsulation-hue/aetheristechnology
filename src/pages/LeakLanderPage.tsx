@@ -118,21 +118,6 @@ const LeakLanderPage: React.FC = () => {
             </h1>
           </section>
 
-          {/* Proprietary banner */}
-          <div className="mt-10 max-w-5xl mx-auto">
-            <div className="rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] px-5 py-5 text-center">
-              <div className="font-case text-xs uppercase tracking-widest text-amber mb-2">
-                Proprietary · Built In-House
-              </div>
-              <p className="text-base sm:text-lg text-foreground leading-relaxed">
-                All technology in this suite is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
-              </p>
-              <p className="text-base sm:text-lg text-foreground leading-relaxed mt-3">
-                We aren't a marketing, consulting, or brand agency. We do not sell software, AI, or systems. We are <span className="text-amber font-semibold">strictly Business Forensics</span>.
-              </p>
-            </div>
-          </div>
-
           {/* Buttons. primary CTAs, larger */}
           <section
             className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
@@ -159,10 +144,25 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
-          {/* Free PDF download */}
+          {/* Demand generation infographic. front & center above "What the Hell" */}
+          <section
+            className="mt-12 max-w-5xl mx-auto animate-fade-in"
+            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
+              <img
+                src={demandGenInfographic}
+                alt="Aetheris Business Forensics & Revenue Recovery. 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
+                className="w-full h-auto rounded-xl"
+                loading="lazy"
+              />
+            </div>
+          </section>
+
+          {/* Free PDF download. moved below the infographic */}
           <section
             className="mt-10 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "260ms", animationFillMode: "both" }}
+            style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
             <a
               href="/downloads/How-Aetheris-Can-Help-You.pdf"
@@ -183,20 +183,6 @@ const LeakLanderPage: React.FC = () => {
             </a>
           </section>
 
-          {/* Demand generation infographic. front & center above "What the Hell" */}
-          <section
-            className="mt-12 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
-              <img
-                src={demandGenInfographic}
-                alt="Aetheris Business Forensics & Revenue Recovery. 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
-                className="w-full h-auto rounded-xl"
-                loading="lazy"
-              />
-            </div>
-          </section>
 
 
 
