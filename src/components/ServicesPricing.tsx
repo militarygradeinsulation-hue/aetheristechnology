@@ -688,23 +688,23 @@ export const ServicesPricing: React.FC = () => {
                 <div
                   onClick={() => { if (!locked) setExpandedIdx(index); }}
                   className={`forensic-tile rounded-md flex flex-col h-full transition-all duration-300 group relative overflow-hidden p-5 ${
-                    locked ? 'cursor-not-allowed opacity-95 border border-border/60' : 'cursor-pointer'
+                    locked ? 'cursor-not-allowed opacity-95 border-2 border-border/70' : 'cursor-pointer'
                   } ${
                     isSelected
-                      ? 'border-2 border-amber/70 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.35)]'
-                      : `border ${locked ? 'border-border/60' : 'border-border/60 hover:border-amber/50'}`
+                      ? 'border-[3px] border-amber/80 shadow-[0_24px_70px_-18px_hsl(var(--amber-glow)/0.4)]'
+                      : `border-2 ${locked ? 'border-border/70' : 'border-amber/40 hover:border-amber/70'}`
                   }`}
                 >
                   {isServiceComingSoon(service) ? (
-                    <span className="absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-mono border bg-crimson/15 text-crimson border-crimson/40 backdrop-blur-md bg-background/70">
+                    <span className="absolute top-3 right-3 z-10 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-mono border-2 bg-crimson/15 text-crimson border-crimson/50 backdrop-blur-md bg-background/70">
                       Coming Soon
                     </span>
                   ) : service.badge && (
                     <span
-                      className={`absolute top-3 right-3 z-10 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-case border ${
+                      className={`absolute top-3 right-3 z-10 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.14em] font-case border-2 ${
                         service.badge === 'FOUNDATIONAL'
-                          ? 'bg-amber/10 text-amber border-amber/40 backdrop-blur-md bg-background/70'
-                          : 'bg-amber/15 text-amber border-amber/30 backdrop-blur-md'
+                          ? 'bg-amber/10 text-amber border-amber/50 backdrop-blur-md bg-background/70'
+                          : 'bg-amber/15 text-amber border-amber/40 backdrop-blur-md'
                       }`}
                     >
                       {service.badge === 'FOUNDATIONAL' ? 'Foundational Engagement' : service.badge}
@@ -713,29 +713,30 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Case-file header */}
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 transition-all bg-amber/10 group-hover:bg-amber/20 ${
+                    <div className={`w-11 h-11 rounded-md flex items-center justify-center shrink-0 transition-all bg-amber/10 group-hover:bg-amber/20 ${
                       isSelected ? 'ring-1 ring-amber/50 shadow-[0_0_18px_-2px_hsl(var(--amber-glow)/0.55)]' : ''
                     }`}>
-                      <service.icon className="w-5 h-5 text-amber" />
+                      <service.icon className="w-6 h-6 text-amber" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-0.5">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber/80 mb-0.5">
                         Tool {toolNum} / {totalStr}
                       </div>
-                      <div className="font-bold text-foreground text-sm leading-tight font-display">{service.title}</div>
+                      <div className="font-bold text-foreground text-base leading-tight font-display">{service.title}</div>
                     </div>
                   </div>
 
                   {/* Finds line */}
-                  <p className="text-xs text-foreground/70 leading-snug pl-[3.25rem] mb-3">
-                    <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
+                  <p className="text-sm text-foreground/80 leading-snug pl-[3.5rem] mb-3">
+                    <span className="font-case text-[10px] uppercase tracking-widest text-amber">Finds → </span>
                     {service.description}
                   </p>
 
                   {/* Success stat — case-file footnote */}
-                  <div className="pl-[3.25rem] mb-3 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 leading-snug">
+                  <div className="pl-[3.5rem] mb-3 font-case text-[10px] uppercase tracking-widest text-muted-foreground/80 leading-snug">
                     ▸ {service.successStat}
                   </div>
+
 
                   {/* Price + open hint */}
                   <div className="mt-auto pt-3 border-t border-amber/15 flex items-end justify-between gap-3">
