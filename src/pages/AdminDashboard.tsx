@@ -764,25 +764,27 @@ const AdminDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => toggleCategory(group.name, isOpen)}
-                          className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left"
+                          className="w-full flex items-center gap-2 text-left"
+                          style={tabTileStyle(tabScale)}
                           aria-expanded={isOpen}
                         >
                           <ChevronDown
-                            className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform ${isOpen ? '' : '-rotate-90'}`}
+                            style={{ width: tabIconSize(tabScale) * 0.9, height: tabIconSize(tabScale) * 0.9 }}
+                            className={`text-muted-foreground/60 transition-transform ${isOpen ? '' : '-rotate-90'}`}
                           />
-                          <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-amber/80">
+                          <span className="uppercase tracking-[0.2em] font-mono text-amber/80" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
                             {group.name}
                           </span>
                           <span className="h-px flex-1 bg-border/40" aria-hidden />
-                          <span className="text-[10px] font-mono text-muted-foreground/50">
+                          <span className="font-mono text-muted-foreground/50" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
                             {group.keys.length}
                           </span>
                           {containsActive && (
-                            <span className="text-[9px] font-mono uppercase tracking-wider text-amber/90">●</span>
+                            <span className="font-mono uppercase tracking-wider text-amber/90" style={{ fontSize: `${(9 * tabScale).toFixed(2)}px` }}>●</span>
                           )}
                         </button>
                         {isOpen && (
-                          <div className="flex gap-1.5 flex-wrap px-3.5 pb-3 pt-0.5">
+                          <div className="flex flex-wrap pt-0.5" style={tabTileBodyStyle(tabScale)}>
                             {group.keys
                               .map(k => ALL_TAB_DEFS.find(t => t.key === k))
                               .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
