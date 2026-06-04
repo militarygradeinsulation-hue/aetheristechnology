@@ -43,7 +43,7 @@ const groupMeta = [
   {
     icon: PenLine,
     felt: "It's 11pm on a Sunday and you still haven't posted anything this week.",
-    fix: 'Stop staring at the blank page — these do the heavy lift.',
+    fix: 'Stop staring at the blank page. These do the heavy lift.',
     backstory:
       "I missed three months of posting while my kids were in surgery. The content generator is what I built when I came back, so I never had to choose between visibility and showing up at the hospital again.",
   },
@@ -59,7 +59,7 @@ const groupMeta = [
     felt: "You've paid six figures to consultants and you're still asking the same questions.",
     fix: 'Stop paying for decks. Get an operator-led ledger with dollar amounts on every leak.',
     backstory:
-      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $2,500 Forensic Diagnostic is the opposite of that experience — flat fee, written ledger, credit toward the work.",
+      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $2,500 Forensic Diagnostic is the opposite of that experience. Flat fee, written ledger, credit toward the work.",
   },
   {
     icon: Anchor,
@@ -77,7 +77,7 @@ const groupMeta = [
   },
   {
     icon: BatteryLow,
-    felt: "The work isn't the problem anymore — the carrying it is.",
+    felt: "The work isn't the problem anymore. The carrying it is.",
     fix: 'Hand the audit to an operator. Get the weekend back.',
     backstory:
       "I spent a winter freezing inside half-built houses with two kids in surgery and a company I couldn't put down. Nobody should have to carry it alone. That's the only reason Aetheris exists.",

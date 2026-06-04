@@ -58,10 +58,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="w-full max-w-5xl mx-auto text-center space-y-2 pb-1">
             <p className="font-forensic text-lg md:text-2xl lg:text-3xl text-foreground leading-tight">
-              I see you on my site. <span className="text-amber italic">Actually do something about your problem</span> — instead of losing money and just leaving.
+              I see you on my site. <span className="text-amber italic">Actually do something about your problem</span>. Instead of losing money and just leaving.
             </p>
             <p className="font-forensic text-base md:text-lg lg:text-xl text-foreground/85 leading-snug">
-              I can find your leaks — <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
+              I can find your leaks. <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                         "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
                       </p>
                       <p className="text-[14px] leading-relaxed text-foreground/90 mt-2">
-                        I'd think the same thing. I <span className="text-amber">did</span> think the same thing — every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
+                        I'd think the same thing. I <span className="text-amber">did</span> think the same thing. Every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
                       </p>
                     </div>
 
