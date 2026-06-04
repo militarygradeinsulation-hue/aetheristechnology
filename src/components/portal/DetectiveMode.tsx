@@ -197,6 +197,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     const steps: PrepStep[] = [];
     if (hasWebsite) steps.push({ key: 'scan', label: 'Company website scan', status: 'pending' });
     steps.push({ key: 'deep', label: 'Deep scan (Firecrawl + RocketReach)', status: 'pending' });
+    if ((lead as any)?.contact_name) steps.push({ key: 'personality', label: 'Personality + backstory dossier', status: 'pending' });
     setPrepSteps(steps);
 
     if (hasWebsite) {
@@ -230,6 +231,18 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       }
     } catch (e) {
       updateStep('deep', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+    }
+
+    // Personality dossier — separate call so portal leads (which use portalLeads.rocketReach)
+    // still get the human-connection brief.
+    if ((lead as any)?.contact_name) {
+      updateStep('personality', { status: 'running' });
+      try {
+        await runDetectivePrep('personality dossier');
+        updateStep('personality', { status: 'done', note: 'connection angles built' });
+      } catch (e) {
+        updateStep('personality', { status: 'fail', note: e instanceof Error ? e.message : 'failed' });
+      }
     }
 
     return { scan: curScan, rr: curRr, fc: curFc, enrich: curEnrich };
