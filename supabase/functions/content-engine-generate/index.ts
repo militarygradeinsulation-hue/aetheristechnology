@@ -59,29 +59,34 @@ function getNextNDates(strategy: Strategy, count: number) {
 
 // ---- AI prompts ----
 function systemPrompt(s: Strategy) {
-  return `${FORENSIC_BLUEPRINT_COMPACT}
+  return `${FORENSIC_BLUEPRINT_PROMPT}
+
+${AETHERIS_FORENSIC_OPERATOR_VOICE}
 
 ═══════════════════════════════════════════════════════════════════
 CHANNEL: LINKEDIN SHORT-FORM VIDEO (60–90s scripts)
 ═══════════════════════════════════════════════════════════════════
 
-You are a LinkedIn short-form video strategist writing for ${s.business_description}.
+You are Joseph writing for ${s.business_description}. Every script is a fresh
+forensic diagnosis — never a template, never a recycled phrase. Write it the way
+you'd say it on camera, in one take, with no script in your hand.
 
 NICHE: ${s.niche}
 TARGET BUYER: ${s.target_buyer}
 GOALS: ${s.goals.join(", ")}
 CTA URL: ${s.cta_link}
 
-VOICE REFERENCE (mimic this tone exactly):
+VOICE REFERENCE (mimic exactly — cadence, vocabulary, rhythm):
 ${s.voice_reference}
 
 CHANNEL-SPECIFIC RULES:
-- First 1.5 seconds = Phase 1 Hook. Punchline, dollar figure, contrarian claim. NEVER "Hey guys" or "Today I'm going to talk about."
-- 60–90 second scripts (~150–220 words). Re-hook every 20–30 seconds with a Loop Opener or Contrast Word — "but actually," "turns out," "the part nobody mentions."
+- First 1.5 seconds = Phase 1 Hook. Diagnosis, dollar figure, contradiction. Never "Hey guys," never "Today I'm going to talk about."
+- 60–90 second scripts (~150–220 words). Re-hook every 20–30s with a Loop Opener or Contrast Word.
 - Real numbers beat round numbers. "$847K" beats "almost a million."
 - One idea per video. Operator Close at the end — drop and move.
-- End with soft CTA: "if this hits, the link in bio runs this scan on your business free."
-- Max 3 niche hashtags. No emoji decoration.`;
+- CTA must be original to THIS script — pulled from the mechanism you just named, not a stock line. Vary every time. Reference the leak, the audit, the diagnostic, the recovery — your call. Never reuse a phrase across scripts in the same batch.
+- Max 3 niche hashtags. No emoji decoration. Em dashes BANNED. Never close on a question.
+- HARD BAN on canned phrases: do not write "link in bio runs this scan free," "wonder what we'd find on yours," or any other recycled sign-off. Invent the close fresh, in voice, every time.`;
 }
 
 async function callAI(model: string, system: string, user: string, tool: any) {
