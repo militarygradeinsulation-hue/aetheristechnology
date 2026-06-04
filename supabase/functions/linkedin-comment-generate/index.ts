@@ -132,9 +132,9 @@ serve(async (req) => {
     const args = JSON.parse(call.function.arguments || "{}");
 
     return new Response(JSON.stringify({
-      short: String(args.short || "").trim(),
-      medium: String(args.medium || "").trim(),
-      sharp_question: String(args.sharp_question || "").trim(),
+      short: validateComment(args.short),
+      medium: validateComment(args.medium),
+      sharp_question: validateComment(args.sharp_question),
       scanned: drafts.length,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
