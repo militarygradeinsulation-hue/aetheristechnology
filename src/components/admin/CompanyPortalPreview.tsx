@@ -131,8 +131,8 @@ export const CompanyPortalPreview: React.FC<{ defaultTab?: string; title?: strin
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-amber" />
           <div>
-            <h2 className="text-lg font-bold text-foreground font-display leading-tight">Company Portal, Live Preview</h2>
-            <p className="text-xs text-muted-foreground">View any rep's real portal, leads, commissions, calendar, training. Changes are live.</p>
+            <h2 className="text-lg font-bold text-foreground font-display leading-tight">{title || 'Company Portal, Live Preview'}</h2>
+            <p className="text-xs text-muted-foreground">{subtitle || "View any rep's real portal, leads, commissions, calendar, training. Changes are live."}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
