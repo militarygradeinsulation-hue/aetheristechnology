@@ -10,7 +10,7 @@ import { SEOHead } from '@/components/SEOHead';
 import architectBanner from '@/assets/you-dont-need-expensive.png.asset.json';
 
 
-import { UpcomingEvents } from '@/components/UpcomingEvents';
+
 import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 
 import { ProblemPicker } from '@/components/ProblemPicker';
@@ -134,8 +134,6 @@ const Home = () => {
           </section>
 
 
-          {/* Upcoming events, anchor the bottom */}
-          <UpcomingEvents />
         </main>
 
         <Footer />
