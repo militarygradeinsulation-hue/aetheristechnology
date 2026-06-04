@@ -27,7 +27,7 @@ const GENERIC_REP = '__rep__';
 const REP_PREVIEW_KEY = 'admin.portalPreview.selectedRep.v1';
 const DEVICE_PREVIEW_KEY = 'admin.portalPreview.device.v1';
 
-export const CompanyPortalPreview: React.FC = () => {
+export const CompanyPortalPreview: React.FC<{ defaultTab?: string; title?: string; subtitle?: string }> = ({ defaultTab, title, subtitle }) => {
   const { toast } = useToast();
   const [device, setDevice] = useState<Device>(() => {
     if (typeof window === 'undefined') return 'desktop';
