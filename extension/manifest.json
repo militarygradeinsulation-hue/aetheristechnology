@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Aetheris Operator — LinkedIn Co-Pilot",
+  "version": "0.1.0",
+  "description": "Reads the LinkedIn post you are viewing and drafts 3 AI comment variants in a side panel. Built by Aetheris.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://ihdjpxhcaiaixmqxyqoe.supabase.co/*"
+  ],
+  "action": { "default_title": "Aetheris Operator", "default_icon": "icon.png" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "48": "icon.png", "128": "icon.png" }
+}
