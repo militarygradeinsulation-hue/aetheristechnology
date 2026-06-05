@@ -13,6 +13,7 @@ import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
+import ClassicTabsButton from '@/components/ClassicTabsButton';
 import { useTabSize, tabButtonStyle, tabIconSize, tabTileStyle, tabTileBodyStyle } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -701,6 +702,7 @@ const AdminDashboard: React.FC = () => {
           />
           <TabColorToggle />
           <TabSizeSlider />
+          <ClassicTabsButton />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {visibleTabs.length} / {ALL_TAB_DEFS.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
           </span>
