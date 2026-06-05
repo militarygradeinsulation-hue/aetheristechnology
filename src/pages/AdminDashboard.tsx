@@ -732,7 +732,36 @@ const AdminDashboard: React.FC = () => {
               )}
             </div>
 
-            {!tabsCollapsed && (() => {
+            {!tabsCollapsed && classicTabs && (
+              <div className="flex flex-wrap gap-1.5 mb-8" style={tabTileBodyStyle(tabScale)}>
+                {ALL_TAB_DEFS
+                  .filter(t => visibleTabs.includes(t.key))
+                  .map(({ key: tab, label, icon: Icon }) => {
+                    const active = activeTab === tab;
+                    return (
+                      <Button
+                        key={tab}
+                        id={`admin-tab-btn-${tab}`}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(tab as typeof activeTab);
+                          ensureTabData(tab);
+                          if (tab !== 'tools') setActiveTool(null);
+                        }}
+                        variant={active ? 'default' : 'ghost'}
+                        size="sm"
+                        style={tabButtonStyle(tabScale)}
+                        className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
+                      >
+                        <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                        <span>{label}</span>
+                      </Button>
+                    );
+                  })}
+              </div>
+            )}
+
+            {!tabsCollapsed && !classicTabs && (() => {
               const CATEGORIES: { name: string; keys: string[] }[] = [
                 { name: 'Overview', keys: ['overview', 'insights', 'events'] },
                 { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
