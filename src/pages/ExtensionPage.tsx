@@ -25,6 +25,7 @@ export default function ExtensionPage() {
   return (
     <>
       <SEOHead
+        path="/extension"
         title="Aetheris Operator — Chrome Extension"
         description="Drafts 3 AI LinkedIn comments inside your real browser. Reads the post you're viewing, lets you insert directly into the comment box."
       />
