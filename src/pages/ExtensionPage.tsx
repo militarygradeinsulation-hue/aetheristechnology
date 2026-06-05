@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function ExtensionPage() {
   const download = () => {
