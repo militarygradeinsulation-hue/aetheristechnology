@@ -14,6 +14,7 @@ import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
 import ClassicTabsButton from '@/components/ClassicTabsButton';
+import { useClassicTabs } from '@/lib/classicTabs';
 import { useTabSize, tabButtonStyle, tabIconSize, tabTileStyle, tabTileBodyStyle } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
