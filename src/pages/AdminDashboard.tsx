@@ -14,6 +14,7 @@ import CustomViewSelector from '@/components/admin/CustomViewSelector';
 import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
 import ClassicTabsButton from '@/components/ClassicTabsButton';
+import { useClassicTabs } from '@/lib/classicTabs';
 import { useTabSize, tabButtonStyle, tabIconSize, tabTileStyle, tabTileBodyStyle } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -199,6 +200,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { mode: tabColorMode } = useTabColorMode();
   const { scale: tabScale } = useTabSize();
+  const { classic: classicTabs } = useClassicTabs();
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
@@ -730,7 +732,36 @@ const AdminDashboard: React.FC = () => {
               )}
             </div>
 
-            {!tabsCollapsed && (() => {
+            {!tabsCollapsed && classicTabs && (
+              <div className="flex flex-wrap gap-1.5 mb-8" style={tabTileBodyStyle(tabScale)}>
+                {ALL_TAB_DEFS
+                  .filter(t => visibleTabs.includes(t.key))
+                  .map(({ key: tab, label, icon: Icon }) => {
+                    const active = activeTab === tab;
+                    return (
+                      <Button
+                        key={tab}
+                        id={`admin-tab-btn-${tab}`}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(tab as typeof activeTab);
+                          ensureTabData(tab);
+                          if (tab !== 'tools') setActiveTool(null);
+                        }}
+                        variant={active ? 'default' : 'ghost'}
+                        size="sm"
+                        style={tabButtonStyle(tabScale)}
+                        className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
+                      >
+                        <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                        <span>{label}</span>
+                      </Button>
+                    );
+                  })}
+              </div>
+            )}
+
+            {!tabsCollapsed && !classicTabs && (() => {
               const CATEGORIES: { name: string; keys: string[] }[] = [
                 { name: 'Overview', keys: ['overview', 'insights', 'events'] },
                 { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
