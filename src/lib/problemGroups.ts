@@ -16,6 +16,7 @@ import coldLeadsCartoon from '@/assets/cold-leads-cartoon.png.asset.json';
 import blankPageCartoon from '@/assets/blank-page-cartoon.png.asset.json';
 import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
 import expertBurnCartoon from '@/assets/expert-burn-cartoon.png.asset.json';
+import bottleneckCartoon from '@/assets/bottleneck-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -91,6 +92,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I'm the bottleneck. Nothing moves unless I touch it.",
     symptom: "You wanted a business. You built a job that pays worse and never clocks out. Vacations are a lie.",
+    image: bottleneckCartoon.url,
     tools: [
       { thumbnail: diagnosticThumb, title: 'Business Diagnostic', solves: 'Names every decision still routed through you — and the ones you can hand off Monday.', path: '/business-diagnostic' },
       { thumbnail: followUpThumb, title: 'Follow-Up System Plan', solves: 'Takes sales follow-up off your plate with a cadence the team runs without you.', path: '/follow-up-plan' },
