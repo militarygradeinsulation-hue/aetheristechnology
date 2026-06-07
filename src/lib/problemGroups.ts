@@ -14,6 +14,7 @@ import leakingMoneyCartoon from '@/assets/leaking-money-cartoon.png.asset.json';
 import brandDissonanceCartoon from '@/assets/brand-dissonance-cartoon.png.asset.json';
 import coldLeadsCartoon from '@/assets/cold-leads-cartoon.png.asset.json';
 import blankPageCartoon from '@/assets/blank-page-cartoon.png.asset.json';
+import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -72,6 +73,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I'm about to hire and I can't afford to get it wrong.",
     symptom: "The last bad hire cost you $40K and three months of sideways energy. You want to know before the offer.",
+    image: hiringRiskCartoon.url,
     tools: [
       { thumbnail: resumeForensicsThumb, title: 'Resume Forensics', solves: 'Turns a resume into a case file: fit score, red flags, and the interview questions that expose them.', path: '/resume-forensics' },
     ],
