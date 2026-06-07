@@ -10,6 +10,7 @@ import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
 import brandContradictionsThumb from '@/assets/brand-contradictions-thumb.jpg';
 import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
 import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
+import leakingMoneyCartoon from '@/assets/leaking-money-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -21,6 +22,7 @@ export interface Tool {
 export interface ProblemGroup {
   problem: string;
   symptom: string;
+  image?: string;
   tools: Tool[];
 }
 
@@ -28,6 +30,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I don't know where the business is actually leaking money.",
     symptom: "Revenue feels stuck. The numbers look fine on paper but cash is tight and you can't point at why.",
+    image: leakingMoneyCartoon.url,
     tools: [
       { thumbnail: diagnosticThumb, title: 'Business Diagnostic', solves: 'Scores 20 operational pressure points so you can see, in writing, what your gut already knows.', path: '/business-diagnostic' },
       { thumbnail: scannerThumb, title: 'Website Scanner', solves: 'Finds the SEO, speed, and conversion leaks killing your inbound before leads ever call.', path: '/scan' },
