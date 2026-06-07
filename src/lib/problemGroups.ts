@@ -17,6 +17,7 @@ import blankPageCartoon from '@/assets/blank-page-cartoon.png.asset.json';
 import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
 import expertBurnCartoon from '@/assets/expert-burn-cartoon.png.asset.json';
 import bottleneckCartoon from '@/assets/bottleneck-cartoon.png.asset.json';
+import junkStackCartoon from '@/assets/junk-stack-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -102,6 +103,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "My tech stack is a junk drawer of subscriptions doing nothing.",
     symptom: "You're paying for tools nobody opens. Your CRM is half-built. Reports take a person, not a system.",
+    image: junkStackCartoon.url,
     tools: [
       { thumbnail: scannerThumb, title: 'Website Scanner', solves: 'Audits the public-facing tech stack — speed, SEO, broken signals — in 30 seconds.', path: '/scan' },
       { thumbnail: diagnosticThumb, title: 'Business Diagnostic', solves: 'Maps your tooling spend against actual usage and flags what to kill.', path: '/business-diagnostic' },
