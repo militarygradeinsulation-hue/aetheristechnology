@@ -170,6 +170,17 @@ export const ProblemPicker: React.FC = () => {
                 </button>
               </div>
 
+              {openGroup.image && (
+                <div className="mb-3 rounded-sm overflow-hidden border border-amber/30 bg-background">
+                  <img
+                    src={openGroup.image}
+                    alt={`Editorial illustration: ${openGroup.problem}`}
+                    className="w-full h-auto block"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
               {openMeta?.backstory && (
                 <div className="mb-3 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-3 py-2">
                   <p className="text-[13px] text-foreground/85 leading-relaxed italic">
