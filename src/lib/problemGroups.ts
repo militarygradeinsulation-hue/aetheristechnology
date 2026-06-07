@@ -18,6 +18,7 @@ import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
 import expertBurnCartoon from '@/assets/expert-burn-cartoon.png.asset.json';
 import bottleneckCartoon from '@/assets/bottleneck-cartoon.png.asset.json';
 import junkStackCartoon from '@/assets/junk-stack-cartoon.png.asset.json';
+import burnoutCartoon from '@/assets/burnout-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -112,6 +113,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I haven't taken a real weekend in two years and I'm running out of gas.",
     symptom: "The work isn't the problem anymore — the carrying it is. You can't remember the last Saturday you didn't check email.",
+    image: burnoutCartoon.url,
     tools: [
       { thumbnail: diagnosticThumb, title: 'Forensic Diagnostic ($2,500)', solves: 'Hand the audit to an operator. Get a written ledger back. Stop being the smartest person in your own room.', path: '/leak-audit' },
       { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', solves: 'Strips the words on your site that quietly invite tire-kickers into your inbox.', path: '/friction-audit' },
