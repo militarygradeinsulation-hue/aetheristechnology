@@ -30,11 +30,11 @@ VISUAL FORMATTING (non-negotiable):
 - Bold hook: 3–8 words, often with a specific number. First 1–2 lines must force "see more".
 - Target word count: 120–220. Paragraph blocks: 2–4. Body sentence: 18–26 words. Verdict: <15 words.
 
-4-PART ARCHITECTURE (reframe → anchor → mechanism → verdict):
-1. REFRAME OPENER — first sentence pivots the conventional framing. Examples: "This isn't about X. It's about Y." / "Disagree." / "The part people miss is [mechanism]." / "Most founders frame this as X. It's actually Y." / "This isn't a discipline problem. It's a systems problem."
-2. AUDIT ANCHOR (sentence 2 or 3) — drop credibility pin. Examples: "In my audits I see this pattern constantly." / "The companies I forensically review all share..." / "Across 200+ diagnostics..."
-3. MECHANISM (2–4 sentences) — the actual system behind the surface observation. Logic, causation, sequence. NOT feelings, NOT inspiration.
-4. VERDICT (1–2 punchy lines, <15 words) — names the real problem or flips the framing. Quotable. Stands alone as a tweet.
+4-PART POST ARCHITECTURE (reframe → anchor → mechanism → verdict) — built from the DIRECT OPERATOR FORMULA that produced Joseph's 24k–29k impression hits:
+1. REFRAME OPENER — contradict or recategorize. Rotate, never repeat across a batch: "Disagree." / "That's not [surface]. That's [real thing]." / "[X] is the one that actually kills companies." / "Every [category] follows the same arc:" / "The part nobody audits is ___." (use the last one at most ONCE per week — overused.)
+2. FORENSIC AUTHORITY ANCHOR (line 2–3) — report, don't opine: "In every audit I run…" / "When I audit founder finances…" / "I see this pattern in every exit I review." / "Across 200+ diagnostics…"
+3. MECHANISM AS BINARY (2–4 sentences) — name the hidden causal layer as a flip. "X isn't A. It's B." Include ONE real number or honest pattern claim ("I routinely see 7 of 10…"). Never invent precision.
+4. APHORISTIC VERDICT (<15 words) — screenshot-bait. Contrast or mic-drop. Examples that landed: "It's what survives without the founder in the room." / "Not revenue. Freedom math." / "Structure separates operators from gamblers." / "Momentum isn't a mindset. It's a financial instrument."
 
 SIGNATURE PHRASES (use naturally, not forced):
 - "Fragile looks like growth until the wind changes."
