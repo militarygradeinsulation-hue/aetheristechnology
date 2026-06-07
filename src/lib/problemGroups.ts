@@ -12,6 +12,7 @@ import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
 import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 import leakingMoneyCartoon from '@/assets/leaking-money-cartoon.png.asset.json';
 import brandDissonanceCartoon from '@/assets/brand-dissonance-cartoon.png.asset.json';
+import coldLeadsCartoon from '@/assets/cold-leads-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -50,6 +51,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "Leads come in, then go cold. Sales is a guessing game.",
     symptom: "Your team can't tell you why deals stall. Follow-up is whoever remembers. Pipeline is a feeling, not a number.",
+    image: coldLeadsCartoon.url,
     tools: [
       { thumbnail: salesScriptsThumb, title: 'Sales Script Generator', solves: 'Gives reps real opening lines, objection handlers, and follow-ups built for your offer.', path: '/sales-scripts' },
       { thumbnail: followUpThumb, title: 'Follow-Up System Plan', solves: "A 14-day multi-channel cadence so no lead dies in someone's inbox again.", path: '/follow-up-plan' },
