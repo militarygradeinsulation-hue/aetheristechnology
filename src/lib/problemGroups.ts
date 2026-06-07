@@ -11,6 +11,7 @@ import brandContradictionsThumb from '@/assets/brand-contradictions-thumb.jpg';
 import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
 import resumeForensicsThumb from '@/assets/resume-forensics-thumb.jpg';
 import leakingMoneyCartoon from '@/assets/leaking-money-cartoon.png.asset.json';
+import brandDissonanceCartoon from '@/assets/brand-dissonance-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
