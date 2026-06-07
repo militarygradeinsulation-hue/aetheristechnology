@@ -15,6 +15,7 @@ import brandDissonanceCartoon from '@/assets/brand-dissonance-cartoon.png.asset.
 import coldLeadsCartoon from '@/assets/cold-leads-cartoon.png.asset.json';
 import blankPageCartoon from '@/assets/blank-page-cartoon.png.asset.json';
 import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
+import expertBurnCartoon from '@/assets/expert-burn-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
@@ -81,6 +82,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I keep paying experts and walking away worse off than I started.",
     symptom: "Every consultant sells you a deck. Nobody puts a dollar number on anything, and nobody touches the work.",
+    image: expertBurnCartoon.url,
     tools: [
       { thumbnail: diagnosticThumb, title: 'Forensic Diagnostic ($2,500)', solves: 'Flat fee. Operator-led. A written leak ledger with a dollar amount on every wound — credit applies to any engagement.', path: '/leak-audit' },
       { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', solves: "Asks the questions a real operator would, before you write another check to a 'strategist.'", path: '/strategic-questions' },
