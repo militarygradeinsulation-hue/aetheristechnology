@@ -40,24 +40,20 @@ OUTPUT — 3 distinct variants via the JSON tool call. No two may share opening 
 
 If a persona is provided, write IN that persona's voice — persona controls cadence, the skeleton and bans still apply. Treat "recent drafts" the user sends as a forbidden-style list: do not reuse their openers, rhythms, or closers.
 
-- No two variants may share the same opening word, sentence rhythm, or closing line.
-- Treat the "recent drafts" the user sends as a forbidden-style list. Do not echo their openers, structures, or phrasing.
-- If a persona is provided, write IN that persona's voice. Persona overrides default cadence but the no-self-promo rule still applies.`;
+- No two variants may share the same opening word, sentence rhythm, or closing line.`;
 
+// Brand-leak + filler bans only. Forensic / audit / pattern vocab is REQUIRED by the formula.
 const BANNED_OUTPUT_PATTERNS = [
   /aetheris/i,
   /businessforensics\.tech/i,
   /aetheris\.technology/i,
   /business forensics/i,
   /leak audit/i,
-  /diagnostic/i,
-  /\bleak(s|ing)?\b/i,
-  /forensic/i,
-  /autopsy/i,
   /great post/i,
   /love this/i,
   /well said/i,
   /spot on/i,
+  /\b100%\b/,
   /https?:\/\//i,
 ];
 
