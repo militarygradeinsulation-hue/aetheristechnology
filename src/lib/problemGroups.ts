@@ -41,6 +41,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "My brand is saying one thing and signaling another.",
     symptom: "You've spent money on the site and the content, but prospects still treat you like a vendor — not a peer.",
+    image: brandDissonanceCartoon.url,
     tools: [
       { thumbnail: brandContradictionsThumb, title: 'Brand Contradiction Finder', solves: 'Shows where your brand promises authority but your copy quietly says the opposite.', path: '/brand-contradictions' },
       { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', solves: 'Pinpoints the exact words on your site that are leaking trust and pricing power.', path: '/friction-audit' },
