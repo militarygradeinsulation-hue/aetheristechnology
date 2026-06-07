@@ -61,6 +61,7 @@ export const problemGroups: ProblemGroup[] = [
   {
     problem: "I'm tired of staring at a blank page trying to post something.",
     symptom: "You know visibility matters. You also know you'll never write a content calendar at 11pm on a Sunday.",
+    image: blankPageCartoon.url,
     tools: [
       { thumbnail: contentGenThumb, title: 'Social Content Generator', solves: 'Scans your site and produces 25 ready-to-post pieces in your voice.', path: '/content-generator' },
       { thumbnail: contentCalendarThumb, title: '30-Day Content Calendar', solves: 'Daily post ideas, hooks, and topics built around your industry — no blank page.', path: '/content-calendar' },
