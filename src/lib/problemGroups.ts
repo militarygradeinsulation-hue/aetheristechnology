@@ -14,6 +14,7 @@ import leakingMoneyCartoon from '@/assets/leaking-money-cartoon.png.asset.json';
 import brandDissonanceCartoon from '@/assets/brand-dissonance-cartoon.png.asset.json';
 import coldLeadsCartoon from '@/assets/cold-leads-cartoon.png.asset.json';
 import blankPageCartoon from '@/assets/blank-page-cartoon.png.asset.json';
+import hiringRiskCartoon from '@/assets/hiring-risk-cartoon.png.asset.json';
 
 export interface Tool {
   thumbnail: string;
