@@ -93,9 +93,9 @@ const CapabilitiesPage = () => {
 
                     {isExpanded && (
                       <div className="mt-4 rounded-xl border border-amber/30 bg-background/60 backdrop-blur p-6 animate-fade-in">
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                            {group.symptom}
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <p className="font-display text-base md:text-lg font-bold text-foreground leading-snug">
+                            "{group.problem}"
                           </p>
                           <button
                             onClick={() => setExpandedIdx(null)}
@@ -105,6 +105,9 @@ const CapabilitiesPage = () => {
                             <X className="w-4 h-4" />
                           </button>
                         </div>
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                          {group.symptom}
+                        </p>
                         <div className="font-case text-[10px] uppercase tracking-[0.22em] text-amber mb-3">
                           Tools that plug this leak
                         </div>
