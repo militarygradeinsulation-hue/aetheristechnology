@@ -570,11 +570,11 @@ const PlaybookSection = () => (
           <p className="text-muted-foreground mb-4">Lead with observation, not pitch. You're pointing out a problem they already feel.</p>
           <div className="space-y-3">
             {[
-              "Visit their website. Find 2-3 obvious problems (slow load, no mobile, outdated photos, no CTA).",
+              "Visit their website. Find 2-3 obvious leaks (slow load, no mobile, outdated photos, dead CTAs, broken follow-up).",
               "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
-              "Offer the $149 Digital Snapshot as the entry point. It's cheap, it's fast, and it proves value.",
-              "Once they see the report, they'll ask 'what now?' That's when you introduce the Strategy Blueprint or 14-Day Diagnostic.",
-              "Implementation and Fractional CTO/CMO retainers sell themselves after the diagnostic reveals the full damage.",
+              "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
+              "Once they see the leaks, position the 21-Day Revenue Diagnostic ($18,500 fixed) as the operator-led version that quantifies the damage.",
+              "After the Diagnostic, the Implementation Retainer ($15,000/mo, 3-month minimum) sells itself, that's where your $4,000/mo recurring kicks in.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
