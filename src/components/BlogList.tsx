@@ -1,15 +1,22 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ArrowRight, X } from 'lucide-react';
+import { BookOpen, ArrowRight, X, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogCard } from './BlogCard';
 import { Button } from './ui/button';
+import { AccessGate, getStoredAccessCode } from './AccessGate';
 
 const PAGE_SIZE = 12;
+const FREE_PREVIEW_COUNT = 3;
 
 export const BlogList: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState<boolean>(false);
+
+  useEffect(() => {
+    setUnlocked(Boolean(getStoredAccessCode()));
+  }, []);
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['blog-posts-list'],
@@ -131,12 +138,30 @@ export const BlogList: React.FC = () => {
         ) : visiblePosts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {visiblePosts.map((post, idx) => (
+              {(unlocked ? visiblePosts : visiblePosts.slice(0, FREE_PREVIEW_COUNT)).map((post, idx) => (
                 <BlogCard key={post.id} post={post} caseFileNumber={filteredPosts.length - idx} />
               ))}
             </div>
 
-            {remaining > 0 && (
+            {!unlocked && filteredPosts.length > FREE_PREVIEW_COUNT && (
+              <div className="mt-12">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-crimson/40 bg-crimson/5">
+                    <Lock className="w-3.5 h-3.5 text-crimson" />
+                    <span className="font-case text-[10px] uppercase tracking-widest text-crimson">
+                      {filteredPosts.length - FREE_PREVIEW_COUNT} more field notes locked
+                    </span>
+                  </div>
+                </div>
+                <AccessGate
+                  contentLabel="the field notes"
+                  remainingCount={filteredPosts.length - FREE_PREVIEW_COUNT}
+                  onUnlocked={() => setUnlocked(true)}
+                />
+              </div>
+            )}
+
+            {unlocked && remaining > 0 && (
               <div className="mt-12 flex justify-center">
                 <Button
                   size="lg"
@@ -150,6 +175,7 @@ export const BlogList: React.FC = () => {
               </div>
             )}
           </>
+
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground">
