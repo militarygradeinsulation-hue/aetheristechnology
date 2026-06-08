@@ -740,7 +740,7 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Price + open hint */}
                   <div className="mt-auto pt-3 border-t border-amber/15 flex items-end justify-between gap-3">
-                    <div className="flex items-baseline gap-2 flex-wrap">
+                    <div className="tool-price flex items-baseline gap-2 flex-wrap">
                       {isServiceComingSoon(service) ? (
                         <span className="text-xs font-case uppercase tracking-widest text-crimson">Pricing TBA</span>
                       ) : billingMode === 'monthly' && service.monthlyPriceId ? (

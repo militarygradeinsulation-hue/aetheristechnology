@@ -106,7 +106,7 @@ const CareersPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Sales Rep, Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell business forensics & digital transformation to SMB owners. Earn 15% on every deal, including recurring revenue."
+        description="Independent commission sales role. Sell the 21-Day Revenue Diagnostic ($18,500) and Implementation Retainer ($15,000/mo) to specialty manufacturers. $5,000 per flagship close, $4,000/mo recurring."
         path="/careers"
       />
       <Background />
@@ -222,21 +222,23 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
-            <p className="font-display text-xl text-foreground mt-1">Forensic Diagnostic</p>
-            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+            <p className="font-display text-xl text-foreground mt-1">21-Day Revenue Diagnostic</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $18,500 fixed</p>
+            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Paid within 7 days of client clearance.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $10K · Rep $5K · Partner $3K. Paid within 7 days of clearance.</p>
             </div>
           </div>
 
           <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
-            <p className="font-display text-xl text-foreground mt-1">Operator Retainer</p>
-            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+            <p className="font-display text-xl text-foreground mt-1">Implementation Retainer</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $15,000/mo · 3-mo min</p>
+            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$4,000<span className="text-lg text-amber/70">/mo</span></p>
-              <p className="text-xs text-muted-foreground mt-2">Held 12 months = <strong className="text-amber">$48,000</strong> from one client.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $8K · Rep $4K · Partner $3K — every month the client stays. 12 months = <strong className="text-amber">$48,000</strong>.</p>
             </div>
           </div>
         </div>
@@ -273,7 +275,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </div>
 
         <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Catalog products pay the standard 15%, flagships are the volume game.
+          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
         </p>
       </div>
     </div>
@@ -546,10 +548,10 @@ const PlaybookSection = () => (
               </TableRow>
             ))}
             <TableRow>
-              <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
+              <TableCell className="text-foreground">Recurring catalog subscriptions</TableCell>
               <TableCell className="text-right text-muted-foreground">varies</TableCell>
-              <TableCell className="text-right text-muted-foreground">flat 15%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">15% of every invoice, for life</TableCell>
+              <TableCell className="text-right text-muted-foreground">tier-based</TableCell>
+              <TableCell className="text-right font-semibold text-primary">Same tier % every invoice, for the life of the subscription</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -568,11 +570,11 @@ const PlaybookSection = () => (
           <p className="text-muted-foreground mb-4">Lead with observation, not pitch. You're pointing out a problem they already feel.</p>
           <div className="space-y-3">
             {[
-              "Visit their website. Find 2-3 obvious problems (slow load, no mobile, outdated photos, no CTA).",
+              "Visit their website. Find 2-3 obvious leaks (slow load, no mobile, outdated photos, dead CTAs, broken follow-up).",
               "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
-              "Offer the $149 Digital Snapshot as the entry point. It's cheap, it's fast, and it proves value.",
-              "Once they see the report, they'll ask 'what now?' That's when you introduce the Strategy Blueprint or 14-Day Diagnostic.",
-              "Implementation and Fractional CTO/CMO retainers sell themselves after the diagnostic reveals the full damage.",
+              "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
+              "Once they see the leaks, position the 21-Day Revenue Diagnostic ($18,500 fixed) as the operator-led version that quantifies the damage.",
+              "After the Diagnostic, the Implementation Retainer ($15,000/mo, 3-month minimum) sells itself, that's where your $4,000/mo recurring kicks in.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
@@ -625,13 +627,13 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math at <strong className="text-foreground">15% flat</strong> across the real product ladder:</p>
+        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$60' },
-            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$245' },
-            { label: 'Strong month', detail: '1 × $2,500 Forensic Diagnostic + 2 Snapshots + 1 Fractional retainer signed ($5,900/mo)', total: '$1,365 first month + $885/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,755 first month + $885/mo recurring' },
+            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
+            { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
+            { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
+            { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
           ].map((row) => (
             <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
               <p className="text-sm text-muted-foreground">{row.label}</p>
@@ -640,7 +642,7 @@ const PlaybookSection = () => (
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = <strong className="text-foreground">$21,240</strong> in residual commission alone.</p>
+        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Retainer clients held for 12 months = <strong className="text-foreground">$96,000</strong> in residual commission alone, before bonuses.</p>
       </CardContent>
     </Card>
 
@@ -655,7 +657,7 @@ const PlaybookSection = () => (
             { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
             { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
             { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site, I think you're losing 8–15% of revenue silently. Want to see where?'" },
-            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $2,500 Forensic Diagnostic." },
+            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $18,500 21-Day Revenue Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">
               <CardContent className="p-5 flex items-start gap-3">
