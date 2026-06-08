@@ -814,3 +814,23 @@ input, textarea, [contenteditable="true"] {
   animation: leak-audit-glow 4.2s ease-in-out infinite;
   will-change: text-shadow;
 }
+
+/* Catalog: à la carte tech suite — visually de-emphasised in favor of the package tiers above. */
+.catalog-suite-faded {
+  position: relative;
+  opacity: 0.55;
+  filter: grayscale(0.45);
+  pointer-events: none;
+  user-select: none;
+}
+.catalog-suite-faded a,
+.catalog-suite-faded button {
+  pointer-events: none !important;
+}
+.catalog-suite-faded::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, hsl(var(--background) / 0) 0%, hsl(var(--background) / 0.35) 100%);
+  pointer-events: none;
+}
