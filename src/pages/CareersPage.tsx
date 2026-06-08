@@ -222,21 +222,23 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
-            <p className="font-display text-xl text-foreground mt-1">Forensic Diagnostic</p>
-            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+            <p className="font-display text-xl text-foreground mt-1">21-Day Revenue Diagnostic</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $18,500 fixed</p>
+            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Paid within 7 days of client clearance.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $10K · Rep $5K · Partner $3K. Paid within 7 days of clearance.</p>
             </div>
           </div>
 
           <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
-            <p className="font-display text-xl text-foreground mt-1">Operator Retainer</p>
-            <div className="mt-5 rounded-lg bg-amber/10 border border-amber/40 p-5">
+            <p className="font-display text-xl text-foreground mt-1">Implementation Retainer</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $15,000/mo · 3-mo min</p>
+            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$4,000<span className="text-lg text-amber/70">/mo</span></p>
-              <p className="text-xs text-muted-foreground mt-2">Held 12 months = <strong className="text-amber">$48,000</strong> from one client.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $8K · Rep $4K · Partner $3K — every month the client stays. 12 months = <strong className="text-amber">$48,000</strong>.</p>
             </div>
           </div>
         </div>
