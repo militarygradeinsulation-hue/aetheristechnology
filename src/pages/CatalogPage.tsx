@@ -10,6 +10,7 @@ import { ServicesPricing } from '@/components/ServicesPricing';
 import { ComparisonSection } from '@/components/ComparisonSection';
 import { Button } from '@/components/ui/button';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import { PackageTiers } from '@/components/PackageTiers';
 
 const CatalogPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
