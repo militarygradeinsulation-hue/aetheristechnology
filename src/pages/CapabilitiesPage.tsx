@@ -59,30 +59,35 @@ const CapabilitiesPage = () => {
                         type="button"
                         onClick={() => setExpandedIdx(isExpanded ? null : gi)}
                         aria-expanded={isExpanded}
-                        className={`w-full text-left forensic-tile amber-corner rounded-xl overflow-hidden flex flex-col transition-all ${isExpanded ? 'ring-2 ring-amber/60' : ''}`}
+                        aria-label={group.problem}
+                        className={`group relative w-full text-left forensic-tile amber-corner rounded-xl overflow-hidden flex flex-col transition-all ${isExpanded ? 'ring-2 ring-amber/60' : ''}`}
                       >
-                        {group.image && (
-                          <div className="thumb-frame w-full aspect-[4/3] overflow-hidden">
+                        {group.image ? (
+                          <div className="thumb-frame relative w-full aspect-[4/3] overflow-hidden">
                             <span className="thumb-hairline" />
                             <img
                               src={group.image}
                               alt={group.problem}
                               loading="lazy"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                             />
+                            <div className="absolute top-2 left-2 font-case text-[9px] uppercase tracking-[0.22em] text-crimson bg-background/70 backdrop-blur px-2 py-1 rounded-sm">
+                              Case {String(gi + 1).padStart(2, '0')}
+                            </div>
+                            <div className="absolute bottom-2 right-2 text-[10px] font-case uppercase tracking-[0.2em] text-amber bg-background/70 backdrop-blur px-2 py-1 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                              {isExpanded ? 'Tap to close' : 'Tap to open'}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-5">
+                            <div className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson mb-2">
+                              Case {String(gi + 1).padStart(2, '0')}
+                            </div>
+                            <p className="font-display text-base md:text-lg font-bold text-foreground leading-snug">
+                              "{group.problem}"
+                            </p>
                           </div>
                         )}
-                        <div className="p-5">
-                          <div className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson mb-2">
-                            Case {String(gi + 1).padStart(2, '0')}
-                          </div>
-                          <p className="font-display text-base md:text-lg font-bold text-foreground leading-snug">
-                            "{group.problem}"
-                          </p>
-                          <div className="mt-3 text-[11px] font-case uppercase tracking-[0.2em] text-amber/80">
-                            {isExpanded ? 'Tap to close' : 'Tap to open case file'}
-                          </div>
-                        </div>
                       </button>
                     </ParallaxTilt>
 
