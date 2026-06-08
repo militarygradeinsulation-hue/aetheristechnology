@@ -90,9 +90,27 @@ const CatalogPage: React.FC = () => {
             </div>
           </section>
 
-          <ServicesPricing />
+          {/* Three-tier operator packages — primary path */}
+          <PackageTiers onRequest={() => setContactOpen(true)} />
+
+          {/* À la carte tech suite — visually de-emphasized so packages above feel like the move */}
+          <section className="px-4 max-w-5xl mx-auto mb-4">
+            <div className="rounded-sm border border-amber/30 bg-amber/5 px-5 py-4 text-center">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                À la carte · Pricing under review
+              </div>
+              <p className="text-sm text-foreground/85">
+                Individual tool pricing is being repackaged. Buy as a <span className="text-amber font-semibold">package above</span> for the full operator stack — or <button type="button" onClick={() => setContactOpen(true)} className="text-amber underline underline-offset-2 hover:text-amber/80">talk to Joseph</button> if you only need one tool.
+              </p>
+            </div>
+          </section>
+
+          <div className="catalog-suite-faded">
+            <ServicesPricing />
+          </div>
 
           <ComparisonSection />
+
 
         </main>
         <Footer />
