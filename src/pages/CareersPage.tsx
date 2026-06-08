@@ -275,7 +275,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </div>
 
         <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Catalog products pay the standard 15%, flagships are the volume game.
+          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
         </p>
       </div>
     </div>
