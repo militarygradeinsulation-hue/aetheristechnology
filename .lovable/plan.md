@@ -1,62 +1,56 @@
-## Goal
+## 1. Catalog page — premium look, packages over à la carte
 
-When a rep scans a lead, generate a **complete, ready-to-run outreach sequence** (every touchpoint with its date, channel, why, subject/opener, talking points, objection handles, and CTA) and automatically save **each touch as its own calendar event** on the rep's calendar — body fully populated, no thinking required.
+- Add a new **Packages** section to `CatalogPage.tsx` above the existing Premium Tech Suite, with three tiers (CTA = "Request access" → opens ContactModal). No Stripe checkout — these are operator-led so they feel premium and exclusive.
 
-Today the scan only seeds 4 generic reminders sharing one shared body (recommended channel + best time + the one `first_touch_script`). Touches 2–4 are blank scaffolding. This plan upgrades that to per-touch, fully written playbooks.
+  - **Starter — "First Look"** ($499/mo or one‑time)
+    - Full Website Report, Digital Snapshot, Social Content Pack, Brand Contradiction Finder, Friction Vocabulary Audit
+    - For owners testing the waters who want signal fast.
 
-## What changes
+  - **Operator — "Revenue Systems"** ($1,499/mo)
+    - Everything in First Look, plus: Strategy Blueprint, Content Calendar, Follow‑Up Plan, Sales Script Pack, Lead‑Nurture Automation, Strategic Question Engine
+    - For $1M–$10M companies that want the working tools, not just the scan.
 
-### 1. Scan AI returns a `touchpoint_plan` (new field on `outreach`)
+  - **Full Suite — "The Forensic Suite"** (Operator‑only, by application)
+    - Everything in the catalog, the full Premium Tech Suite, plus the Forensic Diagnostic ($2,500 credit applied) and a Fractional CTO/CMO seat.
+    - For owners who want the whole machine — price shown only after a fit call.
 
-Extend the `website_diagnostic_report` tool schema in `supabase/functions/scan-website/index.ts` so the AI produces a 5-touch sequence tuned to the prospect's industry, size, timezone, and the leaks the scan just found.
+- Below the package tiers, keep the existing à la carte Premium Tech Suite but **grey it out**: wrap `<ServicesPricing />` in a `.catalog-suite-faded` container (`opacity-50`, hover lift removed) with a top banner "À la carte pricing under review — buy as a package above for the full operator stack." Prices stay visible but no checkout buttons fire (pointer‑events disabled on the price chips and CTAs).
 
-Each touch in the array:
+## 2. Gated content — playbooks + field notes (blog)
 
-- `step` (1–5)
-- `day_offset` (0, 3, 7, 14, 21)
-- `channel` (`call` | `email` | `linkedin` | `voicemail` | `text`)
-- `why_now` — what makes this touch land at this point in the cadence (e.g. "Day 7 bump: tie back to the broken CTA you flagged on Touch 1")
-- `subject_or_opener` — exact subject line (email) or opening line (call/voicemail/LinkedIn)
-- `talking_points` — 3–5 bullets tied to **specific leaks from this scan** (e.g. "lead with the $14k/yr SEO leak on /services")
-- `objection_handles` — 2 likely pushbacks with one-line responses
-- `cta` — the one ask
-- `full_script` — ready-to-send body (email draft, voicemail script, or call talk-track)
-- `best_send_window_local` — exact send window in prospect local time
+Make Joseph's library feel exclusive: a few free samples, the rest behind a short signup that returns a personal access code.
 
-The system prompt is updated to require the plan reference real leaks/gaps the scan surfaced (no generic copy).
+- **DB migration** — `public.access_codes` table:
+  - `code text primary key` (8‑char base36)
+  - `name`, `email`, `phone`, `created_at`, `last_used_at`
+  - `unique(lower(email))`
+  - RLS: no anon read; service_role full. Edge function handles all reads/writes.
 
-### 2. `scheduleScanCadence` consumes `touchpoint_plan` instead of hardcoding 4 generic touches
+- **Edge function** `request-access-code`:
+  - Input: `{ name, email, phone }` (zod validation)
+  - Generates a code, upserts on email, returns `{ code }`.
+  - Already covered by INBOUND_EMAIL infra — for now the code is returned in‑UI; no transactional email until Joseph asks for it.
 
-In `supabase/functions/portal-leads/index.ts`:
+- **Edge function** `verify-access-code`:
+  - Input: `{ code }` → `{ valid: boolean }`. Updates `last_used_at`.
 
-- If `scan.outreach.touchpoint_plan` exists and has ≥1 item, iterate over it.
-- For each touch, create a `rep_calendar_events` row with:
-  - `kind` mapped from channel (`call` → `call`, `meeting` if CTA is a meeting, else `follow_up`)
-  - `start_at` = anchor (tomorrow at recommended hour) + `day_offset` days, at the touch's own best send hour
-  - `end_at` = +30 min
-  - `title` = `Touch {step} · {Channel} — {business_name}`
-  - `body` = a clean, fully assembled brief with sections: WHY NOW, SUBJECT/OPENER, TALKING POINTS (bulleted), OBJECTION HANDLES, CTA, FULL SCRIPT, BEST WINDOW, LEAKS REFERENCED
-- Fallback (if AI didn't return a plan, e.g. older cached scans or AI gateway hiccup): keep the existing 4-touch generic seeder so reps never end up with an empty calendar.
-- Keep the existing dedupe: delete prior `created_by='system'` events for this `lead_id`+`rep_code` before inserting fresh ones, so re-scan re-seeds cleanly.
+- **New component** `AccessGate.tsx`:
+  - Two tabs: **Get a code** (name/email/phone form) and **Have a code** (single input).
+  - On success, stores code in `localStorage` under `aetheris_access_code` and calls an `onUnlocked()` callback. Shows the code prominently after signup so they can save it.
 
-### 3. Calendar UI surfaces the talking points in-place
+- **Gating rules**
+  - `BlogList.tsx`: show the first **3** newest posts free. Render the rest only if `aetheris_access_code` is present in localStorage; otherwise show `<AccessGate />` instead of the remaining cards, plus a small "Members read X more field notes" line.
+  - `ResourcesPage.tsx`: show the first **2** playbooks free; gate the rest the same way.
+  - `BlogPostPage.tsx`: leave individual post URLs open (they're already discoverable via SEO) — gating lives at the list level so direct links from search still resolve.
 
-`RepCalendarView` (and the admin view) already render `body`. No structural change needed — the new body is plain-text formatted with clear section headers (`WHY NOW`, `TALKING POINTS`, `FULL SCRIPT`, etc.) so it reads well in the existing event detail panel.
+## 3. Out of scope
 
-### 4. Toast confirmation gets sharper
+- No emailing the code yet (returns it in‑UI).
+- Existing Stripe products for individual tools stay registered (greying out is presentation‑only); we keep the option to re‑enable per‑item checkout later.
+- No login/auth system — code lives in localStorage. Joseph can grant or revoke codes from the DB directly via the existing admin tools.
 
-After a fresh scan: `"Scan complete — 5 fully-written touchpoints added to your calendar."` (uses the count actually inserted, falls back gracefully).
+## Files
 
-## Technical notes
-
-- No DB migration needed — `rep_calendar_events` already has `title`, `body`, `kind`, `start_at`, `lead_id`, `created_by='system'`.
-- No new edge function — changes are confined to `scan-website` (schema + prompt) and `portal-leads` (cadence builder).
-- The plan is generated inside the existing single AI call in `scan-website`, so there's **no extra latency or extra API cost** per scan.
-- Re-scanning a lead replaces the auto-events (same dedupe as today). Rep-edited or admin-added events on the same lead are untouched (different `created_by`).
-- Body uses plain text with line breaks — no markdown rendering dependency. Stays under ~3KB per event.
-
-## Out of scope (call out if you want them next)
-
-- Push notifications / email reminders at touch time (today the calendar just shows them).
-- Auto-sending the drafted email/LinkedIn touches — this plan only **drafts** them onto the calendar; the rep still hits send.
-- Backfilling old already-scanned leads — only newly-scanned (or force-rescanned) leads get the full plan.
+- New: `src/components/PackageTiers.tsx`, `src/components/AccessGate.tsx`, `supabase/functions/request-access-code/index.ts`, `supabase/functions/verify-access-code/index.ts`
+- Edited: `src/pages/CatalogPage.tsx`, `src/components/BlogList.tsx`, `src/pages/ResourcesPage.tsx`, `src/index.css` (the `.catalog-suite-faded` rule)
+- Migration: `access_codes` table + RLS + GRANTs
