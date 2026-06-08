@@ -627,13 +627,13 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math at <strong className="text-foreground">15% flat</strong> across the real product ladder:</p>
+        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$60' },
-            { label: 'Solid month', detail: '3 Snapshots + 2 Strategy Blueprints + 1 Website Eval', total: '~$245' },
-            { label: 'Strong month', detail: '1 × $2,500 Forensic Diagnostic + 2 Snapshots + 1 Fractional retainer signed ($5,900/mo)', total: '$1,365 first month + $885/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,755 first month + $885/mo recurring' },
+            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
+            { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
+            { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
+            { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
           ].map((row) => (
             <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
               <p className="text-sm text-muted-foreground">{row.label}</p>
@@ -642,7 +642,7 @@ const PlaybookSection = () => (
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Fractional clients held for 12 months = <strong className="text-foreground">$21,240</strong> in residual commission alone.</p>
+        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Retainer clients held for 12 months = <strong className="text-foreground">$96,000</strong> in residual commission alone, before bonuses.</p>
       </CardContent>
     </Card>
 
