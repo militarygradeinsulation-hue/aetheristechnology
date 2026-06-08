@@ -818,8 +818,7 @@ input, textarea, [contenteditable="true"] {
 /* Catalog: à la carte tech suite — visually de-emphasised in favor of the package tiers above. */
 .catalog-suite-faded {
   position: relative;
-  opacity: 0.55;
-  filter: grayscale(0.45);
+  opacity: 0.85;
   pointer-events: none;
   user-select: none;
 }
@@ -827,10 +826,27 @@ input, textarea, [contenteditable="true"] {
 .catalog-suite-faded button {
   pointer-events: none !important;
 }
-.catalog-suite-faded::after {
-  content: '';
+/* Blur individual tool prices — pricing is being repackaged, talk to operator instead. */
+.catalog-suite-faded .tool-price {
+  filter: blur(7px);
+  -webkit-filter: blur(7px);
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+}
+.catalog-suite-faded .tool-price::after {
+  content: 'Ask operator';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, hsl(var(--background) / 0) 0%, hsl(var(--background) / 0.35) 100%);
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: hsl(var(--amber));
+  filter: blur(0);
+  -webkit-filter: blur(0);
 }
+
