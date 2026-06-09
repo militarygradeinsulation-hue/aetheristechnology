@@ -344,6 +344,8 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
               </div>
             );
           })()}
+        </CardContent>
+      </Card>
 
       {/* BONUS STACK */}
       <Card className="border-amber/40 bg-amber/[0.03]">
