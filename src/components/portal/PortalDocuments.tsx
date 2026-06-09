@@ -109,6 +109,35 @@ export const PortalDocuments: React.FC = () => {
         </CardContent>
       </Card>
 
+      <Card className="border-amber/40 bg-amber/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="font-display flex items-center gap-2 text-base">
+            <FileText className="w-4 h-4 text-amber" /> Rep Operator Playbook
+            <Badge variant="outline" className="border-amber/50 text-amber font-mono text-[10px] ml-2">REQUIRED</Badge>
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1 font-mono uppercase tracking-wider">
+            New pitch · New math · Read before your next call
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Covers the five-offer public lineup (Signal $2,500 → Operator Suite $10,000 → Diagnostic $18,500 → Retainer $15k/mo), both commission models (tiered % vs flagship fixed-dollar), the exact rep/partner cut per offer, qualification rules for the flagship fit call, and the hard rules ("sell the operator, not the tools").
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a href="/Rep-Operator-Playbook.md" target="_blank" rel="noopener noreferrer">
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90">
+                <FileText className="w-3.5 h-3.5 mr-1.5" /> Read playbook
+              </Button>
+            </a>
+            <a href="/Rep-Operator-Playbook.md" download>
+              <Button size="sm" variant="outline">
+                <Download className="w-3.5 h-3.5 mr-1.5" /> Download
+              </Button>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+
       {loading ? (
         <div className="flex items-center justify-center py-12 text-muted-foreground">
           <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Loading documents…
