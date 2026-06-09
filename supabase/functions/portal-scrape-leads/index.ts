@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,7 +53,7 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
       messages: [
         {
           role: "system",
-          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. We DON'T sell to: enterprises, freelancers, very small (<10 employees), or non-business entities. Score 0-100 based on ICP fit.`,
+          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. HARD EXCLUSIONS: never return enterprises or companies with estimated annual revenue over $100M, publicly traded Fortune 1000 companies, large national chains (>500 employees), freelancers/solopreneurs, very small shops (<10 employees), or non-business entities (gov, schools, churches, non-profits). If you cannot confidently rule out >$100M revenue based on the search context, skip the lead. Score 0-100 based on ICP fit.`,
         },
         {
           role: "user",
@@ -147,12 +148,35 @@ serve(async (req) => {
 
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
+    // Enrich each lead by scraping its site for real contact info (person email
+    // first, info@/contact@ fallback, plus phone + likely contact name).
+    const enrich = async (l: ScoredLead): Promise<ScoredLead> => {
+      if (!l.website) return l;
+      const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+      if (hasPerson && l.phone) return l;
+      try {
+        const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+        return {
+          ...l,
+          email: l.email || found.email,
+          phone: l.phone || found.phone,
+          contact_name: l.contact_name || found.contact_name,
+        };
+      } catch { return l; }
+    };
+    const enriched: ScoredLead[] = [];
+    const CONC = 4;
+    for (let i = 0; i < leads.length; i += CONC) {
+      const chunk = await Promise.all(leads.slice(i, i + CONC).map(enrich));
+      enriched.push(...chunk);
+    }
+
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
     let inserted = 0;
-    if (leads.length > 0) {
+    if (enriched.length > 0) {
       const now = new Date();
       const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const rows = leads.map((l) => ({
+      const rows = enriched.map((l) => ({
         business_name: l.business_name?.slice(0, 200) || null,
         contact_name: l.contact_name?.slice(0, 200) || null,
         email: l.email?.toLowerCase().slice(0, 200) || null,
@@ -197,7 +221,7 @@ serve(async (req) => {
       } catch (e) { console.error("activity log failed:", e); }
     }
 
-    return new Response(JSON.stringify({ ok: true, inserted, leads, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, inserted, leads: enriched, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("portal-scrape-leads error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

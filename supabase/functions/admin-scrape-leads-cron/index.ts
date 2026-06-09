@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
+import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,8 +53,8 @@ async function aiScoreLeads(searchResults: any[], industry: string, count: numbe
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { role: "system", content: `You are a B2B prospecting analyst for Aetheris Technology — Business Forensics. ICP: SMBs in Indianapolis metro, $1M–$50M revenue, 10–500 employees. Score 0-100 by ICP fit.` },
-        { role: "user", content: `From these results extract up to ${count} REAL Indianapolis-area businesses in ${industry}. Skip directories and listicles. Return: business_name, website, industry, location, score, why_fit.\n\n${context}` },
+        { role: "system", content: `You are a B2B prospecting analyst for Aetheris Technology — Business Forensics. ICP: SMBs in Indianapolis metro, $1M–$50M revenue, 10–500 employees. HARD EXCLUSIONS: never return companies over $100M annual revenue, Fortune 1000, large national chains, freelancers, sub-10-employee shops, or non-business entities. If you can't confidently rule out >$100M, skip it. Score 0-100 by ICP fit.` },
+        { role: "user", content: `From these results extract up to ${count} REAL Indianapolis-area businesses in ${industry}. Skip directories, listicles, and any company over $100M revenue. Return: business_name, website, industry, location, score, why_fit.\n\n${context}` },
       ],
       tools: [{
         type: "function",
@@ -119,7 +120,23 @@ serve(async (req) => {
         const leads = await aiScoreLeads(results, industry, targetPerIndustry, lovableKey);
         if (!leads.length) { breakdown[industry] = 0; continue; }
 
-        const rows = leads.map(l => ({
+        // Enrich each lead (parallel, capped) for real contact info from the site.
+        const enriched: ScoredLead[] = [];
+        const CONC = 4;
+        for (let i = 0; i < leads.length; i += CONC) {
+          const chunk = await Promise.all(leads.slice(i, i + CONC).map(async (l) => {
+            if (!l.website) return l;
+            const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+            if (hasPerson && l.phone) return l;
+            try {
+              const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+              return { ...l, email: l.email || found.email, phone: l.phone || found.phone, contact_name: l.contact_name || found.contact_name };
+            } catch { return l; }
+          }));
+          enriched.push(...chunk);
+        }
+
+        const rows = enriched.map(l => ({
           business_name: l.business_name?.slice(0, 200) || null,
           contact_name: l.contact_name?.slice(0, 200) || null,
           email: l.email?.toLowerCase().slice(0, 200) || null,
