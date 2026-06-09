@@ -1708,6 +1708,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     gaps={scan.gaps}
                     initialProgress={scan.gapProgress || {}}
                     onChange={(p) => setScan((prev: any) => prev ? { ...prev, gapProgress: p } : prev)}
+                    lead={lead}
                   />
                 )}
                 {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
