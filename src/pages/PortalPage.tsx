@@ -476,6 +476,7 @@ const PortalPage: React.FC = () => {
   const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean }[] = [
     { id: 'jw-admin' as Tab, label: 'Joseph Work Account', icon: <Crown className="w-4 h-4" />, iconCmp: Crown, href: '/admin', adminOnly: true },
     { id: 'workbench' as Tab, label: 'Workbench', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench, adminOnly: true },
+    { id: 'partnerhub', label: 'Partner Hub', icon: <Compass className="w-4 h-4" />, iconCmp: Compass, partnerOnly: true },
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
