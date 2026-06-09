@@ -573,12 +573,6 @@ const PlaybookSection = () => (
               <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
               <TableCell className="text-right font-semibold text-primary">$4,000/mo</TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell className="text-foreground">Legacy à la carte tools (rep-led only)</TableCell>
-              <TableCell className="text-right text-muted-foreground">$29–$499</TableCell>
-              <TableCell className="text-right text-muted-foreground">T1/T2 tiered</TableCell>
-              <TableCell className="text-right text-muted-foreground">30% / 25% of sale</TableCell>
-            </TableRow>
           </TableBody>
         </Table>
         <p className="text-sm text-muted-foreground">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
