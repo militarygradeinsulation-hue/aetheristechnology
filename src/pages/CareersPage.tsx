@@ -227,7 +227,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $10K · Rep $5K · Partner $3K. Paid within 7 days of clearance.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $10,500 · Rep $5,000 · Partner $3,000 (sum $18,500). Paid within 7 days of clearance.</p>
             </div>
           </div>
 
@@ -288,7 +288,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
+          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the $2,500 Signal Pack as the entry bundle, and the $18,500 21-Day Revenue Diagnostic + $15,000/mo Implementation Retainer as the flagships. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
           { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
