@@ -1,19 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import { ComparisonChart } from './ComparisonChart';
 import { Button } from './ui/button';
 import { INFOGRAPHICS } from '@/lib/infographics';
+import whyusEvidence from '@/assets/editorial/whyus-evidence.jpg';
 
 export const WhyUs: React.FC = () => {
   const benefits = [
-    'Operator-led, never an account manager, never a junior',
-    'Diagnosis before prescription, every leak named and quantified in dollars',
-    'The Leak Audit™, a named, repeatable 7-step forensic methodology',
-    'Psychology + Marine + 20yr operator stack, behavioral leaks, not just tech leaks',
-    'Sealed case files, every engagement closes with verifiable, dollar-tied outcomes',
-    'No retainer ransom, flat-fee Forensic Diagnostic, applied toward engagement',
+    { tag: 'Operator-led', note: 'No account managers, no juniors' },
+    { tag: 'Diagnosis first', note: 'Every leak named in dollars' },
+    { tag: 'The Leak Audit™', note: '7-step forensic process' },
+    { tag: 'Behavioral stack', note: 'Psychology + Marine + 20yr ops' },
+    { tag: 'Sealed case files', note: 'Verifiable, dollar-tied outcomes' },
+    { tag: 'No retainer ransom', note: 'Flat-fee Diagnostic, credited back' },
   ];
 
   return (
@@ -110,34 +111,29 @@ export const WhyUs: React.FC = () => {
           </RevealOnScroll>
 
           <div className="glass p-8 md:p-12 rounded-sm border border-border/60">
-            <div className="flex flex-col lg:flex-row gap-12 items-center">
-              <div className="flex-1 space-y-6">
-                <h3 className="text-3xl font-bold text-foreground mb-8 font-forensic">
-                  The forensic difference.
-                </h3>
-
-                <div className="space-y-4">
-                  {benefits.map((benefit, index) => (
-                    <RevealOnScroll key={benefit} delay={index * 0.1}>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="w-6 h-6 text-amber flex-shrink-0 mt-1" />
-                        <span className="text-lg text-muted-foreground">{benefit}</span>
-                      </div>
-                    </RevealOnScroll>
-                  ))}
-                </div>
-
-                <p className="text-muted-foreground pt-6">
-                  Generic AI consultants ship generic deployments. We name the wound, quantify the bleed,
-                  then close it with the right mix of AI agents, automation, CRM, and human process redesign,
-                  in that order.
-                </p>
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center">
+              <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+                <img src={whyusEvidence} alt="Six forensic evidence tags arranged on a dark linen surface, one bleeding crimson wax" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+                <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
               </div>
 
-              <div className="flex-1 flex justify-center w-full">
-                <RevealOnScroll delay={0.3}>
-                  <ComparisonChart />
-                </RevealOnScroll>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-6 font-forensic">
+                  Six tags. One signature.
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {benefits.map((b) => (
+                    <div key={b.tag} className="forensic-tile rounded-sm border border-amber/20 px-4 py-3">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber">{b.tag}</div>
+                      <div className="text-sm text-foreground/80 mt-0.5">{b.note}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center lg:justify-start">
+                  <RevealOnScroll delay={0.3}>
+                    <ComparisonChart />
+                  </RevealOnScroll>
+                </div>
               </div>
             </div>
           </div>
