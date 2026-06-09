@@ -12,16 +12,16 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
 const INITIAL_MESSAGE: Msg = {
   role: 'assistant',
-  content: "Hey, I'm the Aetheris Sales Advisor. I help business owners figure out exactly what's broken in their digital presence and what to do about it.\n\nWhat's going on in your business? What's the biggest headache right now?",
+  content: "I'm the Aetheris Sales Advisor. We help specialty manufacturers ($5M–$25M) find the $200K–$2M they're leaking through broken CRM, sales follow-up, and lead flow — then fix it.\n\nWhat do you make, and where do you think the leak is?",
 };
 
 const STARTER_PROBLEMS = [
-  "My website isn't generating leads",
-  "I'm losing bids and don't know why",
-  "My CRM is a graveyard",
-  "Marketing spend, no ROI",
-  "My follow-up is broken",
-  "I don't know what's actually broken",
+  "We're a $12M manufacturer",
+  "Our CRM is a graveyard",
+  "Leads come in, nothing closes",
+  "Follow-up is completely broken",
+  "How does the 21-Day Diagnostic work?",
+  "I don't know where we're leaking",
 ];
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
