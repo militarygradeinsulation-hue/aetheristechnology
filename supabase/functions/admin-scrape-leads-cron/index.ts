@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
+import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
