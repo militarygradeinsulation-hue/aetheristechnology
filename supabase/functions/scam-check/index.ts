@@ -150,6 +150,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const SVC = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authedAdmin = await verifyAdminToken(getAdminTokenFromRequest(req), SVC);
+    const authedPortal = !!(await verifyPortalToken(getPortalTokenFromRequest(req), SVC));
+    if (!authedAdmin && !authedPortal) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { url } = await req.json();
     if (!url || typeof url !== "string") {
       return new Response(JSON.stringify({ error: "URL is required" }), {
