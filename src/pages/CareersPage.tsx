@@ -648,10 +648,11 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
+        <p className="text-muted-foreground mb-4">Honest math built on the 3 bundles (20% rep cut) and the 2 flagships ($5,000 per Diagnostic, $4,000/mo per Retainer):</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
+            { label: 'Light month', detail: '2 Signal Packs + 1 Revenue Pack closed', total: '$2,000 one-time' },
+            { label: 'Solid month', detail: '1 Operator Suite + 1 Signal Pack ($12,500 in sales)', total: '$2,500 one-time' },
             { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
             { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
             { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
