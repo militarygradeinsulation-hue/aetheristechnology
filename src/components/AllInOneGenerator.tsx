@@ -225,9 +225,15 @@ export const AllInOneGenerator: React.FC = () => {
 
   const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 3) => {
     let lastErr: any = null;
+    const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
+    const portalToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_portal_token') : null;
+    const headers: Record<string, string> = {};
+    if (adminToken) headers['x-admin-token'] = adminToken;
+    if (portalToken) headers['x-portal-token'] = portalToken;
+    const invokeOpts: any = Object.keys(headers).length ? { body, headers } : { body };
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const { data, error } = await supabase.functions.invoke(fn, { body });
+        const { data, error } = await supabase.functions.invoke(fn, invokeOpts);
         if (error) {
           // Try to read response body for a real error message
           const ctx: any = (error as any).context;

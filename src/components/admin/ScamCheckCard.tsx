@@ -179,7 +179,12 @@ export const ScamCheckCard: React.FC = () => {
     if (!url.trim()) { toast({ title: 'Enter a URL', variant: 'destructive' }); return; }
     setBusy(true); setResult(null); setActiveIdx(null);
     try {
-      const { data, error } = await supabase.functions.invoke('scam-check', { body: { url: url.trim() } });
+      const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
+      const portalToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_portal_token') : null;
+      const headers: Record<string, string> = {};
+      if (adminToken) headers['x-admin-token'] = adminToken;
+      if (portalToken) headers['x-portal-token'] = portalToken;
+      const { data, error } = await supabase.functions.invoke('scam-check', { body: { url: url.trim() }, headers: Object.keys(headers).length ? headers : undefined });
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.error || 'Scan failed');
       const r: ScamResult = data.result;
