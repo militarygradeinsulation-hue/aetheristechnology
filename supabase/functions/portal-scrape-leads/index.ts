@@ -221,7 +221,7 @@ serve(async (req) => {
       } catch (e) { console.error("activity log failed:", e); }
     }
 
-    return new Response(JSON.stringify({ ok: true, inserted, leads, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, inserted, leads: enriched, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("portal-scrape-leads error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
