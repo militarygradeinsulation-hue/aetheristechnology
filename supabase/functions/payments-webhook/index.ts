@@ -29,8 +29,7 @@ const SYSTEM_TITLES: Record<string, string> = Object.fromEntries(
 );
 const PUBLIC_SITE_URL = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
 
-// Tiered commission split (replaces flat 70/15/15).
-// Tier resolved from sale amount (cents):
+// Tiered commission split (catalog tools + the 3 operator-led bundles).
 //   T1 ≤ $59  → company 50 / rep 30 / partner 20
 //   T2 ≤ $349 → company 60 / rep 25 / partner 15
 //   T3  >$349 → company 70 / rep 20 / partner 10
@@ -38,6 +37,22 @@ function ratesForAmount(amountCents: number): { company: number; rep: number; pa
   if (amountCents <= 5900) return { company: 0.50, rep: 0.30, partner: 0.20, tier: 1 };
   if (amountCents <= 34900) return { company: 0.60, rep: 0.25, partner: 0.15, tier: 2 };
   return { company: 0.70, rep: 0.20, partner: 0.10, tier: 3 };
+}
+
+// FLAGSHIP FIXED-DOLLAR SPLITS — sales-led offers only (Diagnostic + Retainer).
+// Matches FLAGSHIP_SPLITS in src/lib/repProducts.ts and the rep portal UI.
+// Mapped by Stripe price lookup_key (or lovable_external_id) passed in metadata.priceId.
+//
+// Diagnostic $18,500 one-time → Co $10,500 · Rep $5,000 · Partner $3,000
+// Retainer   $15,000/mo       → Co  $8,000 · Rep $4,000 · Partner $3,000  (every month)
+const FLAGSHIP_FIXED_SPLITS: Record<string, { company: number; rep: number; partner: number; label: string }> = {
+  diagnostic_21day_once:   { company: 1_050_000, rep: 500_000, partner: 300_000, label: '21-Day Revenue Diagnostic' },
+  implementation_retainer: { company:   800_000, rep: 400_000, partner: 300_000, label: 'Implementation Retainer'   },
+};
+
+function flagshipFixedSplit(priceId: string | null | undefined) {
+  if (!priceId) return null;
+  return FLAGSHIP_FIXED_SPLITS[priceId] ?? null;
 }
 
 serve(async (req) => {

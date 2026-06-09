@@ -1,10 +1,23 @@
 // Single source of truth for rep commission tables.
 // Prices in cents to avoid float math.
 //
-// TIERED COMMISSION MODEL (replaces the old flat 70/15/15 split).
-// Tier 1, Entry ($29–$59):   Company 50% · Rep 30% · Partner 20%
-// Tier 2, Mid   ($79–$349):  Company 60% · Rep 25% · Partner 15%
-// Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
+// TWO MODELS LIVE HERE — read this before touching anything:
+//
+// 1) TIERED COMMISSION (catalog tools + the 3 public bundles)
+//    Tier 1, Entry ($29–$59):   Company 50% · Rep 30% · Partner 20%
+//    Tier 2, Mid   ($79–$349):  Company 60% · Rep 25% · Partner 15%
+//    Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
+//    The 3 bundles ($2,500 / $5,000 / $10,000) all land in Tier 3.
+//
+// 2) FLAGSHIP FIXED-DOLLAR (Diagnostic + Retainer ONLY)
+//    21-Day Revenue Diagnostic ($18,500 one-time)
+//      → Company $10,500 · Rep $5,000 · Partner $3,000
+//    Implementation Retainer ($15,000/mo, paid every month client stays)
+//      → Company $8,000  · Rep $4,000 · Partner $3,000
+//    Enforced server-side in payments-webhook flagshipFixedSplit().
+//
+// Anything NOT on the public site (legacy à la carte tools) is kept here for
+// rep-portal internal sales and back-compat only — marked `legacy: true`.
 
 export type CommissionTier = 1 | 2 | 3;
 
@@ -32,42 +45,60 @@ export interface RepProduct {
   tier: CommissionTier;
   recurring?: boolean;
   highlight?: boolean;
+  /** True for products NOT on the public site (internal/rep-only sales). */
+  legacy?: boolean;
+  /** Marks one of the three sealed operator-led bundles. */
+  bundle?: boolean;
 }
 
+// Fixed-dollar splits for the two flagships. Source of truth for the UI; the
+// webhook enforces the same numbers in flagshipFixedSplit().
+export interface FixedSplitCents { company: number; rep: number; partner: number; }
+
+export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'retainer', FixedSplitCents> = {
+  // 21-Day Revenue Diagnostic — $18,500 one-time
+  diagnostic: { company: 1_050_000, rep: 500_000, partner: 300_000 },
+  // Implementation Retainer — $15,000/mo, paid every month client stays
+  retainer:   { company:   800_000, rep: 400_000, partner: 300_000 },
+};
+
 export const REP_PRODUCTS: RepProduct[] = [
-  // Leak Audit, paid CRM scan
-  { name: 'Leak Audit (CRM Scan)', priceCents: 250000, tier: 3, highlight: true },
+  // ── PUBLIC OPERATOR-LED BUNDLES (the only things publicly for sale) ──
+  { name: 'Signal Pack',     priceCents: 250_000,   tier: 3, bundle: true, highlight: true },
+  { name: 'Revenue Pack',    priceCents: 500_000,   tier: 3, bundle: true, highlight: true },
+  { name: 'Operator Suite',  priceCents: 1_000_000, tier: 3, bundle: true, highlight: true },
+
+  // ── LEGACY À LA CARTE (rep-portal internal only — NOT on public site) ──
+  // Kept for back-compat with existing Stripe products + rep-led direct sales.
   // Tier 1, Entry ($29–$59)
-  { name: 'Playbook Unlock', priceCents: 2900, tier: 1 },
-  { name: 'Social Content Pack', priceCents: 3900, tier: 1 },
-  { name: 'Content Calendar', priceCents: 3900, tier: 1 },
-  { name: 'Sales Script Pack', priceCents: 5900, tier: 1 },
-  { name: 'Follow-Up Plan', priceCents: 5900, tier: 1 },
-  { name: 'Full Website Report', priceCents: 5900, tier: 1 },
-  { name: 'CRM Health Check', priceCents: 7900, tier: 1 },
+  { name: 'Playbook Unlock', priceCents: 2900, tier: 1, legacy: true },
+  { name: 'Social Content Pack', priceCents: 3900, tier: 1, legacy: true },
+  { name: 'Content Calendar', priceCents: 3900, tier: 1, legacy: true },
+  { name: 'Sales Script Pack', priceCents: 5900, tier: 1, legacy: true },
+  { name: 'Follow-Up Plan', priceCents: 5900, tier: 1, legacy: true },
+  { name: 'Full Website Report', priceCents: 5900, tier: 1, legacy: true },
+  { name: 'CRM Health Check', priceCents: 7900, tier: 1, legacy: true },
   // Tier 2, Mid ($79–$349)
-  { name: 'Friction Vocabulary Audit', priceCents: 7900, tier: 2 },
-  { name: 'Lead Flow Mapper', priceCents: 9900, tier: 2 },
-  { name: 'Strategic Question Engine', priceCents: 9900, tier: 2 },
-  { name: 'Brand Contradiction Finder', priceCents: 11900, tier: 2 },
-  { name: 'Digital Snapshot', priceCents: 14900, tier: 2 },
-  { name: 'Competitor Landing Page Analysis', priceCents: 14900, tier: 2 },
-  { name: 'Email Series Bundle', priceCents: 14900, tier: 2 },
-  { name: 'Sales Team Onboarding', priceCents: 29900, tier: 2 },
-  { name: 'Prospecting List Builder', priceCents: 29900, tier: 2 },
-  { name: 'Lead Nurture Automation', priceCents: 29900, tier: 2, recurring: true },
-  { name: 'Landing Page Blueprint', priceCents: 34900, tier: 2 },
-  { name: 'Strategy Blueprint', priceCents: 34900, tier: 2 },
-  { name: 'CRM Setup & Optimization', priceCents: 39900, tier: 2 },
-  { name: 'Sales Coaching Retainer', priceCents: 49900, tier: 2, recurring: true },
-  // Tier 3, High-Ticket ($599+)
-  { name: 'Website Evaluation', priceCents: 59900, tier: 3 },
-  { name: 'Strategic Discovery Audit', priceCents: 59900, tier: 3 },
-  { name: '30-Day Lead Gen Sprint', priceCents: 99900, tier: 3, highlight: true },
-  { name: 'Marketing-to-Sales Alignment', priceCents: 129900, tier: 3 },
-  { name: 'Sales Process Redesign', priceCents: 149900, tier: 3, highlight: true },
-  { name: 'Leak Audit', priceCents: 290000, tier: 3, highlight: true },
-  { name: 'Fractional CTO/CMO', priceCents: 590000, tier: 3, recurring: true, highlight: true },
+  { name: 'Friction Vocabulary Audit', priceCents: 7900, tier: 2, legacy: true },
+  { name: 'Lead Flow Mapper', priceCents: 9900, tier: 2, legacy: true },
+  { name: 'Strategic Question Engine', priceCents: 9900, tier: 2, legacy: true },
+  { name: 'Brand Contradiction Finder', priceCents: 11900, tier: 2, legacy: true },
+  { name: 'Digital Snapshot', priceCents: 14900, tier: 2, legacy: true },
+  { name: 'Competitor Landing Page Analysis', priceCents: 14900, tier: 2, legacy: true },
+  { name: 'Email Series Bundle', priceCents: 14900, tier: 2, legacy: true },
+  { name: 'Sales Team Onboarding', priceCents: 29900, tier: 2, legacy: true },
+  { name: 'Prospecting List Builder', priceCents: 29900, tier: 2, legacy: true },
+  { name: 'Lead Nurture Automation', priceCents: 29900, tier: 2, recurring: true, legacy: true },
+  { name: 'Landing Page Blueprint', priceCents: 34900, tier: 2, legacy: true },
+  { name: 'Strategy Blueprint', priceCents: 34900, tier: 2, legacy: true },
+  { name: 'CRM Setup & Optimization', priceCents: 39900, tier: 2, legacy: true },
+  { name: 'Sales Coaching Retainer', priceCents: 49900, tier: 2, recurring: true, legacy: true },
+  // Tier 3, High-Ticket ($599+) — pre-bundle catalog
+  { name: 'Website Evaluation', priceCents: 59900, tier: 3, legacy: true },
+  { name: 'Strategic Discovery Audit', priceCents: 59900, tier: 3, legacy: true },
+  { name: '30-Day Lead Gen Sprint', priceCents: 99900, tier: 3, legacy: true },
+  { name: 'Marketing-to-Sales Alignment', priceCents: 129900, tier: 3, legacy: true },
+  { name: 'Sales Process Redesign', priceCents: 149900, tier: 3, legacy: true },
 ];
 
 // Resolve tier from raw price (used by webhook where we may only have a price in cents).
@@ -76,6 +107,10 @@ export const tierForPriceCents = (priceCents: number): CommissionTier => {
   if (priceCents <= 34900) return 2;
   return 3;
 };
+
+// Convenience selectors for the new bundle-first UI.
+export const PUBLIC_BUNDLES = REP_PRODUCTS.filter(p => p.bundle);
+export const LEGACY_PRODUCTS = REP_PRODUCTS.filter(p => p.legacy);
 
 // Back-compat default rates (kept for any legacy importers). Prefer TIER_RATES.
 export const REP_RATE = TIER_RATES[2].rep;
@@ -105,8 +140,7 @@ export const partnerCentsForProduct = (p: RepProduct) =>
 export const companyCentsForProduct = (p: RepProduct) =>
   p.priceCents - repCentsForProduct(p) - partnerCentsForProduct(p);
 
-// Legacy fixed-rate helpers (still imported by some panels). Now they just
-// return the math against whatever rate is passed in.
+// Legacy fixed-rate helpers (still imported by some panels).
 export const partnerCents = (priceCents: number) =>
   Math.round(priceCents * PARTNER_RATE);
 
