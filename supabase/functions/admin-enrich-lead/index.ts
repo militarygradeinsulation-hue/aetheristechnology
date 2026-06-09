@@ -9,13 +9,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM = `You are a B2B sales forensics analyst. CURRENCY RULE (NON-NEGOTIABLE): every monetary figure, estimate, ROI, leak, deal size, fee, or cost must be in US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, EUR, GBP, CAD, AUD, or any other currency. Given scraped website content for a prospect, return STRICT JSON:
+const SYSTEM = `You are a B2B sales forensics analyst. CURRENCY RULE (NON-NEGOTIABLE): every monetary figure must be in US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, EUR, GBP, CAD, AUD. Given scraped website content for a prospect, return STRICT JSON. DO NOT return a numeric "score" — the score is computed in code from the "signals" object you fill from observable evidence. Schema:
 {
-  "score": 0-100 (how strong a fit they are for an AI consulting / forensic ops engagement; weight: business size, signs of friction, industry leverage, contact-ability),
-  "score_reason": short 1-line justification,
-  "weak_points": [3-5 short bullets — observable problems, gaps, friction, missing automation, slow processes, outdated tech],
-  "talking_points": [3-5 short bullets — what a sales rep should LEAD with on the first call to grab attention],
-  "icebreaker": "1-2 sentence opener the rep can paste into an email or use on a cold call",
+  "signals": {
+    "has_phone": boolean, "has_email": boolean, "has_contact_form": boolean, "has_calendar_link": boolean,
+    "cta_strength": 0-5, "lead_magnet_present": boolean, "value_prop_clarity": 0-5,
+    "content_depth": 0-5, "has_case_studies": boolean,
+    "has_title_tag": boolean, "has_meta_description": boolean, "has_schema": boolean,
+    "uses_responsive": boolean, "fast_first_paint": boolean,
+    "brand_consistency": 0-5,
+    "industry_fit": "high" | "medium" | "low" | "unknown",
+    "revenue_band": "<500k" | "500k-2M" | "2M-10M" | "10M+" | "unknown"
+  },
+  "score_reason": "one-line justification grounded in what you saw",
+  "weak_points": [3-5 bullets — observable problems, gaps, missing automation, slow processes],
+  "talking_points": [3-5 bullets — what to lead with on first call],
+  "icebreaker": "1-2 sentence opener",
   "decision_makers": [{"role":"...", "why":"..."}],
   "industry_refined": "best-fit industry label",
   "estimated_revenue_band": "<$1M | $1-5M | $5-25M | $25M+",
@@ -23,16 +32,16 @@ const SYSTEM = `You are a B2B sales forensics analyst. CURRENCY RULE (NON-NEGOTI
   "outreach": {
     "recommended_channel": "call | email | linkedin | text",
     "channel_confidence": "low|medium|high",
-    "why_this_channel": "2-3 sentences grounded in OBSERVABLE evidence from the site — tone, formality, industry norms, contact availability, company size, decision-maker persona. Cite specifics you saw.",
+    "why_this_channel": "2-3 sentences grounded in OBSERVABLE evidence",
     "secondary_channel": "call | email | linkedin | text",
-    "best_time_to_reach": "e.g. 'Tue-Thu 7-9am local — trades start early' or 'After 2pm Mon-Wed — professional services post-lunch'",
-    "persona_read": "1-2 sentences on the likely personality / decision style of the owner or buyer (analytical, relational, fast-mover, skeptical, gatekept, etc.) based on the site's voice, design, and content",
-    "tone_to_use": "e.g. 'blunt + numbers-first', 'warm + consultative', 'technical + peer-to-peer'",
-    "do_not_do": ["1-3 short anti-patterns specific to this prospect"],
-    "first_touch_script": "3-5 sentence opener tailored to the chosen channel (call: voicemail-safe; email: subject line + 2-line body; linkedin: connection note under 300 chars)"
+    "best_time_to_reach": "...",
+    "persona_read": "...",
+    "tone_to_use": "...",
+    "do_not_do": ["1-3 anti-patterns"],
+    "first_touch_script": "3-5 sentence opener"
   }
 }
-Be blunt and specific. No fluff. The outreach recommendation MUST be evidence-based — reference what you actually saw (e.g. 'no email listed, only phone CTA → call', 'long-form thought-leadership + active LinkedIn → warm LinkedIn DM', 'enterprise site with gated demo → email ops lead, never cold call', 'family-owned trades shop → call early morning, owner answers'). If the site is low-info, say so in score_reason, lower confidence, and recommend the safest default channel for that industry.`;
+If the scraped content is < 500 chars or you cannot fill the signals from evidence, set confidence to "low" and leave signals fields as their best-guess defaults — the code will refuse to score it. Be blunt and specific. No fluff.`;
 
 async function firecrawl(url: string, key: string): Promise<{ md: string; err?: string }> {
   try {
