@@ -192,20 +192,26 @@ serve(async (req) => {
     const blocked = await loadBlockedKeywords(supabase);
     let inserted = 0;
     if (enriched.length > 0) {
-      const rows = enriched.map((l) => ({
-        business_name: l.business_name?.slice(0, 200) || null,
-        contact_name: l.contact_name?.slice(0, 200) || null,
-        email: l.email?.toLowerCase().slice(0, 200) || null,
-        phone: l.phone?.slice(0, 50) || null,
-        website: l.website?.slice(0, 500) || null,
-        industry: l.industry?.slice(0, 100) || industry || null,
-        location: l.location?.slice(0, 200) || location,
-        score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
-        why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: "admin_scrape",
-        external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
-        status: "new",
-      })).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
+      const rows = enriched.map((l) => {
+        const breakdown = computeScrapeScore(l, location);
+        l.score = breakdown.total;
+        l.score_breakdown = breakdown.parts;
+        return {
+          business_name: l.business_name?.slice(0, 200) || null,
+          contact_name: l.contact_name?.slice(0, 200) || null,
+          email: l.email?.toLowerCase().slice(0, 200) || null,
+          phone: l.phone?.slice(0, 50) || null,
+          website: l.website?.slice(0, 500) || null,
+          industry: l.industry?.slice(0, 100) || industry || null,
+          location: l.location?.slice(0, 200) || location,
+          score: breakdown.total,
+          why_fit: l.why_fit?.slice(0, 1000) || null,
+          enrichment: { scrape_score_breakdown: breakdown.parts, scrape_score_total: breakdown.total },
+          source: "admin_scrape",
+          external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
+          status: "new",
+        };
+      }).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
 
       // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
       const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
