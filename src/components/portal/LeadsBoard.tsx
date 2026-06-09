@@ -945,12 +945,22 @@ export const LeadsBoard: React.FC = () => {
               </Button>
             )}
             <Button
+              variant="outline"
+              className="border-amber/50 text-amber hover:bg-amber/10"
+              disabled={bulkScanning || bulkSelected.size === 0}
+              onClick={runBulkFullForensic}
+              title="Website scan + deep scan + Detective Mode, saved to each lead"
+            >
+              {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Sweeping {bulkSelected.size}…</> : <><Search className="w-3 h-3 mr-1" /> Full Forensic Sweep {bulkSelected.size}</>}
+            </Button>
+            <Button
               className="bg-amber text-background hover:bg-amber/90"
               disabled={bulkScanning || bulkSelected.size === 0}
               onClick={runBulkDeepScan}
             >
               {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scanning {bulkSelected.size}…</> : <>Deep Scan {bulkSelected.size}</>}
             </Button>
+
           </div>
         </DialogContent>
       </Dialog>
