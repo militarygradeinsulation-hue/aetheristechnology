@@ -18,15 +18,15 @@ export async function renderLeakAudit(
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
   const title = override?.title || "The Leak Audit™ — 7-Step Forensic Methodology | Aetheris AI";
-  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, or operator-led $2,500 Forensic Diagnostic.";
+  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, then operator-led bundles from $2,500 or the $18,500 21-Day Revenue Diagnostic.";
   const keywords = override?.keywords || "leak audit, revenue leak audit, business autopsy, forensic methodology, operational audit, sales process audit Indianapolis";
 
   const defaultFaqs = [
     { question: "What is The Leak Audit™?", answer: "A 7-step forensic methodology for finding operational revenue leaks: intake autopsy, funnel pressure test, quote-to-close inspection, follow-up pulse check, ops friction map, tooling drag analysis, and leak ledger." },
-    { question: "Free vs. paid — what's the difference?", answer: "The free self-scan walks you through the 7 steps with guided questions and produces a directional report you fill out yourself. The $2,500 Forensic Diagnostic is operator-led: we run the audit on your business, interview your team, examine your data, and deliver a quantified leak ledger." },
-    { question: "How long is the free self-scan?", answer: "About 20–30 minutes if you have your basic numbers in front of you. Faster if you skip steps." },
+    { question: "Free vs. paid — what's the difference?", answer: "The free self-scan walks you through the 7 steps with guided questions and produces a directional report you fill out yourself. The operator-led paths run the audit on your business — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($18,500) for full quantified leak ledgers." },
+    { question: "How long is the free self-scan?", answer: "About 6 minutes if you have a rough sense of your numbers. 14 questions across 4 categories." },
     { question: "What's in the leak ledger?", answer: "A prioritized list of every leak we identified, each with: a description of the leak, an estimated annual dollar cost, a difficulty-to-close score, a recommended fix, and a projected ROI." },
-    { question: "Does the $2,500 fee apply toward an engagement?", answer: "Yes. If you engage us to close the leaks we found, the full $2,500 applies as a credit." },
+    { question: "What comes after the Diagnostic?", answer: "The Implementation Retainer ($15,000/month, 3-month minimum) is available to 21-Day Diagnostic clients to actually seal the leaks the Diagnostic identified." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 
@@ -63,7 +63,7 @@ export async function renderLeakAudit(
     <main>
       <header>
         <h1>The Leak Audit™ — Find What's Bleeding Out of Your Business</h1>
-        <p class="tldr"><strong>TL;DR:</strong> A 7-step forensic methodology for finding the silent revenue leaks that operators can't see from the inside. Free self-scan. Or hire an operator to run it on your business — $2,500 flat, 14 days, full leak ledger delivered.</p>
+        <p class="tldr"><strong>TL;DR:</strong> A 7-step forensic methodology for finding the silent revenue leaks operators can't see from the inside. Run the free self-scan, then hire an operator to seal them — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($18,500).</p>
       </header>
 
       <section>
@@ -80,10 +80,13 @@ export async function renderLeakAudit(
       </section>
 
       <section>
-        <h2>Two ways to run the audit</h2>
+        <h2>Ways to run the audit</h2>
         <ul>
-          <li><strong>Free Self-Scan</strong> (20–30 min) — Guided 7-step walkthrough. You answer the questions. You get a directional report.</li>
-          <li><strong>Forensic Diagnostic — $2,500 flat</strong> — We run it on your business. 14 days. Operator-led. Full quantified leak ledger. Fee applies toward any engagement.</li>
+          <li><strong>Free Self-Scan</strong> (~6 min) — Guided 14-question walkthrough. You answer. You get a directional PDF.</li>
+          <li><strong>Signal Pack — $2,500</strong> — Operator-led confirmation of the leaks the self-scan flagged. Website Report + Brand Contradiction Finder + Friction Vocabulary Audit + Leak Findings memo + 30-min walkthrough.</li>
+          <li><strong>Revenue Pack — $5,000</strong> — Signal Pack plus Sales Script Pack, Follow-Up Plan, Strategic Question Engine, 30-Day Content Calendar, two 45-min sessions. Most operators pick this.</li>
+          <li><strong>Operator Suite — $10,000</strong> — Revenue Pack plus Strategy Blueprint, Social Content Pack, Digital Snapshot, Lead-Nurture Automation, Tech Suite access. Credits 1:1 toward the Retainer.</li>
+          <li><strong>21-Day Revenue Diagnostic — $18,500</strong> (flagship) — Operator inside the business for 21 days. Full quantified leak ledger. Implementation plan handed off. Required before the Implementation Retainer ($15,000/mo, 3-mo minimum).</li>
         </ul>
       </section>
 
@@ -92,7 +95,8 @@ export async function renderLeakAudit(
       <section>
         <h2>Run the audit</h2>
         <p><a href="${SITE_URL}/leak-audit">Start the free self-scan →</a></p>
-        <p>Or book the Forensic Diagnostic: <a href="tel:+13173762110">(317) 376-2110</a> · <a href="mailto:joseph@aetheris.technology">joseph@aetheris.technology</a></p>
+        <p><a href="${SITE_URL}/catalog">See all 5 operator-led offers →</a></p>
+        <p>Or talk to an operator: <a href="tel:+13173762110">(317) 376-2110</a> · <a href="mailto:joseph@aetheris.technology">joseph@aetheris.technology</a></p>
       </section>
     </main>
     ${renderFooter()}`;

@@ -516,40 +516,95 @@ const LeakAuditPage = () => {
                   ))}
                 </div>
 
-                <div className="glass rounded-lg border border-amber/40 p-8 text-center space-y-4">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                    Next Step
-                  </div>
-                  <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Forensic Diagnostic, $2,500
-                  </h3>
-                  <p className="text-muted-foreground max-w-xl mx-auto">
-                    The Leak Audit was self-reported. The Forensic Diagnostic is the operator-led
-                    investigation: 14 days inside your operation, every leak named, every dollar quantified.
-                    <strong className="text-foreground"> Applied toward engagement if you proceed.</strong>
-                  </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-amber text-primary-foreground hover:bg-amber/90"
-                  >
-                    <a href="/services">
-                      Book the Forensic Diagnostic
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </a>
-                  </Button>
-                  <div className="pt-2">
-                    <a
-                      href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      Or book a 15-min walkthrough first
-                    </a>
-                  </div>
-                </div>
+                {/* Severity-mapped next step — aligned with current operator-led tiers */}
+                {(() => {
+                  const sev = result.severity;
+                  const recommended = sev === 'CRITICAL'
+                    ? {
+                        tag: 'Recommended for CRITICAL findings',
+                        name: '21-Day Revenue Diagnostic',
+                        price: '$18,500',
+                        cadence: 'flagship · 21 days · operator-led',
+                        blurb: 'Your score puts you in active bleed territory. The flagship Diagnostic is 21 days inside your operation — every leak named, quantified, sequenced, with the implementation plan handed off. Credits toward the Implementation Retainer ($15K/mo) if you continue.',
+                        cta: 'Book the 21-Day Diagnostic',
+                      }
+                    : sev === 'ACTIVE'
+                    ? {
+                        tag: 'Recommended for ACTIVE findings',
+                        name: 'Revenue Pack',
+                        price: '$5,000',
+                        cadence: 'operator-led bundle · ~14 hrs',
+                        blurb: 'Most operators at your score pick this. Signal Pack + Sales Script Pack + Follow-Up Plan + Strategic Question Engine + 30-Day Content Calendar + two 45-min working sessions. Closes the response and follow-up leaks first.',
+                        cta: 'Talk to an operator',
+                      }
+                    : {
+                        tag: 'Recommended starting point',
+                        name: 'Signal Pack',
+                        price: '$2,500',
+                        cadence: 'operator-led bundle · ~6 hrs',
+                        blurb: 'Website Report + Brand Contradiction Finder + Friction Vocabulary Audit + a written Leak Findings memo + 30-min walkthrough. Confirms the leaks this self-scan flagged, with operator eyes on your actual surfaces.',
+                        cta: 'Talk to an operator',
+                      };
+
+                  return (
+                    <div className="glass rounded-lg border border-amber/40 p-8 space-y-4">
+                      <div className="text-center">
+                        <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                          Next Step · {recommended.tag}
+                        </div>
+                        <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
+                          {recommended.name} <span className="text-amber">— {recommended.price}</span>
+                        </h3>
+                        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+                          {recommended.cadence}
+                        </div>
+                      </div>
+                      <p className="text-muted-foreground max-w-xl mx-auto text-center">
+                        {recommended.blurb}
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                        <Button
+                          asChild
+                          size="lg"
+                          className="bg-amber text-primary-foreground hover:bg-amber/90"
+                        >
+                          <a href="/catalog">
+                            {recommended.cta}
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                          </a>
+                        </Button>
+                        <Button asChild size="lg" variant="outline">
+                          <a href="/catalog">See all 5 offers</a>
+                        </Button>
+                      </div>
+
+                      <div className="pt-4 border-t border-border/40">
+                        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground text-center mb-3">
+                          The full ladder
+                        </div>
+                        <ul className="grid sm:grid-cols-2 gap-2 text-sm text-muted-foreground max-w-xl mx-auto">
+                          <li><span className="text-amber font-semibold">Signal Pack</span> — $2,500 one-time</li>
+                          <li><span className="text-amber font-semibold">Revenue Pack</span> — $5,000 one-time</li>
+                          <li><span className="text-amber font-semibold">Operator Suite</span> — $10,000 one-time</li>
+                          <li><span className="text-amber font-semibold">21-Day Diagnostic</span> — $18,500 flagship</li>
+                          <li className="sm:col-span-2"><span className="text-amber font-semibold">Implementation Retainer</span> — $15,000/mo (Diagnostic clients only, 3-mo min)</li>
+                        </ul>
+                      </div>
+
+                      <div className="pt-2 text-center">
+                        <a
+                          href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                          Or book a 15-min walkthrough first
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
