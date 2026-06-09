@@ -2384,7 +2384,10 @@ Worth a 15-minute Leak Audit call to walk you through it?
 —`;
               try {
                 await navigator.clipboard.writeText(`To: ${lead.email}\nSubject: ${subject}\n\n${body}`);
-              } catch {}
+                toast({ title: 'Email copied', description: `To ${lead.email}` });
+              } catch {
+                toast({ title: 'Copy failed', variant: 'destructive' });
+              }
             }}
           >
             Copy full email
