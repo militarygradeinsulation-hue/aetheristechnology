@@ -477,11 +477,11 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> The Pricing Ladder</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">You sell a ladder of services. Start small, build trust, close big.</p>
+        <p className="text-muted-foreground mb-4">Three operator-led bundles, then two flagships. You sell the operator — not a list of tools.</p>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Service</TableHead>
+              <TableHead>Offer</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Format</TableHead>
               <TableHead>Purpose</TableHead>
@@ -489,10 +489,11 @@ const PlaybookSection = () => (
           </TableHeader>
           <TableBody>
             {[
-              ["Digital Snapshot", "$149", "Automated report", "Door opener, shows them their gaps"],
-              ["Website Evaluation", "$599", "Detailed analysis + call", "Builds authority, earns trust"],
-              ["14-Day Forensic Diagnostic", "$2,500", "Deep-dive operational audit", "Finds the real problems"],
-              ["Implementation", "$5K–$25K+", "Full build-out", "Website, CRM, automation, the works"],
+              ["Signal Pack",                "$2,500",      "Bundle · ~6 hrs operator time",    "Entry — find the leak. Website + brand + friction read, operator memo."],
+              ["Revenue Pack",               "$5,000",      "Bundle · ~14 hrs operator time",   "Core — fix the sales engine. Scripts + follow-up + questions + calendar as one engine."],
+              ["Operator Suite",             "$10,000",     "Bundle · ~30 hrs over 3 weeks",    "Embedded — full stack against the real business. Credits 1:1 toward Retainer."],
+              ["21-Day Revenue Diagnostic",  "$18,500",     "FLAGSHIP · fixed-fee, fit call",   "Forensic audit of CRM + sales + ops. 15–30 page report, prioritized fixes."],
+              ["Implementation Retainer",    "$15,000/mo",  "FLAGSHIP · 3-mo min, Diagnostic clients only", "Operator executes the fixes. Re-measured every month."],
             ].map(([service, price, format, purpose]) => (
               <TableRow key={service}>
                 <TableCell className="font-medium text-foreground">{service}</TableCell>
@@ -512,52 +513,79 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><TrendingUp className="text-primary" /> Your Commission</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
           <p className="text-foreground font-medium">
-            Flat <span className="text-primary font-bold">15%</span> of every sale tied to your code, including recurring monthly invoices for the life of the subscription.
+            Two pay models, depending on what you close.
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            One rule. No tiers. No caps. No clawbacks on completed work. Easy math on every product, every time.
+          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+            <li>
+              <span className="text-foreground font-semibold">Operator-led bundles & legacy catalog:</span>{' '}
+              tiered split — <span className="text-primary font-bold">30% / 25% / 20% rep</span> at Tier 1 / 2 / 3 by sale size.
+              All three public bundles are Tier 3, so you keep <span className="text-primary font-bold">20% of every bundle close</span>.
+            </li>
+            <li>
+              <span className="text-foreground font-semibold">Flagships (fixed-dollar):</span>{' '}
+              21-Day Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
+              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed.
+            </li>
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            Paid within 7 days of client payment clearing. No clawbacks on completed work.
           </p>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
+              <TableHead>Offer</TableHead>
               <TableHead className="text-right">Client Price</TableHead>
-              <TableHead className="text-right">Tier</TableHead>
+              <TableHead className="text-right">Model</TableHead>
               <TableHead className="text-right">Your Cut</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {REP_PRODUCTS.map((p) => (
-              <TableRow key={p.name} className={p.highlight ? 'bg-primary/5' : undefined}>
-                <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
-                  {p.name}{p.recurring ? ' (recurring)' : ''}
-                </TableCell>
-                <TableCell className="text-right text-muted-foreground">
-                  {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
-                </TableCell>
-                <TableCell className="text-right text-muted-foreground">
-                  T{p.tier} · {Math.round(TIER_RATES[p.tier].rep * 100)}%
-                </TableCell>
-                <TableCell className={`text-right font-semibold ${p.highlight ? 'text-primary' : 'text-foreground'}`}>
-                  {fmtUsd(repCentsForProduct(p))}{p.recurring ? '/mo' : ''}
-                </TableCell>
-              </TableRow>
-            ))}
+            <TableRow className="bg-primary/5">
+              <TableCell className="font-semibold text-foreground">Signal Pack</TableCell>
+              <TableCell className="text-right text-muted-foreground">$2,500</TableCell>
+              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
+              <TableCell className="text-right font-semibold text-primary">$500</TableCell>
+            </TableRow>
+            <TableRow className="bg-primary/5">
+              <TableCell className="font-semibold text-foreground">Revenue Pack</TableCell>
+              <TableCell className="text-right text-muted-foreground">$5,000</TableCell>
+              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
+              <TableCell className="text-right font-semibold text-primary">$1,000</TableCell>
+            </TableRow>
+            <TableRow className="bg-primary/5">
+              <TableCell className="font-semibold text-foreground">Operator Suite</TableCell>
+              <TableCell className="text-right text-muted-foreground">$10,000</TableCell>
+              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
+              <TableCell className="text-right font-semibold text-primary">$2,000</TableCell>
+            </TableRow>
+            <TableRow className="bg-amber/10">
+              <TableCell className="font-semibold text-foreground">21-Day Revenue Diagnostic</TableCell>
+              <TableCell className="text-right text-muted-foreground">$18,500</TableCell>
+              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
+              <TableCell className="text-right font-semibold text-primary">$5,000</TableCell>
+            </TableRow>
+            <TableRow className="bg-amber/10">
+              <TableCell className="font-semibold text-foreground">Implementation Retainer (every month)</TableCell>
+              <TableCell className="text-right text-muted-foreground">$15,000/mo</TableCell>
+              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
+              <TableCell className="text-right font-semibold text-primary">$4,000/mo</TableCell>
+            </TableRow>
             <TableRow>
-              <TableCell className="text-foreground">Recurring catalog subscriptions</TableCell>
-              <TableCell className="text-right text-muted-foreground">varies</TableCell>
-              <TableCell className="text-right text-muted-foreground">tier-based</TableCell>
-              <TableCell className="text-right font-semibold text-primary">Same tier % every invoice, for the life of the subscription</TableCell>
+              <TableCell className="text-foreground">Legacy à la carte tools (rep-led only)</TableCell>
+              <TableCell className="text-right text-muted-foreground">$29–$499</TableCell>
+              <TableCell className="text-right text-muted-foreground">T1/T2 tiered</TableCell>
+              <TableCell className="text-right text-muted-foreground">30% / 25% of sale</TableCell>
             </TableRow>
           </TableBody>
         </Table>
         <p className="text-sm text-muted-foreground">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
       </CardContent>
     </Card>
+
 
     {/* HOW TO SELL */}
     <Card className="bg-card/60 backdrop-blur border-border/50">
