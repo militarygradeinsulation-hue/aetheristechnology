@@ -3,11 +3,13 @@
 // then asks Lovable AI to produce forensic clues in the same shape as the
 // AI Writing Detector so the UI can render them identically.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
 type Clue = {
