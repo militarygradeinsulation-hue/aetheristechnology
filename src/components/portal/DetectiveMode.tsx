@@ -93,6 +93,32 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
     }
   }, [selfTalk]);
 
+  // Hydrate the most recent Detective verdict from the clue trail so closing
+  // and reopening the tool brings the case file back (same persistence as scan / deep scan).
+  const leadIdForHydrate = (lead as any)?.id;
+  useEffect(() => {
+    if (!leadIdForHydrate || result) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await leadClues.list(leadIdForHydrate, 50);
+        if (cancelled) return;
+        const hit = (res?.trail || []).find((c: any) => c.kind === 'detective' && c?.meta?.detective);
+        if (hit) {
+          const saved = (hit.meta as any).detective;
+          const savedChannel = (hit.meta as any).channel;
+          setResult(saved);
+          if (savedChannel === 'email' || savedChannel === 'linkedin' || savedChannel === 'linkedin_intro') {
+            setChannel(savedChannel);
+          }
+          setRevealed(saved?.monologue?.length || 0);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [leadIdForHydrate]);
+
+
   const updateStep = (key: string, patch: Partial<PrepStep>) =>
     setPrepSteps((s) => s.map((x) => (x.key === key ? { ...x, ...patch } : x)));
 
