@@ -275,7 +275,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </div>
 
         <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
+          // Bundles pay a flat 20% to the rep. Flagships pay fixed dollars: $5,000 per Diagnostic close, $4,000/mo every month the Retainer client stays. See the full table below.
         </p>
       </div>
     </div>
