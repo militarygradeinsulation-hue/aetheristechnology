@@ -71,11 +71,27 @@ Deno.serve(async (req) => {
       // Upsert by company_domain + person_email combo
       const dedupeKey = (person_email || `${company_domain || 'unknown'}:${person_name || 'anon'}`).toLowerCase();
 
-      const { data: existing } = await supabase
-        .from('identified_visitors')
-        .select('id, pages_viewed')
-        .or(`person_email.eq.${person_email || 'NULL'},and(company_domain.eq.${company_domain || 'NULL'},person_name.eq.${person_name || 'NULL'})`)
-        .maybeSingle();
+      // Use typed eq() lookups instead of building a raw .or() string from
+      // webhook-supplied values (commas/parens in those fields would otherwise
+      // let an attacker inject extra PostgREST filter clauses).
+      let existing: { id: string; pages_viewed: unknown } | null = null;
+      if (person_email) {
+        const r = await supabase
+          .from('identified_visitors')
+          .select('id, pages_viewed')
+          .eq('person_email', person_email)
+          .maybeSingle();
+        existing = r.data as typeof existing;
+      }
+      if (!existing && company_domain && person_name) {
+        const r = await supabase
+          .from('identified_visitors')
+          .select('id, pages_viewed')
+          .eq('company_domain', company_domain)
+          .eq('person_name', person_name)
+          .maybeSingle();
+        existing = r.data as typeof existing;
+      }
 
       if (existing) {
         const merged = Array.isArray(existing.pages_viewed)

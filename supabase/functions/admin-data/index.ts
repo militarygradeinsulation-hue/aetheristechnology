@@ -137,8 +137,8 @@ serve(async (req) => {
       if (filter === "holding") q = q.eq("admin_holding", true);
 
       if (search.trim()) {
-        const s = search.trim();
-        q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
+        const s = search.trim().replace(/[,()*\\%:\r\n]/g, " ").trim();
+        if (s) q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
       }
       if (minScore !== null) q = q.gte("score", minScore);
 

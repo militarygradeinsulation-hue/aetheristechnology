@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { sanitizePostgrestLike } from "../_shared/sanitize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -91,7 +92,7 @@ serve(async (req) => {
     if (action === "list_messages") {
       const folder = ["inbox", "sent", "drafts", "trash"].includes(body.folder) ? body.folder : "inbox";
       const limit = Math.min(Number(body.limit) || 50, 200);
-      const search = body.search ? String(body.search).slice(0, 200) : null;
+      const search = body.search ? sanitizePostgrestLike(String(body.search).slice(0, 200)) : null;
       let q = sb
         .from("rep_email_messages")
         .select("id,direction,folder,from_address,from_name,to_addresses,subject,body_text,is_read,is_starred,thread_id,attachments,created_at")
