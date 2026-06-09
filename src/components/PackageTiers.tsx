@@ -1,6 +1,8 @@
 import React from 'react';
-import { Check, ShieldCheck, Crown, Zap, ArrowRight, Clock, Users } from 'lucide-react';
+import { Check, ShieldCheck, Crown, Zap, ArrowRight, Clock } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import tierDoors from '@/assets/editorial/tier-doors.jpg';
+import flagshipSplit from '@/assets/editorial/flagship-split.jpg';
 
 interface Tier {
   id: string;
@@ -24,18 +26,15 @@ const TIERS: Tier[] = [
     icon: Zap,
     name: 'Signal Pack',
     tagline: 'Entry — find the leak.',
-    forWho: 'For owners who know something is off and need an outside read.',
+    forWho: 'Owners who know something is off and need an outside read.',
     price: '$2,500',
     priceNote: 'one-time · operator-led',
-    operatorHours: '~6 hours of operator time',
-    pairingRationale:
-      'A website report alone tells you what is broken on the page. A contradiction read tells you why nobody believes you. A friction audit tells you which sentence is killing the sale. Run apart, each one under-delivers. Run together by an operator, you get one Leak Findings memo that names the exact dollar bleed.',
+    operatorHours: '~6 hours operator time',
+    pairingRationale: 'Three tools run apart say "what." Run together by an operator they say "where the dollar bleeds."',
     included: [
-      'Full Website Report',
-      'Brand Contradiction Finder',
-      'Friction Vocabulary Audit',
-      'Single Leak Findings memo (operator-written)',
-      '30-minute walkthrough call',
+      'Website + Brand + Friction audits',
+      'Single Leak Findings memo',
+      '30-min operator walkthrough',
     ],
     cta: 'Talk to an operator',
   },
@@ -44,21 +43,18 @@ const TIERS: Tier[] = [
     icon: ShieldCheck,
     name: 'Revenue Pack',
     tagline: 'Core — fix the sales engine.',
-    forWho: 'For $1M–$10M companies leaking on outbound, follow-up, and nurture.',
+    forWho: '$1M–$10M companies leaking on outbound and follow-up.',
     price: '$5,000',
     priceNote: 'one-time · operator-led',
-    operatorHours: '~14 hours of operator time',
+    operatorHours: '~14 hours operator time',
     highlight: true,
     ribbon: 'Most operators pick this',
-    pairingRationale:
-      'Scripts without a follow-up plan get forgotten. A follow-up plan without the right strategic questions sounds like every other rep. A content calendar without a nurture loop just adds noise. The operator builds these as one system so the lead that lands today actually closes in 90 days.',
+    pairingRationale: 'Scripts, follow-up, and content built as one system so today\'s lead closes in 90 days.',
     included: [
       'Everything in Signal Pack',
-      'Sales Script Pack',
-      'Follow-Up System Plan',
-      'Strategic Question Engine',
+      'Scripts + Follow-up + Questions',
       '30-Day Content Calendar',
-      'Two 45-minute working sessions',
+      'Two 45-min working sessions',
     ],
     cta: 'Talk to an operator',
   },
@@ -66,22 +62,18 @@ const TIERS: Tier[] = [
     id: 'operator-suite',
     icon: Crown,
     name: 'Operator Suite',
-    tagline: 'Embedded — three weeks of an operator.',
-    forWho: 'For owners who want the whole machine, not a tool drawer.',
+    tagline: 'Embedded — 3 weeks of an operator.',
+    forWho: 'Owners who want the whole machine, not a tool drawer.',
     price: '$10,000',
     priceNote: 'one-time · credit toward Retainer',
-    operatorHours: '~30 hours of operator time over 3 weeks',
-    pairingRationale:
-      'The full stack only matters if someone is wielding it for you. The operator embeds for three weeks, runs every tool against your real business, and hands you a working revenue system — not a folder of PDFs. The fee credits 1:1 toward the Implementation Retainer if you keep us.',
+    operatorHours: '~30 hours over 3 weeks',
+    pairingRationale: 'The operator embeds, runs every tool against your real business, hands you a working revenue system.',
     included: [
       'Everything in Revenue Pack',
-      'Strategy Blueprint',
-      'Social Content Pack',
-      'Digital Snapshot',
+      'Strategy Blueprint + Social Pack',
       'Lead-Nurture Automation',
-      'Premium Tech Suite access',
       'Weekly calls + async ops channel',
-      '$10,000 credit toward the Implementation Retainer',
+      '$10k credit toward Retainer',
     ],
     cta: 'Talk to an operator',
   },
@@ -95,17 +87,22 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
   return (
     <section className="px-4 pb-16">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-            Three doors · Operator-led bundles
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center mb-10">
+          <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+            <img src={tierDoors} alt="Three vault doors in a dark corridor lit by a single amber overhead lamp" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+            <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
           </div>
-          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-            You don't buy tools here. You buy the <span className="text-amber italic">operator</span> who runs them.
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Every bundle below is a sealed pairing. The tools only work in sequence, and they only work
-            when an operator is wielding them. That's the entire point. No à la carte. No download-and-pray.
-          </p>
+          <div>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Three doors · Operator-led bundles
+            </div>
+            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
+              You don't buy tools. You buy the <span className="text-amber italic">operator</span> who runs them.
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground mt-3">
+              Sealed pairings. No à la carte. No download-and-pray.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -185,16 +182,22 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
 
         {/* Flagships sit ABOVE the bundles in price + scope */}
         <div className="mt-14">
-          <div className="text-center mb-6">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Flagships · Sales-led only
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center mb-8">
+            <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+              <img src={flagshipSplit} alt="Split editorial: autopsy table on the left, wall of surveillance monitors on the right" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+              <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
             </div>
-            <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground">
-              When the bundles aren't enough.
-            </h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-              These are not products you can checkout. Both require a 15-minute fit call with the operator first.
-            </p>
+            <div>
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Flagships · Sales-led only
+              </div>
+              <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-tight">
+                When the bundles aren't enough.
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Diagnostic, then surveillance. 15-min fit call required.
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="forensic-tile rounded-sm border border-amber/40 p-6">
