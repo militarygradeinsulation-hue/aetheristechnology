@@ -345,7 +345,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
-          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
+          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling an operator that actually sits down and fixes the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence, you bring the voice.' },
