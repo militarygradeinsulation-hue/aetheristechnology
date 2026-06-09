@@ -148,12 +148,35 @@ serve(async (req) => {
 
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
+    // Enrich each lead by scraping its site for real contact info (person email
+    // first, info@/contact@ fallback, plus phone + likely contact name).
+    const enrich = async (l: ScoredLead): Promise<ScoredLead> => {
+      if (!l.website) return l;
+      const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+      if (hasPerson && l.phone) return l;
+      try {
+        const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+        return {
+          ...l,
+          email: l.email || found.email,
+          phone: l.phone || found.phone,
+          contact_name: l.contact_name || found.contact_name,
+        };
+      } catch { return l; }
+    };
+    const enriched: ScoredLead[] = [];
+    const CONC = 4;
+    for (let i = 0; i < leads.length; i += CONC) {
+      const chunk = await Promise.all(leads.slice(i, i + CONC).map(enrich));
+      enriched.push(...chunk);
+    }
+
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
     let inserted = 0;
-    if (leads.length > 0) {
+    if (enriched.length > 0) {
       const now = new Date();
       const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const rows = leads.map((l) => ({
+      const rows = enriched.map((l) => ({
         business_name: l.business_name?.slice(0, 200) || null,
         contact_name: l.contact_name?.slice(0, 200) || null,
         email: l.email?.toLowerCase().slice(0, 200) || null,
