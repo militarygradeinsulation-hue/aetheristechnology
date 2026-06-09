@@ -2354,6 +2354,42 @@ const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan 
           </Button>
         )}
       </div>
+      {lead.email && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-sm border border-amber/30 bg-background/40 px-2 py-1.5">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber">To:</span>
+          <a
+            href={`mailto:${lead.email}?subject=${encodeURIComponent(`Quick read on ${lead.business_name || 'your operation'}`)}&body=${encodeURIComponent(
+              `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`
+            )}`}
+            className="text-xs text-amber hover:underline font-mono break-all"
+          >
+            {lead.email}
+          </a>
+          <button
+            type="button"
+            className="ml-auto text-[11px] text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline"
+            onClick={async () => {
+              const subject = `Quick read on ${lead.business_name || 'your operation'}`;
+              const body =
+`Hi ${lead.contact_name || 'there'},
+
+I ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.
+
+Top leaks:
+${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title}${g.annualCost ? ` — ${g.annualCost}` : ''}`).join('\n')}
+
+Worth a 15-minute Leak Audit call to walk you through it?
+
+—`;
+              try {
+                await navigator.clipboard.writeText(`To: ${lead.email}\nSubject: ${subject}\n\n${body}`);
+              } catch {}
+            }}
+          >
+            Copy full email
+          </button>
+        </div>
+      )}
       <p className="text-[10px] text-muted-foreground mt-2">
         The Sales Coach already has this lead's scan loaded — ask follow-ups and it remembers every leak.
       </p>
