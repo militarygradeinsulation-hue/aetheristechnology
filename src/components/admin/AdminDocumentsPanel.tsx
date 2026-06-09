@@ -66,7 +66,7 @@ const QUICK_PROMPTS: { label: string; type: string; prompt: string }[] = [
   {
     label: "Data Handling Policy",
     type: "data_handling",
-    prompt: "Policy describing how reps must handle prospect PII (names, emails, phones, scan data), store only in /portal Workspace, never export to personal email or third-party CRMs, delete on request, breach notification within 24h to joseph@aetheris.technology.",
+    prompt: "Policy describing how reps must handle prospect PII (names, emails, phones, scan data), store only in /portal Workspace, never export to personal email or third-party CRMs, delete on request, breach notification within 24h to aetheris.technology@outlook.com.",
   },
 ];
 
