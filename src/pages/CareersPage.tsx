@@ -227,7 +227,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
               <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
               <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $10K · Rep $5K · Partner $3K. Paid within 7 days of clearance.</p>
+              <p className="text-xs text-muted-foreground mt-2">Split: Company $10,500 · Rep $5,000 · Partner $3,000 (sum $18,500). Paid within 7 days of clearance.</p>
             </div>
           </div>
 
