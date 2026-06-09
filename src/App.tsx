@@ -161,12 +161,7 @@ const App = () => (
                       <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
                       <Route path="/my-subscription" element={<MySubscriptionPage />} />
                       <Route path="/industries" element={<IndustriesPage />} />
-                      <Route path="/ai-for-healthcare" element={<VerticalLandingPage />} />
-                      <Route path="/ai-for-finance" element={<VerticalLandingPage />} />
-                      <Route path="/ai-for-logistics" element={<VerticalLandingPage />} />
-                      <Route path="/ai-for-construction" element={<VerticalLandingPage />} />
-                      <Route path="/ai-for-manufacturing" element={<VerticalLandingPage />} />
-                      <Route path="/ai-for-saas" element={<VerticalLandingPage />} />
+                      <Route path="/ai-for-:slug" element={<VerticalLandingPage />} />
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
                       <Route path="/leak-audit" element={<LeakAuditPage />} />
