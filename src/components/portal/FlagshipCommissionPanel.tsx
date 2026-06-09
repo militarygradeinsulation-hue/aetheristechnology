@@ -296,50 +296,54 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
             ))}
           </div>
 
-          {/* Combined-deal example */}
-          <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
-            <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Full-stack close, what one client is worth in {months} {months === 1 ? 'month' : 'months'}
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              Diagnostic ({fmtUsd(FLAGSHIPS[0].priceCents)} one-time) + Retainer ({fmtUsd(FLAGSHIPS[1].priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
-              <span className="text-foreground font-semibold">{fmtUsd(FLAGSHIPS[0].priceCents + FLAGSHIPS[1].priceCents * months)} in client revenue</span>.
-            </p>
-            {showFullSplit ? (
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div className="rounded-md border border-border/50 bg-background/60 p-3">
-                  <div className="text-[10px] font-mono uppercase text-muted-foreground">Company</div>
-                  <div className="text-xl font-bold text-foreground">
-                    {fmtUsd(FLAGSHIPS[0].split.company + FLAGSHIPS[1].split.company * months)}
-                  </div>
+          {/* Combined-deal example — wired to the flagship offers by key, not array index. */}
+          {(() => {
+            const diag = FLAGSHIPS.find(f => f.key === 'diagnostic')!;
+            const retainer = FLAGSHIPS.find(f => f.key === 'retainer')!;
+            return (
+              <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
+                <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">
+                  <TrendingUp className="w-3.5 h-3.5" /> Full-stack close, what one client is worth in {months} {months === 1 ? 'month' : 'months'}
                 </div>
-                <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
-                  <div className="text-[10px] font-mono uppercase text-muted-foreground">Rep</div>
-                  <div className="text-xl font-bold text-amber">
-                    {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * months)}
+                <p className="text-sm text-muted-foreground mb-3">
+                  Diagnostic ({fmtUsd(diag.priceCents)} one-time) + Retainer ({fmtUsd(retainer.priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
+                  <span className="text-foreground font-semibold">{fmtUsd(diag.priceCents + retainer.priceCents * months)} in client revenue</span>.
+                </p>
+                {showFullSplit ? (
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div className="rounded-md border border-border/50 bg-background/60 p-3">
+                      <div className="text-[10px] font-mono uppercase text-muted-foreground">Company</div>
+                      <div className="text-xl font-bold text-foreground">
+                        {fmtUsd(diag.split.company + retainer.split.company * months)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
+                      <div className="text-[10px] font-mono uppercase text-muted-foreground">Rep</div>
+                      <div className="text-xl font-bold text-amber">
+                        {fmtUsd(diag.split.rep + retainer.split.rep * months)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
+                      <div className="text-[10px] font-mono uppercase text-muted-foreground">Partner</div>
+                      <div className="text-xl font-bold text-amber">
+                        {fmtUsd(diag.split.partner + retainer.split.partner * months)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
-                  <div className="text-[10px] font-mono uppercase text-muted-foreground">Partner</div>
-                  <div className="text-xl font-bold text-amber">
-                    {fmtUsd(FLAGSHIPS[0].split.partner + FLAGSHIPS[1].split.partner * months)}
+                ) : (
+                  <div className="rounded-md border border-amber/40 bg-amber/10 p-4 text-center">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">You take home</div>
+                    <div className="text-4xl font-bold text-amber leading-tight">
+                      {fmtUsd(diag.split.rep + retainer.split.rep * months)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      per full-stack client over {months} {months === 1 ? 'month' : 'months'}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-            ) : (
-              <div className="rounded-md border border-amber/40 bg-amber/10 p-4 text-center">
-                <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">You take home</div>
-                <div className="text-4xl font-bold text-amber leading-tight">
-                  {fmtUsd(FLAGSHIPS[0].split.rep + FLAGSHIPS[1].split.rep * months)}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  per full-stack client over {months} {months === 1 ? 'month' : 'months'}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            );
+          })()}
 
       {/* BONUS STACK */}
       <Card className="border-amber/40 bg-amber/[0.03]">
