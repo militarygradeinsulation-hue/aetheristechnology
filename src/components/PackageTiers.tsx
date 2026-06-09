@@ -1,6 +1,8 @@
 import React from 'react';
-import { Check, ShieldCheck, Crown, Zap, ArrowRight, Clock, Users } from 'lucide-react';
+import { Check, ShieldCheck, Crown, Zap, ArrowRight, Clock } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import tierDoors from '@/assets/editorial/tier-doors.jpg';
+import flagshipSplit from '@/assets/editorial/flagship-split.jpg';
 
 interface Tier {
   id: string;
@@ -24,18 +26,15 @@ const TIERS: Tier[] = [
     icon: Zap,
     name: 'Signal Pack',
     tagline: 'Entry — find the leak.',
-    forWho: 'For owners who know something is off and need an outside read.',
+    forWho: 'Owners who know something is off and need an outside read.',
     price: '$2,500',
     priceNote: 'one-time · operator-led',
-    operatorHours: '~6 hours of operator time',
-    pairingRationale:
-      'A website report alone tells you what is broken on the page. A contradiction read tells you why nobody believes you. A friction audit tells you which sentence is killing the sale. Run apart, each one under-delivers. Run together by an operator, you get one Leak Findings memo that names the exact dollar bleed.',
+    operatorHours: '~6 hours operator time',
+    pairingRationale: 'Three tools run apart say "what." Run together by an operator they say "where the dollar bleeds."',
     included: [
-      'Full Website Report',
-      'Brand Contradiction Finder',
-      'Friction Vocabulary Audit',
-      'Single Leak Findings memo (operator-written)',
-      '30-minute walkthrough call',
+      'Website + Brand + Friction audits',
+      'Single Leak Findings memo',
+      '30-min operator walkthrough',
     ],
     cta: 'Talk to an operator',
   },
@@ -44,21 +43,18 @@ const TIERS: Tier[] = [
     icon: ShieldCheck,
     name: 'Revenue Pack',
     tagline: 'Core — fix the sales engine.',
-    forWho: 'For $1M–$10M companies leaking on outbound, follow-up, and nurture.',
+    forWho: '$1M–$10M companies leaking on outbound and follow-up.',
     price: '$5,000',
     priceNote: 'one-time · operator-led',
-    operatorHours: '~14 hours of operator time',
+    operatorHours: '~14 hours operator time',
     highlight: true,
     ribbon: 'Most operators pick this',
-    pairingRationale:
-      'Scripts without a follow-up plan get forgotten. A follow-up plan without the right strategic questions sounds like every other rep. A content calendar without a nurture loop just adds noise. The operator builds these as one system so the lead that lands today actually closes in 90 days.',
+    pairingRationale: 'Scripts, follow-up, and content built as one system so today\'s lead closes in 90 days.',
     included: [
       'Everything in Signal Pack',
-      'Sales Script Pack',
-      'Follow-Up System Plan',
-      'Strategic Question Engine',
+      'Scripts + Follow-up + Questions',
       '30-Day Content Calendar',
-      'Two 45-minute working sessions',
+      'Two 45-min working sessions',
     ],
     cta: 'Talk to an operator',
   },
@@ -66,22 +62,18 @@ const TIERS: Tier[] = [
     id: 'operator-suite',
     icon: Crown,
     name: 'Operator Suite',
-    tagline: 'Embedded — three weeks of an operator.',
-    forWho: 'For owners who want the whole machine, not a tool drawer.',
+    tagline: 'Embedded — 3 weeks of an operator.',
+    forWho: 'Owners who want the whole machine, not a tool drawer.',
     price: '$10,000',
     priceNote: 'one-time · credit toward Retainer',
-    operatorHours: '~30 hours of operator time over 3 weeks',
-    pairingRationale:
-      'The full stack only matters if someone is wielding it for you. The operator embeds for three weeks, runs every tool against your real business, and hands you a working revenue system — not a folder of PDFs. The fee credits 1:1 toward the Implementation Retainer if you keep us.',
+    operatorHours: '~30 hours over 3 weeks',
+    pairingRationale: 'The operator embeds, runs every tool against your real business, hands you a working revenue system.',
     included: [
       'Everything in Revenue Pack',
-      'Strategy Blueprint',
-      'Social Content Pack',
-      'Digital Snapshot',
+      'Strategy Blueprint + Social Pack',
       'Lead-Nurture Automation',
-      'Premium Tech Suite access',
       'Weekly calls + async ops channel',
-      '$10,000 credit toward the Implementation Retainer',
+      '$10k credit toward Retainer',
     ],
     cta: 'Talk to an operator',
   },
