@@ -165,25 +165,29 @@ serve(async (req) => {
           scrapeNotes.push("FIRECRAWL_API_KEY not configured");
         }
 
-        const enriched = await aiAnalyze(lead, content, LOVABLE);
-        if (typeof enriched === "object" && enriched) {
-          (enriched as Record<string, unknown>).scrape_source_url = scrapedUrl;
-          (enriched as Record<string, unknown>).scrape_notes = scrapeNotes;
-          (enriched as Record<string, unknown>).scraped_chars = content.length;
-        }
-        const newScore = Number((enriched as Record<string, unknown>)?.score);
+        const enriched = (await aiAnalyze(lead, content, LOVABLE)) as Record<string, unknown>;
+        // Strip any score the AI tried to send — score is computed in code.
+        delete enriched.score;
+        const breakdown = computeWebsiteScore(enriched.signals as any, [], content.length);
+        enriched.score_breakdown = breakdown.parts;
+        if (breakdown.reason) enriched.score_reason_code = breakdown.reason;
+        enriched.scrape_source_url = scrapedUrl;
+        enriched.scrape_notes = scrapeNotes;
+        enriched.scraped_chars = content.length;
+
         const patch: Record<string, unknown> = {
           enrichment: enriched,
           enriched_at: new Date().toISOString(),
         };
-        if (Number.isFinite(newScore)) patch.score = Math.max(0, Math.min(100, Math.round(newScore)));
-        const indRefined = (enriched as Record<string, unknown>)?.industry_refined;
+        // Only overwrite the existing score when we have real evidence to score on.
+        if (breakdown.total != null) patch.score = breakdown.total;
+        const indRefined = enriched.industry_refined;
         if (indRefined && !lead.industry) patch.industry = String(indRefined).slice(0, 100);
         if (scrapedUrl && !lead.website) patch.website = scrapedUrl;
 
         const { error: uErr } = await admin.from("rep_leads").update(patch).eq("id", lead.id);
         if (uErr) throw uErr;
-        results.push({ id: lead.id, ok: true, score: Number.isFinite(newScore) ? newScore : undefined });
+        results.push({ id: lead.id, ok: true, score: breakdown.total ?? undefined });
       } catch (e) {
         console.error("enrich error for", lead.id, e);
         results.push({ id: lead.id, ok: false, error: e instanceof Error ? e.message : String(e) });
