@@ -49,9 +49,14 @@ export const ReadAloudButton: React.FC<Props> = ({
       const key = `${voiceId || 'default'}|${text}`;
       let url = cache.get(key);
       if (!url) {
+        const adminToken = localStorage.getItem('aetheris_admin_token') || '';
+        const portalToken = localStorage.getItem('aetheris_portal_token') || '';
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (adminToken) headers['x-admin-token'] = adminToken;
+        if (portalToken) headers['x-portal-token'] = portalToken;
         const r = await fetch(TTS_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ text, voiceId }),
         });
         if (!r.ok) {

@@ -3,11 +3,13 @@
 // then asks Lovable AI to produce forensic clues in the same shape as the
 // AI Writing Detector so the UI can render them identically.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
 type Clue = {
@@ -148,6 +150,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const SVC = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authedAdmin = await verifyAdminToken(getAdminTokenFromRequest(req), SVC);
+    const authedPortal = !!(await verifyPortalToken(getPortalTokenFromRequest(req), SVC));
+    if (!authedAdmin && !authedPortal) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { url } = await req.json();
     if (!url || typeof url !== "string") {
       return new Response(JSON.stringify({ error: "URL is required" }), {

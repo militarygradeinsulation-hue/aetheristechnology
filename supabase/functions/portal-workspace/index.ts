@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
+import { sanitizePostgrestLike } from "../_shared/sanitize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,7 +85,8 @@ serve(async (req) => {
 
     // ============ NOTES ============
     if (action === "notes_list") {
-      const q = clean(body.q, 200);
+      const raw = clean(body.q, 200);
+      const q = raw ? sanitizePostgrestLike(raw) : null;
       let query = supabase.from("rep_notes")
         .select("id, title, body, pinned, tags, attachments, created_at, updated_at")
         .eq("code", claims.code)
@@ -210,7 +212,8 @@ serve(async (req) => {
 
     // ============ UNIFIED SEARCH ============
     if (action === "search") {
-      const q = clean(body.q, 200);
+      const raw = clean(body.q, 200);
+      const q = raw ? sanitizePostgrestLike(raw) : null;
       if (!q) return jsonResp({ ok: true, notes: [], items: [] });
       const [notesRes, libRes] = await Promise.all([
         supabase.from("rep_notes")

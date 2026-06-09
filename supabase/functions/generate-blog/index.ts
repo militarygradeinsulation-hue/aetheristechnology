@@ -1,12 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-token",
 };
+
 
 // ═══════════════════════════════════════════════════════════════════
 // HASHTAG POOLS — B2B FORENSICS & GROWTH
@@ -195,6 +197,14 @@ serve(async (req) => {
 
     if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Missing required environment variables");
+    }
+
+    // Require admin token. Internal cron callers should pass it via header.
+    const adminOk = await verifyAdminToken(getAdminTokenFromRequest(req), SUPABASE_SERVICE_ROLE_KEY);
+    if (!adminOk) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
