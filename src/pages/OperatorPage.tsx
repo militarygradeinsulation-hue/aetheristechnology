@@ -177,15 +177,32 @@ const OperatorPage: React.FC = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {OPERATOR_WIELDS.map((t) => (
-                <div
-                  key={t}
-                  className="flex items-start gap-2.5 forensic-tile rounded-sm border border-border/60 px-4 py-3"
-                >
-                  <Wrench className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span className="text-sm text-foreground/90">{t}</span>
-                </div>
-              ))}
+              {OPERATOR_WIELDS.map((t) => {
+                const isOpen = openTool === t.name;
+                return (
+                  <button
+                    type="button"
+                    key={t.name}
+                    onClick={() => setOpenTool(isOpen ? null : t.name)}
+                    aria-expanded={isOpen}
+                    className={`text-left forensic-tile rounded-sm border px-4 py-3 transition-all ${isOpen ? 'border-amber/60 bg-amber/[0.04]' : 'border-border/60 hover:border-amber/40'}`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <Wrench className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                      <span className="text-sm text-foreground/90 flex-1">{t.name}</span>
+                      <ChevronDown className={`w-4 h-4 text-amber shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                    {isOpen && (
+                      <div className="mt-3 pt-3 border-t border-amber/20">
+                        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+                          What the operator uses it for
+                        </div>
+                        <p className="text-[13px] text-foreground/80 leading-relaxed">{t.usedFor}</p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
