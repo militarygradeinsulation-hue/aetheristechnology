@@ -168,7 +168,6 @@ const MethodologyPage: React.FC = () => {
                       caseNumber={`Section ${String(i + 1).padStart(2, '0')}`}
                       title={s.title}
                       summary={meta.summary}
-                      fullText={s.body}
                       reverse={i % 2 === 1}
                     />
                     <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 ml-1">
@@ -179,6 +178,16 @@ const MethodologyPage: React.FC = () => {
                         {meta.humanWhy}
                       </p>
                     </div>
+                    <details className="ml-1 group">
+                      <summary className="cursor-pointer font-case text-[10px] uppercase tracking-widest text-amber/70 hover:text-amber select-none">
+                        + Full forensic detail
+                      </summary>
+                      <div className="mt-3 space-y-2 text-sm text-muted-foreground leading-relaxed">
+                        {s.body.map((p, k) => (
+                          <p key={k}>{p}</p>
+                        ))}
+                      </div>
+                    </details>
                   </div>
                 );
               })}
