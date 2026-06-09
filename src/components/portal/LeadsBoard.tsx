@@ -433,6 +433,116 @@ export const LeadsBoard: React.FC = () => {
     runBulkDeepScanFor(failedIds);
   }, [bulkStatuses, runBulkDeepScanFor]);
 
+  // FULL FORENSIC SWEEP — for each selected lead: website scan + deep scan + detective mode, saved.
+  const runBulkFullForensic = useCallback(async () => {
+    const ids = Array.from(bulkSelected);
+    const targets = scanCandidates.filter(l => ids.includes(l.id))
+      .concat(mine.filter(l => ids.includes(l.id) && !scanCandidates.find(s => s.id === l.id)));
+    const unique = Array.from(new Map(targets.map(l => [l.id, l])).values()).slice(0, 10);
+    if (unique.length === 0) return;
+    const token = getPortalToken();
+    if (!token) { toast({ title: 'Portal session expired, sign in again.', variant: 'destructive' }); return; }
+    setBulkScanning(true);
+    setBulkStatuses(prev => ({
+      ...prev,
+      ...Object.fromEntries(unique.map(l => [l.id, 'scanning' as const])),
+    }));
+    toast({ title: `Full forensic sweep on ${unique.length} lead${unique.length === 1 ? '' : 's'}…`, description: 'Website scan → deep scan → detective mode. Running 3 in parallel.' });
+
+    // Run 3 leads at a time so the AI gateway doesn't get hammered.
+    const concurrency = 3;
+    let ok = 0, failed = 0;
+    const queue = [...unique];
+    const worker = async () => {
+      while (queue.length) {
+        const l = queue.shift()!;
+        try {
+          // 1) Website scan
+          let scanRes: any = null;
+          if (l.website) {
+            try {
+              scanRes = await portalLeads.scan(l.id, { url: l.website, force: false });
+              await leadClues.log(l.id, {
+                kind: 'scan',
+                label: scanRes?.cached ? 'Loaded saved website scan (batch)' : 'Ran website leak scan (batch)',
+                tool_key: 'website-scanner',
+                meta: { url: l.website, cached: !!scanRes?.cached, grade: scanRes?.scan?.grade, score: scanRes?.scan?.score },
+              });
+            } catch (e) { console.warn('batch scan failed', l.id, e); }
+          }
+          // 2) Deep scan (RocketReach + Firecrawl)
+          let rrRes: any = null;
+          try {
+            rrRes = await portalLeads.rocketReach(l.id, { force: true });
+            await leadClues.log(l.id, {
+              kind: 'rocketreach',
+              label: rrRes?.cached ? 'Loaded saved deep scan (batch)' : 'Deep scan complete (batch)',
+              tool_key: 'rocketreach',
+              meta: { cached: !!rrRes?.cached, name: rrRes?.person?.name, title: rrRes?.person?.current_title },
+            });
+          } catch (e) { console.warn('batch deep scan failed', l.id, e); }
+          // 3) Detective mode
+          const { data: detData, error: detErr } = await supabase.functions.invoke('portal-detective', {
+            body: {
+              lead: l,
+              scan: scanRes?.scan,
+              rocketreach: rrRes?.person,
+              firecrawl: rrRes?.firecrawl,
+              score: (l as any)?.score,
+              channel: 'email',
+            },
+            headers: { 'x-portal-token': token },
+          });
+          if (detErr) throw new Error(detErr.message);
+          if ((detData as any)?.error) throw new Error((detData as any).error);
+          const detective = (detData as any)?.result || null;
+          await leadClues.log(l.id, {
+            kind: 'detective',
+            label: `Detective verdict: ${detective?.best_angle?.title || detective?.best_angle?.leak_or_gap || 'angle locked'}`,
+            tool_key: 'detective-mode',
+            meta: { detective },
+          });
+          // Calendar follow-up
+          try {
+            const businessName = l.business_name || l.email || 'Lead';
+            await createCalendarEvent({
+              kind: 'follow_up',
+              title: `Forensic sweep ready: ${businessName}`,
+              body: [
+                `Lead: ${businessName}`,
+                detective?.best_angle?.title ? `Angle: ${detective.best_angle.title}` : null,
+                detective?.best_angle?.leak_or_gap ? `Leak: ${detective.best_angle.leak_or_gap}` : null,
+                'Full forensic sweep complete (scan + deep scan + detective). Open the lead to see the case file.',
+              ].filter(Boolean).join('\n'),
+              start_at: nextBusinessMorningISO(),
+              all_day: false,
+              lead_id: l.id,
+            });
+          } catch (calErr) { console.warn('calendar autosave failed:', calErr); }
+          setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
+          ok++;
+        } catch (e) {
+          console.warn('forensic sweep failed', l.id, e);
+          setBulkStatuses(prev => ({ ...prev, [l.id]: 'failed' }));
+          failed++;
+        }
+      }
+    };
+    try {
+      await Promise.all(Array.from({ length: Math.min(concurrency, unique.length) }, worker));
+      toast({
+        title: 'Forensic sweep finished',
+        description: `${ok} complete${failed ? `, ${failed} failed` : ''}. Case files saved to each lead's clue trail; follow-ups on your calendar.`,
+        variant: failed && !ok ? 'destructive' : 'default',
+      });
+      refreshMine();
+    } finally {
+      setBulkScanning(false);
+    }
+  }, [bulkSelected, scanCandidates, mine, refreshMine, toast]);
+
+
+
 
   return (
     <div className="space-y-4">
@@ -720,11 +830,13 @@ export const LeadsBoard: React.FC = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan, Pick up to 10
+              <Sparkles className="w-5 h-5 text-amber" /> Batch Forensics, Pick up to 10
             </DialogTitle>
             <DialogDescription>
-              Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
+              <span className="block"><span className="text-amber">Deep Scan</span> = RocketReach + Firecrawl enrichment only.</span>
+              <span className="block"><span className="text-amber">Full Forensic Sweep</span> = website scan + deep scan + Detective Mode verdict, saved to each lead's clue trail.</span>
             </DialogDescription>
+
           </DialogHeader>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
@@ -835,12 +947,22 @@ export const LeadsBoard: React.FC = () => {
               </Button>
             )}
             <Button
+              variant="outline"
+              className="border-amber/50 text-amber hover:bg-amber/10"
+              disabled={bulkScanning || bulkSelected.size === 0}
+              onClick={runBulkFullForensic}
+              title="Website scan + deep scan + Detective Mode, saved to each lead"
+            >
+              {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Sweeping {bulkSelected.size}…</> : <><Search className="w-3 h-3 mr-1" /> Full Forensic Sweep {bulkSelected.size}</>}
+            </Button>
+            <Button
               className="bg-amber text-background hover:bg-amber/90"
               disabled={bulkScanning || bulkSelected.size === 0}
               onClick={runBulkDeepScan}
             >
               {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scanning {bulkSelected.size}…</> : <>Deep Scan {bulkSelected.size}</>}
             </Button>
+
           </div>
         </DialogContent>
       </Dialog>
