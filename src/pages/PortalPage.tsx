@@ -78,8 +78,6 @@ import { Trophy } from 'lucide-react';
 import { Linkedin } from 'lucide-react';
 import { LinkedInSetupGuide } from '@/components/portal/LinkedInSetupGuide';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
-import { PartnerOnboardingHub } from '@/components/portal/PartnerOnboardingHub';
-import { Compass } from 'lucide-react';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 // Maximize2 imported above
@@ -94,8 +92,10 @@ import { REP_TOOL_TIPS } from '@/lib/repToolTips';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { BusinessPostAnalyst } from '@/components/portal/BusinessPostAnalyst';
 import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
+import { PartnerOnboardingHub } from '@/components/portal/PartnerOnboardingHub';
+import { Compass } from 'lucide-react';
 
-type Tab = 'overview' | 'partnerhub' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -459,6 +459,15 @@ const PortalPage: React.FC = () => {
   }
 
   const isPartner = profile.role === 'partner';
+
+  // Partner-only: auto-route Braden to the new Partner Hub on first visit.
+  useEffect(() => {
+    if (isPartner && !localStorage.getItem('partnerhub-seen-v1')) {
+      setTab('partnerhub');
+      localStorage.setItem('partnerhub-seen-v1', '1');
+    }
+  }, [isPartner]);
+
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
@@ -473,22 +482,10 @@ const PortalPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadChat]);
 
-  // First-visit auto-route partners to their onboarding hub.
-  useEffect(() => {
-    if (!isPartner) return;
-    try {
-      if (!localStorage.getItem('partnerhub-seen-v1')) {
-        setTab('partnerhub');
-        localStorage.setItem('partnerhub-seen-v1', '1');
-      }
-    } catch { /* noop */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPartner]);
-
   const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean }[] = [
+    { id: 'partnerhub', label: 'Partner Hub', icon: <Compass className="w-4 h-4" />, iconCmp: Compass, partnerOnly: true },
     { id: 'jw-admin' as Tab, label: 'Joseph Work Account', icon: <Crown className="w-4 h-4" />, iconCmp: Crown, href: '/admin', adminOnly: true },
     { id: 'workbench' as Tab, label: 'Workbench', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench, adminOnly: true },
-    { id: 'partnerhub', label: 'Partner Hub', icon: <Compass className="w-4 h-4" />, iconCmp: Compass, partnerOnly: true },
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
@@ -636,7 +633,6 @@ const PortalPage: React.FC = () => {
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
-      case 'partnerhub': return <PartnerOnboardingHub onJump={(t) => setTab(t as Tab)} />;
       case 'companycal': return isPartner ? <AdminCompanyCalendarPanel /> : <CompanyCalendarRepView />;
       case 'briefing': return <InterviewBriefingPanel />;
       case 'playbook': return <PortalPlaybook />;
@@ -662,6 +658,7 @@ const PortalPage: React.FC = () => {
       case 'catalog': return <ServicesPricing />;
       case 'linkedin': return <LinkedInSetupGuide />;
       case 'careers': return <PortalCareersPanel />;
+      case 'partnerhub': return <PartnerOnboardingHub onJump={(t) => setTab(t as Tab)} />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
         return isPartner ? (

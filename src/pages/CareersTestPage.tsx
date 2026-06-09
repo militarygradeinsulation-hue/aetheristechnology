@@ -175,7 +175,7 @@ const CareersTestPage = () => {
                   </div>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                  <li>Topics: positioning (operator is the product), Leak Audit, the 3 bundles ($2,500 Signal Pack · $5,000 Revenue Pack · $10,000 Operator Suite) + 2 flagships ($18,500 21-Day Revenue Diagnostic · $15,000/mo Implementation Retainer), commission (tiered 20% on bundles · fixed $5,000 per Diagnostic · $4,000/mo recurring per Retainer), sales process, brand rules.</li>
+                  <li>Topics: positioning, Leak Audit, pricing ($149 Snapshot · $599 Eval · $2,500 Forensic Diagnostic · Fractional retainers), commission (15% flat, recurring for life), sales process, brand rules.</li>
                   <li>Questions are randomized. No back-tracking once submitted.</li>
                   <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code, it's how I review you.</li>
                 </ul>

@@ -1,105 +1,103 @@
-## Goal
+# Operator-First Rewrite + Premium Bundles
 
-Give Braden (partner code 963169) a single, partner-only "Partner Onboarding Hub" inside his existing portal that gets him fluent on:
+Three jobs, in order: (1) scrub staff portals from public nav, (2) replace tool catalog with three operator-led bundles, (3) reframe site copy so the **operator** is the product, tools are the proof.
 
-1. **The new plan** — operator is the product, 3 bundles + 2 flagships, dual commission model
-2. **Hiring** — how reps apply, how the test gates them, what he's reviewing, his partner override on referred reps
-3. **Training** — the rep curriculum he needs to know cold so he can coach
-4. **Structure** — Joseph / Operator / Partner / Reps / Clients, who owns what, money flow
+---
 
-Everything is presentation + content (no new business logic, no schema changes). One new tab on the partner side.
+## 1. Hide staff portals from public nav
 
-## What gets built
+Pages, routes, edge functions, and DB stay intact. You and your team keep using `/admin`, `/portal`, `/staff` directly. Visitors get no breadcrumb to them.
 
-### 1. New partner-only tab: "Partner Hub"
+- `src/components/Navbar.tsx` — remove any link to `/admin`, `/portal`, `/partner-portal`, `/staff`, `/careers`.
+- `src/components/Footer.tsx` — same scrub. Remove "Careers", "Rep Portal", "Partner Login", "Admin".
+- `src/pages/Home.tsx`, `src/components/Hero.tsx`, `src/components/Contact.tsx` — remove any rep/careers CTAs.
+- `public/robots.txt` — disallow `/admin`, `/portal`, `/partner-portal`, `/staff`, `/careers`, `/careers-test`.
+- `src/App.tsx` — keep routes mounted (direct URL still works). Just no link surface.
+- `public/llms.txt` / `public/llms-full.txt` — drop any mention of careers/portal so the LLM crawl doesn't surface them.
 
-- Add a new `id: 'partnerhub'` tab in `src/pages/PortalPage.tsx`'s `tabs` array, `partnerOnly: true`, icon = `Compass` (or `Briefcase`).
-- Slot it at the top of the partner view (just under Overview) so it's the first thing Braden sees.
-- Auto-route Braden's first visit there: if `isPartner && !localStorage.getItem('partnerhub-seen-v1')` on mount → `setTab('partnerhub')` then set the flag.
+No DB or edge-function changes. No data loss.
 
-### 2. New component: `src/components/portal/PartnerOnboardingHub.tsx`
+---
 
-A single scrollable page broken into 6 collapsible sections (using existing card + chevron pattern from `OperatorPage.tsx`). State: `openSection: string | null`.
+## 2. Three operator-led bundles — kill single-tool sales
 
-**Section A — The New Plan (operator is the product)**
-- One paragraph reframing: we don't sell tools, we pair clients with an operator.
-- The 5-offer ladder as a clean table:
-  - Signal Pack $2,500 · ~6 hrs · entry leak memo
-  - Revenue Pack $5,000 · ~14 hrs · sales engine rebuild
-  - Operator Suite $10,000 · ~30 hrs · embedded 3 weeks (credits 1:1 to Retainer)
-  - 21-Day Revenue Diagnostic $18,500 · FLAGSHIP, fit-call required
-  - Implementation Retainer $15,000/mo · FLAGSHIP, 3-mo min, Diagnostic clients only
-- Callout box: "What changed vs the old catalog" — single-tool sales are killed, public lineup is bundles + flagships only.
+### Bundle architecture
 
-**Section B — Your Commission as Partner**
-- Dual model in plain English:
-  - Bundles: partner gets **10%** (Signal $250, Revenue $500, Operator Suite $1,000)
-  - 21-Day Diagnostic: **$3,000 fixed** per close
-  - Implementation Retainer: **$3,000/mo every month** the client stays subscribed
-- Worked example: "1 Diagnostic + 6-month Retainer = $3,000 + (6 × $3,000) = $21,000 to you, recurring through month 6."
-- Reuse `<FlagshipCommissionPanel audience="partner" />` underneath for the live calculator.
-- Referral override line: "+$500/sale, 12-month override on every rep you bring in who closes."
+| Tier | Name | Price | Operator hours | What's in it |
+|---|---|---|---|---|
+| 1 | **Signal Pack** | $2,500 one-time | ~6 hrs operator-led | Website Report + Brand Contradiction Finder + Friction Vocabulary Audit. Operator runs all three, hands you a single Leak Findings memo + 30-min walkthrough call. |
+| 2 | **Revenue Pack** | $5,000 one-time | ~14 hrs operator-led | Everything in Signal + Sales Script Pack + Follow-Up Plan + Strategic Question Engine + Content Calendar. Operator builds your outbound + nurture system, two 45-min working sessions. |
+| 3 | **Operator Suite** | $10,000 one-time | ~30 hrs operator-led | Everything in Revenue + Strategy Blueprint + Social Content Pack + Digital Snapshot + Lead-Nurture Automation + Premium Tech Suite access. Operator embeds for 3 weeks, weekly calls, slack-style async. Credit toward Implementation Retainer. |
 
-**Section C — The Hiring Funnel**
-- Visual 4-step flow (numbered cards):
-  1. Rep reads site → takes 25-question test (80% to pass, 5 attempts/day)
-  2. Passes test → resume + 150-word pitch unlocks
-  3. AI scores fit (6 sections, 6–60 score) → Joseph + Braden review in **Careers Admin**
-  4. Approved → code issued → portal access + onboarding curriculum auto-assigned
-- Inline buttons: "Open Careers Admin" → `setTab('careers')`, "Open the public Careers page" → `/careers`, "Take the test as a rep would" → `/careers/test`.
-- "What you're looking for" checklist pulled from the careers page (B2B closer, hustle, resilience, etc.).
+Flagships stay above the bundles as the "next step":
+- **21-Day Revenue Diagnostic** — $18,500 (sales-led)
+- **Implementation Retainer** — $15,000/mo (diagnostic clients only)
 
-**Section D — Training You Need to Know Cold**
-- Bulleted index linking to existing training surfaces inside the portal:
-  - Aetheris Academy (onboarding curriculum) → `setTab('onboarding')`
-  - 6-Week Bootcamp → `setTab('sprint')` (or wherever it lives)
-  - Sales Coach Chat → `setTab('coach')`
-  - Team Training (MCQ + AI graded) → `setTab('training')`
-  - Rep-Operator Playbook PDF → link to `/Rep-Operator-Playbook.md`
-- For each: one sentence on what it teaches and why Braden should personally complete it so he can coach.
+### Why pairing matters (rendered on each card)
 
-**Section E — The Structure (who does what)**
-- Org diagram rendered as a simple grid (no library):
-  ```
-  Joseph (Operator-in-Chief)
-      ├─ Braden (Partner — hiring, coaching, overrides)
-      │      └─ Reps (closers, code-gated)
-      └─ Clients (bundles + flagships)
-  ```
-- Money flow table for each offer showing Company / Rep / Partner split (mirrors the constants in `payments-webhook/flagshipFixedSplit()` and the bundle 70/20/10 — pull the exact splits from memory `business/pricing`).
-- Decision rights: who can approve a hire, who signs SOWs, who handles delivery, who handles client comms post-close.
+Each bundle card shows a "These tools only work together because…" block — short forensic explanation of which leak each pairing closes. Example for Signal Pack: *"A website report without a brand-contradiction read tells you what's broken on the page but not why visitors don't believe you. Run alone, it under-delivers. Paired, it tells you exactly which sentence is leaking trust."*
 
-**Section F — Your First 14 Days as Partner (checklist)**
-- 10-item task list with checkboxes (persisted in `localStorage` under `partnerhub-checklist-v1`):
-  - Read this hub end-to-end
-  - Complete the Rep-Operator Playbook
-  - Take the 25-question careers test yourself (you should score 100%)
-  - Review the current Careers Admin queue
-  - Complete Aetheris Academy modules 1–3
-  - Shadow Joseph on 1 Diagnostic fit call
-  - Run the commission calculator with 3 deal scenarios
-  - Recruit 1 candidate to the test funnel
-  - Co-pitch 1 Signal Pack
-  - Schedule weekly partner sync with Joseph
+### Catalog page changes
 
-### 3. Wire-up
+- `src/pages/CatalogPage.tsx` — delete the à la carte tool grid entirely. Replace with three bundle cards + the two flagships above. No "buy single tool" buttons anywhere.
+- `src/components/PackageTiers.tsx` — rewrite to the three bundles above with operator-hours, included tools, pairing rationale, and a single "Talk to an operator" CTA per card (opens `ContactModal`, NOT Stripe checkout).
+- `src/components/ServicesPricing.tsx` — page becomes operator-pitch + bundle summary, not a tool price list. Remove the greyed-out tech-suite grid.
+- Individual tool pages (`/sales-scripts`, `/follow-up-plan`, etc.) — keep them live for SEO and rep use, but swap the "Buy now" CTA for "This tool is only sold as part of a bundle. Talk to an operator →".
 
-- Import the component in `PortalPage.tsx`, add `case 'partnerhub': return <PartnerOnboardingHub onJump={setTab} />;` in `renderTabBody`.
-- `onJump` lets the hub deep-link into other tabs (`careers`, `onboarding`, `coach`, `training`, `commissions`).
+### Stripe
 
-## Technical Details
+No new products. Existing single-tool Stripe products stay registered (rep portal still uses them). Public site simply stops linking to checkout. Three new products created for the bundles:
+- `signal_pack` — $2,500 one-time
+- `revenue_pack` — $5,000 one-time
+- `operator_suite` — $10,000 one-time
 
-- All copy lives inline in the new component; pricing constants imported from `src/lib/repProducts.ts` and the bundle/flagship splits hardcoded to match `supabase/functions/payments-webhook/index.ts` `flagshipFixedSplit()` so there's a single mental model.
-- No new tables, no new edge functions, no schema migration. Checklist state is `localStorage` only (per-browser is fine for one partner).
-- Reuses existing tokens (`amber`, `forensic-tile`, `font-display`, `font-mono`) — no design-system changes.
-- Gating: tab is `partnerOnly: true`, so reps will never see it. Joseph (admin) sees it too when previewing the partner role.
+All three open `ContactModal` first (operator-qualifies), then operator sends a Stripe link manually. No public Buy button — preserves the "you can't just buy this" exclusivity.
 
-## Files touched
+---
 
-- **New:** `src/components/portal/PartnerOnboardingHub.tsx`
-- **Edited:** `src/pages/PortalPage.tsx` (add tab + case + first-visit auto-route)
+## 3. Operator-first rewrite
+
+The hero stops selling tools. It sells **a person who runs the tools for you**.
+
+### Files rewritten
+
+- `src/components/Hero.tsx` — new headline: *"You don't need more tools. You need an operator running them."* Sub: *"We pair you with a Business Forensics Operator who sits down with you, finds every leak, and fixes them — using a stack you'd take 18 months to assemble yourself."* Single CTA: "Meet your operator →" → `/operator` (new page).
+- `src/pages/Home.tsx` — reorder sections: Operator pitch first, Leak Audit method second, Bundles third, Flagships fourth, Proof last. Remove anything that reads "buy the tool".
+- `src/components/Services.tsx`, `src/components/ServiceCapabilities.tsx`, `src/components/ToolsCapabilities.tsx`, `src/components/WhatYouReallyGet.tsx` — reframe every "the tool does X" line into "your operator uses X to find Y leak". Tools become evidence of operator capability, not products.
+- `src/pages/CapabilitiesPage.tsx` — keep the problem-first layout from the recent change, but every "solution" panel now says *"Your operator handles this using [tool]"* not *"Use [tool]"*.
+- **New `src/pages/OperatorPage.tsx`** at route `/operator` — long-form: what an operator is, what a 30/60/90-day engagement looks like, the 12 tools they wield, why you can't buy the tools without them, single CTA → ContactModal.
+- `src/components/Navbar.tsx` — primary nav becomes: Operator · Bundles · Method · Field Notes · Contact.
+
+### Copy rules (applied across all rewrites)
+
+- "Tool" never appears as a noun the buyer purchases. Tools are things the operator wields.
+- Replace "Buy", "Get instant access", "Purchase" with "Talk to an operator" everywhere on public pages.
+- Keep the forensic voice, crimson-for-leak-only rule, USD-only rule, all existing style memory.
+
+---
+
+## 4. Memory updates
+
+- `mem://business/pricing` — replace tool-pack list with the three bundles + flagships. Note "tools never sold individually on public site".
+- `mem://index.md` Core — add: *"Operator is the product. Tools are the operator's instruments, never sold à la carte publicly."*
+
+---
 
 ## Out of scope
 
-- No changes to the careers funnel, training engine, commission webhook, or pricing.
-- No new partner-only data tables. If we later want Joseph to see Braden's checklist progress, that's a follow-up (would need a small `partner_onboarding_progress` table).
+- No changes to `/admin`, `/portal`, rep commission math, leads board, training, time clock, smart subscriptions, AI coach — they all keep working, just no link surface.
+- No auth changes. No email changes. No flagship pricing changes ($18.5k / $15k stay).
+- Existing single-tool Stripe products stay registered (rep portal sells them internally).
+- Blog/Field Notes gating stays as built last turn.
+
+---
+
+## Files touched (estimate)
+
+**New:** `src/pages/OperatorPage.tsx`
+**Rewritten:** `Hero.tsx`, `Home.tsx`, `Navbar.tsx`, `Footer.tsx`, `CatalogPage.tsx`, `PackageTiers.tsx`, `ServicesPricing.tsx`, `Services.tsx`, `ToolsCapabilities.tsx`, `WhatYouReallyGet.tsx`, `CapabilitiesPage.tsx`, `robots.txt`, `llms.txt`
+**Touched (CTA swaps):** the 8 individual tool pages
+**Stripe:** 3 new bundle products
+**Memory:** index.md core line, pricing.md
+
+Want me to build it?

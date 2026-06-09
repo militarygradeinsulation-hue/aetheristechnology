@@ -275,7 +275,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
         </div>
 
         <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Bundles pay a flat 20% to the rep. Flagships pay fixed dollars: $5,000 per Diagnostic close, $4,000/mo every month the Retainer client stays. See the full table below.
+          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
         </p>
       </div>
     </div>
@@ -288,7 +288,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Signal Pack to close — the operator-led entry bundle. The pitch writes itself.' },
+          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice and a $2,500 Forensic Diagnostic to close. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
           { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
@@ -345,7 +345,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
-          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling an operator that actually sits down and fixes the leak feels different.' },
+          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence, you bring the voice.' },
@@ -519,17 +519,18 @@ const PlaybookSection = () => (
           </p>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
             <li>
-              <span className="text-foreground font-semibold">Operator-led bundles:</span>{' '}
-              flat <span className="text-primary font-bold">20% rep cut</span> on every Signal Pack ($500), Revenue Pack ($1,000), and Operator Suite ($2,000). Partner gets 10%.
+              <span className="text-foreground font-semibold">Operator-led bundles & legacy catalog:</span>{' '}
+              tiered split — <span className="text-primary font-bold">30% / 25% / 20% rep</span> at Tier 1 / 2 / 3 by sale size.
+              All three public bundles are Tier 3, so you keep <span className="text-primary font-bold">20% of every bundle close</span>.
             </li>
             <li>
               <span className="text-foreground font-semibold">Flagships (fixed-dollar):</span>{' '}
-              21-Day Revenue Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
-              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed. Partner gets $3,000 / $3,000/mo.
+              21-Day Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
+              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed.
             </li>
           </ul>
           <p className="text-xs text-muted-foreground">
-            Paid within 7 days of client payment clearing. No clawbacks on completed work. The remainder funds the company and the operator who delivers.
+            Paid within 7 days of client payment clearing. No clawbacks on completed work.
           </p>
         </div>
 
@@ -572,6 +573,12 @@ const PlaybookSection = () => (
               <TableCell className="text-right text-muted-foreground">$15,000/mo</TableCell>
               <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
               <TableCell className="text-right font-semibold text-primary">$4,000/mo</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="text-foreground">Legacy à la carte tools (rep-led only)</TableCell>
+              <TableCell className="text-right text-muted-foreground">$29–$499</TableCell>
+              <TableCell className="text-right text-muted-foreground">T1/T2 tiered</TableCell>
+              <TableCell className="text-right text-muted-foreground">30% / 25% of sale</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -648,11 +655,10 @@ const PlaybookSection = () => (
         <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math built on the 3 bundles (20% rep cut) and the 2 flagships ($5,000 per Diagnostic, $4,000/mo per Retainer):</p>
+        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { label: 'Light month', detail: '2 Signal Packs + 1 Revenue Pack closed', total: '$2,000 one-time' },
-            { label: 'Solid month', detail: '1 Operator Suite + 1 Signal Pack ($12,500 in sales)', total: '$2,500 one-time' },
+            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
             { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
             { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
             { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
