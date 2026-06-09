@@ -2305,6 +2305,7 @@ If I'm right, this is bleeding revenue every week it stays open. Worth a 15-minu
 
 // ---------- Post-Scan Next Steps (crystal-clear CTAs) ----------
 const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan }) => {
+  const { toast } = useToast();
   const openCoachWithDraft = (intent: 'email' | 'linkedin' | 'call') => {
     // Lock lead context for the coach
     setActiveLead({
