@@ -519,18 +519,17 @@ const PlaybookSection = () => (
           </p>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
             <li>
-              <span className="text-foreground font-semibold">Operator-led bundles & legacy catalog:</span>{' '}
-              tiered split — <span className="text-primary font-bold">30% / 25% / 20% rep</span> at Tier 1 / 2 / 3 by sale size.
-              All three public bundles are Tier 3, so you keep <span className="text-primary font-bold">20% of every bundle close</span>.
+              <span className="text-foreground font-semibold">Operator-led bundles:</span>{' '}
+              flat <span className="text-primary font-bold">20% rep cut</span> on every Signal Pack ($500), Revenue Pack ($1,000), and Operator Suite ($2,000). Partner gets 10%.
             </li>
             <li>
               <span className="text-foreground font-semibold">Flagships (fixed-dollar):</span>{' '}
-              21-Day Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
-              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed.
+              21-Day Revenue Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
+              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed. Partner gets $3,000 / $3,000/mo.
             </li>
           </ul>
           <p className="text-xs text-muted-foreground">
-            Paid within 7 days of client payment clearing. No clawbacks on completed work.
+            Paid within 7 days of client payment clearing. No clawbacks on completed work. The remainder funds the company and the operator who delivers.
           </p>
         </div>
 
