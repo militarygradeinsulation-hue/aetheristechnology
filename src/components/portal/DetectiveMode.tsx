@@ -9,6 +9,7 @@ import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
 import { ReadAloudButton } from '@/components/ReadAloudButton';
+import { leadClues } from '@/lib/leadClues';
 
 type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
