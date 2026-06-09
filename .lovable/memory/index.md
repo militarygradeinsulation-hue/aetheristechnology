@@ -15,7 +15,7 @@
 
 ## Memories
 - [Design System](mem://style/design-system) — HSL color tokens, typography stack, gradients, motion utilities
-- [Pricing & Business Model](mem://business/pricing) — Public offers, legacy product status, tiered commission
+- [Pricing & Business Model](mem://business/pricing) — Five public offers (3 bundles + 2 flagships), TWO commission models (tiered % for bundles, fixed-dollar for flagships), webhook flagshipFixedSplit, rep portal alignment, Rep-Operator-Playbook.md
 - [Brand Strategy](mem://business/brand-strategy) — Specialty-manufacturer wedge, credentials-first positioning, two-offer surface
 - [Content Strategy](mem://marketing/content-strategy) — Automated blog/playbook schedules, LinkedIn 360 Brew
 - [Aetheris Lexicon](mem://marketing/aetheris-lexicon) — REQUIRED Leak Audit™ vocabulary + structural rules for ALL LinkedIn posts/comments/replies (enforced in linkedin-post-respond + linkedin-post-studio)
