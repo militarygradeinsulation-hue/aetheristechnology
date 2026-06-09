@@ -1708,6 +1708,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     gaps={scan.gaps}
                     initialProgress={scan.gapProgress || {}}
                     onChange={(p) => setScan((prev: any) => prev ? { ...prev, gapProgress: p } : prev)}
+                    lead={lead}
                   />
                 )}
                 {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
@@ -2151,7 +2152,8 @@ const LeakChecklist: React.FC<{
   gaps: any[];
   initialProgress: GapProgress;
   onChange?: (p: GapProgress) => void;
-}> = ({ leadId, gaps, initialProgress, onChange }) => {
+  lead?: RepLead;
+}> = ({ leadId, gaps, initialProgress, onChange, lead }) => {
   const { toast } = useToast();
   const [progress, setProgress] = useState<GapProgress>(initialProgress || {});
   const [openTouchIdx, setOpenTouchIdx] = useState<number | null>(null);
@@ -2245,14 +2247,53 @@ const LeakChecklist: React.FC<{
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setOpenTouchIdx(null); setTouchNote(''); }}>Cancel</Button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    className="mt-1 text-[11px] text-amber hover:text-amber/80 underline-offset-2 hover:underline"
-                    onClick={() => { setOpenTouchIdx(i); setTouchNote(''); }}
-                  >
-                    + Add touch point{touches.length > 0 ? ` (${touches.length})` : ''}
-                  </button>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <button
+                      type="button"
+                      className="text-[11px] text-amber hover:text-amber/80 underline-offset-2 hover:underline"
+                      onClick={() => { setOpenTouchIdx(i); setTouchNote(''); }}
+                    >
+                      + Add touch point{touches.length > 0 ? ` (${touches.length})` : ''}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline"
+                      onClick={async () => {
+                        const contactFirst = (lead?.contact_name || '').split(' ')[0] || 'there';
+                        const company = lead?.business_name || 'your operation';
+                        const subject = `${company}: ${g.title}`;
+                        const body =
+`Hi ${contactFirst},
+
+I ran a quick forensic scan on ${company} and one leak stood out:
+
+▸ ${g.title} (${g.category})
+${g.description || ''}
+
+Estimated cost: ${g.annualCost || '—'}
+Recommended fix: ${g.recommendedFix || '—'}
+Projected ROI: ${g.projectedROI || '—'}
+
+If I'm right, this is bleeding revenue every week it stays open. Worth a 15-minute Leak Audit call to walk you through what we found and how we'd close it?
+
+—`;
+                        const full = `Subject: ${subject}\n\n${body}`;
+                        try {
+                          await navigator.clipboard.writeText(full);
+                          toast({ title: 'Email copied', description: 'Subject + body copied to clipboard.' });
+                        } catch {
+                          toast({ title: 'Copy failed', description: 'Clipboard blocked — opening composer instead.', variant: 'destructive' });
+                        }
+                        if (lead?.email) {
+                          openRepMail(lead.email, { subject, body });
+                        }
+                      }}
+                    >
+                      ✉ Make this an email & copy
+                    </button>
+                  </div>
                 )}
+
               </div>
             </div>
           </div>
