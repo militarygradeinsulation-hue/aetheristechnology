@@ -220,31 +220,40 @@ async function recordSaleAndCommissions(args: {
     return;
   }
 
-  // Commission split — tiered by sale amount.
+  // Commission split — flagship fixed-dollar overrides tiered percentages.
   const amount = args.amount_cents;
+  const fixed = flagshipFixedSplit(args.price_id);
   const tierRates = ratesForAmount(amount);
   const commissionRows: any[] = [];
 
-  // Company
+  // Resolve final company/rep/partner amounts + a rate value to store.
+  const companyAmt = fixed ? fixed.company : Math.floor(amount * tierRates.company);
+  const repAmt     = fixed ? fixed.rep     : Math.floor(amount * tierRates.rep);
+  const partnerAmt = fixed ? fixed.partner : Math.floor(amount * tierRates.partner);
+  const companyRate = fixed ? (fixed.company / amount) : tierRates.company;
+  const repRate     = fixed ? (fixed.rep     / amount) : tierRates.rep;
+  const partnerRate = fixed ? (fixed.partner / amount) : tierRates.partner;
+  const splitMeta = fixed
+    ? { split_model: 'flagship_fixed', flagship: fixed.label, tier: null }
+    : { split_model: 'tiered', tier: tierRates.tier };
+
+  // Company always gets a row.
   commissionRows.push({
     sale_id: sale.id, recipient_role: "company", recipient_code: null,
-    amount_cents: Math.floor(amount * tierRates.company), rate: tierRates.company,
+    amount_cents: companyAmt, rate: companyRate,
     status: "pending", environment: args.env,
-    metadata: { tier: tierRates.tier },
+    metadata: splitMeta,
   });
 
   if (args.rep_code) {
     const { data: rep } = await supabase
       .from("rep_codes")
       .select("commission_rate, role").eq("code", args.rep_code).eq("is_active", true).maybeSingle();
-    // Tier rate is the source of truth; rep_codes.commission_rate is ignored under tiered model.
-    const repRate = tierRates.rep;
-    const repAmt = Math.floor(amount * repRate);
     commissionRows.push({
       sale_id: sale.id, recipient_role: "rep", recipient_code: args.rep_code,
       amount_cents: repAmt, rate: repRate,
       status: "pending", environment: args.env,
-      metadata: { tier: tierRates.tier },
+      metadata: splitMeta,
     });
 
     await supabase.rpc("increment_rep_sales" as any, {
@@ -257,12 +266,11 @@ async function recordSaleAndCommissions(args: {
     if (rep?.role !== "partner") {
       const partnerCode = await findActivePartnerCode();
       if (partnerCode) {
-        const partnerAmt = Math.floor(amount * tierRates.partner);
         commissionRows.push({
           sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-          amount_cents: partnerAmt, rate: tierRates.partner,
+          amount_cents: partnerAmt, rate: partnerRate,
           status: "pending", environment: args.env,
-          metadata: { tier: tierRates.tier },
+          metadata: splitMeta,
         });
         await supabase.rpc("increment_rep_sales" as any, {
           _code: partnerCode, _sales: 0, _commission: partnerAmt,
@@ -270,15 +278,14 @@ async function recordSaleAndCommissions(args: {
       }
     }
   } else {
-    // No rep — partner still earns their tier override if one is configured.
+    // No rep — partner still earns their override if one is configured.
     const partnerCode = await findActivePartnerCode();
     if (partnerCode) {
-      const partnerAmt = Math.floor(amount * tierRates.partner);
       commissionRows.push({
         sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-        amount_cents: partnerAmt, rate: tierRates.partner,
+        amount_cents: partnerAmt, rate: partnerRate,
         status: "pending", environment: args.env,
-        metadata: { tier: tierRates.tier },
+        metadata: splitMeta,
       });
       await supabase.rpc("increment_rep_sales" as any, {
         _code: partnerCode, _sales: 0, _commission: partnerAmt,
@@ -294,8 +301,8 @@ async function recordSaleAndCommissions(args: {
     entity_id: sale.id,
     customer_id: customerId,
     rep_code: args.rep_code ?? null,
-    summary: `${args.kind} ${(amount / 100).toFixed(2)} ${args.currency.toUpperCase()} (${args.price_id ?? "?"})`,
-    metadata: { env: args.env, ...(args.metadata ?? {}) },
+    summary: `${args.kind} ${(amount / 100).toFixed(2)} ${args.currency.toUpperCase()} (${args.price_id ?? "?"})${fixed ? ' [FLAGSHIP]' : ''}`,
+    metadata: { env: args.env, ...splitMeta, ...(args.metadata ?? {}) },
   });
 }
 
