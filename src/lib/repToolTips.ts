@@ -43,7 +43,7 @@ export const REP_TOOL_TIPS: Record<RepToolKey, RepToolTip> = {
   'business-diagnostic': {
     useFor: 'Mid-funnel asset — send to prospects who said "tell me more". 20 questions + PDF = perfect demo deliverable.',
     pairWith: 'After they complete it, use Strategic Question Engine to dig into the lowest-scoring section on the call.',
-    proTip: 'Position it as "free $2,500 diagnostic preview" to anchor the paid Forensic Diagnostic.',
+    proTip: 'Position it as a free preview of the Signal Pack ($2,500). The Signal Pack is the paid entry, not the Diagnostic — never confuse the two on a call.',
   },
   'sales-scripts': {
     useFor: 'Generating tailored cold-call + email scripts in seconds, customized to the prospect and their role.',
