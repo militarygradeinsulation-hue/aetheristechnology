@@ -37,7 +37,8 @@ interface ScoredLead {
   website?: string;
   industry?: string;
   location?: string;
-  score: number;
+  score?: number;
+  score_breakdown?: Array<{ key: string; label: string; weight: number; earned: number }>;
   why_fit: string;
 }
 
