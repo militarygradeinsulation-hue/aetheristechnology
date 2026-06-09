@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { fmtUsd } from '@/lib/repProducts';
 
-// Fixed-dollar split for the flagship offers (matches payments-webhook flagshipFixedSplit()).
+// Fixed-dollar split for the flagships (matches payments-webhook flagshipFixedSplit()).
+// Bundles use the tiered % model (T3: 70/20/10) and are shown as their derived dollar
+// amounts so reps see a single $-figure per offer regardless of model.
 // All amounts are in cents.
 interface FixedSplit { company: number; rep: number; partner: number; }
 
@@ -20,14 +22,67 @@ interface Flagship {
   cadence: string;
   included: string[];
   split: FixedSplit;
+  /** Visual badge — flagship (sales-led) vs bundle (operator-led pairings). */
+  band: 'flagship' | 'bundle';
 }
 
 const FLAGSHIPS: Flagship[] = [
+  // ── OPERATOR-LED BUNDLES (public, sealed pairings, Tier 3 split) ──
+  {
+    key: 'signal',
+    name: 'Signal Pack',
+    band: 'bundle',
+    blurb: 'Entry bundle. ~6 hrs of operator time. Website + brand + friction read with one Leak Findings memo.',
+    priceCents: 250_000,
+    cadence: 'one-time',
+    included: [
+      'Full Website Report + Brand Contradiction Finder + Friction Vocabulary Audit',
+      'Operator-written Leak Findings memo',
+      '30-minute walkthrough call',
+    ],
+    // T3 70/20/10: $1,750 / $500 / $250
+    split: { company: 175_000, rep: 50_000, partner: 25_000 },
+  },
+  {
+    key: 'revenue',
+    name: 'Revenue Pack',
+    band: 'bundle',
+    blurb: 'Core bundle. ~14 hrs of operator time. Sales scripts + follow-up + question engine + content calendar built as one engine.',
+    priceCents: 500_000,
+    cadence: 'one-time',
+    included: [
+      'Everything in Signal Pack',
+      'Sales Script Pack + Follow-Up System Plan',
+      'Strategic Question Engine + 30-Day Content Calendar',
+      'Two 45-minute working sessions',
+    ],
+    // T3 70/20/10: $3,500 / $1,000 / $500
+    split: { company: 350_000, rep: 100_000, partner: 50_000 },
+  },
+  {
+    key: 'operator-suite',
+    name: 'Operator Suite',
+    band: 'bundle',
+    blurb: 'Embedded — 3 weeks of an operator. ~30 hrs. Full stack against the real business. Credits 1:1 toward Retainer.',
+    priceCents: 1_000_000,
+    cadence: 'one-time',
+    included: [
+      'Everything in Revenue Pack',
+      'Strategy Blueprint + Social Content Pack + Digital Snapshot',
+      'Lead-Nurture Automation + Premium Tech Suite access',
+      'Weekly calls + async ops channel',
+      '$10,000 credits 1:1 toward Implementation Retainer',
+    ],
+    // T3 70/20/10: $7,000 / $2,000 / $1,000
+    split: { company: 700_000, rep: 200_000, partner: 100_000 },
+  },
+  // ── SALES-LED FLAGSHIPS (fixed-dollar splits) ──
   {
     key: 'diagnostic',
     name: '21-Day Revenue Diagnostic',
-    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.',
-    priceCents: 1_800_000,
+    band: 'flagship',
+    blurb: 'Fixed-fee forensic audit. CRM-agnostic. Fit call required.',
+    priceCents: 1_850_000,
     cadence: 'one-time',
     included: [
       '12-month CRM snapshot and lead-flow review',
@@ -35,11 +90,13 @@ const FLAGSHIPS: Flagship[] = [
       '15–30 page written findings report with prioritized fixes',
       'ROI projections, source-data appendix, and 60-minute readout',
     ],
-    split: { company: 1_000_000, rep: 500_000, partner: 300_000 },
+    // Fixed: $10,500 / $5,000 / $3,000  (sum = $18,500)
+    split: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   },
   {
     key: 'retainer',
     name: 'Implementation Retainer',
+    band: 'flagship',
     blurb: '3-month minimum. Diagnostic clients only. Recurring monthly. Rep & partner get paid EVERY month the client stays.',
     priceCents: 1_500_000,
     recurring: true,
@@ -50,35 +107,8 @@ const FLAGSHIPS: Flagship[] = [
       'Operator-led weekly priorities and implementation oversight',
       'Monthly progress math tied to retained revenue and pipeline',
     ],
+    // Fixed: $8,000 / $4,000 / $3,000
     split: { company: 800_000, rep: 400_000, partner: 300_000 },
-  },
-  {
-    key: 'fractional',
-    name: 'Fractional CTO/CMO',
-    blurb: 'Embedded operator across tech + marketing. Recurring monthly. Highest LTV offer.',
-    priceCents: 590_000,
-    recurring: true,
-    cadence: 'per month',
-    included: [
-      'Embedded operator (CTO + CMO scope) on weekly cadence',
-      'Tech, sales, and marketing leak fixes prioritized monthly',
-      'Vendor + tooling oversight, hiring + onboarding for ops roles',
-      'Quarterly board-level scorecard tied to revenue retained',
-    ],
-    split: { company: 295_000, rep: 177_000, partner: 118_000 }, // 50/30/20
-  },
-  {
-    key: 'leakaudit',
-    name: 'Forensic Diagnostic (Leak Audit)',
-    blurb: 'Operator-led leak audit. Entry offer applied toward the 21-Day engagement on upgrade.',
-    priceCents: 250_000,
-    cadence: 'one-time',
-    included: [
-      'Operator review of the free Leak Audit self-scan',
-      'Surface-level revenue leak map and next-step recommendation',
-      'Applied toward a larger engagement when client upgrades',
-    ],
-    split: { company: 125_000, rep: 75_000, partner: 50_000 }, // 50/30/20 tier-1 example
   },
 ];
 
@@ -183,16 +213,21 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FLAGSHIPS.map((f) => (
               <div key={f.key} className="rounded-lg border border-amber/30 bg-background/40 p-5">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-lg font-bold text-foreground">{f.name}</h3>
-                  {f.recurring && (
-                    <Badge variant="outline" className="border-amber/40 text-amber font-mono text-[10px]">
-                      <Repeat className="w-3 h-3 mr-1" /> RECURRING
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge variant="outline" className={`font-mono text-[10px] ${f.band === 'flagship' ? 'border-amber/60 text-amber' : 'border-border text-muted-foreground'}`}>
+                      {f.band === 'flagship' ? 'FLAGSHIP · sales-led' : 'BUNDLE · operator-led'}
                     </Badge>
-                  )}
+                    {f.recurring && (
+                      <Badge variant="outline" className="border-amber/40 text-amber font-mono text-[10px]">
+                        <Repeat className="w-3 h-3 mr-1" /> RECURRING
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">{f.blurb}</p>
 
