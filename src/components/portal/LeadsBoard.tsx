@@ -2151,7 +2151,8 @@ const LeakChecklist: React.FC<{
   gaps: any[];
   initialProgress: GapProgress;
   onChange?: (p: GapProgress) => void;
-}> = ({ leadId, gaps, initialProgress, onChange }) => {
+  lead?: RepLead;
+}> = ({ leadId, gaps, initialProgress, onChange, lead }) => {
   const { toast } = useToast();
   const [progress, setProgress] = useState<GapProgress>(initialProgress || {});
   const [openTouchIdx, setOpenTouchIdx] = useState<number | null>(null);
