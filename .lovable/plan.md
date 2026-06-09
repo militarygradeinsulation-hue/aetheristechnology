@@ -1,44 +1,87 @@
-## Goal
-Replace text-heavy sections with editorial forensic imagery. Cut copy ~40% (mid-aggressive). Mix three styles per fit: **Case File photographic** for evidence/proof, **Editorial illustration** for concept/argument, **Forensic diagrams** for process/method.
+# Tighten Lead Scoring + Make It Legible to Reps
 
-## Visual style rules (all images)
-- Dark charcoal background, amber spot color, crimson reserved for "leak/bleed" signal
-- Fraunces/JetBrains Mono captions baked into image where appropriate
-- "Aetheris AI Studio" watermark bottom-right
-- Generated via `imagegen--generate_image` (premium for any image with text, fast otherwise)
-- Saved as `src/assets/editorial/*.jpg` (or .png when transparent)
+## Why scores cluster at 45
+Every score today is whatever the LLM feels like returning. We give it `score: 0-100` with vague guidance, no rubric, no required sub-signals. LLMs default to safe middles (40–55) and the same model keeps landing on **45**. There is no math, no anchor, no evidence trail.
 
-## New images to generate (12 total)
+Three functions all do this:
+- `scan-website` (deep website scan, score from AI freeform)
+- `admin-scrape-leads` + `portal-scrape-leads` (score during prospect scraping)
+- `admin-enrich-lead` (re-scores after enrichment)
 
-**Home** (`src/assets/editorial/`)
-1. `home-leak-anatomy.jpg` — Forensic diagram: business as cross-section building with amber dollar signs bleeding crimson out of 7 labeled fissures. Replaces wordy intro of `LeakAuditMethod`.
-2. `home-3areas-triptych.jpg` — Editorial illustration triptych: Sales / Ops / Brand as three forensic specimen jars on a steel table, each tagged. Replaces text columns in `ThreeAreas`.
-3. `home-pitch-evidence.jpg` — Case File photo: manila folder open, redacted invoice + magnifier + crimson "ACTIVE" stamp. Replaces paragraph stack in `ThePitch`.
-4. `home-whyus-operator.jpg` — Editorial: lone operator silhouette at CRT terminal, amber glow, mono captions "12 yrs · 47 audits · 1 verdict". Replaces bullet list in `WhyUs`.
+## Fix: deterministic rubric, AI only returns signals
 
-**Methodology** (the 7-step Leak Audit)
-5–11. `method-step-1.jpg` … `method-step-7.jpg` — 7 forensic diagram tiles, one per step (Intake, Trace, Map, Quantify, Verdict, Plug, Verify). Each is a clean isometric/blueprint with a single mono label. Replaces bulky paragraph per step with image + 1-line caption.
+Stop asking the AI for a score. Ask it for observable **signals**, then compute the score in code with fixed weights. Same inputs → same score, every time. Reps can read the breakdown.
 
-**Services / Solutions**
-12. `services-diagnostic-vs-retainer.jpg` — Editorial split-panel: left = "$2,500 Diagnostic" autopsy table, right = "$15k Retainer" ongoing surveillance wall. Replaces feature bullet lists in `PackageTiers`.
+### A. Website scan rubric (out of 100)
+Replace the single `score` field in the `website_diagnostic_report` tool with a `signals` object the model must fill from evidence, plus we compute totals server-side.
 
-**Industries** — reuse existing `industry-*.jpg` photos; add one overlay treatment component instead of new files.
+```text
+Signal                              Weight  Source
+----------------------------------  ------  -------------------------------------
+Contactability (phone+email+form)     15    AI booleans: has_phone, has_email,
+                                            has_contact_form, has_calendar_link
+Lead capture quality (CTA, gated)     10    AI 0-5: cta_strength, lead_magnet_present
+Messaging clarity (value prop)        10    AI 0-5: value_prop_clarity
+Content depth / authority             10    AI 0-5: content_depth, has_case_studies
+SEO hygiene (title, meta, schema)     10    AI booleans summed
+Mobile + speed signals                 5    AI booleans (uses_responsive, fast_paint)
+Brand consistency                      5    AI 0-5
+Industry leverage for Aetheris        15    AI enum: high/med/low fit for forensic ops
+Revenue band (ability to pay)         10    AI enum: <500k / 500k-2M / 2M-10M / 10M+
+Gap severity load (inverse)           10    Computed: critical gaps hurt, but a site
+                                            with ZERO findings also gets 0 here
+                                            (no evidence = no score)
+```
 
-## Code changes (presentation only)
+Score = sum of weighted sub-scores, clamped 0–100. Grade = A 85+, B 70+, C 55+, D 40+, F <40.
 
-- `src/components/LeakAuditMethod.tsx` — lead with image #1, cut intro paragraph to 1 sentence, keep 7 steps but each becomes `icon → 1-line label` (no body copy).
-- `src/components/ThreeAreas.tsx` — replace 3 text cards with image #2 + 3 short captions under image.
-- `src/components/ThePitch.tsx` — image #3 left, ≤3-line value claim right, single CTA.
-- `src/components/WhyUs.tsx` — image #4 hero, replace bullets with 3 mono stat chips.
-- `src/pages/MethodologyPage.tsx` — replace each step block with image #5–11 + caption + one-line outcome. Remove redundant "what we look for" paragraphs.
-- `src/components/PackageTiers.tsx` — image #12 at top, condense feature lists from 6–8 bullets to 3 per tier.
-- `src/pages/IndustriesPage.tsx` — add a `CaseFileOverlay` treatment on existing industry photos (manila tab, redaction bar, crimson "ACTIVE LEAK" stamp) so each card reads as a case file instead of a stock photo with paragraph.
-- `src/pages/VerticalLandingPage.tsx` — same overlay + trim hero copy to headline + one sentence; convert "common leaks" paragraph to 3-icon row.
+Hard rules in code (not the prompt):
+- If `gaps.length < 4` AND no contact info detected → cap at 35 ("LOW EVIDENCE").
+- If site fetch failed / content < 500 chars → return `score: null` with reason `"insufficient_evidence"` instead of guessing 50.
+- No more `analysis = { score: 50 ... }` default.
 
-## Out of scope (this pass)
-- No new routes, no backend, no copywriting on blog/CRM/portal
-- No changes to navigation, footer, or pricing logic
-- Won't touch `Hero.tsx` (already image-led with `hero-leak.mp4`)
+### B. Scrape-time rubric (out of 100, before any deep scan)
+For `admin-scrape-leads` + `portal-scrape-leads`, drop AI `score` from the tool schema. Compute from what we actually have:
 
-## QA
-After generation, view each image at 1024px and verify: watermark present, crimson only on leak signals, no broken typography. Then preview Home, Methodology, Services, Industries pages on mobile (374px) and desktop.
+```text
++25 has website (required to keep at all)
++15 has direct email
++10 has phone
++10 has named contact (not "info@")
++10 industry in priority list (operations-heavy SMB verticals)
++10 location matches rep's target geo (if provided)
++10 business-size signal in why_fit (employee count, revenue band, multi-location)
++10 explicit pain signal in why_fit (hiring ops, growth complaint, manual process)
+```
+No middle defaults. Score 0–100, integers, deterministic.
+
+### C. Enrichment re-score (`admin-enrich-lead`)
+Same signals contract as A. If the enrichment AI cannot fill the signals (low-info site), leave `score` null and mark `confidence: 'low'` — never overwrite an existing scrape score with a junk 45.
+
+## Make reps understand the score
+
+Add a **"How leads are scored"** panel inside `LeadsBoard.tsx`'s existing score tooltip/modal:
+
+- Plain rubric table (the weights above, rep-friendly wording).
+- Tier bands restated: 80+ HOT, 60–79 WARM, 40–59 WORTH A SHOT, <40 SKIP.
+- For each lead with a score, show the actual sub-scores when available (read from `scan.signals` / `enrichment.signals` JSON we now persist).
+- One line at the top: *"Every score is math, not vibes. Lower scores aren't broken leads — they're leads with less evidence yet."*
+
+Also add a single-paragraph "Scoring system" entry to `InterviewBriefingPanel.tsx` so it shows up in the rep briefing/FAQ.
+
+## Files to change (build phase)
+- `supabase/functions/scan-website/index.ts` — swap tool schema, add `computeScore(signals, gaps)`, kill the `score: 50` default.
+- `supabase/functions/admin-scrape-leads/index.ts` + `supabase/functions/portal-scrape-leads/index.ts` — remove AI `score`, add `computeScrapeScore(lead)`.
+- `supabase/functions/admin-enrich-lead/index.ts` — switch prompt + schema to `signals`, compute in code, allow null.
+- `src/components/portal/LeadsBoard.tsx` — extend score modal with rubric + per-lead sub-score breakdown; pass `signals` through.
+- `src/components/portal/InterviewBriefingPanel.tsx` — add Scoring entry.
+
+## Out of scope
+- No DB migration: signals ride inside existing `enrichment` / `scan` JSON columns.
+- No changes to detective mode, drip cadence, lead actions, or pricing.
+- No retroactive rescoring of historical leads (new scans only; old `45`s stay until rescanned).
+
+## Verification
+- Hit `scan-website` on 3 real domains: confirm scores differ, none equal 45, low-info site returns null, breakdown matches weights.
+- Hit `portal-scrape-leads` with a fake context: confirm two leads with different contact data get clearly different scores.
+- Open LeadsBoard score modal: confirm rubric renders, sub-scores show for newly scanned leads.
