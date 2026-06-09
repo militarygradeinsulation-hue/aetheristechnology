@@ -13,6 +13,9 @@ const corsHeaders = {
       : 'authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token',
 };
 
+const DEFAULT_VOICE = 'JBFqnCBsd6RMkjVDRZzb'; // George — warm, professional
+
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
