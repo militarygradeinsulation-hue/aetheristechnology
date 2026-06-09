@@ -74,7 +74,7 @@ const LocationPage: React.FC = () => {
         description: config.metaDescription,
         url: pageUrl,
         telephone: '+1-317-376-2110',
-        email: 'hello@aetheris.technology',
+        email: 'aetheris.technology@outlook.com',
         priceRange: '$0 - $25,000+',
         address: {
           '@type': 'PostalAddress',
@@ -184,8 +184,8 @@ const LocationPage: React.FC = () => {
                 <a href="tel:+13173762110" className="inline-flex items-center gap-2 hover:text-amber">
                   <Phone className="w-4 h-4" /> (317) 376-2110
                 </a>
-                <a href="mailto:hello@aetheris.technology" className="inline-flex items-center gap-2 hover:text-amber">
-                  <Mail className="w-4 h-4" /> hello@aetheris.technology
+                <a href="mailto:aetheris.technology@outlook.com" className="inline-flex items-center gap-2 hover:text-amber">
+                  <Mail className="w-4 h-4" /> aetheris.technology@outlook.com
                 </a>
               </div>
             </section>

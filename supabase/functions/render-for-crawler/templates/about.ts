@@ -26,7 +26,7 @@ export async function renderAbout(
     { question: "What does Aetheris actually do?", answer: "We run forensic diagnostics on operational businesses, find the silent revenue leaks, name them in dollars, and close them. Engagement structure: Free Self-Scan → $2,500 Forensic Diagnostic → scoped engagement to fix what we found." },
     { question: "Why 'forensics' instead of 'consulting'?", answer: "Consultants build frameworks. Forensic operators look for specific evidence of leaks: missing follow-up, stalled quotes, unbillable hours, tools nobody uses. The deliverable isn't a deck — it's a named leak with a dollar figure attached." },
     { question: "Where is Aetheris located?", answer: "Indianapolis, Indiana. We work with operators across the U.S. but Indy is home." },
-    { question: "How do I work with Joseph directly?", answer: "Call (317) 376-2110 or email joseph@aetheris.technology. The fastest path to working together is the $2,500 Forensic Diagnostic." },
+    { question: "How do I work with Joseph directly?", answer: "Call (317) 376-2110 or email aetheris.technology@outlook.com. The fastest path to working together is the $2,500 Forensic Diagnostic." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 
@@ -48,7 +48,7 @@ export async function renderAbout(
         worksFor: { "@type": "Organization", name: "Aetheris AI", url: SITE_URL },
         url: `${SITE_URL}/about`,
         telephone: "(317) 376-2110",
-        email: "joseph@aetheris.technology",
+        email: "aetheris.technology@outlook.com",
         address: { "@type": "PostalAddress", addressLocality: "Indianapolis", addressRegion: "IN", addressCountry: "US" },
       },
     ],
@@ -79,7 +79,7 @@ export async function renderAbout(
       <section>
         <h2>Contact</h2>
         <p>Phone: <a href="tel:+13173762110">(317) 376-2110</a></p>
-        <p>Email: <a href="mailto:joseph@aetheris.technology">joseph@aetheris.technology</a></p>
+        <p>Email: <a href="mailto:aetheris.technology@outlook.com">aetheris.technology@outlook.com</a></p>
         <p>Indianapolis, Indiana</p>
       </section>
 

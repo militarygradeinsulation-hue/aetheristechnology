@@ -209,7 +209,7 @@ export function generateAIChecklistPdf(data: ChecklistPdfData): jsPDF {
   pdf.setFontSize(10);
   pdf.setTextColor(...PAPER);
   pdf.text('Forensic Diagnostic, $2,500 flat, applied 1:1 toward any engagement.', M + 16, y + 44);
-  pdf.text('aetheris.technology  ·  hello@aetheris.technology  ·  (317) 376-2110', M + 16, y + 60);
+  pdf.text('aetheris.technology  ·  aetheris.technology@outlook.com  ·  (317) 376-2110', M + 16, y + 60);
 
   // Watermark
   pdf.setTextColor(...MUTED);

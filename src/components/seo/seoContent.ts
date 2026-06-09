@@ -142,7 +142,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'Can I see a sample report?',
     answer:
-      'Yes. Email hello@aetheris.technology with the subject "Sample report" and we will send a redacted Diagnostic deliverable used as a public reference.',
+      'Yes. Email aetheris.technology@outlook.com with the subject "Sample report" and we will send a redacted Diagnostic deliverable used as a public reference.',
   },
   {
     question: 'Do you take equity, performance fees, or rev share?',

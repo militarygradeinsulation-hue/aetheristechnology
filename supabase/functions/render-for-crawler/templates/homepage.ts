@@ -26,7 +26,7 @@ export async function renderHomepage(
     { question: "What is The Leak Audit™?", answer: "A 7-step forensic methodology: 1) Intake autopsy, 2) Funnel pressure test, 3) Quote-to-close inspection, 4) Follow-up pulse check, 5) Ops friction map, 6) Tooling drag analysis, 7) Leak ledger with prioritized fixes. Self-scan free at /leak-audit. Operator-led Forensic Diagnostic is $2,500 flat, applied toward engagement." },
     { question: "Why hire Aetheris instead of a typical consultant?", answer: "Most consultants bring frameworks. We bring a forensic posture: assume the leak exists, find it, prove it with numbers, then close it. No 90-day discovery phases, no slide-deck deliverables. The first deliverable is a named leak with a dollar figure attached." },
     { question: "Where is Aetheris based?", answer: "Indianapolis, Indiana. We work with operators across the U.S., but Indy is home base." },
-    { question: "How do I get started?", answer: "Run the free self-scan at aetheris.technology/leak-audit — about 10 minutes. If you want a forensic operator on your business, the $2,500 Forensic Diagnostic is the front door. Call (317) 376-2110 or email joseph@aetheris.technology." },
+    { question: "How do I get started?", answer: "Run the free self-scan at aetheris.technology/leak-audit — about 10 minutes. If you want a forensic operator on your business, the $2,500 Forensic Diagnostic is the front door. Call (317) 376-2110 or email aetheris.technology@outlook.com." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 

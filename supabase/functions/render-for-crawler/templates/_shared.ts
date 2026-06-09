@@ -5,7 +5,7 @@ export const SITE_URL = "https://aetheris.technology";
 export const SITE_NAME = "Aetheris AI";
 export const OG_IMAGE = `${SITE_URL}/aetheris-logo.png`;
 export const PHONE = "(317) 376-2110";
-export const EMAIL = "joseph@aetheris.technology";
+export const EMAIL = "aetheris.technology@outlook.com";
 
 export interface SeoOverride {
   title?: string | null;

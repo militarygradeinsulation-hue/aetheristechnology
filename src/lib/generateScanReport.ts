@@ -439,7 +439,7 @@ export function generateFullReport(report: FullReport): void {
   doc.setFontSize(9);
   doc.setTextColor(...COLORS.gray);
   doc.text('aetheris.technology  |  Indianapolis, IN', PAGE_W / 2, 140, { align: 'center' });
-  doc.text('joseph@aetheris.technology', PAGE_W / 2, 147, { align: 'center' });
+  doc.text('aetheris.technology@outlook.com', PAGE_W / 2, 147, { align: 'center' });
 
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(8.5);
