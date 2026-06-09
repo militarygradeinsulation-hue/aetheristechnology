@@ -491,7 +491,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     const aiData = await aiResponse.json();
     console.log("AI response received");
 
-    let analysis = { score: 50, grade: "C", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "" };
+    let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       try {
@@ -501,8 +501,16 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }
     }
 
+    // DETERMINISTIC SCORE — math, not vibes. Ignore any score the AI tries to send.
+    const breakdown = computeWebsiteScore(analysis?.signals, analysis?.gaps || [], (markdown || "").length);
+    analysis.score = breakdown.total;
+    analysis.score_breakdown = breakdown.parts;
+    if (breakdown.reason) analysis.score_reason = breakdown.reason;
+    analysis.grade = gradeFromScore(breakdown.total);
+
     // Override AI dollar figures with deterministic per-domain math so reps
-    // never see the score hold steady while the leak number drifts.
+    // never see the score hold steady while the leak number drifts. Use a
+    // safe fallback when the score is null (insufficient evidence).
     analysis = applyDeterministicLeaks(analysis, parsedHost);
 
     // Save to database - store full report in gaps column (first scan only is reused later)
