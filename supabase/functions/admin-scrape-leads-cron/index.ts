@@ -53,8 +53,8 @@ async function aiScoreLeads(searchResults: any[], industry: string, count: numbe
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { role: "system", content: `You are a B2B prospecting analyst for Aetheris Technology — Business Forensics. ICP: SMBs in Indianapolis metro, $1M–$50M revenue, 10–500 employees. Score 0-100 by ICP fit.` },
-        { role: "user", content: `From these results extract up to ${count} REAL Indianapolis-area businesses in ${industry}. Skip directories and listicles. Return: business_name, website, industry, location, score, why_fit.\n\n${context}` },
+        { role: "system", content: `You are a B2B prospecting analyst for Aetheris Technology — Business Forensics. ICP: SMBs in Indianapolis metro, $1M–$50M revenue, 10–500 employees. HARD EXCLUSIONS: never return companies over $100M annual revenue, Fortune 1000, large national chains, freelancers, sub-10-employee shops, or non-business entities. If you can't confidently rule out >$100M, skip it. Score 0-100 by ICP fit.` },
+        { role: "user", content: `From these results extract up to ${count} REAL Indianapolis-area businesses in ${industry}. Skip directories, listicles, and any company over $100M revenue. Return: business_name, website, industry, location, score, why_fit.\n\n${context}` },
       ],
       tools: [{
         type: "function",
