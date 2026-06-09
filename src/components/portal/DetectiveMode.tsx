@@ -9,6 +9,7 @@ import { getAdminToken } from '@/lib/adminAuth';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { portalLeads, type RepLead, type LeadScan } from '@/lib/portalLeads';
 import { ReadAloudButton } from '@/components/ReadAloudButton';
+import { leadClues } from '@/lib/leadClues';
 
 type PrepStep = { key: string; label: string; status: 'pending' | 'running' | 'done' | 'skip' | 'fail'; note?: string };
 
@@ -91,6 +92,32 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
       talkScrollRef.current.scrollTop = talkScrollRef.current.scrollHeight;
     }
   }, [selfTalk]);
+
+  // Hydrate the most recent Detective verdict from the clue trail so closing
+  // and reopening the tool brings the case file back (same persistence as scan / deep scan).
+  const leadIdForHydrate = (lead as any)?.id;
+  useEffect(() => {
+    if (!leadIdForHydrate || result) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await leadClues.list(leadIdForHydrate, 50);
+        if (cancelled) return;
+        const hit = (res?.trail || []).find((c: any) => c.kind === 'detective' && c?.meta?.detective);
+        if (hit) {
+          const saved = (hit.meta as any).detective;
+          const savedChannel = (hit.meta as any).channel;
+          setResult(saved);
+          if (savedChannel === 'email' || savedChannel === 'linkedin' || savedChannel === 'linkedin_intro') {
+            setChannel(savedChannel);
+          }
+          setRevealed(saved?.monologue?.length || 0);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [leadIdForHydrate]);
+
 
   const updateStep = (key: string, patch: Partial<PrepStep>) =>
     setPrepSteps((s) => s.map((x) => (x.key === key ? { ...x, ...patch } : x)));
@@ -280,6 +307,21 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
         for (let i = 1; i <= beats; i++) {
           setTimeout(() => setRevealed((r) => Math.max(r, i)), i * 650);
         }
+      }
+      // Persist to the lead's clue trail so the verdict survives closing the tool
+      // (same pattern as scan / deep scan / full forensic sweep).
+      const leadId = (lead as any)?.id;
+      if (leadId && res) {
+        const angle = res?.best_angle?.title || res?.best_angle?.leak_or_gap || 'angle locked';
+        try {
+          await leadClues.log(leadId, {
+            kind: 'detective',
+            label: `Detective verdict: ${angle}`,
+            tool_key: 'detective-mode',
+            tip: res?.best_angle?.why_this_one || undefined,
+            meta: { detective: res, channel: ch, revealed_at: new Date().toISOString() },
+          });
+        } catch {}
       }
     } catch (e) {
       toast({ title: 'Detective failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
