@@ -120,7 +120,23 @@ serve(async (req) => {
         const leads = await aiScoreLeads(results, industry, targetPerIndustry, lovableKey);
         if (!leads.length) { breakdown[industry] = 0; continue; }
 
-        const rows = leads.map(l => ({
+        // Enrich each lead (parallel, capped) for real contact info from the site.
+        const enriched: ScoredLead[] = [];
+        const CONC = 4;
+        for (let i = 0; i < leads.length; i += CONC) {
+          const chunk = await Promise.all(leads.slice(i, i + CONC).map(async (l) => {
+            if (!l.website) return l;
+            const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+            if (hasPerson && l.phone) return l;
+            try {
+              const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+              return { ...l, email: l.email || found.email, phone: l.phone || found.phone, contact_name: l.contact_name || found.contact_name };
+            } catch { return l; }
+          }));
+          enriched.push(...chunk);
+        }
+
+        const rows = enriched.map(l => ({
           business_name: l.business_name?.slice(0, 200) || null,
           contact_name: l.contact_name?.slice(0, 200) || null,
           email: l.email?.toLowerCase().slice(0, 200) || null,
