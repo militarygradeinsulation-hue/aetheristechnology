@@ -830,11 +830,13 @@ export const LeadsBoard: React.FC = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan, Pick up to 10
+              <Sparkles className="w-5 h-5 text-amber" /> Batch Forensics, Pick up to 10
             </DialogTitle>
             <DialogDescription>
-              Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
+              <span className="block"><span className="text-amber">Deep Scan</span> = RocketReach + Firecrawl enrichment only.</span>
+              <span className="block"><span className="text-amber">Full Forensic Sweep</span> = website scan + deep scan + Detective Mode verdict, saved to each lead's clue trail.</span>
             </DialogDescription>
+
           </DialogHeader>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
