@@ -459,6 +459,15 @@ const PortalPage: React.FC = () => {
   }
 
   const isPartner = profile.role === 'partner';
+
+  // Partner-only: auto-route Braden to the new Partner Hub on first visit.
+  useEffect(() => {
+    if (isPartner && !localStorage.getItem('partnerhub-seen-v1')) {
+      setTab('partnerhub');
+      localStorage.setItem('partnerhub-seen-v1', '1');
+    }
+  }, [isPartner]);
+
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
