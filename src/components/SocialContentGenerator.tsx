@@ -143,8 +143,10 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
     }, 3000);
 
     try {
+      const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
       const { data, error } = await supabase.functions.invoke('generate-social-content', {
         body: { url: url.trim() },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       clearInterval(interval);
       if (error || !data) throw new Error(error?.message || 'Failed to generate');

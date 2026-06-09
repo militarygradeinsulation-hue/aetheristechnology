@@ -82,8 +82,10 @@ export function AdminForensicsSystemsPanel() {
     setAutofilling(true);
     try {
       const fieldsSpec = active.intake.map(f => ({ name: f.name, label: f.label, type: f.type }));
+      const adminToken = getAdminToken();
       const { data, error } = await supabase.functions.invoke('autofill-intake-from-url', {
         body: { url, fields: fieldsSpec, toolTitle: active.title },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
