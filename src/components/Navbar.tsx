@@ -53,6 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
+    { label: 'Careers', href: '/careers', accent: true },
   ];
 
   const showStickyCTA = !location.pathname.startsWith('/careers');
