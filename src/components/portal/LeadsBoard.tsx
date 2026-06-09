@@ -106,34 +106,103 @@ function buildLeadVerdict(lead: RepLead, scan: any): { label: string; tone: Lead
   return { label: 'UNREAD', tone: 'maybe', text: 'No scan yet. Open the row and run a Deep Scan to see if it\'s worth your time.' };
 }
 
+const SCORING_RUBRIC: Array<{ label: string; weight: number; what: string }> = [
+  { label: 'Contactability',      weight: 15, what: 'Phone, email, contact form, calendar link visible' },
+  { label: 'Lead capture',        weight: 10, what: 'Strong CTAs, lead magnet / gated offer present' },
+  { label: 'Messaging clarity',   weight: 10, what: 'You can tell what they sell and to whom in 3 seconds' },
+  { label: 'Content + authority', weight: 10, what: 'Real blog / library, case studies, proof' },
+  { label: 'SEO hygiene',         weight: 10, what: 'Title tag, meta description, schema markup' },
+  { label: 'Mobile + speed',      weight:  5, what: 'Responsive layout, fast first paint' },
+  { label: 'Brand consistency',   weight:  5, what: 'Cohesive identity vs. mismatched parts' },
+  { label: 'Industry leverage',   weight: 15, what: 'Ops-heavy SMB = high. Enterprise / solo / non-profit = low' },
+  { label: 'Revenue band',        weight: 10, what: 'Best: $2M–$10M. Below $500k or >$25M get less weight' },
+  { label: 'Gap severity load',   weight: 10, what: 'Critical/warning findings = more real money to recover' },
+];
+
 const ScoreBadge: React.FC<{ lead: RepLead; tone?: 'amber' | 'amber-soft' }> = ({ lead, tone = 'amber' }) => {
   if (typeof lead.score !== 'number') return null;
   const t = scoreTier(lead.score);
   const cls = tone === 'amber'
     ? 'bg-amber/20 text-amber border-amber/40'
     : 'bg-amber/15 text-amber border-amber/30';
+  const breakdown: Array<{ key?: string; label: string; weight: number; earned: number }> | null =
+    (lead as any)?.enrichment?.score_breakdown
+    || (lead as any)?.enrichment?.scrape_score_breakdown
+    || null;
+  const scoreReason: string | undefined = (lead as any)?.enrichment?.score_reason;
   return (
     <Popover>
       <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
           className={`text-xs font-mono px-2 py-0.5 rounded border flex-shrink-0 inline-flex items-center gap-1 hover:brightness-125 ${cls}`}
-          aria-label={`Lead score ${lead.score}. Click to learn what this means.`}
+          aria-label={`Lead score ${lead.score}. Click to see the scoring breakdown.`}
         >
           {lead.score}
           <Info className="w-3 h-3 opacity-70" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 text-xs" onClick={(e) => e.stopPropagation()}>
+      <PopoverContent className="w-96 max-h-[80vh] overflow-y-auto text-xs" onClick={(e) => e.stopPropagation()}>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Lead Score</span>
             <span className={`font-bold ${t.tone}`}>{lead.score}/100 · {t.label}</span>
           </div>
           <p className="text-foreground/90 leading-relaxed">{t.advice}</p>
-          <div className="border-t border-border/50 pt-2 text-muted-foreground leading-relaxed">
-            Score combines: industry fit, location (Indianapolis weighting), website signals, contact completeness, and freshness. Higher = more likely to convert.
+
+          <div className="border-t border-border/50 pt-2">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tier bands</div>
+            <ul className="space-y-0.5 text-[11px] text-foreground/80">
+              <li><span className="text-emerald-400 font-bold">80+</span> HOT — call today</li>
+              <li><span className="text-amber font-bold">60–79</span> WARM — reach this week</li>
+              <li><span className="text-amber/70 font-bold">40–59</span> WORTH A SHOT — light touch</li>
+              <li><span className="text-muted-foreground font-bold">&lt;40</span> SKIP — back to pool</li>
+            </ul>
           </div>
+
+          {breakdown && breakdown.length > 0 && (
+            <div className="border-t border-border/50 pt-2">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">This lead's breakdown</div>
+              <table className="w-full text-[11px]">
+                <tbody>
+                  {breakdown.map((p, i) => (
+                    <tr key={i} className="border-b border-border/20 last:border-0">
+                      <td className="py-0.5 text-foreground/80">{p.label}</td>
+                      <td className="py-0.5 text-right font-mono text-foreground/90 w-16">
+                        {p.earned}/{p.weight}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <details className="border-t border-border/50 pt-2">
+            <summary className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground">
+              How leads are scored
+            </summary>
+            <p className="text-muted-foreground italic mt-1 mb-2 text-[11px]">
+              Every score is math, not vibes. Lower scores aren't broken leads — they're leads with less evidence yet.
+            </p>
+            <table className="w-full text-[11px]">
+              <tbody>
+                {SCORING_RUBRIC.map((r) => (
+                  <tr key={r.label} className="border-b border-border/20 last:border-0">
+                    <td className="py-0.5 text-foreground/80 align-top">{r.label}</td>
+                    <td className="py-0.5 text-right font-mono text-amber w-10 align-top">{r.weight}</td>
+                    <td className="py-0.5 pl-2 text-muted-foreground text-[10px] align-top">{r.what}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+
+          {scoreReason && (
+            <div className="border-t border-border/50 pt-2 text-muted-foreground leading-relaxed italic">
+              {scoreReason}
+            </div>
+          )}
           {lead.why_fit && (
             <div className="border-t border-border/50 pt-2">
               <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Why this lead</div>

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { computeWebsiteScore, gradeFromScore } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -313,7 +314,30 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
               parameters: {
                 type: "object",
                 properties: {
-                  score: { type: "number", description: "Overall score 0-100" },
+                  signals: {
+                    type: "object",
+                    description: "OBSERVABLE signals only — fill from evidence in the scraped content. The numeric score is computed in code from these signals, NOT returned by you.",
+                    properties: {
+                      has_phone: { type: "boolean" },
+                      has_email: { type: "boolean" },
+                      has_contact_form: { type: "boolean" },
+                      has_calendar_link: { type: "boolean" },
+                      cta_strength: { type: "number", description: "0=none, 5=multiple prominent specific CTAs" },
+                      lead_magnet_present: { type: "boolean" },
+                      value_prop_clarity: { type: "number", description: "0=unclear, 5=instantly obvious what they sell and to whom" },
+                      content_depth: { type: "number", description: "0=brochure, 5=deep blog / library / playbooks" },
+                      has_case_studies: { type: "boolean" },
+                      has_title_tag: { type: "boolean" },
+                      has_meta_description: { type: "boolean" },
+                      has_schema: { type: "boolean" },
+                      uses_responsive: { type: "boolean" },
+                      fast_first_paint: { type: "boolean" },
+                      brand_consistency: { type: "number", description: "0=mismatched, 5=cohesive identity" },
+                      industry_fit: { type: "string", enum: ["high","medium","low","unknown"], description: "Fit for Aetheris forensic-ops engagement: high=ops-heavy SMB, low=enterprise/freelancer/non-profit" },
+                      revenue_band: { type: "string", enum: ["<500k","500k-2M","2M-10M","10M+","unknown"] },
+                    },
+                    required: ["has_phone","has_email","has_contact_form","cta_strength","value_prop_clarity","content_depth","industry_fit","revenue_band"],
+                  },
                   grade: { type: "string", description: "Letter grade A-F" },
                   companyName: { type: "string", description: "Company name extracted from site" },
                   executiveSummary: { type: "string", description: "2-3 paragraph executive summary with overall assessment, revenue leak estimate, and positioning" },
@@ -435,7 +459,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
                     required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing", "touchpoint_plan"],
                   },
                 },
-                required: ["score", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
+                required: ["signals", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
               },
             },
           },
@@ -467,7 +491,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     const aiData = await aiResponse.json();
     console.log("AI response received");
 
-    let analysis = { score: 50, grade: "C", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "" };
+    let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       try {
@@ -477,8 +501,16 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }
     }
 
+    // DETERMINISTIC SCORE — math, not vibes. Ignore any score the AI tries to send.
+    const breakdown = computeWebsiteScore(analysis?.signals, analysis?.gaps || [], (markdown || "").length);
+    analysis.score = breakdown.total;
+    analysis.score_breakdown = breakdown.parts;
+    if (breakdown.reason) analysis.score_reason = breakdown.reason;
+    analysis.grade = gradeFromScore(breakdown.total);
+
     // Override AI dollar figures with deterministic per-domain math so reps
-    // never see the score hold steady while the leak number drifts.
+    // never see the score hold steady while the leak number drifts. Use a
+    // safe fallback when the score is null (insufficient evidence).
     analysis = applyDeterministicLeaks(analysis, parsedHost);
 
     // Save to database - store full report in gaps column (first scan only is reused later)

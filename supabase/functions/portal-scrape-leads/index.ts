@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
+import { computeScrapeScore } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,9 @@ interface ScoredLead {
   website?: string;
   industry?: string;
   location?: string;
-  score: number;
+  // score is computed in code from observable signals — NOT returned by the AI.
+  score?: number;
+  score_breakdown?: Array<{ key: string; label: string; weight: number; earned: number }>;
   why_fit: string;
 }
 
@@ -61,14 +64,14 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
 
 CRITICAL: For every lead you MUST identify the company's official website URL (their primary domain — e.g. "acmeco.com", not a LinkedIn/Facebook/directory page). If the search result is a profile (LinkedIn, ZoomInfo, Yelp, BBB, etc.), infer the company they work at and return that company's real homepage URL. Never leave website blank — if you truly cannot determine it, skip the lead entirely. Prefer https:// root domains over deep links.
 
-For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), score (0-100), why_fit (one sentence). Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
+For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), why_fit (one sentence that cites a SIZE signal — employee count, revenue, multi-location — AND a PAIN signal — manual process, missing automation, hiring strain, scaling pressure — whenever the source supports it). DO NOT return a score; the score is computed in code from observable signals. Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
         },
       ],
       tools: [{
         type: "function",
         function: {
           name: "return_leads",
-          description: "Return scored prospect leads",
+          description: "Return ICP-matching prospect leads (score is computed in code, do not include it).",
           parameters: {
             type: "object",
             properties: {
@@ -84,10 +87,9 @@ For each lead return: business_name, website (REQUIRED), industry, location, con
                     contact_name: { type: "string" },
                     email: { type: "string" },
                     phone: { type: "string" },
-                    score: { type: "number" },
                     why_fit: { type: "string" },
                   },
-                  required: ["business_name", "website", "score", "why_fit"],
+                  required: ["business_name", "website", "why_fit"],
                 },
               },
             },
@@ -176,25 +178,31 @@ serve(async (req) => {
     if (enriched.length > 0) {
       const now = new Date();
       const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const rows = enriched.map((l) => ({
-        business_name: l.business_name?.slice(0, 200) || null,
-        contact_name: l.contact_name?.slice(0, 200) || null,
-        email: l.email?.toLowerCase().slice(0, 200) || null,
-        phone: l.phone?.slice(0, 50) || null,
-        website: l.website?.slice(0, 500) || null,
-        industry: l.industry?.slice(0, 100) || industry || null,
-        location: l.location?.slice(0, 200) || location,
-        score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
-        why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: `rep_scrape:${claims.code}`,
-        external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
-        status: "new",
-        ...(assignToMe ? {
-          assigned_to_code: claims.code,
-          assigned_at: now.toISOString(),
-          assignment_expires_at: expires.toISOString(),
-        } : {}),
-      })).filter((r) => r.business_name && r.website);
+      const rows = enriched.map((l) => {
+        const breakdown = computeScrapeScore(l, location);
+        l.score = breakdown.total;
+        l.score_breakdown = breakdown.parts;
+        return {
+          business_name: l.business_name?.slice(0, 200) || null,
+          contact_name: l.contact_name?.slice(0, 200) || null,
+          email: l.email?.toLowerCase().slice(0, 200) || null,
+          phone: l.phone?.slice(0, 50) || null,
+          website: l.website?.slice(0, 500) || null,
+          industry: l.industry?.slice(0, 100) || industry || null,
+          location: l.location?.slice(0, 200) || location,
+          score: breakdown.total,
+          why_fit: l.why_fit?.slice(0, 1000) || null,
+          enrichment: { scrape_score_breakdown: breakdown.parts, scrape_score_total: breakdown.total },
+          source: `rep_scrape:${claims.code}`,
+          external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
+          status: "new",
+          ...(assignToMe ? {
+            assigned_to_code: claims.code,
+            assigned_at: now.toISOString(),
+            assignment_expires_at: expires.toISOString(),
+          } : {}),
+        };
+      }).filter((r) => r.business_name && r.website);
 
       // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
       const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
