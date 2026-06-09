@@ -20,7 +20,9 @@ interface ScoredLead {
   website?: string;
   industry?: string;
   location?: string;
-  score: number;
+  // score is computed in code from observable signals — NOT returned by the AI.
+  score?: number;
+  score_breakdown?: Array<{ key: string; label: string; weight: number; earned: number }>;
   why_fit: string;
 }
 
