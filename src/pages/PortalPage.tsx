@@ -649,6 +649,7 @@ const PortalPage: React.FC = () => {
       case 'catalog': return <ServicesPricing />;
       case 'linkedin': return <LinkedInSetupGuide />;
       case 'careers': return <PortalCareersPanel />;
+      case 'partnerhub': return <PartnerOnboardingHub onJump={(t) => setTab(t as Tab)} />;
       case 'coach': return <div className="max-w-3xl mx-auto"><SalesCoachChat embedded /></div>;
       case 'company':
         return isPartner ? (
