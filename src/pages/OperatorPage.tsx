@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Wrench, Search, Hammer, ShieldCheck, Calendar, Phone } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Wrench, Search, Hammer, ShieldCheck, Calendar, Phone, ChevronDown } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,19 +8,55 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
-const OPERATOR_WIELDS = [
-  'Full Website Report',
-  'Brand Contradiction Finder',
-  'Friction Vocabulary Audit',
-  'Sales Script Pack',
-  'Follow-Up System Plan',
-  'Strategic Question Engine',
-  '30-Day Content Calendar',
-  'Social Content Pack',
-  'Digital Snapshot',
-  'Strategy Blueprint',
-  'Lead-Nurture Automation',
-  'Premium Tech Suite (CRM, automation, AI agents)',
+const OPERATOR_WIELDS: { name: string; usedFor: string }[] = [
+  {
+    name: 'Full Website Report',
+    usedFor: 'Operator runs a deep crawl of your site for SEO, speed, conversion, and trust leaks. You get a written list of every reason a lead landed and left — and what it cost.',
+  },
+  {
+    name: 'Brand Contradiction Finder',
+    usedFor: 'Operator audits every public surface (site, socials, email, sales decks) for the places your promise contradicts your delivery. Contradictions kill close rates. We name them.',
+  },
+  {
+    name: 'Friction Vocabulary Audit',
+    usedFor: 'Operator reads your copy the way a skeptical buyer reads it. Flags the exact words, claims, and CTAs that make a ready buyer hesitate. Then rewrites them.',
+  },
+  {
+    name: 'Sales Script Pack',
+    usedFor: 'Operator builds custom discovery, objection, and close scripts in your voice for your top 3 deal types. Used live by your reps inside 7 days.',
+  },
+  {
+    name: 'Follow-Up System Plan',
+    usedFor: 'Operator designs the multi-touch cadence (email + SMS + call windows) that catches the 60–70% of leads dying in week two. Built once, runs forever.',
+  },
+  {
+    name: 'Strategic Question Engine',
+    usedFor: 'Operator surfaces the questions your team has stopped asking — about pricing, hiring, churn, capacity. The ones that turn 3am spirals into Monday plans.',
+  },
+  {
+    name: '30-Day Content Calendar',
+    usedFor: 'Operator plans every post, email, and lead magnet for the next 30 days, mapped to the leaks they plug. No more posting to feed the algorithm.',
+  },
+  {
+    name: 'Social Content Pack',
+    usedFor: 'Operator drafts 30+ pieces of social content (LinkedIn, IG, email) in your voice, derived from your real wins, losses, and field notes.',
+  },
+  {
+    name: 'Digital Snapshot',
+    usedFor: 'Operator captures your full digital footprint at a single moment — site, reviews, search position, ad spend, social — and benchmarks it. We re-run it post-engagement to prove lift.',
+  },
+  {
+    name: 'Strategy Blueprint',
+    usedFor: 'Operator hands you a 15–30 page written plan: the three leaks worth fixing first, the dollars attached, the systems to rebuild, the order to do it in.',
+  },
+  {
+    name: 'Lead-Nurture Automation',
+    usedFor: 'Operator wires up the CRM workflows, triggers, and AI agents that nurture leads while you sleep. Built in your stack or ours.',
+  },
+  {
+    name: 'Premium Tech Suite (CRM, automation, AI agents)',
+    usedFor: 'The proprietary stack the operator wields on your behalf — CRM build, automation engine, AI sales agents, reporting. You never log in. The operator runs it.',
+  },
 ];
 
 const PHASES = [
@@ -46,6 +82,7 @@ const PHASES = [
 
 const OperatorPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const [openTool, setOpenTool] = useState<string | null>(null);
 
   return (
     <div className="relative min-h-screen">
@@ -141,15 +178,32 @@ const OperatorPage: React.FC = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {OPERATOR_WIELDS.map((t) => (
-                <div
-                  key={t}
-                  className="flex items-start gap-2.5 forensic-tile rounded-sm border border-border/60 px-4 py-3"
-                >
-                  <Wrench className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span className="text-sm text-foreground/90">{t}</span>
-                </div>
-              ))}
+              {OPERATOR_WIELDS.map((t) => {
+                const isOpen = openTool === t.name;
+                return (
+                  <button
+                    type="button"
+                    key={t.name}
+                    onClick={() => setOpenTool(isOpen ? null : t.name)}
+                    aria-expanded={isOpen}
+                    className={`text-left forensic-tile rounded-sm border px-4 py-3 transition-all ${isOpen ? 'border-amber/60 bg-amber/[0.04]' : 'border-border/60 hover:border-amber/40'}`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <Wrench className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                      <span className="text-sm text-foreground/90 flex-1">{t.name}</span>
+                      <ChevronDown className={`w-4 h-4 text-amber shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                    {isOpen && (
+                      <div className="mt-3 pt-3 border-t border-amber/20">
+                        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+                          What the operator uses it for
+                        </div>
+                        <p className="text-[13px] text-foreground/80 leading-relaxed">{t.usedFor}</p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
