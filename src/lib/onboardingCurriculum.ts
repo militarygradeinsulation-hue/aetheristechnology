@@ -36,11 +36,32 @@ export const ONBOARDING_CURRICULUM: OnboardingModuleDef[] = [
   {
     slug: "welcome",
     title: "Welcome to Aetheris",
-    summary: "Who we are, what we sell, and how the commission split works.",
+    summary: "Who we are, what we sell, and how the commission math actually works.",
     scriptOutline: `Welcome a brand-new sales rep to Aetheris Technology, a Business Forensics operator based in Indianapolis.
-Cover: positioning ("Your business is leaking. You just can't see it from the inside."), our flagship offer (the Forensic Diagnostic at $2,500 flat applied toward engagement), and the locked 70/15/15 commission split (Company 70 / Rep 15 / Partner 15) on every sale including recurring.
-Tone: blunt, operator, not corporate. End by telling them the next module covers logging in.`,
+Cover the positioning in one line: "Your business is leaking. You just can't see it from the inside." We do not sell tools. We sell the operator who wields the tools.
+The public site offers exactly five things, in this order:
+  1) Signal Pack — $2,500 one-time, operator-led bundle (~6 hrs).
+  2) Revenue Pack — $5,000 one-time bundle (~14 hrs).
+  3) Operator Suite — $10,000 one-time bundle (~30 hrs, credits 1:1 toward Retainer).
+  4) FLAGSHIP: 21-Day Revenue Diagnostic — $18,500 fixed fee, fit call required.
+  5) FLAGSHIP: Implementation Retainer — $15,000/mo, 3-month minimum, Diagnostic clients only.
+Commission has two models. Bundles use the tiered split — all three bundles are Tier 3 (70/20/10), so the rep keeps 20% (Signal $500, Revenue $1,000, Operator Suite $2,000). Flagships use FIXED dollars — $5,000 to the rep on every Diagnostic close, $4,000/mo to the rep EVERY MONTH the Retainer client stays subscribed. Partner gets $3,000 on Diagnostic and $3,000/mo on Retainer. Company keeps the rest.
+Tone: blunt, operator, not corporate. Tell them the next module covers logging in and the one after that breaks down the operator pitch.`,
     routeHints: { home: "/", leak_audit: "/leak-audit", services: "/services" },
+  },
+  {
+    slug: "operator-pitch",
+    title: "The Operator Pitch (sell the operator, not the tools)",
+    summary: "What changed: we don't sell tools anymore. We sell the operator who wields them.",
+    scriptOutline: `Drill into the most important shift in the business: we KILLED à la carte tool sales on the public site. The new pitch is operator-first.
+Reps must internalize this line: "We don't sell tools. We sell the operator. The tools are how. The operator is what you're paying for."
+Walk through the three sealed bundles and why they only work together:
+  - Signal Pack: website + brand contradiction + friction audit. Run apart, each is a PDF. Run together by an operator, you get one Leak Findings memo naming the dollar bleed.
+  - Revenue Pack: scripts + follow-up + question engine + content calendar built as one engine, so a lead today closes in 90 days.
+  - Operator Suite: 3 weeks of an embedded operator running the full stack — credits 1:1 toward the Implementation Retainer.
+The flagships sit above the bundles: Diagnostic ($18,500) and Retainer ($15k/mo) require a 15-minute fit call first. Reps should pitch the Diagnostic when the prospect already knows something is broken and is exhausted from looking for the fix.
+Hard rule for outbound: never lead with "we have a tool that does X". Always lead with "an operator will sit down with you, find every leak, and rebuild the system causing it." End: send them to the bundles page or book them on the fit call.`,
+    routeHints: { home: "/", services: "/services", portal_tools: "/portal?tab=tools" },
   },
   {
     slug: "logging-in",

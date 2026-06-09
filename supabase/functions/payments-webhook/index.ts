@@ -29,8 +29,7 @@ const SYSTEM_TITLES: Record<string, string> = Object.fromEntries(
 );
 const PUBLIC_SITE_URL = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
 
-// Tiered commission split (replaces flat 70/15/15).
-// Tier resolved from sale amount (cents):
+// Tiered commission split (catalog tools + the 3 operator-led bundles).
 //   T1 ≤ $59  → company 50 / rep 30 / partner 20
 //   T2 ≤ $349 → company 60 / rep 25 / partner 15
 //   T3  >$349 → company 70 / rep 20 / partner 10
@@ -38,6 +37,22 @@ function ratesForAmount(amountCents: number): { company: number; rep: number; pa
   if (amountCents <= 5900) return { company: 0.50, rep: 0.30, partner: 0.20, tier: 1 };
   if (amountCents <= 34900) return { company: 0.60, rep: 0.25, partner: 0.15, tier: 2 };
   return { company: 0.70, rep: 0.20, partner: 0.10, tier: 3 };
+}
+
+// FLAGSHIP FIXED-DOLLAR SPLITS — sales-led offers only (Diagnostic + Retainer).
+// Matches FLAGSHIP_SPLITS in src/lib/repProducts.ts and the rep portal UI.
+// Mapped by Stripe price lookup_key (or lovable_external_id) passed in metadata.priceId.
+//
+// Diagnostic $18,500 one-time → Co $10,500 · Rep $5,000 · Partner $3,000
+// Retainer   $15,000/mo       → Co  $8,000 · Rep $4,000 · Partner $3,000  (every month)
+const FLAGSHIP_FIXED_SPLITS: Record<string, { company: number; rep: number; partner: number; label: string }> = {
+  diagnostic_21day_once:   { company: 1_050_000, rep: 500_000, partner: 300_000, label: '21-Day Revenue Diagnostic' },
+  implementation_retainer: { company:   800_000, rep: 400_000, partner: 300_000, label: 'Implementation Retainer'   },
+};
+
+function flagshipFixedSplit(priceId: string | null | undefined) {
+  if (!priceId) return null;
+  return FLAGSHIP_FIXED_SPLITS[priceId] ?? null;
 }
 
 serve(async (req) => {
@@ -205,31 +220,40 @@ async function recordSaleAndCommissions(args: {
     return;
   }
 
-  // Commission split — tiered by sale amount.
+  // Commission split — flagship fixed-dollar overrides tiered percentages.
   const amount = args.amount_cents;
+  const fixed = flagshipFixedSplit(args.price_id);
   const tierRates = ratesForAmount(amount);
   const commissionRows: any[] = [];
 
-  // Company
+  // Resolve final company/rep/partner amounts + a rate value to store.
+  const companyAmt = fixed ? fixed.company : Math.floor(amount * tierRates.company);
+  const repAmt     = fixed ? fixed.rep     : Math.floor(amount * tierRates.rep);
+  const partnerAmt = fixed ? fixed.partner : Math.floor(amount * tierRates.partner);
+  const companyRate = fixed ? (fixed.company / amount) : tierRates.company;
+  const repRate     = fixed ? (fixed.rep     / amount) : tierRates.rep;
+  const partnerRate = fixed ? (fixed.partner / amount) : tierRates.partner;
+  const splitMeta = fixed
+    ? { split_model: 'flagship_fixed', flagship: fixed.label, tier: null }
+    : { split_model: 'tiered', tier: tierRates.tier };
+
+  // Company always gets a row.
   commissionRows.push({
     sale_id: sale.id, recipient_role: "company", recipient_code: null,
-    amount_cents: Math.floor(amount * tierRates.company), rate: tierRates.company,
+    amount_cents: companyAmt, rate: companyRate,
     status: "pending", environment: args.env,
-    metadata: { tier: tierRates.tier },
+    metadata: splitMeta,
   });
 
   if (args.rep_code) {
     const { data: rep } = await supabase
       .from("rep_codes")
       .select("commission_rate, role").eq("code", args.rep_code).eq("is_active", true).maybeSingle();
-    // Tier rate is the source of truth; rep_codes.commission_rate is ignored under tiered model.
-    const repRate = tierRates.rep;
-    const repAmt = Math.floor(amount * repRate);
     commissionRows.push({
       sale_id: sale.id, recipient_role: "rep", recipient_code: args.rep_code,
       amount_cents: repAmt, rate: repRate,
       status: "pending", environment: args.env,
-      metadata: { tier: tierRates.tier },
+      metadata: splitMeta,
     });
 
     await supabase.rpc("increment_rep_sales" as any, {
@@ -242,12 +266,11 @@ async function recordSaleAndCommissions(args: {
     if (rep?.role !== "partner") {
       const partnerCode = await findActivePartnerCode();
       if (partnerCode) {
-        const partnerAmt = Math.floor(amount * tierRates.partner);
         commissionRows.push({
           sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-          amount_cents: partnerAmt, rate: tierRates.partner,
+          amount_cents: partnerAmt, rate: partnerRate,
           status: "pending", environment: args.env,
-          metadata: { tier: tierRates.tier },
+          metadata: splitMeta,
         });
         await supabase.rpc("increment_rep_sales" as any, {
           _code: partnerCode, _sales: 0, _commission: partnerAmt,
@@ -255,15 +278,14 @@ async function recordSaleAndCommissions(args: {
       }
     }
   } else {
-    // No rep — partner still earns their tier override if one is configured.
+    // No rep — partner still earns their override if one is configured.
     const partnerCode = await findActivePartnerCode();
     if (partnerCode) {
-      const partnerAmt = Math.floor(amount * tierRates.partner);
       commissionRows.push({
         sale_id: sale.id, recipient_role: "partner", recipient_code: partnerCode,
-        amount_cents: partnerAmt, rate: tierRates.partner,
+        amount_cents: partnerAmt, rate: partnerRate,
         status: "pending", environment: args.env,
-        metadata: { tier: tierRates.tier },
+        metadata: splitMeta,
       });
       await supabase.rpc("increment_rep_sales" as any, {
         _code: partnerCode, _sales: 0, _commission: partnerAmt,
@@ -279,8 +301,8 @@ async function recordSaleAndCommissions(args: {
     entity_id: sale.id,
     customer_id: customerId,
     rep_code: args.rep_code ?? null,
-    summary: `${args.kind} ${(amount / 100).toFixed(2)} ${args.currency.toUpperCase()} (${args.price_id ?? "?"})`,
-    metadata: { env: args.env, ...(args.metadata ?? {}) },
+    summary: `${args.kind} ${(amount / 100).toFixed(2)} ${args.currency.toUpperCase()} (${args.price_id ?? "?"})${fixed ? ' [FLAGSHIP]' : ''}`,
+    metadata: { env: args.env, ...splitMeta, ...(args.metadata ?? {}) },
   });
 }
 
