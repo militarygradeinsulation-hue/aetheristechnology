@@ -137,7 +137,7 @@ serve(async (req) => {
 
     // Fan-out intake notification to operator inbox (Joseph + Braden).
     const notifyTargets = [
-      "joseph@aetheris.technology",
+      "aetheris.technology@outlook.com",
       "braden.aetheristechnology@outlook.com",
     ];
     const leadId = leadRow?.id || crypto.randomUUID();

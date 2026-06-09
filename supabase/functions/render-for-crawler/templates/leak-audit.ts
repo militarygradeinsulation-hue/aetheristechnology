@@ -96,7 +96,7 @@ export async function renderLeakAudit(
         <h2>Run the audit</h2>
         <p><a href="${SITE_URL}/leak-audit">Start the free self-scan →</a></p>
         <p><a href="${SITE_URL}/catalog">See all 5 operator-led offers →</a></p>
-        <p>Or talk to an operator: <a href="tel:+13173762110">(317) 376-2110</a> · <a href="mailto:joseph@aetheris.technology">joseph@aetheris.technology</a></p>
+        <p>Or talk to an operator: <a href="tel:+13173762110">(317) 376-2110</a> · <a href="mailto:aetheris.technology@outlook.com">aetheris.technology@outlook.com</a></p>
       </section>
     </main>
     ${renderFooter()}`;

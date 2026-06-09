@@ -339,7 +339,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(11);
   pdf.setTextColor(...ink);
-  pdf.text('joseph@aetheris.technology', pageW / 2, cy, { align: 'center' }); cy += 6;
+  pdf.text('aetheris.technology@outlook.com', pageW / 2, cy, { align: 'center' }); cy += 6;
   pdf.text('(317) 376-2110', pageW / 2, cy, { align: 'center' }); cy += 6;
   pdf.text('aetheris.technology', pageW / 2, cy, { align: 'center' }); cy += 16;
 

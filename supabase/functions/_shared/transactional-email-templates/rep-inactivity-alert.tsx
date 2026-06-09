@@ -67,7 +67,7 @@ export const template: TemplateEntry = {
     const n = Array.isArray(data.reps) ? data.reps.length : 0
     return `🚨 ${n} rep${n === 1 ? '' : 's'} inactive ${data.threshold_days || 3}+ days — access revoked`
   },
-  to: 'joseph@aetheris.technology',
+  to: 'aetheris.technology@outlook.com',
   displayName: 'Rep inactivity alert',
   previewData: {
     threshold_days: 3,

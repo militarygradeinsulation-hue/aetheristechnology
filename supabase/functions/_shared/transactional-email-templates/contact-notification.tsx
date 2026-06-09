@@ -47,7 +47,7 @@ export const template = {
   component: ContactNotificationEmail,
   subject: (data: Record<string, any>) => `New Lead: ${data.name || 'Unknown'} — ${data.service_interest || 'General Inquiry'}`,
   displayName: 'Contact form notification',
-  to: 'joseph@aetheris.technology',
+  to: 'aetheris.technology@outlook.com',
   previewData: { name: 'Jane Smith', email: 'jane@acme.com', phone: '(555) 123-4567', company: 'Acme Corp', message: 'Our website is outdated and we need help with branding.', service_interest: 'The Diagnostic — $4,500' },
 } satisfies TemplateEntry
 

@@ -177,7 +177,7 @@ function renderBackCover(doc: jsPDF) {
   doc.setTextColor(...GOLD);
   doc.setFont('helvetica', 'bold');
   doc.text('(317) 376-2110', PAGE_W / 2, contactY + 12, { align: 'center' });
-  doc.text('joseph@aetheris.technology', PAGE_W / 2, contactY + 26, { align: 'center' });
+  doc.text('aetheris.technology@outlook.com', PAGE_W / 2, contactY + 26, { align: 'center' });
   doc.text('aetheris.technology', PAGE_W / 2, contactY + 40, { align: 'center' });
 
   doc.setFontSize(9);

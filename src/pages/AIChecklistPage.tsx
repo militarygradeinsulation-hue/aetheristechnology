@@ -46,7 +46,7 @@ export default function AIChecklistPage() {
       setDone(true);
     } catch (err) {
       console.error(err);
-      toast({ title: 'Something went wrong', description: 'Please try again or email hello@aetheris.technology', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: 'Please try again or email aetheris.technology@outlook.com', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }

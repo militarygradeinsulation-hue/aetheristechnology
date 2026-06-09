@@ -54,7 +54,7 @@ export const ContactForm: React.FC = () => {
       const { error } = await supabase.from('contact_submissions').insert({ ...trimmed, id: submissionId });
       if (error) throw error;
       
-      // Send notification email to joseph@aetheris.technology
+      // Send notification email to aetheris.technology@outlook.com
       supabase.functions.invoke('send-transactional-email', {
         body: {
           templateName: 'contact-notification',

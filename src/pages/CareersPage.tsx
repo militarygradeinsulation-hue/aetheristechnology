@@ -87,7 +87,7 @@ const CareersPage = () => {
     supabase.functions.invoke('send-transactional-email', {
       body: {
         templateName: 'rep-application-notification',
-        recipientEmail: 'joseph@aetheris.technology',
+        recipientEmail: 'aetheris.technology@outlook.com',
         idempotencyKey: `rep-app-notify-${id}`,
         templateData: {
           name: trimmedName,

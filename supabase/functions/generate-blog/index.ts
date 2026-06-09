@@ -326,7 +326,7 @@ ${brandedFramework}
 
 **Your business is leaking. You just can't see it from the inside. Let's find it.**
 
-📧 [joseph@aetheris.technology](mailto:joseph@aetheris.technology)
+📧 [aetheris.technology@outlook.com](mailto:aetheris.technology@outlook.com)
 📞 (317) 376-2110
 🔗 [Connect with Joseph Toney on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 🌐 [aetheris.technology](https://aetheris.technology)
