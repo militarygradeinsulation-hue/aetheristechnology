@@ -87,17 +87,22 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
   return (
     <section className="px-4 pb-16">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-            Three doors · Operator-led bundles
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center mb-10">
+          <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+            <img src={tierDoors} alt="Three vault doors in a dark corridor lit by a single amber overhead lamp" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+            <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
           </div>
-          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-            You don't buy tools here. You buy the <span className="text-amber italic">operator</span> who runs them.
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Every bundle below is a sealed pairing. The tools only work in sequence, and they only work
-            when an operator is wielding them. That's the entire point. No à la carte. No download-and-pray.
-          </p>
+          <div>
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Three doors · Operator-led bundles
+            </div>
+            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
+              You don't buy tools. You buy the <span className="text-amber italic">operator</span> who runs them.
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground mt-3">
+              Sealed pairings. No à la carte. No download-and-pray.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -177,16 +182,22 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
 
         {/* Flagships sit ABOVE the bundles in price + scope */}
         <div className="mt-14">
-          <div className="text-center mb-6">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Flagships · Sales-led only
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center mb-8">
+            <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+              <img src={flagshipSplit} alt="Split editorial: autopsy table on the left, wall of surveillance monitors on the right" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+              <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
             </div>
-            <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground">
-              When the bundles aren't enough.
-            </h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-              These are not products you can checkout. Both require a 15-minute fit call with the operator first.
-            </p>
+            <div>
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Flagships · Sales-led only
+              </div>
+              <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-tight">
+                When the bundles aren't enough.
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Diagnostic, then surveillance. 15-min fit call required.
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="forensic-tile rounded-sm border border-amber/40 p-6">
