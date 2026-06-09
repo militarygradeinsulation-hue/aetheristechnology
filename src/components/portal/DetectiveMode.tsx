@@ -282,6 +282,21 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
           setTimeout(() => setRevealed((r) => Math.max(r, i)), i * 650);
         }
       }
+      // Persist to the lead's clue trail so the verdict survives closing the tool
+      // (same pattern as scan / deep scan / full forensic sweep).
+      const leadId = (lead as any)?.id;
+      if (leadId && res) {
+        const angle = res?.best_angle?.title || res?.best_angle?.leak_or_gap || 'angle locked';
+        try {
+          await leadClues.log(leadId, {
+            kind: 'detective',
+            label: `Detective verdict: ${angle}`,
+            tool_key: 'detective-mode',
+            tip: res?.best_angle?.why_this_one || undefined,
+            meta: { detective: res, channel: ch, revealed_at: new Date().toISOString() },
+          });
+        } catch {}
+      }
     } catch (e) {
       toast({ title: 'Detective failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
