@@ -624,6 +624,7 @@ const PortalPage: React.FC = () => {
           </div>
         );
       case 'calendar': return <RepCalendarView isAdmin={false} />;
+      case 'partnerhub': return <PartnerOnboardingHub onJump={(t) => setTab(t as Tab)} />;
       case 'companycal': return isPartner ? <AdminCompanyCalendarPanel /> : <CompanyCalendarRepView />;
       case 'briefing': return <InterviewBriefingPanel />;
       case 'playbook': return <PortalPlaybook />;
