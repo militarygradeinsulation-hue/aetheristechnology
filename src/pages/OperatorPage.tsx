@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Wrench, Search, Hammer, ShieldCheck, Calendar, Phone } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Wrench, Search, Hammer, ShieldCheck, Calendar, Phone, ChevronDown } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
