@@ -4,7 +4,7 @@
 - Primary domain: https://aetheris.technology. Target SEO: Indianapolis, Indiana.
 - Intellectual Property exclusively owned by CTOguy.ai.
 - **Positioning (public site):** Revenue systems for **specialty manufacturers** ($5M–$25M, US-based). Credentials-first. 20 years building revenue systems · Marine Corps veteran · former Director of Strategy at $25M aerospace firm with SpaceX accounts.
-- **Public offers (only two):** **21-Day Revenue Diagnostic — $18,500 fixed fee** + **Implementation Retainer — $15K/mo, 3-month minimum, diagnostic clients only.** All other Stripe products are legacy/internal — keep routes alive but hide from nav, hero, services.
+- **Public offers:** Three operator-led bundles on `/catalog` — **Signal Pack $2,500 / Revenue Pack $5,000 / Operator Suite $10,000** — plus two flagships: **21-Day Revenue Diagnostic $18,500** + **Implementation Retainer $15K/mo (3-mo min, diagnostic clients only).** **Operator is the product** — tools are NEVER sold individually on the public site. All bundle/flagship CTAs read "Talk to an operator" → ContactModal. Legacy single-tool Stripe products stay live but are not linked publicly (rep portal still uses them). Admin/rep/partner portals are hidden from public nav (triple-tap logo → `/staff` for entry).
 - **Methodology doc** lives at `/methodology` and goes to every prospect before pricing. **Credentials sheet** at `/credentials`.
 - "Revenue leak" / "Leak Audit™" language is allowed in long-form content (blog, /leak-audit) but never leads the homepage or services page.
 - Tone: blunt, operator, credentials-first. Less metaphor.

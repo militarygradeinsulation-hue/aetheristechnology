@@ -141,6 +141,12 @@ Disallow: /admin
 Disallow: /admin/
 Disallow: /admin/login
 Disallow: /staff
+Disallow: /portal
+Disallow: /partner-portal
+Disallow: /rep-portal
+Disallow: /careers
+Disallow: /careers/
+Disallow: /careers-test
 Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password

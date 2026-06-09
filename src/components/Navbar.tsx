@@ -47,18 +47,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const navItems: NavItem[] = [
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
     { label: 'Home', href: '/home', blood: true },
-    
-    { label: 'Premium Tech Suite', href: '/catalog', accent: true },
+    { label: 'Meet the Operator', href: '/operator', accent: true },
+    { label: 'Bundles', href: '/catalog', accent: true },
     { label: 'Industries', href: '/industries' },
-    
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers', accent: true },
   ];
 
-  const isCareersContext = location.pathname.startsWith('/careers');
-  const showStickyCTA = !isCareersContext;
+  const showStickyCTA = !location.pathname.startsWith('/careers');
   const expanded = isHovered || isMobileMenuOpen;
 
   const isActive = (href: string) =>

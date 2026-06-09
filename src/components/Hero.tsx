@@ -162,6 +162,25 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             78% of the leaks we find, the owner already felt, they just couldn't name them.
           </p>
 
+          <div className="max-w-3xl mx-auto pt-2">
+            <div className="forensic-tile rounded-sm border border-amber/40 px-5 py-4 md:px-6 md:py-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                What you're actually buying
+              </div>
+              <p className="text-base md:text-lg text-foreground/90 leading-snug">
+                <span className="text-amber font-semibold">We don't sell tools.</span> We pair you with an
+                operator who sits down with you, finds every leak, and crafts the solutions — so you don't
+                have to.
+              </p>
+              <Link
+                to="/operator"
+                className="inline-flex items-center gap-2 mt-3 text-amber font-bold hover:text-amber/80 transition-colors"
+              >
+                Meet your operator →
+              </Link>
+            </div>
+          </div>
+
           <ProblemPicker />
 
         </motion.div>
