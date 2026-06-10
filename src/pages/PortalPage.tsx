@@ -188,7 +188,7 @@ const PortalPage: React.FC = () => {
     } catch {}
   }, [activeTool, profile?.code, restoredFor, ACTIVE_TOOL_KEY]);
 
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint']; // newly added tabs auto-show
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint', 'coach']; // newly added tabs auto-show; coach pinned so Braden never loses it
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
