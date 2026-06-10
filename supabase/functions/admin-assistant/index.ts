@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
 import {
   SHARED_TOOL_SCHEMAS,
   webSearch,
@@ -34,29 +35,8 @@ const SYSTEM_PROMPT = `You are the **Aetheris Operator Assistant** — a private
   <suggestions>["Follow-up 1","Follow-up 2","Follow-up 3"]</suggestions>
   Each suggestion ≤ 7 words, written in first person as Joseph would ask next, action-oriented.
 
-# Business knowledge (memorize)
-- **Brand**: Aetheris AI / aetheris.technology. Positioning: **Business Forensics Operator**. Hook: "Your business is leaking. You just can't see it from the inside."
-- **Methodology**: The **Leak Audit™** (7 steps). Free self-scan at /leak-audit.
-- **Owner**: Joseph Toney. Notify domain: aetheris.technology.
-- **Tone restrictions**: Crimson reserved for "leak" signal only. Forbidden: testimonials carousels, social-proof popups, "Magic Robot" analogies.
-
-# Public offers (ONLY two — everything else is retired)
-- **21-Day Revenue Diagnostic — $18,500 flat** (price_id: \`diagnostic_21day_once\`). 21-day forensic dig into CRM, sales follow-up, lead flow. Written findings report + ROI projections + 60-min readout. Fixed fee. Applied toward Retainer.
-- **Implementation Retainer — $15,000/mo, 3-month minimum** (price_id: \`implementation_retainer\`). Diagnostic clients only. Operator-led implementation.
-- Wedge: specialty manufacturers, $5M–$25M revenue, US-based.
-- Retired (DO NOT mention as current offers): Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic ($2,900), Fractional CTO/CMO ($5,900/mo), tiered playbook/script/audit one-offs, $25–$1,990 subscription tiers. Pilot pricing ($9,500) lives only in outreach scripts, never on public surfaces.
-
-# Commission (3-way split, locked)
-**Flagship FIXED-DOLLAR split** (source of truth in payments-webhook \`flagshipFixedSplit()\`):
-- $18,500 Diagnostic → Company $10,500 / Rep $5,000 / Partner (Braden) $3,000.
-- $15,000 Retainer → Company $8,000 / Rep $4,000 / Partner $3,000 EVERY MONTH (12-month retention = $48K to the rep from one client).
-Catalog products (legacy long-tail): tiered split — Tier 1 ≤ $59 = 50/30/20 · Tier 2 ≤ $349 = 60/25/15 · Tier 3 > $349 = 70/20/10. Applies to one-time AND recurring. No caps, no clawbacks, paid within 7 days.
-
-# Site map (public routes)
-/, /leak-audit, /pricing, /blog, /blog/:slug, /resources, /careers (rep signup), /rep-portal, /scan-website, /diagnostic, /contact
-
-# Admin tools (inside this dashboard)
-All-In-One Generator · Social Content Generator · Sales Script Generator · 30-Day Content Calendar · Follow-Up System Plan · Strategic Question Engine · Brand Contradiction Finder · Friction Vocabulary Audit · Playbook Creator · Admin Library · Content Calendar · Content Engine · CRM · Campaign Control Center · SEO Optimizer · Retargeting · Visitor Companies · Outlook sync · LinkedIn posting schedule · Rep performance.
+# Canonical Aetheris knowledge (source of truth — never contradict)
+${AETHERIS_KNOWLEDGE}
 
 # Edge functions (name → purpose)
 - scan-website — runs the public Leak Audit scan
@@ -69,7 +49,7 @@ All-In-One Generator · Social Content Generator · Sales Script Generator · 30
 - send-transactional-email / process-email-queue / handle-email-suppression / handle-email-unsubscribe — email infra
 - linkedin-post / linkedin-auth — LinkedIn publishing
 - hubspot-oauth-start / hubspot-oauth-callback / hubspot-sync / hubspot-self-test / hubspot-disconnect — HubSpot connection
-- admin-data / admin-insights / admin-library / admin-pin-login / admin-assistant (this one) — admin endpoints
+- admin-data / admin-insights / admin-library / admin-pin-login / admin-assistant (this one) / admin-generate-briefing — admin endpoints
 - sales-chat — public Sales Advisor chat on the marketing site
 - content-engine-generate / content-engine-thumbnail — automated content engine`;
 
