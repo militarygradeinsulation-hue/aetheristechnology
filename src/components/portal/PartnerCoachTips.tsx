@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Lightbulb, Clock, Target, MousePointerClick, Sparkles } from "lucide-react";
 import { getPartnerGuidance } from "@/lib/partnerGuidance";
+import { getPortalProfile } from "@/lib/portalAuth";
 
 interface Props {
   tabId: string;
@@ -13,6 +14,8 @@ interface Props {
  */
 export const PartnerCoachTips: React.FC<Props> = ({ tabId }) => {
   const block = getPartnerGuidance(tabId);
+  const profile = getPortalProfile();
+  const firstName = (profile?.rep_name || '').split(/\s+/)[0] || 'Partner';
   const storageKey = `partner-coach-collapsed-${tabId}`;
   const [collapsed, setCollapsed] = useState(false);
 
@@ -41,7 +44,7 @@ export const PartnerCoachTips: React.FC<Props> = ({ tabId }) => {
           </div>
           <div className="min-w-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-              COO Coach · for Braden
+              COO Coach · for {firstName}
             </div>
             <div className="font-display text-base font-semibold text-foreground truncate">
               {block.headline}

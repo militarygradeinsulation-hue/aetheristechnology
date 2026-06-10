@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronRight, FileText, ExternalLink, Briefcase,
 } from 'lucide-react';
 import { fmtUsd } from '@/lib/repProducts';
+import { getPortalProfile } from '@/lib/portalAuth';
 
 interface Props {
   onJump?: (tab: string) => void;
@@ -65,6 +66,9 @@ const Section: React.FC<{
 };
 
 export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
+  const profile = getPortalProfile();
+  const isBraden = profile?.code === '963169';
+  const firstName = (profile?.rep_name || '').split(/\s+/)[0] || 'Partner';
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -96,7 +100,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
                 Partner Hub · COO Onboarding
               </div>
               <h1 className="font-display text-2xl font-bold text-foreground">
-                Welcome, Braden. Here's the new operating model.
+                Welcome, {firstName}. Here's the new operating model.
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
                 One page. Everything you need to get fluent on the new operator-led plan, the
