@@ -100,7 +100,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
                 Partner Hub · COO Onboarding
               </div>
               <h1 className="font-display text-2xl font-bold text-foreground">
-                Welcome, Braden. Here's the new operating model.
+                Welcome, {firstName}. Here's the new operating model.
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
                 One page. Everything you need to get fluent on the new operator-led plan, the
