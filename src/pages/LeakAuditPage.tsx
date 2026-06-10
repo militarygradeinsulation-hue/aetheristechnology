@@ -568,15 +568,26 @@ const LeakAuditPage = () => {
                           size="lg"
                           className="bg-amber text-primary-foreground hover:bg-amber/90"
                         >
-                          <a href="/catalog">
+                          <a
+                            href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             {recommended.cta}
                             <ArrowRight className="ml-2 w-4 h-4" />
                           </a>
                         </Button>
-                        <Button asChild size="lg" variant="outline">
-                          <a href="/catalog">See all 5 offers</a>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={() => setIsContactModalOpen(true)}
+                        >
+                          Request a callback
                         </Button>
                       </div>
+                      <p className="text-center text-xs text-muted-foreground italic pt-1">
+                        Engagements are operator-led. Every offer starts with a conversation — no self-checkout.
+                      </p>
 
                       <div className="pt-4 border-t border-border/40">
                         <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground text-center mb-3">
