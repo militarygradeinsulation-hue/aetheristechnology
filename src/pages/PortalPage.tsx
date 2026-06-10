@@ -468,10 +468,12 @@ const PortalPage: React.FC = () => {
     }
   }, [isPartner]);
 
-  // Partner gets the simpler rep-style top-tab layout, no view selector / widget board.
+  // Partner (Braden) gets the simpler rep-style top-tab layout, no view selector / widget board.
+  // Joseph is also a partner but as the owner/admin he keeps the full customization UI.
+  const isOwnerAdmin = hasValidAdminToken();
   useEffect(() => {
-    if (isPartner && layout !== 'tabs') setLayout('tabs');
-  }, [isPartner, layout]);
+    if (isPartner && !isOwnerAdmin && layout !== 'tabs') setLayout('tabs');
+  }, [isPartner, isOwnerAdmin, layout]);
 
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
