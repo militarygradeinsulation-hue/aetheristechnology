@@ -66,6 +66,9 @@ const Section: React.FC<{
 };
 
 export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
+  const profile = getPortalProfile();
+  const isBraden = profile?.code === '963169';
+  const firstName = (profile?.rep_name || '').split(/\s+/)[0] || 'Partner';
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
