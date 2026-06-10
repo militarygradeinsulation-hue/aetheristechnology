@@ -361,6 +361,7 @@ export const BriefingsPanel: React.FC = () => {
           briefing material for partners, or a reference when iterating on either surface.
         </p>
       </div>
+      <BriefingChat />
       {BRIEFINGS.map(b => <BriefingCard key={b.id} briefing={b} />)}
     </div>
   );
