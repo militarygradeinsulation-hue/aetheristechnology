@@ -38,10 +38,16 @@ function pickFor(role: 'COO' | 'CEO'): string {
 export const OperatorIdentityBar: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { role, name, title } = useMemo(() => {
     const portal = getPortalProfile();
-    const isBraden = portal?.role === 'partner' || portal?.code === '963169';
-    return isBraden
-      ? { role: 'COO' as const, name: 'Braden Roberts', title: 'Chief Operating Officer' }
-      : { role: 'CEO' as const, name: 'Joseph Toney', title: 'Chief Executive Officer' };
+    // Braden's actual code is the only one that maps to the COO identity.
+    // Every other partner code (e.g. Joseph's own work account) shows their
+    // own name so two partners never see each other's profile.
+    if (portal?.code === '963169') {
+      return { role: 'COO' as const, name: 'Braden Roberts', title: 'Chief Operating Officer' };
+    }
+    if (portal?.role === 'partner') {
+      return { role: 'COO' as const, name: portal.rep_name || 'Partner', title: 'Operating Partner' };
+    }
+    return { role: 'CEO' as const, name: 'Joseph Toney', title: 'Chief Executive Officer' };
   }, []);
 
   const Icon = role === 'CEO' ? Crown : Briefcase;
