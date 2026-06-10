@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe, Server, Copy, Download, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { BriefingChat } from '@/components/admin/BriefingChat';
 
 /**
  * BriefingsPanel
