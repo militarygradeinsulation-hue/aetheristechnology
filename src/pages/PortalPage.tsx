@@ -893,7 +893,7 @@ const PortalPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         <OperatorIdentityBar />
         {/* View selector */}
-        {!isPartner && (
+        {(!isPartner || isAdmin) && (
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <PortalViewSelector
             storageNamespace={ns}
