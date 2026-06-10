@@ -44,7 +44,7 @@ export const PartnerCoachTips: React.FC<Props> = ({ tabId }) => {
           </div>
           <div className="min-w-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-              COO Coach · for Braden
+              COO Coach · for {firstName}
             </div>
             <div className="font-display text-base font-semibold text-foreground truncate">
               {block.headline}
