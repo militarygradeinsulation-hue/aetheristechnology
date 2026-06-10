@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe, Server, Copy, Download, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { BriefingChat } from '@/components/admin/BriefingChat';
 
 /**
  * BriefingsPanel
@@ -361,6 +362,7 @@ export const BriefingsPanel: React.FC = () => {
           briefing material for partners, or a reference when iterating on either surface.
         </p>
       </div>
+      <BriefingChat />
       {BRIEFINGS.map(b => <BriefingCard key={b.id} briefing={b} />)}
     </div>
   );
