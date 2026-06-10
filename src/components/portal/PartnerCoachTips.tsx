@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Lightbulb, Clock, Target, MousePointerClick, Sparkles } from "lucide-react";
 import { getPartnerGuidance } from "@/lib/partnerGuidance";
+import { getPortalProfile } from "@/lib/portalAuth";
 
 interface Props {
   tabId: string;
