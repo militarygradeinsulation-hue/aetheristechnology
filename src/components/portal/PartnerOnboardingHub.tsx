@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronRight, FileText, ExternalLink, Briefcase,
 } from 'lucide-react';
 import { fmtUsd } from '@/lib/repProducts';
+import { getPortalProfile } from '@/lib/portalAuth';
 
 interface Props {
   onJump?: (tab: string) => void;
