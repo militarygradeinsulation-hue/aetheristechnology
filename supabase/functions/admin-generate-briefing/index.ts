@@ -48,22 +48,8 @@ Bulleted list of unknowns or things to watch.
 ---
 *Aetheris Operator Briefing · Internal use only*
 
-# Business knowledge (use accurately, do not contradict)
-- **Brand**: Aetheris AI. Domain aetheris.technology. Positioning: **Business Forensics Operator**. Hook: "Your business is leaking. You just can't see it from the inside."
-- **Methodology**: The Leak Audit™ (7 steps). Free self-scan at /leak-audit.
-- **Wedge market**: Specialty manufacturers, $5M–$25M revenue, US-based (Indianapolis SEO target).
-- **Owner**: Joseph Toney (CEO). Braden Roberts (COO / partner, code 963169).
-- **Public offers (only two)**:
-  - 21-Day Revenue Diagnostic — $18,500 flat. Forensic dig into CRM, sales follow-up, lead flow. Written report + ROI projections + 60-min readout. Applied toward Retainer.
-  - Implementation Retainer — $15,000/mo, 3-month minimum. Diagnostic clients only. Operator-led.
-- **Catalog bundles** (legacy / on-ramp): Signal Pack $2,500, Revenue Pack $5,000, Operator Suite $10,000. All 10% rep payout.
-- **Commission split (flagship FIXED-DOLLAR, locked)**:
-  - $18,500 Diagnostic → Company $10,500 / Rep $5,000 / Partner $3,000.
-  - $15,000 Retainer → Company $8,000 / Rep $4,000 / Partner $3,000 EVERY MONTH (12-month retention = $48K rep payout from one client).
-  - Catalog tier split: T1 ≤ $59 = 50/30/20, T2 ≤ $349 = 60/25/15, T3 > $349 = 70/20/10.
-  - Bonuses: volume (+$1k/$2.5k/$5k at 2/3/5 monthly sales), retention (+$1k/$2.5k/$5k at 3/6/12mo extension), referral ($500 onboard + $7k first-close + $500/sale override 12mo).
-- **Channels**: Public site, /rep-portal (code-only), /admin (PIN 9822). Smart Subscriptions deliver monthly via Stripe invoice.paid.
-- **Tone constraints**: Crimson reserved for "leak" signals only. Dark charcoal + amber palette. Fraunces serif for autopsy headlines, JetBrains Mono for case-file labels.`;
+# Business knowledge (canonical — use accurately, do not contradict)
+${AETHERIS_KNOWLEDGE}`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
