@@ -468,6 +468,11 @@ const PortalPage: React.FC = () => {
     }
   }, [isPartner]);
 
+  // Partner gets the simpler rep-style top-tab layout, no view selector / widget board.
+  useEffect(() => {
+    if (isPartner && layout !== 'tabs') setLayout('tabs');
+  }, [isPartner, layout]);
+
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
