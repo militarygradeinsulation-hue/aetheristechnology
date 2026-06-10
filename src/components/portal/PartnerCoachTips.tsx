@@ -14,6 +14,8 @@ interface Props {
  */
 export const PartnerCoachTips: React.FC<Props> = ({ tabId }) => {
   const block = getPartnerGuidance(tabId);
+  const profile = getPortalProfile();
+  const firstName = (profile?.rep_name || '').split(/\s+/)[0] || 'Partner';
   const storageKey = `partner-coach-collapsed-${tabId}`;
   const [collapsed, setCollapsed] = useState(false);
 
