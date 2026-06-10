@@ -468,10 +468,12 @@ const PortalPage: React.FC = () => {
     }
   }, [isPartner]);
 
-  // Partner gets the simpler rep-style top-tab layout, no view selector / widget board.
+  // Partner (Braden) gets the simpler rep-style top-tab layout, no view selector / widget board.
+  // Joseph is also a partner but as the owner/admin he keeps the full customization UI.
+  const isOwnerAdmin = hasValidAdminToken();
   useEffect(() => {
-    if (isPartner && layout !== 'tabs') setLayout('tabs');
-  }, [isPartner, layout]);
+    if (isPartner && !isOwnerAdmin && layout !== 'tabs') setLayout('tabs');
+  }, [isPartner, isOwnerAdmin, layout]);
 
   const fmt = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
@@ -523,7 +525,7 @@ const PortalPage: React.FC = () => {
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const sharedWsUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
-  const isAdmin = hasValidAdminToken();
+  const isAdmin = isOwnerAdmin;
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
@@ -891,7 +893,7 @@ const PortalPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         <OperatorIdentityBar />
         {/* View selector */}
-        {!isPartner && (
+        {(!isPartner || isAdmin) && (
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <PortalViewSelector
             storageNamespace={ns}
