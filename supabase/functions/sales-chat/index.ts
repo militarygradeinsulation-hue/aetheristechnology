@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
