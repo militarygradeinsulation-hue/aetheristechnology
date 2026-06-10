@@ -891,6 +891,7 @@ const PortalPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         <OperatorIdentityBar />
         {/* View selector */}
+        {!isPartner && (
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <PortalViewSelector
             storageNamespace={ns}
@@ -952,6 +953,7 @@ const PortalPage: React.FC = () => {
             {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board · drag headers to reorder · ☆ to pin · 1/4–4/4 to resize' : 'Tab view'}
           </span>
         </div>
+        )}
 
         {layout === 'tabs' ? (
           <EasyModeWrapper tabKey={tab}>
