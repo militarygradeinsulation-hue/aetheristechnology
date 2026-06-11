@@ -798,8 +798,8 @@
     // Any AI leak with a structured fixAction goes through the generic handler.
     const useAiVisual = leak.fixAction && typeof leak.fixAction === "object";
     const baseId = useAiVisual ? "ai_visual"
-                 : leak.id.startsWith("form_too_long") ? "form_too_long"
-                 : leak.id.startsWith("form_unlabeled") ? null
+                  : leak.id.startsWith("form_too_long") ? "form_too_long"
+                  : leak.id.startsWith("form_unlabeled") ? "form_unlabeled"
                  : leak.id;
     const handler = baseId && INPAGE_FIXES[baseId];
     if (!handler) return { ok: false, error: "No in-page fix available for this leak yet." };
