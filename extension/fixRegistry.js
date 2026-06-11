@@ -39,5 +39,6 @@ export function hasInPageFix(leak) {
   if (leak.fixAction && typeof leak.fixAction === "object" && leak.fixAction.op) return true;
   if (INPAGE_FIX_IDS.has(leak.id)) return true;
   if (leak.id.startsWith("form_too_long")) return true;
+  if (leak.id.startsWith("form_unlabeled")) return true;
   return false;
 }
