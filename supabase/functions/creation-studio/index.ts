@@ -325,6 +325,66 @@ No prose. JSON only.`;
       return json({ titles, topics, recipes });
     }
 
+    if (action === "animate_image") {
+      // AI-animate a still image into a short video clip via Replicate.
+      const replicate = Deno.env.get("REPLICATE_API_TOKEN");
+      if (!replicate) {
+        return json({
+          error: "AI animate requires a Replicate API token. Add REPLICATE_API_TOKEN in Project Settings → Secrets (get one at replicate.com/account/api-tokens).",
+        }, 400);
+      }
+      const imageUrl = (body.image_url as string || "").trim();
+      const motionPrompt = (body.prompt as string || "Slow cinematic push-in, subtle parallax.").trim();
+      const durationSec = Math.max(3, Math.min(10, Number(body.duration_sec) || 5));
+      if (!imageUrl) return json({ error: "image_url required" }, 400);
+
+      // Model: ByteDance Seedance 1 Lite (image-to-video, fast + affordable).
+      // Falls back to a generic prediction request shape.
+      const createRes = await fetch("https://api.replicate.com/v1/models/bytedance/seedance-1-lite/predictions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${replicate}`,
+          "Content-Type": "application/json",
+          Prefer: "wait=60",
+        },
+        body: JSON.stringify({
+          input: {
+            image: imageUrl,
+            prompt: motionPrompt,
+            duration: durationSec,
+            resolution: "720p",
+            aspect_ratio: "9:16",
+          },
+        }),
+      });
+      if (!createRes.ok) {
+        const t = await createRes.text();
+        return json({ error: `Replicate ${createRes.status}: ${t.slice(0, 300)}` }, 502);
+      }
+      let pred = await createRes.json();
+
+      // Poll if not finished after the initial wait
+      const started = Date.now();
+      while (pred?.status && pred.status !== "succeeded" && pred.status !== "failed" && pred.status !== "canceled") {
+        if (Date.now() - started > 180_000) break; // 3-minute cap
+        await new Promise((r) => setTimeout(r, 2500));
+        const pollUrl = pred.urls?.get;
+        if (!pollUrl) break;
+        const pr = await fetch(pollUrl, { headers: { Authorization: `Bearer ${replicate}` } });
+        if (!pr.ok) break;
+        pred = await pr.json();
+      }
+      if (pred.status !== "succeeded") {
+        return json({ error: `Replicate ${pred.status || "unknown"}: ${(pred.error || "").toString().slice(0, 240) || "animation failed"}` }, 502);
+      }
+      const out = pred.output;
+      const videoUrl = Array.isArray(out) ? out[0] : out;
+      if (!videoUrl || typeof videoUrl !== "string") {
+        return json({ error: "Replicate returned no video URL" }, 502);
+      }
+      return json({ video_url: videoUrl, model: "bytedance/seedance-1-lite", duration_sec: durationSec });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("creation-studio error:", e);

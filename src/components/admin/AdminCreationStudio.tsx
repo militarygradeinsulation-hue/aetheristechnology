@@ -15,11 +15,28 @@ const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
 
-type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload' };
+type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload'; videoUrl?: string; kind?: 'image' | 'clip' };
 type SceneImageStyle = 'case_file' | 'autopsy_diagram' | 'blueprint' | 'editorial_cartoon' | 'data_macro' | 'noir_object' | 'isometric' | 'free';
-type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle };
+type SceneMotion = 'auto' | 'still' | 'zoom_in' | 'zoom_out' | 'pan_left' | 'pan_right' | 'pan_up' | 'pan_down' | 'parallax' | 'ken_burns';
+type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle; motion?: SceneMotion };
 type Plan = { title: string; scenes: Scene[] };
 type Voice = { voice_id: string; name: string; category?: string; preview_url?: string };
+
+const MOTION_OPTIONS: { key: SceneMotion; label: string }[] = [
+  { key: 'auto',       label: 'Auto (varied)' },
+  { key: 'ken_burns',  label: 'Ken Burns (zoom + pan)' },
+  { key: 'zoom_in',    label: 'Zoom in' },
+  { key: 'zoom_out',   label: 'Zoom out' },
+  { key: 'pan_left',   label: 'Pan left' },
+  { key: 'pan_right',  label: 'Pan right' },
+  { key: 'pan_up',     label: 'Pan up' },
+  { key: 'pan_down',   label: 'Pan down' },
+  { key: 'parallax',   label: 'Slow parallax' },
+  { key: 'still',      label: 'Still (no motion)' },
+];
+
+const AUTO_MOTION_CYCLE: SceneMotion[] = ['zoom_in', 'pan_right', 'ken_burns', 'zoom_out', 'pan_left', 'parallax', 'pan_up', 'pan_down'];
+const pickAutoMotion = (i: number): SceneMotion => AUTO_MOTION_CYCLE[i % AUTO_MOTION_CYCLE.length];
 
 const SCENE_STYLE_OPTIONS: { key: SceneImageStyle; label: string; desc: string }[] = [
   { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction · crimson' },
@@ -561,11 +578,53 @@ export const AdminCreationStudio: React.FC = () => {
     const next: AssetImage[] = [];
     for (const f of files) {
       const url = URL.createObjectURL(f);
-      next.push({ id: `up:${Date.now()}-${f.name}`, url, label: f.name, source: 'upload' });
+      const isVideo = f.type.startsWith('video/');
+      next.push({
+        id: `up:${Date.now()}-${f.name}`,
+        url: isVideo ? url : url,
+        videoUrl: isVideo ? url : undefined,
+        label: f.name,
+        source: 'upload',
+        kind: isVideo ? 'clip' : 'image',
+      });
     }
     setUploads(prev => [...prev, ...next]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  // ===== AI-animate an image into a short video clip (Replicate) =====
+  const [animatingImgId, setAnimatingImgId] = useState<string | null>(null);
+  const animateImage = async (img: ImageLibItem) => {
+    const motionPrompt = window.prompt(
+      'Describe the motion (camera, subject):',
+      'Slow cinematic push-in, subtle parallax, hard amber rim light, forensic case-file mood.'
+    );
+    if (motionPrompt === null) return;
+    setAnimatingImgId(img.id);
+    try {
+      const { data, error } = await adminInvoke('animate_image', {
+        image_url: img.url,
+        prompt: motionPrompt.trim() || 'Slow cinematic push-in, subtle parallax.',
+        duration_sec: 5,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const videoUrl = data.video_url as string;
+      if (!videoUrl) throw new Error('No video returned');
+      const id = `clip:${img.id}`;
+      setUploads(prev => prev.find(u => u.id === id) ? prev : [...prev, {
+        id, url: img.url, videoUrl, label: `Animated: ${img.prompt?.slice(0, 40) || 'clip'}`,
+        source: 'upload', kind: 'clip',
+      }]);
+      toast({ title: 'Animation ready', description: 'Added to Per-video uploads as a clip.' });
+      loadVideoLibrary();
+    } catch (e) {
+      toast({ title: 'AI animate failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAnimatingImgId(null);
+    }
+  };
+
 
   const generatePlan = async (): Promise<Plan | null> => {
     setLastError('');
@@ -648,11 +707,30 @@ export const AdminCreationStudio: React.FC = () => {
       canvas.width = aspectDef.w; canvas.height = aspectDef.h;
       const ctx = canvas.getContext('2d')!;
 
-      // 3) Preload images
-      const sceneImgs: HTMLImageElement[] = [];
+      // 3) Preload images AND video clips. For clips, we use HTMLVideoElement
+      //    as the draw source. For images, HTMLImageElement.
+      const sceneImgs: (HTMLImageElement | null)[] = [];
+      const sceneVids: (HTMLVideoElement | null)[] = [];
       for (const s of activePlan.scenes) {
         const a = allAvailable.find(x => x.id === s.imageId)!;
-        sceneImgs.push(await loadImage(a.url));
+        if (a?.videoUrl) {
+          const v = document.createElement('video');
+          v.src = a.videoUrl;
+          v.crossOrigin = 'anonymous';
+          v.muted = true;
+          v.playsInline = true;
+          v.preload = 'auto';
+          v.loop = true;
+          await new Promise<void>((res) => {
+            v.onloadeddata = () => res();
+            v.onerror = () => res();
+          });
+          sceneImgs.push(null);
+          sceneVids.push(v);
+        } else {
+          sceneImgs.push(await loadImage(a.url));
+          sceneVids.push(null);
+        }
       }
 
       // 4) Build combined audio MediaStream via WebAudio
@@ -712,29 +790,55 @@ export const AdminCreationStudio: React.FC = () => {
         }
       }
 
-      // 7) Animate canvas. Ken-Burns on each scene + caption.
+      // 7) Animate canvas. Per-scene motion preset + caption.
       const animStart = performance.now();
       let scenePtr = 0;
+      let lastPlayedSceneIdx = -1;
+
+      const motionFor = (sceneIdx: number): SceneMotion => {
+        const m = activePlan.scenes[sceneIdx].motion || 'auto';
+        return m === 'auto' ? pickAutoMotion(sceneIdx) : m;
+      };
+
+      // Returns {zoom, panX, panY} as a fraction of canvas size (panX, panY in [-1..1]).
+      const motionTransform = (motion: SceneMotion, t: number) => {
+        switch (motion) {
+          case 'still':      return { zoom: 1.0,                panX: 0,                  panY: 0 };
+          case 'zoom_in':    return { zoom: 1.04 + 0.16 * t,    panX: 0,                  panY: 0 };
+          case 'zoom_out':   return { zoom: 1.20 - 0.16 * t,    panX: 0,                  panY: 0 };
+          case 'pan_left':   return { zoom: 1.12,               panX:  0.10 - 0.20 * t,   panY: 0 };
+          case 'pan_right':  return { zoom: 1.12,               panX: -0.10 + 0.20 * t,   panY: 0 };
+          case 'pan_up':     return { zoom: 1.12,               panX: 0,                  panY:  0.10 - 0.20 * t };
+          case 'pan_down':   return { zoom: 1.12,               panX: 0,                  panY: -0.10 + 0.20 * t };
+          case 'parallax':   return { zoom: 1.10 + 0.04 * t,    panX:  0.06 - 0.12 * t,   panY:  0.03 - 0.06 * t };
+          case 'ken_burns':
+          default:           return { zoom: 1.06 + 0.14 * t,    panX: -0.04 + 0.08 * t,   panY: -0.02 + 0.04 * t };
+        }
+      };
 
       const drawScene = (sceneIdx: number, localT: number, sceneDur: number) => {
         const img = sceneImgs[sceneIdx];
+        const vid = sceneVids[sceneIdx];
+        const src: CanvasImageSource | null = vid || img;
+        if (!src) return;
         const s = activePlan.scenes[sceneIdx];
         const cw = canvas.width, ch = canvas.height;
+        const sw = (vid ? vid.videoWidth : img!.width) || cw;
+        const sh = (vid ? vid.videoHeight : img!.height) || ch;
 
-        // Cover-fit + zoom
         const t = Math.min(1, localT / sceneDur);
-        const zoom = 1.05 + 0.12 * t; // ken-burns
-        const panX = (sceneIdx % 2 === 0 ? -1 : 1) * 0.04 * t * cw;
-        const ir = img.width / img.height;
+        const motion = vid ? 'still' : motionFor(sceneIdx);
+        const { zoom, panX, panY } = motionTransform(motion, t);
+        const ir = sw / sh;
         const cr = cw / ch;
-        let dw, dh;
+        let dw: number, dh: number;
         if (ir > cr) { dh = ch * zoom; dw = dh * ir; } else { dw = cw * zoom; dh = dw / ir; }
-        const dx = (cw - dw) / 2 + panX;
-        const dy = (ch - dh) / 2;
+        const dx = (cw - dw) / 2 + panX * cw;
+        const dy = (ch - dh) / 2 + panY * ch;
 
         ctx.fillStyle = '#0a0a0a';
         ctx.fillRect(0, 0, cw, ch);
-        ctx.drawImage(img, dx, dy, dw, dh);
+        ctx.drawImage(src, dx, dy, dw, dh);
 
         // Bottom gradient for caption legibility
         const grad = ctx.createLinearGradient(0, ch * 0.55, 0, ch);
@@ -773,11 +877,21 @@ export const AdminCreationStudio: React.FC = () => {
           cum += d; idx = i; local = d;
         }
         scenePtr = idx;
+        // Start/stop video clips as scenes transition
+        if (idx !== lastPlayedSceneIdx) {
+          if (lastPlayedSceneIdx >= 0) {
+            const prev = sceneVids[lastPlayedSceneIdx];
+            if (prev) { prev.pause(); }
+          }
+          const cur = sceneVids[idx];
+          if (cur) { try { cur.currentTime = 0; cur.play().catch(() => {}); } catch {} }
+          lastPlayedSceneIdx = idx;
+        }
         drawScene(idx, local, activePlan.scenes[idx].durationMs / 1000);
         const pct = Math.min(99, 30 + Math.round((elapsed / totalSec) * 70));
         setProgress(pct);
         if (elapsed < totalSec) requestAnimationFrame(tick);
-        else setTimeout(() => recorder.stop(), 200);
+        else setTimeout(() => { sceneVids.forEach(v => v && v.pause()); recorder.stop(); }, 200);
       };
       requestAnimationFrame(tick);
 
@@ -1155,12 +1269,19 @@ export const AdminCreationStudio: React.FC = () => {
             <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
               <Upload className="w-3 h-3 mr-1" /> Add
             </Button>
-            <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleUpload} className="hidden" />
           </div>
           <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
             {uploads.map(img => (
-              <div key={img.id} className="relative aspect-square overflow-hidden rounded border-2 border-amber">
-                <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+              <div key={img.id} className="relative aspect-square overflow-hidden rounded border-2 border-amber bg-black">
+                {img.videoUrl ? (
+                  <video src={img.videoUrl} muted loop playsInline className="w-full h-full object-cover" onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(()=>{})} onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()} />
+                ) : (
+                  <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                )}
+                {img.videoUrl && (
+                  <span className="absolute bottom-1 left-1 bg-amber text-charcoal text-[9px] font-mono px-1 rounded uppercase tracking-wider">Clip</span>
+                )}
                 <button
                   type="button"
                   onClick={() => setUploads(prev => prev.filter(u => u.id !== img.id))}
@@ -1170,10 +1291,11 @@ export const AdminCreationStudio: React.FC = () => {
                 </button>
               </div>
             ))}
-            {uploads.length === 0 && <div className="col-span-4 text-xs text-muted-foreground py-6 text-center">No uploads yet</div>}
+            {uploads.length === 0 && <div className="col-span-4 text-xs text-muted-foreground py-6 text-center">No uploads yet. Drop images or short video clips here.</div>}
           </div>
         </div>
       </div>
+
 
       {/* Shared Image Library, every image generated/uploaded by anyone */}
       <div className="glass p-6 rounded-xl">
@@ -1205,9 +1327,13 @@ export const AdminCreationStudio: React.FC = () => {
                   <Button size="sm" className="h-6 text-[10px] px-2 w-full bg-amber text-charcoal hover:bg-amber/90" onClick={() => addLibraryImageToScenes(img)}>
                     <Upload className="w-3 h-3 mr-1" /> Add
                   </Button>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 w-full border-amber/40 text-amber hover:bg-amber/10" disabled={animatingImgId === img.id} onClick={() => animateImage(img)} title="AI-animate this image into a 5s clip">
+                    {animatingImgId === img.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Film className="w-3 h-3 mr-1" /> Animate</>}
+                  </Button>
                   <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 w-full border-crimson/50 text-crimson hover:bg-crimson/10" disabled={imgDeletingId === img.id} onClick={() => deleteLibraryImage(img)}>
                     {imgDeletingId === img.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Trash2 className="w-3 h-3 mr-1" /> Delete</>}
                   </Button>
+
                 </div>
               </div>
             ))}
@@ -1231,13 +1357,21 @@ export const AdminCreationStudio: React.FC = () => {
               return (
                 <div key={i} className="flex gap-3 p-3 bg-background/40 rounded-lg border border-border">
                   <div className="w-24 flex-shrink-0 flex flex-col gap-2">
-                    <div className="w-24 h-24 rounded overflow-hidden bg-charcoal border border-border/40 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded overflow-hidden bg-charcoal border border-border/40 flex items-center justify-center relative">
                       {img ? (
-                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        img.videoUrl ? (
+                          <>
+                            <video src={img.videoUrl} muted loop playsInline autoPlay className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0.5 left-0.5 bg-amber text-charcoal text-[8px] font-mono px-1 rounded uppercase">Clip</span>
+                          </>
+                        ) : (
+                          <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        )
                       ) : (
                         <span className="text-[10px] text-muted-foreground text-center px-1">No image</span>
                       )}
                     </div>
+
                     <Button
                       type="button"
                       size="sm"
@@ -1319,6 +1453,20 @@ export const AdminCreationStudio: React.FC = () => {
                               <option key={o.key} value={o.key}>{o.label}</option>
                             ))}
                           </select>
+                          <select
+                            value={s.motion || 'auto'}
+                            onChange={(e) => {
+                              const next = { ...plan }; next.scenes[i] = { ...s, motion: e.target.value as SceneMotion };
+                              setPlan(next);
+                            }}
+                            title="How this scene's image is animated during render"
+                            className="h-6 rounded border border-amber/40 bg-background px-1.5 text-[10px] font-mono uppercase text-amber"
+                          >
+                            {MOTION_OPTIONS.map(o => (
+                              <option key={o.key} value={o.key}>{o.label}</option>
+                            ))}
+                          </select>
+
                         </div>
                       </div>
                       <Textarea
