@@ -15,11 +15,28 @@ const ASSET_GLOB = import.meta.glob('/src/assets/**/*.{jpg,jpeg,png,webp,JPG,PNG
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
 
-type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload' };
+type AssetImage = { id: string; url: string; label: string; source: 'site' | 'upload'; videoUrl?: string; kind?: 'image' | 'clip' };
 type SceneImageStyle = 'case_file' | 'autopsy_diagram' | 'blueprint' | 'editorial_cartoon' | 'data_macro' | 'noir_object' | 'isometric' | 'free';
-type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle };
+type SceneMotion = 'auto' | 'still' | 'zoom_in' | 'zoom_out' | 'pan_left' | 'pan_right' | 'pan_up' | 'pan_down' | 'parallax' | 'ken_burns';
+type Scene = { imageId: string; caption: string; voiceover: string; durationMs: number; imagePrompt?: string; imageStyle?: SceneImageStyle; motion?: SceneMotion };
 type Plan = { title: string; scenes: Scene[] };
 type Voice = { voice_id: string; name: string; category?: string; preview_url?: string };
+
+const MOTION_OPTIONS: { key: SceneMotion; label: string }[] = [
+  { key: 'auto',       label: 'Auto (varied)' },
+  { key: 'ken_burns',  label: 'Ken Burns (zoom + pan)' },
+  { key: 'zoom_in',    label: 'Zoom in' },
+  { key: 'zoom_out',   label: 'Zoom out' },
+  { key: 'pan_left',   label: 'Pan left' },
+  { key: 'pan_right',  label: 'Pan right' },
+  { key: 'pan_up',     label: 'Pan up' },
+  { key: 'pan_down',   label: 'Pan down' },
+  { key: 'parallax',   label: 'Slow parallax' },
+  { key: 'still',      label: 'Still (no motion)' },
+];
+
+const AUTO_MOTION_CYCLE: SceneMotion[] = ['zoom_in', 'pan_right', 'ken_burns', 'zoom_out', 'pan_left', 'parallax', 'pan_up', 'pan_down'];
+const pickAutoMotion = (i: number): SceneMotion => AUTO_MOTION_CYCLE[i % AUTO_MOTION_CYCLE.length];
 
 const SCENE_STYLE_OPTIONS: { key: SceneImageStyle; label: string; desc: string }[] = [
   { key: 'case_file',         label: 'Case File',         desc: 'Manila folder · redaction · crimson' },
