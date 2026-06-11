@@ -33,9 +33,10 @@
     <section class="panel active" id="tab-scan">
       <div class="row">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
-        <button id="scan-deepen" class="ghost" title="Run Pass B AI judgment on these findings">Deepen with AI</button>
+        <button id="scan-deepen" class="ghost" title="Run Detective Mode AI judgment on these findings">Deepen (Detective)</button>
       </div>
       <div id="scan-meta" class="meta hidden"></div>
+      <div id="scan-dossier"></div>
       <div id="scan-results"></div>
     </section>
 
@@ -51,29 +52,80 @@
         <textarea id="chat-input" rows="2" placeholder="Ask the Operator about what's on this page…"></textarea>
         <button type="submit" class="primary">Send</button>
       </form>
-      <div class="hint" id="op-hint">Observe: panel auto-scans every page. Suggest: free chat with vision. Execute: enabled only on allow-listed domains.</div>
+      <div class="hint" id="op-hint">Observe: panel reads the page silently. Suggest: free chat with vision. Execute: confirm-before-act on allow-listed domains.</div>
     </section>
 
     <!-- FIX -->
     <section class="panel" id="tab-fix">
-      <div class="empty" id="fix-empty">Run a scan first. Leaks will route to matching tools here.</div>
+      <div class="empty" id="fix-empty">Run a scan first. Leaks that can be patched in-page will appear here.</div>
       <div id="fix-list"></div>
     </section>
 
     <!-- GROWTH -->
     <section class="panel" id="tab-growth">
-      <div class="card">
-        <div class="card-title">LinkedIn Reply Drafter</div>
-        <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to…"></textarea>
-        <div class="row">
-          <select id="li-tone">
-            <option value="forensic">Forensic operator</option>
-            <option value="agree">Agree-and-extend</option>
-            <option value="contrarian">Contrarian challenge</option>
-          </select>
-          <button id="li-go" class="primary">Draft reply</button>
+      <div class="growth-tabs">
+        <button class="gt active" data-gt="reply">LinkedIn Reply</button>
+        <button class="gt" data-gt="post">Post From Page</button>
+        <button class="gt" data-gt="cold">Cold Opener</button>
+        <button class="gt" data-gt="hooks">Hooks</button>
+      </div>
+
+      <!-- LinkedIn Reply -->
+      <div class="gpanel active" id="gpanel-reply">
+        <div class="card">
+          <div class="card-title">LinkedIn reply drafter</div>
+          <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to, or click 'Grab selection' to pull text from the current page."></textarea>
+          <div class="row" style="margin-top:8px">
+            <button id="li-grab" class="ghost">Grab selection</button>
+            <select id="li-tone">
+              <option value="forensic">Forensic operator</option>
+              <option value="agree">Agree-and-extend</option>
+              <option value="contrarian">Contrarian challenge</option>
+            </select>
+            <button id="li-go" class="primary">Draft reply</button>
+          </div>
+          <pre id="li-out" class="out"></pre>
         </div>
-        <pre id="li-out" class="out"></pre>
+      </div>
+
+      <!-- Post from page -->
+      <div class="gpanel" id="gpanel-post">
+        <div class="card">
+          <div class="card-title">LinkedIn post from this page</div>
+          <div class="muted" style="margin-bottom:8px">Pulls the current tab's visible text and drafts a forensic LinkedIn post.</div>
+          <div class="row">
+            <select id="gp-tone">
+              <option value="forensic">Forensic operator</option>
+              <option value="story">Mini case study</option>
+              <option value="contrarian">Contrarian take</option>
+            </select>
+            <button id="gp-go" class="primary">Draft post</button>
+          </div>
+          <pre id="gp-out" class="out"></pre>
+        </div>
+      </div>
+
+      <!-- Cold opener -->
+      <div class="gpanel" id="gpanel-cold">
+        <div class="card">
+          <div class="card-title">Cold email opener for this prospect</div>
+          <div class="muted" style="margin-bottom:8px">Uses the current page as the prospect's site. Outputs a sharp first line + 2-sentence pitch.</div>
+          <input id="gc-name" placeholder="Recipient first name (optional)" />
+          <div class="row" style="margin-top:8px">
+            <button id="gc-go" class="primary">Draft opener</button>
+          </div>
+          <pre id="gc-out" class="out"></pre>
+        </div>
+      </div>
+
+      <!-- Hooks -->
+      <div class="gpanel" id="gpanel-hooks">
+        <div class="card">
+          <div class="card-title">5 contrarian hooks from this page</div>
+          <div class="muted" style="margin-bottom:8px">Reads the current page and returns 5 pattern-breaking opening lines you can use as posts or ad headlines.</div>
+          <button id="gh-go" class="primary">Generate hooks</button>
+          <pre id="gh-out" class="out"></pre>
+        </div>
       </div>
     </section>
 
@@ -87,7 +139,7 @@
       <div id="case-diff"></div>
     </section>
 
-    <!-- AUTOPSY (floats inside Scan tab via button) -->
+    <!-- AUTOPSY (sticky) -->
     <div id="autopsy-bar" class="autopsy-bar hidden">
       <span class="dot"></span><span id="autopsy-status">Recording funnel autopsy…</span>
       <button id="autopsy-stop" class="primary">Stop</button>
@@ -96,7 +148,7 @@
 
   <footer class="cockpit-footer">
     <button id="autopsy-start" class="ghost">⏺ Record Autopsy</button>
-    <span class="muted">v0.3 · Forensic Cockpit</span>
+    <span class="muted">v0.4 · Forensic Cockpit</span>
   </footer>
 
   <script type="module" src="sidepanel.js"></script>

@@ -1,6 +1,4 @@
-/* Aetheris Forensic Cockpit — side panel styles
-   Charcoal + amber. Crimson reserved for leak signal.
-*/
+/* Aetheris Forensic Cockpit — side panel styles (v0.4) */
 :root {
   --bg: #0a0a0a;
   --bg-2: #111111;
@@ -78,6 +76,28 @@ textarea { resize: vertical; font-family: inherit; }
 .meta .score { color: var(--amber); }
 .meta .grade-F, .meta .grade-D { color: var(--crimson); }
 
+/* Dossier */
+.dossier {
+  margin-top: 12px; border: 1px solid var(--crimson); border-radius: 4px; background: linear-gradient(180deg, #1a0808 0%, var(--bg-2) 50%);
+  padding: 12px; box-shadow: 0 0 0 1px rgba(220,38,38,0.2) inset;
+}
+.dossier.loading { border-color: var(--line); background: var(--bg-2); }
+.dossier-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.dossier .badge {
+  font: 700 10px var(--mono); text-transform: uppercase; letter-spacing: 0.15em;
+  padding: 3px 8px; background: var(--crimson); color: #fff; border-radius: 2px;
+}
+.dossier .leak-value { font: 700 13px var(--mono); color: var(--amber); }
+.dossier-summary { font-style: italic; color: var(--fg); margin-bottom: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-left: 3px solid var(--amber); }
+.dossier-grid { display: grid; grid-template-columns: 88px 1fr; gap: 6px 12px; margin: 0; }
+.dossier-grid dt { font: 700 10px var(--mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--amber); padding-top: 3px; }
+.dossier-grid dd { margin: 0; color: var(--fg); }
+.dossier-grid .ev { margin: 0; padding-left: 18px; }
+.dossier-grid .ev li { margin-bottom: 4px; }
+.dossier-grid .confession { white-space: pre-wrap; font-family: var(--mono); font-size: 12px; line-height: 1.5; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 3px; }
+.priority { margin-top: 10px; padding: 8px 10px; background: var(--amber); color: #0a0a0a; border-radius: 3px; font-weight: 600; }
+.priority b { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; }
+
 .leak {
   margin-top: 10px; padding: 10px; border: 1px solid var(--line); border-left-width: 3px;
   border-radius: 4px; background: var(--bg-2);
@@ -91,8 +111,9 @@ textarea { resize: vertical; font-family: inherit; }
 .leak-why { color: var(--muted); margin: 4px 0; }
 .leak-fix { color: var(--fg); font-size: 13px; }
 .leak-fix b { color: var(--amber); }
-.leak-actions { display: flex; gap: 6px; margin-top: 8px; }
+.leak-actions { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
 .leak-actions button { padding: 4px 8px; font-size: 10px; }
+.applied { color: var(--ok); font: 700 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
 
 .chat { min-height: 240px; max-height: calc(100vh - 280px); overflow-y: auto; padding: 4px 0; }
 .bubble { padding: 8px 10px; border-radius: 6px; margin: 6px 0; max-width: 92%; white-space: pre-wrap; }
@@ -112,15 +133,25 @@ textarea { resize: vertical; font-family: inherit; }
 
 .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px; margin-bottom: 10px; }
 .card-title { font-weight: 700; margin-bottom: 8px; }
-.out { background: var(--bg-3); border: 1px solid var(--line); padding: 10px; border-radius: 4px; white-space: pre-wrap; font: 12px/1.5 var(--mono); max-height: 300px; overflow: auto; }
+.out { background: var(--bg-3); border: 1px solid var(--line); padding: 10px; border-radius: 4px; white-space: pre-wrap; font: 12px/1.5 var(--mono); max-height: 360px; overflow: auto; margin-top: 8px; }
+
+/* Growth sub-tabs */
+.growth-tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--bg-2); padding: 3px; border-radius: 4px; }
+.growth-tabs .gt {
+  flex: 1; background: transparent; border: 0; color: var(--muted); padding: 6px; font: 600 10px var(--mono);
+  text-transform: uppercase; letter-spacing: 0.1em; border-radius: 3px; cursor: pointer;
+}
+.growth-tabs .gt.active { background: var(--amber); color: #0a0a0a; }
+.gpanel { display: none; }
+.gpanel.active { display: block; }
 
 .case-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; margin-top: 6px; background: var(--bg-2); }
 .case-row .host { font-weight: 600; font-family: var(--mono); }
 .case-row .grade { padding: 2px 6px; border-radius: 3px; font: 700 11px var(--mono); }
-.case-row .grade-A,.grade-A { background: var(--ok); color: #0a0a0a; }
-.case-row .grade-B { background: #65a30d; color: #0a0a0a; }
-.case-row .grade-C { background: var(--amber); color: #0a0a0a; }
-.case-row .grade-D,.case-row .grade-F { background: var(--crimson); color: #fff; }
+.grade-A { background: var(--ok); color: #0a0a0a; }
+.grade-B { background: #65a30d; color: #0a0a0a; }
+.grade-C { background: var(--amber); color: #0a0a0a; }
+.grade-D, .grade-F { background: var(--crimson); color: #fff; }
 .case-row input[type=checkbox] { width: auto; }
 
 .empty { color: var(--muted); padding: 24px; text-align: center; font: 12px var(--mono); }
@@ -138,3 +169,14 @@ textarea { resize: vertical; font-family: inherit; }
 }
 .autopsy-bar .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--crimson); animation: pulse 1s infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--amber); color: #0a0a0a; padding: 10px 16px; border-radius: 4px;
+  font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: 0.08em;
+  opacity: 0; transition: all 0.25s ease; z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
