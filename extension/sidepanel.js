@@ -91,7 +91,31 @@ $("scan-run").addEventListener("click", async () => {
 
 $("scan-deepen").addEventListener("click", async () => {
   if (!state.lastScan) return alert("Run a scan first.");
-  $("scan-dossier").innerHTML = `<div class="dossier loading"><div class="dossier-head"><span class="badge">Detective Mode</span><span class="muted">analyzing DOM + viewport…</span></div></div>`;
+  const traceSteps = [
+    "Capturing viewport…",
+    "Parsing visible DOM text…",
+    "Cross-referencing Pass A signals…",
+    "Profiling the suspect (your funnel)…",
+    "Building motive + evidence chain…",
+    "Estimating annual leak exposure…",
+    "Writing the dossier…",
+  ];
+  $("scan-dossier").innerHTML = `
+    <div class="dossier loading">
+      <div class="dossier-head">
+        <span class="badge">Detective Mode</span>
+        <span class="thinking"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span> Thinking</span>
+      </div>
+      <div class="thinking-trace" id="det-trace"></div>
+    </div>`;
+  const traceEl = $("det-trace");
+  let traceIdx = 0;
+  const traceTimer = setInterval(() => {
+    if (traceIdx >= traceSteps.length) return;
+    const line = document.createElement("div");
+    line.className = "line"; line.textContent = "› " + traceSteps[traceIdx++];
+    traceEl.appendChild(line);
+  }, 650);
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
   const cap = await captureViewport();
   try {
@@ -105,6 +129,7 @@ $("scan-deepen").addEventListener("click", async () => {
       }),
     });
     const data = await r.json();
+    clearInterval(traceTimer);
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     state.lastDossier = data;
     if (Array.isArray(data.leaks)) state.lastScan.leaks = [...state.lastScan.leaks, ...data.leaks];
@@ -113,6 +138,7 @@ $("scan-deepen").addEventListener("click", async () => {
     renderDossier();
     renderScan();
   } catch (e) {
+    clearInterval(traceTimer);
     $("scan-dossier").innerHTML = `<div class="bubble err">Detective Mode failed: ${e.message}</div>`;
   }
 });
@@ -170,7 +196,10 @@ function renderScan() {
       <div class="leak-actions">
         ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
         ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
-        ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Revert</button><span class="applied">✓ Applied</span>` : ""}
+        ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
+        <div class="more-menu">
+          <button class="ghost more-btn" data-more="${escapeAttr(l.id)}">More ▾</button>
+        </div>
       </div>
     </div>`;
   }).join("");
@@ -202,6 +231,53 @@ function wireScanActions() {
     if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderScan(); }
     else alert(r?.error || "Revert failed.");
   }));
+  out.querySelectorAll("[data-more]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const id = b.dataset.more;
+    const leak = state.lastScan.leaks.find((x) => x.id === id);
+    openMoreMenu(b, leak);
+  }));
+}
+
+function openMoreMenu(anchor, leak) {
+  document.querySelectorAll(".menu-pop").forEach((m) => m.remove());
+  const menu = document.createElement("div");
+  menu.className = "menu-pop";
+  const subPages = ["/", "/about", "/pricing", "/contact", "/blog", "/services"];
+  menu.innerHTML = `
+    <button data-act="copy-fix">📋 Copy fix text</button>
+    <button data-act="copy-leak">📋 Copy leak as JSON</button>
+    <button data-act="open-tab">↗ Open page in new tab</button>
+    <button data-act="open-devtools">🛠 Inspect element (console hint)</button>
+    <hr style="border:0;border-top:1px solid var(--line);margin:4px 0" />
+    <div style="padding:6px 10px;font:600 10px var(--mono);color:var(--muted);letter-spacing:.1em">SCAN SUB-PAGE</div>
+    ${subPages.map((p) => `<button data-scan-sub="${p}">→ ${p}</button>`).join("")}
+  `;
+  anchor.parentElement.appendChild(menu);
+  menu.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button"); if (!btn) return;
+    const act = btn.dataset.act; const sub = btn.dataset.scanSub;
+    if (act === "copy-fix") { await navigator.clipboard.writeText(leak.fix || ""); toast("Fix copied."); }
+    else if (act === "copy-leak") { await navigator.clipboard.writeText(JSON.stringify(leak, null, 2)); toast("Leak JSON copied."); }
+    else if (act === "open-tab") { chrome.tabs.create({ url: state.activeUrl }); }
+    else if (act === "open-devtools") {
+      const sel = leak.selectors?.[0] || "";
+      await navigator.clipboard.writeText(`document.querySelector(${JSON.stringify(sel)})`);
+      toast("Inspector snippet copied. Paste in DevTools console.");
+    }
+    else if (sub) {
+      try {
+        const base = new URL(state.activeUrl);
+        const target = new URL(sub, base).toString();
+        chrome.tabs.create({ url: target, active: true });
+        toast(`Opening ${sub} — re-run scan there.`);
+      } catch { toast("Could not resolve sub-page."); }
+    }
+    menu.remove();
+  });
+  setTimeout(() => {
+    document.addEventListener("click", () => menu.remove(), { once: true });
+  }, 0);
 }
 
 // ---------------- Overlay ----------------
