@@ -273,6 +273,11 @@ function wireScanActions() {
     if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderScan(); }
     else alert(r?.error || "Revert failed.");
   }));
+  out.querySelectorAll("[data-fix-tab]").forEach((b) => b.addEventListener("click", () => {
+    switchTab("fix");
+    const card = document.querySelector(`#fix-list [data-fix-card="${CSS.escape(b.dataset.fixTab)}"]`);
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }));
   out.querySelectorAll("[data-more]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
     const id = b.dataset.more;
