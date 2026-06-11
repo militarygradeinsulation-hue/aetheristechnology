@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { computeWebsiteScore, gradeFromScore } from "../_shared/lead-scoring.ts";
+import type { WebsiteSignals } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,7 +69,7 @@ function applyDeterministicLeaks(analysis: any, host: string): any {
     let summary = analysis.executiveSummary.replace(/\$[\d,]+\s*[-–]\s*\$[\d,]+/g, totalRange);
     if (!hadRange) {
       let replaced = false;
-      summary = summary.replace(/\$[\d,]{4,}/g, (m) => {
+      summary = summary.replace(/\$[\d,]{4,}/g, (m: string) => {
         if (replaced) return m;
         replaced = true;
         return totalRange;
@@ -110,7 +111,7 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
   const contentDepth = lower.length > 8000 ? 5 : lower.length > 4500 ? 4 : lower.length > 2200 ? 3 : lower.length > 900 ? 2 : 1;
   const ctaStrength = Math.max(0, Math.min(5, ctaHits + (hasCalendarLink ? 1 : 0) + (hasContactForm ? 1 : 0)));
 
-  const signals = {
+  const signals: WebsiteSignals = {
     has_phone: hasPhone,
     has_email: hasEmail,
     has_contact_form: hasContactForm,
@@ -141,6 +142,8 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
   gaps.push({ category: "Speed", severity: signals.fast_first_paint ? "info" : "warning", title: "Performance Should Be Watched Above the Fold", description: `Large pages, scripts, or media can delay the first meaningful impression. The scan uses page weight as a proxy and flags this so the main headline and conversion path stay fast.`, annualCost: "$8,000 - $22,000", recommendedFix: "Prioritize the hero headline/image, defer non-critical scripts, and compress above-the-fold media.", projectedROI: "90-180%" });
 
   const breakdown = computeWebsiteScore(signals, gaps, markdown.length);
+  const scoreForLeaks = breakdown.total ?? 35;
+  const leakRange = computeLeakRange(host, scoreForLeaks);
   const analysis = {
     signals,
     score: breakdown.total,
@@ -148,7 +151,7 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
     ...(breakdown.reason ? { score_reason: breakdown.reason } : {}),
     grade: gradeFromScore(breakdown.total),
     companyName,
-    executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(computeLeakRange(host, breakdown.total).low)} - ${fmt$(computeLeakRange(host, breakdown.total).high)}.`,
+    executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(leakRange.low)} - ${fmt$(leakRange.high)}.`,
     gaps,
     roadmap: [
       { month: "Month 1", action: "Repair the first-screen message and primary CTA", estimatedCost: "$2,500 - $6,000", projectedRecovery: "$12,000 - $28,000" },
