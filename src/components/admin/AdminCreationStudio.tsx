@@ -665,11 +665,30 @@ export const AdminCreationStudio: React.FC = () => {
       canvas.width = aspectDef.w; canvas.height = aspectDef.h;
       const ctx = canvas.getContext('2d')!;
 
-      // 3) Preload images
-      const sceneImgs: HTMLImageElement[] = [];
+      // 3) Preload images AND video clips. For clips, we use HTMLVideoElement
+      //    as the draw source. For images, HTMLImageElement.
+      const sceneImgs: (HTMLImageElement | null)[] = [];
+      const sceneVids: (HTMLVideoElement | null)[] = [];
       for (const s of activePlan.scenes) {
         const a = allAvailable.find(x => x.id === s.imageId)!;
-        sceneImgs.push(await loadImage(a.url));
+        if (a?.videoUrl) {
+          const v = document.createElement('video');
+          v.src = a.videoUrl;
+          v.crossOrigin = 'anonymous';
+          v.muted = true;
+          v.playsInline = true;
+          v.preload = 'auto';
+          v.loop = true;
+          await new Promise<void>((res) => {
+            v.onloadeddata = () => res();
+            v.onerror = () => res();
+          });
+          sceneImgs.push(null);
+          sceneVids.push(v);
+        } else {
+          sceneImgs.push(await loadImage(a.url));
+          sceneVids.push(null);
+        }
       }
 
       // 4) Build combined audio MediaStream via WebAudio
