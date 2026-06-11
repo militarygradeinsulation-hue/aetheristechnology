@@ -20,6 +20,16 @@ export const INPAGE_FIX_IDS = new Set([
   "dead_links",
   "form_too_long", // parametric (form_too_long_<selector>)
   "mixed_content",
+  "heading_skip",
+  "no_form",
+  "no_followup_hook",
+  "no_proof",
+  "no_pricing",
+  "no_visible_contact",
+  "page_weight",
+  "third_party_bloat",
+  "hero_image_weight",
+  "autoplay_loud",
 ]);
 
 export function hasInPageFix(leak) {
