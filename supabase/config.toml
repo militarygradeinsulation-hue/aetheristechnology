@@ -197,4 +197,9 @@ verify_jwt = false
 [functions.extension-operator-chat]
 verify_jwt = false
 
+[functions.extension-leak-scan-ai]
+verify_jwt = false
+
+
+
 
