@@ -196,7 +196,10 @@ function renderScan() {
       <div class="leak-actions">
         ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
         ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
-        ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Revert</button><span class="applied">✓ Applied</span>` : ""}
+        ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
+        <div class="more-menu">
+          <button class="ghost more-btn" data-more="${escapeAttr(l.id)}">More ▾</button>
+        </div>
       </div>
     </div>`;
   }).join("");
