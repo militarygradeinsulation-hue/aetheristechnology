@@ -259,14 +259,14 @@ serve(async (req) => {
 
     console.log("Scrape successful, analyzing with AI...");
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           {
             role: "system",
@@ -468,18 +468,42 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }),
     });
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const models = ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite", "google/gemini-2.5-pro"];
+    let aiResponse: Response | null = null;
+    let lastErrText = "";
+    outer: for (const m of models) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        aiResponse = await callAi(m);
+        if (aiResponse.ok) break outer;
+        lastErrText = await aiResponse.clone().text();
+        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
+        if (aiResponse.status === 429 || aiResponse.status === 402) break outer;
+        if (aiResponse.status === 503 || aiResponse.status >= 500) {
+          await sleep(800 * (attempt + 1));
+          continue;
+        }
+        break;
+      }
+    }
 
-      if (aiResponse.status === 429) {
+    if (!aiResponse || !aiResponse.ok) {
+      const status = aiResponse?.status ?? 503;
+      console.error("AI gateway final failure:", status, lastErrText);
+
+      if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
+      if (status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 503) {
+        return new Response(JSON.stringify({ error: "AI service is temporarily unavailable. Please retry in a minute." }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
