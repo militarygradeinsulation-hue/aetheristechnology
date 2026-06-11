@@ -1688,7 +1688,7 @@ export default function LinkedInPostStudio() {
               />
             )}
             {readString(viewItem.input_data, 'postText') && (
-              <div className="text-[11px] text-foreground/70 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
+              <div className="text-[11px] text-foreground/85 bg-background/40 border border-border rounded p-3 mb-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source post</div>
                 {readString(viewItem.input_data, 'postText')}
               </div>
@@ -1889,7 +1889,7 @@ export default function LinkedInPostStudio() {
             <MultiPersonaPicker value={persona} onChange={setPersona} />
           </div>
 
-          <div className="text-[10px] text-muted-foreground/70 mt-1.5 font-case uppercase tracking-wider">
+          <div className="text-[10px] text-muted-foreground mt-1.5 font-case uppercase tracking-wider">
             Site link auto-appended to every post: aetheris.technology
           </div>
           <div className="flex flex-wrap gap-1.5 mt-2">

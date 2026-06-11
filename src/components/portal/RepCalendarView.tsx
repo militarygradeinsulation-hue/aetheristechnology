@@ -542,7 +542,7 @@ const DayAgenda: React.FC<{
               <div className="w-14 text-[11px] font-mono text-muted-foreground pt-0.5">{label}</div>
               <div className="flex-1 flex flex-col gap-1">
                 {slot.length === 0 ? (
-                  <button onClick={onAdd} className="text-[11px] text-muted-foreground/40 hover:text-amber text-left">
+                  <button onClick={onAdd} className="text-[11px] text-muted-foreground hover:text-amber text-left">
                     + add
                   </button>
                 ) : slot.map((e) => {

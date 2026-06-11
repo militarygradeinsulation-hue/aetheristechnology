@@ -166,7 +166,7 @@ export const LeadCluesTrail: React.FC<Props> = ({
         )}
       </div>
 
-      <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60 flex items-center gap-1">
+      <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1">
         <MapPin className="w-2.5 h-2.5" /> Persistent — visible to admins for coaching
       </div>
     </div>

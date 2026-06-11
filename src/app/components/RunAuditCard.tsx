@@ -133,9 +133,9 @@ export const RunAuditCard = ({ accountId, hasData }: Props) => {
                 ) : isCurrent ? (
                   <Loader2 className="h-4 w-4 text-primary shrink-0 animate-spin" />
                 ) : (
-                  <Circle className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                  <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
                 )}
-                <span className={isCurrent ? "text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground/60"}>
+                <span className={isCurrent ? "text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground"}>
                   {s.label}
                   {isCurrent && stageMessage && <span className="text-muted-foreground ml-2">,  {stageMessage}</span>}
                 </span>

@@ -746,7 +746,7 @@ export const ServicesPricing: React.FC = () => {
                       ) : billingMode === 'monthly' && service.monthlyPriceId ? (
                         <>
                           <span className="text-2xl font-bold text-amber font-forensic">{service.monthlyPricing}</span>
-                          <span className="text-xs text-muted-foreground/70 line-through">{service.pricing}</span>
+                          <span className="text-xs text-muted-foreground line-through">{service.pricing}</span>
                           <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{service.monthlySavePercent}%</span>
                         </>
                       ) : (
@@ -773,7 +773,7 @@ export const ServicesPricing: React.FC = () => {
 
                   {/* Open hint */}
                   <div className={`pl-[3.25rem] mt-2 font-case text-[9px] uppercase tracking-widest transition-colors ${
-                    locked ? 'text-crimson/70' : 'text-muted-foreground/70 group-hover:text-amber/80'
+                    locked ? 'text-crimson/70' : 'text-muted-foreground group-hover:text-amber/80'
                   }`}>
                     {locked ? 'Case file sealed →' : 'Click to open the case file →'}
                   </div>
@@ -844,7 +844,7 @@ export const ServicesPricing: React.FC = () => {
                         ) : billingMode === 'monthly' && expandedService.monthlyPriceId ? (
                           <>
                             <span className="text-2xl font-bold text-amber font-forensic">{expandedService.monthlyPricing}</span>
-                            <span className="text-sm text-muted-foreground/70 line-through">{expandedService.pricing}</span>
+                            <span className="text-sm text-muted-foreground line-through">{expandedService.pricing}</span>
                             <span className="text-[10px] font-semibold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full tracking-[0.08em]">−{expandedService.monthlySavePercent}%</span>
                           </>
                         ) : (
@@ -1044,7 +1044,7 @@ export const ServicesPricing: React.FC = () => {
             </h3>
 
             <p className="text-base md:text-lg text-muted-foreground/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-              It's not <span className="text-foreground/70">"Do I spend $2,500?"</span>, it's{' '}
+              It's not <span className="text-foreground/85">"Do I spend $2,500?"</span>, it's{' '}
               <span className="text-foreground font-semibold">
                 "How much is inefficiency already costing me every month?"
               </span>

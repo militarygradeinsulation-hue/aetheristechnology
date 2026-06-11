@@ -347,7 +347,7 @@ const DiagnosticPage: React.FC = () => {
                 <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">What it isn't</div>
                 <ul className="space-y-2.5">
                   {NOT_INCLUDED.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/70">
+                    <li key={i} className="flex gap-3 text-sm text-foreground/85">
                       <X className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       <span>{i}</span>
                     </li>
@@ -368,7 +368,7 @@ const DiagnosticPage: React.FC = () => {
               <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
                 The full Operator Tool Suite ships with every Leak Audit.
               </h2>
-              <p className="text-sm text-foreground/75 mb-5">
+              <p className="text-sm text-foreground/90 mb-5">
                 When you buy the $2,500 Leak Audit, your operator runs all nine live diagnostic tools against your business, the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -410,12 +410,12 @@ const DiagnosticPage: React.FC = () => {
                             <ChevronDown className="w-4 h-4" />
                           </div>
                         </div>
-                        <p className="text-xs text-foreground/70 leading-snug pl-[3.25rem]">
+                        <p className="text-xs text-foreground/85 leading-snug pl-[3.25rem]">
                           <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
                           {t.finds}
                         </p>
                         {!isOpen && (
-                          <div className="pl-[3.25rem] mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground/70 group-hover:text-amber/80 transition-colors">
+                          <div className="pl-[3.25rem] mt-2 font-case text-[9px] uppercase tracking-widest text-muted-foreground group-hover:text-amber/80 transition-colors">
                             Click to open the case file →
                           </div>
                         )}

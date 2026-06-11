@@ -345,7 +345,7 @@ const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () 
           <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">What we measure</div>
           <ul className="space-y-1 mb-4">
             {v.whatWeMeasure.map((m) => (
-              <li key={m} className="text-xs text-foreground/75 flex gap-2">
+              <li key={m} className="text-xs text-foreground/90 flex gap-2">
                 <span className="text-amber">›</span>{m}
               </li>
             ))}

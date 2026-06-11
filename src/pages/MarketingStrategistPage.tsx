@@ -29,7 +29,7 @@ const MarketingStrategistPage = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Aetheris AI
         </Link>
-        <span className="text-muted-foreground/50">|</span>
+        <span className="text-muted-foreground">|</span>
         <span className="text-sm font-semibold text-foreground">Marketing Hub</span>
         <span className="ml-auto text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-medium">Free Tool</span>
       </div>

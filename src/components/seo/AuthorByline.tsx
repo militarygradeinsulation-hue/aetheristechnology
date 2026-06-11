@@ -29,13 +29,13 @@ export const AuthorByline: React.FC<Props> = ({ date, className = '' }) => {
       >
         <span itemProp="name">Joseph Toney</span>
       </Link>
-      <span className="text-muted-foreground/70">·</span>
+      <span className="text-muted-foreground">·</span>
       <span itemProp="jobTitle">Business Forensics Operator</span>
-      <span className="text-muted-foreground/70">·</span>
+      <span className="text-muted-foreground">·</span>
       <span itemProp="address">Indianapolis, IN</span>
       {date && (
         <>
-          <span className="text-muted-foreground/70">·</span>
+          <span className="text-muted-foreground">·</span>
           <time dateTime={date}>{date}</time>
         </>
       )}

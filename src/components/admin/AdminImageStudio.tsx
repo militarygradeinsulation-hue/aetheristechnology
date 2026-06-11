@@ -431,7 +431,7 @@ WATERMARK: "aetheris.technology"`;
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Headline (white)</label>
+              <label className="text-[10px] uppercase tracking-wider text-foreground/85 font-mono">Headline (white)</label>
               <button type="button" onClick={() => shuffleField('headline')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
                 <Shuffle className="w-3 h-3" /> Random
               </button>
@@ -451,7 +451,7 @@ WATERMARK: "aetheris.technology"`;
 
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label className="text-[10px] uppercase tracking-wider text-foreground/70 font-mono">Subline</label>
+            <label className="text-[10px] uppercase tracking-wider text-foreground/85 font-mono">Subline</label>
             <button type="button" onClick={() => shuffleField('sub')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
               <Shuffle className="w-3 h-3" /> Random
             </button>
@@ -505,7 +505,7 @@ WATERMARK: "aetheris.technology"`;
             ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating pack {packProgress ? `(${packProgress.done}/${packProgress.total})` : ''}...</>
             : <><Linkedin className="w-4 h-4 mr-2" /> Generate Variation Pack (5 backgrounds → Reps)</>}
         </Button>
-        <p className="text-[10px] text-muted-foreground/70 text-center">
+        <p className="text-[10px] text-muted-foreground text-center">
           Logo is auto-embedded top-right. Every banner is pushed to the reps shared banner library.
         </p>
       </div>
