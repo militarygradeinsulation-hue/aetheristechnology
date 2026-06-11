@@ -671,6 +671,11 @@ const AdminDashboard: React.FC = () => {
                 <Database className="w-4 h-4 mr-1 text-primary" /> HubSpot Hub
               </Button>
             </Link>
+            <Link to="/extension">
+              <Button variant="outline" size="sm" title="Download the Aetheris Chrome extension">
+                <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> Extension
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
