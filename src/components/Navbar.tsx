@@ -133,19 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             })}
           </div>
 
-          {/* Single right-aligned premium CTA */}
-          <div className="hidden lg:flex items-center ml-auto shrink-0">
-            <a
-              href={BOOK_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('book_meeting_click', { location: 'navbar_cta' })}
-              className="group inline-flex items-center gap-2 bg-amber text-background font-bold text-sm tracking-wide px-5 py-2.5 rounded-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-12px_hsl(var(--amber)/0.7)] active:translate-y-0"
-            >
-              <Calendar className="w-4 h-4" />
-              Book Diagnostic
-            </a>
-          </div>
+          {/* CTA removed per operator request */}
 
         </div>
 
@@ -186,37 +174,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                 </Link>
               );
             })}
-            <a
-              href={BOOK_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => { setIsMobileMenuOpen(false); trackEvent('book_meeting_click', { location: 'navbar_mobile_cta' }); }}
-              className="mt-3 flex items-center justify-center gap-2 bg-amber text-background font-bold text-sm tracking-wide px-5 py-3 rounded-md"
-            >
-              <Calendar className="w-4 h-4" />
-              Book Diagnostic
-            </a>
+            {/* Mobile CTA removed per operator request */}
           </div>
         )}
       </div>
 
-      {showStickyCTA && (
-        <div
-          className={`bg-amber overflow-hidden transition-all duration-300 ${
-            expanded ? 'max-h-12 py-1.5 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
-          } px-4 text-center`}
-        >
-          <a
-            href={BOOK_MEETING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
-            onClick={() => trackEvent('click', { label: 'sticky_cta_book_call', location: 'navbar_sticky' })}
-          >
-            Book a 15-min call with the Operator →
-          </a>
-        </div>
-      )}
+      {/* Sticky CTA removed per operator request */}
 
     </nav>
   );
