@@ -180,3 +180,14 @@ textarea { resize: vertical; font-family: inherit; }
   max-width: 90%; text-align: center;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* LinkedIn reply drafter */
+.li-src { display: block; }
+.li-src.hidden { display: none; }
+.li-lbl { display: block; font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 10px 0 4px; }
+.li-lbl-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 4px; }
+.li-thumb { display: block; max-width: 100%; max-height: 160px; margin-top: 8px; border: 1px solid var(--line); border-radius: 4px; object-fit: contain; background: #000; }
+.li-thumb.hidden { display: none; }
+.btn-file, .link-btn { cursor: pointer; }
+.link-btn { font: 600 10px var(--mono); color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; }
+.link-btn:hover { text-decoration: underline; }
