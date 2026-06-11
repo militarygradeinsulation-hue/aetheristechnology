@@ -253,14 +253,9 @@ function wireScanActions() {
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
-    const leak = state.lastScan.leaks.find((x) => x.id === id);
     b.disabled = true; b.textContent = "Applying…";
-    const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
-    if (r?.ok) {
-      state.revertById.set(id, r.revertId);
-      toast(r.message || "Fix applied to live page.");
-      renderScan();
-    } else {
+    const r = await applyLeakFix(id);
+    if (!r?.ok) {
       b.disabled = false; b.textContent = "Fix in-page";
       alert(r?.error || "Fix failed.");
     }
@@ -284,6 +279,41 @@ function wireScanActions() {
     const leak = state.lastScan.leaks.find((x) => x.id === id);
     openMoreMenu(b, leak);
   }));
+}
+
+async function applyLeakFix(id) {
+  const leak = state.lastScan?.leaks?.find((x) => x.id === id);
+  if (!leak) return { ok: false, error: "Leak not found." };
+  const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
+  if (r?.ok) {
+    state.revertById.set(id, r.revertId);
+    toast(r.message || "Fix applied to live page.");
+    renderScan();
+    renderFix();
+    renderOperatorLiveActions();
+  }
+  return r;
+}
+
+async function revertLeakFix(id) {
+  const revertId = state.revertById.get(id);
+  if (!revertId) return { ok: false, error: "Nothing to undo for this leak." };
+  const r = await relayToTab({ type: "AETHERIS_REVERT_FIX", revertId });
+  if (r?.ok) {
+    state.revertById.delete(id);
+    toast("Reverted.");
+    renderScan();
+    renderFix();
+    renderOperatorLiveActions();
+  }
+  return r;
+}
+
+async function undoLastFix() {
+  const lastId = Array.from(state.revertById.keys()).pop();
+  if (!lastId) return toast("No applied fix to undo.");
+  const r = await revertLeakFix(lastId);
+  if (!r?.ok) alert(r?.error || "Undo failed.");
 }
 
 function openMoreMenu(anchor, leak) {
