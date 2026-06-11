@@ -20,6 +20,7 @@ export const INPAGE_FIX_IDS = new Set([
   "dead_links",
   "form_too_long", // parametric (form_too_long_<selector>)
   "mixed_content",
+  "form_unlabeled", // parametric (form_unlabeled_<selector>)
   "heading_skip",
   "no_form",
   "no_followup_hook",
