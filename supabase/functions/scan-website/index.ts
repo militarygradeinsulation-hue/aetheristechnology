@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { computeWebsiteScore, gradeFromScore } from "../_shared/lead-scoring.ts";
+import type { WebsiteSignals } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,7 +69,7 @@ function applyDeterministicLeaks(analysis: any, host: string): any {
     let summary = analysis.executiveSummary.replace(/\$[\d,]+\s*[-–]\s*\$[\d,]+/g, totalRange);
     if (!hadRange) {
       let replaced = false;
-      summary = summary.replace(/\$[\d,]{4,}/g, (m) => {
+      summary = summary.replace(/\$[\d,]{4,}/g, (m: string) => {
         if (replaced) return m;
         replaced = true;
         return totalRange;
@@ -79,6 +80,142 @@ function applyDeterministicLeaks(analysis: any, host: string): any {
 
   analysis.totalAnnualLeak = totalRange;
   return analysis;
+}
+
+function firstText(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata: any, formattedUrl: string, host: string): any {
+  const content = `${firstText(metadata?.title)}\n${firstText(metadata?.description)}\n${markdown}`;
+  const lower = content.toLowerCase();
+  const linkList = Array.isArray(links) ? links.map((l) => String(l).toLowerCase()) : [];
+  const title = firstText(metadata?.title, metadata?.ogTitle, host);
+  const companyName = title
+    .replace(/\s*[|–—-]\s*(home|official site|homepage|welcome).*$/i, "")
+    .replace(/\s*[|–—-].*$/i, "")
+    .trim() || host;
+
+  const hasPhone = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(content);
+  const hasEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(content);
+  const hasContactForm = lower.includes("contact form") || linkList.some((l) => l.includes("contact")) || lower.includes("contact us");
+  const hasCalendarLink = lower.includes("calendly") || lower.includes("book a call") || lower.includes("schedule") || lower.includes("appointment");
+  const ctaHits = ["book", "schedule", "quote", "consult", "call", "contact", "demo", "start", "buy"].filter((term) => lower.includes(term)).length;
+  const leadMagnetPresent = /download|guide|checklist|audit|ebook|whitepaper|case study|newsletter/.test(lower);
+  const hasCaseStudies = /case stud|results|portfolio|testimonials|clients|reviews/.test(lower);
+  const hasMetaDescription = Boolean(firstText(metadata?.description, metadata?.ogDescription));
+  const valuePropClarity = lower.length > 1200 ? (/(we help|we build|we provide|specializ|serving|for businesses|for homeowners|for teams)/.test(lower) ? 4 : 3) : 2;
+  const contentDepth = lower.length > 8000 ? 5 : lower.length > 4500 ? 4 : lower.length > 2200 ? 3 : lower.length > 900 ? 2 : 1;
+  const ctaStrength = Math.max(0, Math.min(5, ctaHits + (hasCalendarLink ? 1 : 0) + (hasContactForm ? 1 : 0)));
+
+  const signals: WebsiteSignals = {
+    has_phone: hasPhone,
+    has_email: hasEmail,
+    has_contact_form: hasContactForm,
+    has_calendar_link: hasCalendarLink,
+    cta_strength: ctaStrength,
+    lead_magnet_present: leadMagnetPresent,
+    value_prop_clarity: valuePropClarity,
+    content_depth: contentDepth,
+    has_case_studies: hasCaseStudies,
+    has_title_tag: Boolean(title),
+    has_meta_description: hasMetaDescription,
+    has_schema: lower.includes("schema.org") || lower.includes("ld+json"),
+    uses_responsive: true,
+    fast_first_paint: lower.length < 12000,
+    brand_consistency: title && hasMetaDescription ? 4 : 3,
+    industry_fit: "medium",
+    revenue_band: "unknown",
+  };
+
+  const gaps: any[] = [];
+  if (!hasMetaDescription) gaps.push({ category: "SEO", severity: "critical", title: "Search Result Snippet Is Missing", description: `${companyName} is not exposing a clear meta description in the scan data. That weakens search click-through and makes the first impression dependent on whatever text search engines choose to extract.`, annualCost: "$18,000 - $42,000", recommendedFix: "Write a page-specific meta description that names the offer, market, and conversion action.", projectedROI: "140-260%" });
+  if (ctaStrength < 3) gaps.push({ category: "CTA", severity: "critical", title: "Primary Conversion Path Is Too Soft", description: `${companyName} does not show enough strong conversion language above the fold in the scraped content. Visitors need one obvious action instead of hunting for the next step.`, annualCost: "$24,000 - $58,000", recommendedFix: "Install one dominant CTA tied to a specific business outcome, then repeat it at every major decision point.", projectedROI: "180-320%" });
+  if (!hasPhone && !hasEmail && !hasContactForm) gaps.push({ category: "Lead Capture", severity: "critical", title: "Contact Friction Is Blocking Hot Prospects", description: `The scan could not verify a phone number, email address, or clear contact form. High-intent visitors may be ready to act but have no low-friction path to start the conversation.`, annualCost: "$30,000 - $75,000", recommendedFix: "Add visible phone, email, and a short form with a response-time promise.", projectedROI: "200-380%" });
+  if (!leadMagnetPresent) gaps.push({ category: "Lead Capture", severity: "warning", title: "No Mid-Funnel Capture Asset", description: `${companyName} appears to rely on visitors being ready to contact immediately. Prospects who are interested but not ready have no reason to identify themselves before leaving.`, annualCost: "$12,000 - $34,000", recommendedFix: "Add a diagnostic checklist, calculator, or buyer guide that captures email before the sales conversation.", projectedROI: "120-240%" });
+  if (!hasCaseStudies) gaps.push({ category: "Content", severity: "warning", title: "Proof Is Not Doing Enough Work", description: `The scrape did not surface strong case-study or results language. Without proof, the site forces visitors to trust claims instead of seeing evidence.`, annualCost: "$16,000 - $40,000", recommendedFix: "Publish 2-3 outcome-driven case studies with before/after metrics and decision-maker context.", projectedROI: "130-250%" });
+  if (contentDepth < 3) gaps.push({ category: "Content", severity: "warning", title: "Thin Page Depth Limits Buyer Confidence", description: `The available page content is light for a serious buyer evaluation. Thin content makes the business look less established and gives search engines less relevance to rank.`, annualCost: "$14,000 - $36,000", recommendedFix: "Expand service pages with process, objections, pricing context, FAQs, and proof points.", projectedROI: "120-230%" });
+  gaps.push({ category: "Messaging", severity: valuePropClarity >= 4 ? "info" : "warning", title: "Positioning Needs a Sharper First Read", description: `${companyName}'s scanned content should make the offer, buyer, and business outcome unmistakable in the first few seconds. Any ambiguity slows down qualified prospects and increases bounce risk.`, annualCost: "$10,000 - $28,000", recommendedFix: "Rewrite the first-screen message around buyer pain, measurable outcome, and a direct next step.", projectedROI: "110-220%" });
+  gaps.push({ category: "Speed", severity: signals.fast_first_paint ? "info" : "warning", title: "Performance Should Be Watched Above the Fold", description: `Large pages, scripts, or media can delay the first meaningful impression. The scan uses page weight as a proxy and flags this so the main headline and conversion path stay fast.`, annualCost: "$8,000 - $22,000", recommendedFix: "Prioritize the hero headline/image, defer non-critical scripts, and compress above-the-fold media.", projectedROI: "90-180%" });
+
+  const breakdown = computeWebsiteScore(signals, gaps, markdown.length);
+  const scoreForLeaks = breakdown.total ?? 35;
+  const leakRange = computeLeakRange(host, scoreForLeaks);
+  const analysis = {
+    signals,
+    score: breakdown.total,
+    score_breakdown: breakdown.parts,
+    ...(breakdown.reason ? { score_reason: breakdown.reason } : {}),
+    grade: gradeFromScore(breakdown.total),
+    companyName,
+    executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(leakRange.low)} - ${fmt$(leakRange.high)}.`,
+    gaps,
+    roadmap: [
+      { month: "Month 1", action: "Repair the first-screen message and primary CTA", estimatedCost: "$2,500 - $6,000", projectedRecovery: "$12,000 - $28,000" },
+      { month: "Month 2", action: "Add lead capture, response promise, and contact redundancy", estimatedCost: "$1,500 - $4,500", projectedRecovery: "$10,000 - $24,000" },
+      { month: "Month 3", action: "Publish proof assets and objection-handling sections", estimatedCost: "$3,000 - $8,000", projectedRecovery: "$14,000 - $32,000" },
+      { month: "Month 4", action: "Tighten technical SEO and page-speed priorities", estimatedCost: "$1,500 - $5,000", projectedRecovery: "$8,000 - $20,000" },
+      { month: "Month 5", action: "Build retargeting and follow-up automation", estimatedCost: "$2,000 - $6,000", projectedRecovery: "$10,000 - $26,000" },
+      { month: "Month 6", action: "Review conversion data and double down on highest-leak pages", estimatedCost: "$1,500 - $4,000", projectedRecovery: "$12,000 - $30,000" },
+    ],
+    roiTable: [
+      { category: "CTA", currentWaste: "$24,000 - $58,000", projectedRecovery: "$14,000 - $38,000" },
+      { category: "Lead Capture", currentWaste: "$18,000 - $52,000", projectedRecovery: "$12,000 - $34,000" },
+      { category: "Proof + Content", currentWaste: "$16,000 - $40,000", projectedRecovery: "$10,000 - $26,000" },
+      { category: "SEO + Speed", currentWaste: "$12,000 - $32,000", projectedRecovery: "$7,000 - $19,000" },
+    ],
+    nextSteps: [
+      "Rewrite the first-screen value proposition so a cold visitor understands the offer immediately.",
+      "Add one dominant CTA and repeat it consistently across the page.",
+      "Create a low-friction lead capture path for visitors who are not ready to call.",
+      "Add proof assets with measurable business outcomes.",
+      "Audit technical SEO and above-the-fold speed after the conversion fixes are live.",
+    ],
+    competitiveBrief: `${companyName} can compete harder if the site stops behaving like a brochure and starts acting like a conversion system. The current public signals leave too much work to the buyer.`,
+    outreach: {
+      recommended_channel: hasPhone ? "call" : "email",
+      channel_confidence: hasPhone || hasEmail ? "medium" : "low",
+      why_this_channel: hasPhone ? "A phone number appears to be present, which suggests direct outreach is acceptable. Lead with the visible website leak, not a generic pitch." : "The scan did not verify a strong phone-first path, so email is the safer first touch. Keep it short and anchored to one concrete leak from the site.",
+      secondary_channel: hasPhone ? "Email the same day with the leak summary if the call does not connect." : "Follow with a call or LinkedIn touch once the diagnostic angle is established.",
+      best_time_to_reach: "Tue-Thu 8:00-10:00 AM local time — before the day gets buried in operations.",
+      persona_read: "The decision-maker likely cares about qualified leads, trust, and fewer wasted website visits.",
+      tone_to_use: "blunt operator",
+      do_not_do: ["Do not open with a generic SEO pitch.", "Do not lead with AI jargon.", "Do not overwhelm them with a full teardown before they ask."],
+      first_touch_script: `I ran ${formattedUrl} through a quick leak scan. The issue is not traffic alone — the site is letting high-intent visitors leave without a strong enough next step. Worth a 15-minute teardown?`,
+      email_timing: {
+        inferred_timezone: "Local business timezone unknown",
+        timezone_evidence: "No reliable location signal was confirmed in the scan output.",
+        inferred_industry: "general business services",
+        inferred_company_size: "small (2-10)",
+        size_evidence: "Public page depth and proof signals suggest a smaller operator-led business unless the site shows otherwise.",
+        best_send_windows: [
+          { day: "Tuesday", local_time: "8:00-9:30 AM local", eastern_time: "8:00-9:30 AM ET if local is unknown", reasoning: "Early weekday inbox review gives the leak angle the best chance to be seen before operations take over." },
+          { day: "Thursday", local_time: "3:00-4:30 PM local", eastern_time: "3:00-4:30 PM ET if local is unknown", reasoning: "Late-week planning window works for owners reviewing missed opportunities and next-week priorities." },
+        ],
+        avoid_windows: ["Monday before 10:00 AM — inbox triage", "Friday afternoon — low attention and low reply intent"],
+        subject_line_angle: "Short leak-specific subject tied to the website URL",
+        follow_up_cadence: "5 touches over 21 days: insight, data, proof, direct challenge, breakup.",
+        seasonality_note: "",
+      },
+      touchpoint_plan: [0, 3, 7, 14, 21].map((day, idx) => ({
+        step: idx + 1,
+        day_offset: day,
+        channel: idx === 0 ? (hasPhone ? "call" : "email") : idx === 1 ? "email" : idx === 2 ? "linkedin" : idx === 3 ? "voicemail" : "email",
+        why_now: "This touch escalates from observed leak to direct business impact.",
+        subject_or_opener: `${companyName} website leak: ${gaps[0]?.title || "conversion path"}`,
+        talking_points: gaps.slice(0, 3).map((g) => `${g.title}: ${g.annualCost}`),
+        objection_handles: ["We're not focused on the website right now → That is usually when the leak is most expensive.", "We already have someone for SEO → This is conversion forensics, not keyword maintenance."],
+        cta: "15-minute leak teardown this week?",
+        full_script: `I ran ${formattedUrl} through a leak scan and found a few public-facing gaps that can quietly suppress qualified leads. The biggest one: ${gaps[0]?.title || "the conversion path is not clear enough"}. This is not about redesign for its own sake — it is about stopping visitors from leaving before they take action. If you want, I can show you the exact leak points and what I would fix first in 15 minutes.`,
+        best_send_window_local: "Tue-Thu 8:00-10:00 AM local",
+      })),
+    },
+  };
+
+  return applyDeterministicLeaks(analysis, host);
 }
 
 serve(async (req) => {
@@ -261,8 +398,10 @@ serve(async (req) => {
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(5000),
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
+        "X-Lovable-AIG-SDK": "vercel-ai-sdk",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -469,12 +608,19 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     });
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const models = ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite", "google/gemini-2.5-pro"];
+    const models = ["google/gemini-3-flash-preview"];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     outer: for (const m of models) {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        aiResponse = await callAi(m);
+      for (let attempt = 0; attempt < 1; attempt++) {
+        try {
+          aiResponse = await callAi(m);
+        } catch (err) {
+          lastErrText = err instanceof Error ? err.message : String(err);
+          console.error(`AI gateway request failed (model=${m}, attempt=${attempt + 1}):`, lastErrText);
+          aiResponse = null;
+          break outer;
+        }
         if (aiResponse.ok) break outer;
         lastErrText = await aiResponse.clone().text();
         console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
@@ -501,14 +647,29 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (status === 503) {
-        return new Response(JSON.stringify({ error: "AI service is temporarily unavailable. Please retry in a minute." }), {
-          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const fallback = buildDeterministicAnalysis(markdown, links, metadata, formattedUrl, parsedHost);
+      fallback._fallback = true;
+      fallback._fallbackReason = status === 503
+        ? "AI gateway temporarily unavailable; deterministic scan returned instead."
+        : "AI analysis failed; deterministic scan returned instead.";
 
-      return new Response(JSON.stringify({ error: "AI analysis failed" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          score: fallback.score,
+          gaps: fallback,
+        }),
+      });
+
+      return new Response(JSON.stringify(fallback), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
