@@ -76,7 +76,11 @@ const Home = () => {
               src={architectBanner.url}
               alt="The Architect — You don't need expensive. Expensive is a distraction. Results are the point."
               className="w-full h-auto rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]"
+              width={1536}
+              height={864}
               loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
           </div>
 
