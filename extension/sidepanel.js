@@ -36,7 +36,7 @@ document.querySelectorAll(".tab").forEach((btn) => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
     state.tab = btn.dataset.tab;
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === `tab-${state.tab}`));
-    if (state.tab === "case") renderCaseList();
+    if (state.tab === "case") (typeof resetCaseView === "function" ? resetCaseView() : renderCaseList());
     if (state.tab === "fix") renderFix();
   });
 });
@@ -217,15 +217,10 @@ function drawOverlay() {
 }
 
 // ---------------- OPERATOR ----------------
-document.querySelectorAll(".modepill .m").forEach((b) => {
+document.querySelectorAll("#op-chips .chip").forEach((b) => {
   b.addEventListener("click", () => {
-    document.querySelectorAll(".modepill .m").forEach((x) => x.classList.toggle("active", x === b));
-    state.mode = b.dataset.mode;
-    $("op-hint").textContent = {
-      observe: "Observe: panel reads the page silently. No vision sent to AI.",
-      suggest: "Suggest: free chat with vision. Operator sees URL, DOM text, and a viewport screenshot.",
-      execute: "Execute: confirm-before-act mode. Only enabled on allow-listed domains.",
-    }[state.mode];
+    $("chat-input").value = b.dataset.prompt || "";
+    $("chat-input").focus();
   });
 });
 
@@ -236,7 +231,7 @@ $("chat-form").addEventListener("submit", async (e) => {
   input.value = "";
   appendBubble("user", text);
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
-  const cap = state.mode !== "observe" ? await captureViewport() : { dataUrl: null };
+  const cap = await captureViewport();
   appendBubble("ai", "…");
   const last = $("chat-log").querySelector(".bubble.ai:last-of-type");
   try {
@@ -245,7 +240,7 @@ $("chat-form").addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
       body: JSON.stringify({
         userText: text, pageUrl: extract?.url || state.activeUrl, pageText: extract?.pageText || "",
-        screenshot: cap?.dataUrl || null, history: state.history.slice(-8), mode: state.mode,
+        screenshot: cap?.dataUrl || null, history: state.history.slice(-8),
       }),
     });
     const data = await r.json();
@@ -567,3 +562,165 @@ function toast(msg) {
 }
 function escapeHtml(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function escapeAttr(s) { return escapeHtml(s).replace(/`/g, "&#96;"); }
+
+// ---------------- v0.6 — Contradictions / Friction / Download / Case detail ----------------
+const CONTRADICTIONS_PROMPT = `Run a BRAND CONTRADICTION SCAN on this page. Find places where the brand SAYS one thing but SHOWS another. For each contradiction return:
+- CLAIM: what the page promises (verbatim quote, max 12 words)
+- REALITY: what the page actually demonstrates (specific, observable)
+- TRUST COST: one sentence on how this weakens buyer trust
+- FIX: one specific rewrite or change
+
+Return 3-6 contradictions, ranked by severity. No preamble. Use plain text with clear section breaks.`;
+
+const FRICTION_PROMPT = `Run a FRICTION VOCABULARY AUDIT on this page. Find every word, phrase, or UX pattern that introduces hesitation, doubt, or work for the buyer. For each, return:
+- FRICTION: the exact word/phrase/pattern (verbatim)
+- WHY IT LEAKS: the cognitive cost it creates (1 sentence)
+- REPLACEMENT: a sharper alternative
+
+Group findings into: Headlines, Body Copy, CTAs, Forms, Trust signals. Rank by impact. No fluff. No preamble.`;
+
+async function runExtraScan(label, prompt, containerId) {
+  const c = $(containerId);
+  c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>Scanning…</pre></div>`;
+  try {
+    const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
+    const cap = await captureViewport();
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/extension-operator-chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({
+        userText: prompt,
+        pageUrl: extract?.url || state.activeUrl,
+        pageText: extract?.pageText || "",
+        screenshot: cap?.dataUrl || null,
+        history: [],
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+    const reply = data.reply || "(empty)";
+    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>${escapeHtml(reply)}</pre></div>`;
+    // Auto-save to case file
+    if (state.activeHost) {
+      const entry = state.caseFiles[state.activeHost] || { history: [], fixes: [], autopsies: [], extras: {} };
+      entry.extras = entry.extras || {};
+      entry.extras[label] = { text: reply, at: Date.now() };
+      state.caseFiles[state.activeHost] = entry;
+      await chrome.storage.local.set({ caseFiles: state.caseFiles });
+    }
+  } catch (e) {
+    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>Failed: ${escapeHtml(e.message)}</pre></div>`;
+  }
+}
+
+$("scan-contradictions").addEventListener("click", () => runExtraScan("Brand Contradictions", CONTRADICTIONS_PROMPT, "scan-extra"));
+$("scan-friction").addEventListener("click", () => runExtraScan("Friction Vocabulary", FRICTION_PROMPT, "scan-extra"));
+
+// ---------------- Download report ----------------
+function buildReportMarkdown(host, entry) {
+  const s = entry?.lastScan; if (!s) return `# ${host}\n\nNo scan data.`;
+  const d = state.lastDossier && host === state.activeHost ? state.lastDossier : null;
+  const lines = [];
+  lines.push(`# Aetheris Forensic Report — ${host}`);
+  lines.push(`Generated: ${new Date().toISOString()}`);
+  lines.push(`URL: ${s.url || ""}`);
+  lines.push(`\n## Score\n- Grade: **${s.grade}** (${s.score}/100)`);
+  lines.push(`- Leaks: ${s.leaks?.length || 0}`);
+  lines.push(`- Page weight: ${s.weightKB || "?"} KB`);
+  if (d?.dossier) {
+    lines.push(`\n## Detective Dossier`);
+    lines.push(`- **Suspect:** ${d.dossier.suspect || "—"}`);
+    lines.push(`- **Motive:** ${d.dossier.motive || "—"}`);
+    lines.push(`- **Verdict:** ${d.dossier.verdict || "—"}`);
+    lines.push(`- **Confession:** ${d.dossier.confession || "—"}`);
+    if (d.leakValueUSD) lines.push(`- **Estimated annual leak:** $${(d.leakValueUSD.low||0).toLocaleString()} – $${(d.leakValueUSD.high||0).toLocaleString()}`);
+  }
+  lines.push(`\n## Leaks (${s.leaks?.length || 0})`);
+  (s.leaks || []).forEach((l, i) => {
+    lines.push(`\n### ${i + 1}. ${l.title} [${l.severity}]`);
+    lines.push(`- Category: ${l.category}`);
+    if (l.why) lines.push(`- Why: ${l.why}`);
+    if (l.fix) lines.push(`- Fix: ${l.fix}`);
+  });
+  if (entry.extras) {
+    Object.entries(entry.extras).forEach(([label, payload]) => {
+      lines.push(`\n## ${label}\n\n${payload.text || ""}`);
+    });
+  }
+  return lines.join("\n");
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+$("scan-download").addEventListener("click", () => {
+  if (!state.lastScan) return toast("Run a scan first.");
+  const host = state.lastScan.host || state.activeHost || "report";
+  const entry = state.caseFiles[host] || { lastScan: state.lastScan };
+  const md = buildReportMarkdown(host, entry);
+  downloadText(`aetheris-${host}-${Date.now()}.md`, md);
+  toast("Report downloaded.");
+});
+
+// ---------------- Case detail view ----------------
+// Event delegation: clicking a case row (not its checkbox) opens detail.
+document.addEventListener("click", (e) => {
+  const row = e.target.closest("#case-list .case-row");
+  if (!row) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "LABEL") return;
+  const host = row.querySelector("input[type=checkbox]")?.dataset.host;
+  if (host) openCaseDetail(host);
+});
+
+function resetCaseView() {
+  $("case-detail").innerHTML = "";
+  $("case-back").classList.add("hidden");
+  $("case-list").classList.remove("hidden");
+  $("case-diff").classList.remove("hidden");
+  renderCaseList();
+}
+
+function openCaseDetail(host) {
+  const entry = state.caseFiles[host]; if (!entry) return;
+  const s = entry.lastScan || {};
+  $("case-list").classList.add("hidden");
+  $("case-diff").classList.add("hidden");
+  $("case-back").classList.remove("hidden");
+  const leaks = (s.leaks || []).map((l, i) =>
+    `<div class="leak ${l.severity}"><div class="leak-head"><div class="leak-title">${i+1}. ${escapeHtml(l.title)}</div><div class="leak-cat">${escapeHtml(l.category)} · ${l.severity}</div></div>${l.why?`<div class="leak-why">${escapeHtml(l.why)}</div>`:""}${l.fix?`<div class="leak-fix"><b>FIX:</b> ${escapeHtml(l.fix)}</div>`:""}</div>`
+  ).join("") || `<div class="empty">No leaks recorded.</div>`;
+  const extras = entry.extras ? Object.entries(entry.extras).map(([k,v]) =>
+    `<div class="extra-report"><h4>${escapeHtml(k)}</h4><pre>${escapeHtml(v.text||"")}</pre></div>`
+  ).join("") : "";
+  $("case-detail").innerHTML = `
+    <div class="card">
+      <div class="card-title">${escapeHtml(host)}</div>
+      <div class="meta"><span>SCORE <b>${s.score ?? "?"}</b></span><span>GRADE <b class="grade-${s.grade||"F"}">${s.grade||"?"}</b></span><span>LEAKS <b>${s.leaks?.length||0}</b></span></div>
+      <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">
+        <button class="primary" id="case-download">⬇ Download Report</button>
+        <button class="ghost" id="case-delete">Delete</button>
+      </div>
+    </div>
+    ${leaks}
+    ${extras}
+  `;
+  $("case-download").addEventListener("click", () => {
+    const md = buildReportMarkdown(host, entry);
+    downloadText(`aetheris-${host}-${Date.now()}.md`, md);
+    toast("Report downloaded.");
+  });
+  $("case-delete").addEventListener("click", async () => {
+    if (!confirm(`Delete case file for ${host}?`)) return;
+    delete state.caseFiles[host];
+    await chrome.storage.local.set({ caseFiles: state.caseFiles });
+    renderCaseList();
+  });
+}
+
+$("case-back").addEventListener("click", resetCaseView);

@@ -31,28 +31,37 @@
   <main>
     <!-- SCAN -->
     <section class="panel active" id="tab-scan">
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap;gap:6px">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
-        <button id="scan-deepen" class="ghost" title="Run Detective Mode AI judgment on these findings">Deepen (Detective)</button>
+        <button id="scan-deepen" class="ghost" title="AI dossier on these findings">Deepen (Detective)</button>
+        <button id="scan-contradictions" class="ghost" title="Find brand contradictions on this page">Contradictions</button>
+        <button id="scan-friction" class="ghost" title="Find friction vocabulary on this page">Friction</button>
+        <button id="scan-download" class="ghost" title="Download full report as Markdown">⬇ Report</button>
       </div>
       <div id="scan-meta" class="meta hidden"></div>
       <div id="scan-dossier"></div>
+      <div id="scan-extra"></div>
       <div id="scan-results"></div>
     </section>
 
     <!-- OPERATOR -->
     <section class="panel" id="tab-operator">
-      <div class="modepill">
-        <button class="m active" data-mode="observe">Observe</button>
-        <button class="m" data-mode="suggest">Suggest</button>
-        <button class="m" data-mode="execute">Execute</button>
+      <div id="op-chips" class="chips">
+        <button class="chip" data-prompt="What is the single biggest leak on this page right now? Name it and the fix.">Biggest leak</button>
+        <button class="chip" data-prompt="Rewrite the hero headline + subhead. Give me 3 sharp options. Keep each under 12 words.">Rewrite hero</button>
+        <button class="chip" data-prompt="Rewrite the primary CTA. Give me 3 options that name an outcome, not an action.">Rewrite CTA</button>
+        <button class="chip" data-prompt="Audit the proof on this page. What's missing, what's weak, what should be added above the fold?">Audit proof</button>
+        <button class="chip" data-prompt="Find the contradictions on this page — places where the brand says one thing and shows another.">Contradictions</button>
+        <button class="chip" data-prompt="Estimate the annual revenue this page is leaking in USD. Show your reasoning in 3 short lines.">$ leak estimate</button>
+        <button class="chip" data-prompt="If I had 1 week and 1 developer, what 3 changes would compound? List in priority order.">Ship-this-week plan</button>
+        <button class="chip" data-prompt="Score this page 1-10 on: clarity, proof, friction, capture, urgency. One sentence each.">5-axis scorecard</button>
       </div>
       <div id="chat-log" class="chat"></div>
       <form id="chat-form" class="composer">
         <textarea id="chat-input" rows="2" placeholder="Ask the Operator about what's on this page…"></textarea>
         <button type="submit" class="primary">Send</button>
       </form>
-      <div class="hint" id="op-hint">Observe: panel reads the page silently. Suggest: free chat with vision. Execute: confirm-before-act on allow-listed domains.</div>
+      <div class="hint" id="op-hint">Vision-aware. The Operator sees the page URL, scraped text, and a viewport screenshot.</div>
     </section>
 
     <!-- FIX -->
@@ -182,11 +191,13 @@
 
     <!-- CASE FILE -->
     <section class="panel" id="tab-case">
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap;gap:6px">
         <input id="case-search" placeholder="Search domains…" />
         <button id="case-compare" class="ghost">Compare 2</button>
+        <button id="case-back" class="ghost hidden">← Back</button>
       </div>
       <div id="case-list"></div>
+      <div id="case-detail"></div>
       <div id="case-diff"></div>
     </section>
 
@@ -199,7 +210,7 @@
 
   <footer class="cockpit-footer">
     <button id="autopsy-start" class="ghost">⏺ Record Autopsy</button>
-    <span class="muted">v0.4 · Forensic Cockpit</span>
+    <span class="muted">v0.6 · Forensic Cockpit</span>
   </footer>
 
   <script type="module" src="sidepanel.js"></script>
