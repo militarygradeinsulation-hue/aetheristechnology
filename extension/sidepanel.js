@@ -54,8 +54,7 @@ async function refreshHeader() {
   if (t?.url) {
     try { state.activeHost = new URL(t.url).hostname.replace(/^www\./, ""); } catch { state.activeHost = ""; }
     state.activeUrl = t.url;
-    $("active-host").textContent = state.activeHost || t.url;
-  } else { $("active-host").textContent = "—"; }
+  }
 }
 chrome.runtime.onMessage.addListener((m) => { if (m?.type === "AETHERIS_TAB_CHANGED") refreshHeader(); });
 refreshHeader();
