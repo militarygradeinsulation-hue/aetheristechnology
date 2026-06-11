@@ -748,29 +748,55 @@ export const AdminCreationStudio: React.FC = () => {
         }
       }
 
-      // 7) Animate canvas. Ken-Burns on each scene + caption.
+      // 7) Animate canvas. Per-scene motion preset + caption.
       const animStart = performance.now();
       let scenePtr = 0;
+      let lastPlayedSceneIdx = -1;
+
+      const motionFor = (sceneIdx: number): SceneMotion => {
+        const m = activePlan.scenes[sceneIdx].motion || 'auto';
+        return m === 'auto' ? pickAutoMotion(sceneIdx) : m;
+      };
+
+      // Returns {zoom, panX, panY} as a fraction of canvas size (panX, panY in [-1..1]).
+      const motionTransform = (motion: SceneMotion, t: number) => {
+        switch (motion) {
+          case 'still':      return { zoom: 1.0,                panX: 0,                  panY: 0 };
+          case 'zoom_in':    return { zoom: 1.04 + 0.16 * t,    panX: 0,                  panY: 0 };
+          case 'zoom_out':   return { zoom: 1.20 - 0.16 * t,    panX: 0,                  panY: 0 };
+          case 'pan_left':   return { zoom: 1.12,               panX:  0.10 - 0.20 * t,   panY: 0 };
+          case 'pan_right':  return { zoom: 1.12,               panX: -0.10 + 0.20 * t,   panY: 0 };
+          case 'pan_up':     return { zoom: 1.12,               panX: 0,                  panY:  0.10 - 0.20 * t };
+          case 'pan_down':   return { zoom: 1.12,               panX: 0,                  panY: -0.10 + 0.20 * t };
+          case 'parallax':   return { zoom: 1.10 + 0.04 * t,    panX:  0.06 - 0.12 * t,   panY:  0.03 - 0.06 * t };
+          case 'ken_burns':
+          default:           return { zoom: 1.06 + 0.14 * t,    panX: -0.04 + 0.08 * t,   panY: -0.02 + 0.04 * t };
+        }
+      };
 
       const drawScene = (sceneIdx: number, localT: number, sceneDur: number) => {
         const img = sceneImgs[sceneIdx];
+        const vid = sceneVids[sceneIdx];
+        const src: CanvasImageSource | null = vid || img;
+        if (!src) return;
         const s = activePlan.scenes[sceneIdx];
         const cw = canvas.width, ch = canvas.height;
+        const sw = (vid ? vid.videoWidth : img!.width) || cw;
+        const sh = (vid ? vid.videoHeight : img!.height) || ch;
 
-        // Cover-fit + zoom
         const t = Math.min(1, localT / sceneDur);
-        const zoom = 1.05 + 0.12 * t; // ken-burns
-        const panX = (sceneIdx % 2 === 0 ? -1 : 1) * 0.04 * t * cw;
-        const ir = img.width / img.height;
+        const motion = vid ? 'still' : motionFor(sceneIdx);
+        const { zoom, panX, panY } = motionTransform(motion, t);
+        const ir = sw / sh;
         const cr = cw / ch;
-        let dw, dh;
+        let dw: number, dh: number;
         if (ir > cr) { dh = ch * zoom; dw = dh * ir; } else { dw = cw * zoom; dh = dw / ir; }
-        const dx = (cw - dw) / 2 + panX;
-        const dy = (ch - dh) / 2;
+        const dx = (cw - dw) / 2 + panX * cw;
+        const dy = (ch - dh) / 2 + panY * ch;
 
         ctx.fillStyle = '#0a0a0a';
         ctx.fillRect(0, 0, cw, ch);
-        ctx.drawImage(img, dx, dy, dw, dh);
+        ctx.drawImage(src, dx, dy, dw, dh);
 
         // Bottom gradient for caption legibility
         const grad = ctx.createLinearGradient(0, ch * 0.55, 0, ch);
@@ -809,11 +835,21 @@ export const AdminCreationStudio: React.FC = () => {
           cum += d; idx = i; local = d;
         }
         scenePtr = idx;
+        // Start/stop video clips as scenes transition
+        if (idx !== lastPlayedSceneIdx) {
+          if (lastPlayedSceneIdx >= 0) {
+            const prev = sceneVids[lastPlayedSceneIdx];
+            if (prev) { prev.pause(); }
+          }
+          const cur = sceneVids[idx];
+          if (cur) { try { cur.currentTime = 0; cur.play().catch(() => {}); } catch {} }
+          lastPlayedSceneIdx = idx;
+        }
         drawScene(idx, local, activePlan.scenes[idx].durationMs / 1000);
         const pct = Math.min(99, 30 + Math.round((elapsed / totalSec) * 70));
         setProgress(pct);
         if (elapsed < totalSec) requestAnimationFrame(tick);
-        else setTimeout(() => recorder.stop(), 200);
+        else setTimeout(() => { sceneVids.forEach(v => v && v.pause()); recorder.stop(); }, 200);
       };
       requestAnimationFrame(tick);
 
