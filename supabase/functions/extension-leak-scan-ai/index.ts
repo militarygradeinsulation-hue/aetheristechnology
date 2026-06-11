@@ -143,15 +143,33 @@ serve(async (req) => {
 
     // Normalize
     if (!Array.isArray(parsed.leaks)) parsed.leaks = [];
-    parsed.leaks = parsed.leaks.slice(0, 6).map((l: any, i: number) => ({
-      id: l.id || `ai_${i}`,
-      severity: ["critical", "warning", "info"].includes(l.severity) ? l.severity : "warning",
-      category: l.category || "Messaging",
-      title: String(l.title || "").slice(0, 140),
-      why: String(l.why || "").slice(0, 500),
-      fix: String(l.fix || "").slice(0, 500),
-      selectors: [],
-    }));
+    parsed.leaks = parsed.leaks.slice(0, 6).map((l: any, i: number) => {
+      const sel = Array.isArray(l.selectors) ? l.selectors.filter((s: any) => typeof s === "string" && s.trim()).slice(0, 3) : [];
+      let fa: any = null;
+      if (l.fixAction && typeof l.fixAction === "object") {
+        const op = String(l.fixAction.op || "").trim();
+        const allowed = ["replaceText","setHTML","hide","setStyle","injectBanner","injectCTA","replaceAttr"];
+        if (allowed.includes(op)) {
+          fa = {
+            op,
+            selector: typeof l.fixAction.selector === "string" ? l.fixAction.selector.slice(0, 300) : "",
+            value: l.fixAction.value ?? null,
+            where: ["top","bottom"].includes(l.fixAction.where) ? l.fixAction.where : "top",
+          };
+          if (!fa.selector && !["injectBanner","injectCTA"].includes(op)) fa = null;
+        }
+      }
+      return {
+        id: l.id || `ai_${i}`,
+        severity: ["critical", "warning", "info"].includes(l.severity) ? l.severity : "warning",
+        category: l.category || "Messaging",
+        title: String(l.title || "").slice(0, 140),
+        why: String(l.why || "").slice(0, 500),
+        fix: String(l.fix || "").slice(0, 500),
+        selectors: sel,
+        fixAction: fa,
+      };
+    });
     if (parsed.dossier && typeof parsed.dossier === "object") {
       parsed.dossier.evidence = Array.isArray(parsed.dossier.evidence)
         ? parsed.dossier.evidence.slice(0, 6).map((s: any) => String(s).slice(0, 300))
