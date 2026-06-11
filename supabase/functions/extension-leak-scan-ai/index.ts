@@ -47,7 +47,13 @@ OUTPUT STRICT JSON, no prose outside the JSON:
       "title": "short forensic label",
       "why": "1-2 sentences naming the mechanism of loss",
       "fix": "1 sentence with the specific repair",
-      "selectors": []
+      "selectors": ["<css selector for the offending element on the page, if any>"],
+      "fixAction": {
+        "op": "replaceText | setHTML | hide | setStyle | injectBanner | injectCTA | replaceAttr",
+        "selector": "<css selector of the element to mutate, REQUIRED for replaceText/setHTML/hide/setStyle/replaceAttr>",
+        "value": "<the new text / HTML / CTA label, or a JSON style object for setStyle, or {attr,value} for replaceAttr>",
+        "where": "top|bottom (only for injectBanner/injectCTA)"
+      }
     }
   ]
 }
@@ -56,6 +62,8 @@ RULES:
 - 3-6 judgment leaks. Do NOT repeat anything Pass A already listed by title.
 - Evidence MUST quote or cite something from the actual DOM text or screenshot. Generic platitudes are rejected.
 - Confession MUST be specific to THIS page (the actual offer, the actual headline, the actual CTA), not generic copy advice.
+- For EVERY leak that has a visible element on the page, populate "selectors" AND "fixAction" so the operator can apply the repair in-place. Prefer stable selectors (h1, header h2, [data-cta], main button:first-of-type, section:nth-of-type(2) p). If you cannot reasonably target the element, set fixAction to null.
+- "replaceText" = swap the textContent. "setHTML" = swap innerHTML (use sparingly). "hide" = display:none. "setStyle" value must be a JSON object of CSS props. "injectBanner" inserts a top/bottom amber banner with value as the message. "injectCTA" inserts a floating CTA button labeled value.
 - leakValueUSD low/high should reflect the company's apparent size and the severity of leaks combined. Use integers, no commas.`;
 
 const ipBuckets = new Map<string, { count: number; reset: number }>();
@@ -135,15 +143,33 @@ serve(async (req) => {
 
     // Normalize
     if (!Array.isArray(parsed.leaks)) parsed.leaks = [];
-    parsed.leaks = parsed.leaks.slice(0, 6).map((l: any, i: number) => ({
-      id: l.id || `ai_${i}`,
-      severity: ["critical", "warning", "info"].includes(l.severity) ? l.severity : "warning",
-      category: l.category || "Messaging",
-      title: String(l.title || "").slice(0, 140),
-      why: String(l.why || "").slice(0, 500),
-      fix: String(l.fix || "").slice(0, 500),
-      selectors: [],
-    }));
+    parsed.leaks = parsed.leaks.slice(0, 6).map((l: any, i: number) => {
+      const sel = Array.isArray(l.selectors) ? l.selectors.filter((s: any) => typeof s === "string" && s.trim()).slice(0, 3) : [];
+      let fa: any = null;
+      if (l.fixAction && typeof l.fixAction === "object") {
+        const op = String(l.fixAction.op || "").trim();
+        const allowed = ["replaceText","setHTML","hide","setStyle","injectBanner","injectCTA","replaceAttr"];
+        if (allowed.includes(op)) {
+          fa = {
+            op,
+            selector: typeof l.fixAction.selector === "string" ? l.fixAction.selector.slice(0, 300) : "",
+            value: l.fixAction.value ?? null,
+            where: ["top","bottom"].includes(l.fixAction.where) ? l.fixAction.where : "top",
+          };
+          if (!fa.selector && !["injectBanner","injectCTA"].includes(op)) fa = null;
+        }
+      }
+      return {
+        id: l.id || `ai_${i}`,
+        severity: ["critical", "warning", "info"].includes(l.severity) ? l.severity : "warning",
+        category: l.category || "Messaging",
+        title: String(l.title || "").slice(0, 140),
+        why: String(l.why || "").slice(0, 500),
+        fix: String(l.fix || "").slice(0, 500),
+        selectors: sel,
+        fixAction: fa,
+      };
+    });
     if (parsed.dossier && typeof parsed.dossier === "object") {
       parsed.dossier.evidence = Array.isArray(parsed.dossier.evidence)
         ? parsed.dossier.evidence.slice(0, 6).map((s: any) => String(s).slice(0, 300))

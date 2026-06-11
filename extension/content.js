@@ -712,12 +712,93 @@
       const id = recordRevert(() => touched.forEach(([el, attr, orig]) => el.setAttribute(attr, orig)));
       return { revertId: id, message: `Rewrote ${touched.length} insecure URLs to https://.` };
     },
+    // Generic AI-driven visual fix. Routed for any leak with a structured fixAction.
+    ai_visual(leak) {
+      const fa = leak?.fixAction;
+      if (!fa || !fa.op) return { error: "AI did not provide a structured fix for this leak." };
+      const op = fa.op;
+      try {
+        if (op === "injectBanner") {
+          const banner = document.createElement("div");
+          banner.textContent = String(fa.value || leak.fix || "");
+          banner.setAttribute("data-aetheris-injected", "1");
+          Object.assign(banner.style, {
+            position: "fixed", left: "0", right: "0", [fa.where === "bottom" ? "bottom" : "top"]: "0",
+            zIndex: "2147483640", background: "#f59e0b", color: "#0a0a0a",
+            padding: "12px 18px", fontFamily: "ui-monospace,Menlo,monospace", fontWeight: "700",
+            letterSpacing: "0.06em", textAlign: "center", boxShadow: "0 4px 16px rgba(245,158,11,0.4)",
+          });
+          document.body.appendChild(banner);
+          const id = recordRevert(() => banner.remove());
+          return { revertId: id, message: `Injected banner: "${banner.textContent}"` };
+        }
+        if (op === "injectCTA") {
+          const cta = document.createElement("button");
+          cta.textContent = String(fa.value || "Take Action").slice(0, 40);
+          cta.setAttribute("data-aetheris-injected", "1");
+          Object.assign(cta.style, {
+            position: "fixed", [fa.where === "bottom" ? "bottom" : "top"]: "16px", right: "16px",
+            zIndex: "2147483640", background: "#f59e0b", color: "#0a0a0a", border: "0",
+            padding: "12px 18px", borderRadius: "4px", fontFamily: "ui-monospace,Menlo,monospace",
+            fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer",
+            boxShadow: "0 4px 16px rgba(245,158,11,0.4)",
+          });
+          document.body.appendChild(cta);
+          const id = recordRevert(() => cta.remove());
+          return { revertId: id, message: `Floated AI CTA: "${cta.textContent}"` };
+        }
+        const el = document.querySelector(fa.selector);
+        if (!el) return { error: `Selector "${fa.selector}" not found on page.` };
+        if (op === "replaceText") {
+          const orig = el.textContent;
+          el.textContent = String(fa.value ?? "");
+          el.setAttribute("data-aetheris-touched", "1");
+          const id = recordRevert(() => { el.textContent = orig; el.removeAttribute("data-aetheris-touched"); });
+          return { revertId: id, message: `Rewrote element text → "${String(fa.value).slice(0, 80)}"` };
+        }
+        if (op === "setHTML") {
+          const orig = el.innerHTML;
+          el.innerHTML = String(fa.value ?? "");
+          el.setAttribute("data-aetheris-touched", "1");
+          const id = recordRevert(() => { el.innerHTML = orig; el.removeAttribute("data-aetheris-touched"); });
+          return { revertId: id, message: `Replaced element HTML.` };
+        }
+        if (op === "hide") {
+          const orig = el.style.cssText;
+          el.style.display = "none";
+          el.setAttribute("data-aetheris-touched", "1");
+          const id = recordRevert(() => { el.style.cssText = orig; el.removeAttribute("data-aetheris-touched"); });
+          return { revertId: id, message: `Hid offending element.` };
+        }
+        if (op === "setStyle") {
+          const styleObj = typeof fa.value === "string" ? JSON.parse(fa.value) : (fa.value || {});
+          const orig = el.style.cssText;
+          Object.entries(styleObj).forEach(([k, v]) => { try { el.style.setProperty(k.replace(/[A-Z]/g, m => "-" + m.toLowerCase()), String(v)); } catch {} });
+          el.setAttribute("data-aetheris-touched", "1");
+          const id = recordRevert(() => { el.style.cssText = orig; el.removeAttribute("data-aetheris-touched"); });
+          return { revertId: id, message: `Restyled element (${Object.keys(styleObj).length} props).` };
+        }
+        if (op === "replaceAttr") {
+          const { attr, value } = (typeof fa.value === "string" ? JSON.parse(fa.value) : fa.value) || {};
+          if (!attr) return { error: "replaceAttr requires {attr,value}" };
+          const orig = el.getAttribute(attr);
+          el.setAttribute(attr, String(value ?? ""));
+          const id = recordRevert(() => { orig === null ? el.removeAttribute(attr) : el.setAttribute(attr, orig); });
+          return { revertId: id, message: `Set ${attr}="${value}".` };
+        }
+        return { error: `Unknown op "${op}".` };
+      } catch (e) {
+        return { error: String(e?.message || e) };
+      }
+    },
   };
 
   function applyFix(leak) {
     if (!leak) return { ok: false, error: "No leak provided." };
-    // Normalize the id family for parametric ones
-    const baseId = leak.id.startsWith("form_too_long") ? "form_too_long"
+    // Any AI leak with a structured fixAction goes through the generic handler.
+    const useAiVisual = leak.fixAction && typeof leak.fixAction === "object";
+    const baseId = useAiVisual ? "ai_visual"
+                 : leak.id.startsWith("form_too_long") ? "form_too_long"
                  : leak.id.startsWith("form_unlabeled") ? null
                  : leak.id;
     const handler = baseId && INPAGE_FIXES[baseId];

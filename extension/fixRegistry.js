@@ -24,6 +24,8 @@ export const INPAGE_FIX_IDS = new Set([
 
 export function hasInPageFix(leak) {
   if (!leak?.id) return false;
+  // Any leak with a structured AI fixAction is auto-applicable via the generic handler.
+  if (leak.fixAction && typeof leak.fixAction === "object" && leak.fixAction.op) return true;
   if (INPAGE_FIX_IDS.has(leak.id)) return true;
   if (leak.id.startsWith("form_too_long")) return true;
   return false;
