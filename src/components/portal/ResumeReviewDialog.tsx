@@ -249,7 +249,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
               <div className="px-3 py-2 border-b flex items-center gap-2 text-xs">
                 <Lock className="w-3 h-3 text-amber" />
                 <span className="font-mono uppercase tracking-wider text-muted-foreground">Private notes & messages</span>
-                <span className="text-muted-foreground/70">(only you can see these)</span>
+                <span className="text-muted-foreground">(only you can see these)</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {loadingMsgs ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> :

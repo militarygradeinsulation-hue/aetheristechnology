@@ -262,7 +262,7 @@ export const EasyModeWrapper: React.FC<EasyModeWrapperProps> = ({ tabKey, longCo
           {!busy && !simplified && (
             <p className="text-sm text-muted-foreground">Reading this section… give it a moment, then tap Refresh if nothing appears.</p>
           )}
-          <p className="text-[10px] text-muted-foreground/70">The original section is still below — keep using it as normal.</p>
+          <p className="text-[10px] text-muted-foreground">The original section is still below — keep using it as normal.</p>
         </div>
       )}
 

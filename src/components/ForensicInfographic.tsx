@@ -66,7 +66,7 @@ export const ForensicInfographic: React.FC<ForensicInfographicProps> = ({
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
               </button>
               {open && (
-                <div className="mt-4 space-y-3 text-sm text-foreground/75 leading-relaxed border-l-2 border-amber/30 pl-4">
+                <div className="mt-4 space-y-3 text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/30 pl-4">
                   {paragraphs.map((p, i) => (
                     <p key={i}>{p}</p>
                   ))}

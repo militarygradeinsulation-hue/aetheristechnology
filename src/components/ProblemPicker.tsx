@@ -142,7 +142,7 @@ export const ProblemPicker: React.FC = () => {
                   <div className="font-forensic font-bold text-foreground text-sm md:text-base leading-snug">
                     "{group.problem}"
                   </div>
-                  <p className="text-[11px] md:text-xs text-foreground/70 leading-snug italic line-clamp-2 mt-auto">
+                  <p className="text-[11px] md:text-xs text-foreground/85 leading-snug italic line-clamp-2 mt-auto">
                     {meta?.felt ?? group.symptom}
                   </p>
                 </button>

@@ -804,13 +804,13 @@ const AdminDashboard: React.FC = () => {
                         >
                           <ChevronDown
                             style={{ width: tabIconSize(tabScale) * 0.9, height: tabIconSize(tabScale) * 0.9 }}
-                            className={`text-muted-foreground/60 transition-transform ${isOpen ? '' : '-rotate-90'}`}
+                            className={`text-muted-foreground transition-transform ${isOpen ? '' : '-rotate-90'}`}
                           />
                           <span className="uppercase tracking-[0.2em] font-mono text-amber/80" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
                             {group.name}
                           </span>
                           <span className="h-px flex-1 bg-border/40" aria-hidden />
-                          <span className="font-mono text-muted-foreground/50" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
+                          <span className="font-mono text-muted-foreground" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
                             {group.keys.length}
                           </span>
                           {containsActive && (

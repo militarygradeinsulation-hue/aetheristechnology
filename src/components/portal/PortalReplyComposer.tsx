@@ -353,7 +353,7 @@ export const PortalReplyComposer: React.FC = () => {
                     {aiDetect.clues.map((c, i) => (
                       <li key={i} className="text-xs">
                         <span className="font-bold text-amber">{c.pattern}:</span>{' '}
-                        <span className="text-foreground/75">{c.evidence}</span>
+                        <span className="text-foreground/90">{c.evidence}</span>
                       </li>
                     ))}
                   </ul>

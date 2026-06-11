@@ -109,7 +109,7 @@ export const PostImageGenerator: React.FC<Props> = ({
               className={`w-full text-left px-2.5 py-2 border-b border-border/40 last:border-b-0 hover:bg-amber/15 cursor-pointer transition-colors ${style === opt.key ? 'bg-amber/20' : ''}`}
             >
               <div className={`font-bold ${compact ? 'text-[11px]' : 'text-sm'} text-foreground`}>{opt.label}</div>
-              <div className="text-[10px] text-foreground/60 leading-tight mt-0.5">{opt.desc}</div>
+              <div className="text-[10px] text-foreground/85 leading-tight mt-0.5">{opt.desc}</div>
             </button>
           ))}
         </div>

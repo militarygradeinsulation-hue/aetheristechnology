@@ -93,7 +93,7 @@ export const VerifiableOutcomes: React.FC = () => {
                     <span className="text-[11px] font-semibold text-muted-foreground tracking-wide uppercase">
                       Engagement
                     </span>
-                    <p className="text-xs text-foreground/70 mt-1 leading-snug">
+                    <p className="text-xs text-foreground/85 mt-1 leading-snug">
                       {outcome.engagement}
                     </p>
                   </div>
@@ -104,7 +104,7 @@ export const VerifiableOutcomes: React.FC = () => {
         </div>
 
         <RevealOnScroll delay={0.3}>
-          <p className="text-center text-xs text-muted-foreground/70 mt-8 max-w-2xl mx-auto italic">
+          <p className="text-center text-xs text-muted-foreground mt-8 max-w-2xl mx-auto italic">
             Client identities and proprietary data withheld by agreement. Outcomes representative of typical engagement results, your situation may differ.
           </p>
         </RevealOnScroll>

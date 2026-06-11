@@ -224,7 +224,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-baseline gap-2">
-                              <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                              <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                                 CAT {String(idx + 1).padStart(2, '0')}
                               </span>
                             </div>

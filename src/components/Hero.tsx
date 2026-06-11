@@ -130,7 +130,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                       <p className="font-case text-xs uppercase tracking-widest text-amber/90">
                         Marketing. AI. Automation. CRM. Websites. Operations. Sales.
                       </p>
-                      <p className="italic text-foreground/75">Those are just tools.</p>
+                      <p className="italic text-foreground/90">Those are just tools.</p>
                       <p>
                         The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
                       </p>

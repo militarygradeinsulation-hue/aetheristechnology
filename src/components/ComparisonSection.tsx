@@ -62,7 +62,7 @@ export const ComparisonSection: React.FC = () => {
         <RevealOnScroll>
           <div className="font-case text-[11px] uppercase tracking-[0.34em] text-amber flex items-center gap-3">
             <span className="w-8 h-px bg-amber" />
-            Case File 09 <span className="text-muted-foreground/70 tracking-[0.28em]">/ Bundles vs. Big-Name Agencies</span>
+            Case File 09 <span className="text-muted-foreground tracking-[0.28em]">/ Bundles vs. Big-Name Agencies</span>
           </div>
           <h2 className="font-forensic font-black text-3xl md:text-5xl leading-[1.04] tracking-tight mt-5 max-w-[22ch] text-foreground">
             Same deliverables. Operator-led once, <span className="text-amber italic">not billed every month.</span>
@@ -115,7 +115,7 @@ export const ComparisonSection: React.FC = () => {
           <p className="mt-5 text-sm md:text-[15px] text-foreground leading-relaxed max-w-[78ch]">
             <b className="text-amber">Every bundle costs less than one month of the equivalent agency retainer</b> — and the agency keeps billing month after month.
           </p>
-          <p className="mt-2 text-[12px] text-muted-foreground/70 leading-relaxed max-w-[78ch] italic">
+          <p className="mt-2 text-[12px] text-muted-foreground leading-relaxed max-w-[78ch] italic">
             Agency figures are published 2026 pricing / industry benchmarks for the equivalent scope of work delivered as a monthly retainer.
           </p>
         </RevealOnScroll>
@@ -125,19 +125,19 @@ export const ComparisonSection: React.FC = () => {
           <div className="mt-16 font-case text-[11px] uppercase tracking-[0.34em] text-amber/90 flex items-center gap-3">
             <span className="font-bold text-amber">02</span>
             <span className="w-6 h-px bg-amber/50" />
-            The verdict <span className="text-muted-foreground/60 tracking-[0.2em]">/ Revenue Pack vs. a $3,000/mo retainer × 12 months</span>
+            The verdict <span className="text-muted-foreground tracking-[0.2em]">/ Revenue Pack vs. a $3,000/mo retainer × 12 months</span>
           </div>
 
           <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="border border-border rounded-xl bg-card p-5">
               <div className="font-case text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Revenue Pack</div>
               <div className="font-forensic font-black text-3xl md:text-4xl text-amber mt-2 leading-none">{fmtUsd(BUNDLE_ONE_TIME)}</div>
-              <div className="text-[11px] text-muted-foreground/70 mt-2 font-case tracking-wide">one-time, operator-led</div>
+              <div className="text-[11px] text-muted-foreground mt-2 font-case tracking-wide">one-time, operator-led</div>
             </div>
             <div className="border border-border rounded-xl bg-card p-5">
               <div className="font-case text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Agency over 12 mo</div>
               <div className="font-forensic font-black text-3xl md:text-4xl text-destructive mt-2 leading-none">{fmtUsd(AGENCY_TOTAL)}</div>
-              <div className="text-[11px] text-muted-foreground/70 mt-2 font-case tracking-wide">$3,000 × 12</div>
+              <div className="text-[11px] text-muted-foreground mt-2 font-case tracking-wide">$3,000 × 12</div>
             </div>
             <div className="border border-amber/50 rounded-xl bg-amber/[0.06] p-5">
               <div className="font-case text-[10px] tracking-[0.16em] uppercase text-amber">You save</div>
@@ -147,7 +147,7 @@ export const ComparisonSection: React.FC = () => {
             <div className="border border-border rounded-xl bg-card p-5">
               <div className="font-case text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Cost multiple</div>
               <div className="font-forensic font-black text-3xl md:text-4xl text-foreground mt-2 leading-none">{MULTIPLE}×</div>
-              <div className="text-[11px] text-muted-foreground/70 mt-2 font-case tracking-wide">agency ÷ Revenue Pack</div>
+              <div className="text-[11px] text-muted-foreground mt-2 font-case tracking-wide">agency ÷ Revenue Pack</div>
             </div>
           </div>
 
@@ -185,7 +185,7 @@ export const ComparisonSection: React.FC = () => {
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[11.5px] text-muted-foreground/70 leading-relaxed font-case tracking-wide italic">
+          <p className="mt-3 text-[11.5px] text-muted-foreground leading-relaxed font-case tracking-wide italic">
             Sources: WebFX & SmartSites published / G2 pricing, Clutch industry survey (2026). All agency pricing is monthly and ongoing; every Aetheris bundle is one-time, operator-led.
           </p>
         </RevealOnScroll>

@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
                       ? 'text-amber after:bg-amber after:w-full after:scale-x-100'
                       : item.accent
                       ? 'text-amber/90 hover:text-amber font-semibold after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
-                      : 'text-foreground/75 hover:text-amber after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      : 'text-foreground/90 hover:text-amber after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
                   }`}
                 >
                   {item.label}

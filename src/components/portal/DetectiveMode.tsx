@@ -574,7 +574,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80 flex items-center gap-1">
               <Brain className="w-3 h-3" /> internal monologue · live
             </p>
-            <span className="text-[9px] font-mono text-muted-foreground/60">{selfTalk.length} thoughts</span>
+            <span className="text-[9px] font-mono text-muted-foreground">{selfTalk.length} thoughts</span>
           </div>
           <div ref={talkScrollRef} className="max-h-36 overflow-y-auto space-y-1 pr-1">
             {selfTalk.map((line, i) => {
@@ -583,7 +583,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
                 <p
                   key={`${i}-${line.slice(0, 8)}`}
                   className={`text-[11.5px] leading-snug font-case italic animate-fade-in ${
-                    isLast ? 'text-amber' : 'text-muted-foreground/70'
+                    isLast ? 'text-amber' : 'text-muted-foreground'
                   }`}
                 >
                   <span className="text-amber/50 mr-1.5 not-italic">›</span>
@@ -667,7 +667,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
                 >
                   <div className="mt-0.5 flex-shrink-0">{beatIcon(b.type)}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70 mb-0.5">
+                    <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-0.5">
                       {b.type === 'question' ? 'asks itself' : b.type}
                     </p>
                     <p className={`text-[12px] leading-relaxed ${b.type === 'question' ? 'text-amber italic' : 'text-foreground'}`}>
@@ -846,7 +846,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="w-3.5 h-3.5 text-amber" />
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">The trail of clues</p>
-              <span className="text-[9px] font-mono text-muted-foreground/60">· follow the string</span>
+              <span className="text-[9px] font-mono text-muted-foreground">· follow the string</span>
             </div>
             <ol className="relative space-y-3 pl-6">
               {/* the string */}
@@ -870,7 +870,7 @@ export const DetectiveMode: React.FC<Props> = ({ lead, scan, rr, fc, enrichment,
                       </div>
                       {s.evidence && (
                         <div className="mt-2 pt-2 border-t border-dashed border-border/50">
-                          <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60 mb-0.5">Evidence pinned</p>
+                          <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-0.5">Evidence pinned</p>
                           <p className="text-[11px] text-foreground/80 italic leading-relaxed">"{s.evidence}"</p>
                         </div>
                       )}
