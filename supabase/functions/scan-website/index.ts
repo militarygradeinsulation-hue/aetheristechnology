@@ -146,10 +146,10 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
   const leakRange = computeLeakRange(host, scoreForLeaks);
   const analysis = {
     signals,
-    score: breakdown.total,
+    score: scoreForLeaks,
     score_breakdown: breakdown.parts,
     ...(breakdown.reason ? { score_reason: breakdown.reason } : {}),
-    grade: gradeFromScore(breakdown.total),
+    grade: gradeFromScore(scoreForLeaks),
     companyName,
     executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(leakRange.low)} - ${fmt$(leakRange.high)}.`,
     gaps,
@@ -235,14 +235,6 @@ serve(async (req) => {
     const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
     if (!FIRECRAWL_API_KEY) {
       return new Response(JSON.stringify({ error: "Firecrawl not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "AI not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -394,7 +386,38 @@ serve(async (req) => {
     const links = scrapeData.data?.links || scrapeData.links || [];
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
 
-    console.log("Scrape successful, analyzing with AI...");
+    console.log("Scrape successful, building deterministic scan...");
+
+    const deterministic = buildDeterministicAnalysis(markdown, links, metadata, formattedUrl, parsedHost);
+    deterministic._fallback = false;
+    deterministic._mode = "deterministic";
+    deterministic._fallbackReason = "AI gateway bypassed; deterministic scanner used.";
+
+    try {
+      await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          score: deterministic.score,
+          gaps: deterministic,
+        }),
+      });
+    } catch (saveErr) {
+      console.warn("Website scan save failed, returning report anyway:", saveErr);
+    }
+
+    return new Response(JSON.stringify(deterministic), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -615,17 +638,17 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       for (let attempt = 0; attempt < 1; attempt++) {
         try {
           aiResponse = await callAi(m);
-        } catch (err) {
+        } catch (err: any) {
           lastErrText = err instanceof Error ? err.message : String(err);
           console.error(`AI gateway request failed (model=${m}, attempt=${attempt + 1}):`, lastErrText);
           aiResponse = null;
           break outer;
         }
-        if (aiResponse.ok) break outer;
-        lastErrText = await aiResponse.clone().text();
-        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
-        if (aiResponse.status === 429 || aiResponse.status === 402) break outer;
-        if (aiResponse.status === 503 || aiResponse.status >= 500) {
+        if (aiResponse!.ok) break outer;
+        lastErrText = await aiResponse!.clone().text();
+        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse!.status, lastErrText);
+        if (aiResponse!.status === 429 || aiResponse!.status === 402) break outer;
+        if (aiResponse!.status === 503 || aiResponse!.status >= 500) {
           await sleep(800 * (attempt + 1));
           continue;
         }
@@ -633,7 +656,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }
     }
 
-    if (!aiResponse || !aiResponse.ok) {
+    if (!aiResponse || !aiResponse!.ok) {
       const status = aiResponse?.status ?? 503;
       console.error("AI gateway final failure:", status, lastErrText);
 
@@ -673,7 +696,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       });
     }
 
-    const aiData = await aiResponse.json();
+    const aiData = await aiResponse!.json();
     console.log("AI response received");
 
     let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
