@@ -399,7 +399,8 @@ serve(async (req) => {
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
+        "X-Lovable-AIG-SDK": "edge-fetch",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -606,11 +607,11 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     });
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const models = ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite", "google/gemini-2.5-pro"];
+    const models = ["google/gemini-3-flash-preview", "google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     outer: for (const m of models) {
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 1; attempt++) {
         aiResponse = await callAi(m);
         if (aiResponse.ok) break outer;
         lastErrText = await aiResponse.clone().text();
