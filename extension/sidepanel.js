@@ -1021,3 +1021,140 @@ function openCaseDetail(host) {
 }
 
 $("case-back").addEventListener("click", resetCaseView);
+
+// ---------------- v0.8.5 — Collapsible sections + Contact Finder ----------------
+
+// Delegated collapse toggling for any card with class .extra-report, .dossier, .leak
+document.addEventListener("click", (e) => {
+  // Click on the header element should toggle the parent .is-collapsed.
+  const extraH = e.target.closest(".extra-report > h4");
+  const dossierH = e.target.closest(".dossier-head");
+  const leakH = e.target.closest(".leak-head");
+  // Only fire if the click was directly on the header (not on a button inside it).
+  if (e.target.closest("button, a, input, select, textarea")) return;
+  if (extraH) extraH.parentElement.classList.toggle("is-collapsed");
+  else if (dossierH) dossierH.parentElement.classList.toggle("is-collapsed");
+  else if (leakH) leakH.parentElement.classList.toggle("is-collapsed");
+});
+
+function setCollapsedAll(collapsed) {
+  document.querySelectorAll("#tab-scan .extra-report, #tab-scan .dossier, #tab-scan .leak, #tab-scan .contacts-card")
+    .forEach((el) => el.classList.toggle("is-collapsed", collapsed));
+}
+$("scan-collapse-all")?.addEventListener("click", () => setCollapsedAll(true));
+$("scan-expand-all")?.addEventListener("click", () => setCollapsedAll(false));
+
+// Contacts-card uses .collapsible-head/.collapsible-body classes; delegate there too.
+document.addEventListener("click", (e) => {
+  const head = e.target.closest(".contacts-card > .collapsible-head");
+  if (!head) return;
+  if (e.target.closest("button, a")) return;
+  head.parentElement.classList.toggle("is-collapsed");
+});
+
+// ----- Find Contacts (Firecrawl + RocketReach) -----
+async function runFindContacts() {
+  const out = $("scan-contacts-out");
+  if (!out) return;
+  const url = state.activeUrl || state.lastScan?.url;
+  if (!url) { toast("Open a page first."); return; }
+  out.innerHTML = `<div class="contacts-card"><h4>Contacts · scraping site + RocketReach…</h4><div class="muted">This can take 10-20 seconds.</div></div>`;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/extension-contacts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ url }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+    renderContacts(data);
+    // Save into case file
+    if (state.activeHost) {
+      const entry = state.caseFiles[state.activeHost] || { history: [], fixes: [], autopsies: [], extras: {} };
+      entry.contacts = data;
+      state.caseFiles[state.activeHost] = entry;
+      await chrome.storage.local.set({ caseFiles: state.caseFiles });
+    }
+  } catch (e) {
+    out.innerHTML = `<div class="contacts-card"><h4>Contacts</h4><div class="muted">Failed: ${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+function copyText(s) {
+  navigator.clipboard?.writeText(s).then(() => toast(`Copied ${s}`));
+}
+
+function renderContacts(d) {
+  const out = $("scan-contacts-out");
+  const emails = d.emails || [];
+  const phones = d.phones || [];
+  const socials = d.socials || {};
+  const dms = d.decision_makers || [];
+  const siteLeaders = d.leadership_from_site || [];
+  const noteParts = [];
+  if (!d.sources?.firecrawl_configured) noteParts.push("Firecrawl not configured");
+  if (!d.sources?.rocketreach_configured) noteParts.push("RocketReach not configured");
+  if (d.sources?.firecrawl_configured && !d.sources?.firecrawl) noteParts.push("Firecrawl returned no data");
+  if (d.sources?.rocketreach_configured && !d.sources?.rocketreach) noteParts.push("RocketReach found no profiles");
+
+  const emailChips = emails.length
+    ? emails.map(e => `<span class="contact-chip">${escapeHtml(e)}<button data-copy="${escapeAttr(e)}" title="Copy">⧉</button></span>`).join("")
+    : `<span class="muted">No emails found.</span>`;
+
+  const phoneChips = phones.length
+    ? phones.map(p => `<span class="contact-chip">${escapeHtml(p)}<button data-copy="${escapeAttr(p)}" title="Copy">⧉</button></span>`).join("")
+    : `<span class="muted">No phone numbers found.</span>`;
+
+  const socialBits = Object.entries(socials).filter(([, v]) => v).map(([k, v]) =>
+    `<a class="contact-chip" href="${escapeAttr(v)}" target="_blank" rel="noopener">${escapeHtml(k)} ↗</a>`
+  ).join("") || `<span class="muted">No social links.</span>`;
+
+  const dmRows = dms.map(p => {
+    const best = (p.emails || [])[0]?.email;
+    const phone = (p.phones || [])[0]?.number;
+    return `<div class="dm-row">
+      ${p.profile_pic ? `<img class="dm-pic" src="${escapeAttr(p.profile_pic)}" alt="" onerror="this.style.display='none'" />` : `<div class="dm-pic"></div>`}
+      <div class="dm-body">
+        <div class="dm-name">${escapeHtml(p.name || "—")}</div>
+        <div class="dm-title">${escapeHtml(p.title || "")}${p.employer ? " · " + escapeHtml(p.employer) : ""}</div>
+        <div class="dm-meta">
+          ${best ? `<span>${escapeHtml(best)} <button data-copy="${escapeAttr(best)}" style="background:transparent;border:0;color:var(--amber);cursor:pointer">⧉</button></span>` : ""}
+          ${phone ? `<span>${escapeHtml(phone)} <button data-copy="${escapeAttr(phone)}" style="background:transparent;border:0;color:var(--amber);cursor:pointer">⧉</button></span>` : ""}
+          ${p.linkedin_url ? `<a href="${escapeAttr(p.linkedin_url)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ""}
+          ${p.location ? `<span>${escapeHtml(p.location)}</span>` : ""}
+        </div>
+      </div>
+    </div>`;
+  }).join("") || `<span class="muted">No decision-makers returned from RocketReach.</span>`;
+
+  const siteLeaderRows = siteLeaders.length ? `
+    <div class="contacts-section">
+      <h5>Leadership scraped from site</h5>
+      ${siteLeaders.map(l => `<div class="dm-row"><div class="dm-pic"></div><div class="dm-body">
+        <div class="dm-name">${escapeHtml(l.name || "—")}</div>
+        <div class="dm-title">${escapeHtml(l.title || "")}</div>
+        <div class="dm-meta">${l.email ? `<span>${escapeHtml(l.email)} <button data-copy="${escapeAttr(l.email)}" style="background:transparent;border:0;color:var(--amber);cursor:pointer">⧉</button></span>` : ""}${l.linkedin ? `<a href="${escapeAttr(l.linkedin)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ""}</div>
+      </div></div>`).join("")}
+    </div>` : "";
+
+  out.innerHTML = `
+    <div class="contacts-card">
+      <div class="collapsible-head"><h4 style="margin:0">Contacts · ${escapeHtml(d.domain || "")}${d.company ? " · " + escapeHtml(d.company) : ""}</h4></div>
+      <div class="collapsible-body">
+        ${noteParts.length ? `<div class="muted" style="font-size:11px;margin-bottom:8px">⚠ ${escapeHtml(noteParts.join(" · "))}</div>` : ""}
+        <div class="contacts-section"><h5>Emails (${emails.length})</h5>${emailChips}</div>
+        <div class="contacts-section"><h5>Phones (${phones.length})</h5>${phoneChips}</div>
+        <div class="contacts-section"><h5>Social</h5>${socialBits}</div>
+        <div class="contacts-section"><h5>Decision-makers · RocketReach (${dms.length})</h5>${dmRows}</div>
+        ${siteLeaderRows}
+        <div class="muted" style="font-size:10px;margin-top:10px">Fetched ${new Date(d.fetched_at).toLocaleTimeString()}</div>
+      </div>
+    </div>`;
+
+  out.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    copyText(b.dataset.copy);
+  }));
+}
+
+$("scan-contacts")?.addEventListener("click", runFindContacts);
