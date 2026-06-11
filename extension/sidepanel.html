@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aetheris Operator</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="cockpit-header">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div>
+        <div class="brand-title">Aetheris Operator</div>
+        <div class="brand-sub" id="active-host">—</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="overlay-toggle" class="ghost" title="Toggle on-page X-ray overlay">X-RAY</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="scan">Scan</button>
+    <button class="tab" data-tab="operator">Operator</button>
+    <button class="tab" data-tab="fix">Fix</button>
+    <button class="tab" data-tab="growth">Growth</button>
+    <button class="tab" data-tab="case">Case File</button>
+  </nav>
+
+  <main>
+    <!-- SCAN -->
+    <section class="panel active" id="tab-scan">
+      <div class="row">
+        <button id="scan-run" class="primary">Run Forensic Scan</button>
+        <button id="scan-deepen" class="ghost" title="Run Pass B AI judgment on these findings">Deepen with AI</button>
+      </div>
+      <div id="scan-meta" class="meta hidden"></div>
+      <div id="scan-results"></div>
+    </section>
+
+    <!-- OPERATOR -->
+    <section class="panel" id="tab-operator">
+      <div class="modepill">
+        <button class="m active" data-mode="observe">Observe</button>
+        <button class="m" data-mode="suggest">Suggest</button>
+        <button class="m" data-mode="execute">Execute</button>
+      </div>
+      <div id="chat-log" class="chat"></div>
+      <form id="chat-form" class="composer">
+        <textarea id="chat-input" rows="2" placeholder="Ask the Operator about what's on this page…"></textarea>
+        <button type="submit" class="primary">Send</button>
+      </form>
+      <div class="hint" id="op-hint">Observe: panel auto-scans every page. Suggest: free chat with vision. Execute: enabled only on allow-listed domains.</div>
+    </section>
+
+    <!-- FIX -->
+    <section class="panel" id="tab-fix">
+      <div class="empty" id="fix-empty">Run a scan first. Leaks will route to matching tools here.</div>
+      <div id="fix-list"></div>
+    </section>
+
+    <!-- GROWTH -->
+    <section class="panel" id="tab-growth">
+      <div class="card">
+        <div class="card-title">LinkedIn Reply Drafter</div>
+        <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to…"></textarea>
+        <div class="row">
+          <select id="li-tone">
+            <option value="forensic">Forensic operator</option>
+            <option value="agree">Agree-and-extend</option>
+            <option value="contrarian">Contrarian challenge</option>
+          </select>
+          <button id="li-go" class="primary">Draft reply</button>
+        </div>
+        <pre id="li-out" class="out"></pre>
+      </div>
+    </section>
+
+    <!-- CASE FILE -->
+    <section class="panel" id="tab-case">
+      <div class="row">
+        <input id="case-search" placeholder="Search domains…" />
+        <button id="case-compare" class="ghost">Compare 2</button>
+      </div>
+      <div id="case-list"></div>
+      <div id="case-diff"></div>
+    </section>
+
+    <!-- AUTOPSY (floats inside Scan tab via button) -->
+    <div id="autopsy-bar" class="autopsy-bar hidden">
+      <span class="dot"></span><span id="autopsy-status">Recording funnel autopsy…</span>
+      <button id="autopsy-stop" class="primary">Stop</button>
+    </div>
+  </main>
+
+  <footer class="cockpit-footer">
+    <button id="autopsy-start" class="ghost">⏺ Record Autopsy</button>
+    <span class="muted">v0.3 · Forensic Cockpit</span>
+  </footer>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
