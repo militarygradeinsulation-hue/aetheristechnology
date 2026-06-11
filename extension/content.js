@@ -712,6 +712,43 @@
       const id = recordRevert(() => touched.forEach(([el, attr, orig]) => el.setAttribute(attr, orig)));
       return { revertId: id, message: `Rewrote ${touched.length} insecure URLs to https://.` };
     },
+    form_unlabeled(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s, idx) => {
+        try {
+          const el = document.querySelector(s);
+          if (!el || el.getAttribute("aria-label")) return;
+          touched.push([el, el.getAttribute("aria-label")]);
+          el.setAttribute("aria-label", el.getAttribute("placeholder") || `Field ${idx + 1}`);
+        } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, orig]) => orig === null ? el.removeAttribute("aria-label") : el.setAttribute("aria-label", orig)));
+      return { revertId: id, message: `Added aria-labels to ${touched.length} fields.` };
+    },
+    heading_skip(leak) { return previewChecklist(leak, "Normalize heading levels in sequence: H1, H2, H3. No jumps."); },
+    no_form(leak) { return injectLeadCapturePreview(leak); },
+    no_followup_hook(leak) { return injectLeadCapturePreview(leak, "Add calendar/chat capture here"); },
+    no_proof(leak) { return injectProofPreview(leak); },
+    no_pricing(leak) { return injectBannerPreview(leak, "Pricing signal missing. Add starting price, range, or package tiers."); },
+    no_visible_contact(leak) { return injectBannerPreview(leak, "Contact path missing. Add phone, email, or direct booking route."); },
+    page_weight(leak) { return previewChecklist(leak, "Compress hero media. Convert large images to WebP/AVIF. Defer non-critical scripts."); },
+    third_party_bloat(leak) { return previewChecklist(leak, "Audit scripts. Remove low-value tags. Defer chat, heatmaps, and retargeting until consent/intent."); },
+    hero_image_weight(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s) => {
+        try { const el = document.querySelector(s); if (el) { touched.push([el, el.style.cssText]); el.style.outline = "3px solid #f59e0b"; el.style.filter = "saturate(.75) contrast(.9)"; } } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, css]) => el.style.cssText = css));
+      return { revertId: id, message: `Marked ${touched.length} heavy hero image(s) for compression.` };
+    },
+    autoplay_loud(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s) => {
+        try { const el = document.querySelector(s); if (el?.tagName === "VIDEO") { touched.push([el, el.muted]); el.muted = true; } } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, muted]) => { el.muted = muted; }));
+      return { revertId: id, message: `Muted ${touched.length} autoplay video(s).` };
+    },
     // Generic AI-driven visual fix. Routed for any leak with a structured fixAction.
     ai_visual(leak) {
       const fa = leak?.fixAction;
