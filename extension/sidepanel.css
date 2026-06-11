@@ -111,9 +111,21 @@ textarea { resize: vertical; font-family: inherit; }
 .leak-why { color: var(--muted); margin: 4px 0; }
 .leak-fix { color: var(--fg); font-size: 13px; }
 .leak-fix b { color: var(--amber); }
-.leak-actions { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+.leak-actions { display: flex; gap: 6px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
 .leak-actions button { padding: 4px 8px; font-size: 10px; }
 .applied { color: var(--ok); font: 700 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+
+.fix-unavailable {
+  color: var(--muted); font: 700 10px var(--mono); letter-spacing: 0.08em;
+  text-transform: uppercase; border: 1px dashed var(--line); padding: 4px 7px; border-radius: 3px;
+}
+.action-bank, .op-actions {
+  margin-top: 8px; padding: 8px; background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 4px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+}
+.action-bank-title { width: 100%; color: var(--amber); font: 700 10px var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+.op-actions { margin-bottom: 10px; border-left: 3px solid var(--amber); }
+.op-actions .muted { width: 100%; font: 11px var(--mono); }
 
 .chat { min-height: 240px; max-height: calc(100vh - 280px); overflow-y: auto; padding: 4px 0; }
 .bubble { padding: 8px 10px; border-radius: 6px; margin: 6px 0; max-width: 92%; white-space: pre-wrap; }
@@ -130,6 +142,11 @@ textarea { resize: vertical; font-family: inherit; }
 
 .composer { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .hint { color: var(--muted); font: 11px var(--mono); margin-top: 6px; }
+
+.operator-controls { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.operator-controls button { padding: 6px 8px; font-size: 10px; }
+.bubble-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.bubble-actions button { padding: 5px 8px; font-size: 10px; }
 
 .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px; margin-bottom: 10px; }
 .card-title { font-weight: 700; margin-bottom: 8px; }
