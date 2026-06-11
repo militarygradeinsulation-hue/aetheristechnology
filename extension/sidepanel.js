@@ -322,22 +322,135 @@ async function callOperator(userText, withScreenshot = false) {
   return data.reply || "(empty)";
 }
 
-// Reply
+// ---------------- LinkedIn Reply Drafter (mirrors Content Studio) ----------------
+const liState = {
+  source: "image",                // image | text | reply
+  imageDataUrl: null,             // for source=image
+  replyImgs: { myComment: null, theirReply: null, originalPost: null },
+  lastDraft: "",
+  lastDraftPayload: null,
+};
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result || ""));
+    fr.onerror = () => reject(new Error("Could not read file"));
+    fr.readAsDataURL(file);
+  });
+}
+
+// Source-pill toggle
+document.querySelectorAll("#li-source-pill .m").forEach((b) => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#li-source-pill .m").forEach((x) => x.classList.toggle("active", x === b));
+    liState.source = b.dataset.src;
+    document.querySelectorAll(".li-src").forEach((el) => el.classList.add("hidden"));
+    $(`li-src-${liState.source}`).classList.remove("hidden");
+  });
+});
+
+// IMAGE: upload
+$("li-img-file").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0]; if (!f) return;
+  try {
+    liState.imageDataUrl = await readFileAsDataUrl(f);
+    const p = $("li-img-preview"); p.src = liState.imageDataUrl; p.classList.remove("hidden");
+  } catch (err) { toast(err.message); }
+});
+// IMAGE: capture current tab viewport
+$("li-img-capture").addEventListener("click", async () => {
+  const cap = await captureViewport();
+  if (!cap?.dataUrl) return toast("Capture failed.");
+  liState.imageDataUrl = cap.dataUrl;
+  const p = $("li-img-preview"); p.src = cap.dataUrl; p.classList.remove("hidden");
+});
+$("li-img-clear").addEventListener("click", () => {
+  liState.imageDataUrl = null;
+  $("li-img-file").value = "";
+  $("li-img-preview").classList.add("hidden");
+});
+
+// TEXT: grab selection
 $("li-grab").addEventListener("click", async () => {
   const x = await relayToTab({ type: "AETHERIS_EXTRACT" });
   if (x?.selection) $("li-post").value = x.selection;
   else toast("No text selected on the page.");
 });
-$("li-go").addEventListener("click", async () => {
-  const post = $("li-post").value.trim(); if (!post) return;
-  const tone = $("li-tone").value;
-  const out = $("li-out"); out.textContent = "Drafting…";
+
+// REPLY-TO-REPLY: per-slot image attachments
+document.querySelectorAll('[data-li-img]').forEach((input) => {
+  input.addEventListener("change", async (e) => {
+    const slot = input.dataset.liImg;
+    const f = e.target.files?.[0]; if (!f) return;
+    try {
+      const url = await readFileAsDataUrl(f);
+      liState.replyImgs[slot] = url;
+      const prev = document.querySelector(`[data-li-prev="${slot}"]`);
+      if (prev) { prev.src = url; prev.classList.remove("hidden"); }
+    } catch (err) { toast(err.message); }
+  });
+});
+
+async function draftLinkedInReply() {
+  const out = $("li-out");
+  const mode = $("li-length").value || "brief";
+  const direction = $("li-direction").value.trim();
+
+  let body = {
+    mode,
+    extraContext: direction,
+    recentDrafts: [],
+  };
+
+  if (liState.source === "image") {
+    if (!liState.imageDataUrl) return toast("Add a screenshot first.");
+    body.imageDataUrl = liState.imageDataUrl;
+  } else if (liState.source === "text") {
+    const post = $("li-post").value.trim();
+    if (post.length < 10) return toast("Paste the post text (at least 10 chars).");
+    body.postText = post;
+  } else {
+    const mine = $("li-r-mine").value.trim();
+    const theirs = $("li-r-theirs").value.trim();
+    const orig = $("li-r-orig").value.trim();
+    if ((mine.length < 10 && !liState.replyImgs.myComment) || (theirs.length < 5 && !liState.replyImgs.theirReply)) {
+      return toast("Need your comment AND their reply (text or screenshot).");
+    }
+    body = {
+      ...body,
+      conversationKind: "reply_to_reply",
+      myComment: mine,
+      theirReply: theirs,
+      originalPostText: orig,
+      myCommentImageDataUrl: liState.replyImgs.myComment || "",
+      theirReplyImageDataUrl: liState.replyImgs.theirReply || "",
+      originalPostImageDataUrl: liState.replyImgs.originalPost || "",
+    };
+  }
+
+  liState.lastDraftPayload = body;
+  out.textContent = "Drafting…";
   try {
-    const reply = await callOperator(
-      `Draft a LinkedIn reply in the "${tone}" voice. 2-4 sentences. No emojis, no hashtags, no em dashes. Forensic operator voice. Source post below.\n\nSOURCE POST:\n${post}`
-    );
-    out.textContent = reply;
-  } catch (e) { out.textContent = `Failed: ${e.message}`; }
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/linkedin-post-respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+    liState.lastDraft = data.post || "(empty)";
+    out.textContent = liState.lastDraft;
+  } catch (e) {
+    out.textContent = `Failed: ${e.message}`;
+  }
+}
+$("li-go").addEventListener("click", draftLinkedInReply);
+$("li-regen").addEventListener("click", draftLinkedInReply);
+$("li-copy").addEventListener("click", async () => {
+  if (!liState.lastDraft) return toast("Nothing to copy yet.");
+  try { await navigator.clipboard.writeText(liState.lastDraft); toast("Copied."); }
+  catch { toast("Copy blocked by browser."); }
 });
 
 // Post from page
