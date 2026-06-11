@@ -58,3 +58,54 @@
 #aetheris-panel .ae-variant .ae-actions { display: flex; gap: 6px; margin-top: 8px; }
 #aetheris-panel .ae-error { color: #ff6b6b; margin-top: 10px; font-size: 12px; }
 #aetheris-panel .ae-hint { color: #888; margin-top: 8px; font-size: 11px; }
+
+#aetheris-panel .ae-tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2419;
+  background: #0f1115;
+}
+#aetheris-panel .ae-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 10px 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+#aetheris-panel .ae-tab.active {
+  color: #f5a524;
+  border-bottom-color: #f5a524;
+}
+#aetheris-panel .ae-label-input {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #888;
+  margin: 8px 0 4px;
+}
+#aetheris-panel .ae-input {
+  width: 100%;
+  background: #0f1115;
+  border: 1px solid #2a2419;
+  border-radius: 4px;
+  padding: 8px;
+  color: #f3efe7;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+#aetheris-panel .ae-input:focus {
+  outline: none;
+  border-color: #f5a524;
+}
+#aetheris-panel select.ae-input {
+  cursor: pointer;
+}
