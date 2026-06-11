@@ -85,6 +85,8 @@ async function runScanFlow({ silent = false } = {}) {
   $("scan-dossier").innerHTML = "";
   $("scan-extra").innerHTML = "";
   state.lastDossier = null;
+  const revertIds = Array.from(state.revertById.values());
+  await Promise.allSettled(revertIds.map((revertId) => relayToTab({ type: "AETHERIS_REVERT_FIX", revertId })));
   state.revertById.clear();
   const res = await relayToTab({ type: "AETHERIS_SCAN" });
   if (res?.error) { $("scan-results").innerHTML = `<div class="bubble err">${escapeHtml(res.error)}</div>`; return res; }
