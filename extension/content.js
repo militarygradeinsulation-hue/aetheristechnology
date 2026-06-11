@@ -510,6 +510,50 @@
     catch (e) { return { ok: false, error: String(e) }; }
   }
 
+  function injectBannerPreview(leak, text) {
+    const banner = document.createElement("div");
+    banner.textContent = String(leak?.aiFix || text || leak?.fix || "Preview fix").slice(0, 180);
+    banner.setAttribute("data-aetheris-injected", "1");
+    Object.assign(banner.style, {
+      position: "fixed", left: "0", right: "0", bottom: "0", zIndex: "2147483640",
+      background: "#f59e0b", color: "#0a0a0a", padding: "12px 18px", textAlign: "center",
+      fontFamily: "ui-monospace,Menlo,monospace", fontWeight: "700", letterSpacing: "0.04em",
+      boxShadow: "0 -4px 16px rgba(245,158,11,0.35)",
+    });
+    document.body.appendChild(banner);
+    const id = recordRevert(() => banner.remove());
+    return { revertId: id, message: "Injected a preview repair banner." };
+  }
+
+  function injectLeadCapturePreview(leak, label = "Start here") {
+    const box = document.createElement("form");
+    box.setAttribute("data-aetheris-injected", "1");
+    box.innerHTML = `<strong>${label}</strong><input aria-label="Name" placeholder="Name"><input aria-label="Email" placeholder="Email"><button type="button">Submit</button>`;
+    Object.assign(box.style, {
+      position: "fixed", right: "16px", bottom: "16px", zIndex: "2147483640", width: "min(320px, calc(100vw - 32px))",
+      display: "grid", gap: "8px", background: "#111", color: "#e5e5e5", border: "2px solid #f59e0b",
+      borderRadius: "4px", padding: "12px", fontFamily: "ui-monospace,Menlo,monospace", boxShadow: "0 8px 28px rgba(0,0,0,.45)",
+    });
+    box.querySelectorAll("input").forEach((i) => Object.assign(i.style, { padding: "10px", border: "1px solid #333", borderRadius: "3px", background: "#181818", color: "#e5e5e5" }));
+    Object.assign(box.querySelector("button").style, { padding: "10px", border: "0", borderRadius: "3px", background: "#f59e0b", color: "#0a0a0a", fontWeight: "700" });
+    document.body.appendChild(box);
+    const id = recordRevert(() => box.remove());
+    return { revertId: id, message: "Inserted a preview lead-capture module." };
+  }
+
+  function injectProofPreview(leak) {
+    const proof = document.createElement("section");
+    proof.setAttribute("data-aetheris-injected", "1");
+    proof.textContent = leak?.aiFix || "Proof block preview: add named outcomes, client logos, or measurable before/after results here.";
+    Object.assign(proof.style, { padding: "16px", margin: "12px", background: "#111", color: "#e5e5e5", border: "2px solid #f59e0b", fontFamily: "ui-monospace,Menlo,monospace" });
+    const target = document.querySelector("main") || document.body;
+    target.prepend(proof);
+    const id = recordRevert(() => proof.remove());
+    return { revertId: id, message: "Inserted a preview proof block." };
+  }
+
+  function previewChecklist(leak, text) { return injectBannerPreview(leak, text); }
+
   const INPAGE_FIXES = {
     no_meta_desc(leak) {
       const proposed = (leak?.aiFix || "Service offer for [audience] that delivers [measurable outcome]. Contact today.").slice(0, 160);
