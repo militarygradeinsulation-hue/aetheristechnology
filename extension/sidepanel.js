@@ -197,8 +197,15 @@ function renderDossier() {
           <dt>Confession</dt><dd class="confession">${escapeHtml(d.dossier.confession || "—")}</dd>
         </dl>` : ""}
       ${d.priorityFix ? `<div class="priority"><b>Ship this week:</b> ${escapeHtml(d.priorityFix)}</div>` : ""}
+      <div class="action-bank">
+        <div class="action-bank-title">Available controls</div>
+        <button class="primary" data-op-action="fixes">Open fix buttons</button>
+        <button class="ghost" data-op-action="overlay">Show X-ray</button>
+        <button class="ghost" data-op-action="undo">Undo last fix</button>
+      </div>
     </div>
   `;
+  wireOperatorActionButtons($("scan-dossier"));
 }
 
 function renderScan() {
@@ -230,6 +237,8 @@ function renderScan() {
         ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
         ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
         ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
+        ${!fixable ? `<span class="fix-unavailable">Manual fix</span>` : ""}
+        <button class="ghost" data-fix-tab="${escapeAttr(l.id)}">View fix buttons</button>
         <div class="more-menu">
           <button class="ghost more-btn" data-more="${escapeAttr(l.id)}">More ▾</button>
         </div>
