@@ -31,12 +31,16 @@
   <main>
     <!-- SCAN -->
     <section class="panel active" id="tab-scan">
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap;gap:6px">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
-        <button id="scan-deepen" class="ghost" title="Run Detective Mode AI judgment on these findings">Deepen (Detective)</button>
+        <button id="scan-deepen" class="ghost" title="AI dossier on these findings">Deepen (Detective)</button>
+        <button id="scan-contradictions" class="ghost" title="Find brand contradictions on this page">Contradictions</button>
+        <button id="scan-friction" class="ghost" title="Find friction vocabulary on this page">Friction</button>
+        <button id="scan-download" class="ghost" title="Download full report as Markdown">⬇ Report</button>
       </div>
       <div id="scan-meta" class="meta hidden"></div>
       <div id="scan-dossier"></div>
+      <div id="scan-extra"></div>
       <div id="scan-results"></div>
     </section>
 
