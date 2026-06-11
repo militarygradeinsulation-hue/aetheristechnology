@@ -437,35 +437,45 @@ function renderFix() {
   const empty = $("fix-empty");
   if (!state.lastScan || !state.lastScan.leaks?.length) { empty.classList.remove("hidden"); out.innerHTML = ""; return; }
   empty.classList.add("hidden");
-  const fixable = state.lastScan.leaks.filter(hasInPageFix);
-  if (!fixable.length) { out.innerHTML = `<div class="empty">No in-page fixes available for this scan.</div>`; return; }
-  out.innerHTML = fixable.map((l, i) => {
+  const leaks = state.lastScan.leaks || [];
+  out.innerHTML = leaks.map((l, i) => {
+    const fixable = hasInPageFix(l);
     const revertId = state.revertById.get(l.id);
     return `
-      <div class="card">
+      <div class="card" data-fix-card="${escapeAttr(l.id)}">
         <div class="card-title">${i + 1}. ${escapeHtml(l.title)}</div>
         <div class="muted" style="margin-bottom:8px">${escapeHtml(l.why || "")}</div>
-        <div class="row">
-          ${revertId
-            ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Revert</button><span class="applied">✓ Applied</span>`
-            : `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>`}
+        <div class="leak-fix" style="margin-bottom:8px"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
+        <div class="row" style="flex-wrap:wrap">
+          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
+          ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>` : ""}
+          ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Undo this fix</button><span class="applied">✓ Applied</span>` : ""}
+          <button class="ghost" data-copy-fix="${escapeAttr(l.id)}">Copy fix</button>
+          <button class="ghost" data-open-page>Open page</button>
+          ${!fixable ? `<span class="fix-unavailable">No safe one-click patch</span>` : ""}
         </div>
       </div>`;
   }).join("");
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
-    const leak = state.lastScan.leaks.find((x) => x.id === id);
     b.disabled = true; b.textContent = "Applying…";
-    const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
-    if (r?.ok) { state.revertById.set(id, r.revertId); toast(r.message || "Applied."); renderFix(); renderScan(); }
+    const r = await applyLeakFix(id);
+    if (r?.ok) { renderFix(); renderScan(); }
     else { b.disabled = false; b.textContent = "Apply in-page fix"; alert(r?.error || "Failed."); }
   }));
   out.querySelectorAll("[data-revert]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.revert;
-    const r = await relayToTab({ type: "AETHERIS_REVERT_FIX", revertId: state.revertById.get(id) });
-    if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderFix(); renderScan(); }
+    const r = await revertLeakFix(id);
+    if (r?.ok) { renderFix(); renderScan(); }
     else alert(r?.error || "Revert failed.");
   }));
+  out.querySelectorAll("[data-copy-fix]").forEach((b) => b.addEventListener("click", async () => {
+    const leak = state.lastScan.leaks.find((x) => x.id === b.dataset.copyFix);
+    await navigator.clipboard.writeText(leak?.fix || "");
+    toast("Fix copied.");
+  }));
+  out.querySelectorAll("[data-open-page]").forEach((b) => b.addEventListener("click", () => chrome.tabs.create({ url: state.activeUrl })));
 }
 
 // ---------------- GROWTH tab ----------------
