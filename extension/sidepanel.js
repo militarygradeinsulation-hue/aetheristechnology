@@ -75,20 +75,50 @@ async function saveCaseFile(scan) {
 loadCaseFiles();
 
 // ---------------- SCAN ----------------
-$("scan-run").addEventListener("click", async () => {
+function switchTab(tab) {
+  const btn = document.querySelector(`.tab[data-tab="${tab}"]`);
+  if (btn) btn.click();
+}
+
+async function runScanFlow({ silent = false } = {}) {
   $("scan-results").innerHTML = `<div class="empty">Scanning…</div>`;
   $("scan-dossier").innerHTML = "";
+  $("scan-extra").innerHTML = "";
   state.lastDossier = null;
   state.revertById.clear();
   const res = await relayToTab({ type: "AETHERIS_SCAN" });
-  if (res?.error) { $("scan-results").innerHTML = `<div class="bubble err">${res.error}</div>`; return; }
+  if (res?.error) { $("scan-results").innerHTML = `<div class="bubble err">${escapeHtml(res.error)}</div>`; return res; }
   state.lastScan = res;
   await saveCaseFile(res);
   renderScan();
+  renderOperatorLiveActions();
   if (state.overlayOn) drawOverlay();
-});
+  if (!silent) toast("Scan complete.");
+  return res;
+}
 
-$("scan-deepen").addEventListener("click", async () => {
+async function clearScan({ silent = false } = {}) {
+  const revertIds = Array.from(state.revertById.values());
+  await Promise.allSettled(revertIds.map((revertId) => relayToTab({ type: "AETHERIS_REVERT_FIX", revertId })));
+  state.lastScan = null;
+  state.lastDossier = null;
+  state.revertById.clear();
+  state.overlayOn = false;
+  await relayToTab({ type: "AETHERIS_OVERLAY_CLEAR" });
+  $("overlay-toggle").style.background = "transparent";
+  $("overlay-toggle").style.color = "var(--fg)";
+  $("scan-meta").classList.add("hidden");
+  $("scan-meta").innerHTML = "";
+  $("scan-dossier").innerHTML = "";
+  $("scan-extra").innerHTML = "";
+  $("scan-results").innerHTML = `<div class="empty">Cleared. Run a fresh forensic scan when ready.</div>`;
+  $("fix-empty").classList.remove("hidden");
+  $("fix-list").innerHTML = "";
+  renderOperatorLiveActions();
+  if (!silent) toast("Scan cleared.");
+}
+
+async function runDetectiveFlow() {
   if (!state.lastScan) return alert("Run a scan first.");
   const traceSteps = [
     "Capturing viewport…",
@@ -140,7 +170,11 @@ $("scan-deepen").addEventListener("click", async () => {
     clearInterval(traceTimer);
     $("scan-dossier").innerHTML = `<div class="bubble err">Detective Mode failed: ${e.message}</div>`;
   }
-});
+}
+
+$("scan-run").addEventListener("click", () => runScanFlow());
+$("scan-clear").addEventListener("click", () => clearScan());
+$("scan-deepen").addEventListener("click", () => runDetectiveFlow());
 
 function renderDossier() {
   const d = state.lastDossier; if (!d) { $("scan-dossier").innerHTML = ""; return; }
