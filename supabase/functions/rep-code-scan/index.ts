@@ -21,6 +21,27 @@ const clean = (v: unknown, max: number): string =>
 
 const isEmail = (s: string) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(s);
 
+function leadOnlyFallback(url: string, company: string) {
+  const host = (() => {
+    try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
+  })();
+  const companyName = company || host;
+  return {
+    _fallback: true,
+    _mode: "lead_capture_only",
+    score: 42,
+    grade: "D",
+    companyName,
+    executiveSummary: `${companyName} was captured as a lead, but the live website scan could not complete at this moment. The operator should still follow up: the safest first angle is a quick leak audit around CTA clarity, lead capture, proof, and speed.`,
+    gaps: [
+      { category: "CTA", severity: "critical", title: "Manual Follow-Up Required", description: "The automated scan path could not complete, so this lead should be reviewed manually instead of discarded.", annualCost: "$10,000 - $30,000", recommendedFix: "Open the website directly and check the first-screen CTA, contact path, and proof assets.", projectedROI: "100-200%" },
+      { category: "Lead Capture", severity: "warning", title: "Verify Contact Path", description: "Confirm whether the site has a visible phone number, email address, short form, or booking link.", annualCost: "$8,000 - $24,000", recommendedFix: "Document the easiest conversion path and lead with that in outreach.", projectedROI: "90-180%" },
+      { category: "Messaging", severity: "warning", title: "Check First-Screen Clarity", description: "Confirm whether a cold visitor can understand the offer, buyer, and outcome in five seconds.", annualCost: "$8,000 - $22,000", recommendedFix: "Use the first outreach touch to point out the clearest observed friction.", projectedROI: "90-180%" },
+    ],
+    nextSteps: ["Review the site manually", "Send a short operator-led leak audit opener"],
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -53,22 +74,29 @@ serve(async (req) => {
       return json(403, { error: "That operator code isn't active. Double-check with your operator." });
     }
 
-    // 2) Run the existing scan-website function
-    const scanRes = await fetch(`${SUPABASE_URL}/functions/v1/scan-website`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SVC}`,
-        apikey: SVC,
-      },
-      body: JSON.stringify({ url }),
-    });
-    if (!scanRes.ok) {
-      const t = await scanRes.text();
-      console.error("scan-website failed:", scanRes.status, t);
-      return json(scanRes.status, { error: "Scan failed. Try again or contact your operator." });
+    // 2) Run the existing scan-website function; never lose the lead if scan infrastructure is degraded.
+    let full: any = null;
+    try {
+      const scanRes = await fetch(`${SUPABASE_URL}/functions/v1/scan-website`, {
+        method: "POST",
+        signal: AbortSignal.timeout(20000),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SVC}`,
+          apikey: SVC,
+        },
+        body: JSON.stringify({ url }),
+      });
+      if (scanRes.ok) {
+        full = await scanRes.json();
+      } else {
+        const t = await scanRes.text();
+        console.error("scan-website failed:", scanRes.status, t);
+      }
+    } catch (scanErr) {
+      console.error("scan-website unavailable, using lead-only fallback:", scanErr);
     }
-    const full = await scanRes.json();
+    if (!full || typeof full !== "object") full = leadOnlyFallback(url, company);
 
     // 3) Build the teaser — enough to be useful, not enough to skip the call
     const gaps: any[] = Array.isArray(full?.gaps) ? full.gaps : [];
