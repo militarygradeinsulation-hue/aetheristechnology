@@ -84,6 +84,7 @@ async function runScanFlow({ silent = false } = {}) {
   $("scan-results").innerHTML = `<div class="empty">Scanning…</div>`;
   $("scan-dossier").innerHTML = "";
   $("scan-extra").innerHTML = "";
+  const co = $("scan-contacts-out"); if (co) co.innerHTML = "";
   state.lastDossier = null;
   const revertIds = Array.from(state.revertById.values());
   await Promise.allSettled(revertIds.map((revertId) => relayToTab({ type: "AETHERIS_REVERT_FIX", revertId })));
