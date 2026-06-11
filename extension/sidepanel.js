@@ -885,7 +885,15 @@ async function runExtraScan(label, prompt, containerId) {
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     const reply = data.reply || "(empty)";
-    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>${escapeHtml(reply)}</pre></div>`;
+    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>${escapeHtml(reply)}</pre>
+      <div class="action-bank">
+        <div class="action-bank-title">Controls</div>
+        <button class="primary" data-op-action="fixes">Open fix buttons</button>
+        <button class="ghost" data-op-action="detective">Run Detective</button>
+        <button class="ghost" data-op-action="overlay">Show X-ray</button>
+      </div>
+    </div>`;
+    wireOperatorActionButtons(c);
     // Auto-save to case file
     if (state.activeHost) {
       const entry = state.caseFiles[state.activeHost] || { history: [], fixes: [], autopsies: [], extras: {} };
