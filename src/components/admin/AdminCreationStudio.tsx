@@ -1269,12 +1269,19 @@ export const AdminCreationStudio: React.FC = () => {
             <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
               <Upload className="w-3 h-3 mr-1" /> Add
             </Button>
-            <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleUpload} className="hidden" />
           </div>
           <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
             {uploads.map(img => (
-              <div key={img.id} className="relative aspect-square overflow-hidden rounded border-2 border-amber">
-                <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+              <div key={img.id} className="relative aspect-square overflow-hidden rounded border-2 border-amber bg-black">
+                {img.videoUrl ? (
+                  <video src={img.videoUrl} muted loop playsInline className="w-full h-full object-cover" onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(()=>{})} onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()} />
+                ) : (
+                  <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                )}
+                {img.videoUrl && (
+                  <span className="absolute bottom-1 left-1 bg-amber text-charcoal text-[9px] font-mono px-1 rounded uppercase tracking-wider">Clip</span>
+                )}
                 <button
                   type="button"
                   onClick={() => setUploads(prev => prev.filter(u => u.id !== img.id))}
@@ -1284,10 +1291,11 @@ export const AdminCreationStudio: React.FC = () => {
                 </button>
               </div>
             ))}
-            {uploads.length === 0 && <div className="col-span-4 text-xs text-muted-foreground py-6 text-center">No uploads yet</div>}
+            {uploads.length === 0 && <div className="col-span-4 text-xs text-muted-foreground py-6 text-center">No uploads yet. Drop images or short video clips here.</div>}
           </div>
         </div>
       </div>
+
 
       {/* Shared Image Library, every image generated/uploaded by anyone */}
       <div className="glass p-6 rounded-xl">
