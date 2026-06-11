@@ -33,6 +33,7 @@
     <section class="panel active" id="tab-scan">
       <div class="row" style="flex-wrap:wrap;gap:6px">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
+        <button id="scan-clear" class="ghost" title="Clear this scan, remove overlays, and undo preview fixes">Clear / Start Over</button>
         <button id="scan-deepen" class="ghost" title="AI dossier on these findings">Deepen (Detective)</button>
         <button id="scan-contradictions" class="ghost" title="Find brand contradictions on this page">Contradictions</button>
         <button id="scan-friction" class="ghost" title="Find friction vocabulary on this page">Friction</button>
@@ -46,6 +47,15 @@
 
     <!-- OPERATOR -->
     <section class="panel" id="tab-operator">
+      <div class="operator-controls" id="operator-controls">
+        <button class="ghost" data-op-action="scan">Scan</button>
+        <button class="ghost" data-op-action="detective">Detective</button>
+        <button class="ghost" data-op-action="fixes">Fixes</button>
+        <button class="ghost" data-op-action="overlay">X-Ray</button>
+        <button class="ghost" data-op-action="undo">Undo</button>
+        <button class="ghost" data-op-action="clear">Clear</button>
+      </div>
+      <div id="operator-live-actions" class="op-actions hidden"></div>
       <div id="op-chips" class="chips">
         <button class="chip" data-prompt="What is the single biggest leak on this page right now? Name it and the fix.">Biggest leak</button>
         <button class="chip" data-prompt="Rewrite the hero headline + subhead. Give me 3 sharp options. Keep each under 12 words.">Rewrite hero</button>
