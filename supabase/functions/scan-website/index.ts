@@ -146,10 +146,10 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
   const leakRange = computeLeakRange(host, scoreForLeaks);
   const analysis = {
     signals,
-    score: breakdown.total,
+    score: scoreForLeaks,
     score_breakdown: breakdown.parts,
     ...(breakdown.reason ? { score_reason: breakdown.reason } : {}),
-    grade: gradeFromScore(breakdown.total),
+    grade: gradeFromScore(scoreForLeaks),
     companyName,
     executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(leakRange.low)} - ${fmt$(leakRange.high)}.`,
     gaps,
