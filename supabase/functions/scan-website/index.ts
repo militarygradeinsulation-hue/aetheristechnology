@@ -398,9 +398,10 @@ serve(async (req) => {
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(5000),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
-        "X-Lovable-AIG-SDK": "edge-fetch",
+        "X-Lovable-AIG-SDK": "vercel-ai-sdk",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -607,12 +608,19 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     });
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const models = ["google/gemini-3-flash-preview", "google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"];
+    const models = ["google/gemini-3-flash-preview"];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     outer: for (const m of models) {
       for (let attempt = 0; attempt < 1; attempt++) {
-        aiResponse = await callAi(m);
+        try {
+          aiResponse = await callAi(m);
+        } catch (err) {
+          lastErrText = err instanceof Error ? err.message : String(err);
+          console.error(`AI gateway request failed (model=${m}, attempt=${attempt + 1}):`, lastErrText);
+          aiResponse = null;
+          break outer;
+        }
         if (aiResponse.ok) break outer;
         lastErrText = await aiResponse.clone().text();
         console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
