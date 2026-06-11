@@ -553,7 +553,7 @@
     },
     no_atf_cta(leak) {
       const cta = document.createElement("button");
-      cta.textContent = (leak?.aiFix || "Book a Forensic Diagnostic").slice(0, 40);
+      cta.textContent = (leak?.aiFix || "Primary CTA").slice(0, 40);
       cta.setAttribute("data-aetheris-injected", "1");
       Object.assign(cta.style, {
         position: "fixed", top: "16px", right: "16px", zIndex: "2147483640",
