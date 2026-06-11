@@ -46,17 +46,22 @@
 
     <!-- OPERATOR -->
     <section class="panel" id="tab-operator">
-      <div class="modepill">
-        <button class="m active" data-mode="observe">Observe</button>
-        <button class="m" data-mode="suggest">Suggest</button>
-        <button class="m" data-mode="execute">Execute</button>
+      <div id="op-chips" class="chips">
+        <button class="chip" data-prompt="What is the single biggest leak on this page right now? Name it and the fix.">Biggest leak</button>
+        <button class="chip" data-prompt="Rewrite the hero headline + subhead. Give me 3 sharp options. Keep each under 12 words.">Rewrite hero</button>
+        <button class="chip" data-prompt="Rewrite the primary CTA. Give me 3 options that name an outcome, not an action.">Rewrite CTA</button>
+        <button class="chip" data-prompt="Audit the proof on this page. What's missing, what's weak, what should be added above the fold?">Audit proof</button>
+        <button class="chip" data-prompt="Find the contradictions on this page — places where the brand says one thing and shows another.">Contradictions</button>
+        <button class="chip" data-prompt="Estimate the annual revenue this page is leaking in USD. Show your reasoning in 3 short lines.">$ leak estimate</button>
+        <button class="chip" data-prompt="If I had 1 week and 1 developer, what 3 changes would compound? List in priority order.">Ship-this-week plan</button>
+        <button class="chip" data-prompt="Score this page 1-10 on: clarity, proof, friction, capture, urgency. One sentence each.">5-axis scorecard</button>
       </div>
       <div id="chat-log" class="chat"></div>
       <form id="chat-form" class="composer">
         <textarea id="chat-input" rows="2" placeholder="Ask the Operator about what's on this page…"></textarea>
         <button type="submit" class="primary">Send</button>
       </form>
-      <div class="hint" id="op-hint">Observe: panel reads the page silently. Suggest: free chat with vision. Execute: confirm-before-act on allow-listed domains.</div>
+      <div class="hint" id="op-hint">Vision-aware. The Operator sees the page URL, scraped text, and a viewport screenshot.</div>
     </section>
 
     <!-- FIX -->
