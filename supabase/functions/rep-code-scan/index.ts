@@ -19,7 +19,7 @@ const json = (status: number, body: unknown) =>
 const clean = (v: unknown, max: number): string =>
   String(v ?? "").trim().slice(0, max);
 
-const isEmail = (s: string) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(s);
+const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 function leadOnlyFallback(url: string, company: string) {
   const host = (() => {
