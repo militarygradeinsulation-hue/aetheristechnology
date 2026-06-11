@@ -723,4 +723,4 @@ function openCaseDetail(host) {
   });
 }
 
-$("case-back").addEventListener("click", renderCaseList);
+$("case-back").addEventListener("click", resetCaseView);
