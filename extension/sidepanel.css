@@ -191,3 +191,18 @@ textarea { resize: vertical; font-family: inherit; }
 .btn-file, .link-btn { cursor: pointer; }
 .link-btn { font: 600 10px var(--mono); color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; }
 .link-btn:hover { text-decoration: underline; }
+
+/* v0.6 — operator chips + case detail + extra reports */
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.chip {
+  font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .06em;
+  padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  background: var(--bg-3); color: var(--fg); border: 1px solid var(--line);
+}
+.chip:hover { border-color: var(--amber); color: var(--amber); }
+.case-row { cursor: pointer; transition: background .15s; padding: 8px; border-radius: 4px; }
+.case-row:hover { background: var(--bg-3); }
+.case-row .open-btn { font: 600 10px var(--mono); color: var(--amber); }
+.extra-report { background: var(--bg-2); border:1px solid var(--line); border-left:3px solid var(--amber); padding:10px 12px; border-radius:4px; margin-top:10px; }
+.extra-report h4 { margin:0 0 6px; font:700 12px var(--mono); text-transform:uppercase; letter-spacing:.1em; color:var(--amber); }
+.extra-report pre { white-space:pre-wrap; word-wrap:break-word; font:13px/1.5 -apple-system, system-ui, sans-serif; color:var(--fg); margin:0; }
