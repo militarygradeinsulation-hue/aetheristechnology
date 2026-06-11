@@ -1445,6 +1445,20 @@ export const AdminCreationStudio: React.FC = () => {
                               <option key={o.key} value={o.key}>{o.label}</option>
                             ))}
                           </select>
+                          <select
+                            value={s.motion || 'auto'}
+                            onChange={(e) => {
+                              const next = { ...plan }; next.scenes[i] = { ...s, motion: e.target.value as SceneMotion };
+                              setPlan(next);
+                            }}
+                            title="How this scene's image is animated during render"
+                            className="h-6 rounded border border-amber/40 bg-background px-1.5 text-[10px] font-mono uppercase text-amber"
+                          >
+                            {MOTION_OPTIONS.map(o => (
+                              <option key={o.key} value={o.key}>{o.label}</option>
+                            ))}
+                          </select>
+
                         </div>
                       </div>
                       <Textarea
