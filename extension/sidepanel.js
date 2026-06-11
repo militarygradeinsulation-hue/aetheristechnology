@@ -36,7 +36,7 @@ document.querySelectorAll(".tab").forEach((btn) => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
     state.tab = btn.dataset.tab;
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === `tab-${state.tab}`));
-    if (state.tab === "case") renderCaseList();
+    if (state.tab === "case") (typeof resetCaseView === "function" ? resetCaseView() : renderCaseList());
     if (state.tab === "fix") renderFix();
   });
 });
