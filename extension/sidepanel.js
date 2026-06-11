@@ -669,27 +669,22 @@ $("scan-download").addEventListener("click", () => {
 });
 
 // ---------------- Case detail view ----------------
-const origRenderCaseList = renderCaseList;
-renderCaseList = function() {
+// Event delegation: clicking a case row (not its checkbox) opens detail.
+document.addEventListener("click", (e) => {
+  const row = e.target.closest("#case-list .case-row");
+  if (!row) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "LABEL") return;
+  const host = row.querySelector("input[type=checkbox]")?.dataset.host;
+  if (host) openCaseDetail(host);
+});
+
+function resetCaseView() {
   $("case-detail").innerHTML = "";
   $("case-back").classList.add("hidden");
   $("case-list").classList.remove("hidden");
   $("case-diff").classList.remove("hidden");
-  origRenderCaseList();
-  setTimeout(() => {
-    document.querySelectorAll("#case-list .case-row").forEach((row) => {
-      const host = row.querySelector("input[type=checkbox]")?.dataset.host;
-      if (!host) return;
-      row.addEventListener("click", (e) => {
-        if (e.target.tagName === "INPUT") return;
-        openCaseDetail(host);
-      });
-      const openBtn = document.createElement("span");
-      openBtn.className = "open-btn"; openBtn.textContent = "OPEN →";
-      row.appendChild(openBtn);
-    });
-  }, 0);
-};
+  renderCaseList();
+}
 
 function openCaseDetail(host) {
   const entry = state.caseFiles[host]; if (!entry) return;
