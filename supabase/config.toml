@@ -191,3 +191,10 @@ verify_jwt = false
 [functions.revoke-rep-access]
 verify_jwt = false
 
+[functions.extension-leak-scan]
+verify_jwt = false
+
+[functions.extension-operator-chat]
+verify_jwt = false
+
+
