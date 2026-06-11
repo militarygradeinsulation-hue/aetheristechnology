@@ -487,18 +487,23 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }
     }
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
+    if (!aiResponse || !aiResponse.ok) {
+      const status = aiResponse?.status ?? 503;
+      console.error("AI gateway final failure:", status, lastErrText);
 
-      if (aiResponse.status === 429) {
+      if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
+      if (status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 503) {
+        return new Response(JSON.stringify({ error: "AI service is temporarily unavailable. Please retry in a minute." }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
