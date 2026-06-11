@@ -462,6 +462,7 @@ $("chat-form").addEventListener("submit", async (e) => {
   const text = input.value.trim(); if (!text) return;
   input.value = "";
   appendBubble("user", text);
+  if (await handleOperatorCommand(text)) return;
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
   const cap = await captureViewport();
   appendBubble("ai", "…");
@@ -485,6 +486,45 @@ $("chat-form").addEventListener("submit", async (e) => {
     last.textContent = `Operator failed: ${err.message}`;
   }
 });
+
+async function handleOperatorCommand(text) {
+  const t = text.toLowerCase();
+  const wants = (...words) => words.some((w) => t.includes(w));
+  if (wants("start over", "clear scan", "reset scan", "clear all")) {
+    appendBubble("ai", "Clearing the scan, overlay, and any preview fixes now.");
+    await clearScan();
+    return true;
+  }
+  if (wants("run scan", "scan this", "scan page", "new scan")) {
+    appendBubble("ai", "Running the forensic scan now.");
+    switchTab("scan");
+    await runScanFlow();
+    return true;
+  }
+  if (wants("detective", "deepen", "case file")) {
+    appendBubble("ai", "Running Detective Mode now.");
+    switchTab("scan");
+    await runDetectiveFlow();
+    return true;
+  }
+  if (wants("show fixes", "fix buttons", "open fixes", "fix tab")) {
+    appendBubble("ai", "Opening the fix controls now.");
+    switchTab("fix");
+    renderFix();
+    return true;
+  }
+  if (wants("x-ray", "xray", "overlay", "show me")) {
+    appendBubble("ai", "Toggling the on-page X-ray overlay now.");
+    $("overlay-toggle").click();
+    return true;
+  }
+  if (wants("undo", "revert")) {
+    appendBubble("ai", "Undoing the last applied preview fix now.");
+    await undoLastFix();
+    return true;
+  }
+  return false;
+}
 function appendBubble(role, text) {
   const el = document.createElement("div");
   el.className = `bubble ${role}`;
