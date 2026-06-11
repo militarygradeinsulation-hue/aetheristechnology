@@ -75,20 +75,52 @@ async function saveCaseFile(scan) {
 loadCaseFiles();
 
 // ---------------- SCAN ----------------
-$("scan-run").addEventListener("click", async () => {
+function switchTab(tab) {
+  const btn = document.querySelector(`.tab[data-tab="${tab}"]`);
+  if (btn) btn.click();
+}
+
+async function runScanFlow({ silent = false } = {}) {
   $("scan-results").innerHTML = `<div class="empty">Scanning…</div>`;
   $("scan-dossier").innerHTML = "";
+  $("scan-extra").innerHTML = "";
   state.lastDossier = null;
+  const revertIds = Array.from(state.revertById.values());
+  await Promise.allSettled(revertIds.map((revertId) => relayToTab({ type: "AETHERIS_REVERT_FIX", revertId })));
   state.revertById.clear();
   const res = await relayToTab({ type: "AETHERIS_SCAN" });
-  if (res?.error) { $("scan-results").innerHTML = `<div class="bubble err">${res.error}</div>`; return; }
+  if (res?.error) { $("scan-results").innerHTML = `<div class="bubble err">${escapeHtml(res.error)}</div>`; return res; }
   state.lastScan = res;
   await saveCaseFile(res);
   renderScan();
+  renderOperatorLiveActions();
   if (state.overlayOn) drawOverlay();
-});
+  if (!silent) toast("Scan complete.");
+  return res;
+}
 
-$("scan-deepen").addEventListener("click", async () => {
+async function clearScan({ silent = false } = {}) {
+  const revertIds = Array.from(state.revertById.values());
+  await Promise.allSettled(revertIds.map((revertId) => relayToTab({ type: "AETHERIS_REVERT_FIX", revertId })));
+  state.lastScan = null;
+  state.lastDossier = null;
+  state.revertById.clear();
+  state.overlayOn = false;
+  await relayToTab({ type: "AETHERIS_OVERLAY_CLEAR" });
+  $("overlay-toggle").style.background = "transparent";
+  $("overlay-toggle").style.color = "var(--fg)";
+  $("scan-meta").classList.add("hidden");
+  $("scan-meta").innerHTML = "";
+  $("scan-dossier").innerHTML = "";
+  $("scan-extra").innerHTML = "";
+  $("scan-results").innerHTML = `<div class="empty">Cleared. Run a fresh forensic scan when ready.</div>`;
+  $("fix-empty").classList.remove("hidden");
+  $("fix-list").innerHTML = "";
+  renderOperatorLiveActions();
+  if (!silent) toast("Scan cleared.");
+}
+
+async function runDetectiveFlow() {
   if (!state.lastScan) return alert("Run a scan first.");
   const traceSteps = [
     "Capturing viewport…",
@@ -140,7 +172,11 @@ $("scan-deepen").addEventListener("click", async () => {
     clearInterval(traceTimer);
     $("scan-dossier").innerHTML = `<div class="bubble err">Detective Mode failed: ${e.message}</div>`;
   }
-});
+}
+
+$("scan-run").addEventListener("click", () => runScanFlow());
+$("scan-clear").addEventListener("click", () => clearScan());
+$("scan-deepen").addEventListener("click", () => runDetectiveFlow());
 
 function renderDossier() {
   const d = state.lastDossier; if (!d) { $("scan-dossier").innerHTML = ""; return; }
@@ -163,8 +199,15 @@ function renderDossier() {
           <dt>Confession</dt><dd class="confession">${escapeHtml(d.dossier.confession || "—")}</dd>
         </dl>` : ""}
       ${d.priorityFix ? `<div class="priority"><b>Ship this week:</b> ${escapeHtml(d.priorityFix)}</div>` : ""}
+      <div class="action-bank">
+        <div class="action-bank-title">Available controls</div>
+        <button class="primary" data-op-action="fixes">Open fix buttons</button>
+        <button class="ghost" data-op-action="overlay">Show X-ray</button>
+        <button class="ghost" data-op-action="undo">Undo last fix</button>
+      </div>
     </div>
   `;
+  wireOperatorActionButtons($("scan-dossier"));
 }
 
 function renderScan() {
@@ -196,6 +239,8 @@ function renderScan() {
         ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
         ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
         ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
+        ${!fixable ? `<span class="fix-unavailable">Manual fix</span>` : ""}
+        <button class="ghost" data-fix-tab="${escapeAttr(l.id)}">View fix buttons</button>
         <div class="more-menu">
           <button class="ghost more-btn" data-more="${escapeAttr(l.id)}">More ▾</button>
         </div>
@@ -210,14 +255,9 @@ function wireScanActions() {
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
-    const leak = state.lastScan.leaks.find((x) => x.id === id);
     b.disabled = true; b.textContent = "Applying…";
-    const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
-    if (r?.ok) {
-      state.revertById.set(id, r.revertId);
-      toast(r.message || "Fix applied to live page.");
-      renderScan();
-    } else {
+    const r = await applyLeakFix(id);
+    if (!r?.ok) {
       b.disabled = false; b.textContent = "Fix in-page";
       alert(r?.error || "Fix failed.");
     }
@@ -230,12 +270,52 @@ function wireScanActions() {
     if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderScan(); }
     else alert(r?.error || "Revert failed.");
   }));
+  out.querySelectorAll("[data-fix-tab]").forEach((b) => b.addEventListener("click", () => {
+    switchTab("fix");
+    const card = document.querySelector(`#fix-list [data-fix-card="${CSS.escape(b.dataset.fixTab)}"]`);
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }));
   out.querySelectorAll("[data-more]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
     const id = b.dataset.more;
     const leak = state.lastScan.leaks.find((x) => x.id === id);
     openMoreMenu(b, leak);
   }));
+}
+
+async function applyLeakFix(id) {
+  const leak = state.lastScan?.leaks?.find((x) => x.id === id);
+  if (!leak) return { ok: false, error: "Leak not found." };
+  const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
+  if (r?.ok) {
+    state.revertById.set(id, r.revertId);
+    toast(r.message || "Fix applied to live page.");
+    renderScan();
+    renderFix();
+    renderOperatorLiveActions();
+  }
+  return r;
+}
+
+async function revertLeakFix(id) {
+  const revertId = state.revertById.get(id);
+  if (!revertId) return { ok: false, error: "Nothing to undo for this leak." };
+  const r = await relayToTab({ type: "AETHERIS_REVERT_FIX", revertId });
+  if (r?.ok) {
+    state.revertById.delete(id);
+    toast("Reverted.");
+    renderScan();
+    renderFix();
+    renderOperatorLiveActions();
+  }
+  return r;
+}
+
+async function undoLastFix() {
+  const lastId = Array.from(state.revertById.keys()).pop();
+  if (!lastId) return toast("No applied fix to undo.");
+  const r = await revertLeakFix(lastId);
+  if (!r?.ok) alert(r?.error || "Undo failed.");
 }
 
 function openMoreMenu(anchor, leak) {
@@ -310,6 +390,67 @@ function drawOverlay() {
 }
 
 // ---------------- OPERATOR ----------------
+document.querySelectorAll("#operator-controls [data-op-action]").forEach((b) => b.addEventListener("click", () => runOperatorAction(b.dataset.opAction)));
+
+function renderOperatorLiveActions() {
+  const box = $("operator-live-actions");
+  if (!box) return;
+  if (!state.lastScan) {
+    box.classList.remove("hidden");
+    box.innerHTML = `<div class="muted">No active scan.</div><button class="primary" data-op-action="scan">Run scan now</button>`;
+  } else {
+    const fixable = state.lastScan.leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)).slice(0, 4);
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <div class="muted">${escapeHtml(state.lastScan.host)} · ${state.lastScan.leaks.length} leaks · ${fixable.length} one-click fixes ready</div>
+      <button class="primary" data-op-action="fixes">Open fix buttons</button>
+      <button class="ghost" data-op-action="detective">Run Detective</button>
+      <button class="ghost" data-op-action="overlay">Toggle X-ray</button>
+      ${fixable.map((l) => `<button class="ghost" data-apply="${escapeAttr(l.id)}">Fix: ${escapeHtml(String(l.title || "leak").slice(0, 24))}</button>`).join("")}
+    `;
+  }
+  wireOperatorActionButtons(box);
+}
+
+async function runOperatorAction(action) {
+  if (action === "scan") { switchTab("scan"); await runScanFlow(); return; }
+  if (action === "detective") { switchTab("scan"); await runDetectiveFlow(); return; }
+  if (action === "fixes") { switchTab("fix"); renderFix(); return; }
+  if (action === "overlay") { $("overlay-toggle").click(); return; }
+  if (action === "undo") { await undoLastFix(); return; }
+  if (action === "clear") { await clearScan(); return; }
+}
+
+function wireOperatorActionButtons(root = document) {
+  root.querySelectorAll("[data-op-action]").forEach((b) => b.addEventListener("click", () => runOperatorAction(b.dataset.opAction)));
+  root.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true; b.textContent = "Applying…";
+    const r = await applyLeakFix(b.dataset.apply);
+    if (!r?.ok) { b.disabled = false; b.textContent = "Fix in-page"; alert(r?.error || "Fix failed."); }
+  }));
+  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+}
+
+function decorateOperatorBubble(bubble, reply = "") {
+  const actions = document.createElement("div");
+  actions.className = "bubble-actions";
+  const lower = reply.toLowerCase();
+  const fixable = state.lastScan?.leaks?.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)) || [];
+  const applied = state.revertById.size;
+  const buttons = [];
+  if (!state.lastScan) buttons.push(`<button class="primary" data-op-action="scan">Run scan</button>`);
+  if (state.lastScan) buttons.push(`<button class="ghost" data-op-action="fixes">Open fix buttons</button>`);
+  if (state.lastScan && (lower.includes("fix") || lower.includes("leak") || lower.includes("cta") || lower.includes("headline"))) {
+    fixable.slice(0, 3).forEach((l) => buttons.push(`<button class="primary" data-apply="${escapeAttr(l.id)}">Fix: ${escapeHtml(String(l.title || "leak").slice(0, 22))}</button>`));
+  }
+  if (state.lastScan) buttons.push(`<button class="ghost" data-op-action="overlay">Show X-ray</button>`);
+  if (applied) buttons.push(`<button class="ghost" data-op-action="undo">Undo last</button>`);
+  buttons.push(`<button class="ghost" data-op-action="clear">Clear</button>`);
+  actions.innerHTML = buttons.join("");
+  bubble.appendChild(actions);
+  wireOperatorActionButtons(actions);
+}
+
 document.querySelectorAll("#op-chips .chip").forEach((b) => {
   b.addEventListener("click", () => {
     $("chat-input").value = b.dataset.prompt || "";
@@ -323,6 +464,7 @@ $("chat-form").addEventListener("submit", async (e) => {
   const text = input.value.trim(); if (!text) return;
   input.value = "";
   appendBubble("user", text);
+  if (await handleOperatorCommand(text)) return;
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
   const cap = await captureViewport();
   appendBubble("ai", "…");
@@ -339,19 +481,62 @@ $("chat-form").addEventListener("submit", async (e) => {
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     last.textContent = data.reply || "(empty)";
+    decorateOperatorBubble(last, data.reply || "");
     state.history.push({ role: "user", content: text }, { role: "assistant", content: data.reply || "" });
   } catch (err) {
     last.classList.replace("ai", "err");
     last.textContent = `Operator failed: ${err.message}`;
   }
 });
+
+async function handleOperatorCommand(text) {
+  const t = text.toLowerCase();
+  const wants = (...words) => words.some((w) => t.includes(w));
+  if (wants("start over", "clear scan", "reset scan", "clear all")) {
+    appendBubble("ai", "Clearing the scan, overlay, and any preview fixes now.");
+    await clearScan();
+    return true;
+  }
+  if (wants("run scan", "scan this", "scan page", "new scan")) {
+    appendBubble("ai", "Running the forensic scan now.");
+    switchTab("scan");
+    await runScanFlow();
+    return true;
+  }
+  if (wants("detective", "deepen", "case file")) {
+    appendBubble("ai", "Running Detective Mode now.");
+    switchTab("scan");
+    await runDetectiveFlow();
+    return true;
+  }
+  if (wants("show fixes", "fix buttons", "open fixes", "fix tab")) {
+    appendBubble("ai", "Opening the fix controls now.");
+    switchTab("fix");
+    renderFix();
+    return true;
+  }
+  if (wants("x-ray", "xray", "overlay", "show me")) {
+    appendBubble("ai", "Toggling the on-page X-ray overlay now.");
+    $("overlay-toggle").click();
+    return true;
+  }
+  if (wants("undo", "revert")) {
+    appendBubble("ai", "Undoing the last applied preview fix now.");
+    await undoLastFix();
+    return true;
+  }
+  return false;
+}
 function appendBubble(role, text) {
   const el = document.createElement("div");
   el.className = `bubble ${role}`;
   el.textContent = text;
   $("chat-log").appendChild(el);
   $("chat-log").scrollTop = $("chat-log").scrollHeight;
+  return el;
 }
+
+renderOperatorLiveActions();
 
 // ---------------- FIX tab ----------------
 function renderFix() {
@@ -359,35 +544,45 @@ function renderFix() {
   const empty = $("fix-empty");
   if (!state.lastScan || !state.lastScan.leaks?.length) { empty.classList.remove("hidden"); out.innerHTML = ""; return; }
   empty.classList.add("hidden");
-  const fixable = state.lastScan.leaks.filter(hasInPageFix);
-  if (!fixable.length) { out.innerHTML = `<div class="empty">No in-page fixes available for this scan.</div>`; return; }
-  out.innerHTML = fixable.map((l, i) => {
+  const leaks = state.lastScan.leaks || [];
+  out.innerHTML = leaks.map((l, i) => {
+    const fixable = hasInPageFix(l);
     const revertId = state.revertById.get(l.id);
     return `
-      <div class="card">
+      <div class="card" data-fix-card="${escapeAttr(l.id)}">
         <div class="card-title">${i + 1}. ${escapeHtml(l.title)}</div>
         <div class="muted" style="margin-bottom:8px">${escapeHtml(l.why || "")}</div>
-        <div class="row">
-          ${revertId
-            ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Revert</button><span class="applied">✓ Applied</span>`
-            : `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>`}
+        <div class="leak-fix" style="margin-bottom:8px"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
+        <div class="row" style="flex-wrap:wrap">
+          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
+          ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>` : ""}
+          ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Undo this fix</button><span class="applied">✓ Applied</span>` : ""}
+          <button class="ghost" data-copy-fix="${escapeAttr(l.id)}">Copy fix</button>
+          <button class="ghost" data-open-page>Open page</button>
+          ${!fixable ? `<span class="fix-unavailable">No safe one-click patch</span>` : ""}
         </div>
       </div>`;
   }).join("");
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
-    const leak = state.lastScan.leaks.find((x) => x.id === id);
     b.disabled = true; b.textContent = "Applying…";
-    const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
-    if (r?.ok) { state.revertById.set(id, r.revertId); toast(r.message || "Applied."); renderFix(); renderScan(); }
+    const r = await applyLeakFix(id);
+    if (r?.ok) { renderFix(); renderScan(); }
     else { b.disabled = false; b.textContent = "Apply in-page fix"; alert(r?.error || "Failed."); }
   }));
   out.querySelectorAll("[data-revert]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.revert;
-    const r = await relayToTab({ type: "AETHERIS_REVERT_FIX", revertId: state.revertById.get(id) });
-    if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderFix(); renderScan(); }
+    const r = await revertLeakFix(id);
+    if (r?.ok) { renderFix(); renderScan(); }
     else alert(r?.error || "Revert failed.");
   }));
+  out.querySelectorAll("[data-copy-fix]").forEach((b) => b.addEventListener("click", async () => {
+    const leak = state.lastScan.leaks.find((x) => x.id === b.dataset.copyFix);
+    await navigator.clipboard.writeText(leak?.fix || "");
+    toast("Fix copied.");
+  }));
+  out.querySelectorAll("[data-open-page]").forEach((b) => b.addEventListener("click", () => chrome.tabs.create({ url: state.activeUrl })));
 }
 
 // ---------------- GROWTH tab ----------------
@@ -692,7 +887,15 @@ async function runExtraScan(label, prompt, containerId) {
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     const reply = data.reply || "(empty)";
-    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>${escapeHtml(reply)}</pre></div>`;
+    c.innerHTML = `<div class="extra-report"><h4>${label}</h4><pre>${escapeHtml(reply)}</pre>
+      <div class="action-bank">
+        <div class="action-bank-title">Controls</div>
+        <button class="primary" data-op-action="fixes">Open fix buttons</button>
+        <button class="ghost" data-op-action="detective">Run Detective</button>
+        <button class="ghost" data-op-action="overlay">Show X-ray</button>
+      </div>
+    </div>`;
+    wireOperatorActionButtons(c);
     // Auto-save to case file
     if (state.activeHost) {
       const entry = state.caseFiles[state.activeHost] || { history: [], fixes: [], autopsies: [], extras: {} };

@@ -510,6 +510,50 @@
     catch (e) { return { ok: false, error: String(e) }; }
   }
 
+  function injectBannerPreview(leak, text) {
+    const banner = document.createElement("div");
+    banner.textContent = String(leak?.aiFix || text || leak?.fix || "Preview fix").slice(0, 180);
+    banner.setAttribute("data-aetheris-injected", "1");
+    Object.assign(banner.style, {
+      position: "fixed", left: "0", right: "0", bottom: "0", zIndex: "2147483640",
+      background: "#f59e0b", color: "#0a0a0a", padding: "12px 18px", textAlign: "center",
+      fontFamily: "ui-monospace,Menlo,monospace", fontWeight: "700", letterSpacing: "0.04em",
+      boxShadow: "0 -4px 16px rgba(245,158,11,0.35)",
+    });
+    document.body.appendChild(banner);
+    const id = recordRevert(() => banner.remove());
+    return { revertId: id, message: "Injected a preview repair banner." };
+  }
+
+  function injectLeadCapturePreview(leak, label = "Start here") {
+    const box = document.createElement("form");
+    box.setAttribute("data-aetheris-injected", "1");
+    box.innerHTML = `<strong>${label}</strong><input aria-label="Name" placeholder="Name"><input aria-label="Email" placeholder="Email"><button type="button">Submit</button>`;
+    Object.assign(box.style, {
+      position: "fixed", right: "16px", bottom: "16px", zIndex: "2147483640", width: "min(320px, calc(100vw - 32px))",
+      display: "grid", gap: "8px", background: "#111", color: "#e5e5e5", border: "2px solid #f59e0b",
+      borderRadius: "4px", padding: "12px", fontFamily: "ui-monospace,Menlo,monospace", boxShadow: "0 8px 28px rgba(0,0,0,.45)",
+    });
+    box.querySelectorAll("input").forEach((i) => Object.assign(i.style, { padding: "10px", border: "1px solid #333", borderRadius: "3px", background: "#181818", color: "#e5e5e5" }));
+    Object.assign(box.querySelector("button").style, { padding: "10px", border: "0", borderRadius: "3px", background: "#f59e0b", color: "#0a0a0a", fontWeight: "700" });
+    document.body.appendChild(box);
+    const id = recordRevert(() => box.remove());
+    return { revertId: id, message: "Inserted a preview lead-capture module." };
+  }
+
+  function injectProofPreview(leak) {
+    const proof = document.createElement("section");
+    proof.setAttribute("data-aetheris-injected", "1");
+    proof.textContent = leak?.aiFix || "Proof block preview: add named outcomes, client logos, or measurable before/after results here.";
+    Object.assign(proof.style, { padding: "16px", margin: "12px", background: "#111", color: "#e5e5e5", border: "2px solid #f59e0b", fontFamily: "ui-monospace,Menlo,monospace" });
+    const target = document.querySelector("main") || document.body;
+    target.prepend(proof);
+    const id = recordRevert(() => proof.remove());
+    return { revertId: id, message: "Inserted a preview proof block." };
+  }
+
+  function previewChecklist(leak, text) { return injectBannerPreview(leak, text); }
+
   const INPAGE_FIXES = {
     no_meta_desc(leak) {
       const proposed = (leak?.aiFix || "Service offer for [audience] that delivers [measurable outcome]. Contact today.").slice(0, 160);
@@ -712,6 +756,43 @@
       const id = recordRevert(() => touched.forEach(([el, attr, orig]) => el.setAttribute(attr, orig)));
       return { revertId: id, message: `Rewrote ${touched.length} insecure URLs to https://.` };
     },
+    form_unlabeled(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s, idx) => {
+        try {
+          const el = document.querySelector(s);
+          if (!el || el.getAttribute("aria-label")) return;
+          touched.push([el, el.getAttribute("aria-label")]);
+          el.setAttribute("aria-label", el.getAttribute("placeholder") || `Field ${idx + 1}`);
+        } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, orig]) => orig === null ? el.removeAttribute("aria-label") : el.setAttribute("aria-label", orig)));
+      return { revertId: id, message: `Added aria-labels to ${touched.length} fields.` };
+    },
+    heading_skip(leak) { return previewChecklist(leak, "Normalize heading levels in sequence: H1, H2, H3. No jumps."); },
+    no_form(leak) { return injectLeadCapturePreview(leak); },
+    no_followup_hook(leak) { return injectLeadCapturePreview(leak, "Add calendar/chat capture here"); },
+    no_proof(leak) { return injectProofPreview(leak); },
+    no_pricing(leak) { return injectBannerPreview(leak, "Pricing signal missing. Add starting price, range, or package tiers."); },
+    no_visible_contact(leak) { return injectBannerPreview(leak, "Contact path missing. Add phone, email, or direct booking route."); },
+    page_weight(leak) { return previewChecklist(leak, "Compress hero media. Convert large images to WebP/AVIF. Defer non-critical scripts."); },
+    third_party_bloat(leak) { return previewChecklist(leak, "Audit scripts. Remove low-value tags. Defer chat, heatmaps, and retargeting until consent/intent."); },
+    hero_image_weight(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s) => {
+        try { const el = document.querySelector(s); if (el) { touched.push([el, el.style.cssText]); el.style.outline = "3px solid #f59e0b"; el.style.filter = "saturate(.75) contrast(.9)"; } } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, css]) => el.style.cssText = css));
+      return { revertId: id, message: `Marked ${touched.length} heavy hero image(s) for compression.` };
+    },
+    autoplay_loud(leak) {
+      const touched = [];
+      (leak?.selectors || []).forEach((s) => {
+        try { const el = document.querySelector(s); if (el?.tagName === "VIDEO") { touched.push([el, el.muted]); el.muted = true; } } catch {}
+      });
+      const id = recordRevert(() => touched.forEach(([el, muted]) => { el.muted = muted; }));
+      return { revertId: id, message: `Muted ${touched.length} autoplay video(s).` };
+    },
     // Generic AI-driven visual fix. Routed for any leak with a structured fixAction.
     ai_visual(leak) {
       const fa = leak?.fixAction;
@@ -798,8 +879,8 @@
     // Any AI leak with a structured fixAction goes through the generic handler.
     const useAiVisual = leak.fixAction && typeof leak.fixAction === "object";
     const baseId = useAiVisual ? "ai_visual"
-                 : leak.id.startsWith("form_too_long") ? "form_too_long"
-                 : leak.id.startsWith("form_unlabeled") ? null
+                  : leak.id.startsWith("form_too_long") ? "form_too_long"
+                  : leak.id.startsWith("form_unlabeled") ? "form_unlabeled"
                  : leak.id;
     const handler = baseId && INPAGE_FIXES[baseId];
     if (!handler) return { ok: false, error: "No in-page fix available for this leak yet." };

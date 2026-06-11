@@ -20,6 +20,17 @@ export const INPAGE_FIX_IDS = new Set([
   "dead_links",
   "form_too_long", // parametric (form_too_long_<selector>)
   "mixed_content",
+  "form_unlabeled", // parametric (form_unlabeled_<selector>)
+  "heading_skip",
+  "no_form",
+  "no_followup_hook",
+  "no_proof",
+  "no_pricing",
+  "no_visible_contact",
+  "page_weight",
+  "third_party_bloat",
+  "hero_image_weight",
+  "autoplay_loud",
 ]);
 
 export function hasInPageFix(leak) {
@@ -28,5 +39,6 @@ export function hasInPageFix(leak) {
   if (leak.fixAction && typeof leak.fixAction === "object" && leak.fixAction.op) return true;
   if (INPAGE_FIX_IDS.has(leak.id)) return true;
   if (leak.id.startsWith("form_too_long")) return true;
+  if (leak.id.startsWith("form_unlabeled")) return true;
   return false;
 }
