@@ -1357,13 +1357,21 @@ export const AdminCreationStudio: React.FC = () => {
               return (
                 <div key={i} className="flex gap-3 p-3 bg-background/40 rounded-lg border border-border">
                   <div className="w-24 flex-shrink-0 flex flex-col gap-2">
-                    <div className="w-24 h-24 rounded overflow-hidden bg-charcoal border border-border/40 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded overflow-hidden bg-charcoal border border-border/40 flex items-center justify-center relative">
                       {img ? (
-                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        img.videoUrl ? (
+                          <>
+                            <video src={img.videoUrl} muted loop playsInline autoPlay className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0.5 left-0.5 bg-amber text-charcoal text-[8px] font-mono px-1 rounded uppercase">Clip</span>
+                          </>
+                        ) : (
+                          <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        )
                       ) : (
                         <span className="text-[10px] text-muted-foreground text-center px-1">No image</span>
                       )}
                     </div>
+
                     <Button
                       type="button"
                       size="sm"
