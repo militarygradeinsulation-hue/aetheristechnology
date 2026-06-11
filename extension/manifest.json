@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Aetheris Operator — Forensic Cockpit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Forensic operator that scans any page for revenue leaks, draws an X-ray overlay on the live DOM, records funnel autopsies, and routes every finding to a fix.",
   "permissions": ["activeTab", "storage", "scripting", "tabs", "sidePanel", "webNavigation"],
   "optional_permissions": ["debugger"],
