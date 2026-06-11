@@ -478,6 +478,7 @@ $("chat-form").addEventListener("submit", async (e) => {
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     last.textContent = data.reply || "(empty)";
+    decorateOperatorBubble(last, data.reply || "");
     state.history.push({ role: "user", content: text }, { role: "assistant", content: data.reply || "" });
   } catch (err) {
     last.classList.replace("ai", "err");
@@ -490,7 +491,10 @@ function appendBubble(role, text) {
   el.textContent = text;
   $("chat-log").appendChild(el);
   $("chat-log").scrollTop = $("chat-log").scrollHeight;
+  return el;
 }
+
+renderOperatorLiveActions();
 
 // ---------------- FIX tab ----------------
 function renderFix() {
