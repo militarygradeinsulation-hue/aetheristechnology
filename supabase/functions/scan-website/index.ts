@@ -635,14 +635,29 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (status === 503) {
-        return new Response(JSON.stringify({ error: "AI service is temporarily unavailable. Please retry in a minute." }), {
-          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const fallback = buildDeterministicAnalysis(markdown, links, metadata, formattedUrl, parsedHost);
+      fallback._fallback = true;
+      fallback._fallbackReason = status === 503
+        ? "AI gateway temporarily unavailable; deterministic scan returned instead."
+        : "AI analysis failed; deterministic scan returned instead.";
 
-      return new Response(JSON.stringify({ error: "AI analysis failed" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          score: fallback.score,
+          gaps: fallback,
+        }),
+      });
+
+      return new Response(JSON.stringify(fallback), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
