@@ -252,3 +252,66 @@ textarea { resize: vertical; font-family: inherit; }
 .menu-pop { position: fixed; background: var(--bg-2); border:1px solid var(--line); border-radius:4px; min-width: 200px; max-width: calc(100vw - 16px); max-height: 60vh; overflow-y: auto; z-index: 9999; box-shadow: 0 8px 24px hsl(0 0% 0% / 0.6); }
 .menu-pop button { display:block; width:100%; text-align:left; padding:8px 10px; background:transparent; border:0; color:var(--fg); font: 500 12px var(--mono); cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .menu-pop button:hover { background: var(--bg-3); color: var(--amber); }
+
+/* ---------------- Collapsible cards (v0.8.5) ---------------- */
+.collapsible-head { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+.collapsible-head::before {
+  content: "▾"; color: var(--amber); font-size: 10px; flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+.is-collapsed > .collapsible-head::before,
+.is-collapsed.collapsible-head::before { transform: rotate(-90deg); }
+.is-collapsed > .collapsible-body { display: none !important; }
+
+/* Make existing card headers collapsible without re-rendering */
+.extra-report h4,
+.dossier-head,
+.leak-head { cursor: pointer; user-select: none; }
+.extra-report h4::after,
+.dossier-head::after,
+.leak-head::after {
+  content: "▾"; color: var(--amber); font-size: 10px; margin-left: 8px;
+  display: inline-block; transition: transform 0.15s ease;
+}
+.extra-report.is-collapsed h4::after,
+.dossier.is-collapsed .dossier-head::after,
+.leak.is-collapsed .leak-head::after { transform: rotate(-90deg); }
+
+.extra-report.is-collapsed > *:not(h4) { display: none !important; }
+.dossier.is-collapsed > *:not(.dossier-head) { display: none !important; }
+.leak.is-collapsed > *:not(.leak-head) { display: none !important; }
+
+/* ---------------- Contacts panel (v0.8.5) ---------------- */
+.contacts-card {
+  background: var(--bg-2); border: 1px solid var(--line); border-left: 3px solid var(--amber);
+  border-radius: 4px; padding: 10px 12px; margin-top: 10px;
+}
+.contacts-card h4 {
+  margin: 0 0 8px; font: 700 12px var(--mono); text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--amber);
+}
+.contacts-section { margin-top: 10px; }
+.contacts-section h5 {
+  margin: 0 0 6px; font: 700 10px var(--mono); text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted);
+}
+.contact-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: 3px;
+  padding: 4px 8px; margin: 2px 4px 2px 0; font: 12px var(--mono); color: var(--fg);
+}
+.contact-chip button {
+  background: transparent; border: 0; color: var(--muted); cursor: pointer;
+  font: 10px var(--mono); padding: 0 2px;
+}
+.contact-chip button:hover { color: var(--amber); }
+.dm-row {
+  display: flex; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--bg-3); margin-bottom: 6px;
+}
+.dm-pic { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-2); object-fit: cover; flex: 0 0 36px; }
+.dm-body { flex: 1; min-width: 0; }
+.dm-name { font-weight: 700; font-size: 13px; }
+.dm-title { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+.dm-meta { font: 11px var(--mono); color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+.dm-meta a { color: var(--amber); text-decoration: none; }
