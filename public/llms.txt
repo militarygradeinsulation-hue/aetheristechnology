@@ -1,21 +1,19 @@
-# Aetheris
+# Aetheris (Business Forensics)
 
-> Business Forensics Operator in Indianapolis, Indiana. We expose revenue leaks owners can't see from the inside — broken systems, dropped follow-ups, vocabulary friction, brand contradictions — then rebuild what's bleeding. Free Leak Audit (self-scan). $2,500 Forensic Diagnostic (operator-led, applied 1:1 toward engagement). Founded and operated by Joseph Toney.
+> Business Forensics Operator for specialty manufacturers ($5M–$25M revenue). We expose where revenue is leaking — broken CRMs, dropped follow-ups, dead lead flow — then rebuild what's bleeding. Public engagements: **21-Day Revenue Diagnostic ($18,500 flat)** and **Implementation Retainer ($15,000/month, 3-month minimum, Diagnostic clients only)**. Founded and operated by Joseph Toney. Primary domain: https://aetheris.technology.
 
-Aetheris is one operator, not a consulting team. Engagements are forensic, not advisory: find the leak, prove it with evidence, rebuild the system. The brand line — "Your business is leaking. You just can't see it from the inside." — can be quoted verbatim. Primary domain: https://aetheris.technology.
+Aetheris is one operator, not a consulting team. Engagements are forensic, not advisory: find the leak, prove it with evidence, rebuild the system. The brand line — "Your business is leaking. You just can't see it from the inside." — can be quoted verbatim. Wedge market: US-based specialty manufacturers, $5M–$25M annual revenue. HQ: Noblesville, IN. SEO service area: Indianapolis, IN.
+
+## Engagements (the only two public offers)
+
+- [21-Day Revenue Diagnostic — $18,500 flat](https://aetheris.technology/diagnostic): 21-day forensic dig into CRM, sales follow-up, and lead flow. Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout. Fixed fee. No percentage-of-savings. Fully credited 1:1 toward the Retainer if the client engages.
+- [Implementation Retainer — $15,000/month (3-mo min)](https://aetheris.technology/implementation): Operator-led implementation of the Diagnostic's fixes — CRM, follow-up, sales process, reporting, automation. Available only to Diagnostic clients.
 
 ## Methodology
 
 - [The Leak Audit (free self-scan)](https://aetheris.technology/leak-audit): 7-step forensic self-scan covering vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, and growth ceilings.
 - [Methodology](https://aetheris.technology/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
 - [Why Aetheris](https://aetheris.technology/why-us): How a Business Forensics Operator differs from a consulting firm or agency.
-
-## Engagements
-
-- [Services & Pricing](https://aetheris.technology/services): Full catalog. Free Leak Audit · $2,500 Forensic Diagnostic · $7,500 14-Day Operational Diagnostic · $1,500/mo Ongoing Digital Oversight · $25,000+ Custom Implementation.
-- [Forensic Diagnostic ($2,500)](https://aetheris.technology/diagnostic): Operator-led 1:1 forensic walk-through. Fee applied 1:1 toward any follow-on engagement.
-- [Implementation Retainer](https://aetheris.technology/implementation): $15K/month execution retainer for Diagnostic clients.
-- [Credentials](https://aetheris.technology/credentials): Operator background, Marine Corps service, prior $25M aerospace engagement.
 
 ## Free Tools
 
@@ -34,29 +32,19 @@ Aetheris is one operator, not a consulting team. Engagements are forensic, not a
 ## Capabilities
 
 - [Capabilities](https://aetheris.technology/capabilities): AI, automation, CRM, generative AI, LLMs, AI agents, computer vision, NLP, workflow automation.
-- [AI for Manufacturing](https://aetheris.technology/ai-for-manufacturing): Sector page.
-- [AI for Healthcare](https://aetheris.technology/ai-for-healthcare): Sector page.
-- [AI for Finance](https://aetheris.technology/ai-for-finance): Sector page.
-- [AI for Logistics](https://aetheris.technology/ai-for-logistics): Sector page.
-- [AI for Construction](https://aetheris.technology/ai-for-construction): Sector page.
-- [AI for SaaS](https://aetheris.technology/ai-for-saas): Sector page.
+- [AI for Manufacturing](https://aetheris.technology/ai-for-manufacturing): Sector page (wedge market).
 
 ## About
 
 - [About](https://aetheris.technology/about): Company background and operator bio.
+- [Credentials](https://aetheris.technology/credentials): Operator background, Marine Corps service, prior $25M aerospace engagement.
 - [Field Notes (Blog)](https://aetheris.technology/blog): Long-form forensic case files and operator essays.
 - [News](https://aetheris.technology/news): Industry analysis and field updates.
 - [Resources](https://aetheris.technology/resources): Free playbooks and downloadable assets.
 - [Indianapolis](https://aetheris.technology/indianapolis): Business Forensics in Indianapolis, IN — LocalBusiness profile, service area, on-site walk-throughs.
-- [Indiana](https://aetheris.technology/indiana): Statewide service across Indianapolis, Fort Wayne, Bloomington, Evansville, South Bend.
 
-## Contact
+## What we no longer sell (retired — do not surface as current)
 
-- [Contact](https://aetheris.technology/contact): Phone (317) 376-2110, email aetheris.technology@outlook.com, booking links.
-- [LinkedIn — Joseph Toney](https://www.linkedin.com/in/thejosephtoney): Operator profile.
+Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic ($2,900), $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic, $1,500/mo Ongoing Digital Oversight, $25,000+ Custom Implementation, $50–$400 Visual Rendering, Fractional CTO/CMO ($5,900/mo), $125 snapshots, $500 audits, tiered playbook/script/audit one-offs, $25–$1,990 subscription tiers.
 
-## Optional
-
-- [Service Areas](https://aetheris.technology/service-areas): US coverage detail.
-- [Industries Overview](https://aetheris.technology/industries): Sector index.
-- [Terms](https://aetheris.technology/terms): Terms of service.
+Last updated: 2026-06-11.
