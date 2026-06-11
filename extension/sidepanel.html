@@ -74,15 +74,66 @@
       <div class="gpanel active" id="gpanel-reply">
         <div class="card">
           <div class="card-title">LinkedIn reply drafter</div>
-          <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to, or click 'Grab selection' to pull text from the current page."></textarea>
-          <div class="row" style="margin-top:8px">
-            <button id="li-grab" class="ghost">Grab selection</button>
-            <select id="li-tone">
-              <option value="forensic">Forensic operator</option>
-              <option value="agree">Agree-and-extend</option>
-              <option value="contrarian">Contrarian challenge</option>
+          <div class="muted" style="margin-bottom:8px">Same engine as the Content Studio. Vision-aware. Three source modes.</div>
+
+          <div class="modepill" id="li-source-pill" style="margin-bottom:10px">
+            <button class="m active" data-src="image">Screenshot</button>
+            <button class="m" data-src="text">Paste post</button>
+            <button class="m" data-src="reply">Reply to reply</button>
+          </div>
+
+          <!-- IMAGE source -->
+          <div class="li-src" id="li-src-image">
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <label class="ghost btn-file">Upload screenshot<input type="file" id="li-img-file" accept="image/*" hidden /></label>
+              <button id="li-img-capture" class="ghost" title="Capture the current tab's viewport">Capture this tab</button>
+              <button id="li-img-clear" class="ghost" type="button">Clear</button>
+            </div>
+            <img id="li-img-preview" class="li-thumb hidden" alt="post screenshot" />
+          </div>
+
+          <!-- TEXT source -->
+          <div class="li-src hidden" id="li-src-text">
+            <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to, or click 'Grab selection' to pull text from the current page."></textarea>
+            <div class="row" style="margin-top:6px">
+              <button id="li-grab" class="ghost">Grab selection</button>
+            </div>
+          </div>
+
+          <!-- REPLY-TO-REPLY source -->
+          <div class="li-src hidden" id="li-src-reply">
+            <label class="li-lbl">Original post (optional context)</label>
+            <textarea id="li-r-orig" rows="2" placeholder="Optional: paste the original post you commented on."></textarea>
+            <label class="li-lbl-row">
+              <span class="li-lbl">Your prior comment</span>
+              <label class="link-btn">Attach image<input type="file" data-li-img="myComment" accept="image/*" hidden /></label>
+            </label>
+            <textarea id="li-r-mine" rows="3" placeholder="Paste the comment YOU wrote."></textarea>
+            <img class="li-thumb hidden" data-li-prev="myComment" alt="" />
+
+            <label class="li-lbl-row">
+              <span class="li-lbl">Their reply to you</span>
+              <label class="link-btn">Attach image<input type="file" data-li-img="theirReply" accept="image/*" hidden /></label>
+            </label>
+            <textarea id="li-r-theirs" rows="3" placeholder="Paste their reply to your comment. This is what you're answering."></textarea>
+            <img class="li-thumb hidden" data-li-prev="theirReply" alt="" />
+          </div>
+
+          <!-- Controls -->
+          <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
+            <select id="li-length" title="Response length">
+              <option value="micro">Micro · 35-65 words</option>
+              <option value="brief" selected>Brief · 70-120 words</option>
+              <option value="medium">Medium · 130-190 words</option>
+              <option value="long">Long · 200-280 words</option>
+              <option value="full">Full · standalone post</option>
             </select>
+            <input id="li-direction" placeholder="Optional direction (e.g. push back on their 2nd point)" />
+          </div>
+          <div class="row" style="margin-top:8px;gap:8px">
             <button id="li-go" class="primary">Draft reply</button>
+            <button id="li-copy" class="ghost" type="button">Copy</button>
+            <button id="li-regen" class="ghost" type="button">Regenerate</button>
           </div>
           <pre id="li-out" class="out"></pre>
         </div>
