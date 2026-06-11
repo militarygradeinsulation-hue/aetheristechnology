@@ -638,17 +638,17 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       for (let attempt = 0; attempt < 1; attempt++) {
         try {
           aiResponse = await callAi(m);
-        } catch (err) {
+        } catch (err: any) {
           lastErrText = err instanceof Error ? err.message : String(err);
           console.error(`AI gateway request failed (model=${m}, attempt=${attempt + 1}):`, lastErrText);
           aiResponse = null;
           break outer;
         }
-        if (aiResponse.ok) break outer;
-        lastErrText = await aiResponse.clone().text();
-        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
-        if (aiResponse.status === 429 || aiResponse.status === 402) break outer;
-        if (aiResponse.status === 503 || aiResponse.status >= 500) {
+        if (aiResponse!.ok) break outer;
+        lastErrText = await aiResponse!.clone().text();
+        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse!.status, lastErrText);
+        if (aiResponse!.status === 429 || aiResponse!.status === 402) break outer;
+        if (aiResponse!.status === 503 || aiResponse!.status >= 500) {
           await sleep(800 * (attempt + 1));
           continue;
         }
@@ -656,7 +656,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }
     }
 
-    if (!aiResponse || !aiResponse.ok) {
+    if (!aiResponse || !aiResponse!.ok) {
       const status = aiResponse?.status ?? 503;
       console.error("AI gateway final failure:", status, lastErrText);
 
@@ -696,7 +696,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       });
     }
 
-    const aiData = await aiResponse.json();
+    const aiData = await aiResponse!.json();
     console.log("AI response received");
 
     let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
