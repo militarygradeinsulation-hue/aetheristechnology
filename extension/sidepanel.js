@@ -91,7 +91,31 @@ $("scan-run").addEventListener("click", async () => {
 
 $("scan-deepen").addEventListener("click", async () => {
   if (!state.lastScan) return alert("Run a scan first.");
-  $("scan-dossier").innerHTML = `<div class="dossier loading"><div class="dossier-head"><span class="badge">Detective Mode</span><span class="muted">analyzing DOM + viewport…</span></div></div>`;
+  const traceSteps = [
+    "Capturing viewport…",
+    "Parsing visible DOM text…",
+    "Cross-referencing Pass A signals…",
+    "Profiling the suspect (your funnel)…",
+    "Building motive + evidence chain…",
+    "Estimating annual leak exposure…",
+    "Writing the dossier…",
+  ];
+  $("scan-dossier").innerHTML = `
+    <div class="dossier loading">
+      <div class="dossier-head">
+        <span class="badge">Detective Mode</span>
+        <span class="thinking"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span> Thinking</span>
+      </div>
+      <div class="thinking-trace" id="det-trace"></div>
+    </div>`;
+  const traceEl = $("det-trace");
+  let traceIdx = 0;
+  const traceTimer = setInterval(() => {
+    if (traceIdx >= traceSteps.length) return;
+    const line = document.createElement("div");
+    line.className = "line"; line.textContent = "› " + traceSteps[traceIdx++];
+    traceEl.appendChild(line);
+  }, 650);
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
   const cap = await captureViewport();
   try {
@@ -105,6 +129,7 @@ $("scan-deepen").addEventListener("click", async () => {
       }),
     });
     const data = await r.json();
+    clearInterval(traceTimer);
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     state.lastDossier = data;
     if (Array.isArray(data.leaks)) state.lastScan.leaks = [...state.lastScan.leaks, ...data.leaks];
@@ -113,6 +138,7 @@ $("scan-deepen").addEventListener("click", async () => {
     renderDossier();
     renderScan();
   } catch (e) {
+    clearInterval(traceTimer);
     $("scan-dossier").innerHTML = `<div class="bubble err">Detective Mode failed: ${e.message}</div>`;
   }
 });
