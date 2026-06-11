@@ -578,11 +578,53 @@ export const AdminCreationStudio: React.FC = () => {
     const next: AssetImage[] = [];
     for (const f of files) {
       const url = URL.createObjectURL(f);
-      next.push({ id: `up:${Date.now()}-${f.name}`, url, label: f.name, source: 'upload' });
+      const isVideo = f.type.startsWith('video/');
+      next.push({
+        id: `up:${Date.now()}-${f.name}`,
+        url: isVideo ? url : url,
+        videoUrl: isVideo ? url : undefined,
+        label: f.name,
+        source: 'upload',
+        kind: isVideo ? 'clip' : 'image',
+      });
     }
     setUploads(prev => [...prev, ...next]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  // ===== AI-animate an image into a short video clip (Replicate) =====
+  const [animatingImgId, setAnimatingImgId] = useState<string | null>(null);
+  const animateImage = async (img: ImageLibItem) => {
+    const motionPrompt = window.prompt(
+      'Describe the motion (camera, subject):',
+      'Slow cinematic push-in, subtle parallax, hard amber rim light, forensic case-file mood.'
+    );
+    if (motionPrompt === null) return;
+    setAnimatingImgId(img.id);
+    try {
+      const { data, error } = await adminInvoke('animate_image', {
+        image_url: img.url,
+        prompt: motionPrompt.trim() || 'Slow cinematic push-in, subtle parallax.',
+        duration_sec: 5,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const videoUrl = data.video_url as string;
+      if (!videoUrl) throw new Error('No video returned');
+      const id = `clip:${img.id}`;
+      setUploads(prev => prev.find(u => u.id === id) ? prev : [...prev, {
+        id, url: img.url, videoUrl, label: `Animated: ${img.prompt?.slice(0, 40) || 'clip'}`,
+        source: 'upload', kind: 'clip',
+      }]);
+      toast({ title: 'Animation ready', description: 'Added to Per-video uploads as a clip.' });
+      loadVideoLibrary();
+    } catch (e) {
+      toast({ title: 'AI animate failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAnimatingImgId(null);
+    }
+  };
+
 
   const generatePlan = async (): Promise<Plan | null> => {
     setLastError('');
