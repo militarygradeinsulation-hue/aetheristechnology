@@ -1327,9 +1327,13 @@ export const AdminCreationStudio: React.FC = () => {
                   <Button size="sm" className="h-6 text-[10px] px-2 w-full bg-amber text-charcoal hover:bg-amber/90" onClick={() => addLibraryImageToScenes(img)}>
                     <Upload className="w-3 h-3 mr-1" /> Add
                   </Button>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 w-full border-amber/40 text-amber hover:bg-amber/10" disabled={animatingImgId === img.id} onClick={() => animateImage(img)} title="AI-animate this image into a 5s clip">
+                    {animatingImgId === img.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Film className="w-3 h-3 mr-1" /> Animate</>}
+                  </Button>
                   <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 w-full border-crimson/50 text-crimson hover:bg-crimson/10" disabled={imgDeletingId === img.id} onClick={() => deleteLibraryImage(img)}>
                     {imgDeletingId === img.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Trash2 className="w-3 h-3 mr-1" /> Delete</>}
                   </Button>
+
                 </div>
               </div>
             ))}
