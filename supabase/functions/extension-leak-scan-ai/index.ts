@@ -47,7 +47,13 @@ OUTPUT STRICT JSON, no prose outside the JSON:
       "title": "short forensic label",
       "why": "1-2 sentences naming the mechanism of loss",
       "fix": "1 sentence with the specific repair",
-      "selectors": []
+      "selectors": ["<css selector for the offending element on the page, if any>"],
+      "fixAction": {
+        "op": "replaceText | setHTML | hide | setStyle | injectBanner | injectCTA | replaceAttr",
+        "selector": "<css selector of the element to mutate, REQUIRED for replaceText/setHTML/hide/setStyle/replaceAttr>",
+        "value": "<the new text / HTML / CTA label, or a JSON style object for setStyle, or {attr,value} for replaceAttr>",
+        "where": "top|bottom (only for injectBanner/injectCTA)"
+      }
     }
   ]
 }
@@ -56,6 +62,8 @@ RULES:
 - 3-6 judgment leaks. Do NOT repeat anything Pass A already listed by title.
 - Evidence MUST quote or cite something from the actual DOM text or screenshot. Generic platitudes are rejected.
 - Confession MUST be specific to THIS page (the actual offer, the actual headline, the actual CTA), not generic copy advice.
+- For EVERY leak that has a visible element on the page, populate "selectors" AND "fixAction" so the operator can apply the repair in-place. Prefer stable selectors (h1, header h2, [data-cta], main button:first-of-type, section:nth-of-type(2) p). If you cannot reasonably target the element, set fixAction to null.
+- "replaceText" = swap the textContent. "setHTML" = swap innerHTML (use sparingly). "hide" = display:none. "setStyle" value must be a JSON object of CSS props. "injectBanner" inserts a top/bottom amber banner with value as the message. "injectCTA" inserts a floating CTA button labeled value.
 - leakValueUSD low/high should reflect the company's apparent size and the severity of leaks combined. Use integers, no commas.`;
 
 const ipBuckets = new Map<string, { count: number; reset: number }>();
