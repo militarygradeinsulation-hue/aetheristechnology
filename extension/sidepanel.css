@@ -206,3 +206,32 @@ textarea { resize: vertical; font-family: inherit; }
 .extra-report { background: var(--bg-2); border:1px solid var(--line); border-left:3px solid var(--amber); padding:10px 12px; border-radius:4px; margin-top:10px; }
 .extra-report h4 { margin:0 0 6px; font:700 12px var(--mono); text-transform:uppercase; letter-spacing:.1em; color:var(--amber); }
 .extra-report pre { white-space:pre-wrap; word-wrap:break-word; font:13px/1.5 -apple-system, system-ui, sans-serif; color:var(--fg); margin:0; }
+
+/* v0.7 — logo + detective thinking */
+.brand-logo {
+  width: 32px; height: 32px; border-radius: 6px; object-fit: contain;
+  background: var(--bg-3); padding: 2px; border: 1px solid var(--line);
+}
+.dossier.loading {
+  border-left: 3px solid var(--amber);
+  animation: detective-pulse 1.6s ease-in-out infinite;
+}
+@keyframes detective-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(38 92% 50% / 0.0); border-left-color: var(--amber); }
+  50%      { box-shadow: 0 0 24px -4px hsl(38 92% 50% / 0.6); border-left-color: var(--amber-2); }
+}
+.thinking { display:inline-flex; gap:4px; align-items:center; font:600 11px var(--mono); color:var(--amber); text-transform:uppercase; letter-spacing:.1em; }
+.thinking .d { width:6px; height:6px; border-radius:50%; background: var(--amber); animation: blink 1.2s infinite ease-in-out; }
+.thinking .d:nth-child(2){ animation-delay:.18s; }
+.thinking .d:nth-child(3){ animation-delay:.36s; }
+.thinking .d:nth-child(4){ animation-delay:.54s; }
+@keyframes blink { 0%,80%,100%{opacity:.2; transform:scale(.85);} 40%{opacity:1; transform:scale(1.1);} }
+.thinking-trace { font: 11px var(--mono); color: var(--muted); margin-top: 8px; min-height: 16px; }
+.thinking-trace .line { opacity: 0; animation: trace-in .3s forwards; }
+@keyframes trace-in { to { opacity: 1; } }
+
+.leak-actions .more-menu { position: relative; display: inline-block; }
+.leak-actions .more-btn { font-size: 11px; padding: 4px 8px; }
+.menu-pop { position: absolute; right: 0; top: 110%; background: var(--bg-2); border:1px solid var(--line); border-radius:4px; min-width: 200px; z-index:50; box-shadow: 0 8px 24px hsl(0 0% 0% / 0.5); }
+.menu-pop button { display:block; width:100%; text-align:left; padding:8px 10px; background:transparent; border:0; color:var(--fg); font: 500 12px var(--mono); cursor:pointer; }
+.menu-pop button:hover { background: var(--bg-3); color: var(--amber); }
