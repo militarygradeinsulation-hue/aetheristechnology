@@ -388,6 +388,67 @@ function drawOverlay() {
 }
 
 // ---------------- OPERATOR ----------------
+document.querySelectorAll("#operator-controls [data-op-action]").forEach((b) => b.addEventListener("click", () => runOperatorAction(b.dataset.opAction)));
+
+function renderOperatorLiveActions() {
+  const box = $("operator-live-actions");
+  if (!box) return;
+  if (!state.lastScan) {
+    box.classList.remove("hidden");
+    box.innerHTML = `<div class="muted">No active scan.</div><button class="primary" data-op-action="scan">Run scan now</button>`;
+  } else {
+    const fixable = state.lastScan.leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)).slice(0, 4);
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <div class="muted">${escapeHtml(state.lastScan.host)} · ${state.lastScan.leaks.length} leaks · ${fixable.length} one-click fixes ready</div>
+      <button class="primary" data-op-action="fixes">Open fix buttons</button>
+      <button class="ghost" data-op-action="detective">Run Detective</button>
+      <button class="ghost" data-op-action="overlay">Toggle X-ray</button>
+      ${fixable.map((l) => `<button class="ghost" data-apply="${escapeAttr(l.id)}">Fix: ${escapeHtml(String(l.title || "leak").slice(0, 24))}</button>`).join("")}
+    `;
+  }
+  wireOperatorActionButtons(box);
+}
+
+async function runOperatorAction(action) {
+  if (action === "scan") { switchTab("scan"); await runScanFlow(); return; }
+  if (action === "detective") { switchTab("scan"); await runDetectiveFlow(); return; }
+  if (action === "fixes") { switchTab("fix"); renderFix(); return; }
+  if (action === "overlay") { $("overlay-toggle").click(); return; }
+  if (action === "undo") { await undoLastFix(); return; }
+  if (action === "clear") { await clearScan(); return; }
+}
+
+function wireOperatorActionButtons(root = document) {
+  root.querySelectorAll("[data-op-action]").forEach((b) => b.addEventListener("click", () => runOperatorAction(b.dataset.opAction)));
+  root.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true; b.textContent = "Applying…";
+    const r = await applyLeakFix(b.dataset.apply);
+    if (!r?.ok) { b.disabled = false; b.textContent = "Fix in-page"; alert(r?.error || "Fix failed."); }
+  }));
+  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+}
+
+function decorateOperatorBubble(bubble, reply = "") {
+  const actions = document.createElement("div");
+  actions.className = "bubble-actions";
+  const lower = reply.toLowerCase();
+  const fixable = state.lastScan?.leaks?.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)) || [];
+  const applied = state.revertById.size;
+  const buttons = [];
+  if (!state.lastScan) buttons.push(`<button class="primary" data-op-action="scan">Run scan</button>`);
+  if (state.lastScan) buttons.push(`<button class="ghost" data-op-action="fixes">Open fix buttons</button>`);
+  if (state.lastScan && (lower.includes("fix") || lower.includes("leak") || lower.includes("cta") || lower.includes("headline"))) {
+    fixable.slice(0, 3).forEach((l) => buttons.push(`<button class="primary" data-apply="${escapeAttr(l.id)}">Fix: ${escapeHtml(String(l.title || "leak").slice(0, 22))}</button>`));
+  }
+  if (state.lastScan) buttons.push(`<button class="ghost" data-op-action="overlay">Show X-ray</button>`);
+  if (applied) buttons.push(`<button class="ghost" data-op-action="undo">Undo last</button>`);
+  buttons.push(`<button class="ghost" data-op-action="clear">Clear</button>`);
+  actions.innerHTML = buttons.join("");
+  bubble.appendChild(actions);
+  wireOperatorActionButtons(actions);
+}
+
 document.querySelectorAll("#op-chips .chip").forEach((b) => {
   b.addEventListener("click", () => {
     $("chat-input").value = b.dataset.prompt || "";
