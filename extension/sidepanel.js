@@ -217,15 +217,10 @@ function drawOverlay() {
 }
 
 // ---------------- OPERATOR ----------------
-document.querySelectorAll(".modepill .m").forEach((b) => {
+document.querySelectorAll("#op-chips .chip").forEach((b) => {
   b.addEventListener("click", () => {
-    document.querySelectorAll(".modepill .m").forEach((x) => x.classList.toggle("active", x === b));
-    state.mode = b.dataset.mode;
-    $("op-hint").textContent = {
-      observe: "Observe: panel reads the page silently. No vision sent to AI.",
-      suggest: "Suggest: free chat with vision. Operator sees URL, DOM text, and a viewport screenshot.",
-      execute: "Execute: confirm-before-act mode. Only enabled on allow-listed domains.",
-    }[state.mode];
+    $("chat-input").value = b.dataset.prompt || "";
+    $("chat-input").focus();
   });
 });
 
@@ -236,7 +231,7 @@ $("chat-form").addEventListener("submit", async (e) => {
   input.value = "";
   appendBubble("user", text);
   const extract = await relayToTab({ type: "AETHERIS_EXTRACT" });
-  const cap = state.mode !== "observe" ? await captureViewport() : { dataUrl: null };
+  const cap = await captureViewport();
   appendBubble("ai", "…");
   const last = $("chat-log").querySelector(".bubble.ai:last-of-type");
   try {
@@ -245,7 +240,7 @@ $("chat-form").addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
       body: JSON.stringify({
         userText: text, pageUrl: extract?.url || state.activeUrl, pageText: extract?.pageText || "",
-        screenshot: cap?.dataUrl || null, history: state.history.slice(-8), mode: state.mode,
+        screenshot: cap?.dataUrl || null, history: state.history.slice(-8),
       }),
     });
     const data = await r.json();
