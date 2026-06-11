@@ -33,7 +33,7 @@ export default function ExtensionPage() {
         <div className="max-w-2xl mx-auto space-y-8">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber mb-3">
-              Operator Tool · Local Install · v0.2
+              Operator Tool · Local Install · v0.3
             </div>
             <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight">
               The Aetheris Operator <span className="text-amber">in every tab</span>
@@ -78,7 +78,7 @@ export default function ExtensionPage() {
             >
               Download Extension (.zip)
             </button>
-            <div className="text-xs text-muted-foreground">v0.2 · works in Chrome, Edge, Brave, Arc, Opera</div>
+            <div className="text-xs text-muted-foreground">v0.3 · works in Chrome, Edge, Brave, Arc, Opera</div>
           </div>
 
           <div className="rounded-md border border-border bg-card p-6 space-y-3">
