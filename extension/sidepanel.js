@@ -252,7 +252,25 @@ function openMoreMenu(anchor, leak) {
     <div style="padding:6px 10px;font:600 10px var(--mono);color:var(--muted);letter-spacing:.1em">SCAN SUB-PAGE</div>
     ${subPages.map((p) => `<button data-scan-sub="${p}">→ ${p}</button>`).join("")}
   `;
-  anchor.parentElement.appendChild(menu);
+  document.body.appendChild(menu);
+  // Position in viewport, anchored to the More button, kept inside the panel.
+  const r = anchor.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  // Render hidden first to measure
+  menu.style.visibility = "hidden";
+  menu.style.left = "0px";
+  menu.style.top = "0px";
+  const mw = Math.min(menu.offsetWidth, vw - 16);
+  const mh = menu.offsetHeight;
+  let left = Math.min(r.right - mw, vw - mw - 8);
+  if (left < 8) left = 8;
+  let top = r.bottom + 4;
+  if (top + mh > vh - 8) top = Math.max(8, r.top - mh - 4);
+  menu.style.left = left + "px";
+  menu.style.top = top + "px";
+  menu.style.width = mw + "px";
+  menu.style.visibility = "visible";
   menu.addEventListener("click", async (e) => {
     const btn = e.target.closest("button"); if (!btn) return;
     const act = btn.dataset.act; const sub = btn.dataset.scanSub;
