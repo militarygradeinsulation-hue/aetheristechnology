@@ -232,6 +232,6 @@ textarea { resize: vertical; font-family: inherit; }
 
 .leak-actions .more-menu { position: relative; display: inline-block; }
 .leak-actions .more-btn { font-size: 11px; padding: 4px 8px; }
-.menu-pop { position: absolute; right: 0; top: 110%; background: var(--bg-2); border:1px solid var(--line); border-radius:4px; min-width: 200px; z-index:50; box-shadow: 0 8px 24px hsl(0 0% 0% / 0.5); }
-.menu-pop button { display:block; width:100%; text-align:left; padding:8px 10px; background:transparent; border:0; color:var(--fg); font: 500 12px var(--mono); cursor:pointer; }
+.menu-pop { position: fixed; background: var(--bg-2); border:1px solid var(--line); border-radius:4px; min-width: 200px; max-width: calc(100vw - 16px); max-height: 60vh; overflow-y: auto; z-index: 9999; box-shadow: 0 8px 24px hsl(0 0% 0% / 0.6); }
+.menu-pop button { display:block; width:100%; text-align:left; padding:8px 10px; background:transparent; border:0; color:var(--fg); font: 500 12px var(--mono); cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .menu-pop button:hover { background: var(--bg-3); color: var(--amber); }
