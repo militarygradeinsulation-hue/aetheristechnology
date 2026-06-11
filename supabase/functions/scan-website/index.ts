@@ -468,6 +468,25 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }),
     });
 
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const models = ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite", "google/gemini-2.5-pro"];
+    let aiResponse: Response | null = null;
+    let lastErrText = "";
+    outer: for (const m of models) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        aiResponse = await callAi(m);
+        if (aiResponse.ok) break outer;
+        lastErrText = await aiResponse.clone().text();
+        console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse.status, lastErrText);
+        if (aiResponse.status === 429 || aiResponse.status === 402) break outer;
+        if (aiResponse.status === 503 || aiResponse.status >= 500) {
+          await sleep(800 * (attempt + 1));
+          continue;
+        }
+        break;
+      }
+    }
+
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errText);
