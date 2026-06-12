@@ -545,7 +545,7 @@ const PortalPage: React.FC = () => {
   // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
-  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing', 'jw-admin']);
+  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing']);
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
