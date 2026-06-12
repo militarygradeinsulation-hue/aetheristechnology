@@ -8,7 +8,7 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
+    "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const SYSTEM_PROMPT = `You are the **Aetheris Detective** — a forensic sales operator working a single lead.
