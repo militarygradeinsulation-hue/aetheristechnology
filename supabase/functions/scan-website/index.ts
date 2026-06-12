@@ -421,7 +421,7 @@ serve(async (req) => {
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(45000),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
