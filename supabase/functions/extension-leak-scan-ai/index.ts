@@ -207,6 +207,28 @@ serve(async (req) => {
     parsed.priorityFix = typeof parsed.priorityFix === "string" ? parsed.priorityFix.slice(0, 400) : "";
     parsed.summary = typeof parsed.summary === "string" ? parsed.summary.slice(0, 500) : "";
 
+    if (parsed.leadImpact && typeof parsed.leadImpact === "object") {
+      ["currentLeadsLostPerMonth", "recoverableLeadsPerMonth", "dollarPerLead", "assumptionsNote"].forEach((k) => {
+        parsed.leadImpact[k] = typeof parsed.leadImpact[k] === "string" ? parsed.leadImpact[k].slice(0, 240) : "";
+      });
+    } else {
+      parsed.leadImpact = null;
+    }
+
+    if (parsed.repScript && typeof parsed.repScript === "object") {
+      ["cold_call_opener", "voicemail", "cold_email", "linkedin_dm", "in_person_pitch", "close_ask"].forEach((k) => {
+        parsed.repScript[k] = typeof parsed.repScript[k] === "string" ? parsed.repScript[k].slice(0, 2000) : "";
+      });
+      parsed.repScript.discovery_questions = Array.isArray(parsed.repScript.discovery_questions)
+        ? parsed.repScript.discovery_questions.slice(0, 8).map((s: any) => String(s).slice(0, 300))
+        : [];
+      parsed.repScript.objection_handles = Array.isArray(parsed.repScript.objection_handles)
+        ? parsed.repScript.objection_handles.slice(0, 6).map((s: any) => String(s).slice(0, 300))
+        : [];
+    } else {
+      parsed.repScript = null;
+    }
+
     return json(parsed);
   } catch (e) {
     console.error("extension-leak-scan-ai error:", e);
