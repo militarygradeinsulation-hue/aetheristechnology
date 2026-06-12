@@ -72,7 +72,13 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
       messages: [
         {
           role: "system",
-          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. HARD EXCLUSIONS: never return enterprises or companies with estimated annual revenue over $100M, publicly traded Fortune 1000 companies, large national chains (>500 employees), freelancers/solopreneurs, very small shops (<10 employees), or non-business entities (gov, schools, churches, non-profits). If you cannot confidently rule out >$100M revenue based on the search context, skip the lead. Score 0-100 based on ICP fit.`,
+          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks.
+
+ICP — TWO TRACKS, both valid:
+  TRACK A (B2B / pro services): small-to-mid-market businesses, 10–500 employees, revenue $1M–$50M — HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, B2B in Indianapolis / Indiana / Midwest.
+  TRACK B (LOCAL OPERATOR-LED): owner-operated local businesses with $500k–$15M revenue and a real sales/follow-up problem — Medspas, Auto repair shops, Dental practices, Roofing/HVAC/Plumbing, Law firms, Real estate brokerages, Chiropractors, Insurance agencies, Accounting/CPA firms, Restaurants (multi-unit), Home services. Single-location and multi-location both qualify if owner-run.
+
+HARD EXCLUSIONS (apply to BOTH tracks): never return enterprises >$100M revenue, publicly traded Fortune 1000 companies, large national chains (>500 employees), pure freelancers/solopreneurs, tiny shops with <3 staff, or non-business entities (gov, schools, churches, non-profits). If you cannot rule out >$100M revenue, skip the lead. Score is computed in code, do not include it.`,
         },
         {
           role: "user",
@@ -80,7 +86,7 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
 
 CRITICAL: For every lead you MUST identify the company's official website URL (their primary domain — e.g. "acmeco.com", not a LinkedIn/Facebook/directory page). If the search result is a profile (LinkedIn, ZoomInfo, Yelp, BBB, etc.), infer the company they work at and return that company's real homepage URL. Never leave website blank — if you truly cannot determine it, skip the lead entirely. Prefer https:// root domains over deep links.
 
-For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), why_fit (one sentence that cites a SIZE signal — employee count, revenue, multi-location — AND a PAIN signal — manual process, missing automation, hiring strain, scaling pressure — whenever the source supports it). DO NOT return a score; the score is computed in code from observable signals. Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
+For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), why_fit (one sentence that cites a SIZE signal — employee count, revenue, multi-location, owner name — AND a PAIN signal — manual process, missing automation, slow follow-up, no online booking, no review system, scaling pressure — whenever the source supports it). DO NOT return a score; the score is computed in code from observable signals. Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
         },
       ],
       tools: [{
@@ -154,8 +160,33 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Per-industry query expansion so verticals like "medspa" or "auto mechanic"
+    // actually return the right kind of result instead of just literal name matches.
+    const INDUSTRY_QUERY_HINTS: Record<string, string> = {
+      medspa: 'medspa OR "med spa" OR "medical spa" OR aesthetics clinic OR botox',
+      'med spa': 'medspa OR "med spa" OR "medical spa" OR aesthetics OR injectables',
+      mechanic: 'auto repair OR mechanic OR "tire shop" OR "transmission repair"',
+      'auto mechanic': 'auto repair OR mechanic OR "tire shop" OR "transmission repair"',
+      'auto repair': 'auto repair OR mechanic OR "collision center"',
+      dental: 'dental practice OR dentist OR orthodontist',
+      roofing: 'roofing contractor OR roofer OR roof replacement',
+      hvac: 'HVAC OR plumbing OR "air conditioning" OR heating contractor',
+      plumbing: 'plumber OR plumbing contractor',
+      'law firm': 'law firm OR attorney OR "personal injury"',
+      'real estate': 'real estate brokerage OR realtor',
+      chiropractor: 'chiropractor OR chiropractic',
+      insurance: 'insurance agency OR insurance broker',
+      accounting: '"accounting firm" OR CPA OR bookkeeping',
+      'marketing agency': 'marketing agency OR digital agency OR creative agency',
+      saas: 'B2B SaaS OR software company',
+      ecommerce: 'ecommerce brand OR Shopify store OR DTC brand',
+      'home services': 'landscaping OR pest control OR cleaning service',
+      restaurant: 'restaurant group OR multi-unit restaurant',
+    };
+    const key = industry.toLowerCase().trim();
+    const expanded = INDUSTRY_QUERY_HINTS[key] || industry;
     const query = industry
-      ? `${industry} companies in ${location}`
+      ? `(${expanded}) in ${location}`
       : `small to mid-market businesses ${location} HubSpot Salesforce`;
     const results = await firecrawlSearch(query, firecrawlKey, 15);
     if (results.length === 0) {

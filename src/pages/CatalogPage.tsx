@@ -6,9 +6,13 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PackageTiers } from '@/components/PackageTiers';
 import { ComparisonSection } from '@/components/ComparisonSection';
+import { RepPosTerminal } from '@/components/pos/RepPosTerminal';
+import { hasValidPortalSession } from '@/lib/portalAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 const CatalogPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const showPos = hasValidPortalSession() || hasValidAdminToken();
 
   return (
     <div className="relative min-h-screen">
@@ -59,6 +63,13 @@ const CatalogPage: React.FC = () => {
           </section>
 
           <ComparisonSection />
+
+          {/* POS Terminal — only visible to authenticated reps, partners, and admins */}
+          {showPos && (
+            <section className="px-4 max-w-7xl mx-auto py-16 border-t border-amber/20 mt-12">
+              <RepPosTerminal />
+            </section>
+          )}
         </main>
         <Footer />
       </div>
