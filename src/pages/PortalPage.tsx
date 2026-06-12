@@ -660,8 +660,8 @@ const PortalPage: React.FC = () => {
         </div>
       );
       case 'documents': return <PortalDocuments />;
-      case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
+
       case 'sprint': return <Sprint90View />;
       case 'catalog': return <ServicesPricing />;
       case 'linkedin': return <LinkedInSetupGuide />;
