@@ -154,6 +154,17 @@ const PortalPage: React.FC = () => {
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
   const { mode: tabColorMode } = useTabColorMode();
   const { scale: tabScale } = useTabSize();
+  const [wideMode, setWideMode] = useState<boolean>(() => {
+    try { return localStorage.getItem('portal.wideMode.v1') === '1'; } catch { return false; }
+  });
+  const toggleWideMode = () => setWideMode(v => {
+    const next = !v;
+    try { localStorage.setItem('portal.wideMode.v1', next ? '1' : '0'); } catch {}
+    return next;
+  });
+  // Tabs that benefit from a wider canvas (workspace boards, company portal, etc.)
+  const WIDE_TABS = new Set<Tab>(['workspace','sharedws','company','briefing','interviews','careers','leads','forecast','documents','training','onboarding']);
+
 
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
