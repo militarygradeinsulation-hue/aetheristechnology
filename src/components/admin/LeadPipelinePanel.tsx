@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw, Ban } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { SeasonalityWidget } from './SeasonalityWidget';
 
 interface DripSettings {
   id: string;
@@ -260,7 +261,23 @@ export const LeadPipelinePanel: React.FC = () => {
           <CardContent className="space-y-3">
             <div>
               <Label className="text-xs">Industry focus</Label>
-              <Input value={scrapeIndustry} onChange={e => setScrapeIndustry(e.target.value)} placeholder="e.g. healthcare, manufacturing" />
+              <div className="flex flex-wrap gap-1.5 mt-1 mb-2">
+                {['Medspas','Auto Mechanics','Dental','Roofing','HVAC','Law Firm','Real Estate','Chiropractor','Insurance','Accounting','SaaS','Restaurant'].map(label => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setScrapeIndustry(label.toLowerCase())}
+                    className={`px-2 py-0.5 rounded-full text-[11px] border transition ${
+                      scrapeIndustry.toLowerCase() === label.toLowerCase()
+                        ? 'border-amber bg-amber text-background'
+                        : 'border-border/60 bg-card/40 text-muted-foreground hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <Input value={scrapeIndustry} onChange={e => setScrapeIndustry(e.target.value)} placeholder="e.g. medspa, auto mechanic, healthcare" />
             </div>
             <Button onClick={runScraper} disabled={scraping} className="bg-amber text-background hover:bg-amber/90 w-full">
               {scraping ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping…</> : <><Play className="w-4 h-4 mr-1" /> Run Now</>}
@@ -268,6 +285,9 @@ export const LeadPipelinePanel: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Seasonal industry intelligence — click any card to load it as a scrape target */}
+      <SeasonalityWidget onPickIndustry={(ind) => setScrapeIndustry(ind.label.split(' /')[0].toLowerCase())} />
 
       {/* Drip settings */}
       {settings && (

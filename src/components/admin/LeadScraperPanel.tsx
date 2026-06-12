@@ -247,10 +247,33 @@ export const LeadScraperPanel: React.FC = () => {
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div>
+            <Label className="text-xs">Quick-pick industries</Label>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {[
+                'Medspas','Auto Mechanics','Dental','Roofing','HVAC','Plumbing',
+                'Law Firm','Real Estate','Chiropractor','Insurance','Accounting',
+                'Marketing Agency','SaaS','Ecommerce','Home Services','Restaurant',
+              ].map(label => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setIndustry(label.toLowerCase())}
+                  className={`px-2.5 py-1 rounded-full text-xs border transition ${
+                    industry.toLowerCase() === label.toLowerCase()
+                      ? 'border-amber bg-amber text-background'
+                      : 'border-border/60 bg-card/40 text-muted-foreground hover:border-amber/50 hover:text-amber'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
-              <Label className="text-xs">Industry (optional)</Label>
-              <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+              <Label className="text-xs">Industry (free text)</Label>
+              <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="medspa, mechanic, dental, SaaS…" />
             </div>
             <div>
               <Label className="text-xs">Location</Label>
