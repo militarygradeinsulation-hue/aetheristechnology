@@ -31,9 +31,9 @@ import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
-import { InboxTab } from '@/components/portal/InboxTab';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
-import { Mail as MailIcon, Newspaper } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
+
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Braden Roberts
