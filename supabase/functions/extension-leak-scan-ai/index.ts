@@ -185,6 +185,8 @@ serve(async (req) => {
         title: String(l.title || "").slice(0, 140),
         why: String(l.why || "").slice(0, 500),
         fix: String(l.fix || "").slice(0, 500),
+        leadsLostPerMonth: typeof l.leadsLostPerMonth === "string" ? l.leadsLostPerMonth.slice(0, 60) : "",
+        leadsRecoverablePerMonth: typeof l.leadsRecoverablePerMonth === "string" ? l.leadsRecoverablePerMonth.slice(0, 60) : "",
         selectors: sel,
         fixAction: fa,
       };
