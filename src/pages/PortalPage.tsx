@@ -541,8 +541,11 @@ const PortalPage: React.FC = () => {
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
-  const sharedWsUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const isAdmin = isOwnerAdmin;
+  // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
+  // Reps must NEVER see them, regardless of saved visibleTabs config.
+  const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
+  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing', 'jw-admin']);
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
@@ -550,6 +553,7 @@ const PortalPage: React.FC = () => {
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
     && (t.id !== 'briefing' || sharedWsUnlocked)
+    && (!HIDDEN_FOR_REPS.has(t.id as Tab) || isPartner || isAdmin)
   );
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
