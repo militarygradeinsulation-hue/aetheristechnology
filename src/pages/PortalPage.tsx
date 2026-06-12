@@ -729,7 +729,7 @@ const PortalPage: React.FC = () => {
   return (
     <div className={`min-h-screen bg-background ${cursorClassName}`}>
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/40 backdrop-blur sticky top-0 z-30">
+      <header className="border-b border-border/50 bg-card/40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded bg-amber/20 flex items-center justify-center flex-shrink-0">
