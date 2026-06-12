@@ -31,9 +31,9 @@ import SharedWorkspace from '@/components/admin/SharedWorkspace';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
-import { InboxTab } from '@/components/portal/InboxTab';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
-import { Mail as MailIcon, Newspaper } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
+
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Braden Roberts
@@ -154,6 +154,17 @@ const PortalPage: React.FC = () => {
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
   const { mode: tabColorMode } = useTabColorMode();
   const { scale: tabScale } = useTabSize();
+  const [wideMode, setWideMode] = useState<boolean>(() => {
+    try { return localStorage.getItem('portal.wideMode.v1') === '1'; } catch { return false; }
+  });
+  const toggleWideMode = () => setWideMode(v => {
+    const next = !v;
+    try { localStorage.setItem('portal.wideMode.v1', next ? '1' : '0'); } catch {}
+    return next;
+  });
+  // Tabs that benefit from a wider canvas (workspace boards, company portal, etc.)
+  const WIDE_TABS = new Set<Tab>(['workspace','sharedws','company','briefing','interviews','careers','leads','forecast','documents','training','onboarding']);
+
 
 
   // Personalized view: tabs vs widget board, plus per-rep visible tabs and widget sizes.
@@ -461,13 +472,18 @@ const PortalPage: React.FC = () => {
 
   const isPartner = profile.role === 'partner';
 
-  // Partner-only: auto-route Braden to the new Partner Hub on first visit.
+  // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
+  const isOwnerAdminEarly = hasValidAdminToken();
   useEffect(() => {
-    if (isPartner && !localStorage.getItem('partnerhub-seen-v1')) {
-      setTab('partnerhub');
-      localStorage.setItem('partnerhub-seen-v1', '1');
+    if (isPartner && !isOwnerAdminEarly && profile?.code) {
+      const savedTab = (() => { try { return localStorage.getItem(ACTIVE_TAB_KEY); } catch { return null; } })();
+      const adminOnlyTabs = new Set(['jw-admin', 'workbench']);
+      if (!savedTab || adminOnlyTabs.has(savedTab)) {
+        setTab('partnerhub');
+      }
     }
-  }, [isPartner]);
+  }, [isPartner, isOwnerAdminEarly, profile?.code, ACTIVE_TAB_KEY]);
+
 
   // Partner (Braden) gets the simpler rep-style top-tab layout, no view selector / widget board.
   // Joseph is also a partner but as the owner/admin he keeps the full customization UI.
@@ -505,7 +521,7 @@ const PortalPage: React.FC = () => {
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
     { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" />, iconCmp: FileText },
     { id: 'forecast', label: 'Forecast Center', icon: <Activity className="w-4 h-4" />, iconCmp: Activity },
-    { id: 'inbox', label: 'Inbox', icon: <MailIcon className="w-4 h-4" />, iconCmp: MailIcon },
+
     { id: 'briefing', label: 'Interview Briefing', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'incentives', label: 'Incentive Plan', icon: <Trophy className="w-4 h-4" />, iconCmp: Trophy },
@@ -660,8 +676,8 @@ const PortalPage: React.FC = () => {
         </div>
       );
       case 'documents': return <PortalDocuments />;
-      case 'inbox': return <InboxTab />;
       case 'news': return <NewsFeedPanel />;
+
       case 'sprint': return <Sprint90View />;
       case 'catalog': return <ServicesPricing />;
       case 'linkedin': return <LinkedInSetupGuide />;
@@ -839,8 +855,9 @@ const PortalPage: React.FC = () => {
                 {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
                   const active = tab === t.id;
                   const Icon = t.iconCmp;
-                  // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
-                   const isStevenInbox = t.id === 'inbox' && profile?.code === '317469';
+                  // Braden / partner Sales Coach highlight, glowing amber so it's always front-and-center
+                   const isStevenInbox = false;
+
                    // Braden / partner Sales Coach highlight, glowing amber so it's always front-and-center
                    const isPartnerCoach = t.id === 'coach' && isPartner;
                    return (
@@ -892,7 +909,19 @@ const PortalPage: React.FC = () => {
 
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <main className={`${(wideMode || WIDE_TABS.has(tab)) ? 'max-w-screen-2xl 2xl:max-w-[1800px]' : 'max-w-7xl'} mx-auto px-4 py-6 space-y-6`}>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleWideMode}
+            className="h-8 gap-1.5 border-amber/40 text-amber hover:bg-amber/10"
+            title={wideMode ? 'Switch to standard width' : 'Use the full screen width'}
+          >
+            {wideMode ? <><Minimize2 className="w-3.5 h-3.5" /> Standard width</> : <><Maximize2 className="w-3.5 h-3.5" /> Wider view</>}
+          </Button>
+        </div>
+
         <OperatorIdentityBar />
         {/* View selector */}
         {(!isPartner || isAdmin) && (

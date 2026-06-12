@@ -414,42 +414,14 @@ serve(async (req) => {
     const links = scrapeData.data?.links || scrapeData.links || [];
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
 
-    console.log("Scrape successful, building deterministic scan...");
-
-    const deterministic = buildDeterministicAnalysis(markdown, links, metadata, formattedUrl, parsedHost);
-    deterministic._fallback = false;
-    deterministic._mode = "deterministic";
-    deterministic._fallbackReason = "AI gateway bypassed; deterministic scanner used.";
-
-    try {
-      await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          Prefer: "return=minimal",
-        },
-        body: JSON.stringify({
-          url: formattedUrl,
-          score: deterministic.score,
-          gaps: deterministic,
-        }),
-      });
-    } catch (saveErr) {
-      console.warn("Website scan save failed, returning report anyway:", saveErr);
-    }
-
-    return new Response(JSON.stringify(deterministic), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.log("Scrape successful, calling AI analyzer...");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
+
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(45000),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
