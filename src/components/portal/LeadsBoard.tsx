@@ -2413,6 +2413,13 @@ const LeakChecklist: React.FC<{
                 </p>
                 <p className="text-muted-foreground">{g.description}</p>
                 <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+                {(g.leadsLostPerMonth || g.leadsRecoverablePerMonth) && (
+                  <p className="text-[11px] mt-0.5">
+                    {g.leadsLostPerMonth && <span className="text-crimson">Losing {g.leadsLostPerMonth}</span>}
+                    {g.leadsLostPerMonth && g.leadsRecoverablePerMonth && <span className="text-muted-foreground"> · </span>}
+                    {g.leadsRecoverablePerMonth && <span className="text-emerald-400">Recoverable {g.leadsRecoverablePerMonth}</span>}
+                  </p>
+                )}
 
                 {touches.length > 0 && (
                   <ul className="mt-1 space-y-0.5">
