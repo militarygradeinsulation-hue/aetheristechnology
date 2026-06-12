@@ -649,7 +649,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
                     required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing", "touchpoint_plan"],
                   },
                 },
-                required: ["signals", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
+                required: ["signals", "grade", "companyName", "executiveSummary", "gaps", "leadImpact", "repTalkTrack", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
               },
             },
           },
