@@ -38,6 +38,21 @@ OUTPUT STRICT JSON, no prose outside the JSON:
     "confession": "the exact rewrite, restructure, or sequence the page needs (3-5 specific actions, numbered)"
   },
   "leakValueUSD": { "low": <integer dollars per year>, "high": <integer dollars per year> },
+  "leadImpact": {
+    "currentLeadsLostPerMonth": "string range, e.g. '12-22 leads/mo'",
+    "recoverableLeadsPerMonth": "string range, e.g. '7-14 leads/mo'",
+    "dollarPerLead": "string, e.g. '$900 per closed lead'",
+    "assumptionsNote": "1-2 sentence note on how this was derived"
+  },
+  "repScript": {
+    "cold_call_opener": "30-second opener naming the company/page, the #1 leak, and the monthly leads being lost. 4-6 sentences.",
+    "voicemail": "20-second voicemail citing the dollar leak range and leads/mo recoverable.",
+    "cold_email": "100-160 word cold email. First line 'Subject: ...'. Body cites top 2 leaks by title, monthly $ leak, and leads/mo recoverable.",
+    "in_person_pitch": "60-90 second pitch script: name leak, cite $ AND lead loss, state recoverable leads, ask for the diagnostic.",
+    "discovery_questions": ["5 forensic discovery questions tied to specific leaks found"],
+    "objection_handles": ["3 lines formatted 'Pushback: ... → Response: ...'"],
+    "close_ask": "exact one-sentence ask"
+  },
   "priorityFix": "the ONE change to ship this week, in one sentence",
   "leaks": [
     {
@@ -47,6 +62,8 @@ OUTPUT STRICT JSON, no prose outside the JSON:
       "title": "short forensic label",
       "why": "1-2 sentences naming the mechanism of loss",
       "fix": "1 sentence with the specific repair",
+      "leadsLostPerMonth": "string range, e.g. '3-6 leads/mo' — leads bled by THIS leak",
+      "leadsRecoverablePerMonth": "string range, e.g. '2-4 leads/mo' — recovered if fixed",
       "selectors": ["<css selector for the offending element on the page, if any>"],
       "fixAction": {
         "op": "replaceText | setHTML | hide | setStyle | injectBanner | injectCTA | replaceAttr",
@@ -64,7 +81,9 @@ RULES:
 - Confession MUST be specific to THIS page (the actual offer, the actual headline, the actual CTA), not generic copy advice.
 - For EVERY leak that has a visible element on the page, populate "selectors" AND "fixAction" so the operator can apply the repair in-place. Prefer stable selectors (h1, header h2, [data-cta], main button:first-of-type, section:nth-of-type(2) p). If you cannot reasonably target the element, set fixAction to null.
 - "replaceText" = swap the textContent. "setHTML" = swap innerHTML (use sparingly). "hide" = display:none. "setStyle" value must be a JSON object of CSS props. "injectBanner" inserts a top/bottom amber banner with value as the message. "injectCTA" inserts a floating CTA button labeled value.
-- leakValueUSD low/high should reflect the company's apparent size and the severity of leaks combined. Use integers, no commas.`;
+- leakValueUSD low/high should reflect the company's apparent size and the severity of leaks combined. Use integers, no commas.
+- LEAD COUNTS (leadImpact + per-leak leadsLostPerMonth/leadsRecoverablePerMonth) are MANDATORY. Base them on observable traffic/scale signals + industry conversion benchmarks. Per-leak counts should sum loosely to the leadImpact totals.
+- REP_SCRIPT is MANDATORY. Every script must cite at least one specific leak title from above, the dollar leak range, AND the recoverable leads/mo. Use the actual company/brand name from the page if present. No generic templates.`;
 
 const ipBuckets = new Map<string, { count: number; reset: number }>();
 function rateLimited(ip: string, limit = 20, windowMs = 3600_000): boolean {
