@@ -839,8 +839,9 @@ const PortalPage: React.FC = () => {
                 {availableTabs.filter(t => effectiveVisible.includes(t.id)).map((t) => {
                   const active = tab === t.id;
                   const Icon = t.iconCmp;
-                  // Steven's personalized Inbox highlight, bigger, brighter, hard to miss
-                   const isStevenInbox = t.id === 'inbox' && profile?.code === '317469';
+                  // Braden / partner Sales Coach highlight, glowing amber so it's always front-and-center
+                   const isStevenInbox = false;
+
                    // Braden / partner Sales Coach highlight, glowing amber so it's always front-and-center
                    const isPartnerCoach = t.id === 'coach' && isPartner;
                    return (
