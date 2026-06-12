@@ -1893,6 +1893,29 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     )}
                   </div>
                 )}
+                {scan.leadImpact && (
+                  <div className="rounded-md border border-crimson/40 bg-crimson/5 p-3 space-y-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-crimson">Lead Drop-Off Analysis</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Currently bleeding</p>
+                        <p className="text-crimson font-bold">{scan.leadImpact.currentLeadsLostPerMonth || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Recoverable / mo</p>
+                        <p className="text-emerald-400 font-bold">{scan.leadImpact.recoverableLeadsPerMonth || '—'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">$ per closed lead</p>
+                        <p className="text-foreground">{scan.leadImpact.dollarPerLead || '—'}</p>
+                      </div>
+                    </div>
+                    {scan.leadImpact.assumptionsNote && (
+                      <p className="text-[10px] text-muted-foreground italic">{scan.leadImpact.assumptionsNote}</p>
+                    )}
+                  </div>
+                )}
+                {scan.repTalkTrack && <RepTalkTrackPanel track={scan.repTalkTrack} companyName={scan.companyName} />}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
                   <LeakChecklist
                     leadId={lead.id}
