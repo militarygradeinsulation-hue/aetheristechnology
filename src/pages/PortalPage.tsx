@@ -909,7 +909,19 @@ const PortalPage: React.FC = () => {
 
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <main className={`${(wideMode || WIDE_TABS.has(tab)) ? 'max-w-screen-2xl 2xl:max-w-[1800px]' : 'max-w-7xl'} mx-auto px-4 py-6 space-y-6`}>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleWideMode}
+            className="h-8 gap-1.5 border-amber/40 text-amber hover:bg-amber/10"
+            title={wideMode ? 'Switch to standard width' : 'Use the full screen width'}
+          >
+            {wideMode ? <><Minimize2 className="w-3.5 h-3.5" /> Standard width</> : <><Maximize2 className="w-3.5 h-3.5" /> Wider view</>}
+          </Button>
+        </div>
+
         <OperatorIdentityBar />
         {/* View selector */}
         {(!isPartner || isAdmin) && (
