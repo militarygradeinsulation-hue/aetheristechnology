@@ -421,7 +421,7 @@ serve(async (req) => {
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(90000),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
@@ -631,7 +631,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     });
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const models = ["google/gemini-3-flash-preview"];
+    const models = ["google/gemini-2.5-pro", "google/gemini-2.5-flash", "google/gemini-3-flash-preview"];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     outer: for (const m of models) {
