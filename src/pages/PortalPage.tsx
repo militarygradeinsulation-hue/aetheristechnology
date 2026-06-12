@@ -78,6 +78,7 @@ import { Trophy } from 'lucide-react';
 import { Linkedin } from 'lucide-react';
 import { LinkedInSetupGuide } from '@/components/portal/LinkedInSetupGuide';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
+import { LanguageToggle } from '@/components/portal/LanguageToggle';
 import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
 import PortalViewSelector, { type LayoutMode, type WidgetSize } from '@/components/portal/PortalViewSelector';
 // Maximize2 imported above
