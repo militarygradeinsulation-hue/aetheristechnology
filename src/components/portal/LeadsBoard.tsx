@@ -1893,6 +1893,29 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     )}
                   </div>
                 )}
+                {scan.leadImpact && (
+                  <div className="rounded-md border border-crimson/40 bg-crimson/5 p-3 space-y-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-crimson">Lead Drop-Off Analysis</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Currently bleeding</p>
+                        <p className="text-crimson font-bold">{scan.leadImpact.currentLeadsLostPerMonth || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Recoverable / mo</p>
+                        <p className="text-emerald-400 font-bold">{scan.leadImpact.recoverableLeadsPerMonth || '—'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">$ per closed lead</p>
+                        <p className="text-foreground">{scan.leadImpact.dollarPerLead || '—'}</p>
+                      </div>
+                    </div>
+                    {scan.leadImpact.assumptionsNote && (
+                      <p className="text-[10px] text-muted-foreground italic">{scan.leadImpact.assumptionsNote}</p>
+                    )}
+                  </div>
+                )}
+                {scan.repTalkTrack && <RepTalkTrackPanel track={scan.repTalkTrack} companyName={scan.companyName} />}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
                   <LeakChecklist
                     leadId={lead.id}
@@ -2413,6 +2436,13 @@ const LeakChecklist: React.FC<{
                 </p>
                 <p className="text-muted-foreground">{g.description}</p>
                 <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+                {(g.leadsLostPerMonth || g.leadsRecoverablePerMonth) && (
+                  <p className="text-[11px] mt-0.5">
+                    {g.leadsLostPerMonth && <span className="text-crimson">Losing {g.leadsLostPerMonth}</span>}
+                    {g.leadsLostPerMonth && g.leadsRecoverablePerMonth && <span className="text-muted-foreground"> · </span>}
+                    {g.leadsRecoverablePerMonth && <span className="text-emerald-400">Recoverable {g.leadsRecoverablePerMonth}</span>}
+                  </p>
+                )}
 
                 {touches.length > 0 && (
                   <ul className="mt-1 space-y-0.5">
@@ -2588,6 +2618,82 @@ Worth a 15-minute Leak Audit call to walk you through it?
       <p className="text-[10px] text-muted-foreground mt-2">
         The Sales Coach already has this lead's scan loaded — ask follow-ups and it remembers every leak.
       </p>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// Rep Talk Track — tailor-made scripts built from the scan's
+// actual leaks, dollar loss, and lead recovery numbers.
+// ─────────────────────────────────────────────────────────────
+const RepTalkTrackPanel: React.FC<{ track: any; companyName?: string }> = ({ track, companyName }) => {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const sections: Array<{ key: string; label: string }> = [
+    { key: 'cold_call_opener', label: 'Cold Call Opener' },
+    { key: 'voicemail', label: 'Voicemail' },
+    { key: 'cold_email', label: 'Cold Email' },
+    { key: 'linkedin_dm', label: 'LinkedIn DM' },
+    { key: 'in_person_pitch', label: 'In-Person / Zoom Pitch' },
+    { key: 'close_ask', label: 'The Close Ask' },
+  ];
+  const copy = (label: string, text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => toast({ title: `${label} copied` }),
+      () => toast({ title: 'Copy failed', variant: 'destructive' })
+    );
+  };
+  return (
+    <div className="rounded-md border-2 border-amber/60 bg-amber/10 p-3 space-y-2">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-2"
+      >
+        <p className="text-[10px] font-mono uppercase tracking-wider text-amber">
+          🎯 Rep Talk Track {companyName ? `· ${companyName}` : ''}
+        </p>
+        <span className="text-[10px] font-mono text-amber/80">{open ? 'Hide' : 'Show all scripts'}</span>
+      </button>
+      {open && (
+        <div className="space-y-2 pt-1">
+          {sections.map(({ key, label }) => {
+            const text = (track as any)[key];
+            if (!text || typeof text !== 'string') return null;
+            return (
+              <div key={key} className="rounded bg-background/40 border border-amber/20 p-2">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <p className="font-mono text-[10px] uppercase text-amber">{label}</p>
+                  <button
+                    type="button"
+                    onClick={() => copy(label, text)}
+                    className="text-[10px] text-amber hover:underline"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="text-xs text-foreground whitespace-pre-wrap">{text}</p>
+              </div>
+            );
+          })}
+          {Array.isArray(track.discovery_questions) && track.discovery_questions.length > 0 && (
+            <div className="rounded bg-background/40 border border-amber/20 p-2">
+              <p className="font-mono text-[10px] uppercase text-amber mb-1">Discovery Questions</p>
+              <ul className="text-xs text-foreground list-disc pl-4 space-y-0.5">
+                {track.discovery_questions.map((q: string, i: number) => <li key={i}>{q}</li>)}
+              </ul>
+            </div>
+          )}
+          {Array.isArray(track.objection_handles) && track.objection_handles.length > 0 && (
+            <div className="rounded bg-background/40 border border-amber/20 p-2">
+              <p className="font-mono text-[10px] uppercase text-amber mb-1">Objection Handles</p>
+              <ul className="text-xs text-foreground space-y-0.5">
+                {track.objection_handles.map((q: string, i: number) => <li key={i}>{q}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

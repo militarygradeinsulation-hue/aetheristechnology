@@ -450,7 +450,11 @@ Return a comprehensive analysis using the website_diagnostic_report function. Be
 
 For the executive summary: provide an overall letter grade (A-F), estimate total annual revenue leak, and give a 2-3 sentence positioning assessment.
 
-For gaps: include 12-16 findings across categories (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture). Each gap needs: category, severity, title, detailed description (3-4 sentences), estimated annual cost of the gap, recommended fix, and projected ROI percentage from fixing it.
+For gaps: include 12-16 findings across categories (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture). Each gap needs: category, severity, title, detailed description (3-4 sentences), estimated annual cost of the gap, leadsLostPerMonth (qualified leads currently bleeding because of THIS gap, range), leadsRecoverablePerMonth (what fixing it brings back, range), recommended fix, and projected ROI percentage from fixing it. Be conservative but specific — base lead counts on observable traffic signals + industry conversion benchmarks for this vertical/size.
+
+For LEAD_IMPACT (CRITICAL): give totals across all gaps — currentLeadsLostPerMonth, recoverableLeadsPerMonth, dollarPerLead (revenue per closed lead given their apparent model), and a 1-2 sentence assumptionsNote explaining the math.
+
+For REP_TALK_TRACK (CRITICAL — this is what the rep will read off the call): build a tailor-made talking script using the ACTUAL company name, the #1 leak title, the dollar leak range, and the leads/mo recoverable. No generic copy. Cover: cold_call_opener, voicemail, cold_email (with Subject line), linkedin_dm, in_person_pitch, 5 forensic discovery_questions tied to specific leaks, 3 objection_handles, and the close_ask. Every script must cite at least one specific gap title AND a dollar figure AND a lead count from this report.
 
 For the roadmap: create a 6-month implementation plan with monthly actions, estimated costs, and projected revenue recovery.
 
@@ -513,11 +517,39 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
                         title: { type: "string" },
                         description: { type: "string" },
                         annualCost: { type: "string", description: "Estimated annual revenue leak e.g. '$12,000 - $24,000'" },
+                        leadsLostPerMonth: { type: "string", description: "Estimated qualified leads currently lost per month due to THIS gap, as a range e.g. '6-12 leads/mo'. Base it on observable traffic signals, industry conversion benchmarks, and the severity of the gap." },
+                        leadsRecoverablePerMonth: { type: "string", description: "Qualified leads per month that would be recovered if THIS gap is fixed, as a range e.g. '4-9 leads/mo'. Usually 50-80% of leadsLostPerMonth depending on fix realism." },
                         recommendedFix: { type: "string", description: "Specific actionable fix" },
                         projectedROI: { type: "string", description: "Projected ROI percentage from fixing e.g. '150-300%'" },
                       },
-                      required: ["category", "severity", "title", "description", "annualCost", "recommendedFix", "projectedROI"],
+                      required: ["category", "severity", "title", "description", "annualCost", "leadsLostPerMonth", "leadsRecoverablePerMonth", "recommendedFix", "projectedROI"],
                     },
+                  },
+                  leadImpact: {
+                    type: "object",
+                    description: "Aggregate lead-flow impact across all gaps. Lead counts are MONTHLY.",
+                    properties: {
+                      currentLeadsLostPerMonth: { type: "string", description: "Total qualified leads currently lost across all gaps, e.g. '35-60 leads/mo'" },
+                      recoverableLeadsPerMonth: { type: "string", description: "Total qualified leads recoverable if top fixes ship, e.g. '20-40 leads/mo'" },
+                      dollarPerLead: { type: "string", description: "Estimated revenue per recovered lead given the apparent business model, e.g. '$1,200 per closed lead'" },
+                      assumptionsNote: { type: "string", description: "1-2 sentence note on how these numbers were derived (traffic signals, industry benchmarks, deal size assumption)." },
+                    },
+                    required: ["currentLeadsLostPerMonth", "recoverableLeadsPerMonth", "dollarPerLead", "assumptionsNote"],
+                  },
+                  repTalkTrack: {
+                    type: "object",
+                    description: "Tailor-made talking script for the sales rep, built FROM the specific leaks, dollar loss, and lead loss found in THIS report. Must name the company, cite the #1 leak, the dollar range, and the lead recovery number. No generic copy.",
+                    properties: {
+                      cold_call_opener: { type: "string", description: "30-second cold opener naming the company, the #1 leak found, and the monthly leads being lost. End with a permission-to-continue question. 4-6 sentences." },
+                      voicemail: { type: "string", description: "20-second voicemail script citing the dollar leak range and the lead loss. End with a clear callback ask." },
+                      cold_email: { type: "string", description: "100-160 word cold email. Subject line on first line prefixed 'Subject: '. Body cites the top 2 gaps by title, the monthly dollar leak, and the leads/mo recoverable if fixed. Single CTA at the end (15-minute call)." },
+                      linkedin_dm: { type: "string", description: "60-90 word LinkedIn opener referencing the specific leak and lead loss. No pitch." },
+                      in_person_pitch: { type: "string", description: "60-90 second in-person / Zoom pitch script. Structure: (1) name the company + leak, (2) cite dollar loss AND lead loss, (3) state recoverable leads, (4) ask for the diagnostic." },
+                      discovery_questions: { type: "array", items: { type: "string" }, description: "5 forensic discovery questions tied directly to the leaks found (e.g. 'Your contact page has no phone — how are inbound calls getting to you today?')" },
+                      objection_handles: { type: "array", items: { type: "string" }, description: "3 likely pushbacks with one-line responses, formatted 'Pushback: ... → Response: ...'" },
+                      close_ask: { type: "string", description: "The exact one-sentence ask: book the Forensic Diagnostic with the dollar/lead recovery as the carrot." },
+                    },
+                    required: ["cold_call_opener", "voicemail", "cold_email", "in_person_pitch", "discovery_questions", "objection_handles", "close_ask"],
                   },
                   roadmap: {
                     type: "array",
@@ -621,7 +653,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
                     required: ["recommended_channel", "channel_confidence", "why_this_channel", "best_time_to_reach", "persona_read", "tone_to_use", "first_touch_script", "email_timing", "touchpoint_plan"],
                   },
                 },
-                required: ["signals", "grade", "companyName", "executiveSummary", "gaps", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
+                required: ["signals", "grade", "companyName", "executiveSummary", "gaps", "leadImpact", "repTalkTrack", "roadmap", "roiTable", "nextSteps", "competitiveBrief", "outreach"],
               },
             },
           },

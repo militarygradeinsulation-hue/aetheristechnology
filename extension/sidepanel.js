@@ -200,6 +200,17 @@ function renderDossier() {
           <dt>Confession</dt><dd class="confession">${escapeHtml(d.dossier.confession || "—")}</dd>
         </dl>` : ""}
       ${d.priorityFix ? `<div class="priority"><b>Ship this week:</b> ${escapeHtml(d.priorityFix)}</div>` : ""}
+      ${d.leadImpact ? `
+        <div class="lead-impact" style="margin-top:8px;padding:8px;border:1px solid rgba(220,38,38,.4);background:rgba(220,38,38,.06);border-radius:6px">
+          <div style="font-family:monospace;font-size:10px;text-transform:uppercase;color:#dc2626;margin-bottom:4px">Lead Drop-Off</div>
+          <div style="font-size:12px;line-height:1.5">
+            <div><b style="color:#dc2626">Losing</b> ${escapeHtml(d.leadImpact.currentLeadsLostPerMonth || "—")}</div>
+            <div><b style="color:#10b981">Recoverable</b> ${escapeHtml(d.leadImpact.recoverableLeadsPerMonth || "—")}</div>
+            <div style="color:#9ca3af">${escapeHtml(d.leadImpact.dollarPerLead || "")}</div>
+            ${d.leadImpact.assumptionsNote ? `<div style="font-size:10px;color:#9ca3af;font-style:italic;margin-top:2px">${escapeHtml(d.leadImpact.assumptionsNote)}</div>` : ""}
+          </div>
+        </div>` : ""}
+      ${d.repScript ? renderRepScript(d.repScript) : ""}
       <div class="action-bank">
         <div class="action-bank-title">Available controls</div>
         <button class="primary" data-op-action="fixes">Open fix buttons</button>
@@ -209,6 +220,55 @@ function renderDossier() {
     </div>
   `;
   wireOperatorActionButtons($("scan-dossier"));
+  wireRepScriptCopy($("scan-dossier"));
+}
+
+function renderRepScript(rs) {
+  const block = (label, text) => text ? `
+    <details style="margin-top:6px;border:1px solid rgba(245,158,11,.3);border-radius:6px;background:rgba(245,158,11,.06)">
+      <summary style="cursor:pointer;padding:6px 8px;font-family:monospace;font-size:10px;text-transform:uppercase;color:#f59e0b;display:flex;justify-content:space-between;align-items:center">
+        <span>${escapeHtml(label)}</span>
+        <button class="ghost" data-copy-script="${escapeAttr(text)}" style="font-size:10px;padding:2px 6px">Copy</button>
+      </summary>
+      <div style="padding:8px;font-size:12px;white-space:pre-wrap;color:#e5e7eb">${escapeHtml(text)}</div>
+    </details>` : "";
+  const qList = Array.isArray(rs.discovery_questions) && rs.discovery_questions.length
+    ? `<details style="margin-top:6px;border:1px solid rgba(245,158,11,.3);border-radius:6px;background:rgba(245,158,11,.06)">
+        <summary style="cursor:pointer;padding:6px 8px;font-family:monospace;font-size:10px;text-transform:uppercase;color:#f59e0b">Discovery Questions</summary>
+        <ul style="padding:8px 8px 8px 22px;font-size:12px;color:#e5e7eb">${rs.discovery_questions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
+       </details>` : "";
+  const oList = Array.isArray(rs.objection_handles) && rs.objection_handles.length
+    ? `<details style="margin-top:6px;border:1px solid rgba(245,158,11,.3);border-radius:6px;background:rgba(245,158,11,.06)">
+        <summary style="cursor:pointer;padding:6px 8px;font-family:monospace;font-size:10px;text-transform:uppercase;color:#f59e0b">Objection Handles</summary>
+        <ul style="padding:8px 8px 8px 22px;font-size:12px;color:#e5e7eb">${rs.objection_handles.map(q => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
+       </details>` : "";
+  return `
+    <div style="margin-top:8px;padding:8px;border:2px solid rgba(245,158,11,.6);background:rgba(245,158,11,.1);border-radius:6px">
+      <div style="font-family:monospace;font-size:11px;text-transform:uppercase;color:#f59e0b;margin-bottom:4px">🎯 Rep Talk Track</div>
+      ${block("Cold Call Opener", rs.cold_call_opener)}
+      ${block("Voicemail", rs.voicemail)}
+      ${block("Cold Email", rs.cold_email)}
+      ${block("LinkedIn DM", rs.linkedin_dm)}
+      ${block("In-Person / Zoom Pitch", rs.in_person_pitch)}
+      ${block("The Close Ask", rs.close_ask)}
+      ${qList}
+      ${oList}
+    </div>`;
+}
+
+function wireRepScriptCopy(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-copy-script]").forEach((b) => {
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const txt = b.getAttribute("data-copy-script") || "";
+      navigator.clipboard.writeText(txt).then(
+        () => { const t = b.textContent; b.textContent = "✓ Copied"; setTimeout(() => { b.textContent = t; }, 1200); },
+        () => { b.textContent = "Copy failed"; }
+      );
+    });
+  });
 }
 
 function renderScan() {
