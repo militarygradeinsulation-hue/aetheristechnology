@@ -49,9 +49,12 @@
     "Segment": /cdn\.segment\.com/i,
   };
   const FOLLOWUP_RX = /calendly|hubspot.*meet|cal\.com|drift|intercom|tawk|tidio|chatwoot|crisp/i;
-  const PROOF_RX = /testimonial|case stud|reviews?|clients?|trusted by|featured in|as seen in|results?|portfolio|customers say/i;
-  const PRICE_RX = /\$\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\bpricing\b|\bplans?\b|\bpackages?\b|\bstarts?\s+at\b/i;
-  const PHONE_RX = /(\+?\d{1,2}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
+  // Stricter: require actual proof signals, not the word "results" alone.
+  const PROOF_RX = /testimonial|case stud(y|ies)|client logo|trusted by|featured in|as seen in|"[^"]{20,}"\s*[—-]\s*\w+|\d+\s*(\+|plus)\s*(clients|customers|companies)/i;
+  // Stricter: require actual currency or explicit pricing copy, not just "plans".
+  const PRICE_RX = /\$\s?\d{2,}(?:[.,]\d{2,3})?\b|\bstarts?\s+at\s+\$|\bfrom\s+\$|\bpricing\s+(starts|begins|from)\b|\b\$\d+\s*\/\s*(mo|month|yr|year)\b/i;
+  // Stricter: real US/intl phone, not any 10-digit string (zip+4, ids, etc.).
+  const PHONE_RX = /(?:\+\d{1,2}[\s.-])?\(\d{3}\)\s?\d{3}[\s.-]?\d{4}|\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b|tel:\s*\+?[\d\s().-]{7,}/i;
   const EMAIL_RX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 
   function aboveFold(el) {
