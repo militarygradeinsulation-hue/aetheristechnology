@@ -505,7 +505,7 @@ const PortalPage: React.FC = () => {
     { id: 'company', label: 'Company Portal', icon: <Building2 className="w-4 h-4" />, iconCmp: Building2, partnerOnly: true },
     { id: 'documents', label: 'Documents', icon: <FileText className="w-4 h-4" />, iconCmp: FileText },
     { id: 'forecast', label: 'Forecast Center', icon: <Activity className="w-4 h-4" />, iconCmp: Activity },
-    { id: 'inbox', label: 'Inbox', icon: <MailIcon className="w-4 h-4" />, iconCmp: MailIcon },
+
     { id: 'briefing', label: 'Interview Briefing', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'incentives', label: 'Incentive Plan', icon: <Trophy className="w-4 h-4" />, iconCmp: Trophy },
