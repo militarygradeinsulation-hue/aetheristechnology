@@ -289,7 +289,10 @@ serve(async (req) => {
         if (cacheRes.ok) {
           const rows = await cacheRes.json();
           const cached = Array.isArray(rows) && rows[0]?.gaps;
-          if (cached && typeof cached === "object" && cached.score != null) {
+          // Invalidate stale cache: older scans only produced 2-3 leaks. Force a
+          // fresh forensic run if the cached report is below today's standard.
+          const cachedGapCount = Array.isArray(cached?.gaps) ? cached.gaps.length : 0;
+          if (cached && typeof cached === "object" && cached.score != null && cachedGapCount >= 10) {
             console.log("Returning cached scan for host:", parsedHost);
             return new Response(JSON.stringify({ ...cached, _cached: true }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
