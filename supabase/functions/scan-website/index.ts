@@ -450,7 +450,11 @@ Return a comprehensive analysis using the website_diagnostic_report function. Be
 
 For the executive summary: provide an overall letter grade (A-F), estimate total annual revenue leak, and give a 2-3 sentence positioning assessment.
 
-For gaps: include 12-16 findings across categories (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture). Each gap needs: category, severity, title, detailed description (3-4 sentences), estimated annual cost of the gap, recommended fix, and projected ROI percentage from fixing it.
+For gaps: include 12-16 findings across categories (SEO, CTA, Messaging, Mobile, Speed, Brand Consistency, Content, Lead Capture). Each gap needs: category, severity, title, detailed description (3-4 sentences), estimated annual cost of the gap, leadsLostPerMonth (qualified leads currently bleeding because of THIS gap, range), leadsRecoverablePerMonth (what fixing it brings back, range), recommended fix, and projected ROI percentage from fixing it. Be conservative but specific — base lead counts on observable traffic signals + industry conversion benchmarks for this vertical/size.
+
+For LEAD_IMPACT (CRITICAL): give totals across all gaps — currentLeadsLostPerMonth, recoverableLeadsPerMonth, dollarPerLead (revenue per closed lead given their apparent model), and a 1-2 sentence assumptionsNote explaining the math.
+
+For REP_TALK_TRACK (CRITICAL — this is what the rep will read off the call): build a tailor-made talking script using the ACTUAL company name, the #1 leak title, the dollar leak range, and the leads/mo recoverable. No generic copy. Cover: cold_call_opener, voicemail, cold_email (with Subject line), linkedin_dm, in_person_pitch, 5 forensic discovery_questions tied to specific leaks, 3 objection_handles, and the close_ask. Every script must cite at least one specific gap title AND a dollar figure AND a lead count from this report.
 
 For the roadmap: create a 6-month implementation plan with monthly actions, estimated costs, and projected revenue recovery.
 
