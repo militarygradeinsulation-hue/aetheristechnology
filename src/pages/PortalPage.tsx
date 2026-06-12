@@ -461,13 +461,18 @@ const PortalPage: React.FC = () => {
 
   const isPartner = profile.role === 'partner';
 
-  // Partner-only: auto-route Braden to the new Partner Hub on first visit.
+  // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
+  const isOwnerAdminEarly = hasValidAdminToken();
   useEffect(() => {
-    if (isPartner && !localStorage.getItem('partnerhub-seen-v1')) {
-      setTab('partnerhub');
-      localStorage.setItem('partnerhub-seen-v1', '1');
+    if (isPartner && !isOwnerAdminEarly && profile?.code) {
+      const savedTab = (() => { try { return localStorage.getItem(ACTIVE_TAB_KEY); } catch { return null; } })();
+      const adminOnlyTabs = new Set(['jw-admin', 'workbench']);
+      if (!savedTab || adminOnlyTabs.has(savedTab)) {
+        setTab('partnerhub');
+      }
     }
-  }, [isPartner]);
+  }, [isPartner, isOwnerAdminEarly, profile?.code, ACTIVE_TAB_KEY]);
+
 
   // Partner (Braden) gets the simpler rep-style top-tab layout, no view selector / widget board.
   // Joseph is also a partner but as the owner/admin he keeps the full customization UI.
