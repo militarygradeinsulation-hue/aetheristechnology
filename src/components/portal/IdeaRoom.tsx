@@ -71,6 +71,8 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [topicFilter, setTopicFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({ title: '', body: '', category: 'general', priority: 'normal' });
   const [expanded, setExpanded] = useState<string | null>(null);
   const [edits, setEdits] = useState<Record<string, Partial<Idea>>>({});
