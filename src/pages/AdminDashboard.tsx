@@ -81,6 +81,7 @@ const DetectiveModeStandalone = lazy(() => import('@/components/DetectiveModeSta
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
 const AdminPodcastStudio = lazy(() => import('@/components/admin/AdminPodcastStudio').then(m => ({ default: m.AdminPodcastStudio })));
 const EasyModeTool = lazy(() => import('@/components/EasyModeTool').then(m => ({ default: m.EasyModeTool })));
+const IdeaRoom = lazy(() => import('@/components/portal/IdeaRoom').then(m => ({ default: m.IdeaRoom })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-12 text-muted-foreground">
