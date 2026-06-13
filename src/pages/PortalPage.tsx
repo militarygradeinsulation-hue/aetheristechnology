@@ -1104,6 +1104,7 @@ const PortalPage: React.FC = () => {
 
       {/* Global floating Operator dock — live on every portal page/tab */}
       <SalesCoachChat />
+      <OutlookMailDrawer />
     </div>
 
   );
