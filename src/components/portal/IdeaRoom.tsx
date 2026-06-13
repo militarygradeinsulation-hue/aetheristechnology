@@ -156,8 +156,16 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
     }
   };
 
-  const filtered = filter === 'all' ? ideas : ideas.filter(i => i.status === filter);
+  const q = search.trim().toLowerCase();
+  const filtered = ideas.filter(i =>
+    (filter === 'all' || i.status === filter) &&
+    (topicFilter === 'all' || i.category === topicFilter || groupForTopic(i.category) === topicFilter) &&
+    (!q || i.title.toLowerCase().includes(q) || i.body.toLowerCase().includes(q) || (i.rep_name || '').toLowerCase().includes(q) || i.category.toLowerCase().includes(q))
+  );
   const counts = STATUSES.reduce<Record<string, number>>((acc, s) => { acc[s.key] = ideas.filter(i => i.status === s.key).length; return acc; }, {});
+  const topicCounts: Record<string, number> = {};
+  for (const i of ideas) topicCounts[i.category] = (topicCounts[i.category] || 0) + 1;
+  const topicsInUse = Object.keys(topicCounts).sort();
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
