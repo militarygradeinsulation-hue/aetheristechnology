@@ -541,6 +541,7 @@ const PortalPage: React.FC = () => {
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
+    { id: 'ideas', label: 'Idea Room', icon: <Lightbulb className="w-4 h-4" />, iconCmp: Lightbulb },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
