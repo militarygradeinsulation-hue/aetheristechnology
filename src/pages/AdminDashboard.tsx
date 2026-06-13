@@ -81,6 +81,7 @@ const DetectiveModeStandalone = lazy(() => import('@/components/DetectiveModeSta
 const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
 const AdminPodcastStudio = lazy(() => import('@/components/admin/AdminPodcastStudio').then(m => ({ default: m.AdminPodcastStudio })));
 const EasyModeTool = lazy(() => import('@/components/EasyModeTool').then(m => ({ default: m.EasyModeTool })));
+const IdeaRoom = lazy(() => import('@/components/portal/IdeaRoom').then(m => ({ default: m.IdeaRoom })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -205,7 +206,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved) return saved as any;
@@ -253,6 +254,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'training', label: 'Training', icon: GraduationCap },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
+    { key: 'ideas', label: 'Idea Room', icon: Lightbulb },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring']; // newly added tabs auto-show even if user has saved prefs
@@ -572,6 +574,7 @@ const AdminDashboard: React.FC = () => {
       );
       case 'documents': return <AdminDocumentsPanel />;
       case 'easymode': return <EasyModeTool />;
+      case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return <ContentEngine />;

@@ -96,8 +96,10 @@ import { BusinessPostAnalyst } from '@/components/portal/BusinessPostAnalyst';
 import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
 import { PartnerOnboardingHub } from '@/components/portal/PartnerOnboardingHub';
 import { Compass } from 'lucide-react';
+import { IdeaRoom } from '@/components/portal/IdeaRoom';
+import { Lightbulb } from 'lucide-react';
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -341,7 +343,7 @@ const PortalPage: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
     const toolParam = params.get('tool');
-    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin'];
+    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas'];
     const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
     if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
       setTab(tabParam as Tab);
@@ -539,6 +541,7 @@ const PortalPage: React.FC = () => {
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'workspace', label: 'Workspace', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
+    { id: 'ideas', label: 'Idea Room', icon: <Lightbulb className="w-4 h-4" />, iconCmp: Lightbulb },
   ];
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -670,6 +673,7 @@ const PortalPage: React.FC = () => {
       case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
+      case 'ideas': return <IdeaRoom isAdmin={false} />;
       case 'sharedws': return <SharedWorkspace me="braden" />;
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
