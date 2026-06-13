@@ -192,9 +192,14 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
           />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-              <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              <SelectTrigger><SelectValue placeholder="Topic" /></SelectTrigger>
+              <SelectContent className="max-h-80">
+                {TOPIC_GROUPS.map(g => (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group}</div>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)}</SelectItem>)}
+                  </div>
+                ))}
               </SelectContent>
             </Select>
             <Select value={form.priority} onValueChange={v => setForm(f => ({ ...f, priority: v }))}>
