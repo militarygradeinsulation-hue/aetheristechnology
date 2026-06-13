@@ -29,7 +29,23 @@ interface Idea {
   updated_at: string;
 }
 
-const CATEGORIES = ['general', 'system', 'sales', 'tools', 'training', 'process', 'bug', 'feature'];
+// Structured topic library — reps pick from these so admin can filter by subject.
+// Stored in the existing `category` column on rep_ideas (no migration needed).
+const TOPIC_GROUPS: Array<{ group: string; topics: string[] }> = [
+  { group: 'Company & Strategy', topics: ['company-vision', 'positioning', 'pricing', 'commission-structure', 'partnerships'] },
+  { group: 'Sales Process', topics: ['cold-outreach', 'discovery-calls', 'objection-handling', 'follow-up', 'closing', 'pipeline-management'] },
+  { group: 'Leads & Prospecting', topics: ['lead-quality', 'lead-sources', 'scraping', 'enrichment', 'territory'] },
+  { group: 'Tools & Software', topics: ['portal-ui', 'scanner-tool', 'crm', 'extension', 'outlook-mail', 'ai-coach', 'mobile'] },
+  { group: 'Training & Onboarding', topics: ['rep-training', 'playbook', 'scripts', 'product-knowledge', 'role-play'] },
+  { group: 'Marketing & Content', topics: ['linkedin', 'blog', 'webinars', 'social-content', 'case-studies', 'collateral'] },
+  { group: 'Operations', topics: ['workflow', 'documentation', 'meetings', 'reporting', 'admin-tasks'] },
+  { group: 'Client Experience', topics: ['onboarding-clients', 'deliverables', 'retention', 'upsell'] },
+  { group: 'Bugs & Issues', topics: ['bug-report', 'broken-feature', 'data-issue', 'performance'] },
+  { group: 'Other', topics: ['general', 'feature-request', 'team-culture'] },
+];
+const ALL_TOPICS: string[] = TOPIC_GROUPS.flatMap(g => g.topics);
+const topicLabel = (t: string) => t.split('-').map(w => w[0]?.toUpperCase() + w.slice(1)).join(' ');
+const groupForTopic = (t: string): string => TOPIC_GROUPS.find(g => g.topics.includes(t))?.group ?? 'Other';
 const PRIORITIES: Array<{ key: string; label: string }> = [
   { key: 'low', label: 'Low' },
   { key: 'normal', label: 'Normal' },
@@ -55,6 +71,8 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [topicFilter, setTopicFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({ title: '', body: '', category: 'general', priority: 'normal' });
   const [expanded, setExpanded] = useState<string | null>(null);
   const [edits, setEdits] = useState<Record<string, Partial<Idea>>>({});
@@ -138,8 +156,16 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
     }
   };
 
-  const filtered = filter === 'all' ? ideas : ideas.filter(i => i.status === filter);
+  const q = search.trim().toLowerCase();
+  const filtered = ideas.filter(i =>
+    (filter === 'all' || i.status === filter) &&
+    (topicFilter === 'all' || i.category === topicFilter || groupForTopic(i.category) === topicFilter) &&
+    (!q || i.title.toLowerCase().includes(q) || i.body.toLowerCase().includes(q) || (i.rep_name || '').toLowerCase().includes(q) || i.category.toLowerCase().includes(q))
+  );
   const counts = STATUSES.reduce<Record<string, number>>((acc, s) => { acc[s.key] = ideas.filter(i => i.status === s.key).length; return acc; }, {});
+  const topicCounts: Record<string, number> = {};
+  for (const i of ideas) topicCounts[i.category] = (topicCounts[i.category] || 0) + 1;
+  const topicsInUse = Object.keys(topicCounts).sort();
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -176,9 +202,14 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
           />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-              <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              <SelectTrigger><SelectValue placeholder="Topic" /></SelectTrigger>
+              <SelectContent className="max-h-80">
+                {TOPIC_GROUPS.map(g => (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group}</div>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)}</SelectItem>)}
+                  </div>
+                ))}
               </SelectContent>
             </Select>
             <Select value={form.priority} onValueChange={v => setForm(f => ({ ...f, priority: v }))}>
@@ -194,22 +225,67 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === 'all' ? 'bg-amber/15 text-amber border-amber/40' : 'border-border text-muted-foreground hover:text-foreground'}`}
-        >
-          All ({ideas.length})
-        </button>
-        {STATUSES.map(s => (
+      <div className="space-y-3 rounded-lg border border-border/50 bg-card/30 p-3">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_240px] gap-2">
+          <Input
+            placeholder="Search ideas by title, body, rep, topic…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <Select value={topicFilter} onValueChange={setTopicFilter}>
+            <SelectTrigger><SelectValue placeholder="All topics" /></SelectTrigger>
+            <SelectContent className="max-h-80">
+              <SelectItem value="all">All topics ({ideas.length})</SelectItem>
+              {TOPIC_GROUPS.map(g => {
+                const groupCount = g.topics.reduce((sum, t) => sum + (topicCounts[t] || 0), 0);
+                if (groupCount === 0 && !g.topics.some(t => topicsInUse.includes(t))) return (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group}</div>
+                    <SelectItem value={g.group}>↳ {g.group} (0)</SelectItem>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)} (0)</SelectItem>)}
+                  </div>
+                );
+                return (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group} ({groupCount})</div>
+                    <SelectItem value={g.group}>↳ Whole group: {g.group}</SelectItem>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)} ({topicCounts[t] || 0})</SelectItem>)}
+                  </div>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
           <button
-            key={s.key}
-            onClick={() => setFilter(s.key)}
-            className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === s.key ? s.tone : 'border-border text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === 'all' ? 'bg-amber/15 text-amber border-amber/40' : 'border-border text-muted-foreground hover:text-foreground'}`}
           >
-            {s.label} ({counts[s.key] || 0})
+            All ({ideas.length})
           </button>
-        ))}
+          {STATUSES.map(s => (
+            <button
+              key={s.key}
+              onClick={() => setFilter(s.key)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === s.key ? s.tone : 'border-border text-muted-foreground hover:text-foreground'}`}
+            >
+              {s.label} ({counts[s.key] || 0})
+            </button>
+          ))}
+          {(topicFilter !== 'all' || search) && (
+            <button
+              onClick={() => { setTopicFilter('all'); setSearch(''); setFilter('all'); }}
+              className="ml-auto px-3 py-1.5 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+        {topicFilter !== 'all' && (
+          <p className="text-xs text-muted-foreground">
+            Showing topic: <span className="text-amber font-medium">{topicFilter.includes('-') ? topicLabel(topicFilter) : topicFilter}</span> · {filtered.length} result{filtered.length === 1 ? '' : 's'}
+          </p>
+        )}
       </div>
 
       {loading ? (
@@ -235,7 +311,7 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className={`text-xs ${statusTone(idea.status)}`}>{statusLabel(idea.status)}</Badge>
-                        <Badge variant="outline" className="text-xs">{idea.category}</Badge>
+                        <Badge variant="outline" className="text-xs" title={groupForTopic(idea.category)}>{topicLabel(idea.category)}</Badge>
                         {idea.priority !== 'normal' && <Badge variant="outline" className="text-xs uppercase">{idea.priority}</Badge>}
                         <span className="text-xs text-muted-foreground">
                           {idea.rep_name || idea.rep_code} · {new Date(idea.created_at).toLocaleDateString()}
