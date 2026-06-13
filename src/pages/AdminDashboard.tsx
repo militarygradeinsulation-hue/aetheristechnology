@@ -574,6 +574,7 @@ const AdminDashboard: React.FC = () => {
       );
       case 'documents': return <AdminDocumentsPanel />;
       case 'easymode': return <EasyModeTool />;
+      case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return <ContentEngine />;
