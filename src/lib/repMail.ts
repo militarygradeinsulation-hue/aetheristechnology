@@ -102,9 +102,18 @@ export function buildComposeUrl(
 }
 
 export async function openRepMail(to: string, opts: { subject?: string; body?: string } = {}) {
+  // If signed into the portal, prefer the in-app Outlook drawer.
+  if (getPortalToken()) {
+    try {
+      const { openOutlookCompose } = await import('@/lib/outlookMail');
+      openOutlookCompose(to, opts);
+      return;
+    } catch {
+      // fall through to legacy compose
+    }
+  }
   const prefs = await loadRepMailPrefs();
   const url = buildComposeUrl(to, prefs, opts);
-  // mailto: must use location to trigger handler; web URLs open in new tab
   if (url.startsWith('mailto:')) window.location.href = url;
   else window.open(url, '_blank', 'noopener,noreferrer');
 }

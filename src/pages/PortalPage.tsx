@@ -41,6 +41,7 @@ import { logPortalActivity } from '@/lib/portalLeads';
 import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
 import { FlagshipCommissionPanel } from '@/components/portal/FlagshipCommissionPanel';
 import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
+import { OutlookMailDrawer } from '@/components/portal/OutlookMailDrawer';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { MotivationCard } from '@/components/portal/MotivationCard';
@@ -1103,6 +1104,7 @@ const PortalPage: React.FC = () => {
 
       {/* Global floating Operator dock — live on every portal page/tab */}
       <SalesCoachChat />
+      <OutlookMailDrawer />
     </div>
 
   );
