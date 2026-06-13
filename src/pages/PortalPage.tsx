@@ -96,6 +96,8 @@ import { BusinessPostAnalyst } from '@/components/portal/BusinessPostAnalyst';
 import PartnerCoachTips from '@/components/portal/PartnerCoachTips';
 import { PartnerOnboardingHub } from '@/components/portal/PartnerOnboardingHub';
 import { Compass } from 'lucide-react';
+import { IdeaRoom } from '@/components/portal/IdeaRoom';
+import { Lightbulb } from 'lucide-react';
 
 type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas';
 type ToolKey =
