@@ -225,22 +225,67 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === 'all' ? 'bg-amber/15 text-amber border-amber/40' : 'border-border text-muted-foreground hover:text-foreground'}`}
-        >
-          All ({ideas.length})
-        </button>
-        {STATUSES.map(s => (
+      <div className="space-y-3 rounded-lg border border-border/50 bg-card/30 p-3">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_240px] gap-2">
+          <Input
+            placeholder="Search ideas by title, body, rep, topic…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <Select value={topicFilter} onValueChange={setTopicFilter}>
+            <SelectTrigger><SelectValue placeholder="All topics" /></SelectTrigger>
+            <SelectContent className="max-h-80">
+              <SelectItem value="all">All topics ({ideas.length})</SelectItem>
+              {TOPIC_GROUPS.map(g => {
+                const groupCount = g.topics.reduce((sum, t) => sum + (topicCounts[t] || 0), 0);
+                if (groupCount === 0 && !g.topics.some(t => topicsInUse.includes(t))) return (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group}</div>
+                    <SelectItem value={g.group}>↳ {g.group} (0)</SelectItem>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)} (0)</SelectItem>)}
+                  </div>
+                );
+                return (
+                  <div key={g.group}>
+                    <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{g.group} ({groupCount})</div>
+                    <SelectItem value={g.group}>↳ Whole group: {g.group}</SelectItem>
+                    {g.topics.map(t => <SelectItem key={t} value={t}>{topicLabel(t)} ({topicCounts[t] || 0})</SelectItem>)}
+                  </div>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
           <button
-            key={s.key}
-            onClick={() => setFilter(s.key)}
-            className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === s.key ? s.tone : 'border-border text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === 'all' ? 'bg-amber/15 text-amber border-amber/40' : 'border-border text-muted-foreground hover:text-foreground'}`}
           >
-            {s.label} ({counts[s.key] || 0})
+            All ({ideas.length})
           </button>
-        ))}
+          {STATUSES.map(s => (
+            <button
+              key={s.key}
+              onClick={() => setFilter(s.key)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${filter === s.key ? s.tone : 'border-border text-muted-foreground hover:text-foreground'}`}
+            >
+              {s.label} ({counts[s.key] || 0})
+            </button>
+          ))}
+          {(topicFilter !== 'all' || search) && (
+            <button
+              onClick={() => { setTopicFilter('all'); setSearch(''); setFilter('all'); }}
+              className="ml-auto px-3 py-1.5 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+        {topicFilter !== 'all' && (
+          <p className="text-xs text-muted-foreground">
+            Showing topic: <span className="text-amber font-medium">{topicFilter.includes('-') ? topicLabel(topicFilter) : topicFilter}</span> · {filtered.length} result{filtered.length === 1 ? '' : 's'}
+          </p>
+        )}
       </div>
 
       {loading ? (
