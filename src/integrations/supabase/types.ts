@@ -4597,6 +4597,60 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_ideas: {
+        Row: {
+          admin_notes: string | null
+          admin_reply: string | null
+          body: string
+          category: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          priority: string
+          rep_code: string
+          rep_name: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          admin_reply?: string | null
+          body: string
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          priority?: string
+          rep_code: string
+          rep_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          admin_reply?: string | null
+          body?: string
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          priority?: string
+          rep_code?: string
+          rep_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rep_image_studio: {
         Row: {
           created_at: string
