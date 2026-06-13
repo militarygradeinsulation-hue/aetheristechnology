@@ -1218,3 +1218,165 @@ function renderContacts(d) {
 }
 
 $("scan-contacts")?.addEventListener("click", runFindContacts);
+
+// ============================================================
+// v0.9.0 — CRM (HubSpot bridge) + Auto-Fix Live Site
+// ============================================================
+
+const SB_FN = (name) => `${SUPABASE_URL}/functions/v1/${name}`;
+
+async function getAccessCode() {
+  const { aetherisAccessCode } = await chrome.storage.local.get("aetherisAccessCode");
+  if (aetherisAccessCode) return aetherisAccessCode;
+  const code = (prompt("Enter your rep code or client unlock code to use HubSpot reader + Auto-Fix:") || "").trim().toUpperCase();
+  if (!code) return null;
+  await chrome.storage.local.set({ aetherisAccessCode: code });
+  return code;
+}
+
+async function callBridge(payload) {
+  const r = await fetch(SB_FN("extension-hubspot-bridge"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+    body: JSON.stringify(payload),
+  });
+  return r.json();
+}
+
+async function callCms(payload) {
+  const r = await fetch(SB_FN("extension-cms-apply"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+    body: JSON.stringify(payload),
+  });
+  return r.json();
+}
+
+// ---------- CRM tab ----------
+function renderCrmResult(data) {
+  const out = $("crm-out");
+  if (!out) return;
+  if (data?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(data.error)}</div>`; return; }
+  const leaks = Array.isArray(data?.leaks) ? data.leaks : [];
+  const total = data?.totalExposureUSD ? `$${Number(data.totalExposureUSD).toLocaleString()}` : "—";
+  out.innerHTML = `
+    <div class="meta"><b>${escapeHtml(data?.summary || "")}</b><br/>
+      <span class="muted">Total exposure: ${total} · ${leaks.length} leak${leaks.length === 1 ? "" : "s"} found · Access: ${escapeHtml(data?.accessKind || "")}</span></div>
+    ${leaks.map((l) => `
+      <div class="bubble">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <b>${escapeHtml(l.title || "")}</b>
+          <span class="muted">${escapeHtml(l.severity || "")}${l.count != null ? " · " + l.count : ""}${l.exposureUSD ? " · $" + Number(l.exposureUSD).toLocaleString() : ""}</span>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:4px">${escapeHtml(l.evidence || "")}</div>
+        <div style="margin-top:4px"><b>Fix:</b> ${escapeHtml(l.fix || "")}</div>
+      </div>`).join("")}
+    ${data?.repScript ? `
+      <div class="bubble">
+        <b>Rep script</b>
+        <div style="margin-top:4px"><b>Opener:</b> ${escapeHtml(data.repScript.opener || "")}</div>
+        ${(data.repScript.discovery || []).map((q) => `<div>• ${escapeHtml(q)}</div>`).join("")}
+        <div style="margin-top:4px"><b>Ask:</b> ${escapeHtml(data.repScript.close || "")}</div>
+      </div>` : ""}
+    ${Array.isArray(data?.nextThreeActions) && data.nextThreeActions.length ? `
+      <div class="bubble"><b>Next 30 minutes</b>${data.nextThreeActions.map((a) => `<div>• ${escapeHtml(a)}</div>`).join("")}</div>` : ""}
+  `;
+}
+
+async function crmScrape() {
+  const out = $("crm-out"); out.innerHTML = `<div class="empty">Reading HubSpot tab…</div>`;
+  const accessCode = await getAccessCode(); if (!accessCode) { out.innerHTML = ""; return; }
+  const scrape = await relayToTab({ type: "AETHERIS_HUBSPOT_SCRAPE" });
+  if (scrape?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(scrape.error)}</div>`; return; }
+  out.innerHTML = `<div class="empty">Analyzing CRM leaks…</div>`;
+  const data = await callBridge({ accessCode, mode: "dom", url: scrape.url, payload: scrape });
+  renderCrmResult(data);
+}
+
+async function crmPullViaSession(kind) {
+  const out = $("crm-out"); out.innerHTML = `<div class="empty">Pulling ${kind} via your HubSpot session…</div>`;
+  const accessCode = await getAccessCode(); if (!accessCode) { out.innerHTML = ""; return; }
+  const path = kind === "deals"
+    ? "/crm/v3/objects/deals?limit=100&properties=dealname,amount,dealstage,closedate,hs_lastmodifieddate,pipeline,hubspot_owner_id"
+    : "/crm/v3/objects/contacts?limit=100&properties=email,firstname,lastname,lifecyclestage,hs_lead_status,lastmodifieddate,notes_last_contacted";
+  const res = await relayToTab({ type: "AETHERIS_HUBSPOT_API_FETCH", path });
+  if (res?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(res.error)}<br/><span class="muted">Tip: switch to a hubspot.com or app.hubspot.com tab first so the session cookie is available.</span></div>`; return; }
+  if (!res?.ok) { out.innerHTML = `<div class="bubble err">HubSpot returned ${res?.status || "error"}. ${res?.json ? escapeHtml(JSON.stringify(res.json).slice(0,300)) : ""}</div>`; return; }
+  out.innerHTML = `<div class="empty">Running forensic detectors on ${res.json?.results?.length || 0} ${kind}…</div>`;
+  const data = await callBridge({ accessCode, mode: "api", url: `hubapi.com${path}`, payload: { kind, results: res.json?.results || [], paging: res.json?.paging } });
+  renderCrmResult(data);
+}
+
+$("crm-scrape")?.addEventListener("click", crmScrape);
+$("crm-pull-deals")?.addEventListener("click", () => crmPullViaSession("deals"));
+$("crm-pull-contacts")?.addEventListener("click", () => crmPullViaSession("contacts"));
+$("crm-clear")?.addEventListener("click", () => { $("crm-out").innerHTML = ""; });
+
+// ---------- Auto-Fix Site tab ----------
+function buildPatchesFromScan() {
+  // Convert the last scan's AI fixActions (op=replaceText with selector + value) into
+  // text-level find/replace pairs the WordPress endpoint can apply to the raw HTML.
+  const leaks = state.lastDossier?.leaks || state.lastScan?.leaks || [];
+  const patches = [];
+  for (const l of leaks) {
+    const fa = l?.fixAction;
+    if (!fa || fa.op !== "replaceText") continue;
+    // The scanner stored the original textContent in state.revertById entries, but the
+    // simpler durable signal is the leak's "original" text if present.
+    const find = l.originalText || l.evidence || "";
+    if (find && fa.value && typeof fa.value === "string") {
+      patches.push({ find: String(find).slice(0, 400), replace: String(fa.value).slice(0, 800) });
+    }
+  }
+  return patches;
+}
+
+async function afDetect() {
+  const r = await relayToTab({ type: "AETHERIS_CMS_DETECT" });
+  const el = $("af-detect");
+  if (r?.error) { el.innerHTML = `<span style="color:var(--crimson, #c1121f)">${escapeHtml(r.error)}</span>`; return; }
+  el.innerHTML = `Detected: <b>${escapeHtml(r.platform)}</b> at <code>${escapeHtml(r.origin || "")}</code>${r.generator ? " · " + escapeHtml(r.generator) : ""}`;
+  if (r.platform === "wordpress") { $("af-site").value = r.origin || ""; $("af-pageurl").value = r.url || ""; }
+  else if (r.platform !== "unknown") {
+    el.innerHTML += `<br/><span class="muted">Direct write-back for ${escapeHtml(r.platform)} isn't supported yet. Use the Fix tab to copy the patch and paste it into your CMS.</span>`;
+  }
+}
+
+async function afCall(action, extra = {}) {
+  const out = $("af-out");
+  const accessCode = await getAccessCode(); if (!accessCode) return;
+  const payload = {
+    accessCode, action, platform: "wordpress",
+    siteUrl: $("af-site").value.trim(),
+    username: $("af-user").value.trim(),
+    appPassword: $("af-pass").value.trim(),
+    pageUrl: $("af-pageurl").value.trim() || state.activeUrl,
+    ...extra,
+  };
+  out.innerHTML = `<div class="empty">Calling WordPress…</div>`;
+  const r = await callCms(payload);
+  if (r?.error || r?.ok === false) {
+    out.innerHTML = `<div class="bubble err">${escapeHtml(r.error || "Failed")}</div>`; return r;
+  }
+  if (action === "verify") out.innerHTML = `<div class="bubble"><b>✓ Connected as ${escapeHtml(r.user)}</b></div>`;
+  else if (action === "apply" && r.dryRun) {
+    out.innerHTML = `<div class="bubble"><b>Preview</b> · post #${r.postId} (${escapeHtml(r.type)}) · ${r.patchesApplied} patch${r.patchesApplied === 1 ? "" : "es"} would apply${r.patchesMissed?.length ? `, ${r.patchesMissed.length} not found` : ""}.</div>`;
+  } else if (action === "apply") {
+    out.innerHTML = `<div class="bubble"><b>✓ Pushed live.</b> Post #${r.postId} updated with ${r.patchesApplied} change${r.patchesApplied === 1 ? "" : "s"}. <a href="${escapeAttr(r.link || "#")}" target="_blank" rel="noopener">View ↗</a></div>`;
+  }
+  return r;
+}
+
+$("af-detect-btn")?.addEventListener("click", afDetect);
+$("af-verify")?.addEventListener("click", () => afCall("verify"));
+$("af-preview")?.addEventListener("click", () => {
+  const patches = buildPatchesFromScan();
+  if (!patches.length) { $("af-out").innerHTML = `<div class="bubble err">Run a scan with Deepen (Detective) first so the AI produces replaceText fixes.</div>`; return; }
+  return afCall("apply", { patches, dryRun: true });
+});
+$("af-apply")?.addEventListener("click", async () => {
+  const patches = buildPatchesFromScan();
+  if (!patches.length) { $("af-out").innerHTML = `<div class="bubble err">No patches available. Run Deepen first.</div>`; return; }
+  if (!confirm(`Push ${patches.length} change${patches.length === 1 ? "" : "s"} LIVE to ${$("af-site").value}? This rewrites the post content.`)) return;
+  return afCall("apply", { patches, dryRun: false });
+});
