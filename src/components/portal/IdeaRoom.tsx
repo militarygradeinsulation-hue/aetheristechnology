@@ -29,7 +29,23 @@ interface Idea {
   updated_at: string;
 }
 
-const CATEGORIES = ['general', 'system', 'sales', 'tools', 'training', 'process', 'bug', 'feature'];
+// Structured topic library — reps pick from these so admin can filter by subject.
+// Stored in the existing `category` column on rep_ideas (no migration needed).
+const TOPIC_GROUPS: Array<{ group: string; topics: string[] }> = [
+  { group: 'Company & Strategy', topics: ['company-vision', 'positioning', 'pricing', 'commission-structure', 'partnerships'] },
+  { group: 'Sales Process', topics: ['cold-outreach', 'discovery-calls', 'objection-handling', 'follow-up', 'closing', 'pipeline-management'] },
+  { group: 'Leads & Prospecting', topics: ['lead-quality', 'lead-sources', 'scraping', 'enrichment', 'territory'] },
+  { group: 'Tools & Software', topics: ['portal-ui', 'scanner-tool', 'crm', 'extension', 'outlook-mail', 'ai-coach', 'mobile'] },
+  { group: 'Training & Onboarding', topics: ['rep-training', 'playbook', 'scripts', 'product-knowledge', 'role-play'] },
+  { group: 'Marketing & Content', topics: ['linkedin', 'blog', 'webinars', 'social-content', 'case-studies', 'collateral'] },
+  { group: 'Operations', topics: ['workflow', 'documentation', 'meetings', 'reporting', 'admin-tasks'] },
+  { group: 'Client Experience', topics: ['onboarding-clients', 'deliverables', 'retention', 'upsell'] },
+  { group: 'Bugs & Issues', topics: ['bug-report', 'broken-feature', 'data-issue', 'performance'] },
+  { group: 'Other', topics: ['general', 'feature-request', 'team-culture'] },
+];
+const ALL_TOPICS: string[] = TOPIC_GROUPS.flatMap(g => g.topics);
+const topicLabel = (t: string) => t.split('-').map(w => w[0]?.toUpperCase() + w.slice(1)).join(' ');
+const groupForTopic = (t: string): string => TOPIC_GROUPS.find(g => g.topics.includes(t))?.group ?? 'Other';
 const PRIORITIES: Array<{ key: string; label: string }> = [
   { key: 'low', label: 'Low' },
   { key: 'normal', label: 'Normal' },
