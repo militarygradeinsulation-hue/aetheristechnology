@@ -976,6 +976,67 @@
       case "AETHERIS_APPLY_FIX": sendResponse(applyFix(msg.leak)); return;
       case "AETHERIS_REVERT_FIX": sendResponse(revertFix(msg.revertId)); return;
       case "AETHERIS_EXEC": sendResponse(execAction(msg.action || {})); return;
+
+      // ---------- HubSpot bridge ----------
+      case "AETHERIS_HUBSPOT_SCRAPE": {
+        try {
+          const host = location.hostname;
+          if (!/hubspot\.com$/.test(host) && !/hubapi\.com$/.test(host)) {
+            sendResponse({ error: "Open a HubSpot tab first (app.hubspot.com)." });
+            return;
+          }
+          const grabRows = (root) => Array.from(root.querySelectorAll("tr, [role='row']"))
+            .slice(0, 400)
+            .map((tr) => Array.from(tr.querySelectorAll("td, th, [role='cell'], [role='columnheader']"))
+              .map((c) => (c.textContent || "").replace(/\s+/g, " ").trim())
+              .filter(Boolean))
+            .filter((row) => row.length);
+          const headings = Array.from(document.querySelectorAll("h1,h2,h3"))
+            .slice(0, 40).map((h) => h.textContent.trim()).filter(Boolean);
+          const cards = Array.from(document.querySelectorAll("[data-test-id*='card'],[data-selenium-test*='card'],[class*='Card']"))
+            .slice(0, 80).map((c) => (c.textContent || "").replace(/\s+/g, " ").trim().slice(0, 400)).filter(Boolean);
+          sendResponse({
+            url: location.href, title: document.title,
+            screen: location.pathname.split("/").filter(Boolean).slice(0, 3).join("/"),
+            headings, rows: grabRows(document).slice(0, 200), cards: cards.slice(0, 60),
+            visibleText: (document.body.innerText || "").slice(0, 8000),
+          });
+        } catch (e) { sendResponse({ error: String(e && e.message || e) }); }
+        return;
+      }
+      // Use the user's session cookie to call private HubSpot endpoints from
+      // within the hubspot.com / hubapi.com origin (no API key required).
+      case "AETHERIS_HUBSPOT_API_FETCH": {
+        (async () => {
+          try {
+            const host = location.hostname;
+            if (!/hubspot\.com$/.test(host) && !/hubapi\.com$/.test(host)) {
+              sendResponse({ error: "Switch to a HubSpot tab to use session-cookie fetch." }); return;
+            }
+            const path = String(msg.path || "");
+            if (!path.startsWith("/")) { sendResponse({ error: "path must start with /" }); return; }
+            const r = await fetch(`https://api.hubapi.com${path}`, { credentials: "include", headers: { Accept: "application/json" } });
+            const text = await r.text();
+            let json = null; try { json = JSON.parse(text); } catch {}
+            sendResponse({ status: r.status, ok: r.ok, json, text: json ? null : text.slice(0, 4000) });
+          } catch (e) { sendResponse({ error: String(e && e.message || e) }); }
+        })();
+        return true;
+      }
+      case "AETHERIS_CMS_DETECT": {
+        try {
+          const html = document.documentElement.outerHTML.slice(0, 50000);
+          const gen = (document.querySelector('meta[name="generator"]')?.content || "").toLowerCase();
+          const isWP = /wp-content|wp-includes|wordpress/i.test(html) || /wordpress/.test(gen);
+          const isWebflow = /webflow/i.test(html) || /webflow/.test(gen);
+          const isShopify = /cdn\.shopify\.com|shopify/i.test(html);
+          const isSquarespace = /squarespace/i.test(html);
+          const isWix = /wix\.com|static\.wixstatic/i.test(html);
+          const platform = isWP ? "wordpress" : isWebflow ? "webflow" : isShopify ? "shopify" : isSquarespace ? "squarespace" : isWix ? "wix" : "unknown";
+          sendResponse({ platform, generator: gen || null, url: location.href, origin: location.origin });
+        } catch (e) { sendResponse({ error: String(e && e.message || e) }); }
+        return;
+      }
       default: return;
     }
   });

@@ -24,6 +24,8 @@
     <button class="tab active" data-tab="scan">Scan</button>
     <button class="tab" data-tab="operator">Operator</button>
     <button class="tab" data-tab="fix">Fix</button>
+    <button class="tab" data-tab="crm">CRM</button>
+    <button class="tab" data-tab="autofix">Auto-Fix Site</button>
     <button class="tab" data-tab="growth">Growth</button>
     <button class="tab" data-tab="case">Case File</button>
   </nav>
@@ -213,6 +215,45 @@
       <div id="case-list"></div>
       <div id="case-detail"></div>
       <div id="case-diff"></div>
+    </section>
+
+    <!-- CRM (HubSpot bridge) -->
+    <section class="panel" id="tab-crm">
+      <div class="card">
+        <div class="card-title">HubSpot CRM Autopsy</div>
+        <div class="muted" style="margin-bottom:8px">No API key needed. Reads the HubSpot tab you have open, or uses your session cookie to pull pipelines directly. Then runs the same leak detectors we use in the operator backend.</div>
+        <div class="row" style="flex-wrap:wrap;gap:6px">
+          <button id="crm-scrape" class="primary" title="Read what's on the open HubSpot tab">Scan visible HubSpot tab</button>
+          <button id="crm-pull-deals" class="ghost" title="Pull deal pipeline via your HubSpot session">Pull deals (session)</button>
+          <button id="crm-pull-contacts" class="ghost" title="Pull contacts via your HubSpot session">Pull contacts (session)</button>
+          <button id="crm-clear" class="ghost">Clear</button>
+        </div>
+        <div id="crm-out" class="out" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- AUTO-FIX SITE -->
+    <section class="panel" id="tab-autofix">
+      <div class="card">
+        <div class="card-title">Auto-Fix Live Site</div>
+        <div class="muted" style="margin-bottom:8px">Pushes the scan's recommended copy fixes back to your WordPress site through the REST API. Uses an Application Password — never your main password. Credentials live only in this tab; nothing is stored on our server.</div>
+        <div id="af-detect" class="muted" style="font-size:11px;margin-bottom:6px">Open the site you want to fix in another tab, then click Detect.</div>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button id="af-detect-btn" class="ghost">Detect CMS</button>
+        </div>
+        <div class="af-fields" style="margin-top:10px;display:grid;gap:6px">
+          <input id="af-site" placeholder="WordPress site URL (e.g. https://acme.com)" />
+          <input id="af-user" placeholder="WP username" autocomplete="off" />
+          <input id="af-pass" type="password" placeholder="Application Password (Users → Profile → Application Passwords)" autocomplete="off" />
+          <input id="af-pageurl" placeholder="Page URL to patch (defaults to the active tab)" />
+        </div>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button id="af-verify" class="ghost">Verify connection</button>
+          <button id="af-preview" class="primary" title="Dry run — see what would change">Preview patch</button>
+          <button id="af-apply" class="primary" style="background:var(--amber);color:#000" title="Actually write to your live site">Push fixes LIVE</button>
+        </div>
+        <div id="af-out" class="out" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- AUTOPSY (sticky) -->
