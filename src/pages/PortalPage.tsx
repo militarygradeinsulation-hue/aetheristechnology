@@ -673,6 +673,7 @@ const PortalPage: React.FC = () => {
       case 'onboarding': return <OnboardingLibrary />;
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
+      case 'ideas': return <IdeaRoom isAdmin={false} />;
       case 'sharedws': return <SharedWorkspace me="braden" />;
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
