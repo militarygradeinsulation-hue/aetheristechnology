@@ -311,7 +311,7 @@ export const IdeaRoom: React.FC<Props> = ({ isAdmin = false }) => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className={`text-xs ${statusTone(idea.status)}`}>{statusLabel(idea.status)}</Badge>
-                        <Badge variant="outline" className="text-xs">{idea.category}</Badge>
+                        <Badge variant="outline" className="text-xs" title={groupForTopic(idea.category)}>{topicLabel(idea.category)}</Badge>
                         {idea.priority !== 'normal' && <Badge variant="outline" className="text-xs uppercase">{idea.priority}</Badge>}
                         <span className="text-xs text-muted-foreground">
                           {idea.rep_name || idea.rep_code} · {new Date(idea.created_at).toLocaleDateString()}
