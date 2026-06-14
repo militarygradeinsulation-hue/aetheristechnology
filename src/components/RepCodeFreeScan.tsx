@@ -4,8 +4,9 @@ import { Loader2, Lock, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldC
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
 
-type TopIssue = { category: string; severity: string; title: string; hint: string };
+type TopIssue = { category: string; severity: string; title: string; hint: string; annualCost?: string };
 type Teaser = {
   score: number | null;
   grade: string | null;
@@ -17,6 +18,7 @@ type Teaser = {
   topIssues: TopIssue[];
   contradictions: TopIssue[];
   friction: TopIssue[];
+  chartGaps?: LeakChartGap[];
   nextSteps: string[];
 };
 
@@ -205,6 +207,9 @@ export const RepCodeFreeScan = () => {
                     </div>
                   )}
                 </div>
+
+                {/* LOST LEADS + GRAPH FIRST */}
+                <LeakChart gaps={teaser.chartGaps || teaser.topIssues || []} />
 
                 {teaser.executiveSummary && (
                   <p className="text-sm md:text-base text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-4">
