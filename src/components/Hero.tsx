@@ -158,6 +158,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
             <span className="text-crimson italic">leaking</span>
             <span className="text-foreground"> — and how to get them </span>
             <span className="text-amber italic">all back.</span>
+            <span className="block mt-3 text-2xl md:text-3xl lg:text-4xl text-foreground/85">
+              Without <span className="text-amber">extra marketing</span>, <span className="text-amber">extra costs</span>, or <span className="text-amber">new systems</span>.
+            </span>
           </h1>
 
           <p className="font-case text-sm md:text-base uppercase tracking-widest text-amber max-w-3xl mx-auto">
