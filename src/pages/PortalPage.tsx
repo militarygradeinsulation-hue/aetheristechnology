@@ -509,14 +509,13 @@ const PortalPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadChat]);
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean }[] = [
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; iconCmp: React.ElementType; partnerOnly?: boolean; badge?: number; href?: string; adminOnly?: boolean; adminOrPartnerOnly?: boolean }[] = [
     { id: 'partnerhub', label: 'Partner Hub', icon: <Compass className="w-4 h-4" />, iconCmp: Compass, partnerOnly: true },
-    { id: 'jw-admin' as Tab, label: 'Joseph Work Account', icon: <Crown className="w-4 h-4" />, iconCmp: Crown, href: '/admin', adminOnly: true },
     { id: 'workbench' as Tab, label: 'Workbench', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench, adminOnly: true },
     { id: 'news', label: 'Aetheris News', icon: <Newspaper className="w-4 h-4" />, iconCmp: Newspaper },
     { id: 'coach', label: 'AI Sales Coach', icon: <MessageSquareCode className="w-4 h-4" />, iconCmp: MessageSquareCode },
     { id: 'art', label: 'Art Studio', icon: <Palette className="w-4 h-4" />, iconCmp: Palette },
-    { id: 'video', label: 'Video Studio', icon: <Film className="w-4 h-4" />, iconCmp: Film },
+    { id: 'video', label: 'Video Studio', icon: <Film className="w-4 h-4" />, iconCmp: Film, adminOrPartnerOnly: true },
     { id: 'poststudio', label: 'Post Studio', icon: <PenSquare className="w-4 h-4" />, iconCmp: PenSquare },
     { id: 'careers', label: 'Careers Admin', icon: <Briefcase className="w-4 h-4" />, iconCmp: Briefcase },
     { id: 'commissions', label: 'Commission Calculator', icon: <Calculator className="w-4 h-4" />, iconCmp: Calculator },
@@ -527,7 +526,7 @@ const PortalPage: React.FC = () => {
 
     { id: 'briefing', label: 'Interview Briefing', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
     { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
-    { id: 'incentives', label: 'Incentive Plan', icon: <Trophy className="w-4 h-4" />, iconCmp: Trophy },
+    { id: 'incentives', label: 'Incentive Plan', icon: <Trophy className="w-4 h-4" />, iconCmp: Trophy, adminOrPartnerOnly: true },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
@@ -535,8 +534,8 @@ const PortalPage: React.FC = () => {
     { id: 'onboarding', label: 'Aetheris Academy', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
     { id: 'overview', label: 'Overview', icon: <DollarSign className="w-4 h-4" />, iconCmp: DollarSign },
     { id: 'linkedin', label: 'Set Up LinkedIn', icon: <Linkedin className="w-4 h-4" />, iconCmp: Linkedin },
-    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen },
-    { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket },
+    { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen, adminOrPartnerOnly: true },
+    { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket, adminOrPartnerOnly: true },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -553,6 +552,7 @@ const PortalPage: React.FC = () => {
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
+    && (!t.adminOrPartnerOnly || isAdmin || isPartner)
     && (t.id !== 'careers' || careersUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
