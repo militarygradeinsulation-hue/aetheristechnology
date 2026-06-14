@@ -44,6 +44,7 @@ import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { OutlookMailDrawer } from '@/components/portal/OutlookMailDrawer';
 import { RepClockWidget } from '@/components/portal/RepClockWidget';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
+import { NewRepBlueprintCard } from '@/components/portal/NewRepBlueprintCard';
 import { MotivationCard } from '@/components/portal/MotivationCard';
 import { CompanyDailyTasksCard } from '@/components/portal/CompanyDailyTasksCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
@@ -569,6 +570,7 @@ const PortalPage: React.FC = () => {
       case 'overview':
         return (
           <div className="space-y-6">
+            <NewRepBlueprintCard />
             <DailyHustleCard onViewSprint={() => { setTab('sprint'); setActiveTool(null); }} />
             <MotivationCard />
             <CompanyDailyTasksCard />

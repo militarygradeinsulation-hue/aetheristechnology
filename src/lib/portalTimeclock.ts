@@ -41,7 +41,9 @@ async function call<T>(action: string, payload: Record<string, unknown> = {}): P
 export const portalTimeclock = {
   status: () => call<{ open: TimeEntry | null }>("status"),
   clockIn: (note?: string) => call<{ open: TimeEntry }>("clock_in", { note }),
-  clockOut: (note?: string) => call<{ entry: TimeEntry }>("clock_out", { note }),
+  /** end_at lets the client backdate the clock-out to the last activity timestamp. */
+  clockOut: (note?: string, end_at?: string) =>
+    call<{ entry: TimeEntry }>("clock_out", { note, end_at }),
   list: (opts: { rep_code?: string; limit?: number } = {}) =>
     call<{ entries: TimeEntry[] }>("list", opts),
   summary: (sinceIso?: string) =>
