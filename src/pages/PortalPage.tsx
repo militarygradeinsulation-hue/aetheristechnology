@@ -569,6 +569,7 @@ const PortalPage: React.FC = () => {
       case 'overview':
         return (
           <div className="space-y-6">
+            <NewRepBlueprintCard />
             <DailyHustleCard onViewSprint={() => { setTab('sprint'); setActiveTool(null); }} />
             <MotivationCard />
             <CompanyDailyTasksCard />
