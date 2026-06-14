@@ -10,6 +10,7 @@ import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import demandGenInfographic from "@/assets/demand-generation-infographic.png";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
+import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 const LeakLanderPage: React.FC = () => {
   const [deckOpen, setDeckOpen] = useState(false);
@@ -149,6 +150,11 @@ const LeakLanderPage: React.FC = () => {
               </a>
             </Button>
           </section>
+
+          {/* Public website leak scan — email + URL only */}
+          <PublicLeakScan />
+
+
 
           {/* Demand generation infographic. front & center above "What the Hell" */}
           <section

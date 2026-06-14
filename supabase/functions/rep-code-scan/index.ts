@@ -107,7 +107,8 @@ serve(async (req) => {
       category: g?.category || "",
       severity: g?.severity || "info",
       title: g?.title || "",
-      hint: typeof g?.description === "string" ? g.description.split(/\\.\\s/)[0].slice(0, 180) + "." : "",
+      hint: typeof g?.description === "string" ? g.description.split(/\.\s/)[0].slice(0, 180) + "." : "",
+      annualCost: g?.annualCost || "",
     });
 
     const teaser = {
@@ -123,6 +124,15 @@ serve(async (req) => {
       topIssues: [...critical.slice(0, 2), ...warning.slice(0, 2)].slice(0, 4).map(pickPreview),
       contradictions: (gaps.filter((g) => /contradict/i.test(g?.category || "") || /contradict/i.test(g?.title || "")).slice(0, 2)).map(pickPreview),
       friction: (gaps.filter((g) => /friction/i.test(g?.category || "") || /friction/i.test(g?.title || "")).slice(0, 2)).map(pickPreview),
+      chartGaps: gaps
+        .filter((g) => g?.annualCost)
+        .slice(0, 12)
+        .map((g) => ({
+          category: g.category || "",
+          title: g.title || g.category || "Leak",
+          severity: g.severity || "info",
+          annualCost: g.annualCost,
+        })),
       nextSteps: Array.isArray(full?.nextSteps) ? full.nextSteps.slice(0, 2) : [],
     };
 

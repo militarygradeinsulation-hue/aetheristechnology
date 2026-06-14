@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generatePreviewPdf, generateFullReport, type FullReport } from '@/lib/generateScanReport';
+import { LeakChart } from '@/components/LeakChart';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
@@ -122,11 +123,13 @@ const GapCard = ({ gap, index, onFixClick, isLocked, showRepSuggestions }: { gap
           <h4 className="font-semibold text-foreground mt-1">{gap.title}</h4>
           <p className="text-sm text-muted-foreground mt-1">{gap.description}</p>
           {gap.annualCost && (
-            <div className="mt-2 flex flex-wrap gap-3 text-xs">
+            <div className="mt-2 flex flex-col gap-1 text-xs">
               <span className="text-destructive font-bold flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Est. Leak: {gap.annualCost}
+                <DollarSign className="w-3 h-3" /> Est. Lead Loss: {gap.annualCost} / yr
               </span>
-              {gap.projectedROI && <span className="text-primary font-medium">ROI: {gap.projectedROI}</span>}
+              {gap.projectedROI && (
+                <span className="text-primary/80 text-[11px]">Potential ROI once fixed: {gap.projectedROI}</span>
+              )}
             </div>
           )}
           {suggestions.length > 0 && (
@@ -449,14 +452,15 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Score */}
+              {/* LOST LEADS + LEAK GRAPH FIRST (before any ROI / score talk) */}
+              <LeakChart gaps={result.gaps} className="mb-6" />
+
+              {/* Then the health score (context, not the headline) */}
               <div className="text-center mb-6">
                 <p className="text-sm text-muted-foreground mb-2">Your Digital Health Score</p>
                 <ScoreGauge score={result.score} grade={result.grade} />
               </div>
 
-              {/* Revenue Leak Banner */}
-              <RevenueBanner gaps={result.gaps} />
 
               {/* Visible gaps */}
               <div className="space-y-3">
