@@ -112,9 +112,12 @@ const LeakLanderPage: React.FC = () => {
               <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Indianapolis · US-Wide</span>
               <span className="h-px w-8 bg-amber/50" />
             </div>
-            <h1 className="font-forensic text-2xl sm:text-4xl font-bold leading-[1.05] tracking-tight">
-              Stop guessing what's broken.{" "}
-              <span className="bg-gradient-to-r from-amber via-amber/90 to-amber/60 bg-clip-text text-transparent italic">Find the leak.</span>
+            <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
+              I can find{" "}
+              <span className="bg-gradient-to-r from-amber via-amber/90 to-amber/60 bg-clip-text text-transparent italic">instantly</span>{" "}
+              where your leads are{" "}
+              <span className="text-crimson italic">leaking</span>
+              {" "}— and how to get them <span className="text-amber italic">all back</span>.
             </h1>
           </section>
 
