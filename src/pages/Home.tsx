@@ -15,6 +15,7 @@ import { WhatYouReallyGet } from '@/components/WhatYouReallyGet';
 
 import { ProblemPicker } from '@/components/ProblemPicker';
 import { RepCodeFreeScan } from '@/components/RepCodeFreeScan';
+import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { OperatorBio } from '@/components/OperatorBio';
 import { VerifiableOutcomes } from '@/components/VerifiableOutcomes';
 
@@ -86,6 +87,8 @@ const Home = () => {
 
           <Hero onContactClick={() => setIsContactModalOpen(true)} />
 
+          {/* Public website leak scan — email + URL only */}
+          <PublicLeakScan />
 
           {/* Operator-code gated free website leak scan */}
           <RepCodeFreeScan />
