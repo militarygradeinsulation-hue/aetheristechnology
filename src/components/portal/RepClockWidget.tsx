@@ -36,16 +36,17 @@ export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = fals
     return () => { if (tickRef.current) window.clearInterval(tickRef.current); };
   }, [open]);
 
-  // Auto clock-out after 30 minutes of inactivity.
-  // Tracks last activity in localStorage so tab-close also counts as idle time.
+  // Auto clock-out after 5 minutes of screen inactivity, and BACKDATE the
+  // clock-out to the actual last-activity timestamp so the recorded time
+  // reflects real work, not when the sweep ran.
   useEffect(() => {
     if (!open) return;
-    const IDLE_MS = 30 * 60 * 1000;
+    const IDLE_MS = 5 * 60 * 1000;
     const KEY = "rep.lastActivityAt";
     const bump = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch {} };
     bump();
 
-    const events = ["mousemove", "keydown", "click", "touchstart", "scroll", "visibilitychange"];
+    const events = ["mousemove", "keydown", "click", "touchstart", "scroll", "visibilitychange", "focus"];
     events.forEach(e => window.addEventListener(e, bump, { passive: true }));
 
     const checkIdle = async () => {
@@ -53,17 +54,22 @@ export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = fals
       try { last = Number(localStorage.getItem(KEY) || "0"); } catch {}
       if (!last || Date.now() - last < IDLE_MS) return;
       try {
-        const { entry } = await portalTimeclock.clockOut("Auto clock-out (inactive 30m)");
+        // End the session at the moment we last saw activity, not now.
+        const endIso = new Date(last).toISOString();
+        const { entry } = await portalTimeclock.clockOut(
+          "Auto clock-out (inactive ≥5m)",
+          endIso,
+        );
         setOpen(null);
         toast({
           title: "Auto clocked out",
-          description: `Inactive 30m. Session: ${formatDuration(entry.duration_seconds)}`,
+          description: `Closed at last activity ${new Date(last).toLocaleTimeString()}. Session: ${formatDuration(entry.duration_seconds)}`,
         });
       } catch (e) { console.error("auto clock-out failed", e); }
     };
-    // Check every 60s (also catches stale tabs / re-opens).
+    // Check every 30s.
     checkIdle();
-    const id = window.setInterval(checkIdle, 60_000);
+    const id = window.setInterval(checkIdle, 30_000);
     return () => {
       events.forEach(e => window.removeEventListener(e, bump));
       window.clearInterval(id);

@@ -65,7 +65,7 @@ serve(async (req) => {
     if (action === "clock_out") {
       const { data: open } = await supabase
         .from("rep_time_entries")
-        .select("id")
+        .select("id, clock_in_at")
         .eq("rep_code", claims.code)
         .is("clock_out_at", null)
         .order("clock_in_at", { ascending: false })
@@ -73,7 +73,21 @@ serve(async (req) => {
         .maybeSingle();
       if (!open) return json(409, { error: "Not clocked in" });
 
-      const patch: Record<string, unknown> = { clock_out_at: new Date().toISOString() };
+      // Accept an explicit end timestamp so the client can backdate the
+      // session to the rep's actual last-activity time. Clamp to:
+      //   - never before clock_in_at  (no negative durations)
+      //   - never after now           (no future timestamps)
+      let endIso = new Date().toISOString();
+      if (typeof body.end_at === "string") {
+        const parsed = new Date(body.end_at);
+        if (!Number.isNaN(parsed.getTime())) {
+          const startMs = new Date(open.clock_in_at).getTime();
+          const nowMs = Date.now();
+          const endMs = Math.min(Math.max(parsed.getTime(), startMs), nowMs);
+          endIso = new Date(endMs).toISOString();
+        }
+      }
+      const patch: Record<string, unknown> = { clock_out_at: endIso };
       if (typeof body.note === "string") patch.note = body.note;
 
       const { data, error } = await supabase
