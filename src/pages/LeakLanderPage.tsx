@@ -118,9 +118,12 @@ const LeakLanderPage: React.FC = () => {
               where your leads are{" "}
               <span className="text-crimson italic">leaking</span>
               {" "}— and how to get them <span className="text-amber italic">all back</span>.
+              <span className="block mt-3 text-lg sm:text-2xl md:text-3xl text-foreground/85">
+                Without <span className="text-amber">extra marketing</span>, <span className="text-amber">extra costs</span>, or <span className="text-amber">new systems</span>.
+              </span>
             </h1>
           </section>
-
+          
           {/* Buttons. primary CTAs, larger */}
           <section
             className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
