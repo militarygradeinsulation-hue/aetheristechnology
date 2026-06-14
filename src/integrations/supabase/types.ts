@@ -4243,6 +4243,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_blueprint_progress: {
+        Row: {
+          created_at: string
+          day_index: number
+          done_at: string
+          id: string
+          note: string | null
+          rep_code: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_index: number
+          done_at?: string
+          id?: string
+          note?: string | null
+          rep_code: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_index?: number
+          done_at?: string
+          id?: string
+          note?: string | null
+          rep_code?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rep_calendar_events: {
         Row: {
           admin_notes: string | null
@@ -4381,6 +4414,7 @@ export type Database = {
           code: string
           commission_rate: number
           created_at: string
+          first_login_at: string | null
           id: string
           is_active: boolean
           rep_email: string | null
@@ -4395,6 +4429,7 @@ export type Database = {
           code: string
           commission_rate?: number
           created_at?: string
+          first_login_at?: string | null
           id?: string
           is_active?: boolean
           rep_email?: string | null
@@ -4409,6 +4444,7 @@ export type Database = {
           code?: string
           commission_rate?: number
           created_at?: string
+          first_login_at?: string | null
           id?: string
           is_active?: boolean
           rep_email?: string | null
