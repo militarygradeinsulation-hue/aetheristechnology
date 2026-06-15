@@ -27,6 +27,8 @@ import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { leadClues } from '@/lib/leadClues';
 import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LeakChart } from '@/components/LeakChart';
+
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
 import { wb } from '@/lib/workbench';
@@ -1793,6 +1795,10 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 {scan.executiveSummary && (
                   <p className="text-xs text-muted-foreground italic whitespace-pre-wrap">{scan.executiveSummary}</p>
                 )}
+                {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
+                  <LeakChart gaps={scan.gaps as any} className="mt-2" />
+                )}
+
                 {scan.outreach && (
                   <div className="rounded-md border-2 border-amber/60 bg-amber/10 p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
