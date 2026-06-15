@@ -71,9 +71,41 @@ function ensure(doc: jsPDF, y: number, needed: number): number {
   return y + needed > BOTTOM ? newPage(doc) : y;
 }
 
+// jsPDF's built-in Helvetica only supports WinAnsi. Anything outside that range
+// (smart quotes, em/en dashes, ellipsis, bullets, arrows, emoji, accented AI output)
+// renders as garbled boxes/symbols. Normalize everything before drawing.
+function sanitize(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+    .replace(/[\u2013\u2014\u2212]/g, '-')
+    .replace(/\u2026/g, '...')
+    .replace(/[\u2022\u25CF\u25E6\u2043]/g, '-')
+    .replace(/[\u2192\u27A1]/g, '->')
+    .replace(/[\u2190]/g, '<-')
+    .replace(/\u00A0/g, ' ')
+    .replace(/[\u200B-\u200F\uFEFF]/g, '')
+    // Strip emoji and any remaining non-WinAnsi chars
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, '')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+}
+
+function shrinkToFit(doc: jsPDF, text: string, w: number, maxSize: number, minSize = 6): number {
+  let size = maxSize;
+  doc.setFontSize(size);
+  while (size > minSize && doc.getTextWidth(text) > w) {
+    size -= 0.5;
+    doc.setFontSize(size);
+  }
+  return size;
+}
+
 function wrap(doc: jsPDF, text: string, w: number, size: number): string[] {
   doc.setFontSize(size);
-  return doc.splitTextToSize(text || '', w);
+  return doc.splitTextToSize(sanitize(text), w);
 }
 
 function drawLines(doc: jsPDF, lines: string[], x: number, y: number, lh: number): number {
@@ -90,10 +122,18 @@ function sectionHeader(doc: jsPDF, title: string, y: number): number {
   doc.setFillColor(...COLORS.gold);
   doc.rect(MARGIN, y, CONTENT_W, 0.8, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
   doc.setTextColor(...COLORS.gold);
-  doc.text(title.toUpperCase(), MARGIN, y + 8);
+  const t = sanitize(title).toUpperCase();
+  shrinkToFit(doc, t, CONTENT_W, 13, 9);
+  doc.text(t, MARGIN, y + 8);
   return y + 14;
+}
+
+// Draw a single line of text that must fit in width w; auto-shrink if needed.
+function fitText(doc: jsPDF, text: string, x: number, y: number, w: number, maxSize: number, minSize = 6) {
+  const t = sanitize(text);
+  shrinkToFit(doc, t, w, maxSize, minSize);
+  doc.text(t, x, y);
 }
 
 export function generatePreviewPdf(report: FullReport): void {
@@ -116,7 +156,7 @@ export function generatePreviewPdf(report: FullReport): void {
 
   doc.setFontSize(18);
   doc.setTextColor(...COLORS.white);
-  doc.text(report.companyName || 'Website Analysis', MARGIN, 110);
+  fitText(doc, report.companyName || 'Website Analysis', MARGIN, 110, CONTENT_W, 18, 10);
 
   let y = 130;
   for (const gap of report.gaps.slice(0, 2)) {
@@ -124,9 +164,8 @@ export function generatePreviewPdf(report: FullReport): void {
     doc.rect(MARGIN, y, 60, 0.6, 'F');
     y += 6;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
     doc.setTextColor(...COLORS.gold);
-    doc.text(`${gap.category}  •  ${gap.severity?.toUpperCase()}`, MARGIN, y);
+    fitText(doc, `${sanitize(gap.category)}  -  ${sanitize(gap.severity).toUpperCase()}`, MARGIN, y, CONTENT_W, 9, 7);
     y += 6;
     doc.setFontSize(11);
     doc.setTextColor(...COLORS.white);
@@ -187,9 +226,8 @@ export function generateFullReport(report: FullReport): void {
   doc.setFillColor(...COLORS.gold);
   doc.rect(MARGIN + 10, 152, 80, 0.8, 'F');
 
-  doc.setFontSize(16);
   doc.setTextColor(...COLORS.gold);
-  doc.text(report.companyName || 'Website Analysis', MARGIN + 10, 168);
+  fitText(doc, report.companyName || 'Website Analysis', MARGIN + 10, 168, CONTENT_W - 10, 16, 10);
 
   doc.setFontSize(9);
   doc.setTextColor(...COLORS.gray);
@@ -273,9 +311,8 @@ export function generateFullReport(report: FullReport): void {
 
     let cy = y + 6;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
     doc.setTextColor(...COLORS.gold);
-    doc.text(`${gap.category || ''}  •  ${(gap.severity || '').toUpperCase()}`, MARGIN + 8, cy);
+    fitText(doc, `${sanitize(gap.category)}  -  ${sanitize(gap.severity).toUpperCase()}`, MARGIN + 8, cy, CONTENT_W - 16, 8, 6);
     cy += 5;
 
     doc.setFontSize(11);
@@ -289,14 +326,13 @@ export function generateFullReport(report: FullReport): void {
 
     if (hasMetrics) {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
       if (gap.annualCost) {
         doc.setTextColor(...COLORS.red);
-        doc.text(`Annual Cost: ${gap.annualCost}`, MARGIN + 8, cy);
+        fitText(doc, `Annual Cost: ${sanitize(gap.annualCost)}`, MARGIN + 8, cy, 80, 8, 6);
       }
       if (gap.projectedROI) {
         doc.setTextColor(...COLORS.gold);
-        doc.text(`Projected ROI: ${gap.projectedROI}`, MARGIN + 95, cy);
+        fitText(doc, `Projected ROI: ${sanitize(gap.projectedROI)}`, MARGIN + 95, cy, CONTENT_W - 95 - 8, 8, 6);
       }
       cy += 6;
     }
@@ -332,18 +368,18 @@ export function generateFullReport(report: FullReport): void {
       doc.rect(MARGIN, y, 3, cardH, 'F');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
       doc.setTextColor(...COLORS.gold);
-      doc.text(item.month || '', MARGIN + 8, y + 8);
+      fitText(doc, item.month || '', MARGIN + 8, y + 8, 28, 10, 7);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...COLORS.white);
       drawLines(doc, actionLines, MARGIN + 40, y + 8, 4.5);
 
-      doc.setFontSize(7);
       doc.setTextColor(...COLORS.gray);
-      doc.text(`Cost: ${item.estimatedCost || ', '}  |  Recovery: ${item.projectedRecovery || ', '}`, MARGIN + 8, y + cardH - 4);
+      const cost = sanitize(item.estimatedCost) || 'N/A';
+      const recov = sanitize(item.projectedRecovery) || 'N/A';
+      fitText(doc, `Cost: ${cost}  |  Recovery: ${recov}`, MARGIN + 8, y + cardH - 4, CONTENT_W - 16, 7, 6);
 
       y += cardH + 4;
     }
@@ -373,13 +409,13 @@ export function generateFullReport(report: FullReport): void {
         doc.rect(MARGIN, y - 2, CONTENT_W, rowH, 'F');
       }
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
       doc.setTextColor(...COLORS.white);
+      doc.setFontSize(8);
       drawLines(doc, catLines, MARGIN + 4, y + 4, 4);
       doc.setTextColor(...COLORS.red);
-      doc.text(row.currentWaste || '', MARGIN + 70, y + 4);
+      fitText(doc, row.currentWaste || '', MARGIN + 70, y + 4, 58, 8, 6);
       doc.setTextColor(...COLORS.gold);
-      doc.text(row.projectedRecovery || '', MARGIN + 130, y + 4);
+      fitText(doc, row.projectedRecovery || '', MARGIN + 130, y + 4, CONTENT_W - 130 + MARGIN - 4, 8, 6);
       y += rowH + 1;
     });
   }
