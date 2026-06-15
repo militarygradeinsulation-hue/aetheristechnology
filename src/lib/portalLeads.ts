@@ -81,23 +81,47 @@ export const portalLeads = {
     callPortalLeads('update_status', { id, ...opts }),
   upload: (rows: Partial<RepLead>[]) => callPortalLeads('upload', { rows }) as Promise<{ ok: true; inserted: number }>,
   download: () => callPortalLeads('download') as Promise<{ ok: true; rows: any[] }>,
-  scan: (id: string, opts: { url?: string; force?: boolean } = {}) =>
-    callPortalLeads('scan', { id, ...opts }) as Promise<{ ok: true; scan: LeadScan; cached: boolean; scheduled?: number }>,
+  scan: async (id: string, opts: { url?: string; force?: boolean; businessName?: string } = {}) => {
+    const res = await callPortalLeads('scan', { id, url: opts.url, force: opts.force }) as { ok: true; scan: LeadScan; cached: boolean; scheduled?: number };
+    // Auto-save every fresh scan to the rep's workspace history. Cached hits are
+    // already in the library from a prior run, so we skip to avoid duplicates.
+    if (res?.ok && res.scan && !res.cached) {
+      const who = opts.businessName || (res.scan as any)?.companyName || opts.url || 'Lead';
+      saveToolRun({
+        tool_type: 'website_scan',
+        title: `Website Scan — ${who}`,
+        input_data: { lead_id: id, url: opts.url || (res.scan as any)?.scanned_url || null },
+        output_data: res.scan as any,
+      }).catch(() => { /* helper already toasts on failure */ });
+    }
+    return res;
+  },
   updateScanProgress: (id: string, gapIndex: number, opts: { checked?: boolean; touchNote?: string; addTouch?: boolean } = {}) =>
     callPortalLeads('update_scan_progress', { id, gapIndex, ...opts }) as Promise<{ ok: true; gapProgress: Record<string, { checked: boolean; touches: { at: string; note: string }[]; closedAt?: string }> }>,
   listReps: () => callPortalLeads('list_reps') as Promise<{ ok: true; reps: { code: string; rep_name: string | null }[] }>,
   forward: (id: string, target_code: string, note?: string) =>
     callPortalLeads('forward', { id, target_code, note }) as Promise<{ ok: true; target: string }>,
-  rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string } = {}) => {
+  rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string; businessName?: string } = {}) => {
     const token = getPortalToken();
     if (!token) throw new Error('Not signed in');
     const { data, error } = await supabase.functions.invoke('portal-rocketreach', {
-      body: { id, ...opts },
+      body: { id, force: opts.force, name: opts.name, company: opts.company, email: opts.email },
       headers: { 'x-portal-token': token },
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
-    return data as { ok: true; cached: boolean; person: any; firecrawl?: any };
+    const res = data as { ok: true; cached: boolean; person: any; firecrawl?: any };
+    // Auto-save deep scans (RocketReach + Firecrawl) so reps can revisit them.
+    if (res?.ok && !res.cached && (res.person || res.firecrawl)) {
+      const who = opts.businessName || opts.company || opts.name || res.person?.name || 'Lead';
+      saveToolRun({
+        tool_type: 'lead_deep_scan',
+        title: `Deep Scan — ${who}`,
+        input_data: { lead_id: id, name: opts.name, company: opts.company, email: opts.email },
+        output_data: { person: res.person, firecrawl: res.firecrawl },
+      }).catch(() => { /* helper already toasts on failure */ });
+    }
+    return res;
   },
 };
 
