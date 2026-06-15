@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
-  Film, Wand2, Zap, Languages,
+  Film, Wand2, Zap, Languages, History,
 } from "lucide-react";
 
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
@@ -95,6 +95,8 @@ const RepImageStudio = lazy(() =>
   import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
 const EasyModeTool = lazy(() =>
   import("@/components/EasyModeTool").then(m => ({ default: m.EasyModeTool })));
+const WorkspaceHistory = lazy(() =>
+  import("@/components/portal/WorkspaceHistory").then(m => ({ default: m.WorkspaceHistory })));
 
 
 const wrap = (node: React.ReactNode) => (
@@ -183,6 +185,11 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "easy-mode", label: "Easy Mode Translator", group: "Content", icon: Languages,
     accent: "145 65% 52%",
     render: () => wrap(<EasyModeTool />) },
+
+  // Briefs
+  { id: "workspace-history", label: "Workspace History", group: "Briefs", icon: History,
+    accent: "190 85% 55%",
+    render: () => wrap(<WorkspaceHistory />) },
 ];
 
 
