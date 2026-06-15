@@ -71,9 +71,41 @@ function ensure(doc: jsPDF, y: number, needed: number): number {
   return y + needed > BOTTOM ? newPage(doc) : y;
 }
 
+// jsPDF's built-in Helvetica only supports WinAnsi. Anything outside that range
+// (smart quotes, em/en dashes, ellipsis, bullets, arrows, emoji, accented AI output)
+// renders as garbled boxes/symbols. Normalize everything before drawing.
+function sanitize(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+    .replace(/[\u2013\u2014\u2212]/g, '-')
+    .replace(/\u2026/g, '...')
+    .replace(/[\u2022\u25CF\u25E6\u2043]/g, '-')
+    .replace(/[\u2192\u27A1]/g, '->')
+    .replace(/[\u2190]/g, '<-')
+    .replace(/\u00A0/g, ' ')
+    .replace(/[\u200B-\u200F\uFEFF]/g, '')
+    // Strip emoji and any remaining non-WinAnsi chars
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, '')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+}
+
+function shrinkToFit(doc: jsPDF, text: string, w: number, maxSize: number, minSize = 6): number {
+  let size = maxSize;
+  doc.setFontSize(size);
+  while (size > minSize && doc.getTextWidth(text) > w) {
+    size -= 0.5;
+    doc.setFontSize(size);
+  }
+  return size;
+}
+
 function wrap(doc: jsPDF, text: string, w: number, size: number): string[] {
   doc.setFontSize(size);
-  return doc.splitTextToSize(text || '', w);
+  return doc.splitTextToSize(sanitize(text), w);
 }
 
 function drawLines(doc: jsPDF, lines: string[], x: number, y: number, lh: number): number {
