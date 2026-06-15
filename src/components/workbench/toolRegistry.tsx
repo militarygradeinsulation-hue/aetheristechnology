@@ -95,6 +95,8 @@ const RepImageStudio = lazy(() =>
   import("@/components/portal/RepImageStudio").then(m => ({ default: m.RepImageStudio })));
 const EasyModeTool = lazy(() =>
   import("@/components/EasyModeTool").then(m => ({ default: m.EasyModeTool })));
+const WorkspaceHistory = lazy(() =>
+  import("@/components/portal/WorkspaceHistory").then(m => ({ default: m.WorkspaceHistory })));
 
 
 const wrap = (node: React.ReactNode) => (
