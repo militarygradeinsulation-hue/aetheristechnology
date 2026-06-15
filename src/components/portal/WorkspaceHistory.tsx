@@ -21,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
   website_scan: 'Website Scan',
+  lead_deep_scan: 'Lead Deep Scan',
   business_diagnostic: 'Business Diagnostic',
   ai_detect: 'AI Writing Detector',
   detective_case: 'Detective Case File',
