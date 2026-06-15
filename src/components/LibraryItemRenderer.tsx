@@ -1314,6 +1314,77 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
     case 'detective_case': return <DetectiveCaseView data={data} input={(item as any).input_data} copiedId={copiedId} setCopiedId={setCopiedId} />;
+    case 'lead_deep_scan': {
+      const person = data?.person || {};
+      const fc = data?.firecrawl || {};
+      const emails: any[] = Array.isArray(person.emails) ? person.emails : [];
+      const phones: any[] = Array.isArray(person.phones) ? person.phones : [];
+      return (
+        <div className="space-y-5">
+          <div className="flex items-center gap-2 flex-wrap text-[10px] font-mono uppercase tracking-[0.2em] text-amber/80 border-b border-amber/20 pb-2">
+            <Search className="w-3.5 h-3.5 text-amber" />
+            <span>Lead deep scan · RocketReach + Firecrawl</span>
+          </div>
+          {(person.name || person.current_title || person.current_employer) && (
+            <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 space-y-1">
+              {person.name && <p className="text-base font-display font-bold text-foreground">{person.name}</p>}
+              {(person.current_title || person.current_employer) && (
+                <p className="text-sm text-muted-foreground">
+                  {[person.current_title, person.current_employer].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              {person.location && <p className="text-xs text-muted-foreground">{person.location}</p>}
+              {person.linkedin_url && (
+                <a href={person.linkedin_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-amber underline">
+                  <Linkedin className="w-3 h-3" /> LinkedIn profile
+                </a>
+              )}
+            </div>
+          )}
+          {(emails.length > 0 || phones.length > 0) && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {emails.length > 0 && (
+                <div className="rounded-md border border-border bg-card/40 p-3">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Mail className="w-3 h-3" /> Emails</p>
+                  <ul className="space-y-1 text-xs">
+                    {emails.map((e: any, i: number) => (
+                      <li key={i} className="text-foreground break-all">
+                        {e.email || e.address || String(e)}
+                        {e.type && <span className="text-muted-foreground ml-1">· {e.type}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {phones.length > 0 && (
+                <div className="rounded-md border border-border bg-card/40 p-3">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Phone className="w-3 h-3" /> Phones</p>
+                  <ul className="space-y-1 text-xs">
+                    {phones.map((p: any, i: number) => (
+                      <li key={i} className="text-foreground">{p.number || String(p)}{p.type && <span className="text-muted-foreground ml-1">· {p.type}</span>}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {fc?.summary && (
+            <div className="rounded-md border border-border bg-card/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Globe className="w-3 h-3" /> Website intel</p>
+              <p className="text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed">{fc.summary}</p>
+            </div>
+          )}
+          {Array.isArray(fc?.signals) && fc.signals.length > 0 && (
+            <div className="rounded-md border border-border bg-card/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2">Signals</p>
+              <ul className="list-disc pl-5 space-y-0.5 text-xs text-muted-foreground">
+                {fc.signals.map((s: any, i: number) => <li key={i}>{typeof s === 'string' ? s : (s.text || JSON.stringify(s))}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
     case 'video': return (
       <div className="space-y-3">
         {item.file_url ? (
