@@ -34,7 +34,7 @@ import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Newspaper } from 'lucide-react';
 
-import { EasyModeWrapper } from '@/components/EasyModeBar';
+import { EasyModeBar, EasyModeWrapper } from '@/components/EasyModeBar';
 
 const CAREERS_ALLOWED_CODES = new Set(['963169']); // Braden Roberts
 import { logPortalActivity } from '@/lib/portalLeads';
@@ -933,6 +933,8 @@ const PortalPage: React.FC = () => {
           </Button>
         </div>
 
+        <EasyModeBar tabKey="portal" className="w-full" />
+
         <OperatorIdentityBar />
         {/* View selector */}
         {(!isPartner || isAdmin) && (
@@ -1000,7 +1002,7 @@ const PortalPage: React.FC = () => {
         )}
 
         {layout === 'tabs' ? (
-          <EasyModeWrapper tabKey={tab}>
+          <EasyModeWrapper tabKey={tab} showBar={false}>
             {isPartner && <PartnerCoachTips tabId={tab} />}
             {renderTabBody(tab)}
           </EasyModeWrapper>
@@ -1096,8 +1098,10 @@ const PortalPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
-                    {isPartner && <PartnerCoachTips tabId={t.id} />}
-                    {renderTabBody(t.id)}
+                    <EasyModeWrapper tabKey={t.id} showBar={false}>
+                      {isPartner && <PartnerCoachTips tabId={t.id} />}
+                      {renderTabBody(t.id)}
+                    </EasyModeWrapper>
                   </div>
                 </div>
               );
