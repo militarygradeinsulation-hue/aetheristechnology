@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { saveToolRun } from '@/lib/toolSaveHelper';
 
 export interface RepLead {
   id: string;
