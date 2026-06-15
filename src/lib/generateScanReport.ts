@@ -226,9 +226,8 @@ export function generateFullReport(report: FullReport): void {
   doc.setFillColor(...COLORS.gold);
   doc.rect(MARGIN + 10, 152, 80, 0.8, 'F');
 
-  doc.setFontSize(16);
   doc.setTextColor(...COLORS.gold);
-  doc.text(report.companyName || 'Website Analysis', MARGIN + 10, 168);
+  fitText(doc, report.companyName || 'Website Analysis', MARGIN + 10, 168, CONTENT_W - 10, 16, 10);
 
   doc.setFontSize(9);
   doc.setTextColor(...COLORS.gray);
