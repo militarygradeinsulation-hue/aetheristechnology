@@ -1126,6 +1126,164 @@ const PlaybookView = ({ data, fileUrl }: any) => (
 // ────────────────────────────────────────────────────────────────────────────
 // SWITCH
 // ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+// DETECTIVE CASE FILE
+// ────────────────────────────────────────────────────────────────────────────
+const DetectiveCaseView: React.FC<{ data: any; input?: any; copiedId: string | null; setCopiedId: (id: string | null) => void }> = ({ data, input, copiedId, setCopiedId }) => {
+  const channel = input?.channel || data?.channel || 'email';
+  const monologue: Array<{ type: string; text: string }> = Array.isArray(data?.monologue) ? data.monologue : [];
+  const angle = data?.best_angle || null;
+  const chain: Array<{ step?: number; from?: string; to?: string; evidence?: string }> = Array.isArray(data?.deduction_chain) ? data.deduction_chain : [];
+  const reserve: string[] = Array.isArray(data?.deeper_forensics) ? data.deeper_forensics : [];
+  const message = data?.message || null;
+
+  const beatIcon = (t: string) => {
+    if (t === 'question') return <HelpCircle className="w-3.5 h-3.5 text-amber" />;
+    if (t === 'observation') return <Eye className="w-3.5 h-3.5 text-sky-400" />;
+    if (t === 'conclusion') return <Gavel className="w-3.5 h-3.5 text-emerald-400" />;
+    return <Lightbulb className="w-3.5 h-3.5 text-amber/70" />;
+  };
+
+  const messageText = message?.body
+    ? (channel === 'email' && message.subject ? `Subject: ${message.subject}\n\n${message.body}` : String(message.body))
+    : '';
+
+  return (
+    <div className="space-y-5">
+      {/* Case header strip */}
+      <div className="flex items-center gap-2 flex-wrap text-[10px] font-mono uppercase tracking-[0.2em] text-amber/80 border-b border-amber/20 pb-2">
+        <Fingerprint className="w-3.5 h-3.5 text-amber" />
+        <span>Aetheris · case file</span>
+        <span className="text-muted-foreground">·</span>
+        <span className="text-muted-foreground normal-case tracking-normal">Channel:</span>
+        <span className="text-amber">{channel}</span>
+      </div>
+
+      {/* Verdict */}
+      {angle && (
+        <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Gavel className="w-4 h-4 text-amber" />
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">Verdict · best angle</p>
+          </div>
+          {angle.title && <p className="text-base font-display font-bold text-foreground">{angle.title}</p>}
+          {angle.leak_or_gap && (
+            <p className="text-sm text-foreground">
+              <span className="text-amber font-bold">Leak:</span> {angle.leak_or_gap}
+              {angle.estimated_cost && <span className="text-red-400 font-semibold"> · ~{angle.estimated_cost}/yr</span>}
+            </p>
+          )}
+          {angle.why_this_one && (
+            <p className="text-xs text-muted-foreground italic leading-snug">{angle.why_this_one}</p>
+          )}
+        </div>
+      )}
+
+      {/* Deduction A → B */}
+      {chain.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <FileSearch className="w-4 h-4 text-amber" />
+            <h4 className="text-sm font-display font-bold text-foreground">Deduction chain</h4>
+            <span className="text-[10px] font-mono uppercase text-muted-foreground">A → B</span>
+          </div>
+          <ol className="space-y-2">
+            {chain.map((s, i) => (
+              <li key={i} className="rounded-md border border-border bg-card/40 p-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-[10px] font-mono text-amber bg-amber/10 border border-amber/30 rounded px-1.5 py-0.5 mt-0.5">
+                    {String(s.step ?? i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap text-sm text-foreground">
+                      <span>{s.from}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-amber flex-shrink-0" />
+                      <span className="font-semibold">{s.to}</span>
+                    </div>
+                    {s.evidence && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <span className="text-amber font-bold">Evidence:</span> {s.evidence}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Monologue */}
+      {monologue.length > 0 && (
+        <details className="rounded-md border border-border bg-card/30 p-3">
+          <summary className="cursor-pointer text-sm font-display font-bold text-foreground flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 text-amber" />
+            Detective monologue
+            <span className="text-[10px] font-mono uppercase text-muted-foreground">({monologue.length} beats)</span>
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {monologue.map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5">{beatIcon(b.type)}</span>
+                <div className="flex-1">
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mr-2">{b.type}</span>
+                  <span className="text-foreground/90">{b.text}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {/* Reserve */}
+      {reserve.length > 0 && (
+        <div className="rounded-md border border-border bg-card/30 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-4 h-4 text-amber" />
+            <h4 className="text-sm font-display font-bold text-foreground">Hold in reserve</h4>
+          </div>
+          <ul className="space-y-1 list-disc pl-5">
+            {reserve.map((b, i) => (
+              <li key={i} className="text-xs text-muted-foreground">{b}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* The message */}
+      {message?.body && (
+        <div className="relative rounded-lg border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Send className="w-4 h-4 text-primary" />
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary">The message · {channel}</p>
+            <Button
+              variant="ghost" size="sm"
+              className="ml-auto h-7 w-7 p-0"
+              onClick={() => copyText(messageText, setCopiedId, 'det-msg')}
+            >
+              {copiedId === 'det-msg' ? <Check className="w-3.5 h-3.5 text-amber" /> : <Copy className="w-3.5 h-3.5" />}
+            </Button>
+          </div>
+          {channel === 'email' && message.subject && (
+            <p className="text-sm">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mr-2">Subject</span>
+              <span className="font-semibold text-foreground">{message.subject}</span>
+            </p>
+          )}
+          <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed bg-background/40 rounded p-3 border border-border/60">
+{message.body}
+          </pre>
+          {message.why_it_lands && (
+            <p className="text-[11px] text-muted-foreground italic border-t border-border/40 pt-2">
+              <span className="text-amber font-bold not-italic">Why it lands:</span> {message.why_it_lands}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const data = (item.output_data || {}) as any;
