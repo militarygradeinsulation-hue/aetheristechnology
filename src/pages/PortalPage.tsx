@@ -963,15 +963,15 @@ const PortalPage: React.FC = () => {
               setPinnedWidgetsState([]);
               try { localStorage.setItem(PINNED_KEY, JSON.stringify([])); } catch {}
               const sizeMap: Record<string, WidgetSize> = {
-                leads: 4, tools: 4, coach: 4, workspace: 4, poststudio: 2, art: 2, video: 2,
+                leads: 2, tools: 2, coach: 2, workspace: 2, poststudio: 2, art: 2, video: 2,
               };
               setWidgetSizesState(prev => {
                 const next = { ...prev };
-                order.forEach(id => { next[id] = (sizeMap[id] || 4) as WidgetSize; });
+                order.forEach(id => { next[id] = (sizeMap[id] || 2) as WidgetSize; });
                 try { localStorage.setItem(SIZES_KEY, JSON.stringify(next)); } catch {}
                 return next;
               });
-              toast({ title: 'Optimized mode on', description: 'Leads → Tools → AI Coach → Workspace History → Media Studio.' });
+              toast({ title: 'Optimized mode on', description: 'Half-width widgets side-by-side. Saved automatically.' });
             }}
             title="One-click optimized rep layout"
           >
