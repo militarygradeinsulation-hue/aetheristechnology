@@ -311,9 +311,8 @@ export function generateFullReport(report: FullReport): void {
 
     let cy = y + 6;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
     doc.setTextColor(...COLORS.gold);
-    doc.text(`${gap.category || ''}  •  ${(gap.severity || '').toUpperCase()}`, MARGIN + 8, cy);
+    fitText(doc, `${sanitize(gap.category)}  -  ${sanitize(gap.severity).toUpperCase()}`, MARGIN + 8, cy, CONTENT_W - 16, 8, 6);
     cy += 5;
 
     doc.setFontSize(11);
@@ -327,14 +326,13 @@ export function generateFullReport(report: FullReport): void {
 
     if (hasMetrics) {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
       if (gap.annualCost) {
         doc.setTextColor(...COLORS.red);
-        doc.text(`Annual Cost: ${gap.annualCost}`, MARGIN + 8, cy);
+        fitText(doc, `Annual Cost: ${sanitize(gap.annualCost)}`, MARGIN + 8, cy, 80, 8, 6);
       }
       if (gap.projectedROI) {
         doc.setTextColor(...COLORS.gold);
-        doc.text(`Projected ROI: ${gap.projectedROI}`, MARGIN + 95, cy);
+        fitText(doc, `Projected ROI: ${sanitize(gap.projectedROI)}`, MARGIN + 95, cy, CONTENT_W - 95 - 8, 8, 6);
       }
       cy += 6;
     }
