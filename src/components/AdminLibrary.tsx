@@ -35,6 +35,10 @@ export const AdminLibrary: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const COMPACT_LIMIT = 5;
+
 
   const load = useCallback(async () => {
     setLoading(true);
