@@ -23,6 +23,7 @@ const TOOL_LABELS: Record<string, string> = {
   website_scan: 'Website Scan',
   business_diagnostic: 'Business Diagnostic',
   ai_detect: 'AI Writing Detector',
+  detective_case: 'Detective Case File',
 };
 
 interface Props {
