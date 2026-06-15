@@ -368,18 +368,18 @@ export function generateFullReport(report: FullReport): void {
       doc.rect(MARGIN, y, 3, cardH, 'F');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
       doc.setTextColor(...COLORS.gold);
-      doc.text(item.month || '', MARGIN + 8, y + 8);
+      fitText(doc, item.month || '', MARGIN + 8, y + 8, 28, 10, 7);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...COLORS.white);
       drawLines(doc, actionLines, MARGIN + 40, y + 8, 4.5);
 
-      doc.setFontSize(7);
       doc.setTextColor(...COLORS.gray);
-      doc.text(`Cost: ${item.estimatedCost || ', '}  |  Recovery: ${item.projectedRecovery || ', '}`, MARGIN + 8, y + cardH - 4);
+      const cost = sanitize(item.estimatedCost) || 'N/A';
+      const recov = sanitize(item.projectedRecovery) || 'N/A';
+      fitText(doc, `Cost: ${cost}  |  Recovery: ${recov}`, MARGIN + 8, y + cardH - 4, CONTENT_W - 16, 7, 6);
 
       y += cardH + 4;
     }
