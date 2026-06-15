@@ -156,7 +156,7 @@ export function generatePreviewPdf(report: FullReport): void {
 
   doc.setFontSize(18);
   doc.setTextColor(...COLORS.white);
-  doc.text(report.companyName || 'Website Analysis', MARGIN, 110);
+  fitText(doc, report.companyName || 'Website Analysis', MARGIN, 110, CONTENT_W, 18, 10);
 
   let y = 130;
   for (const gap of report.gaps.slice(0, 2)) {
@@ -164,9 +164,8 @@ export function generatePreviewPdf(report: FullReport): void {
     doc.rect(MARGIN, y, 60, 0.6, 'F');
     y += 6;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
     doc.setTextColor(...COLORS.gold);
-    doc.text(`${gap.category}  •  ${gap.severity?.toUpperCase()}`, MARGIN, y);
+    fitText(doc, `${sanitize(gap.category)}  -  ${sanitize(gap.severity).toUpperCase()}`, MARGIN, y, CONTENT_W, 9, 7);
     y += 6;
     doc.setFontSize(11);
     doc.setTextColor(...COLORS.white);
