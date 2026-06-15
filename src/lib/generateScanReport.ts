@@ -409,13 +409,13 @@ export function generateFullReport(report: FullReport): void {
         doc.rect(MARGIN, y - 2, CONTENT_W, rowH, 'F');
       }
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
       doc.setTextColor(...COLORS.white);
+      doc.setFontSize(8);
       drawLines(doc, catLines, MARGIN + 4, y + 4, 4);
       doc.setTextColor(...COLORS.red);
-      doc.text(row.currentWaste || '', MARGIN + 70, y + 4);
+      fitText(doc, row.currentWaste || '', MARGIN + 70, y + 4, 58, 8, 6);
       doc.setTextColor(...COLORS.gold);
-      doc.text(row.projectedRecovery || '', MARGIN + 130, y + 4);
+      fitText(doc, row.projectedRecovery || '', MARGIN + 130, y + 4, CONTENT_W - 130 + MARGIN - 4, 8, 6);
       y += rowH + 1;
     });
   }
