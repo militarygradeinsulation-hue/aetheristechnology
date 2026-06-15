@@ -27,6 +27,8 @@ import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { leadClues } from '@/lib/leadClues';
 import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LeakChart } from '@/components/LeakChart';
+
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
 import { wb } from '@/lib/workbench';
