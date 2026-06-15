@@ -185,6 +185,11 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "easy-mode", label: "Easy Mode Translator", group: "Content", icon: Languages,
     accent: "145 65% 52%",
     render: () => wrap(<EasyModeTool />) },
+
+  // Briefs
+  { id: "workspace-history", label: "Workspace History", group: "Briefs", icon: History,
+    accent: "190 85% 55%",
+    render: () => wrap(<WorkspaceHistory />) },
 ];
 
 
