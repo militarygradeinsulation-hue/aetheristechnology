@@ -126,86 +126,94 @@ export const AdminLibrary: React.FC = () => {
 
   const types = Array.from(new Set(items.map(i => i.tool_type)));
 
+  const visible = showAll ? filtered : filtered.slice(0, COMPACT_LIMIT);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <FileText className="w-6 h-6 text-amber" />
-          <h2 className="text-2xl font-bold text-foreground font-display">My Library</h2>
-          <span className="text-xs text-muted-foreground ml-2">{items.length} saved</span>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
-        </Button>
-      </div>
-
-      <div className="flex gap-2 flex-wrap items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search by title..." className="pl-9" />
-        </div>
         <button
-          onClick={() => setTypeFilter('')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${!typeFilter ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
-        >All</button>
-        {types.map(t => (
-          <button
-            key={t}
-            onClick={() => setTypeFilter(t)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
-          >{TOOL_LABELS[t] || t}</button>
-        ))}
+          type="button"
+          onClick={() => setCollapsed(c => !c)}
+          className="flex items-center gap-2 group"
+          aria-expanded={!collapsed}
+        >
+          <FileText className="w-5 h-5 text-amber" />
+          <h2 className="text-lg font-bold text-foreground font-display group-hover:text-amber transition-colors">My Library</h2>
+          <span className="text-xs text-muted-foreground">{items.length} saved</span>
+          {collapsed ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 text-muted-foreground" />}
+        </button>
+        {!collapsed && (
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </Button>
+        )}
       </div>
 
-      {loading ? (
-        <div className="glass p-12 rounded-xl text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="glass p-12 rounded-xl text-center text-muted-foreground">
-          {items.length === 0 ? 'Nothing saved yet. Generate something in My Tools and it will appear here.' : 'No items match this filter.'}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map(item => (
-            <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4 group hover:border-amber/30 transition-colors">
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(item)}>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-[10px] font-bold uppercase text-amber bg-amber/10 px-2 py-0.5 rounded">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
-                  {item.file_url && <span className="text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">PDF</span>}
-                  <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString()}</span>
-                </div>
-                <p className="text-sm font-bold text-foreground truncate group-hover:text-amber transition-colors">{item.title}</p>
-                {item.tool_type === 'playbook' && item.file_url && (
-                  <p className="text-xs text-muted-foreground mt-1">Click to view · PDF available</p>
-                )}
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {item.tool_type === 'playbook' && item.file_url ? (
-                  <>
-                    <a href={item.file_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm" className="text-xs h-8">
-                        <BookOpen className="w-3.5 h-3.5 mr-1" /> View PDF
-                      </Button>
-                    </a>
-                    <Button variant="ghost" size="icon" title="View details" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
-                  </>
-                ) : (
-                  <Button variant="ghost" size="icon" title="View" onClick={() => handleView(item)}><Eye className="w-4 h-4" /></Button>
-                )}
-                <Button variant="ghost" size="icon" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-4 h-4" /></Button>
-                {item.file_url && (
-                  <a href={item.file_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon" title="Open PDF"><ExternalLink className="w-4 h-4" /></Button>
-                  </a>
-                )}
-                <Button variant="ghost" size="icon" title="Delete" onClick={() => handleDelete(item)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
-              </div>
+      {!collapsed && (
+        <>
+          <div className="flex gap-2 flex-wrap items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search by title..." className="pl-9 h-8 text-sm" />
             </div>
-          ))}
-        </div>
+            <button
+              onClick={() => setTypeFilter('')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${!typeFilter ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
+            >All</button>
+            {types.map(t => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
+              >{TOOL_LABELS[t] || t}</button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="glass p-6 rounded-xl text-center">
+              <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="glass p-6 rounded-xl text-center text-sm text-muted-foreground">
+              {items.length === 0 ? 'Nothing saved yet. Generate something in My Tools and it will appear here.' : 'No items match this filter.'}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                {visible.map(item => (
+                  <div key={item.id} className="glass rounded-md px-3 py-2 border border-border/60 flex items-center gap-3 group hover:border-amber/40 transition-colors">
+                    <div className="flex-1 min-w-0 cursor-pointer flex items-center gap-2 flex-wrap" onClick={() => handleView(item)}>
+                      <span className="text-[9px] font-bold uppercase text-amber bg-amber/10 px-1.5 py-0.5 rounded flex-shrink-0">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+                      {item.file_url && <span className="text-[9px] font-bold uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">PDF</span>}
+                      <p className="text-xs font-semibold text-foreground truncate group-hover:text-amber transition-colors flex-1 min-w-0">{item.title}</p>
+                      <span className="text-[10px] text-muted-foreground flex-shrink-0 hidden sm:inline">{new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="View" onClick={() => handleView(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                      {item.file_url && (
+                        <a href={item.file_url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Open PDF"><ExternalLink className="w-3.5 h-3.5" /></Button>
+                        </a>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-red-400" /></Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {filtered.length > COMPACT_LIMIT && (
+                <div className="text-center pt-1">
+                  <Button variant="ghost" size="sm" onClick={() => setShowAll(s => !s)} className="text-xs text-muted-foreground hover:text-amber">
+                    {showAll ? `Show less` : `Show all ${filtered.length}`}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
+
 
       {viewItem && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
