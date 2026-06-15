@@ -77,8 +77,8 @@ const Home = () => {
             src={leadLeakInfographic.url}
             alt="One button finds where your leads are leaking — business forensics and revenue recovery in four steps."
             className="w-full h-auto rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]"
-            width={1536}
-            height={864}
+            width={1572}
+            height={1001}
             loading="eager"
             fetchPriority="high"
             decoding="async"
