@@ -7,7 +7,7 @@ import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
-import architectBanner from '@/assets/you-dont-need-expensive.png.asset.json';
+import leadLeakInfographic from '@/assets/lead-leak-infographic.png.asset.json';
 
 
 
@@ -73,16 +73,16 @@ const Home = () => {
         <main>
           {/* Architect manifesto banner */}
           <div className="px-4 max-w-6xl mx-auto pt-24 md:pt-28">
-            <img
-              src={architectBanner.url}
-              alt="The Architect — You don't need expensive. Expensive is a distraction. Results are the point."
-              className="w-full h-auto rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]"
-              width={1536}
-              height={864}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-            />
+          <img
+            src={leadLeakInfographic.url}
+            alt="One button finds where your leads are leaking — business forensics and revenue recovery in four steps."
+            className="w-full h-auto rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]"
+            width={1536}
+            height={864}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
           </div>
 
           <Hero onContactClick={() => setIsContactModalOpen(true)} />
