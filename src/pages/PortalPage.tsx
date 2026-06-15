@@ -1002,7 +1002,7 @@ const PortalPage: React.FC = () => {
         )}
 
         {layout === 'tabs' ? (
-          <EasyModeWrapper tabKey={tab}>
+          <EasyModeWrapper tabKey={tab} showBar={false}>
             {isPartner && <PartnerCoachTips tabId={tab} />}
             {renderTabBody(tab)}
           </EasyModeWrapper>
