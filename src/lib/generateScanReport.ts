@@ -122,10 +122,18 @@ function sectionHeader(doc: jsPDF, title: string, y: number): number {
   doc.setFillColor(...COLORS.gold);
   doc.rect(MARGIN, y, CONTENT_W, 0.8, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
   doc.setTextColor(...COLORS.gold);
-  doc.text(title.toUpperCase(), MARGIN, y + 8);
+  const t = sanitize(title).toUpperCase();
+  shrinkToFit(doc, t, CONTENT_W, 13, 9);
+  doc.text(t, MARGIN, y + 8);
   return y + 14;
+}
+
+// Draw a single line of text that must fit in width w; auto-shrink if needed.
+function fitText(doc: jsPDF, text: string, x: number, y: number, w: number, maxSize: number, minSize = 6) {
+  const t = sanitize(text);
+  shrinkToFit(doc, t, w, maxSize, minSize);
+  doc.text(t, x, y);
 }
 
 export function generatePreviewPdf(report: FullReport): void {
