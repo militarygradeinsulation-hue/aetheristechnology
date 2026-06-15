@@ -1313,6 +1313,7 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'website_scan': return <WebsiteScanView {...props} />;
     case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
+    case 'detective_case': return <DetectiveCaseView data={data} input={(item as any).input_data} copiedId={copiedId} setCopiedId={setCopiedId} />;
     case 'video': return (
       <div className="space-y-3">
         {item.file_url ? (
