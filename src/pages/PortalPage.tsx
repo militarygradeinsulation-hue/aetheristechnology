@@ -934,6 +934,8 @@ const PortalPage: React.FC = () => {
         </div>
 
         <EasyModeBar tabKey="portal" className="w-full" />
+
+        <OperatorIdentityBar />
         {/* View selector */}
         {(!isPartner || isAdmin) && (
         <div className="flex items-center justify-between gap-3 flex-wrap">
