@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
-  Film, Wand2, Zap, Languages,
+  Film, Wand2, Zap, Languages, History,
 } from "lucide-react";
 
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
