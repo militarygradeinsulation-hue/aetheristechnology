@@ -139,7 +139,7 @@ export const TOOL_REGISTRY: ToolDef[] = [
     render: () => wrap(<FollowUpPlanGenerator adminMode />) },
 
   // Diagnostics (crimson/red spectrum)
-  { id: "scan", label: "Website Scanner", group: "Diagnostics", icon: Globe, fullPagePath: "/scan",
+  { id: "scan", label: "Website Scanner", group: "Diagnostics", icon: Globe, fullPagePath: "/portal",
     accent: "0 78% 62%",
     render: () => wrap(<WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />) },
   { id: "brand-contradictions", label: "Brand Contradictions", group: "Diagnostics", icon: AlertTriangle, fullPagePath: "/brand-contradictions",
