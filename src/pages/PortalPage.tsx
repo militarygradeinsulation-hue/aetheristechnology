@@ -920,7 +920,7 @@ const PortalPage: React.FC = () => {
 
       </header>
 
-      <main className={`${(wideMode || WIDE_TABS.has(tab)) ? 'max-w-screen-2xl 2xl:max-w-[1800px]' : 'max-w-7xl'} mx-auto px-4 py-6 space-y-6`}>
+      <main className={`${(wideMode || WIDE_TABS.has(tab)) ? 'max-w-none w-full' : 'max-w-7xl'} mx-auto px-4 py-6 space-y-6`}>
         <div className="flex justify-end">
           <Button
             variant="outline"
