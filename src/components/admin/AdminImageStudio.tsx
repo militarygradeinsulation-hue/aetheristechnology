@@ -30,6 +30,8 @@ export const AdminImageStudio: React.FC = () => {
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
+  const [animateTarget, setAnimateTarget] = useState<StudioImage | null>(null);
+  const [animatePrompt, setAnimatePrompt] = useState('Bring this image to life — subtle natural movement: hair flowing, slight head turn, eyes blinking, fabric drift, ambient breeze. Keep identity, lighting, and composition exact. Cinematic, photoreal, 5 seconds.');
   const fileRef = useRef<HTMLInputElement>(null);
 
   // LinkedIn Banner Creator state
