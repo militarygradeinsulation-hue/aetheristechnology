@@ -98,84 +98,78 @@ const OperatorPage: React.FC = () => {
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="pt-28 pb-20">
 
-          {/* Hero */}
-          <section className="px-4 max-w-5xl mx-auto text-center mb-16">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-              The operator is the product
-            </div>
-            <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05]">
-              You don't need more tools. <br className="hidden md:block" />
-              You need an <span className="text-amber italic">operator</span> running them.
-            </h1>
-            <p className="text-base md:text-xl text-foreground/85 mt-6 max-w-3xl mx-auto leading-relaxed">
-              We pair you with a Business Forensics Operator who sits down with you, finds every leak
-              in your business, and crafts the solutions so you don't have to. The stack we wield would
-              take you 18 months and six hires to assemble. You skip all of it.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
-              <a
-                href={BOOK_MEETING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-amber text-background font-bold px-6 py-3 rounded-sm hover:-translate-y-0.5 transition-transform"
-              >
-                <Calendar className="w-4 h-4" /> Book a 15-min fit call
-              </a>
-              <button
-                type="button"
-                onClick={() => setContactOpen(true)}
-                className="inline-flex items-center gap-2 border border-amber/50 text-amber font-bold px-6 py-3 rounded-sm hover:bg-amber/10 transition-colors"
-              >
-                <Phone className="w-4 h-4" /> Talk to the operator
-              </button>
+          {/* Hero — simplified */}
+          <section className="px-4 max-w-5xl mx-auto mb-20">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-amber" />
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                  The operator is the product
+                </span>
+              </div>
+              <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05]">
+                You don't need more tools. <br className="hidden md:block" />
+                You need an <span className="text-amber italic">operator</span> running them.
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground mt-6 leading-relaxed">
+                We pair you with a Business Forensics Operator who sits down with you, finds every leak,
+                and rebuilds the systems causing them. You skip 18 months of hiring and tool selection.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 mt-8">
+                <a
+                  href={BOOK_MEETING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-amber text-background font-bold px-6 py-3 rounded-sm hover:-translate-y-0.5 transition-transform"
+                >
+                  <Calendar className="w-4 h-4" /> Book a 15-min fit call
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setContactOpen(true)}
+                  className="inline-flex items-center gap-2 text-amber font-case text-xs uppercase tracking-[0.2em] hover:gap-4 transition-all"
+                >
+                  <Phone className="w-3.5 h-3.5" /> Or talk to the operator
+                </button>
+              </div>
             </div>
           </section>
 
-          {/* What an operator actually is */}
-          <section className="px-4 max-w-4xl mx-auto mb-16">
-            <div className="forensic-tile rounded-sm border border-amber/30 p-7 md:p-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Definition · Read this slowly
+          {/* What an operator actually is — crimson left-rule */}
+          <section className="px-4 max-w-3xl mx-auto mb-20">
+            <div className="border-l-2 border-crimson/70 pl-6 py-2">
+              <div className="font-case text-[10px] uppercase tracking-[0.3em] text-amber mb-3">
+                Definition
               </div>
-              <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-tight mb-4">
-                A Business Forensics Operator is <span className="text-amber italic">not</span> a consultant.
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground italic mb-4">
+                An operator is <span className="text-amber not-italic">not</span> a consultant.
               </h2>
-              <div className="space-y-3 text-foreground/85 text-[15px] leading-relaxed">
+              <div className="space-y-3 text-muted-foreground text-[15px] leading-relaxed">
                 <p>
-                  A consultant hands you a deck. An agency hands you an invoice and a Slack channel full of
-                  juniors. A SaaS hands you a login and walks away.
+                  A consultant hands you a deck. We sit in the chair next to yours, open your CRM with you,
+                  and tell you in plain English exactly where the money is bleeding out.
                 </p>
                 <p>
-                  An operator sits in the chair next to yours, opens your CRM with you, watches your sales
-                  team take a call, reads your last 90 days of follow-up email, and tells you — in plain
-                  English — exactly where the money is bleeding out of the building.
-                </p>
-                <p>
-                  Then they <span className="text-amber font-semibold">fix it themselves</span>, using a
-                  stack of 12+ proprietary tools they've built specifically for finding and plugging revenue
-                  leaks. You don't learn the tools. You don't pay per seat. You don't run anything. That's
-                  the entire promise.
-                </p>
-                <p className="border-l-2 border-crimson/60 pl-3 font-forensic text-base md:text-lg text-foreground">
-                  Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
+                  Then we <span className="text-amber font-semibold">fix it ourselves</span>, using a stack of
+                  12+ proprietary tools built specifically for plugging revenue leaks. You don't learn the
+                  tools. You don't run anything.
                 </p>
               </div>
             </div>
           </section>
 
           {/* The 12 tools the operator wields */}
-          <section className="px-4 max-w-5xl mx-auto mb-16">
-            <div className="text-center mb-8">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                What the operator brings to the chair
+          <section className="px-4 max-w-5xl mx-auto mb-20">
+            <div className="max-w-2xl mb-10">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-amber" />
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                  What the operator wields
+                </span>
               </div>
               <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-                Twelve tools. <span className="text-amber italic">One person wielding all of them.</span>
+                Twelve tools. <span className="text-amber italic">One person running all of them.</span>
               </h2>
-              <p className="text-sm text-muted-foreground mt-3 max-w-2xl mx-auto">
-                None of these are sold individually. They were built to be run as a sequence by someone who
-                knows what they're looking for. That someone is your operator.
-              </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {OPERATOR_WIELDS.map((t) => {
@@ -186,7 +180,7 @@ const OperatorPage: React.FC = () => {
                     key={t.name}
                     onClick={() => setOpenTool(isOpen ? null : t.name)}
                     aria-expanded={isOpen}
-                    className={`text-left forensic-tile rounded-sm border px-4 py-3 transition-all ${isOpen ? 'border-amber/60 bg-amber/[0.04]' : 'border-border/60 hover:border-amber/40'}`}
+                    className={`text-left rounded-sm border px-4 py-3 transition-all ${isOpen ? 'border-amber/60 bg-amber/[0.04]' : 'border-border/60 hover:border-amber/40'}`}
                   >
                     <div className="flex items-start gap-2.5">
                       <Wrench className="w-4 h-4 text-amber shrink-0 mt-0.5" />
@@ -195,10 +189,7 @@ const OperatorPage: React.FC = () => {
                     </div>
                     {isOpen && (
                       <div className="mt-3 pt-3 border-t border-amber/20">
-                        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                          What the operator uses it for
-                        </div>
-                        <p className="text-[13px] text-foreground/80 leading-relaxed">{t.usedFor}</p>
+                        <p className="text-[13px] text-muted-foreground leading-relaxed">{t.usedFor}</p>
                       </div>
                     )}
                   </button>
@@ -208,10 +199,13 @@ const OperatorPage: React.FC = () => {
           </section>
 
           {/* Engagement timeline */}
-          <section className="px-4 max-w-5xl mx-auto mb-16">
-            <div className="text-center mb-8">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                What an engagement looks like
+          <section className="px-4 max-w-5xl mx-auto mb-20">
+            <div className="max-w-2xl mb-10">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-amber" />
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                  What an engagement looks like
+                </span>
               </div>
               <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
                 Three weeks. <span className="text-amber italic">Then we re-measure.</span>
@@ -221,63 +215,33 @@ const OperatorPage: React.FC = () => {
               {PHASES.map((p) => {
                 const Icon = p.icon;
                 return (
-                  <div key={p.title} className="forensic-tile rounded-sm border border-amber/30 p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-9 h-9 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-amber" />
-                      </div>
-                      <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                  <div key={p.title} className="rounded-sm border border-border/60 p-6 hover:border-amber/40 transition-colors">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Icon className="w-4 h-4 text-amber" />
+                      <div className="font-case text-[10px] uppercase tracking-[0.2em] text-amber">
                         {p.range}
                       </div>
                     </div>
                     <h3 className="font-forensic text-xl font-bold text-foreground mb-2">{p.title}</h3>
-                    <p className="text-sm text-foreground/80 leading-relaxed">{p.body}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
                   </div>
                 );
               })}
             </div>
           </section>
 
-          {/* Why you can't buy the tools alone */}
-          <section className="px-4 max-w-4xl mx-auto mb-16">
-            <div className="forensic-tile rounded-sm border-l-4 border-crimson/60 border-y border-r border-border/60 p-7 md:p-9 bg-crimson/[0.03]">
-              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
-                Hard rule
-              </div>
-              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-3">
-                You cannot buy the tools alone. Ever.
-              </h2>
-              <p className="text-foreground/85 leading-relaxed">
-                We get the request weekly. The answer is no. A scan you don't know how to read is worse
-                than no scan. A script you can't deliver in your own voice underperforms the one you have.
-                A follow-up plan without someone enforcing the cadence dies in week two. Every leak we've
-                ever found started as a tool nobody was operating.
-              </p>
-            </div>
-          </section>
-
-          {/* Bundles teaser */}
-          <section className="px-4 max-w-3xl mx-auto text-center">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Pick a door
-            </div>
-            <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Three operator-led bundles. <span className="text-amber italic">$2,500 to $10,000.</span>
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Signal Pack to find the leak. Revenue Pack to fix the sales engine. Operator Suite for three
-              embedded weeks. Above all three sit the flagships — the $18,500 Diagnostic and the $15K/mo
-              Retainer.
-            </p>
+          {/* Bundles teaser — slim */}
+          <section className="px-4 max-w-3xl mx-auto text-center pt-8 border-t border-border/40">
             <Link
               to="/catalog"
-              className="inline-flex items-center gap-2 bg-amber text-background font-bold px-6 py-3 rounded-sm hover:-translate-y-0.5 transition-transform"
+              className="inline-flex items-center gap-2 text-amber font-case text-xs uppercase tracking-[0.2em] hover:gap-4 transition-all"
             >
-              See the bundles <ArrowRight className="w-4 h-4" />
+              See the operator-led bundles <ArrowRight className="w-4 h-4" />
             </Link>
           </section>
 
         </main>
+
         <Footer />
       </div>
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />

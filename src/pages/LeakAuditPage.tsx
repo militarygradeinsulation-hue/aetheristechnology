@@ -5,7 +5,6 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { CaseFileCard } from '@/components/CaseFileCard';
-import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,11 +12,7 @@ import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
-import architectLogo from '@/assets/architect-logo.jpg';
-import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
-import { ForensicInfographic } from '@/components/ForensicInfographic';
 import { INFOGRAPHICS } from '@/lib/infographics';
-import { ThisIsForYou } from '@/components/ThisIsForYou';
 import { CitedFactsBlock } from '@/components/seo/CitedFactsBlock';
 import { BuyerIntentFaq } from '@/components/seo/BuyerIntentFaq';
 import { LeakAuditHowToSchema } from '@/components/seo/LeakAuditHowToSchema';
@@ -244,48 +239,32 @@ const LeakAuditPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
         <main className="pt-28 pb-16 px-4">
-          <div className="max-w-3xl mx-auto mb-6">
-            <div className="glass rounded-sm border border-amber/40 px-4 py-3 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
-                Proprietary · Built In-House
-              </div>
-              <p className="text-sm text-foreground/90 leading-snug">
-                All technology on this site is <span className="text-amber font-semibold">proprietary and personally built in-house</span>. You won't see reskinned tools or fake AI agencies here.
-              </p>
-            </div>
-          </div>
-          {step === 'intake' && <ThisIsForYou />}
           <div className="max-w-3xl mx-auto">
             {/* INTAKE */}
             {step === 'intake' && (
-              <div className="space-y-8">
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
-                    Free Self-Audit · ~6 minutes
+              <div className="space-y-10">
+                <div>
+                  <div className="inline-flex items-center gap-3 mb-6">
+                    <div className="h-px w-8 bg-amber" />
+                    <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                      Free Self-Audit · ~6 minutes
+                    </span>
                   </div>
                   <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05] mb-5">
                     The Leak Audit<sup className="text-2xl text-amber">™</sup>
                   </h1>
-                  <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                    14 questions. We name where your business is leaking and put a real annual dollar figure on it.
-                    PDF case file, downloadable when you're done.
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                    14 questions. We name where your business is leaking and put a real annual dollar figure
+                    on it. PDF case file, downloadable when you're done.
                   </p>
                 </div>
 
-                <ForensicInfographic
-                  image={INFOGRAPHICS.leakAuditAutopsy}
-                  imageAlt="Forensic autopsy diagram of a business with seven amber annotation arrows and one crimson leak point"
-                  caseNumber="LA-001 · Self-Scan"
-                  title="14 questions. Four categories. One leak map."
-                  summary="We score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion, then name the specific leaks in each, with a real dollar estimate tied to your revenue band."
-                />
-
-                <div className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5">
+                <div className="rounded-sm border border-border/60 p-6 md:p-8 space-y-5">
                   <div>
-                    <Label className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <Label className="font-case text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                       Annual Revenue Band
                     </Label>
-                    <div className="grid sm:grid-cols-3 gap-2 mt-2">
+                    <div className="grid sm:grid-cols-3 gap-2 mt-3">
                       {REVENUE_BANDS.map((b) => (
                         <button
                           key={b.value}
@@ -314,23 +293,10 @@ const LeakAuditPage = () => {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
-
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <CaseFileCard
-                    caseNumber={47}
-                    businessType="$4M services firm"
-                    leakFound="Inbound dying in one Gmail inbox."
-                    amountBled="$380K / yr"
-                  />
-                  <CaseFileCard
-                    caseNumber={62}
-                    businessType="Regional B2B SaaS"
-                    leakFound="73% of quotes never followed up after Day 3."
-                    amountBled="$610K / yr"
-                  />
-                </div>
               </div>
             )}
+
+
 
             {/* QUESTIONS */}
             {step === 'questions' && (
