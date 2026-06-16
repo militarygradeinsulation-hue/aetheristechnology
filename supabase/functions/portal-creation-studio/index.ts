@@ -202,6 +202,8 @@ serve(async (req) => {
     if (action === "generate_topics" || action === "generate_ideas") {
       const key = Deno.env.get("LOVABLE_API_KEY");
       if (!key) return json({ error: "LOVABLE_API_KEY missing" }, 500);
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "ideas");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
 
       const sys = `You are the Aetheris Business Forensics Operator. Generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
 
