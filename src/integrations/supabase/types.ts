@@ -5187,6 +5187,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_studio_usage: {
+        Row: {
+          action: string
+          count: number
+          day: string
+          rep_code: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          day?: string
+          rep_code: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          day?: string
+          rep_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rep_time_entries: {
         Row: {
           clock_in_at: string

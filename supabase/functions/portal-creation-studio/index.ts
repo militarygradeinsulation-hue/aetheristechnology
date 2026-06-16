@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { consumeStudioQuota } from "../_shared/studio-quota.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -140,8 +141,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const claims = await verifyPortalToken(getPortalTokenFromRequest(req), SERVICE_KEY);
     if (!claims) return json({ error: "Unauthorized" }, 401);
+    const repCode = claims.code;
 
     const body = await req.json().catch(() => ({}));
     const action = body.action as string;
@@ -153,6 +156,8 @@ serve(async (req) => {
       if (!prompt || !Array.isArray(images) || images.length === 0) {
         return json({ error: "prompt and images required" }, 400);
       }
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "video_plan");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const plan = await planVideo(prompt, images, {
         durationSec: Number(durationSec) || 30,
         aspect: aspect || "9:16",
@@ -163,6 +168,11 @@ serve(async (req) => {
     if (action === "tts") {
       const { text, voiceId } = body;
       if (!text || !voiceId) return json({ error: "text and voiceId required" }, 400);
+      if (typeof text === "string" && text.length > 1200) {
+        return json({ error: "Voiceover too long (max 1200 chars)" }, 400);
+      }
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "tts");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const audioBase64 = await tts(text, voiceId);
       return json({ audioBase64, mime: "audio/mpeg" });
     }
@@ -171,8 +181,11 @@ serve(async (req) => {
       const el = Deno.env.get("ELEVENLABS_API_KEY");
       if (!el) return json({ error: "ELEVENLABS_API_KEY missing" }, 500);
       const prompt = (body.prompt as string || "").trim();
-      const ms = Math.max(10000, Math.min(180000, Number(body.durationMs) || 30000));
+      // Cap music length to 60s for reps (was 180s) — biggest single credit sink.
+      const ms = Math.max(10000, Math.min(60000, Number(body.durationMs) || 30000));
       if (!prompt) return json({ error: "prompt required" }, 400);
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "music");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const res = await fetch("https://api.elevenlabs.io/v1/music", {
         method: "POST",
         headers: { "xi-api-key": el, "Content-Type": "application/json" },
@@ -189,6 +202,8 @@ serve(async (req) => {
     if (action === "generate_topics" || action === "generate_ideas") {
       const key = Deno.env.get("LOVABLE_API_KEY");
       if (!key) return json({ error: "LOVABLE_API_KEY missing" }, 500);
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "ideas");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
 
       const sys = `You are the Aetheris Business Forensics Operator. Generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
 
@@ -223,7 +238,7 @@ JSON only.`;
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-flash-lite",
           messages: [{ role: "system", content: sys }, { role: "user", content: user }],
           response_format: { type: "json_object" },
         }),
