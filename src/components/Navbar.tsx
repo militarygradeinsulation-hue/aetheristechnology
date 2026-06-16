@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'The Leak Audit', href: '/diagnostic', kind: 'case' },
     { label: 'Home', href: '/home', blood: true },
     { label: 'Meet the Operator', href: '/operator', accent: true },
-    { label: 'Bundles', href: '/catalog', accent: true },
+    { label: 'Bundles', href: '/leak-audit#bundles', accent: true },
     { label: 'Industries', href: '/industries' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },

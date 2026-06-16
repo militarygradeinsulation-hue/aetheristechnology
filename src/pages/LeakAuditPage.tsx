@@ -17,6 +17,10 @@ import { CitedFactsBlock } from '@/components/seo/CitedFactsBlock';
 import { BuyerIntentFaq } from '@/components/seo/BuyerIntentFaq';
 import { LeakAuditHowToSchema } from '@/components/seo/LeakAuditHowToSchema';
 import { CORE_LEAK_FACTS, LEAK_AUDIT_FAQS } from '@/components/seo/seoContent';
+import { PackageTiers } from '@/components/PackageTiers';
+import { RepPosTerminal } from '@/components/pos/RepPosTerminal';
+import { hasValidPortalSession } from '@/lib/portalAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -628,6 +632,44 @@ const LeakAuditPage = () => {
 
           <CitedFactsBlock facts={CORE_LEAK_FACTS} pageUrl="https://aetheris.technology/leak-audit" />
           <BuyerIntentFaq faqs={LEAK_AUDIT_FAQS} pageUrl="https://aetheris.technology/leak-audit" />
+
+          {/* Operator-led bundles — merged in from former /catalog page */}
+          <section id="bundles" className="px-4 pt-20 mt-8 border-t border-amber/20 scroll-mt-28">
+            <div className="max-w-5xl mx-auto mb-10">
+              <div className="inline-flex items-center gap-3 mb-5">
+                <div className="h-px w-8 bg-amber" />
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                  Select your engagement
+                </span>
+              </div>
+              <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05] mb-4">
+                We don't sell tools. <span className="text-amber italic">We sell the operator.</span>
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                Once the scan shows where you're bleeding, an operator runs the rebuild. Three bundles
+                — Signal, Revenue, Operator Suite — each pairs you with the human who closes the leak.
+              </p>
+            </div>
+            <PackageTiers onRequest={() => setIsContactModalOpen(true)} />
+
+            <div className="px-4 max-w-3xl mx-auto py-16">
+              <div className="border-l-2 border-crimson/70 pl-6 py-2">
+                <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground italic mb-2">
+                  A drawer full of instruments doesn't perform surgery.
+                </h3>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl">
+                  Every tool in our stack was built to be operated by an expert. Sold alone, they're just PDFs.
+                  Paired with an operator, they expose the exact sentence costing you money.
+                </p>
+              </div>
+            </div>
+
+            {(hasValidPortalSession() || hasValidAdminToken()) && (
+              <div className="px-4 max-w-7xl mx-auto py-12 border-t border-amber/20">
+                <RepPosTerminal />
+              </div>
+            )}
+          </section>
         </main>
         <LeakAuditHowToSchema pageUrl="https://aetheris.technology/leak-audit" />
 
