@@ -147,10 +147,10 @@ export const PublicLeakScan = () => {
             Free · No operator code required
           </div>
           <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
-            Scan your site. <span className="text-crimson italic">See your leaks.</span>
+            Scan your business. <span className="text-crimson italic">See every leak.</span>
           </h2>
           <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Drop your email and company URL. Watch the AI detective work the case in real time — then see exactly where your leads are leaking out.
+            Drop your email and company URL. The AI detective audits seven operational surfaces — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
 
