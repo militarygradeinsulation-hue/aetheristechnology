@@ -58,7 +58,7 @@ const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
-const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
+
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
@@ -126,9 +126,9 @@ const App = () => (
                       <Route path="/" element={<LeakLanderPage />} />
                       <Route path="/home" element={<Home />} />
                       <Route path="/services" element={<ServicesPage />} />
-                      <Route path="/catalog" element={<Navigate to="/leak-audit#bundles" replace />} />
+                      <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/operator" element={<OperatorPage />} />
-                      <Route path="/bundles" element={<Navigate to="/leak-audit#bundles" replace />} />
+                      <Route path="/bundles" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/why-us" element={<WhyUsPage />} />
                       <Route path="/about" element={<Navigate to="/" replace />} />
                       <Route path="/contact" element={<ContactPage />} />
@@ -164,7 +164,7 @@ const App = () => (
                       <Route path="/ai-for-:slug" element={<VerticalLandingPage />} />
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
-                      <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/leak-audit" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
