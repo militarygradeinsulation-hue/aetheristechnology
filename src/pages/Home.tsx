@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
+import landingInfographicAsset from '@/assets/landing-infographic.png.asset.json';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -32,18 +33,19 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
-          <section className="px-4 pt-28 md:pt-36 pb-6 text-center max-w-3xl mx-auto">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">
-              Business Forensics · One Scan
-            </div>
-            <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-tight">
-              Find where your leads went.
-              <br />
-              <span className="text-crimson italic">And how to get them back.</span>
+          <section className="px-4 pt-28 md:pt-36 pb-6">
+            <h1 className="sr-only">
+              One button finds where your leads are leaking and instantly begins getting them back.
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mt-5 max-w-xl mx-auto">
-              Drop your site. One scan shows you exactly where revenue is leaking — and what to plug first.
-            </p>
+            <div className="max-w-6xl mx-auto">
+              <img
+                src={landingInfographicAsset.url}
+                alt="Aetheris Business Forensics: One button finds where your leads are leaking and begins getting them back. 4-step process: press, find leaks, recover leads, see the return."
+                className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
+                loading="eager"
+                fetchPriority="high"
+              />
+            </div>
           </section>
 
           <PublicLeakScan />
