@@ -93,7 +93,7 @@ export const PublicLeakScan = () => {
         }),
       );
       if (stepIdx >= PREP_INIT.length - 1) clearInterval(stepTimer);
-    }, 2200);
+    }, 1600);
 
     const talkTimer = setInterval(() => {
       const next = THOUGHTS[thoughtIdx % THOUGHTS.length];
