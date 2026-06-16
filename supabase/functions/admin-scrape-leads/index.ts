@@ -241,6 +241,7 @@ serve(async (req) => {
           source: "admin_scrape",
           external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
           status: "new",
+          score_stage: "triage",
         };
       }).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
 
