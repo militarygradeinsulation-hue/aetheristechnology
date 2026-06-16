@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch } from "lucide-react";
+import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
+import { generateLeakAuditPdf, type LeakAuditCategoryResult } from "@/lib/generateLeakAuditPdf";
 
 type TopIssue = { category: string; severity: string; title: string; hint: string; annualCost?: string };
+type ReportCategory = LeakAuditCategoryResult;
+type Report = {
+  estimatedAnnualLeak: number;
+  severity: 'CRITICAL' | 'ACTIVE' | 'MINOR';
+  executiveSummary?: string;
+  categories: ReportCategory[];
+};
 type Teaser = {
   score: number | null;
   grade: string | null;
@@ -18,6 +26,7 @@ type Teaser = {
   topIssues: TopIssue[];
   chartGaps: LeakChartGap[];
   nextSteps: string[];
+  report?: Report;
 };
 
 const SEV_STYLE: Record<string, { icon: any; cls: string; label: string }> = {
@@ -26,27 +35,34 @@ const SEV_STYLE: Record<string, { icon: any; cls: string; label: string }> = {
   info: { icon: CheckCircle2, cls: "text-muted-foreground border-border bg-muted/30", label: "Note" },
 };
 
-type PrepKey = 'fetch' | 'meta' | 'cta' | 'forms' | 'leaks';
+type PrepKey = 'fetch' | 'meta' | 'capture' | 'funnel' | 'followup' | 'reputation' | 'local' | 'brand' | 'leaks';
 type Prep = { key: PrepKey; label: string; status: 'pending' | 'running' | 'done' };
 
 const PREP_INIT: Prep[] = [
-  { key: 'fetch', label: 'Pulling homepage + sitemap', status: 'pending' },
-  { key: 'meta', label: 'Reading meta, schema, headings', status: 'pending' },
-  { key: 'cta', label: 'Auditing CTAs + offer hierarchy', status: 'pending' },
-  { key: 'forms', label: 'Probing forms, friction, follow-up', status: 'pending' },
-  { key: 'leaks', label: 'Estimating the bleed', status: 'pending' },
+  { key: 'fetch',      label: 'Pulling homepage + sitemap',                  status: 'pending' },
+  { key: 'meta',       label: 'Auditing website & SEO surface',              status: 'pending' },
+  { key: 'capture',    label: 'Probing lead capture + conversion path',      status: 'pending' },
+  { key: 'funnel',     label: 'Mapping sales process + qualification',       status: 'pending' },
+  { key: 'followup',   label: 'Timing speed-to-lead + nurture sequences',    status: 'pending' },
+  { key: 'reputation', label: 'Reading reputation + trust signals',          status: 'pending' },
+  { key: 'local',      label: 'Checking local visibility + discoverability', status: 'pending' },
+  { key: 'brand',      label: 'Stress-testing brand messaging',              status: 'pending' },
+  { key: 'leaks',      label: 'Stacking evidence + pricing the bleed',       status: 'pending' },
 ];
 
 const THOUGHTS = [
-  "Okay, who is this company actually talking to?",
-  "Above the fold — is there a single, dominant promise? Or three?",
+  "Okay — who is this company actually talking to?",
+  "Above the fold: one dominant promise, or three competing ones?",
   "The CTA says 'Learn More.' That's not an ask. That's a shrug.",
-  "Form has 7 fields. Each extra field after 3 bleeds conversions.",
-  "No clear pricing anywhere. Buyers ghost when they have to ask.",
-  "I see a contact form but no trigger for follow-up. Leads will rot here.",
-  "Title tag doesn't mention the buyer or the outcome. SEO is leaking too.",
-  "Counting the friction points… that's where the revenue is escaping.",
-  "Stacking the evidence. Let me put a dollar figure on this.",
+  "Form has 7 fields. Each one past three bleeds conversions.",
+  "No pricing anywhere. Buyers ghost when they have to ask.",
+  "Contact form but no automated first-touch. Leads will rot.",
+  "Title tag doesn't mention the buyer or the outcome. SEO is leaking.",
+  "Industry says under 5 min response wins. Bet they're at hours.",
+  "Reviews count, rating, case studies — what's visible to a cold buyer?",
+  "Local pack — are they on the map for their own category?",
+  "Brand promise is generic. Could be any competitor.",
+  "Stacking it all. Putting a dollar number on the bleed.",
 ];
 
 export const PublicLeakScan = () => {
@@ -77,7 +93,7 @@ export const PublicLeakScan = () => {
         }),
       );
       if (stepIdx >= PREP_INIT.length - 1) clearInterval(stepTimer);
-    }, 2200);
+    }, 1600);
 
     const talkTimer = setInterval(() => {
       const next = THOUGHTS[thoughtIdx % THOUGHTS.length];
@@ -131,10 +147,10 @@ export const PublicLeakScan = () => {
             Free · No operator code required
           </div>
           <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
-            Scan your site. <span className="text-crimson italic">See your leaks.</span>
+            Scan your business. <span className="text-crimson italic">See every leak.</span>
           </h2>
           <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Drop your email and company URL. Watch the AI detective work the case in real time — then see exactly where your leads are leaking out.
+            Drop your email and company URL. The AI detective audits seven operational surfaces — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
 
@@ -387,16 +403,101 @@ export const PublicLeakScan = () => {
                   </div>
                 )}
 
+                {teaser.report && teaser.report.categories.length > 0 && (
+                  <div className="space-y-4">
+                    {/* Total bleed banner */}
+                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">
+                          Estimated Annual Leak · 7-Surface Forensic Total
+                        </div>
+                        <div className="font-forensic text-3xl md:text-4xl font-bold text-crimson">
+                          ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-sm font-mono text-crimson/70">/ yr</span>
+                        </div>
+                      </div>
+                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-xs uppercase tracking-widest text-crimson bg-background/60">
+                        Severity · {teaser.report.severity}
+                      </div>
+                    </div>
+
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-amber">
+                      Forensic Read · 7 Operational Surfaces
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {teaser.report.categories.map((c) => {
+                        const tone =
+                          c.pct < 50 ? 'border-crimson/50 bg-crimson/5'
+                          : c.pct < 70 ? 'border-amber/40 bg-amber/5'
+                          : 'border-emerald-500/30 bg-emerald-500/5';
+                        const barColor =
+                          c.pct < 50 ? 'bg-crimson'
+                          : c.pct < 70 ? 'bg-amber'
+                          : 'bg-emerald-500';
+                        return (
+                          <div key={c.key} className={`rounded-md border p-4 ${tone} space-y-2`}>
+                            <div className="flex items-baseline justify-between gap-2">
+                              <div className="font-display font-semibold text-sm text-foreground leading-tight">{c.label}</div>
+                              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                                {c.score}/{c.max}
+                              </div>
+                            </div>
+                            <div className="h-1 w-full bg-background/60 rounded-full overflow-hidden">
+                              <div className={`h-full ${barColor}`} style={{ width: `${c.pct}%` }} />
+                            </div>
+                            {c.diagnosis && (
+                              <p className="text-xs text-foreground/80 leading-relaxed">{c.diagnosis}</p>
+                            )}
+                            {c.topLeaks.length > 0 && (
+                              <ul className="space-y-1 pt-1">
+                                {c.topLeaks.slice(0, 3).map((leak, i) => (
+                                  <li key={i} className="flex items-start gap-1.5 text-[11px] text-foreground/75">
+                                    <span className="text-crimson mt-1 shrink-0">›</span>
+                                    <span>{leak}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-3">
+                  {teaser.report && (
+                    <Button
+                      onClick={() => {
+                        try {
+                          generateLeakAuditPdf({
+                            email,
+                            company: teaser.companyName || url,
+                            revenueBand: 'Self-reported · Public Scan',
+                            estimatedAnnualLeak: teaser.report!.estimatedAnnualLeak,
+                            severity: teaser.report!.severity,
+                            totalScore: teaser.report!.categories.reduce((a, c) => a + c.score, 0),
+                            maxScore: teaser.report!.categories.reduce((a, c) => a + c.max, 0),
+                            categories: teaser.report!.categories,
+                          });
+                          toast.success("Report downloaded.");
+                        } catch (err) {
+                          toast.error("Couldn't generate PDF.");
+                        }
+                      }}
+                      className="bg-crimson hover:bg-crimson/90 text-white font-semibold"
+                    >
+                      <Download className="w-4 h-4 mr-2" /> Download Forensic Report (PDF)
+                    </Button>
+                  )}
+                  <Button asChild className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                    <a href="#book">Book the operator to plug these leaks</a>
+                  </Button>
                   <Button
                     onClick={() => { setTeaser(null); setUrl(""); }}
                     variant="outline"
                     className="border-amber/40 text-amber hover:bg-amber/10"
                   >
                     Scan another site
-                  </Button>
-                  <Button asChild className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    <a href="#book">Book the operator to plug these leaks</a>
                   </Button>
                 </div>
               </motion.div>
