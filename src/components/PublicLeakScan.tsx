@@ -403,16 +403,101 @@ export const PublicLeakScan = () => {
                   </div>
                 )}
 
+                {teaser.report && teaser.report.categories.length > 0 && (
+                  <div className="space-y-4">
+                    {/* Total bleed banner */}
+                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">
+                          Estimated Annual Leak · 7-Surface Forensic Total
+                        </div>
+                        <div className="font-forensic text-3xl md:text-4xl font-bold text-crimson">
+                          ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-sm font-mono text-crimson/70">/ yr</span>
+                        </div>
+                      </div>
+                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-xs uppercase tracking-widest text-crimson bg-background/60">
+                        Severity · {teaser.report.severity}
+                      </div>
+                    </div>
+
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-amber">
+                      Forensic Read · 7 Operational Surfaces
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {teaser.report.categories.map((c) => {
+                        const tone =
+                          c.pct < 50 ? 'border-crimson/50 bg-crimson/5'
+                          : c.pct < 70 ? 'border-amber/40 bg-amber/5'
+                          : 'border-emerald-500/30 bg-emerald-500/5';
+                        const barColor =
+                          c.pct < 50 ? 'bg-crimson'
+                          : c.pct < 70 ? 'bg-amber'
+                          : 'bg-emerald-500';
+                        return (
+                          <div key={c.key} className={`rounded-md border p-4 ${tone} space-y-2`}>
+                            <div className="flex items-baseline justify-between gap-2">
+                              <div className="font-display font-semibold text-sm text-foreground leading-tight">{c.label}</div>
+                              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                                {c.score}/{c.max}
+                              </div>
+                            </div>
+                            <div className="h-1 w-full bg-background/60 rounded-full overflow-hidden">
+                              <div className={`h-full ${barColor}`} style={{ width: `${c.pct}%` }} />
+                            </div>
+                            {c.diagnosis && (
+                              <p className="text-xs text-foreground/80 leading-relaxed">{c.diagnosis}</p>
+                            )}
+                            {c.topLeaks.length > 0 && (
+                              <ul className="space-y-1 pt-1">
+                                {c.topLeaks.slice(0, 3).map((leak, i) => (
+                                  <li key={i} className="flex items-start gap-1.5 text-[11px] text-foreground/75">
+                                    <span className="text-crimson mt-1 shrink-0">›</span>
+                                    <span>{leak}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-3">
+                  {teaser.report && (
+                    <Button
+                      onClick={() => {
+                        try {
+                          generateLeakAuditPdf({
+                            email,
+                            company: teaser.companyName || url,
+                            revenueBand: 'Self-reported · Public Scan',
+                            estimatedAnnualLeak: teaser.report!.estimatedAnnualLeak,
+                            severity: teaser.report!.severity,
+                            totalScore: teaser.report!.categories.reduce((a, c) => a + c.score, 0),
+                            maxScore: teaser.report!.categories.reduce((a, c) => a + c.max, 0),
+                            categories: teaser.report!.categories,
+                          });
+                          toast.success("Report downloaded.");
+                        } catch (err) {
+                          toast.error("Couldn't generate PDF.");
+                        }
+                      }}
+                      className="bg-crimson hover:bg-crimson/90 text-white font-semibold"
+                    >
+                      <Download className="w-4 h-4 mr-2" /> Download Forensic Report (PDF)
+                    </Button>
+                  )}
+                  <Button asChild className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                    <a href="#book">Book the operator to plug these leaks</a>
+                  </Button>
                   <Button
                     onClick={() => { setTeaser(null); setUrl(""); }}
                     variant="outline"
                     className="border-amber/40 text-amber hover:bg-amber/10"
                   >
                     Scan another site
-                  </Button>
-                  <Button asChild className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    <a href="#book">Book the operator to plug these leaks</a>
                   </Button>
                 </div>
               </motion.div>
