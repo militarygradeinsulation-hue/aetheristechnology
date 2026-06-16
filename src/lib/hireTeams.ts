@@ -107,9 +107,15 @@ export async function setRepTeam(repId: string, teamName: string) {
  */
 export async function revokeRepAccess(code: string): Promise<{ revoked: boolean; auth_deleted: boolean }> {
   const { getAdminToken } = await import("./adminAuth");
+  const { getPortalToken } = await import("./portalAuth");
+  const headers: Record<string, string> = {};
+  const adminTok = getAdminToken();
+  if (adminTok) headers["x-admin-token"] = adminTok;
+  const portalTok = getPortalToken();
+  if (portalTok) headers["x-portal-token"] = portalTok;
   const { data, error } = await supabase.functions.invoke("revoke-rep-access", {
     body: { code },
-    headers: { "x-admin-token": getAdminToken() || "" },
+    headers,
   });
   if (error) throw error;
   return data as { revoked: boolean; auth_deleted: boolean };

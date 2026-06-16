@@ -1,10 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -23,7 +24,13 @@ Deno.serve(async (req) => {
 
     const adminTok = req.headers.get("x-admin-token");
     const okAdmin = await verifyAdminToken(adminTok, service);
-    if (!okAdmin) return json(401, { error: "Admin auth required" });
+    if (!okAdmin) {
+      const portalTok = getPortalTokenFromRequest(req);
+      const portal = await verifyPortalToken(portalTok, service);
+      if (!portal || portal.role !== "partner") {
+        return json(401, { error: "Admin or partner auth required" });
+      }
+    }
 
     const { code } = await req.json().catch(() => ({}));
     if (!code || typeof code !== "string") {
