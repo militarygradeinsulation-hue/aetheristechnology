@@ -126,9 +126,9 @@ const App = () => (
                       <Route path="/" element={<LeakLanderPage />} />
                       <Route path="/home" element={<Home />} />
                       <Route path="/services" element={<ServicesPage />} />
-                      <Route path="/catalog" element={<Navigate to="/leak-audit#bundles" replace />} />
+                      <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/operator" element={<OperatorPage />} />
-                      <Route path="/bundles" element={<Navigate to="/leak-audit#bundles" replace />} />
+                      <Route path="/bundles" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/why-us" element={<WhyUsPage />} />
                       <Route path="/about" element={<Navigate to="/" replace />} />
                       <Route path="/contact" element={<ContactPage />} />
