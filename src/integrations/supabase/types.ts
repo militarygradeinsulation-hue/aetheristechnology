@@ -4357,6 +4357,7 @@ export type Database = {
           rep_code: string
           scan_id: string | null
           score: number | null
+          score_stage: string
           teaser: Json
           user_agent: string | null
           website_url: string
@@ -4376,6 +4377,7 @@ export type Database = {
           rep_code: string
           scan_id?: string | null
           score?: number | null
+          score_stage?: string
           teaser?: Json
           user_agent?: string | null
           website_url: string
@@ -4395,6 +4397,7 @@ export type Database = {
           rep_code?: string
           scan_id?: string | null
           score?: number | null
+          score_stage?: string
           teaser?: Json
           user_agent?: string | null
           website_url?: string
@@ -4778,6 +4781,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           score: number | null
+          score_stage: string
           source: string
           status: string
           touch_count: number
@@ -4810,6 +4814,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           score?: number | null
+          score_stage?: string
           source?: string
           status?: string
           touch_count?: number
@@ -4842,6 +4847,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           score?: number | null
+          score_stage?: string
           source?: string
           status?: string
           touch_count?: number
