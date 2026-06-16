@@ -10,6 +10,7 @@ import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import landingOneButtonInfographic from "@/assets/landing-one-button-infographic.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
+import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 const LeakLanderPage: React.FC = () => {
   const [deckOpen, setDeckOpen] = useState(false);
