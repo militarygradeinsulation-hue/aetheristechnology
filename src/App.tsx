@@ -164,7 +164,7 @@ const App = () => (
                       <Route path="/ai-for-:slug" element={<VerticalLandingPage />} />
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
-                      <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/leak-audit" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
