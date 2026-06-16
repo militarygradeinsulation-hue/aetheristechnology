@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
-import landingInfographicAsset from '@/assets/landing-infographic.png.asset.json';
+import homeHeroBanner from '@/assets/home-hero-banner.jpg.asset.json';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -39,8 +39,8 @@ const Home = () => {
             </h1>
             <div className="max-w-6xl mx-auto">
               <img
-                src={landingInfographicAsset.url}
-                alt="Aetheris Business Forensics: One button finds where your leads are leaking and begins getting them back. 4-step process: press, find leaks, recover leads, see the return."
+                src={homeHeroBanner.url}
+                alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks, turns real data into insight, and keeps your business confidential."
                 className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
                 loading="eager"
                 fetchPriority="high"
