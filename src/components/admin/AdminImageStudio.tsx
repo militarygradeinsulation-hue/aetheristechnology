@@ -547,6 +547,9 @@ WATERMARK: "aetheris.technology"`;
                   <Button size="sm" variant="outline" onClick={() => { setEditTarget(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" /> Edit
                   </Button>
+                  <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => setAnimateTarget(img)}>
+                    <Film className="w-3.5 h-3.5 mr-1" /> Animate
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => download(img)}>
                     <Download className="w-3.5 h-3.5" />
                   </Button>
