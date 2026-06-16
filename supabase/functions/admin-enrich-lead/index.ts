@@ -178,6 +178,7 @@ serve(async (req) => {
         const patch: Record<string, unknown> = {
           enrichment: enriched,
           enriched_at: new Date().toISOString(),
+          score_stage: "audit",
         };
         // Only overwrite the existing score when we have real evidence to score on.
         if (breakdown.total != null) patch.score = breakdown.total;

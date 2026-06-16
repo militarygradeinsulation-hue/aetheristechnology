@@ -196,6 +196,7 @@ serve(async (req) => {
           source: `rep_scrape:${claims.code}`,
           external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
           status: "new",
+          score_stage: "triage",
           ...(assignToMe ? {
             assigned_to_code: claims.code,
             assigned_at: now.toISOString(),
