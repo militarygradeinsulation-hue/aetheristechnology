@@ -68,7 +68,13 @@ serve(async (req) => {
       if (!LOVABLE_API_KEY) return json({ error: "AI not configured" }, 500);
       const rawPrompt = (body.prompt as string || "").trim();
       if (!rawPrompt) return json({ error: "prompt required" }, 400);
-      if (rawPrompt.length > 6000) return json({ error: "prompt too long" }, 400);
+      if (rawPrompt.length > 2000) return json({ error: "prompt too long (max 2000 chars)" }, 400);
+      // Daily per-rep cap — stops runaway credit use.
+      const quota = await consumeStudioQuota(
+        SERVICE_KEY, SUPABASE_URL, repCode,
+        action === "edit" ? "image_edit" : "image_generate",
+      );
+      if (!quota.ok) return json({ error: quota.error, limit: quota.limit, used: quota.used }, 429);
       const model = (body.model as string) || "google/gemini-3.1-flash-image-preview";
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
