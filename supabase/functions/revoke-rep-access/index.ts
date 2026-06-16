@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
