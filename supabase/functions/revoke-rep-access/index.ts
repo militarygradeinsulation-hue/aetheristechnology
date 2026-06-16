@@ -24,7 +24,13 @@ Deno.serve(async (req) => {
 
     const adminTok = req.headers.get("x-admin-token");
     const okAdmin = await verifyAdminToken(adminTok, service);
-    if (!okAdmin) return json(401, { error: "Admin auth required" });
+    if (!okAdmin) {
+      const portalTok = getPortalTokenFromRequest(req);
+      const portal = await verifyPortalToken(portalTok, service);
+      if (!portal || portal.role !== "partner") {
+        return json(401, { error: "Admin or partner auth required" });
+      }
+    }
 
     const { code } = await req.json().catch(() => ({}));
     if (!code || typeof code !== "string") {
