@@ -8,6 +8,7 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import landingOneButtonInfographic from "@/assets/landing-one-button-infographic.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
@@ -153,10 +154,21 @@ const LeakLanderPage: React.FC = () => {
           {/* Public website leak scan — email + URL only */}
           <PublicLeakScan />
 
+          {/* One-button leak finder infographic */}
+          <section
+            className="mt-12 max-w-5xl mx-auto animate-fade-in"
+            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
+              <img
+                src={landingOneButtonInfographic.url}
+                alt="Aetheris Business Forensics: One button finds where your leads are leaking and instantly begins getting them back. 4 steps: press, find leaks, recover leads, see the return."
+                className="w-full h-auto rounded-xl"
+                loading="lazy"
+              />
+            </div>
+          </section>
 
-
-
-          {/* Free PDF download. moved below the infographic */}
           <section
             className="mt-10 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
