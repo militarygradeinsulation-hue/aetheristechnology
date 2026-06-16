@@ -8,7 +8,6 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
-import demandGenInfographic from "@/assets/demand-generation-infographic.png";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
@@ -156,20 +155,6 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Demand generation infographic. front & center above "What the Hell" */}
-          <section
-            className="mt-12 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
-              <img
-                src={demandGenInfographic}
-                alt="Aetheris Business Forensics & Revenue Recovery. 4-step demand generation infographic: spot the leaks, build the system, qualify & convert, drive real revenue."
-                className="w-full h-auto rounded-xl"
-                loading="lazy"
-              />
-            </div>
-          </section>
 
           {/* Free PDF download. moved below the infographic */}
           <section
