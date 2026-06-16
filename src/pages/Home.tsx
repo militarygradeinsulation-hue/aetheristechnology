@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
+import landingInfographicAsset from '@/assets/landing-infographic.png.asset.json';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
