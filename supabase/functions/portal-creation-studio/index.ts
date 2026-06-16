@@ -156,6 +156,8 @@ serve(async (req) => {
       if (!prompt || !Array.isArray(images) || images.length === 0) {
         return json({ error: "prompt and images required" }, 400);
       }
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "video_plan");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const plan = await planVideo(prompt, images, {
         durationSec: Number(durationSec) || 30,
         aspect: aspect || "9:16",
@@ -166,6 +168,11 @@ serve(async (req) => {
     if (action === "tts") {
       const { text, voiceId } = body;
       if (!text || !voiceId) return json({ error: "text and voiceId required" }, 400);
+      if (typeof text === "string" && text.length > 1200) {
+        return json({ error: "Voiceover too long (max 1200 chars)" }, 400);
+      }
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "tts");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const audioBase64 = await tts(text, voiceId);
       return json({ audioBase64, mime: "audio/mpeg" });
     }
@@ -174,8 +181,11 @@ serve(async (req) => {
       const el = Deno.env.get("ELEVENLABS_API_KEY");
       if (!el) return json({ error: "ELEVENLABS_API_KEY missing" }, 500);
       const prompt = (body.prompt as string || "").trim();
-      const ms = Math.max(10000, Math.min(180000, Number(body.durationMs) || 30000));
+      // Cap music length to 60s for reps (was 180s) — biggest single credit sink.
+      const ms = Math.max(10000, Math.min(60000, Number(body.durationMs) || 30000));
       if (!prompt) return json({ error: "prompt required" }, 400);
+      const q = await consumeStudioQuota(SERVICE_KEY, SUPABASE_URL, repCode, "music");
+      if (!q.ok) return json({ error: q.error, limit: q.limit, used: q.used }, 429);
       const res = await fetch("https://api.elevenlabs.io/v1/music", {
         method: "POST",
         headers: { "xi-api-key": el, "Content-Type": "application/json" },
