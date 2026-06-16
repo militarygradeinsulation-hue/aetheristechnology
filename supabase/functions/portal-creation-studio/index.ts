@@ -141,8 +141,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const claims = await verifyPortalToken(getPortalTokenFromRequest(req), SERVICE_KEY);
     if (!claims) return json({ error: "Unauthorized" }, 401);
+    const repCode = claims.code;
 
     const body = await req.json().catch(() => ({}));
     const action = body.action as string;
