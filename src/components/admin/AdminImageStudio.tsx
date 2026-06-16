@@ -578,6 +578,51 @@ WATERMARK: "aetheris.technology"`;
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Animate (Bring to Life) request dialog — generates a chat-ready handoff for the Lovable agent to fulfill via internal video model. */}
+      <Dialog open={!!animateTarget} onOpenChange={(o) => !o && setAnimateTarget(null)}>
+        <DialogContent className="max-w-2xl bg-background border-amber/40">
+          {animateTarget && (() => {
+            const handoff = `Bring this image to life as a 5s MP4 (subject motion, not camera). Save it to the Video Library.\n\nImage URL: ${animateTarget.url}\nOriginal prompt: ${animateTarget.prompt || '(none)'}\n\nMotion direction:\n${animatePrompt}`;
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Film className="w-5 h-5 text-amber" />
+                  <h3 className="font-display text-lg">Bring this image to life</h3>
+                </div>
+                <p className="text-xs text-muted-foreground font-mono">
+                  Live video generation needs a connector. Until one is connected, paste the block below into Lovable chat and the agent will render the MP4 with its internal video model and drop it in your Video Library.
+                </p>
+                <img src={animateTarget.url} alt="" className="w-full max-h-64 object-contain rounded border border-border" />
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Motion direction</label>
+                  <Textarea value={animatePrompt} onChange={(e) => setAnimatePrompt(e.target.value)} rows={3} className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Copy this into Lovable chat</label>
+                  <Textarea value={handoff} readOnly rows={6} className="mt-1 text-xs font-mono" />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(handoff);
+                        toast({ title: 'Copied', description: 'Paste into Lovable chat to generate the animation.' });
+                      } catch {
+                        toast({ title: 'Copy failed', description: 'Select the text and copy manually.', variant: 'destructive' });
+                      }
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-1" /> Copy handoff
+                  </Button>
+                  <Button variant="outline" onClick={() => setAnimateTarget(null)}>Close</Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
