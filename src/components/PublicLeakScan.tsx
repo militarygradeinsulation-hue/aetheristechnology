@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch } from "lucide-react";
+import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
+import { generateLeakAuditPdf, type LeakAuditCategoryResult } from "@/lib/generateLeakAuditPdf";
 
 type TopIssue = { category: string; severity: string; title: string; hint: string; annualCost?: string };
+type ReportCategory = LeakAuditCategoryResult;
+type Report = {
+  estimatedAnnualLeak: number;
+  severity: 'CRITICAL' | 'ACTIVE' | 'MINOR';
+  executiveSummary?: string;
+  categories: ReportCategory[];
+};
 type Teaser = {
   score: number | null;
   grade: string | null;
@@ -18,6 +26,7 @@ type Teaser = {
   topIssues: TopIssue[];
   chartGaps: LeakChartGap[];
   nextSteps: string[];
+  report?: Report;
 };
 
 const SEV_STYLE: Record<string, { icon: any; cls: string; label: string }> = {
@@ -26,27 +35,34 @@ const SEV_STYLE: Record<string, { icon: any; cls: string; label: string }> = {
   info: { icon: CheckCircle2, cls: "text-muted-foreground border-border bg-muted/30", label: "Note" },
 };
 
-type PrepKey = 'fetch' | 'meta' | 'cta' | 'forms' | 'leaks';
+type PrepKey = 'fetch' | 'meta' | 'capture' | 'funnel' | 'followup' | 'reputation' | 'local' | 'brand' | 'leaks';
 type Prep = { key: PrepKey; label: string; status: 'pending' | 'running' | 'done' };
 
 const PREP_INIT: Prep[] = [
-  { key: 'fetch', label: 'Pulling homepage + sitemap', status: 'pending' },
-  { key: 'meta', label: 'Reading meta, schema, headings', status: 'pending' },
-  { key: 'cta', label: 'Auditing CTAs + offer hierarchy', status: 'pending' },
-  { key: 'forms', label: 'Probing forms, friction, follow-up', status: 'pending' },
-  { key: 'leaks', label: 'Estimating the bleed', status: 'pending' },
+  { key: 'fetch',      label: 'Pulling homepage + sitemap',                  status: 'pending' },
+  { key: 'meta',       label: 'Auditing website & SEO surface',              status: 'pending' },
+  { key: 'capture',    label: 'Probing lead capture + conversion path',      status: 'pending' },
+  { key: 'funnel',     label: 'Mapping sales process + qualification',       status: 'pending' },
+  { key: 'followup',   label: 'Timing speed-to-lead + nurture sequences',    status: 'pending' },
+  { key: 'reputation', label: 'Reading reputation + trust signals',          status: 'pending' },
+  { key: 'local',      label: 'Checking local visibility + discoverability', status: 'pending' },
+  { key: 'brand',      label: 'Stress-testing brand messaging',              status: 'pending' },
+  { key: 'leaks',      label: 'Stacking evidence + pricing the bleed',       status: 'pending' },
 ];
 
 const THOUGHTS = [
-  "Okay, who is this company actually talking to?",
-  "Above the fold — is there a single, dominant promise? Or three?",
+  "Okay — who is this company actually talking to?",
+  "Above the fold: one dominant promise, or three competing ones?",
   "The CTA says 'Learn More.' That's not an ask. That's a shrug.",
-  "Form has 7 fields. Each extra field after 3 bleeds conversions.",
-  "No clear pricing anywhere. Buyers ghost when they have to ask.",
-  "I see a contact form but no trigger for follow-up. Leads will rot here.",
-  "Title tag doesn't mention the buyer or the outcome. SEO is leaking too.",
-  "Counting the friction points… that's where the revenue is escaping.",
-  "Stacking the evidence. Let me put a dollar figure on this.",
+  "Form has 7 fields. Each one past three bleeds conversions.",
+  "No pricing anywhere. Buyers ghost when they have to ask.",
+  "Contact form but no automated first-touch. Leads will rot.",
+  "Title tag doesn't mention the buyer or the outcome. SEO is leaking.",
+  "Industry says under 5 min response wins. Bet they're at hours.",
+  "Reviews count, rating, case studies — what's visible to a cold buyer?",
+  "Local pack — are they on the map for their own category?",
+  "Brand promise is generic. Could be any competitor.",
+  "Stacking it all. Putting a dollar number on the bleed.",
 ];
 
 export const PublicLeakScan = () => {
