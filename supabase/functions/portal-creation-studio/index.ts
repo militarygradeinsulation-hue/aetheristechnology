@@ -238,7 +238,7 @@ JSON only.`;
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-flash-lite",
           messages: [{ role: "system", content: sys }, { role: "user", content: user }],
           response_format: { type: "json_object" },
         }),
