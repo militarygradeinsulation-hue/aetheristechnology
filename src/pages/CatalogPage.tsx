@@ -5,7 +5,6 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PackageTiers } from '@/components/PackageTiers';
-import { ComparisonSection } from '@/components/ComparisonSection';
 import { RepPosTerminal } from '@/components/pos/RepPosTerminal';
 import { hasValidPortalSession } from '@/lib/portalAuth';
 import { hasValidAdminToken } from '@/lib/adminAuth';
@@ -27,46 +26,45 @@ const CatalogPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="pt-28">
-          <div className="px-4 max-w-3xl mx-auto mb-8 text-center">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              The operator is the product
-            </div>
-            <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
-              We don't sell tools. <span className="text-amber italic">We sell the operator.</span>
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-              Every bundle below pairs you with a Business Forensics Operator who sits down with you,
-              wields the right tools in the right sequence, finds every leak, and rebuilds the systems
-              causing them. The tools are how. The operator is what you're paying for.
-            </p>
-          </div>
-
-          {/* Three-tier operator packages — the only public path */}
-          <PackageTiers onRequest={() => setContactOpen(true)} />
-
-          {/* Why no à la carte */}
-          <section className="px-4 max-w-3xl mx-auto pb-16">
-            <div className="forensic-tile rounded-sm border border-amber/30 p-6 md:p-8">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Why we don't sell tools individually
+          {/* Hero — simplified */}
+          <section className="px-4 max-w-5xl mx-auto mb-20">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-amber" />
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
+                  Select your engagement
+                </span>
               </div>
-              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-3">
-                A drawer full of instruments doesn't perform surgery.
-              </h2>
-              <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
-                Every tool in our stack was built to be operated by someone who knows what they're
-                looking for. Sold alone, they hand you a PDF. Paired with an operator, they expose the
-                exact sentence, system, or step that's costing you money. That's why every bundle here
-                is sealed and operator-led — and why we will turn down the sale if the fit isn't there.
+              <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05] mb-5">
+                We don't sell tools. <br />
+                <span className="text-amber italic">We sell the operator.</span>
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                Every bundle below pairs you with a Business Forensics Operator who finds every leak,
+                then rebuilds the systems causing them.
               </p>
             </div>
           </section>
 
-          <ComparisonSection />
+          {/* Three-tier operator packages */}
+          <PackageTiers onRequest={() => setContactOpen(true)} />
+
+          {/* Why no à la carte — simplified crimson left-rule */}
+          <section className="px-4 max-w-3xl mx-auto py-20">
+            <div className="border-l-2 border-crimson/70 pl-6 py-2">
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground italic mb-2">
+                A drawer full of instruments doesn't perform surgery.
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl">
+                Every tool in our stack was built to be operated by an expert. Sold alone, they're just PDFs.
+                Paired with an operator, they expose the exact sentence costing you money.
+              </p>
+            </div>
+          </section>
 
           {/* POS Terminal — only visible to authenticated reps, partners, and admins */}
           {showPos && (
-            <section className="px-4 max-w-7xl mx-auto py-16 border-t border-amber/20 mt-12">
+            <section className="px-4 max-w-7xl mx-auto py-16 border-t border-amber/20 mt-4">
               <RepPosTerminal />
             </section>
           )}
@@ -79,3 +77,4 @@ const CatalogPage: React.FC = () => {
 };
 
 export default CatalogPage;
+
