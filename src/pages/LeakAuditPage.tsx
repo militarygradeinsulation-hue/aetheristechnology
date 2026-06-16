@@ -17,6 +17,10 @@ import { CitedFactsBlock } from '@/components/seo/CitedFactsBlock';
 import { BuyerIntentFaq } from '@/components/seo/BuyerIntentFaq';
 import { LeakAuditHowToSchema } from '@/components/seo/LeakAuditHowToSchema';
 import { CORE_LEAK_FACTS, LEAK_AUDIT_FAQS } from '@/components/seo/seoContent';
+import { PackageTiers } from '@/components/PackageTiers';
+import { RepPosTerminal } from '@/components/pos/RepPosTerminal';
+import { hasValidPortalSession } from '@/lib/portalAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
